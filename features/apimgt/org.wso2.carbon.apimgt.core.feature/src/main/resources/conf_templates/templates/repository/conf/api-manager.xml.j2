@@ -691,6 +691,25 @@
         {% endif %}
         <!-- This parameter is used to enable/disable using legacy async api parser.-->
         <PreserveLegacyAsyncParser>{{apim.publisher.use_legacy_async_parser}}</PreserveLegacyAsyncParser>
+        {% if apim.publisher.import_definition_file_size_limit is defined %}
+        <ImportDefinitionFileSizeLimit>
+            {% if apim.publisher.import_definition_file_size_limit.oas is defined %}
+            <OAS>{{apim.publisher.import_definition_file_size_limit.oas}}</OAS>
+            {% endif %}
+            {% if apim.publisher.import_definition_file_size_limit.async is defined %}
+            <ASYNC>{{apim.publisher.import_definition_file_size_limit.async}}</ASYNC>
+            {% endif %}
+            {% if apim.publisher.import_definition_file_size_limit.wsdl is defined %}
+            <WSDL>{{apim.publisher.import_definition_file_size_limit.wsdl}}</WSDL>
+            {% endif %}
+            {% if apim.publisher.import_definition_file_size_limit.graphql is defined %}
+            <GRAPHQL>{{apim.publisher.import_definition_file_size_limit.graphql}}</GRAPHQL>
+            {% endif %}
+            {% if apim.publisher.import_definition_file_size_limit.mcp is defined %}
+            <MCP>{{apim.publisher.import_definition_file_size_limit.mcp}}</MCP>
+            {% endif %}
+        </ImportDefinitionFileSizeLimit>
+        {% endif %}
     </APIPublisher>
 
     <!-- Status observers can be registered against the API Publisher to listen for
@@ -2098,34 +2117,27 @@
               <ExpireTimeSeconds>{{apim.gateway_notification.cleanup.expiry_time}}</ExpireTimeSeconds>
               <DataRetentionPeriodSeconds>{{apim.gateway_notification.cleanup.data_retention_period}}</DataRetentionPeriodSeconds>
           </GatewayCleanup>
-          {% if (apim.universal_gateway.version is defined and apim.universal_gateway.version) or (apim.universal_gateway.connect is defined and apim.universal_gateway.connect | length > 0) %}
+          {% if apim.platform_gateway.versions is defined and apim.platform_gateway.versions | length > 0 %}
           <PlatformGatewayConnectConfiguration>
-              {% if apim.universal_gateway.version is defined and apim.universal_gateway.version %}
-              <UniversalGatewayVersion>{{ apim.universal_gateway.version }}</UniversalGatewayVersion>
-              {% endif %}
-              {% if apim.universal_gateway.connect is defined and apim.universal_gateway.connect | length > 0 %}
-              <ConnectGateways>
-              {% for c in apim.universal_gateway.connect %}
-                <Connect>
-                    <RegistrationToken>{{ c.registration_token }}</RegistrationToken>
-                    {% if c.name is defined and c.name %}
-                    <Name>{{ c.name }}</Name>
-                    {% endif %}
-                    {% if c.display_name is defined and c.display_name %}
-                    <DisplayName>{{ c.display_name }}</DisplayName>
-                    {% endif %}
-                    {% if c.description is defined and c.description %}
-                    <Description>{{ c.description }}</Description>
-                    {% endif %}
-                    {% if c.url is defined and c.url %}
-                    <Url>{{ c.url }}</Url>
-                    {% endif %}
-                </Connect>
+              <PlatformGatewayVersions>
+              {% for version in apim.platform_gateway.versions %}
+                  <Version>{{ version }}</Version>
               {% endfor %}
-              </ConnectGateways>
-              {% endif %}
+              </PlatformGatewayVersions>
           </PlatformGatewayConnectConfiguration>
           {% endif %}
+          <APIKeyNotification>
+              <QueueSize>{{apim.gateway_notification.api_key_notification.queue_size}}</QueueSize>
+              <BatchSize>{{apim.gateway_notification.api_key_notification.batch_size}}</BatchSize>
+              <BatchIntervalMillis>{{apim.gateway_notification.api_key_notification.batch_interval}}</BatchIntervalMillis>
+              <MaxRetryCount>{{apim.gateway_notification.api_key_notification.max_retry_count}}</MaxRetryCount>
+              <RetryDuration>{{apim.gateway_notification.api_key_notification.retry_duration}}</RetryDuration>
+              <RetryProgressionFactor>{{apim.gateway_notification.api_key_notification.retry_progression_factor}}</RetryProgressionFactor>
+              <BatchProcessorMinThread>{{apim.gateway_notification.api_key_notification.batch_processor_min_thread}}</BatchProcessorMinThread>
+              <BatchProcessorMaxThread>{{apim.gateway_notification.api_key_notification.batch_processor_max_thread}}</BatchProcessorMaxThread>
+              <BatchProcessorKeepAlive>{{apim.gateway_notification.api_key_notification.batch_processor_keep_alive}}</BatchProcessorKeepAlive>
+              <BatchProcessorQueueSize>{{apim.gateway_notification.api_key_notification.batch_processor_queue_size}}</BatchProcessorQueueSize>
+          </APIKeyNotification>
       </GatewayNotificationConfiguration>
 
       <!-- SynapseArtifactGenerator thread pool configuration -->

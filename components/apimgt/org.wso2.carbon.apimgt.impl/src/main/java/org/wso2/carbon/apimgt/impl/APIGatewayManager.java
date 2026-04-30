@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -43,16 +44,12 @@ public class APIGatewayManager {
     private boolean debugEnabled = log.isDebugEnabled();
     private static APIGatewayManager instance;
 
-    private RecommendationEnvironment recommendationEnvironment;
     private ArtifactSaver artifactSaver;
 
     private static final String PRODUCT_PREFIX = "prod";
 
     private APIGatewayManager() {
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration();
 
-        this.recommendationEnvironment = config.getApiRecommendationEnvironment();
         this.artifactSaver = ServiceReferenceHolder.getInstance().getArtifactSaver();
     }
 
@@ -63,23 +60,9 @@ public class APIGatewayManager {
         return instance;
     }
 
-    private void sendDeploymentEvent(API api, String tenantDomain, Set<String> publishedGateways) {
-        sendDeploymentEvent(api, tenantDomain, publishedGateways, null);
-    }
-
-    private void sendDeploymentEvent(API api, String tenantDomain, Set<String> publishedGateways,
-                                     Set<String> platformGatewayIds) {
-        sendDeploymentEvent(api, tenantDomain, publishedGateways, platformGatewayIds, null);
-    }
-
-    /**
-     * Sends deploy event. When revisionUuidForPlatform is non-null and platformGatewayIds is non-empty,
-     * uses it as eventId so the platform gateway echoes it back in notify-api-deployment-status; APIM then
-     * stores it in AM_GW_REVISION_DEPLOYMENT.REVISION_UUID and deployment stats (deployedGatewayCount,
-     * failedGatewayCount) match the revision.
-     */
-    private void sendDeploymentEvent(API api, String tenantDomain, Set<String> publishedGateways,
-                                     Set<String> platformGatewayIds, String revisionUuidForPlatform) {
+    private void sendDeploymentEvent(API api, Set<String> publishedGateways,
+                                     Set<String> platformGatewayIds, String revisionUuidForPlatform,
+                                     Map<String, String> platformGatewayDeploymentIds) {
         log.info("Sending deployment event for API: " + api.getId().getName() + " version: " + api.getId().getVersion()
                 + " to gateways");
         APIIdentifier apiIdentifier = api.getId();
@@ -98,6 +81,7 @@ public class APIGatewayManager {
         if (platformGatewayIds != null && !platformGatewayIds.isEmpty()) {
             deployAPIInGatewayEvent.setPlatformGatewayIds(platformGatewayIds);
         }
+        deployAPIInGatewayEvent.setPlatformGatewayDeploymentIds(platformGatewayDeploymentIds);
         APIUtil.sendNotification(deployAPIInGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
         if (debugEnabled) {
             log.debug("Event sent to Gateway with eventID " + deployAPIInGatewayEvent.getEventId() + " for api "
@@ -105,11 +89,7 @@ public class APIGatewayManager {
         }
     }
 
-    private void sendDeploymentEvent(APIProduct api, String tenantDomain, Set<String> publishedGateways) {
-        sendDeploymentEvent(api, tenantDomain, publishedGateways, null);
-    }
-
-    private void sendDeploymentEvent(APIProduct api, String tenantDomain, Set<String> publishedGateways,
+    private void sendDeploymentEvent(APIProduct api, Set<String> publishedGateways,
                                     Set<String> platformGatewayIds) {
 
         APIProductIdentifier apiIdentifier = api.getId();
@@ -128,13 +108,9 @@ public class APIGatewayManager {
         }
     }
 
-    private void sendUnDeploymentEvent(API api, String tenantDomain, Set<String> removedGateways,
-                                       boolean onDeleteOrRetire) {
-        sendUnDeploymentEvent(api, tenantDomain, removedGateways, onDeleteOrRetire, null);
-    }
-
-    private void sendUnDeploymentEvent(API api, String tenantDomain, Set<String> removedGateways,
-                                       boolean onDeleteOrRetire, Set<String> platformGatewayIds) {
+    private void sendUnDeploymentEvent(API api, Set<String> removedGateways,
+                                       boolean onDeleteOrRetire, Set<String> platformGatewayIds,
+                                       Map<String, String> platformGatewayDeploymentIds) {
         APIIdentifier apiIdentifier = api.getId();
         if (debugEnabled) {
             log.debug("Sending undeployment event for API: " + apiIdentifier.getName() + " version: " +
@@ -142,7 +118,8 @@ public class APIGatewayManager {
                     onDeleteOrRetire);
         }
         Set<String> gateways = removedGateways != null ? removedGateways : new HashSet<>();
-        DeployAPIInGatewayEvent deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
+        String eventId = UUID.randomUUID().toString();
+        DeployAPIInGatewayEvent deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(eventId,
                 System.currentTimeMillis(), APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name(),
                 api.getOrganization(), api.getId().getId(), api.getUuid(), gateways, apiIdentifier.getName(),
                 apiIdentifier.getVersion(), apiIdentifier.getProviderName(), api.getType(), api.getContext(),
@@ -150,16 +127,12 @@ public class APIGatewayManager {
         if (platformGatewayIds != null && !platformGatewayIds.isEmpty()) {
             deployAPIInGatewayEvent.setPlatformGatewayIds(platformGatewayIds);
         }
+        deployAPIInGatewayEvent.setPlatformGatewayDeploymentIds(platformGatewayDeploymentIds);
         APIUtil.sendNotification(deployAPIInGatewayEvent,
                 APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
     }
 
-    private void sendUnDeploymentEvent(APIProduct apiProduct, String tenantDomain, Set<String> removedGateways,
-                                       Set<API> associatedAPIs) {
-        sendUnDeploymentEvent(apiProduct, tenantDomain, removedGateways, associatedAPIs, null);
-    }
-
-    private void sendUnDeploymentEvent(APIProduct apiProduct, String tenantDomain, Set<String> removedGateways,
+    private void sendUnDeploymentEvent(APIProduct apiProduct, Set<String> removedGateways,
                                        Set<API> associatedAPIs, Set<String> platformGatewayIds) {
 
         APIProductIdentifier apiProductIdentifier = apiProduct.getId();
@@ -240,7 +213,13 @@ public class APIGatewayManager {
      * @param revisionUuid         optional revision UUID for platform path; when set, sent as deploymentId so notify stores correct REVISION_UUID
      */
     public void deployToGateway(API api, String tenantDomain, Set<String> gatewaysToPublish,
-                               Set<String> platformGatewayIds, String revisionUuid) {
+                                Set<String> platformGatewayIds, String revisionUuid) {
+        deployToGateway(api, tenantDomain, gatewaysToPublish, platformGatewayIds, revisionUuid, null);
+    }
+
+    public void deployToGateway(API api, String tenantDomain, Set<String> gatewaysToPublish,
+                                Set<String> platformGatewayIds, String revisionUuid,
+                                Map<String, String> platformGatewayDeploymentIds) {
         log.info("Deploying API: " + api.getId().getName() + " version: " + api.getId().getVersion() + " to tenant: "
                 + tenantDomain);
         if (platformGatewayIds != null && !platformGatewayIds.isEmpty() && log.isDebugEnabled()) {
@@ -250,55 +229,48 @@ public class APIGatewayManager {
         if (debugEnabled) {
             log.debug("Status of " + api.getId() + " has been updated to DB");
         }
-        sendDeploymentEvent(api, tenantDomain, gatewaysToPublish, platformGatewayIds, revisionUuid);
-    }
-
-    public void deployToGateway(APIProduct api, String tenantDomain, Set<String> gatewaysToPublish) {
-        deployToGateway(api, tenantDomain, gatewaysToPublish, null);
+        sendDeploymentEvent(api, gatewaysToPublish, platformGatewayIds, revisionUuid, platformGatewayDeploymentIds);
     }
 
     /**
      * Deploy API product to Synapse or platform gateways.
      *
      * @param api                  API product to deploy
-     * @param tenantDomain         tenant domain
      * @param gatewaysToPublish    Synapse gateway environment names (labels)
      * @param platformGatewayIds   optional set of platform gateway IDs; null or empty to skip platform path
      */
-    public void deployToGateway(APIProduct api, String tenantDomain, Set<String> gatewaysToPublish,
+    public void deployToGateway(APIProduct api, String tenantId, Set<String> gatewaysToPublish,
                                Set<String> platformGatewayIds) {
         if (debugEnabled) {
-            log.debug("Status of " + api.getId() + " has been updated to DB");
+            log.debug("Status of " + api.getId() + " for tenant " + tenantId + " has been updated to DB");
         }
-        sendDeploymentEvent(api, tenantDomain, gatewaysToPublish, platformGatewayIds);
-    }
-
-    public void unDeployFromGateway(API api, String tenantDomain, Set<String> gatewaysToRemove,
-                                    boolean onDeleteOrRetire) {
-        unDeployFromGateway(api, tenantDomain, gatewaysToRemove, onDeleteOrRetire, null);
+        sendDeploymentEvent(api, gatewaysToPublish, platformGatewayIds);
     }
 
     /**
-     * Undeploy API from Synapse or platform gateways.
+     * Undeploys the given API from the specified gateways. This method initiates an event to
+     * remove the API deployment from Synapse or platform gateways.
      *
-     * @param api                  API to undeploy
-     * @param tenantDomain         tenant domain
-     * @param gatewaysToRemove     Synapse gateway environment names to remove from
-     * @param onDeleteOrRetire     true if API is being deleted or retired
-     * @param platformGatewayIds   optional set of platform gateway IDs to notify; null or empty to skip platform path
+     * @param api                          The API to undeploy.
+     * @param gatewaysToRemove             A set of gateway environment names (e.g., Synapse labels)
+     *                                     from which the API should be removed.
+     * @param onDeleteOrRetire             A boolean indicating whether the undeployment is triggered
+     *                                     due to the API being deleted or retired.
+     * @param platformGatewayIds           A set of platform gateway IDs to undeploy from. If null
+     *                                     or empty, the platform gateway path is skipped.
+     * @param platformGatewayDeploymentIds A map containing the deployment IDs for each platform gateway.
+     *                                     The keys represent platform gateway IDs, and the values
+     *                                     represent their corresponding deployment IDs.
      */
-    public void unDeployFromGateway(API api, String tenantDomain, Set<String> gatewaysToRemove,
-                                    boolean onDeleteOrRetire, Set<String> platformGatewayIds) {
+    public void unDeployFromGateway(API api, Set<String> gatewaysToRemove,
+                                    boolean onDeleteOrRetire, Set<String> platformGatewayIds,
+                                    Map<String, String> platformGatewayDeploymentIds) {
         if (debugEnabled) {
             log.debug("Undeploy API: " + api.getId().getName() + " version: " + api.getId().getVersion() +
                     " from gateways");
         }
-        sendUnDeploymentEvent(api, tenantDomain, gatewaysToRemove, onDeleteOrRetire, platformGatewayIds);
-    }
-
-    public void unDeployFromGateway(APIProduct apiProduct, String tenantDomain, Set<API> associatedAPIs,
-                                    Set<String> gatewaysToRemove) throws APIManagementException {
-        unDeployFromGateway(apiProduct, tenantDomain, associatedAPIs, gatewaysToRemove, gatewaysToRemove, null);
+        sendUnDeploymentEvent(api, gatewaysToRemove, onDeleteOrRetire, platformGatewayIds,
+                platformGatewayDeploymentIds);
     }
 
     /**
@@ -335,7 +307,7 @@ public class APIGatewayManager {
             log.debug("Status of " + apiProductIdentifier + " has been updated to DB");
         }
         Set<String> labelsForEvent = synapseLabelsToRemove != null ? synapseLabelsToRemove : gatewaysToRemove;
-        sendUnDeploymentEvent(apiProduct, tenantDomain, labelsForEvent, associatedAPIs, platformGatewayIds);
+        sendUnDeploymentEvent(apiProduct, labelsForEvent, associatedAPIs, platformGatewayIds);
     }
 
     public void deployPolicyToGateway(String mappingUuid, String tenantDomain, Set<String> gatewaysToPublish) {

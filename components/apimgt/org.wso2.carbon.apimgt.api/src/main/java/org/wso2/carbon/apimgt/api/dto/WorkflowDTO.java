@@ -166,7 +166,8 @@ public class WorkflowDTO implements Serializable {
     }
 
     public String getMetadata(String key) {
-        return metadata.get(key).toString();
+        Object value = metadata.get(key);
+        return value != null ? value.toString() : null;
     }
 
     public void setMetadata(String key, String value) {

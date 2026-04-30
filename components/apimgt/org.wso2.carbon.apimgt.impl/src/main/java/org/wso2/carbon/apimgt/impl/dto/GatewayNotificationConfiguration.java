@@ -29,7 +29,7 @@ public class GatewayNotificationConfiguration {
             new DeploymentAcknowledgementConfiguration();
     private RegistrationConfiguration registration = new RegistrationConfiguration();
     private GatewayCleanupConfiguration gatewayCleanupConfiguration = new GatewayCleanupConfiguration();
-
+    private APIKeyConfigurationDTO apiKeyConfiguration = new APIKeyConfigurationDTO();
     public boolean isEnabled() {
         return enabled;
     }
@@ -76,6 +76,14 @@ public class GatewayNotificationConfiguration {
 
     public void setGatewayCleanupConfiguration(GatewayCleanupConfiguration gatewayCleanupConfiguration) {
         this.gatewayCleanupConfiguration = gatewayCleanupConfiguration;
+    }
+
+    public APIKeyConfigurationDTO getApiKeyConfiguration() {
+        return apiKeyConfiguration;
+    }
+
+    public void setApiKeyConfiguration(APIKeyConfigurationDTO apiKeyConfiguration) {
+        this.apiKeyConfiguration = apiKeyConfiguration;
     }
 
     /**

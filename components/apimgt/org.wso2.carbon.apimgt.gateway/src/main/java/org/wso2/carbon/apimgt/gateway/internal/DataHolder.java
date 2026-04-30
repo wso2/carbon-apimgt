@@ -48,6 +48,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class DataHolder {
     private static final Log log  = LogFactory.getLog(DataHolder.class);
@@ -59,7 +61,8 @@ public class DataHolder {
     private Map<String,Map<String, API>> tenantAPIMap  = new HashMap<>();
     private Map<String, Boolean> tenantDeployStatus = new HashMap<>();
     private Map<String, LLMProviderInfo> llmProviderMap = new HashMap<>();
-    private Map<String, APIKeyInfo> apiKeyInfoHashMap = new ConcurrentHashMap<>();
+    private final Map<String, APIKeyInfo> apiKeyInfoHashMap = new ConcurrentHashMap<>();
+    private final ReadWriteLock apiKeyInfoLock = new ReentrantReadWriteLock();
     private final Map<String, Cache<String, Long>> apiSuspendedEndpoints = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, AbstractAPIMgtGatewayJWTGenerator> jwtGeneratorTenantMap =
             new ConcurrentHashMap<>();
@@ -156,7 +159,12 @@ public class DataHolder {
      */
     public void addOpaqueAPIKeyInfo(APIKeyInfo apiKeyInfo) {
 
-        apiKeyInfoHashMap.put(apiKeyInfo.getLookupKey(), apiKeyInfo);
+        apiKeyInfoLock.writeLock().lock();
+        try {
+            apiKeyInfoHashMap.put(apiKeyInfo.getLookupKey(), apiKeyInfo);
+        } finally {
+            apiKeyInfoLock.writeLock().unlock();
+        }
     }
 
     /**
@@ -165,7 +173,12 @@ public class DataHolder {
      */
     public APIKeyInfo getOpaqueAPIKeyInfo(String lookupKey) {
 
-        return apiKeyInfoHashMap.get(lookupKey);
+        apiKeyInfoLock.readLock().lock();
+        try {
+            return apiKeyInfoHashMap.get(lookupKey);
+        } finally {
+            apiKeyInfoLock.readLock().unlock();
+        }
     }
 
     /**
@@ -175,7 +188,36 @@ public class DataHolder {
      */
     public void removeOpaqueAPIKeyInfo(String lookupKey) {
 
-        apiKeyInfoHashMap.remove(lookupKey);
+        apiKeyInfoLock.writeLock().lock();
+        try {
+            apiKeyInfoHashMap.remove(lookupKey);
+        } finally {
+            apiKeyInfoLock.writeLock().unlock();
+        }
+    }
+
+    /**
+     * Atomically replaces an opaque API key entry under a new lookup key.
+     * Acquires the exclusive write lock so no reads or other writes can observe
+     * the transient state between the remove and the put.
+     *
+     * @param oldLookupKey the current key under which the entry is stored
+     * @param newLookupKey the new key to store the entry under
+     */
+    public void replaceOpaqueAPIKeyEntry(String oldLookupKey, String newLookupKey) {
+
+        apiKeyInfoLock.writeLock().lock();
+        try {
+            APIKeyInfo apiKeyInfo = apiKeyInfoHashMap.remove(oldLookupKey);
+            if (apiKeyInfo != null) {
+                APIKeyInfo updatedKeyInfo = new APIKeyInfo(apiKeyInfo);
+                updatedKeyInfo.setApiKeyHash(newLookupKey);
+                updatedKeyInfo.setLookupKey(newLookupKey);
+                apiKeyInfoHashMap.put(newLookupKey, updatedKeyInfo);
+            }
+        } finally {
+            apiKeyInfoLock.writeLock().unlock();
+        }
     }
 
     public void addApiToAliasList(String apiId, List<String> aliasList) {

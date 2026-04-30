@@ -699,6 +699,43 @@ public class RegistryPersistenceImplTestCase {
                 updatedAPI.getDescription());
     }
 
+    @Test
+    public void testChangeApiProviderNormalizesEmailDomain() throws Exception {
+
+        Registry registry = Mockito.mock(UserRegistry.class);
+        Resource resource = new ResourceImpl();
+        GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifact();
+        String apiUUID = artifact.getId();
+        String apiPath = generateArtifactPath(artifact);
+
+        // Mock GovernanceUtils to return a valid artifact path
+        Mockito.when(GovernanceUtils.getArtifactPath(registry, apiUUID)).thenReturn(apiPath);
+        // Mock registry.get to return a non-null resource so the method proceeds
+        Mockito.when(registry.get(apiPath)).thenReturn(resource);
+
+        // Mock RegistryPersistenceUtil.getArtifactManager to return a mock artifact manager
+        PowerMockito.mockStatic(RegistryPersistenceUtil.class);
+        PowerMockito.when(RegistryPersistenceUtil.replaceEmailDomain("user@wso2.com")).thenCallRealMethod();
+        GenericArtifactManager artifactManager = Mockito.mock(GenericArtifactManager.class);
+        PowerMockito.when(RegistryPersistenceUtil.getArtifactManager(registry, APIConstants.API_KEY))
+                .thenReturn(artifactManager);
+
+        Organization org = new Organization(SUPER_TENANT_DOMAIN);
+        APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
+
+        // Invoke changeApiProvider with an email-style provider name
+        apiPersistenceInstance.changeApiProvider("user@wso2.com", apiUUID, org.getName());
+
+        // Verify that the provider attribute was set with '@' replaced by '-AT-'
+        Assert.assertEquals("Provider should be normalized with -AT- replacement",
+                "user-AT-wso2.com", artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));
+
+        // Verify that updateGenericArtifact was called exactly once with the updated artifact
+        Mockito.verify(artifactManager, times(1)).updateGenericArtifact(artifact);
+        // Verify that the transaction was committed
+        Mockito.verify(registry, times(1)).commitTransaction();
+    }
+
     private String generateArtifactPath(GenericArtifact artifact) throws GovernanceException {
         String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
         String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);

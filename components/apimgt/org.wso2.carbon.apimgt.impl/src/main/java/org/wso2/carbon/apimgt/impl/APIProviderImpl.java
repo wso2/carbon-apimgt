@@ -132,6 +132,7 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.gateway.DeploymentModeResolver;
 import org.wso2.carbon.apimgt.impl.gateway.DeploymentModeResolver.DeploymentTargets;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
+import org.wso2.carbon.apimgt.impl.dao.PlatformGatewayArtifactDAO;
 import org.wso2.carbon.apimgt.impl.dao.ServiceCatalogDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIRevisionWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
@@ -180,7 +181,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
 import org.wso2.carbon.apimgt.impl.utils.LifeCycleUtils;
 import org.wso2.carbon.apimgt.impl.utils.MCPUtils;
-import org.wso2.carbon.apimgt.impl.utils.PlatformGatewayDeploymentIdUtil;
 import org.wso2.carbon.apimgt.impl.utils.SimpleContentSearchResultNameComparator;
 import org.wso2.carbon.apimgt.impl.workflow.APIStateWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
@@ -275,6 +275,12 @@ import static org.wso2.carbon.apimgt.impl.APIConstants.LC_RETIRE_LC_STATE;
 class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private static final Log log = LogFactory.getLog(APIProviderImpl.class);
+    /**
+     * HTTP header field-name token allowlist (RFC 9110 {@code token}); matches Policy Hub patterns for
+     * api-key-auth {@code key} (header mode) and jwt-auth {@code headerName}.
+     */
+    private static final Pattern VALID_HTTP_HEADER_NAME_PATTERN =
+            Pattern.compile("^[!#$%&'*+.^_`|~0-9A-Za-z-]+$");
     private static final String ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX = "endpointConfig:";
     private ServiceCatalogDAO serviceCatalogDAO = ServiceCatalogDAO.getInstance();
 
@@ -2319,18 +2325,26 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * For Platform Gateway APIs, derives apiSecurity from hub policies at both API-level and operation-level.
      * This ensures DevPortal functionalities work correctly by populating apiSecurity from the
      * attached authentication policies.
-     * Maps: api-key-auth → api_key, basic-auth → basic_auth, jwt-auth → oauth2
+     * Maps: api-key-auth → api_key, basic-auth → basic_auth, jwt-auth → oauth2.
+     * For api-key-auth, the policy parameter {@code key} (when {@code in} is header) is copied to
+     * {@link API#getApiKeyHeader()} so Dev Portal try-out matches the hub policy configuration.
+     * For jwt-auth, the policy parameter {@code headerName} is copied to {@link API#getAuthorizationHeader()}
+     * (same semantics as Publisher Runtime “Authorization Header”).
      *
      * @param api The API object to process
      */
     private void deriveApiSecurityFromHubPolicies(API api) {
+        String EmptyApiSecurity = "";
         if (!isPlatformGatewayApi(api)) {
             return;
         }
 
         Set<String> securitySchemes = new LinkedHashSet<>();
-        boolean hasApiKeyPolicy = false;
+        boolean hasAnyApiKeyPolicy = false;
+        boolean hasHeaderApiKeyPolicy = false;
         boolean hasJwtPolicy = false;
+        String apiKeyHeaderFromHubPolicy = null;
+        String authorizationHeaderFromJwtPolicy = null;
 
         // Collect from API-level hub policies
         List<OperationPolicy> apiLevelPolicies = api.getHubPolicies();
@@ -2342,9 +2356,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String policyName = policy.getPolicyName();
                 collectSecuritySchemeFromPolicy(policyName, securitySchemes);
                 if ("api-key-auth".equalsIgnoreCase(policyName)) {
-                    hasApiKeyPolicy = true;
+                    hasAnyApiKeyPolicy = true;
+                    if (isApiKeyHeaderPolicy(policy)) {
+                        hasHeaderApiKeyPolicy = true;
+                    }
+                    if (hasHeaderApiKeyPolicy && apiKeyHeaderFromHubPolicy == null) {
+                        apiKeyHeaderFromHubPolicy = extractApiKeyHeaderNameFromHubPolicy(policy);
+                    }
                 } else if ("jwt-auth".equalsIgnoreCase(policyName)) {
                     hasJwtPolicy = true;
+                    if (authorizationHeaderFromJwtPolicy == null) {
+                        authorizationHeaderFromJwtPolicy = extractJwtAuthorizationHeaderFromHubPolicy(policy);
+                    }
                 }
             }
         }
@@ -2369,9 +2392,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         String policyName = policy.getPolicyName();
                         collectSecuritySchemeFromPolicy(policyName, securitySchemes);
                         if ("api-key-auth".equalsIgnoreCase(policyName)) {
-                            hasApiKeyPolicy = true;
+                            hasAnyApiKeyPolicy = true;
+                            if (isApiKeyHeaderPolicy(policy)) {
+                                hasHeaderApiKeyPolicy = true;
+                            }
+                            if (hasHeaderApiKeyPolicy && apiKeyHeaderFromHubPolicy == null) {
+                                apiKeyHeaderFromHubPolicy = extractApiKeyHeaderNameFromHubPolicy(policy);
+                            }
                         } else if ("jwt-auth".equalsIgnoreCase(policyName)) {
                             hasJwtPolicy = true;
+                            if (authorizationHeaderFromJwtPolicy == null) {
+                                authorizationHeaderFromJwtPolicy = extractJwtAuthorizationHeaderFromHubPolicy(policy);
+                            }
                         }
                     }
                 }
@@ -2382,14 +2414,25 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (!securitySchemes.isEmpty()) {
             api.setApiSecurity(String.join(",", securitySchemes));
 
-            if (hasApiKeyPolicy && api.getApiKeyHeader() == null) {
+            if (hasHeaderApiKeyPolicy) {
+                if (apiKeyHeaderFromHubPolicy != null) {
+                    api.setApiKeyHeader(apiKeyHeaderFromHubPolicy);
+                } else {
+                    api.setApiKeyHeader(APIConstants.API_KEY_HEADER_DEFAULT);
+                }
+            } else if (hasAnyApiKeyPolicy) {
+                // api-key-auth exists only in query mode; no API key header should be advertised.
+                api.setApiKeyHeader(null);
+            } else {
                 api.setApiKeyHeader(APIConstants.API_KEY_HEADER_DEFAULT);
             }
-            if (hasJwtPolicy && api.getAuthorizationHeader() == null) {
+            if (hasJwtPolicy && authorizationHeaderFromJwtPolicy != null) {
+                api.setAuthorizationHeader(authorizationHeaderFromJwtPolicy);
+            } else {
                 api.setAuthorizationHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT);
             }
         } else {
-            api.setApiSecurity(null);
+            api.setApiSecurity(EmptyApiSecurity);
             api.setApiKeyHeader(null);
             api.setAuthorizationHeader(null);
         }
@@ -2409,6 +2452,66 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } else if ("jwt-auth".equalsIgnoreCase(policyName)) {
             securitySchemes.add(APIConstants.DEFAULT_API_SECURITY_OAUTH2);
         }
+    }
+
+    /**
+     * Returns the API key header name from an api-key-auth hub policy ({@code key} when {@code in} is header).
+     */
+    private String extractApiKeyHeaderNameFromHubPolicy(OperationPolicy policy) {
+        if (!isApiKeyHeaderPolicy(policy)) {
+            return null;
+        }
+        Map<String, Object> params = policy.getParameters();
+        if (MapUtils.isEmpty(params)) {
+            return null;
+        }
+        Object keyVal = params.get("key");
+        if (keyVal == null) {
+            return null;
+        }
+        String key = keyVal.toString().trim();
+        if (StringUtils.isEmpty(key)) {
+            return null;
+        }
+        return VALID_HTTP_HEADER_NAME_PATTERN.matcher(key).matches() ? key : null;
+    }
+
+    /**
+     * Returns true if the given policy is an api-key-auth policy that uses header transport.
+     * If {@code in} is not defined, this method defaults to header semantics for backward compatibility.
+     */
+    private boolean isApiKeyHeaderPolicy(OperationPolicy policy) {
+        if (policy == null || !"api-key-auth".equalsIgnoreCase(policy.getPolicyName())) {
+            return false;
+        }
+
+        Map<String, Object> params = policy.getParameters();
+        if (MapUtils.isEmpty(params) || params.get("in") == null) {
+            return true;
+        }
+        return "header".equalsIgnoreCase(params.get("in").toString().trim());
+    }
+
+    /**
+     * Returns the HTTP header name for JWT from a jwt-auth hub policy ({@code headerName}).
+     */
+    private String extractJwtAuthorizationHeaderFromHubPolicy(OperationPolicy policy) {
+        if (policy == null || !"jwt-auth".equalsIgnoreCase(policy.getPolicyName())) {
+            return null;
+        }
+        Map<String, Object> params = policy.getParameters();
+        if (MapUtils.isEmpty(params)) {
+            return null;
+        }
+        Object headerNameVal = params.get("headerName");
+        if (headerNameVal == null) {
+            return null;
+        }
+        String headerName = headerNameVal.toString().trim();
+        if (StringUtils.isEmpty(headerName)) {
+            return null;
+        }
+        return VALID_HTTP_HEADER_NAME_PATTERN.matcher(headerName).matches() ? headerName : null;
     }
 
     @Override
@@ -2772,6 +2875,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void removeFromGateway(API api, Set<APIRevisionDeployment> gatewaysToRemove,
                                    Set<String> environmentsToAdd, boolean onDeleteOrRetire)
             throws APIManagementException {
+        removeFromGateway(api, gatewaysToRemove, environmentsToAdd, onDeleteOrRetire, null);
+    }
+
+    private void removeFromGateway(API api, Set<APIRevisionDeployment> gatewaysToRemove,
+                                   Set<String> environmentsToAdd, boolean onDeleteOrRetire,
+                                   String revisionUuidForPlatform) throws APIManagementException {
         Set<String> environmentsToRemove = new HashSet<>();
         for (APIRevisionDeployment apiRevisionDeployment : gatewaysToRemove) {
             environmentsToRemove.add(apiRevisionDeployment.getDeployment());
@@ -2779,14 +2888,38 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         environmentsToRemove.removeAll(environmentsToAdd);
         DeploymentTargets targets = DeploymentModeResolver.resolve(api.getOrganization(), environmentsToRemove);
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
+        Map<String, String> platformGatewayDeploymentIds = resolvePlatformGatewayDeploymentIds(api.getUuid(),
+                targets.getPlatformGatewayIds());
         log.info("Undeploy API: " + api.getId().getApiName() + " from " + environmentsToRemove.size()
                 + " environments");
-        gatewayManager.unDeployFromGateway(api, api.getOrganization(), targets.getSynapseLabels(), onDeleteOrRetire,
-                targets.getPlatformGatewayIds().isEmpty() ? null : targets.getPlatformGatewayIds());
+        gatewayManager.unDeployFromGateway(api, targets.getSynapseLabels(), onDeleteOrRetire,
+                targets.getPlatformGatewayIds().isEmpty() ? null : targets.getPlatformGatewayIds(),
+                platformGatewayDeploymentIds);
         if (log.isDebugEnabled()) {
             log.debug("Removing API: " + api.getId().getApiName() + " from gateways. onDeleteOrRetire: " +
                     onDeleteOrRetire);
         }
+    }
+
+    private Map<String, String> resolvePlatformGatewayDeploymentIds(String apiId, Set<String> platformGatewayIds)
+            throws APIManagementException {
+        Map<String, String> deploymentIds = new HashMap<>();
+        if (StringUtils.isBlank(apiId) || platformGatewayIds == null || platformGatewayIds.isEmpty()) {
+            return deploymentIds;
+        }
+        PlatformGatewayArtifactDAO artifactDAO = PlatformGatewayArtifactDAO.getInstance();
+        String trimmedApiId = apiId.trim();
+        for (String gatewayId : platformGatewayIds) {
+            if (StringUtils.isBlank(gatewayId)) {
+                continue;
+            }
+            String trimmedGatewayId = gatewayId.trim();
+            String deploymentId = artifactDAO.getArtifactDeploymentId(trimmedApiId, trimmedGatewayId);
+            if (StringUtils.isNotBlank(deploymentId)) {
+                deploymentIds.put(trimmedGatewayId, deploymentId.trim());
+            }
+        }
+        return deploymentIds;
     }
 
     public API createNewAPIVersion(String existingApiId, String newVersion, Boolean isDefaultVersion,
@@ -5328,6 +5461,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             if (api != null) {
                 validateApiLifeCycleForApiProducts(api);
+                if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())
+                        || APIUtil.isSequenceDefined(api.getFaultSequence())) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Migrating mediation policies for reference API: " + api.getId() +
+                                " in tenant domain: " + tenantDomain);
+                    }
+                    migrateMediationPoliciesOfAPI(api, tenantDomain, false);
+                }
                 if (api.getSwaggerDefinition() != null) {
                     api.setSwaggerDefinition(getOpenAPIDefinition(apiUUID, product.getOrganization()));
                 }
@@ -5541,6 +5682,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             } else {
                 apiUUID = apiProductResource.getApiId();
                 api = getAPIbyUUID(apiUUID, tenantDomain);
+            }
+            if (api != null) {
+                if (APIConstants.API_SUBTYPE_AI_API.equals(api.getSubtype())) {
+                    log.warn("Cannot create API Products using AI APIs.");
+                    throw new APIManagementException(
+                            ExceptionCodes.from(ExceptionCodes.INVALID_API_FOR_API_PRODUCT, APIConstants.AI.AI));
+                }
+                if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())
+                        || APIUtil.isSequenceDefined(api.getFaultSequence())) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Migrating mediation policies for reference API: " + api.getId() +
+                                " in tenant domain: " + tenantDomain);
+                    }
+                    migrateMediationPoliciesOfAPI(api, tenantDomain, false);
+                }
             }
             if (api.getSwaggerDefinition() != null) {
                 api.setSwaggerDefinition(getOpenAPIDefinition(apiUUID, tenantDomain));
@@ -7715,8 +7871,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                 try {
                     DeploymentTargets targets = DeploymentModeResolver.resolve(organization, targetEnvironments);
+                    Map<String, String> platformGatewayDeploymentIds = createPlatformGatewayDeploymentIds(apiId,
+                            revisionUUID, targets.getPlatformGatewayIds());
                     if (!targets.getPlatformGatewayIds().isEmpty()) {
-                        warmPlatformRevisionArtifactCache(apiId, revisionUUID, targets.getPlatformGatewayIds());
+                        warmPlatformRevisionArtifactCache(apiId, revisionUUID, platformGatewayDeploymentIds);
                     }
                     GatewayArtifactsMgtDAO.getInstance()
                             .addAndRemovePublishedGatewayLabels(apiId, revisionUUID,
@@ -7725,7 +7883,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             + " environments");
                     gatewayManager.deployToGateway(api, organization, targets.getSynapseLabels(),
                             targets.getPlatformGatewayIds().isEmpty() ? null : targets.getPlatformGatewayIds(),
-                            revisionUUID);
+                            revisionUUID, platformGatewayDeploymentIds);
                     logPlatformGatewayDeploymentAudit(api, revisionUUID, targets.getPlatformGatewayIds(),
                             targetEnvironments, APIConstants.AuditLogConstants.DEPLOY);
                 } catch (RuntimeException e) {
@@ -7989,19 +8147,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         try {
             DeploymentTargets targets = DeploymentModeResolver.resolve(organization, environmentsToRemove);
-            removeFromGateway(api, new HashSet<>(apiRevisionDeployments), Collections.emptySet(), onDeleteOrRetire);
-            PlatformGatewayArtifactService artifactService =
-                    ServiceReferenceHolder.getInstance().getPlatformGatewayArtifactService();
-            if (artifactService != null) {
-                for (String gatewayEnvUuid : targets.getPlatformGatewayIds()) {
-                    try {
-                        artifactService.deleteArtifactForGateway(apiId, gatewayEnvUuid);
-                    } catch (Exception e) {
-                        log.warn("Failed to delete platform gateway artifact for API " + apiId
-                                + " in gateway environment " + gatewayEnvUuid, e);
-                    }
-                }
-            }
+            removeFromGateway(api, new HashSet<>(apiRevisionDeployments), Collections.emptySet(), onDeleteOrRetire,
+                    apiRevisionId);
+            deletePlatformArtifactsForTargets(apiId, targets.getPlatformGatewayIds());
             logPlatformGatewayDeploymentAudit(api, apiRevisionId, targets.getPlatformGatewayIds(),
                     environmentsToRemove, APIConstants.AuditLogConstants.UNDEPLOY);
         } catch (RuntimeException e) {
@@ -8012,6 +8160,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             deployment -> environments.contains(deployment.getDeployment()));
                     environmentsToRemove.removeAll(environments);
                     unDeploymentFailures.addAll(environments);
+                }
+                try {
+                    DeploymentTargets successfulTargets = DeploymentModeResolver.resolve(organization,
+                            environmentsToRemove);
+                    deletePlatformArtifactsForTargets(apiId, successfulTargets.getPlatformGatewayIds());
+                } catch (Exception artifactCleanupException) {
+                    log.warn("Failed to clean platform gateway artifacts after partial undeployment for API " + apiId,
+                            artifactCleanupException);
                 }
             } else {
                 throw e;
@@ -8212,20 +8368,60 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return revisionUUID;
     }
 
-    private void warmPlatformRevisionArtifactCache(String apiId, String revisionUUID, Set<String> gatewayEnvUuids)
-            throws APIManagementException {
-        PlatformGatewayArtifactService artifactService =
-                ServiceReferenceHolder.getInstance().getPlatformGatewayArtifactService();
-        if (artifactService == null || StringUtils.isBlank(apiId) || StringUtils.isBlank(revisionUUID)
+    private Map<String, String> createPlatformGatewayDeploymentIds(String apiId, String revisionUUID,
+                                                                   Set<String> gatewayEnvUuids) {
+        Map<String, String> deploymentIds = new HashMap<>();
+        if (StringUtils.isBlank(apiId) || StringUtils.isBlank(revisionUUID)
                 || gatewayEnvUuids == null || gatewayEnvUuids.isEmpty()) {
-            return;
+            return deploymentIds;
         }
         for (String gatewayEnvUuid : gatewayEnvUuids) {
             if (StringUtils.isBlank(gatewayEnvUuid)) {
                 continue;
             }
-            artifactService.ensureArtifact(apiId, revisionUUID, gatewayEnvUuid,
-                    PlatformGatewayDeploymentIdUtil.generate(apiId, gatewayEnvUuid, revisionUUID));
+            deploymentIds.put(gatewayEnvUuid.trim(), UUID.randomUUID().toString());
+        }
+        return deploymentIds;
+    }
+
+    private void warmPlatformRevisionArtifactCache(String apiId, String revisionUUID,
+                                                   Map<String, String> platformGatewayDeploymentIds)
+            throws APIManagementException {
+        PlatformGatewayArtifactService artifactService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayArtifactService();
+        if (artifactService == null || StringUtils.isBlank(apiId) || StringUtils.isBlank(revisionUUID)
+                || platformGatewayDeploymentIds == null || platformGatewayDeploymentIds.isEmpty()) {
+            return;
+        }
+        for (Map.Entry<String, String> entry : platformGatewayDeploymentIds.entrySet()) {
+            String gatewayEnvUuid = entry.getKey();
+            String deploymentId = entry.getValue();
+            if (StringUtils.isBlank(gatewayEnvUuid) || StringUtils.isBlank(deploymentId)) {
+                continue;
+            }
+            artifactService.ensureArtifact(apiId, revisionUUID, gatewayEnvUuid, deploymentId);
+        }
+    }
+
+    private void deletePlatformArtifactsForTargets(String apiId, Set<String> platformGatewayIds) {
+        if (StringUtils.isBlank(apiId) || platformGatewayIds == null || platformGatewayIds.isEmpty()) {
+            return;
+        }
+        PlatformGatewayArtifactService artifactService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayArtifactService();
+        if (artifactService == null) {
+            return;
+        }
+        for (String gatewayEnvUuid : platformGatewayIds) {
+            if (StringUtils.isBlank(gatewayEnvUuid)) {
+                continue;
+            }
+            try {
+                artifactService.deleteArtifactForGateway(apiId, gatewayEnvUuid);
+            } catch (Exception e) {
+                log.warn("Failed to delete platform gateway artifact for API " + apiId
+                        + " in gateway environment " + gatewayEnvUuid, e);
+            }
         }
     }
 

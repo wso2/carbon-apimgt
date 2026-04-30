@@ -7236,10 +7236,11 @@ public class ApiMgtDAO {
                 uriTemplate.setHTTPVerb(rs.getString("HTTP_METHOD"));
                 uriTemplate.setAuthType(rs.getString("AUTH_SCHEME"));
                 uriTemplate.setUriTemplate(rs.getString("URL_PATTERN"));
-                if (rs.getString(APIConstants.THROTTLING_TIER).isEmpty()) {
+                String tier = rs.getString(APIConstants.THROTTLING_TIER);
+                if (tier == null || tier.isEmpty()) {
                     uriTemplate.setThrottlingTier(APIConstants.UNLIMITED_TIER);
                 } else {
-                    uriTemplate.setThrottlingTier(rs.getString(APIConstants.THROTTLING_TIER));
+                    uriTemplate.setThrottlingTier(tier);
                 }
                 InputStream mediationScriptBlob = rs.getBinaryStream("MEDIATION_SCRIPT");
                 if (mediationScriptBlob != null) {
@@ -7334,11 +7335,9 @@ public class ApiMgtDAO {
             String httpVerb = rs.getString("HTTP_METHOD");
             String authType = rs.getString("AUTH_SCHEME");
             String urlPattern = rs.getString("URL_PATTERN");
-            String policyName;
-            if (rs.getString(APIConstants.THROTTLING_TIER).isEmpty()) {
+            String policyName = rs.getString(APIConstants.THROTTLING_TIER);
+            if (policyName == null || policyName.isEmpty()) {
                 policyName = APIConstants.UNLIMITED_TIER;
-            } else {
-                policyName = rs.getString(APIConstants.THROTTLING_TIER);
             }
             String conditionGroupId = rs.getString("CONDITION_GROUP_ID");
             String applicableLevel = rs.getString("APPLICABLE_LEVEL");
@@ -7888,11 +7887,9 @@ public class ApiMgtDAO {
                 String uriPattern = resultSet.getString("URL_PATTERN");
                 String httpMethod = resultSet.getString("HTTP_METHOD");
                 String authScheme = resultSet.getString("AUTH_SCHEME");
-                String throttlingTier;
-                if (resultSet.getString(APIConstants.THROTTLING_TIER).isEmpty()) {
+                String throttlingTier = resultSet.getString(APIConstants.THROTTLING_TIER);
+                if (throttlingTier == null || throttlingTier.isEmpty()) {
                     throttlingTier = APIConstants.UNLIMITED_TIER;
-                } else {
-                    throttlingTier = resultSet.getString(APIConstants.THROTTLING_TIER);
                 }
                 InputStream mediationScriptBlob = resultSet.getBinaryStream("MEDIATION_SCRIPT");
                 if (mediationScriptBlob != null) {
@@ -8094,12 +8091,9 @@ public class ApiMgtDAO {
                     uriTemplate.setDescription(description);
                     uriTemplate.setSchemaDefinition(schemaDefinition);
                     String authType = rs.getString("AUTH_SCHEME");
-                    String throttlingTier;
-                    String tier = rs.getString(APIConstants.THROTTLING_TIER);
-                    if (tier == null || tier.isEmpty()) {
+                    String throttlingTier = rs.getString(APIConstants.THROTTLING_TIER);
+                    if (throttlingTier == null || throttlingTier.isEmpty()) {
                         throttlingTier = APIConstants.UNLIMITED_TIER;
-                    } else {
-                        throttlingTier = rs.getString(APIConstants.THROTTLING_TIER);
                     }
                     if (StringUtils.isNotEmpty(scopeName)) {
                         Scope scope = new Scope();
@@ -8167,11 +8161,9 @@ public class ApiMgtDAO {
                     uriTemplate.setHTTPVerb(verb);
                     uriTemplate.setHttpVerbs(verb);
                     String authType = rs.getString("AUTH_SCHEME");
-                    String throttlingTier;
-                    if (rs.getString(APIConstants.THROTTLING_TIER).isEmpty()) {
+                    String throttlingTier = rs.getString(APIConstants.THROTTLING_TIER);
+                    if (throttlingTier == null || throttlingTier.isEmpty()) {
                         throttlingTier = APIConstants.UNLIMITED_TIER;
-                    } else {
-                        throttlingTier = rs.getString(APIConstants.THROTTLING_TIER);
                     }
                     if (StringUtils.isNotEmpty(scopeName)) {
                         Scope scope = new Scope();
@@ -17166,206 +17158,266 @@ public class ApiMgtDAO {
                 String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
                 URITemplate uriTemplateOriginal = apiProductResource.getUriTemplate();
                 int urlMappingId = uriTemplateOriginal.getId();
+
                 // Adding to AM_API_URL_MAPPING table
-                PreparedStatement getURLMappingsStatement = connection
-                        .prepareStatement(GET_URL_MAPPINGS_WITH_SCOPE_BY_URL_MAPPING_ID);
-                getURLMappingsStatement.setInt(1, urlMappingId);
-                List<URITemplate> urlMappingList = new ArrayList<>();
-                try (ResultSet rs = getURLMappingsStatement.executeQuery()) {
-                    while (rs.next()) {
-                        URITemplate uriTemplate = new URITemplate();
-                        uriTemplate.setHTTPVerb(rs.getString("HTTP_METHOD"));
-                        uriTemplate.setAuthType(rs.getString("AUTH_SCHEME"));
-                        uriTemplate.setUriTemplate(rs.getString("URL_PATTERN"));
-                        if (rs.getString(APIConstants.THROTTLING_TIER).isEmpty()) {
-                            uriTemplate.setThrottlingTier(APIConstants.UNLIMITED_TIER);
-                        } else {
-                            uriTemplate.setThrottlingTier(rs.getString(APIConstants.THROTTLING_TIER));
-                        }
-                        String script = null;
-                        InputStream mediationScriptBlob = rs.getBinaryStream("MEDIATION_SCRIPT");
-                        if (mediationScriptBlob != null) {
-                            script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
-                        }
-                        uriTemplate.setMediationScript(script);
-                        if (!StringUtils.isEmpty(rs.getString("SCOPE_NAME"))) {
-                            Scope scope = new Scope();
-                            scope.setKey(rs.getString("SCOPE_NAME"));
-                            uriTemplate.setScope(scope);
-                        }
-                        if (rs.getInt("API_ID") != 0) {
-                            // Adding api id to uri template id just to store value
-                            uriTemplate.setId(rs.getInt("API_ID"));
-                        }
+                PreparedStatement getURLMappingsStatement = null;
+                try {
+                    getURLMappingsStatement = connection.prepareStatement(
+                            GET_URL_MAPPINGS_WITH_SCOPE_BY_URL_MAPPING_ID);
+                    getURLMappingsStatement.setInt(1, urlMappingId);
+                    List<URITemplate> urlMappingList = new ArrayList<>();
+                    try (ResultSet rs = getURLMappingsStatement.executeQuery()) {
+                        while (rs.next()) {
+                            URITemplate uriTemplate = new URITemplate();
+                            uriTemplate.setHTTPVerb(rs.getString("HTTP_METHOD"));
+                            uriTemplate.setAuthType(rs.getString("AUTH_SCHEME"));
+                            uriTemplate.setUriTemplate(rs.getString("URL_PATTERN"));
+                            String tier = rs.getString(APIConstants.THROTTLING_TIER);
+                            if (tier == null || tier.isEmpty()) {
+                                uriTemplate.setThrottlingTier(APIConstants.UNLIMITED_TIER);
+                            } else {
+                                uriTemplate.setThrottlingTier(tier);
+                            }
+                            String script = null;
+                            InputStream mediationScriptBlob = rs.getBinaryStream("MEDIATION_SCRIPT");
+                            if (mediationScriptBlob != null) {
+                                script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
+                            }
+                            uriTemplate.setMediationScript(script);
+                            if (!StringUtils.isEmpty(rs.getString("SCOPE_NAME"))) {
+                                Scope scope = new Scope();
+                                scope.setKey(rs.getString("SCOPE_NAME"));
+                                uriTemplate.setScope(scope);
+                            }
+                            if (rs.getInt("API_ID") != 0) {
+                                // Adding api id to uri template id just to store value
+                                uriTemplate.setId(rs.getInt("API_ID"));
+                            }
 
-                        populateAPIPoliciesToProductResource(apiProductResource, urlMappingId, uriTemplate,
-                                apiToAPIPolicyMap, connection);
+                            populateAPIPoliciesToProductResource(apiProductResource, urlMappingId, uriTemplate,
+                                    apiToAPIPolicyMap, connection);
 
-                        urlMappingList.add(uriTemplate);
+                            urlMappingList.add(uriTemplate);
+                        }
                     }
-                }
 
-                Map<String, URITemplate> uriTemplateMap = new HashMap<>();
-                for (URITemplate urlMapping : urlMappingList) {
-                    if (urlMapping.getScope() != null) {
-                        URITemplate urlMappingNew = urlMapping;
-                        URITemplate urlMappingExisting = uriTemplateMap.get(urlMapping.getUriTemplate()
-                                + urlMapping.getHTTPVerb());
-                        if (urlMappingExisting != null && urlMappingExisting.getScopes() != null) {
-                            if (!urlMappingExisting.getScopes().contains(urlMapping.getScope())) {
-                                urlMappingExisting.setScopes(urlMapping.getScope());
-                                uriTemplateMap.put(urlMappingExisting.getUriTemplate() + urlMappingExisting.getHTTPVerb(),
-                                        urlMappingExisting);
+                    Map<String, URITemplate> uriTemplateMap = new HashMap<>();
+                    for (URITemplate urlMapping : urlMappingList) {
+                        if (urlMapping.getScope() != null) {
+                            URITemplate urlMappingNew = urlMapping;
+                            URITemplate urlMappingExisting = uriTemplateMap.get(urlMapping.getUriTemplate()
+                                    + urlMapping.getHTTPVerb());
+                            if (urlMappingExisting != null && urlMappingExisting.getScopes() != null) {
+                                if (!urlMappingExisting.getScopes().contains(urlMapping.getScope())) {
+                                    urlMappingExisting.setScopes(urlMapping.getScope());
+                                    uriTemplateMap.put(urlMappingExisting.getUriTemplate() + urlMappingExisting.getHTTPVerb(),
+                                            urlMappingExisting);
+                                }
+                            } else {
+                                urlMappingNew.setScopes(urlMapping.getScope());
+                                uriTemplateMap.put(urlMappingNew.getUriTemplate() + urlMappingNew.getHTTPVerb(),
+                                        urlMappingNew);
+                            }
+                        } else if (urlMapping.getId() != 0) {
+                            URITemplate urlMappingExisting = uriTemplateMap.get(urlMapping.getUriTemplate()
+                                    + urlMapping.getHTTPVerb());
+                            if (urlMappingExisting == null) {
+                                uriTemplateMap.put(urlMapping.getUriTemplate() + urlMapping.getHTTPVerb(), urlMapping);
                             }
                         } else {
-                            urlMappingNew.setScopes(urlMapping.getScope());
-                            uriTemplateMap.put(urlMappingNew.getUriTemplate() + urlMappingNew.getHTTPVerb(),
-                                    urlMappingNew);
-                        }
-                    } else if (urlMapping.getId() != 0) {
-                        URITemplate urlMappingExisting = uriTemplateMap.get(urlMapping.getUriTemplate()
-                                + urlMapping.getHTTPVerb());
-                        if (urlMappingExisting == null) {
                             uriTemplateMap.put(urlMapping.getUriTemplate() + urlMapping.getHTTPVerb(), urlMapping);
                         }
-                    } else {
-                        uriTemplateMap.put(urlMapping.getUriTemplate() + urlMapping.getHTTPVerb(), urlMapping);
                     }
-                }
-                if (isUpdate) {
-                    List<Integer> productUrlMappingIds = new ArrayList<>();
-                    int apiId = uriTemplateMap
-                            .get(uriTemplateOriginal.getUriTemplate() + uriTemplateOriginal.getHTTPVerb())
-                            .getId();
-                    try (PreparedStatement getUrlMappingIdsStmt = connection.prepareStatement(
-                            SQLConstants.GET_PRODUCT_URL_MAPPING_IDS)) {
-                        getUrlMappingIdsStmt.setInt(1, apiId);
-                        getUrlMappingIdsStmt.setString(2, String.valueOf(productId));
-                        getUrlMappingIdsStmt.setString(3, uriTemplateOriginal.getUriTemplate());
-                        getUrlMappingIdsStmt.setString(4, uriTemplateOriginal.getHTTPVerb());
-                        try (ResultSet rs = getUrlMappingIdsStmt.executeQuery()) {
-                            while (rs.next()) {
-                                productUrlMappingIds.add(rs.getInt("URL_MAPPING_ID"));
-                            }
-                        }
-                    }
-                    if (!productUrlMappingIds.isEmpty()) {
-                        try (PreparedStatement removeUrlMappingsStmt = connection.prepareStatement(
-                                SQLConstants.APIRevisionSqlConstants
-                                        .REMOVE_PRODUCT_ENTRIES_IN_AM_API_URL_MAPPING_BY_URL_MAPPING_ID)) {
-                            for (Integer mappingId : productUrlMappingIds) {
-                                removeUrlMappingsStmt.setInt(1, mappingId);
-                                removeUrlMappingsStmt.addBatch();
-                            }
-                            removeUrlMappingsStmt.executeBatch();
-                        }
-                    }
-                }
-                PreparedStatement insertURLMappingsStatement = connection
-                        .prepareStatement(INSERT_URL_MAPPINGS);
-                for (URITemplate urlMapping : uriTemplateMap.values()) {
-                    insertURLMappingsStatement.setInt(1, urlMapping.getId());
-                    insertURLMappingsStatement.setString(2, urlMapping.getHTTPVerb());
-                    insertURLMappingsStatement.setString(3, urlMapping.getAuthType());
-                    insertURLMappingsStatement.setString(4, urlMapping.getUriTemplate());
-                    insertURLMappingsStatement.setString(5, urlMapping.getThrottlingTier());
-                    if (urlMapping.getDescription() != null) {
-                        byte[] descriptionBytes = urlMapping.getDescription().getBytes(StandardCharsets.UTF_8);
-                        insertURLMappingsStatement.setBinaryStream(6,
-                                new ByteArrayInputStream(descriptionBytes), descriptionBytes.length);
-                    } else {
-                        insertURLMappingsStatement.setNull(6, Types.BINARY);
-                    }
-                    if (urlMapping.getSchemaDefinition() != null) {
-                        byte[] schemaDefinitionBytes = urlMapping.getSchemaDefinition()
-                                .getBytes(StandardCharsets.UTF_8);
-                        insertURLMappingsStatement.setBinaryStream(7,
-                                new ByteArrayInputStream(schemaDefinitionBytes), schemaDefinitionBytes.length);
-                    } else {
-                        insertURLMappingsStatement.setNull(7, Types.BINARY);
-                    }
-                    insertURLMappingsStatement.setString(8, String.valueOf(productId));
-                    insertURLMappingsStatement.addBatch();
-                }
-                insertURLMappingsStatement.executeBatch();
-
-                // Add to AM_API_RESOURCE_SCOPE_MAPPING table and to AM_API_PRODUCT_MAPPING
-                PreparedStatement getRevisionedURLMappingsStatement = connection
-                        .prepareStatement(GET_URL_MAPPINGS_ID);
-                PreparedStatement insertScopeResourceMappingStatement = connection
-                        .prepareStatement(INSERT_SCOPE_RESOURCE_MAPPING);
-                PreparedStatement insertProductResourceMappingStatement = connection
-                        .prepareStatement(addProductResourceMappingSql);
-                String dbProductName = connection.getMetaData().getDatabaseProductName();
-                PreparedStatement insertOperationPolicyMappingStatement = connection
-                        .prepareStatement(SQLConstants.OperationPolicyConstants.ADD_API_OPERATION_POLICY_MAPPING);
-                List<ClonePolicyMetadataDTO> toBeClonedPolicyDetails = new ArrayList<>();
-                for (URITemplate urlMapping : uriTemplateMap.values()) {
-                    getRevisionedURLMappingsStatement.setInt(1, urlMapping.getId());
-                    getRevisionedURLMappingsStatement.setString(2, urlMapping.getHTTPVerb());
-                    getRevisionedURLMappingsStatement.setString(3, urlMapping.getAuthType());
-                    getRevisionedURLMappingsStatement.setString(4, urlMapping.getUriTemplate());
-                    getRevisionedURLMappingsStatement.setString(5, urlMapping.getThrottlingTier());
-                    getRevisionedURLMappingsStatement.setString(6, String.valueOf(productId));
-                    if (urlMapping.getScopes() != null && !urlMapping.getScopes().isEmpty()) {
-                        try (ResultSet rs = getRevisionedURLMappingsStatement.executeQuery()) {
-                            while (rs.next()) {
-                                for (Scope scope : urlMapping.getScopes()) {
-                                    insertScopeResourceMappingStatement.setString(1, scope.getKey());
-                                    insertScopeResourceMappingStatement.setInt(2, rs.getInt(1));
-                                    insertScopeResourceMappingStatement.setInt(3, tenantId);
-                                    insertScopeResourceMappingStatement.addBatch();
+                    if (isUpdate) {
+                        List<Integer> productUrlMappingIds = new ArrayList<>();
+                        int apiId = uriTemplateMap
+                                .get(uriTemplateOriginal.getUriTemplate() + uriTemplateOriginal.getHTTPVerb())
+                                .getId();
+                        try (PreparedStatement getUrlMappingIdsStmt = connection.prepareStatement(
+                                SQLConstants.GET_PRODUCT_URL_MAPPING_IDS)) {
+                            getUrlMappingIdsStmt.setInt(1, apiId);
+                            getUrlMappingIdsStmt.setString(2, String.valueOf(productId));
+                            getUrlMappingIdsStmt.setString(3, uriTemplateOriginal.getUriTemplate());
+                            getUrlMappingIdsStmt.setString(4, uriTemplateOriginal.getHTTPVerb());
+                            try (ResultSet rs = getUrlMappingIdsStmt.executeQuery()) {
+                                while (rs.next()) {
+                                    productUrlMappingIds.add(rs.getInt("URL_MAPPING_ID"));
                                 }
                             }
                         }
-                    }
-                    try (ResultSet rs = getRevisionedURLMappingsStatement.executeQuery()) {
-                        while (rs.next()) {
-                            insertProductResourceMappingStatement.setInt(1, productId);
-                            insertProductResourceMappingStatement.setInt(2, rs.getInt(1));
-                            insertProductResourceMappingStatement.setString(3, APIConstants.API_REVISION_CURRENT_API);
-                            insertProductResourceMappingStatement.addBatch();
+                        if (!productUrlMappingIds.isEmpty()) {
+                            try (PreparedStatement removeUrlMappingsStmt = connection.prepareStatement(
+                                    SQLConstants.APIRevisionSqlConstants
+                                            .REMOVE_PRODUCT_ENTRIES_IN_AM_API_URL_MAPPING_BY_URL_MAPPING_ID)) {
+                                for (Integer mappingId : productUrlMappingIds) {
+                                    removeUrlMappingsStmt.setInt(1, mappingId);
+                                    removeUrlMappingsStmt.addBatch();
+                                }
+                                removeUrlMappingsStmt.executeBatch();
+                            }
                         }
                     }
-                    try (ResultSet rs = getRevisionedURLMappingsStatement.executeQuery()) {
-                        while (rs.next()) {
-                            if (urlMapping.getOperationPolicies() != null) {
-                                for (OperationPolicy policy : urlMapping.getOperationPolicies()) {
-                                    handlePolicyCloning(policy, uuid, tenantDomain, connection, clonedPoliciesMap,
-                                            usedClonedPolicies, toBeClonedPolicyDetails);
 
-                                    Gson gson = new Gson();
-                                    String paramJSON = gson.toJson(policy.getParameters());
-                                    insertOperationPolicyMappingStatement.setInt(1, rs.getInt(1));
-                                    insertOperationPolicyMappingStatement
-                                            .setString(2, clonedPoliciesMap.get(policy.getPolicyId()));
-                                    insertOperationPolicyMappingStatement.setString(3, policy.getDirection());
+                    PreparedStatement insertURLMappingsStatement = null;
+                    PreparedStatement getRevisionedURLMappingsStatement = null;
+                    PreparedStatement insertScopeResourceMappingStatement = null;
+                    PreparedStatement insertProductResourceMappingStatement = null;
+                    PreparedStatement insertOperationPolicyMappingStatement = null;
 
-                                    try (InputStream paramInputStream = new ByteArrayInputStream(
-                                            paramJSON.getBytes(StandardCharsets.UTF_8))) {
-                                        insertOperationPolicyMappingStatement.setBinaryStream(4, paramInputStream,
-                                                paramJSON.length());
-                                    } catch (IOException e) {
-                                        log.error("Error creating or reading InputStream for operation policy");
-                                        throw new APIManagementException(
-                                                "Error processing operation policy parameters for policy ID: " +
-                                                        policy.getPolicyId() + " in URL Mapping ID: " + rs.getInt(1),
-                                                e);
+                    try {
+                        insertURLMappingsStatement = connection.prepareStatement(INSERT_URL_MAPPINGS);
+                        for (URITemplate urlMapping : uriTemplateMap.values()) {
+                            insertURLMappingsStatement.setInt(1, urlMapping.getId());
+                            insertURLMappingsStatement.setString(2, urlMapping.getHTTPVerb());
+                            insertURLMappingsStatement.setString(3, urlMapping.getAuthType());
+                            insertURLMappingsStatement.setString(4, urlMapping.getUriTemplate());
+                            insertURLMappingsStatement.setString(5, urlMapping.getThrottlingTier());
+                            if (urlMapping.getDescription() != null) {
+                                byte[] descriptionBytes = urlMapping.getDescription().getBytes(StandardCharsets.UTF_8);
+                                insertURLMappingsStatement.setBinaryStream(6,
+                                        new ByteArrayInputStream(descriptionBytes), descriptionBytes.length);
+                            } else {
+                                insertURLMappingsStatement.setNull(6, Types.BINARY);
+                            }
+                            if (urlMapping.getSchemaDefinition() != null) {
+                                byte[] schemaDefinitionBytes = urlMapping.getSchemaDefinition()
+                                        .getBytes(StandardCharsets.UTF_8);
+                                insertURLMappingsStatement.setBinaryStream(7,
+                                        new ByteArrayInputStream(schemaDefinitionBytes), schemaDefinitionBytes.length);
+                            } else {
+                                insertURLMappingsStatement.setNull(7, Types.BINARY);
+                            }
+                            insertURLMappingsStatement.setString(8, String.valueOf(productId));
+                            insertURLMappingsStatement.addBatch();
+                        }
+                        insertURLMappingsStatement.executeBatch();
+
+                        // Add to AM_API_RESOURCE_SCOPE_MAPPING table and to AM_API_PRODUCT_MAPPING
+                        getRevisionedURLMappingsStatement = connection.prepareStatement(GET_URL_MAPPINGS_ID);
+                        insertScopeResourceMappingStatement = connection.prepareStatement(INSERT_SCOPE_RESOURCE_MAPPING);
+                        insertProductResourceMappingStatement = connection.prepareStatement(addProductResourceMappingSql);
+                        String dbProductName = connection.getMetaData().getDatabaseProductName();
+                        insertOperationPolicyMappingStatement = connection.prepareStatement(
+                                SQLConstants.OperationPolicyConstants.ADD_API_OPERATION_POLICY_MAPPING);
+                        List<ClonePolicyMetadataDTO> toBeClonedPolicyDetails = new ArrayList<>();
+                        for (URITemplate urlMapping : uriTemplateMap.values()) {
+                            getRevisionedURLMappingsStatement.setInt(1, urlMapping.getId());
+                            getRevisionedURLMappingsStatement.setString(2, urlMapping.getHTTPVerb());
+                            getRevisionedURLMappingsStatement.setString(3, urlMapping.getAuthType());
+                            getRevisionedURLMappingsStatement.setString(4, urlMapping.getUriTemplate());
+                            getRevisionedURLMappingsStatement.setString(5, urlMapping.getThrottlingTier());
+                            getRevisionedURLMappingsStatement.setString(6, String.valueOf(productId));
+                            if (urlMapping.getScopes() != null && !urlMapping.getScopes().isEmpty()) {
+                                try (ResultSet rs = getRevisionedURLMappingsStatement.executeQuery()) {
+                                    while (rs.next()) {
+                                        for (Scope scope : urlMapping.getScopes()) {
+                                            insertScopeResourceMappingStatement.setString(1, scope.getKey());
+                                            insertScopeResourceMappingStatement.setInt(2, rs.getInt(1));
+                                            insertScopeResourceMappingStatement.setInt(3, tenantId);
+                                            insertScopeResourceMappingStatement.addBatch();
+                                        }
                                     }
-                                    insertOperationPolicyMappingStatement.setInt(5, policy.getOrder());
-                                    insertOperationPolicyMappingStatement.addBatch();
+                                }
+                            }
+
+                            try (ResultSet rs = getRevisionedURLMappingsStatement.executeQuery()) {
+                                while (rs.next()) {
+                                    insertProductResourceMappingStatement.setInt(1, productId);
+                                    insertProductResourceMappingStatement.setInt(2, rs.getInt(1));
+                                    insertProductResourceMappingStatement.setString(3,
+                                            APIConstants.API_REVISION_CURRENT_API);
+                                    insertProductResourceMappingStatement.addBatch();
+                                }
+                            }
+
+                            try (ResultSet rs = getRevisionedURLMappingsStatement.executeQuery()) {
+                                while (rs.next()) {
+                                    if (urlMapping.getOperationPolicies() != null) {
+                                        for (OperationPolicy policy : urlMapping.getOperationPolicies()) {
+                                            handlePolicyCloning(policy, uuid, tenantDomain, connection, clonedPoliciesMap,
+                                                    usedClonedPolicies, toBeClonedPolicyDetails);
+
+                                            Gson gson = new Gson();
+                                            String paramJSON = gson.toJson(policy.getParameters());
+                                            insertOperationPolicyMappingStatement.setInt(1, rs.getInt(1));
+                                            insertOperationPolicyMappingStatement
+                                                    .setString(2, clonedPoliciesMap.get(policy.getPolicyId()));
+                                            insertOperationPolicyMappingStatement.setString(3, policy.getDirection());
+
+                                            try (InputStream paramInputStream = new ByteArrayInputStream(
+                                                    paramJSON.getBytes(StandardCharsets.UTF_8))) {
+                                                insertOperationPolicyMappingStatement.setBinaryStream(4, paramInputStream,
+                                                        paramJSON.length());
+                                            } catch (IOException e) {
+                                                log.error("Error creating or reading InputStream for operation policy");
+                                                throw new APIManagementException(
+                                                        "Error processing operation policy parameters for policy ID: " +
+                                                                policy.getPolicyId() + " in URL Mapping ID: " + rs.getInt(1),
+                                                        e);
+                                            }
+                                            insertOperationPolicyMappingStatement.setInt(5, policy.getOrder());
+                                            insertOperationPolicyMappingStatement.addBatch();
+                                        }
+                                    }
                                 }
                             }
                         }
+                        insertScopeResourceMappingStatement.executeBatch();
+                        insertProductResourceMappingStatement.executeBatch();
+                        for (ClonePolicyMetadataDTO toBeClonedPolicyData : toBeClonedPolicyDetails) {
+                            cloneCommonPolicyToAPI(connection, toBeClonedPolicyData.getCurrentPolicyUUID(),
+                                    toBeClonedPolicyData.getClonedPolicyUUID(), uuid);
+                        }
+                        insertOperationPolicyMappingStatement.executeBatch();
+
+                    } finally {
+                        // Close all prepared statements
+                        if (insertURLMappingsStatement != null) {
+                            try {
+                                insertURLMappingsStatement.close();
+                            } catch (SQLException e) {
+                                log.warn("Error closing insertURLMappingsStatement", e);
+                            }
+                        }
+                        if (getRevisionedURLMappingsStatement != null) {
+                            try {
+                                getRevisionedURLMappingsStatement.close();
+                            } catch (SQLException e) {
+                                log.warn("Error closing getRevisionedURLMappingsStatement", e);
+                            }
+                        }
+                        if (insertScopeResourceMappingStatement != null) {
+                            try {
+                                insertScopeResourceMappingStatement.close();
+                            } catch (SQLException e) {
+                                log.warn("Error closing insertScopeResourceMappingStatement", e);
+                            }
+                        }
+                        if (insertProductResourceMappingStatement != null) {
+                            try {
+                                insertProductResourceMappingStatement.close();
+                            } catch (SQLException e) {
+                                log.warn("Error closing insertProductResourceMappingStatement", e);
+                            }
+                        }
+                        if (insertOperationPolicyMappingStatement != null) {
+                            try {
+                                insertOperationPolicyMappingStatement.close();
+                            } catch (SQLException e) {
+                                log.warn("Error closing insertOperationPolicyMappingStatement", e);
+                            }
+                        }
+                    }
+                } finally {
+                    // Close the getURLMappingsStatement
+                    if (getURLMappingsStatement != null) {
+                        try {
+                            getURLMappingsStatement.close();
+                        } catch (SQLException e) {
+                            log.warn("Error closing getURLMappingsStatement", e);
+                        }
                     }
                 }
-                insertScopeResourceMappingStatement.executeBatch();
-                insertProductResourceMappingStatement.executeBatch();
-                for (ClonePolicyMetadataDTO toBeClonedPolicyData : toBeClonedPolicyDetails) {
-                    cloneCommonPolicyToAPI(connection, toBeClonedPolicyData.getCurrentPolicyUUID(),
-                            toBeClonedPolicyData.getClonedPolicyUUID(), uuid);
-                }
-                insertOperationPolicyMappingStatement.executeBatch();
             }
             cleanUnusedClonedOperationPolicies(connection, usedClonedPolicies, uuid);
             if (isNewConnection) {
@@ -17658,10 +17710,11 @@ public class ApiMgtDAO {
                             int uriTemplateId = rs.getInt("URL_MAPPING_ID");
                             uriTemplate.setId(uriTemplateId);
                             uriTemplate.setAuthType(rs.getString("AUTH_SCHEME"));
-                            if (rs.getString(APIConstants.THROTTLING_TIER).isEmpty()) {
+                            String tier = rs.getString(APIConstants.THROTTLING_TIER);
+                            if (tier == null || tier.isEmpty()) {
                                 uriTemplate.setThrottlingTier(APIConstants.UNLIMITED_TIER);
                             } else {
-                                uriTemplate.setThrottlingTier(rs.getString(APIConstants.THROTTLING_TIER));
+                                uriTemplate.setThrottlingTier(tier);
                             }
                             try (PreparedStatement scopesStatement = connection.
                                     prepareStatement(SQLConstants.GET_SCOPE_KEYS_BY_URL_MAPPING_ID)) {
@@ -17719,10 +17772,11 @@ public class ApiMgtDAO {
                             int uriTemplateId = rs.getInt("URL_MAPPING_ID");
                             uriTemplate.setId(uriTemplateId);
                             uriTemplate.setAuthType(rs.getString("AUTH_SCHEME"));
-                            if (rs.getString(APIConstants.THROTTLING_TIER).isEmpty()) {
+                            String tier = rs.getString(APIConstants.THROTTLING_TIER);
+                            if (tier == null || tier.isEmpty()) {
                                 uriTemplate.setThrottlingTier(APIConstants.UNLIMITED_TIER);
                             } else {
-                                uriTemplate.setThrottlingTier(rs.getString(APIConstants.THROTTLING_TIER));
+                                uriTemplate.setThrottlingTier(tier);
                             }
 
                             try (PreparedStatement scopesStatement = connection.
@@ -18240,6 +18294,58 @@ public class ApiMgtDAO {
             handleException("Error in adding revoked jwt signature to database : " + e.getMessage(), e);
         }
     }
+
+    /**
+     * Persist multiple revoked jwt signatures to database in batch.
+     *
+     * @param revokedJWTList List of revoked JWT data. Each entry is an Object array containing:
+     *                       [0] eventId (String), [1] jwtSignature (String), [2] type (String),
+     *                       [3] expiryTime (Long), [4] tenantId (Integer)
+     * @throws APIManagementException if an error occurs while adding revoked JWT signatures
+     */
+    public void addRevokedJWTSignatures(List<Object[]> revokedJWTList) throws APIManagementException {
+
+        if (revokedJWTList == null || revokedJWTList.isEmpty()) {
+            return;
+        }
+
+        String addJwtSignature = SQLConstants.RevokedJWTConstants.ADD_JWT_SIGNATURE;
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement ps = conn.prepareStatement(addJwtSignature)) {
+                for (Object[] revokedJWT : revokedJWTList) {
+                    String eventId = (String) revokedJWT[0];
+                    String jwtSignature = (String) revokedJWT[1];
+                    String type = (String) revokedJWT[2];
+                    Long expiryTime = (Long) revokedJWT[3];
+                    int tenantId = (Integer) revokedJWT[4];
+
+                    if (StringUtils.isEmpty(type)) {
+                        type = APIConstants.DEFAULT;
+                    }
+
+                    ps.setString(1, eventId);
+                    ps.setString(2, jwtSignature);
+                    ps.setLong(3, expiryTime);
+                    ps.setInt(4, tenantId);
+                    ps.setString(5, type);
+                    ps.addBatch();
+                }
+                ps.executeBatch();
+                conn.commit();
+            } catch (SQLIntegrityConstraintViolationException e) {
+                conn.rollback();
+                handleException("Batch add of revoked JWT signatures failed due to duplicate entries; " +
+                        "transaction rolled back", e);
+            } catch (SQLException e) {
+                conn.rollback();
+                handleException("Error in batch adding revoked jwt signatures to database", e);
+            }
+        } catch (SQLException e) {
+            handleException("Error in adding revoked jwt signatures to database : " + e.getMessage(), e);
+        }
+    }
+
 
     /**
      * Check revoked Token Identifier exist
@@ -22128,10 +22234,11 @@ public class ApiMgtDAO {
                         uriTemplate.setHTTPVerb(httpMethod);
                         uriTemplate.setAuthType(rs.getString("AUTH_SCHEME"));
                         uriTemplate.setUriTemplate(rs.getString("URL_PATTERN"));
-                        if (rs.getString(APIConstants.THROTTLING_TIER).isEmpty()) {
+                        String tier = rs.getString(APIConstants.THROTTLING_TIER);
+                        if (tier == null || tier.isEmpty()) {
                             uriTemplate.setThrottlingTier(APIConstants.UNLIMITED_TIER);
                         } else {
-                            uriTemplate.setThrottlingTier(rs.getString(APIConstants.THROTTLING_TIER));
+                            uriTemplate.setThrottlingTier(tier);
                         }
                         InputStream mediationScriptBlob = rs.getBinaryStream("MEDIATION_SCRIPT");
                         if (mediationScriptBlob != null) {
@@ -27038,8 +27145,16 @@ public class ApiMgtDAO {
             statement.setString(1, policyMappingUUID);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
-                    OperationPolicy policy = populateOperationPolicyWithRS(rs);
-                    gatewayPolicies.add(policy);
+                    OperationPolicy operationPolicy = new OperationPolicy();
+                    operationPolicy.setPolicyName(rs.getString("POLICY_NAME"));
+                    operationPolicy.setPolicyVersion(rs.getString("POLICY_VERSION"));
+                    operationPolicy.setPolicyId(rs.getString("POLICY_UUID"));
+                    operationPolicy.setOrder(rs.getInt("POLICY_ORDER"));
+                    operationPolicy.setDirection(rs.getString("DIRECTION"));
+                    Map<String, Object> parameters =
+                    APIMgtDBUtil.convertJSONStringToMap(rs.getString("PARAMETERS"));
+                    operationPolicy.setParameters(parameters != null ? parameters : new HashMap<>());
+                    gatewayPolicies.add(operationPolicy);
                 }
             }
         } catch (SQLException e) {

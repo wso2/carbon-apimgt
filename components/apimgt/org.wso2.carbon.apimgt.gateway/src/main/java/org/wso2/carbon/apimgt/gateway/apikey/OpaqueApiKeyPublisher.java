@@ -16,19 +16,14 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.impl.publishers;
+package org.wso2.carbon.apimgt.gateway.apikey;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.impl.dto.GatewayNotificationConfiguration;
-import org.wso2.carbon.apimgt.impl.dto.GatewayNotificationConfiguration.DeploymentAcknowledgementConfiguration;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.token.OpaqueAPIKeyNotifier;
-
+import com.google.gson.Gson;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -38,6 +33,23 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.util.EntityUtils;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dto.APIKeyConfigurationDTO;
+import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
+import org.wso2.carbon.apimgt.impl.dto.GatewayNotificationConfiguration;
+import org.wso2.carbon.apimgt.impl.notifier.events.APIKeyUsageEvent;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 /**
  * Publisher class to notify api key info
@@ -46,14 +58,16 @@ public class OpaqueApiKeyPublisher {
 
     private static final Log log = LogFactory.getLog(OpaqueApiKeyPublisher.class);
 
-    private static OpaqueApiKeyPublisher opaqueApiKeyPublisher = null;
-    private static final BlockingQueue<Properties> currentUsageBatch = new LinkedBlockingQueue<>();
+    private static volatile OpaqueApiKeyPublisher opaqueApiKeyPublisher = null;
+    private final BlockingQueue<APIKeyUsageEvent> currentUsageBatch;
     private static final Object usageBatchLock = new Object();
-    private OpaqueAPIKeyNotifier opaqueApiKeyNotifier;
     private final ThreadPoolExecutor usageBatchProcessorExecutor;
     private final ScheduledExecutorService usageBatchScheduler;
+    private final int maxRetryCount;
+    private final double retryProgressionFactor;
     private volatile boolean shutdownStarted;
     private final int batchSize;
+    private final long retryDuration;
     private final long batchIntervalMillis;
     private final int batchProcessorMinThread;
     private final int batchProcessorMaxThread;
@@ -63,10 +77,10 @@ public class OpaqueApiKeyPublisher {
 
     private OpaqueApiKeyPublisher() {
 
-        opaqueApiKeyNotifier = ServiceReferenceHolder.getInstance().getOpaqueApiKeyNotifier();
         GatewayNotificationConfiguration gatewayNotificationConfig = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getGatewayNotificationConfiguration();
-        DeploymentAcknowledgementConfiguration config = gatewayNotificationConfig.getDeploymentAcknowledgement();
+                .getAPIManagerConfiguration().getGatewayNotificationConfiguration();
+        APIKeyConfigurationDTO config = gatewayNotificationConfig.getApiKeyConfiguration();
+        int queueSize = config.getQueueSize();
         this.batchSize = config.getBatchSize();
         this.batchIntervalMillis = config.getBatchIntervalMillis();
         this.batchProcessorMinThread = config.getBatchProcessorMinThread();
@@ -74,17 +88,14 @@ public class OpaqueApiKeyPublisher {
         this.batchProcessorKeepAlive = config.getBatchProcessorKeepAlive();
         this.batchProcessorQueueSize = config.getBatchProcessorQueueSize();
         this.notificationsEnabled = gatewayNotificationConfig.isEnabled();
-
+        this.retryDuration = config.getRetryDuration();
+        this.maxRetryCount = config.getMaxRetryCount();
+        this.retryProgressionFactor = config.getRetryProgressionFactor();
         this.usageBatchScheduler = createSchedulerExecutor();
         this.usageBatchProcessorExecutor = createThreadPoolExecutor();
-
-        if (opaqueApiKeyNotifier != null) {
-            log.debug("Opaque API key notifier initialized");
-            log.debug("Starting periodic batch processing for API key usage notifications");
-            startPeriodicBatchProcessing();
-        } else {
-            log.warn("Opaque API key notifier is not initialized. Realtime notifications will be disabled.");
-        }
+        currentUsageBatch = new LinkedBlockingQueue<>(queueSize);
+        log.debug("Starting periodic batch processing for API key usage notifications");
+        startPeriodicBatchProcessing();
     }
 
     private ScheduledExecutorService createSchedulerExecutor() {
@@ -129,39 +140,79 @@ public class OpaqueApiKeyPublisher {
             return;
         }
 
-        List<Properties> batchToProcess = new ArrayList<>();
-        currentUsageBatch.drainTo(batchToProcess);
+        List<APIKeyUsageEvent> batchToProcess = new ArrayList<>();
+        currentUsageBatch.drainTo(batchToProcess, batchSize);
         try {
-            usageBatchProcessorExecutor.submit(() -> processBatchedUsageNotifications(batchToProcess));
+            usageBatchProcessorExecutor.execute(() -> {
+                try {
+                    processBatchedUsageNotifications(batchToProcess);
+                } catch (RuntimeException e) {
+                    log.error("Unexpected error while processing API key usage batch notification", e);
+                }
+            });
             if (log.isDebugEnabled()) {
                 log.debug(String.format("Submitted batch of %d API key usage jobs. Active threads: %d, queue size: %d",
                         batchToProcess.size(), usageBatchProcessorExecutor.getActiveCount(),
                         usageBatchProcessorExecutor.getQueue().size()));
             }
         } catch (RejectedExecutionException e) {
-            log.error("Failed to submit API key usage batch due to thread pool rejection. Batch size: "
-                    + batchToProcess.size(), e);
+            log.error("Failed to submit API key usage batch due to thread pool rejection. Batch size: " +
+                    batchToProcess.size() + ". Error: " + e.getMessage());
             currentUsageBatch.addAll(batchToProcess);
         }
     }
 
-    private void processBatchedUsageNotifications(List<Properties> jobs) {
-        if (jobs == null || jobs.isEmpty() || opaqueApiKeyNotifier == null) {
+    private void processBatchedUsageNotifications(List<APIKeyUsageEvent> jobs) {
+        if (jobs == null || jobs.isEmpty()) {
             return;
         }
-        for (Properties job : jobs) {
-            try {
-                opaqueApiKeyNotifier.sendLastUsedTimeOnRealtime(job);
-            } catch (Exception e) {
-                log.error("Error while sending batched API key usage notification", e);
+        try {
+            String threadName = Thread.currentThread().getName();
+            if (log.isDebugEnabled()) {
+                log.debug(String.format("[%s] Processing batch of %d API-Key Usage notifications", threadName,
+                        jobs.size()));
             }
+            String jsonPayload = new Gson().toJson(jobs);
+
+            EventHubConfigurationDto config =
+                    ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getEventHubConfigurationDto();
+            String serviceURLStr = config.getServiceUrl().concat(APIConstants.INTERNAL_WEB_APP_EP).concat("/notify");
+            URL url = new URL(serviceURLStr);
+
+            HttpClient httpClient = APIUtil.getHttpClient(url.getPort(), url.getProtocol());
+
+            HttpPost request = new HttpPost(serviceURLStr);
+            request.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT, APIConstants.AUTHORIZATION_BASIC + new String(
+                    Base64.encodeBase64(
+                            (config.getUsername() + APIConstants.DELEM_COLON + config.getPassword()).getBytes(
+                                    StandardCharsets.UTF_8)), StandardCharsets.UTF_8));
+            request.setHeader(APIConstants.HEADER_CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+            request.setHeader(APIConstants.KeyManager.KEY_MANAGER_TYPE_HEADER,
+                    APIConstants.NotificationEvent.API_KEY_USAGE_EVENT);
+            request.setEntity(new StringEntity(jsonPayload, ContentType.APPLICATION_JSON));
+
+            try (CloseableHttpResponse response = APIUtil.executeHTTPRequestWithRetries(request, httpClient,
+                    retryDuration, maxRetryCount, retryProgressionFactor)) {
+                if (log.isDebugEnabled()) {
+                    int statusCode = response.getStatusLine().getStatusCode();
+                    String responseBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+                    log.debug("Received response for API key usage batch notification. Status code: " + statusCode +
+                            ", Response body: " + responseBody);
+
+                }
+            }
+        } catch (IOException | APIManagementException e) {
+            log.error("Error occurred while calling batched deployment status notification", e);
         }
     }
 
-    public static synchronized OpaqueApiKeyPublisher getInstance() {
-
+    public static OpaqueApiKeyPublisher getInstance() {
         if (opaqueApiKeyPublisher == null) {
-            opaqueApiKeyPublisher = new OpaqueApiKeyPublisher();
+            synchronized (OpaqueApiKeyPublisher.class) {
+                if (opaqueApiKeyPublisher == null) {
+                    opaqueApiKeyPublisher = new OpaqueApiKeyPublisher();
+                }
+            }
         }
         return opaqueApiKeyPublisher;
     }
@@ -169,10 +220,9 @@ public class OpaqueApiKeyPublisher {
     /**
      * Shutdown publisher resources and clear pending usage batch jobs.
      */
-    public static synchronized void shutdownInstance() {
-        if (opaqueApiKeyPublisher != null) {
-            opaqueApiKeyPublisher.shutdown();
-            opaqueApiKeyPublisher = null;
+    public synchronized void shutdownInstance() {
+        if (!shutdownStarted) {
+            shutdown();
         }
     }
 
@@ -208,19 +258,17 @@ public class OpaqueApiKeyPublisher {
 
     /**
      * Publish API key usage events
-     * @param properties
+     * @param apiKeyUsageEvent API key usage event to publish
      */
-    public void publishApiKeyUsageEvents(Properties properties) {
+    public void publishApiKeyUsageEvents(APIKeyUsageEvent apiKeyUsageEvent) {
 
-        if (shutdownStarted || opaqueApiKeyNotifier == null || !notificationsEnabled || properties == null) {
+        if (shutdownStarted || !notificationsEnabled || apiKeyUsageEvent == null) {
             return;
         }
 
-        Properties usageEvent = new Properties();
-        usageEvent.putAll(properties);
-        if (!currentUsageBatch.offer(usageEvent)) {
-            log.error(String.format("API key usage notification queue is full. Current queue size: %d, max capacity: %d",
-                    currentUsageBatch.size(), Integer.MAX_VALUE));
+        if (!currentUsageBatch.offer(apiKeyUsageEvent)) {
+            log.error(String.format("API key usage notification queue is full. Current queue size: %d",
+                    currentUsageBatch.size()));
             return;
         }
 
@@ -233,57 +281,4 @@ public class OpaqueApiKeyPublisher {
         }
     }
 
-    /**
-     * Publish API key info events
-     * @param properties
-     */
-    public void publishApiKeyInfoEvents(Properties properties) {
-
-        if (properties == null) {
-            return;
-        }
-
-        // The notifier service activation order can vary during startup.
-        // If the singleton was initialized before the notifier component activated, the cached reference can be null.
-        if (opaqueApiKeyNotifier == null) {
-            opaqueApiKeyNotifier = ServiceReferenceHolder.getInstance().getOpaqueApiKeyNotifier();
-        }
-
-        if (opaqueApiKeyNotifier != null) {
-            if (log.isDebugEnabled()) {
-                log.debug("Publishing opaque apikey.info to realtime");
-            }
-            opaqueApiKeyNotifier.sendApiKeyInfoOnRealtime(properties);
-        } else {
-            if (log.isDebugEnabled()) {
-                log.debug("OpaqueApiKeyNotifier is not available; skipping opaque apikey.info broadcast");
-            }
-        }
-    }
-
-    /**
-     * Publish API key association info events
-     * @param properties
-     */
-    public void publishApiKeyAssociationInfoEvents(Properties properties) {
-
-        if (properties == null) {
-            return;
-        }
-
-        if (opaqueApiKeyNotifier == null) {
-            opaqueApiKeyNotifier = ServiceReferenceHolder.getInstance().getOpaqueApiKeyNotifier();
-        }
-
-        if (opaqueApiKeyNotifier != null) {
-            if (log.isDebugEnabled()) {
-                log.debug("Publishing opaque apikey.association to realtime");
-            }
-            opaqueApiKeyNotifier.sendApiKeyAssociationInfoOnRealtime(properties);
-        } else {
-            if (log.isDebugEnabled()) {
-                log.debug("OpaqueApiKeyNotifier is not available; skipping opaque apikey.association broadcast");
-            }
-        }
-    }
 }

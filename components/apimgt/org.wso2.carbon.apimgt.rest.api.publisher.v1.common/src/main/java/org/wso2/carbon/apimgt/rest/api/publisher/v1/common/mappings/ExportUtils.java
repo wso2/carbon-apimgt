@@ -746,14 +746,14 @@ public class ExportUtils {
                     APIConstants.API_KEY_TYPE_PRODUCTION);
             if (data != null) {
                 String seqName = data.getName();
-                exportCustomBackend(seqName, data.getSequence(), archivePath);
+                APIUtil.exportCustomBackend(seqName, data.getSequence(), archivePath);
             }
 
             // Add sandbox Backend Sequences
             data = apiProvider.getCustomBackendByAPIUUID(apiUUID, APIConstants.API_KEY_TYPE_SANDBOX);
             if (data != null) {
                 String seqName = data.getName();
-                exportCustomBackend(seqName, data.getSequence(), archivePath);
+                APIUtil.exportCustomBackend(seqName, data.getSequence(), archivePath);
             }
 
         } catch (IOException | APIImportExportException ex) {
@@ -1003,27 +1003,6 @@ public class ExportUtils {
             JsonArray jsonArray = (JsonArray) jsonElement;
             CommonUtil.writeDtoToFile(archivePath + fileLocation, exportFormat, dtoType, jsonArray);
         }
-    }
-
-    /**
-     * Method is used to write Custom Backend file to the Directory
-     *
-     * @param customBackendFileName Custom Backend file name
-     * @param sequence              Content of the Custom Backend
-     * @param archivePath           Archived path
-     * @throws APIImportExportException Import/Export error if exists
-     * @throws IOException              IO Error when reading/writing to the file
-     */
-    public static void exportCustomBackend(String customBackendFileName, String sequence, String archivePath)
-            throws APIImportExportException, IOException {
-        if (!StringUtils.isEmpty(customBackendFileName) && !customBackendFileName.contains(
-                APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML)) {
-            customBackendFileName = customBackendFileName + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML;
-        }
-        String customBackendName =
-                archivePath + File.separator + ImportExportConstants.CUSTOM_BACKEND_DIRECTORY + File.separator
-                        + customBackendFileName;
-        CommonUtil.writeFile(customBackendName, sequence);
     }
 
     /**

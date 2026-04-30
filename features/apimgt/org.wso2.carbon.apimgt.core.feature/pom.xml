@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>9.33.98-SNAPSHOT</version>
+        <version>9.33.123-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -85,6 +85,10 @@
         <dependency>
             <groupId>com.damnhandy.wso2</groupId>
             <artifactId>handy-uri-templates</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.usage.data.exporter</artifactId>
         </dependency>
     </dependencies>
     <build>
@@ -243,6 +247,7 @@
                                 <bundleDef>org.apache.httpcomponents.wso2:httpcore</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.spec.parser:${carbon.apimgt.version}</bundleDef>
                                 <bundleDef>com.damnhandy.wso2:handy-uri-templates:${damnhandy.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.usage.data.exporter</bundleDef>
                             </bundles>
                         </configuration>
                     </execution>

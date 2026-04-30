@@ -76,7 +76,7 @@ public class EnvironmentMappingUtil {
         envDTO.setAdditionalProperties(fromAdditionalPropertiesToAdditionalPropertiesDTO
                 (env.getAdditionalProperties()));
         envDTO.setPermissions(mapPermissionsToDTO(env.getPermissions()));
-        envDTO.setUniversalGatewayVersion(resolveUniversalGatewayVersion());
+        envDTO.setPlatformGatewayVersions(resolvePlatformGatewayVersions());
         return envDTO;
     }
 
@@ -86,7 +86,7 @@ public class EnvironmentMappingUtil {
      * traditional gateway environments.
      *
      * @param gateway       PlatformGateway from AM_PLATFORM_GATEWAY
-     * @param gatewayType   gateway type constant (e.g. Universal)
+     * @param gatewayType   gateway type constant (e.g. APIPlatform)
      * @return EnvironmentDTO suitable for deploy-target list
      */
     public static EnvironmentDTO fromPlatformGatewayToEnvDTO(PlatformGateway gateway, String gatewayType,
@@ -137,21 +137,21 @@ public class EnvironmentMappingUtil {
         envDTO.setStatus(Boolean.TRUE.equals(gateway.isActive())
                 ? EnvironmentDTO.StatusEnum.ACTIVE
                 : EnvironmentDTO.StatusEnum.INACTIVE);
-        envDTO.setUniversalGatewayVersion(resolveUniversalGatewayVersion());
+        envDTO.setPlatformGatewayVersions(resolvePlatformGatewayVersions());
         return envDTO;
     }
 
     /**
-     * Resolve Universal Gateway version from config (apim.universal_gateway.version in api-manager.xml).
+     * Resolve Platform Gateway versions from config.
      */
-    private static String resolveUniversalGatewayVersion() {
+    private static List<String> resolvePlatformGatewayVersions() {
         PlatformGatewayConnectConfig config = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration().getPlatformGatewayConnectConfig();
         if (config == null) {
-            return null;
+            return new ArrayList<>();
         }
-        String global = config.getUniversalGatewayVersion();
-        return (global != null && !global.isEmpty()) ? global : null;
+        List<String> versions = config.getPlatformGatewayVersions();
+        return versions.isEmpty() ? new ArrayList<>() : versions;
     }
 
     /**

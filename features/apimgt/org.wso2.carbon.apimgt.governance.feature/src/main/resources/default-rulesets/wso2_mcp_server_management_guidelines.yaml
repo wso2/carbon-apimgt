@@ -50,7 +50,7 @@ rulesetContent:
 
     mcp-name-cannot-contain-version:
       description: "MCP Server name should not contain a semantic version substring (e.g.,\
-        \ x.y.z). This helps keep the version separate from the API name.\n**Correct\
+        \ x.y.z). This helps keep the version separate from the MCP name.\n**Correct\
         \ Example**: ```json {\n  \"data\": {\n    \"name\": \"CustomerProfileAPI\"\n\
         \  }\n} ```\n**Incorrect Example**: ```json {\n  \"data\": {\n    \"name\":\
         \ \"CustomerProfileAPI-1.2.3\"\n  }\n} ```\n"
@@ -189,16 +189,6 @@ rulesetContent:
                     type: string
                     pattern: '^[A-Za-z0-9_.-]+$'
 
-    mcp-no-unlimited-business-plan:
-      description: "MCP server should not have an unlimited business plan."
-      message: "MCP server should not have an unlimited business plan."
-      severity: "warn"
-      given: "$.data.policies.*"
-      then:
-        function: "pattern"
-        functionOptions:
-          notMatch: "Unlimited"
-
     mcp-no-insecure-transports:
       description: "MCP Server should not have insecure transports."
       message: "MCP Server should not have insecure transports."
@@ -285,16 +275,6 @@ rulesetContent:
         function: "pattern"
         functionOptions:
           match: "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"
-
-    mcp-no-unlimited-throttling-policy:
-      description: "MCP Server should not have an unlimited throttling policy."
-      message: "MCP Server should not have an unlimited throttling policy."
-      severity: "warn"
-      given: "$.data.apiThrottlingPolicy"
-      then:
-        function: "pattern"
-        functionOptions:
-          notMatch: "^Unlimited$"
 
     mcp-resources-security-required:
       description: "Checks that security is enabled for all resources."

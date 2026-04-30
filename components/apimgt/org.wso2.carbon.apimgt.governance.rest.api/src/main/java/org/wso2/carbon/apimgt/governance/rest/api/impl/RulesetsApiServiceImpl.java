@@ -19,6 +19,9 @@
 package org.wso2.carbon.apimgt.governance.rest.api.impl;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.springframework.http.HttpHeaders;
@@ -58,6 +61,8 @@ import javax.ws.rs.core.Response;
  */
 public class RulesetsApiServiceImpl implements RulesetsApiService {
 
+    private static final Log log = LogFactory.getLog(RulesetsApiServiceImpl.class);
+
     /**
      * Create a new Governance Ruleset
      *
@@ -95,7 +100,12 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
         }
 
         Ruleset ruleset = new Ruleset();
+        String fileName = rulesetContentDetail != null ? rulesetContentDetail.getDataHandler().getName() : null;
         try {
+            if (StringUtils.isBlank(fileName)) {
+                throw new APIMGovernanceException(APIMGovExceptionCodes.BAD_REQUEST,
+                        "Ruleset content file is missing in the request");
+            }
             ruleset.setName(name);
             ruleCategory = ruleCategory != null ? ruleCategory : RuleCategory.SPECTRAL.toString();
             ruleset.setRuleCategory(RuleCategory.fromString(ruleCategory));
@@ -107,7 +117,7 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
 
             RulesetContent rulesetContent = new RulesetContent();
             rulesetContent.setContent(IOUtils.toByteArray(rulesetContentInputStream));
-            rulesetContent.setFileName(rulesetContentDetail.getContentDisposition().getFilename());
+            rulesetContent.setFileName(fileName);
             ruleset.setRulesetContent(rulesetContent);
 
             String username = APIMGovernanceAPIUtil.getLoggedInUsername();
@@ -170,7 +180,12 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
                             "the maximum length of 1024 characters", description));
         }
 
+        String fileName = rulesetContentDetail != null ? rulesetContentDetail.getDataHandler().getName() : null;
         try {
+            if (StringUtils.isBlank(fileName)) {
+                throw new APIMGovernanceException(APIMGovExceptionCodes.BAD_REQUEST,
+                        "Ruleset content file is missing in the request");
+            }
             Ruleset ruleset = new Ruleset();
             ruleset.setName(name);
             ruleCategory = ruleCategory != null ? ruleCategory : RuleCategory.SPECTRAL.toString();
@@ -184,7 +199,7 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
 
             RulesetContent rulesetContent = new RulesetContent();
             rulesetContent.setContent(IOUtils.toByteArray(rulesetContentInputStream));
-            rulesetContent.setFileName(rulesetContentDetail.getContentDisposition().getFilename());
+            rulesetContent.setFileName(fileName);
             ruleset.setRulesetContent(rulesetContent);
 
             String username = APIMGovernanceAPIUtil.getLoggedInUsername();
@@ -193,9 +208,33 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
 
             RulesetManager rulesetManager = new RulesetManager();
             RulesetInfo updatedRuleset = rulesetManager.updateRuleset(rulesetId, ruleset, organization);
+            log.info("Successfully updated ruleset '" + updatedRuleset.getName() + "' (id: " + rulesetId + ") in organization: " + organization);
 
-            // Re-access policy compliance in the background
-            new ComplianceManager().handleRulesetChangeEvent(rulesetId, organization);
+            // Trigger compliance re-evaluation for rulesets that are NOT lifecycle/transition-based.
+            // Lifecycle rulesets have compliance_exclusion=true in their YAML and are evaluated
+            // when APIs are deprecated/retired (via changeAPILifecycle), not on ruleset update.
+            // Triggering full re-evaluation for lifecycle mode changes would unnecessarily
+            // re-run compliance tests for ALL APIs against ALL rulesets.
+            boolean isComplianceExcluded = false;
+            RulesetContent rc = ruleset.getRulesetContent();
+            if (rc != null && rc.getContent() != null) {
+                String contentStr = new String(rc.getContent(), java.nio.charset.StandardCharsets.UTF_8);
+                if (contentStr.contains("compliance_exclusion: true")
+                        || contentStr.contains("compliance_exclusion:true")) {
+                    isComplianceExcluded = true;
+                }
+            }
+            if (StringUtils.containsIgnoreCase(name, "lifecycle")
+                    || StringUtils.containsIgnoreCase(name, "retirement")) {
+                isComplianceExcluded = true;
+            }
+            if (!isComplianceExcluded) {
+                log.info("Triggering compliance re-evaluation after update of ruleset: " + rulesetId);
+                new ComplianceManager().handleRulesetChangeEvent(rulesetId, organization);
+            } else {
+                log.info("Skipping compliance re-evaluation for transition-based ruleset: " + rulesetId
+                        + " (compliance_exclusion=true)");
+            }
 
             return Response.status(Response.Status.OK).entity(RulesetMappingUtil.
                     fromRulesetInfoToRulesetInfoDTO(updatedRuleset)).build();

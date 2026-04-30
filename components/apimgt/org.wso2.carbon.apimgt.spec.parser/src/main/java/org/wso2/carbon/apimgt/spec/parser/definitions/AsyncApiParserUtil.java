@@ -83,6 +83,7 @@ import io.apicurio.datamodels.validation.DefaultSeverityRegistry;
 import io.apicurio.datamodels.validation.IValidationSeverityRegistry;
 import io.apicurio.datamodels.validation.ValidationProblem;
 import io.apicurio.datamodels.validation.ValidationProblemSeverity;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
@@ -94,6 +95,8 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.FileSizeLimitExceededException;
+import org.wso2.carbon.apimgt.api.SizeLimitedInputStream;
 import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -101,7 +104,9 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.AsyncApiParseOptions;
 import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.AsyncApiParserFactory;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -232,7 +237,7 @@ public class AsyncApiParserUtil {
      * @throws APIManagementException
      */
     public static APIDefinitionValidationResponse validateAsyncAPISpecificationByURL(
-            String url, HttpClient httpClient, boolean returnJSONContent, AsyncApiParseOptions options)
+            String url, HttpClient httpClient, boolean returnJSONContent, AsyncApiParseOptions options, String maxFileSizeStr)
             throws APIManagementException {
 
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
@@ -240,11 +245,20 @@ public class AsyncApiParserUtil {
             HttpGet httpGet = new HttpGet(url);
             HttpResponse response = httpClient.execute(httpGet);
             if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode()) {
-                ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
-                Object obj = yamlReader.readValue(new URL(url), Object.class);
-                ObjectMapper jsonWriter = new ObjectMapper();
-                String json = jsonWriter.writeValueAsString(obj);
-                validationResponse = validateAsyncAPISpecification(json, returnJSONContent, options);
+                if (response.getEntity() == null) {
+                    throw new IllegalArgumentException("Response entity is null for the provided URL: " + url);
+                }
+                long maxFileSize = Long.parseLong(maxFileSizeStr) * 1024L * 1024L;
+                try (InputStream responseStream = response.getEntity().getContent();
+                        BufferedInputStream bufferedStream = new BufferedInputStream(responseStream, 4096);
+                        SizeLimitedInputStream limitedStream = new SizeLimitedInputStream(bufferedStream,
+                                maxFileSize)) {
+                    ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
+                    Object obj = yamlReader.readValue(limitedStream, Object.class);
+                    ObjectMapper jsonWriter = new ObjectMapper();
+                    String json = jsonWriter.writeValueAsString(obj);
+                    validationResponse = validateAsyncAPISpecification(json, returnJSONContent, options);
+                }
             } else {
                 validationResponse.setValid(false);
                 validationResponse.getErrorItems().add(ExceptionCodes.ASYNCAPI_URL_NO_200);
@@ -252,6 +266,12 @@ public class AsyncApiParserUtil {
         } catch (IOException e) {
             ErrorHandler errorHandler = ExceptionCodes.ASYNCAPI_URL_MALFORMED;
             log.error(errorHandler.getErrorDescription(), e); // log the error and continue
+
+            // Check FileSizeLimitExceed exception presents in the fasterxml exception
+            if (ExceptionUtils.indexOfThrowable(e, FileSizeLimitExceededException.class) != -1) {
+                errorHandler = ExceptionCodes.FILE_TOO_LARGE;
+            }
+
             // since this method is only intended to validate a definition
             validationResponse.setValid(false);
             validationResponse.getErrorItems().add(errorHandler);

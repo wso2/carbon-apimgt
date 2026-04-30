@@ -29,6 +29,20 @@ public class APIMGovernanceConfigDTO {
     private int schedulerTaskCheckInterval;
     private int schedulerTaskCleanupInterval;
 
+    // Deduplication configuration
+    private boolean deduplicationEnabled = true;
+    private double deduplicationSimilarityThreshold = 0.95;
+    private double deduplicationHighConfidenceThreshold = 0.99;
+    private String deduplicationMode = "audit";
+    private int deduplicationNumHashFunctions = 256;
+    private int deduplicationNumBands = 32;
+    private int deduplicationShingleSize = 5;
+
+    // Deprecation Guide configuration
+    private boolean deprecationGuideEnabled = false;
+    private int deprecationGuideScanIntervalMinutes = 60;
+    private double deprecationGuideSuccessorSimilarityThreshold = 0.6;
+
     public String getDataSourceName() {
         return dataSourceName;
     }
@@ -67,5 +81,87 @@ public class APIMGovernanceConfigDTO {
 
     public void setSchedulerTaskCleanupInterval(int schedulerTaskCleanupInterval) {
         this.schedulerTaskCleanupInterval = schedulerTaskCleanupInterval;
+    }
+
+    // Deduplication getters/setters
+    public boolean isDeduplicationEnabled() {
+        return deduplicationEnabled;
+    }
+
+    public void setDeduplicationEnabled(boolean deduplicationEnabled) {
+        this.deduplicationEnabled = deduplicationEnabled;
+    }
+
+    public double getDeduplicationSimilarityThreshold() {
+        return deduplicationSimilarityThreshold;
+    }
+
+    public void setDeduplicationSimilarityThreshold(double deduplicationSimilarityThreshold) {
+        this.deduplicationSimilarityThreshold = deduplicationSimilarityThreshold;
+    }
+
+    public double getDeduplicationHighConfidenceThreshold() {
+        return deduplicationHighConfidenceThreshold;
+    }
+
+    public void setDeduplicationHighConfidenceThreshold(double deduplicationHighConfidenceThreshold) {
+        this.deduplicationHighConfidenceThreshold = deduplicationHighConfidenceThreshold;
+    }
+
+    public String getDeduplicationMode() {
+        return deduplicationMode;
+    }
+
+    public void setDeduplicationMode(String deduplicationMode) {
+        this.deduplicationMode = deduplicationMode;
+    }
+
+    public int getDeduplicationNumHashFunctions() {
+        return deduplicationNumHashFunctions;
+    }
+
+    public void setDeduplicationNumHashFunctions(int deduplicationNumHashFunctions) {
+        this.deduplicationNumHashFunctions = deduplicationNumHashFunctions;
+    }
+
+    public int getDeduplicationNumBands() {
+        return deduplicationNumBands;
+    }
+
+    public void setDeduplicationNumBands(int deduplicationNumBands) {
+        this.deduplicationNumBands = deduplicationNumBands;
+    }
+
+    public int getDeduplicationShingleSize() {
+        return deduplicationShingleSize;
+    }
+
+    public void setDeduplicationShingleSize(int deduplicationShingleSize) {
+        this.deduplicationShingleSize = deduplicationShingleSize;
+    }
+
+    // Deprecation Guide getters/setters
+    public boolean isDeprecationGuideEnabled() {
+        return deprecationGuideEnabled;
+    }
+
+    public void setDeprecationGuideEnabled(boolean deprecationGuideEnabled) {
+        this.deprecationGuideEnabled = deprecationGuideEnabled;
+    }
+
+    public int getDeprecationGuideScanIntervalMinutes() {
+        return deprecationGuideScanIntervalMinutes;
+    }
+
+    public void setDeprecationGuideScanIntervalMinutes(int deprecationGuideScanIntervalMinutes) {
+        this.deprecationGuideScanIntervalMinutes = deprecationGuideScanIntervalMinutes;
+    }
+
+    public double getDeprecationGuideSuccessorSimilarityThreshold() {
+        return deprecationGuideSuccessorSimilarityThreshold;
+    }
+
+    public void setDeprecationGuideSuccessorSimilarityThreshold(double deprecationGuideSuccessorSimilarityThreshold) {
+        this.deprecationGuideSuccessorSimilarityThreshold = deprecationGuideSuccessorSimilarityThreshold;
     }
 }

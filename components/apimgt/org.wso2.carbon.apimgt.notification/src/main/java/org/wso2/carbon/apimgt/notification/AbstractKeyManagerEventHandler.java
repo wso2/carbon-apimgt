@@ -30,9 +30,12 @@ import org.wso2.carbon.apimgt.impl.publishers.RevocationRequestPublisher;
 import org.wso2.carbon.apimgt.notification.event.ConsumerAppRevocationEvent;
 import org.wso2.carbon.apimgt.notification.event.Event;
 import org.wso2.carbon.apimgt.notification.event.SubjectEntityRevocationEvent;
+import org.wso2.carbon.apimgt.notification.event.TokenRevocationBatchEvent;
 import org.wso2.carbon.apimgt.notification.event.TokenRevocationEvent;
 import org.wso2.carbon.apimgt.notification.internal.ServiceReferenceHolder;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -47,8 +50,8 @@ public abstract class AbstractKeyManagerEventHandler implements KeyManagerEventH
         revocationRequestPublisher = RevocationRequestPublisher.getInstance();
     }
 
-    public boolean handleTokenRevocationEvent(TokenRevocationEvent tokenRevocationEvent) throws APIManagementException {
-
+    private void extractPropertiesAndPublishTokenRevocationEvent(TokenRevocationEvent tokenRevocationEvent)
+            throws APIManagementException {
         Properties properties = getRevocationEventProperties(tokenRevocationEvent);
         properties.setProperty(APIConstants.NotificationEvent.EXPIRY_TIME,
                 Long.toString(tokenRevocationEvent.getExpiryTime()));
@@ -66,7 +69,12 @@ public abstract class AbstractKeyManagerEventHandler implements KeyManagerEventH
             String orgId = application.getOrganization();
             properties.put(APIConstants.NotificationEvent.ORG_ID, orgId);
         }
+
         revocationRequestPublisher.publishRevocationEvents(tokenRevocationEvent.getAccessToken(), properties);
+    }
+
+    public boolean handleTokenRevocationEvent(TokenRevocationEvent tokenRevocationEvent) throws APIManagementException {
+        extractPropertiesAndPublishTokenRevocationEvent(tokenRevocationEvent);
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
         String isRevokeTokenCleanupEnabled = config.getFirstProperty(APIConstants.ENABLE_REVOKE_TOKEN_CLEANUP);
@@ -109,6 +117,74 @@ public abstract class AbstractKeyManagerEventHandler implements KeyManagerEventH
 
         // publish event
         revocationRequestPublisher.publishRevocationEvents(userEvent.getEntityId(), properties);
+    }
+
+    public boolean handleTokenRevocationBatchEvent(TokenRevocationBatchEvent tokenRevocationBatchEvent)
+            throws APIManagementException {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        String isRevokeTokenCleanupEnabled = config.getFirstProperty(APIConstants.ENABLE_REVOKE_TOKEN_CLEANUP);
+        if (Boolean.parseBoolean(isRevokeTokenCleanupEnabled)) {
+            extractPropertiesAndPublishTokenRevocationBatchEvent(tokenRevocationBatchEvent);
+            // Cleanup expired revoked tokens from db.
+            Runnable expiredJWTCleaner = new ExpiredJWTCleaner();
+            Thread cleanupThread = new Thread(expiredJWTCleaner);
+            cleanupThread.start();
+        }
+        return true;
+    }
+
+    private void extractPropertiesAndPublishTokenRevocationBatchEvent(
+            TokenRevocationBatchEvent tokenRevocationBatchEvent) throws APIManagementException {
+        List<TokenRevocationEvent> eventList = tokenRevocationBatchEvent.getTokenRevocationEventList();
+        if (eventList.isEmpty()) {
+            return;
+        }
+
+        List<Object[]> revokedJWTList = new ArrayList<>();
+        List<String> accessTokensList = new ArrayList<>();
+
+        for (TokenRevocationEvent tokenRevocationEvent : eventList) {
+            String tokenType = tokenRevocationEvent.getTokenType();
+            if (StringUtils.isBlank(tokenType)) {
+                tokenType = APIConstants.NotificationEvent.APPLICATION_TOKEN_TYPE_OAUTH2;
+            }
+
+            Object[] revokedJWTData = new Object[]{
+                    tokenRevocationEvent.getEventId(),
+                    tokenRevocationEvent.getAccessToken(),
+                    tokenType,
+                    tokenRevocationEvent.getExpiryTime(),
+                    tokenRevocationEvent.getTenantId()
+            };
+            revokedJWTList.add(revokedJWTData);
+            accessTokensList.add(tokenRevocationEvent.getAccessToken());
+        }
+
+        // Batch insert non-expired revoked JWTs to database
+        if (!revokedJWTList.isEmpty()) {
+            ApiMgtDAO.getInstance().addRevokedJWTSignatures(revokedJWTList);
+        }
+
+        // Create single properties bag for the entire batch event
+        Properties properties = getRevocationEventProperties(tokenRevocationBatchEvent);
+        properties.put(APIConstants.NotificationEvent.CONSUMER_KEY, tokenRevocationBatchEvent.getConsumerKey());
+        properties.put(APIConstants.NotificationEvent.TOKEN_TYPE,
+                APIConstants.NotificationEvent.TOKEN_REVOCATION_BATCH_EVENT);
+        properties.put(APIConstants.NotificationEvent.REVOCATION_TIME,
+                Long.toString(tokenRevocationBatchEvent.getTimeStamp()));
+        properties.put(APIConstants.NotificationEvent.REVOKED_TOKENS_LIST,
+                accessTokensList);
+
+        Application application = ApiMgtDAO.getInstance()
+                .getApplicationByClientId(tokenRevocationBatchEvent.getConsumerKey());
+        if (application != null) {
+            String orgId = application.getOrganization();
+            properties.put(APIConstants.NotificationEvent.ORG_ID, orgId);
+        }
+
+        // Publish single batch revocation event with empty access token
+        revocationRequestPublisher.publishRevocationEvents(tokenRevocationBatchEvent.getConsumerKey(), properties);
     }
 
     private Properties getRevocationEventProperties(Event event) {

@@ -82,6 +82,7 @@ import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.lifecycle.LCManager;
 import org.wso2.carbon.apimgt.impl.lifecycle.LCManagerFactory;
 import org.wso2.carbon.apimgt.impl.restapi.publisher.ApisApiServiceImplUtils;
+import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
@@ -2893,16 +2894,8 @@ public class ImportUtils {
                             .get(APIConstants.DATA);
                     DocumentDTO documentDTO = new Gson().fromJson(configElement.getAsJsonObject(), DocumentDTO.class);
 
-                    // Add the documentation DTO
-                    Documentation documentation = apiTypeWrapper.isAPIProduct() ?
-                            PublisherCommonUtils
-                                    .addDocumentationToAPI(documentDTO, apiTypeWrapper.getApiProduct().getUuid(),
-                                            organization) :
-                            PublisherCommonUtils.addDocumentationToAPI(documentDTO, apiTypeWrapper.getApi().getUuid(),
-                                    organization);
-
                     // Adding doc content
-                    String docSourceType = documentation.getSourceType().toString();
+                    String docSourceType = documentDTO.getSourceType().toString();
                     boolean docContentExists =
                             Documentation.DocumentSourceType.INLINE.toString().equalsIgnoreCase(docSourceType)
                                     || Documentation.DocumentSourceType.MARKDOWN.toString()
@@ -2910,8 +2903,9 @@ public class ImportUtils {
                     String apiOrApiProductId = (!apiTypeWrapper.isAPIProduct()) ?
                             apiTypeWrapper.getApi().getUuid() :
                             apiTypeWrapper.getApiProduct().getUuid();
+                    String inlineContent = null;
+                    String filePath = null;
                     if (docContentExists) {
-                        String inlineContent = null;
                         try (FileInputStream inputStream = new FileInputStream(
                                 individualDocumentFilePath + File.separator + folderName)) {
                             inlineContent = IOUtils.toString(inputStream, ImportExportConstants.CHARSET);
@@ -2919,23 +2913,52 @@ public class ImportUtils {
                             // For inline & Markdown docs, if the content file is not found, content will be a space.
                             inlineContent = " ";
                         }
+
+                    } else if (ImportExportConstants.FILE_DOC_TYPE.equalsIgnoreCase(docSourceType)) {
+                        filePath = documentDTO.getFileName();
+                        if (StringUtils.isEmpty(filePath)) {
+                            log.error("Document " + documentDTO.getName() + " not added due to missing fileName." +
+                                    " API/API Product: " + identifier.getName());
+                            continue;
+                        }
+                        try {
+                            filePath = APIFileUtil.resolveFilePath(individualDocumentFilePath, filePath).toString();
+                        } catch (APIManagementException e) {
+                            log.error("Document " + documentDTO.getName() + " not added due to invalid file path." +
+                                    " API/API Product: " + identifier.getName() + ". File path: " + filePath +
+                                    ". File should reside in " + folderName);
+                            continue;
+                        }
+                        if (!APIUtil.isSupportedFileType(filePath)) {
+                            log.error("Document " + documentDTO.getName() + " not added due to unsupported file type." +
+                                    " API/API Product: " + identifier.getName() + ". File path: " + filePath);
+                            continue;
+                        }
+                    }
+
+                    Documentation documentation = apiTypeWrapper.isAPIProduct() ?
+                            PublisherCommonUtils
+                                    .addDocumentationToAPI(documentDTO, apiTypeWrapper.getApiProduct().getUuid(),
+                                            organization) :
+                            PublisherCommonUtils.addDocumentationToAPI(documentDTO,
+                                    apiTypeWrapper.getApi().getUuid(), organization);
+
+                    if (docContentExists) {
                         PublisherCommonUtils.addDocumentationContent(documentation, apiProvider, apiOrApiProductId,
                                 documentation.getId(), organization, inlineContent);
                     } else if (ImportExportConstants.FILE_DOC_TYPE.equalsIgnoreCase(docSourceType)) {
-                        String filePath = documentation.getFilePath();
-                        try (FileInputStream inputStream = new FileInputStream(
-                                individualDocumentFilePath + File.separator + filePath)) {
-                            String docExtension = FilenameUtils.getExtension(
-                                    pathToArchive + File.separator + ImportExportConstants.DOCUMENT_DIRECTORY
-                                            + File.separator + filePath);
+                        try (FileInputStream inputStream = new FileInputStream(filePath)) {
+                            String docExtension = FilenameUtils.getExtension(filePath);
+                            // Relativize the resolved path against the doc folder to get a clean relative path
+                            String docFileName = Paths.get(individualDocumentFilePath)
+                                    .relativize(Paths.get(filePath)).toString();
                             PublisherCommonUtils.addDocumentationContentForFile(inputStream, docExtension,
-                                    documentation.getFilePath(), apiProvider, apiOrApiProductId, documentation.getId(),
+                                    docFileName, apiProvider, apiOrApiProductId, documentation.getId(),
                                     organization);
                         } catch (FileNotFoundException e) {
                             //this error is logged and ignored because documents are optional in an API
                             log.error("Failed to locate the document files of the API/API Product: " + apiTypeWrapper
                                     .getId().getName(), e);
-                            continue;
                         }
                     }
 

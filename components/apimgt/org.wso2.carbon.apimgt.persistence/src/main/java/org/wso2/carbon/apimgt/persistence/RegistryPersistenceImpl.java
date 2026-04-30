@@ -1245,7 +1245,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                         modifiedQuery = modifiedQuery + "&visible_organizations=(" + APIConstants.VISIBLE_ORG_ALL
                                 + " OR " + orgId + ")";
                     }
-                } 
+                }
             }
             log.debug("Modified query for devportal search: " + modifiedQuery);
             String userNameLocal;
@@ -4262,7 +4262,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 if (log.isDebugEnabled()) {
                     log.debug("Changing the provider name of API with id: " + apiId + " to " + providerName);
                 }
-                artifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER, providerName);
+                artifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER,
+                        RegistryPersistenceUtil.replaceEmailDomain(providerName));
                 artifactManager.updateGenericArtifact(artifact);
                 userRegistry.commitTransaction();
                 if (log.isDebugEnabled()) {

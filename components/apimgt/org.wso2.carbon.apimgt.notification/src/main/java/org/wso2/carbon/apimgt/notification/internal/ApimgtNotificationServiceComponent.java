@@ -21,12 +21,14 @@ package org.wso2.carbon.apimgt.notification.internal;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.handlers.EventHandler;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerEventHandler;
+import org.wso2.carbon.apimgt.notification.APIKeyEventHandler;
 import org.wso2.carbon.apimgt.notification.DefaultKeyManagerEventHandlerImpl;
 import org.wso2.carbon.apimgt.notification.NotificationEventService;
 import org.wso2.carbon.apimgt.notification.TenantManagementEventHandler;
@@ -39,9 +41,12 @@ import org.wso2.carbon.event.stream.core.EventStreamService;
  */
 @Component(name = "apim.notification.component", immediate = true)
 public class ApimgtNotificationServiceComponent {
+    private APIKeyEventHandler apikeyEventHandler;
+
 
     @Activate
     protected void activate(ComponentContext ctxt) {
+        apikeyEventHandler = new APIKeyEventHandler();
 
         ctxt.getBundleContext().registerService(KeyManagerEventHandler.class, new DefaultKeyManagerEventHandlerImpl(),
                 null);
@@ -52,6 +57,14 @@ public class ApimgtNotificationServiceComponent {
         ctxt.getBundleContext().registerService(EventHandler.class, new TenantManagementEventHandler(),
                 null);
         ctxt.getBundleContext().registerService(NotificationEventService.class, new NotificationEventService(), null);
+        ctxt.getBundleContext().registerService(EventHandler.class, apikeyEventHandler, null);
+    }
+
+    @Deactivate
+    protected void deactivate(ComponentContext ctxt) {
+        if (apikeyEventHandler != null) {
+            apikeyEventHandler.shutdownScheduler();
+        }
     }
 
     @Reference(

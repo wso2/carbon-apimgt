@@ -18,11 +18,14 @@
 
 package org.wso2.carbon.apimgt.governance.rest.api.util;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.governance.api.APIMGovernanceAPIConstants;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
+import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.Rule;
 import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
@@ -52,12 +55,23 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
  * This class represents the Results Mapping Utility
  */
 public class ComplianceAPIUtil {
+
+    private static final Log log = LogFactory.getLog(ComplianceAPIUtil.class);
+
+    /**
+     * Regex pattern to extract the matched API UUID from a Generic violation path.
+     * Violation path format: "Similarity: XX% | Matched API: Name vVer | API_UUID:uuid"
+     */
+    private static final Pattern MATCHED_API_UUID_PATTERN =
+            Pattern.compile("API_UUID:([a-f0-9-]+)", Pattern.CASE_INSENSITIVE);
 
     /**
      * Get the artifacts compliance details DTO using the Artifact Reference Id, artifact type,
@@ -270,8 +284,10 @@ public class ComplianceAPIUtil {
         RulesetValidationResultWithoutRulesDTO rulesetDTO = new RulesetValidationResultWithoutRulesDTO();
         rulesetDTO.setId(ruleset.getId());
         rulesetDTO.setName(ruleset.getName());
-        rulesetDTO.setRuleType(RulesetValidationResultWithoutRulesDTO
-                .RuleTypeEnum.fromValue(ruleset.getRuleType().name()));
+        if (ruleset.getRuleType() != null) {
+            rulesetDTO.setRuleType(RulesetValidationResultWithoutRulesDTO
+                    .RuleTypeEnum.fromValue(ruleset.getRuleType().name()));
+        }
 
         // If the ruleset has not been evaluated, set the ruleset validation status to unapplied
         if (!isRulesetEvaluated) {
@@ -320,9 +336,15 @@ public class ComplianceAPIUtil {
                 Math.min(offset + limit, allArtifacts.size()));
 
         for (String artifactId : paginatedArtifactIds) {
-            ArtifactComplianceStatusDTO complianceStatus = getArtifactComplianceStatus(artifactId,
-                    artifactType, organization);
-            complianceStatusList.add(complianceStatus);
+            try {
+                ArtifactComplianceStatusDTO complianceStatus = getArtifactComplianceStatus(artifactId,
+                        artifactType, organization);
+                complianceStatusList.add(complianceStatus);
+            } catch (APIMGovernanceException e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Error while fetching compliance status for artifact with id: " + artifactId, e);
+                }
+            }
         }
 
         ArtifactComplianceListDTO complianceListDTO = new ArtifactComplianceListDTO();
@@ -362,8 +384,12 @@ public class ComplianceAPIUtil {
         infoDTO.setName(APIMGovernanceUtil.getArtifactName(artifactRefId, artifactType, organization));
         infoDTO.setVersion(APIMGovernanceUtil.getArtifactVersion(artifactRefId, artifactType, organization));
         infoDTO.setType(ArtifactInfoDTO.TypeEnum.valueOf(String.valueOf(artifactType)));
-        infoDTO.setExtendedType(ArtifactInfoDTO.ExtendedTypeEnum.valueOf(String.valueOf(
-                APIMGovernanceUtil.getExtendedArtifactTypeForArtifact(artifactRefId, artifactType))));
+        ExtendedArtifactType extendedArtifactTypeValue =
+                APIMGovernanceUtil.getExtendedArtifactTypeForArtifact(artifactRefId, artifactType);
+        if (extendedArtifactTypeValue == null) {
+            throw new APIMGovernanceException("Unsupported artifact type: " + artifactType);
+        }
+        infoDTO.setExtendedType(ArtifactInfoDTO.ExtendedTypeEnum.valueOf(String.valueOf(extendedArtifactTypeValue)));
         infoDTO.setOwner(APIMGovernanceUtil.getArtifactOwner(artifactRefId, artifactType, organization));
         complianceStatus.setInfo(infoDTO);
 
@@ -524,7 +550,6 @@ public class ComplianceAPIUtil {
         RulesetValidationResultDTO rulesetValidationResultDTO = new RulesetValidationResultDTO();
         rulesetValidationResultDTO.setId(rulesetId);
         rulesetValidationResultDTO.setName(rulesetInfo.getName());
-
         // If the ruleset has not been evaluated, set the ruleset validation status to unapplied
         boolean isRulesetEvaluatedForArtifact = complianceManager
                 .isRulesetEvaluatedForArtifact(artifactRefId, artifactType, rulesetId, organization);
@@ -549,13 +574,15 @@ public class ComplianceAPIUtil {
         // IMPORTANT: NOTE THAT THERE CAN BE MULTIPLE VIOLATIONS WITH SAME CODE BUT DIFFERENT PATH
         for (RuleViolation ruleViolation : ruleViolations) {
             Rule rule = rulesMap.get(ruleViolation.getRuleName());
-            violatedRules.add(ComplianceAPIUtil.getRuleValidationResultDTO(rule, ruleViolation));
+            violatedRules.add(ComplianceAPIUtil.getRuleValidationResultDTO(rule, ruleViolation,
+                    username, artifactType, organization));
             violatedRuleNames.add(rule.getName());
         }
 
         for (Rule rule : allRules) {
             if (!violatedRuleNames.contains(rule.getName())) {
-                followedRules.add(ComplianceAPIUtil.getRuleValidationResultDTO(rule, null));
+                followedRules.add(ComplianceAPIUtil.getRuleValidationResultDTO(rule, null,
+                        username, artifactType, organization));
             }
         }
 
@@ -569,13 +596,21 @@ public class ComplianceAPIUtil {
     }
 
     /**
-     * Converts a RuleViolations to a RuleValidationResultDTO object
+     * Converts a RuleViolation to a RuleValidationResultDTO object.
+     * Applies scope/tenant visibility masking for matched API references in deduplication
+     * violation paths — if the current user does not have access to the matched API,
+     * the API name and UUID are replaced with "[Access Restricted]".
      *
      * @param rule          Rule object
-     * @param ruleViolation RuleViolation object
+     * @param ruleViolation RuleViolation object (null for passed rules)
+     * @param username      username of the logged-in user
+     * @param artifactType  artifact type
+     * @param organization  organization
      * @return RuleValidationResultDTO object
      */
-    private static RuleValidationResultDTO getRuleValidationResultDTO(Rule rule, RuleViolation ruleViolation) {
+    private static RuleValidationResultDTO getRuleValidationResultDTO(Rule rule, RuleViolation ruleViolation,
+                                                                      String username, ArtifactType artifactType,
+                                                                      String organization) {
 
         RuleValidationResultDTO ruleValidationResultDTO = new RuleValidationResultDTO();
         ruleValidationResultDTO.setId(rule.getId());
@@ -587,13 +622,63 @@ public class ComplianceAPIUtil {
             ruleValidationResultDTO.setSeverity(RuleValidationResultDTO.SeverityEnum.valueOf(
                     String.valueOf(rule.getSeverity())));
             RuleValidationResultViolatedPathDTO violatedPathDTO = new RuleValidationResultViolatedPathDTO();
-            violatedPathDTO.setPath(ruleViolation.getViolatedPath());
+
+            String violatedPath = ruleViolation.getViolatedPath();
+            // Apply scope/tenant visibility masking for matched API references
+            violatedPath = maskMatchedApiIfRestricted(violatedPath, username, artifactType, organization);
+            violatedPathDTO.setPath(violatedPath);
+
             ruleValidationResultDTO.setViolatedPath(violatedPathDTO);
         } else {
             ruleValidationResultDTO.setStatus(RuleValidationResultDTO.StatusEnum.PASSED);
         }
 
         return ruleValidationResultDTO;
+    }
+
+    /**
+     * Checks if the current user has visibility on the matched API referenced in a dedup violation path.
+     * If the user does not have scope (apim:api_view) or the matched API belongs to a different tenant,
+     * the API name and UUID are masked with "[Access Restricted]".
+     *
+     * Only applies to Generic dedup violation paths that contain the API_UUID pattern.
+     * Non-dedup violation paths are returned unchanged.
+     *
+     * @param violatedPath  the violation path string
+     * @param username      username of the logged-in user
+     * @param artifactType  artifact type
+     * @param organization  organization
+     * @return the original or masked violation path
+     */
+    private static String maskMatchedApiIfRestricted(String violatedPath, String username,
+                                                     ArtifactType artifactType, String organization) {
+
+        if (violatedPath == null || username == null) {
+            return violatedPath;
+        }
+
+        Matcher matcher = MATCHED_API_UUID_PATTERN.matcher(violatedPath);
+        if (!matcher.find()) {
+            // Not a dedup violation path — no masking needed
+            return violatedPath;
+        }
+
+        String matchedApiUuid = matcher.group(1);
+        try {
+            if (APIMGovernanceUtil.isArtifactVisibleToUser(
+                    matchedApiUuid, artifactType, username, organization)) {
+                // User has access to the matched API — return full details
+                return violatedPath;
+            }
+        } catch (APIMGovernanceException e) {
+            // If the visibility check fails (e.g., API not found), default to masking for security
+            log.debug("Visibility check failed for matched API " + matchedApiUuid
+                    + " — masking for user " + username, e);
+        }
+
+        // User does not have access to the matched API — mask name and UUID
+        return violatedPath.replaceAll(
+                "Matched API:.*$", "Matched API: [Access Restricted]");
     }
 
     /**

@@ -87,11 +87,13 @@ import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultyGatewayDeploymentException;
 import org.wso2.carbon.apimgt.api.FederatedAPIDiscoveryService;
+import org.wso2.carbon.apimgt.api.FileSizeLimitExceededException;
 import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
 import org.wso2.carbon.apimgt.api.PasswordResolver;
 import org.wso2.carbon.apimgt.api.PlatformGatewayService;
+import org.wso2.carbon.apimgt.api.SizeLimitedInputStream;
 import org.wso2.carbon.apimgt.api.doc.model.APIDefinition;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.doc.model.Operation;
@@ -189,6 +191,9 @@ import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.AIAPIConfigurationsDTO;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.DataLoadingException;
+import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
+import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
+import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.kmclient.ApacheFeignHttpClient;
@@ -256,7 +261,10 @@ import org.wso2.carbon.user.mgt.UserMgtConstants;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -265,6 +273,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
@@ -332,12 +341,21 @@ import java.text.Normalizer;
 import javax.validation.constraints.NotNull;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
+import static org.apache.xerces.impl.Constants.DISALLOW_DOCTYPE_DECL_FEATURE;
+import static org.apache.xerces.impl.Constants.EXTERNAL_GENERAL_ENTITIES_FEATURE;
+import static org.apache.xerces.impl.Constants.EXTERNAL_PARAMETER_ENTITIES_FEATURE;
+import static org.apache.xerces.impl.Constants.LOAD_EXTERNAL_DTD_FEATURE;
+import static org.apache.xerces.impl.Constants.SAX_FEATURE_PREFIX;
+import static org.apache.xerces.impl.Constants.SECURITY_MANAGER_PROPERTY;
+import static org.apache.xerces.impl.Constants.XERCES_FEATURE_PREFIX;
+import static org.apache.xerces.impl.Constants.XERCES_PROPERTY_PREFIX;
 import static org.wso2.carbon.apimgt.impl.APIConstants.SHA_256;
 import static org.wso2.carbon.apimgt.impl.APIConstants.SWAGGER_DESCRIPTION;
 import static org.wso2.carbon.apimgt.impl.APIConstants.SWAGGER_INFO;
@@ -401,6 +419,10 @@ public final class APIUtil {
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     private static final ThreadLocal<Boolean> skipSecretMasking = ThreadLocal.withInitial(() -> Boolean.FALSE);
+
+    private static final String RESTRICTED_SCOPE_PREFIX_APIM = "apim:";
+    private static final String RESTRICTED_SCOPE_PREFIX_APIM_ANALYTICS = "apim_analytics:";
+    private static final String RESTRICTED_SCOPE_PREFIX_SERVICE_CATALOG = "service_catalog:";
 
     private APIUtil() {
 
@@ -5302,9 +5324,17 @@ public final class APIUtil {
      * @return whether the provided URL content contains the string to match
      */
     public static boolean isURLContentContainsString(URL url, String match, int maxLines) {
-
-        try (BufferedReader in =
-                     new BufferedReader(new InputStreamReader(url.openStream(), Charset.defaultCharset()))) {
+        String maxWSDLSizeStr = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration()
+                .getFirstProperty(org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_WSDL_FILE_SIZE_LIMIT);
+        if (maxWSDLSizeStr == null || maxWSDLSizeStr.trim().isEmpty()) {
+            maxWSDLSizeStr = org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_WSDL_FILE_SIZE_LIMIT_DEFAULT_MB;
+        }
+        long maxFileSize = Long.parseLong(maxWSDLSizeStr) * 1024L * 1024L;
+        try (BufferedInputStream bufferedStream = new BufferedInputStream(url.openStream(), 4096);
+                SizeLimitedInputStream limitedStream = new SizeLimitedInputStream(bufferedStream, maxFileSize);
+                BufferedReader in = new BufferedReader(
+                        new InputStreamReader(limitedStream, Charset.defaultCharset()))) {
             String inputLine;
             StringBuilder urlContent = new StringBuilder();
             while ((inputLine = in.readLine()) != null && maxLines > 0) {
@@ -5314,6 +5344,10 @@ public final class APIUtil {
                     return true;
                 }
             }
+        } catch (FileSizeLimitExceededException e) {
+            log.error(
+                    "Error Reading Input from Stream from " + url + ". The file size exceeds the maximum limit of " + maxFileSize + " bytes.",
+                    e);
         } catch (IOException e) {
             log.error("Error Reading Input from Stream from " + url, e);
 
@@ -7733,7 +7767,6 @@ public final class APIUtil {
      */
     public static DocumentBuilderFactory getSecuredDocumentBuilder() {
 
-        org.apache.xerces.impl.Constants Constants = null;
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         dbf.setNamespaceAware(true);
         dbf.setXIncludeAware(false);
@@ -7741,19 +7774,19 @@ public final class APIUtil {
         try {
             // Enable secure processing
             dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-            dbf.setFeature(Constants.XERCES_FEATURE_PREFIX + Constants.DISALLOW_DOCTYPE_DECL_FEATURE, true);
-            dbf.setFeature(Constants.SAX_FEATURE_PREFIX + Constants.EXTERNAL_GENERAL_ENTITIES_FEATURE, false);
-            dbf.setFeature(Constants.SAX_FEATURE_PREFIX + Constants.EXTERNAL_PARAMETER_ENTITIES_FEATURE, false);
-            dbf.setFeature(Constants.XERCES_FEATURE_PREFIX + Constants.LOAD_EXTERNAL_DTD_FEATURE, false);
+            dbf.setFeature(XERCES_FEATURE_PREFIX + DISALLOW_DOCTYPE_DECL_FEATURE, true);
+            dbf.setFeature(SAX_FEATURE_PREFIX + EXTERNAL_GENERAL_ENTITIES_FEATURE, false);
+            dbf.setFeature(SAX_FEATURE_PREFIX + EXTERNAL_PARAMETER_ENTITIES_FEATURE, false);
+            dbf.setFeature(XERCES_FEATURE_PREFIX + LOAD_EXTERNAL_DTD_FEATURE, false);
         } catch (ParserConfigurationException e) {
             log.error(
-                    "Failed to load XML Processor Feature " + Constants.EXTERNAL_GENERAL_ENTITIES_FEATURE + " or " +
-                            Constants.EXTERNAL_PARAMETER_ENTITIES_FEATURE + " or " + Constants.LOAD_EXTERNAL_DTD_FEATURE);
+                    "Failed to load XML Processor Feature " + EXTERNAL_GENERAL_ENTITIES_FEATURE + " or " +
+                            EXTERNAL_PARAMETER_ENTITIES_FEATURE + " or " + LOAD_EXTERNAL_DTD_FEATURE);
         }
 
         SecurityManager securityManager = new SecurityManager();
         securityManager.setEntityExpansionLimit(ENTITY_EXPANSION_LIMIT);
-        dbf.setAttribute(Constants.XERCES_PROPERTY_PREFIX + Constants.SECURITY_MANAGER_PROPERTY, securityManager);
+        dbf.setAttribute(XERCES_PROPERTY_PREFIX + SECURITY_MANAGER_PROPERTY, securityManager);
 
         return dbf;
     }
@@ -8776,17 +8809,6 @@ public final class APIUtil {
 
         Map<String, Environment> allEnvironments = new LinkedHashMap<>(getReadOnlyEnvironments());
         allEnvironments.putAll(envFromDB);
-
-        // Platform gateways created via connect-with-token are stored under WSO2-ALL-TENANTS.
-        // Publisher UI expects platform gateways to be present in the environments list for the logged-in org,
-        // so merge only those platform gateways here.
-        String allTenantsOrg = APIConstants.GatewayNotificationConfigurationConstants.WSO2_ALL_TENANTS;
-        if (organization != null && !organization.equals(allTenantsOrg)) {
-            Map<String, Environment> allTenantEnvs = ApiMgtDAO.getInstance().getAllEnvironments(allTenantsOrg).stream()
-                    .filter(env -> APIConstants.WSO2_API_PLATFORM_GATEWAY.equals(env.getGatewayType()))
-                    .collect(Collectors.toMap(Environment::getName, env -> env, (a, b) -> a));
-            allEnvironments.putAll(allTenantEnvs);
-        }
         return allEnvironments;
     }
 
@@ -11100,20 +11122,63 @@ public final class APIUtil {
      */
     public static String getCustomBackendSequence(String extractedFolderPath, String customBackendFileName,
                                                   String fileExtension) throws APIManagementException {
-        if (!StringUtils.isEmpty(customBackendFileName) && !customBackendFileName.contains(fileExtension)) {
+        if (!StringUtils.isEmpty(customBackendFileName) && !customBackendFileName.endsWith(fileExtension)) {
             customBackendFileName = customBackendFileName + fileExtension;
         }
-        String fileName = extractedFolderPath + File.separator + customBackendFileName;
-        if (checkFileExistence(fileName)) {
-            try {
-                try (InputStream inputStream = new FileInputStream(fileName)) {
-                    return IOUtils.toString(inputStream);
-                }
-            } catch (IOException ex) {
-                handleException("Error reading Custom Backend " + customBackendFileName);
+
+        try {
+            String safeFileName = Paths.get(customBackendFileName).getFileName().toString();
+            Path targetFile = APIFileUtil.resolveFilePath(extractedFolderPath, safeFileName);
+            String userPath = extractedFolderPath + File.separator + customBackendFileName;
+
+            if (!(checkFileExistence(targetFile.toString()) && targetFile.toString().equals(userPath))) {
+                return null;
             }
+
+            try (InputStream inputStream = Files.newInputStream(targetFile)) {
+                String content = IOUtils.toString(inputStream);
+                if (!validateXMLForSequenceBackend(content)) {
+                    throw new APIManagementException("Invalid XML content in Custom Backend " + safeFileName);
+                }
+                return content;
+            }
+        } catch (IOException e) {
+            handleException("Error reading Custom Backend " + customBackendFileName);
         }
+
         return null;
+    }
+
+    /**
+     * Method is used to write Custom Backend file to the Directory
+     *
+     * @param customBackendFileName Custom Backend file name
+     * @param sequence              Content of the Custom Backend
+     * @param archivePath           Archived path
+     * @throws APIImportExportException Import/Export error if exists
+     * @throws IOException              IO Error when reading/writing to the file
+     */
+    public static void exportCustomBackend(String customBackendFileName, String sequence, String archivePath)
+            throws APIImportExportException, IOException, APIManagementException {
+        if (!StringUtils.isEmpty(customBackendFileName) && !customBackendFileName.endsWith(
+                APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML)) {
+            customBackendFileName = customBackendFileName + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML;
+        }
+        try {
+            if (!validateXMLForSequenceBackend(sequence)) {
+                throw new APIImportExportException("Invalid XML content in Custom Backend " + customBackendFileName);
+            }
+            String sequenceDirectory = archivePath + File.separator + ImportExportConstants.CUSTOM_BACKEND_DIRECTORY;
+            String safeFileName = Paths.get(customBackendFileName).getFileName().toString();
+            Path targetFile = APIFileUtil.resolveFilePath(sequenceDirectory, safeFileName);
+            String userPath = sequenceDirectory + File.separator + customBackendFileName;
+            if (targetFile.toString().equals(userPath)) {
+                CommonUtil.writeFile(targetFile.toString(), sequence);
+            }
+        } catch (APIImportExportException | APIManagementException e) {
+            throw new APIManagementException("Error while exporting custom backend sequence " + customBackendFileName,
+                    e);
+        }
     }
 
     /**
@@ -11165,21 +11230,55 @@ public final class APIUtil {
 
         String customBackendContent = null;
         try {
-            if (!StringUtils.isEmpty(sequenceName) && !sequenceName.contains(".xml")) {
+            if (!StringUtils.isEmpty(sequenceName) && !sequenceName.endsWith(fileExtension)) {
                 sequenceName = sequenceName + fileExtension;
             }
-            String fileName = extractedFolderPath + File.separator + sequenceName;
-            if (checkFileExistence(fileName)) {
+            String safeFileName = Paths.get(sequenceName).getFileName().toString();
+            Path targetFile = APIFileUtil.resolveFilePath(extractedFolderPath, safeFileName);
+            if (checkFileExistence(targetFile.toString())) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Found Sequence Backend file " + fileName);
+                    log.debug("Found Sequence Backend file " + targetFile);
                 }
-                customBackendContent = FileUtils.readFileToString(new File(fileName));
+                customBackendContent = FileUtils.readFileToString(targetFile.toFile());
             }
         } catch (IOException e) {
             throw new APIManagementException("Error while reading Custom Backend from path: " + extractedFolderPath, e,
                     ExceptionCodes.ERROR_READING_META_DATA);
         }
         return customBackendContent;
+    }
+
+    /**
+     * This method will validate the given xml content for the syntactical correctness
+     *
+     * @param xmlContent string of xml content
+     * @return true if the xml content is valid, false otherwise
+     * @throws APIManagementException if an error occurs while parsing the xml content
+     */
+    public static boolean validateXMLSchema(String xmlContent) throws APIManagementException {
+        try {
+            DocumentBuilderFactory factory = getSecuredDocumentBuilder();
+            factory.setValidating(false);
+            factory.setNamespaceAware(false);
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            builder.parse(new InputSource(new StringReader(xmlContent)));
+        } catch (ParserConfigurationException | IOException | SAXException e) {
+            log.error("Error occurred while parsing the provided xml content.", e);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * This method will validate the given xml content in sequence backend for the syntactical correctness
+     *
+     * @param xmlContent string of xml content
+     * @return true if the xml content is valid, false otherwise
+     * @throws APIManagementException if an error occurs while parsing the xml content
+     */
+    public static boolean validateXMLForSequenceBackend(String xmlContent) throws APIManagementException {
+        String wrappedXmlContent = "<sequence>" + xmlContent + "</sequence>";
+        return validateXMLSchema(wrappedXmlContent);
     }
 
     /**
@@ -12321,5 +12420,25 @@ public final class APIUtil {
         } else {
             log.error("Swagger definition is null for API: " + api.getId().getApiName());
         }
+    }
+
+    /**
+     * Checks whether a scope name starts with a restricted/reserved prefix.
+     * This method performs an exact, case-sensitive prefix match to preserve existing behaviour.
+     *
+     * @param scopeName Scope name to check
+     * @return true if the scope name starts with a restricted prefix
+     */
+    public static boolean hasRestrictedScopePrefix(String scopeName) {
+        if (log.isDebugEnabled()) {
+            log.debug("Checking if scope has restricted prefix: " + scopeName);
+        }
+        boolean hasRestrictedPrefix = scopeName.startsWith(RESTRICTED_SCOPE_PREFIX_APIM)
+                || scopeName.startsWith(RESTRICTED_SCOPE_PREFIX_APIM_ANALYTICS)
+                || scopeName.startsWith(RESTRICTED_SCOPE_PREFIX_SERVICE_CATALOG);
+        if (hasRestrictedPrefix && log.isDebugEnabled()) {
+            log.debug("Scope has restricted prefix: " + scopeName);
+        }
+        return hasRestrictedPrefix;
     }
 }

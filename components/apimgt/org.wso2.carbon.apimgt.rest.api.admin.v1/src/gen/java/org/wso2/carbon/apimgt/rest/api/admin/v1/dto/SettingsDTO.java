@@ -33,7 +33,7 @@ public class SettingsDTO   {
     private Boolean analyticsEnabled = null;
     private Boolean transactionCounterEnable = null;
     private Boolean isGatewayNotificationEnabled = false;
-    private String universalGatewayVersion = null;
+    private List<String> platformGatewayVersions = new ArrayList<String>();
     private Boolean consumptionExportEnabled = null;
 
   /**
@@ -196,21 +196,21 @@ public class SettingsDTO   {
   }
 
   /**
-   * Universal Gateway version for quick-start guide (e.g. \&quot;0.11.0\&quot;)
+   * API Platform Gateway versions for the quick-start guide.
    **/
-  public SettingsDTO universalGatewayVersion(String universalGatewayVersion) {
-    this.universalGatewayVersion = universalGatewayVersion;
+  public SettingsDTO platformGatewayVersions(List<String> platformGatewayVersions) {
+    this.platformGatewayVersions = platformGatewayVersions;
     return this;
   }
 
   
-  @ApiModelProperty(example = "0.11.0", value = "Universal Gateway version for quick-start guide (e.g. \"0.11.0\")")
-  @JsonProperty("universalGatewayVersion")
-  public String getUniversalGatewayVersion() {
-    return universalGatewayVersion;
+  @ApiModelProperty(value = "API Platform Gateway versions for the quick-start guide.")
+  @JsonProperty("platformGatewayVersions")
+  public List<String> getPlatformGatewayVersions() {
+    return platformGatewayVersions;
   }
-  public void setUniversalGatewayVersion(String universalGatewayVersion) {
-    this.universalGatewayVersion = universalGatewayVersion;
+  public void setPlatformGatewayVersions(List<String> platformGatewayVersions) {
+    this.platformGatewayVersions = platformGatewayVersions;
   }
 
   /**
@@ -250,13 +250,13 @@ public class SettingsDTO   {
         Objects.equals(analyticsEnabled, settings.analyticsEnabled) &&
         Objects.equals(transactionCounterEnable, settings.transactionCounterEnable) &&
         Objects.equals(isGatewayNotificationEnabled, settings.isGatewayNotificationEnabled) &&
-        Objects.equals(universalGatewayVersion, settings.universalGatewayVersion) &&
+        Objects.equals(platformGatewayVersions, settings.platformGatewayVersions) &&
         Objects.equals(consumptionExportEnabled, settings.consumptionExportEnabled);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(scopes, gatewayTypes, isJWTEnabledForLoginTokens, orgAccessControlEnabled, keyManagerConfiguration, gatewayConfiguration, analyticsEnabled, transactionCounterEnable, isGatewayNotificationEnabled, universalGatewayVersion, consumptionExportEnabled);
+    return Objects.hash(scopes, gatewayTypes, isJWTEnabledForLoginTokens, orgAccessControlEnabled, keyManagerConfiguration, gatewayConfiguration, analyticsEnabled, transactionCounterEnable, isGatewayNotificationEnabled, platformGatewayVersions, consumptionExportEnabled);
   }
 
   @Override
@@ -273,7 +273,7 @@ public class SettingsDTO   {
     sb.append("    analyticsEnabled: ").append(toIndentedString(analyticsEnabled)).append("\n");
     sb.append("    transactionCounterEnable: ").append(toIndentedString(transactionCounterEnable)).append("\n");
     sb.append("    isGatewayNotificationEnabled: ").append(toIndentedString(isGatewayNotificationEnabled)).append("\n");
-    sb.append("    universalGatewayVersion: ").append(toIndentedString(universalGatewayVersion)).append("\n");
+    sb.append("    platformGatewayVersions: ").append(toIndentedString(platformGatewayVersions)).append("\n");
     sb.append("    consumptionExportEnabled: ").append(toIndentedString(consumptionExportEnabled)).append("\n");
     sb.append("}");
     return sb.toString();

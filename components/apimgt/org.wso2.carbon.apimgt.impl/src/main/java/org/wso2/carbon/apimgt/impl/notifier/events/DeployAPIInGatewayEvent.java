@@ -1,6 +1,8 @@
 package org.wso2.carbon.apimgt.impl.notifier.events;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class DeployAPIInGatewayEvent extends Event {
@@ -18,6 +20,12 @@ public class DeployAPIInGatewayEvent extends Event {
      * only Synapse (JMS) path is used.
      */
     private Set<String> platformGatewayIds;
+    /**
+     * Explicit platform gateway deployment IDs keyed by platform gateway ID.
+     * This lets CP send the exact persisted deployment identity for each gateway instead of deriving it from the
+     * event correlation ID.
+     */
+    private Map<String, String> platformGatewayDeploymentIds;
     private Set<APIEvent> associatedApis;
     private String context;
     private boolean deleted;
@@ -189,5 +197,30 @@ public class DeployAPIInGatewayEvent extends Event {
 
     public void setPlatformGatewayIds(Set<String> platformGatewayIds) {
         this.platformGatewayIds = platformGatewayIds;
+    }
+
+    /**
+     * Retrieves the mapping of platform gateway deployment IDs.
+     *
+     * @return a map where the key represents the platform gateway identifier and the value represents its corresponding
+     * deployment ID. Returns null if no mapping exists.
+     */
+    public Map<String, String> getPlatformGatewayDeploymentIds() {
+        return platformGatewayDeploymentIds;
+    }
+
+    /**
+     * Sets the mapping of platform gateway deployment IDs. If the input map is null or empty,
+     * the internal reference is set to null. Otherwise, a new map is created from the given data.
+     *
+     * @param platformGatewayDeploymentIds a map where the key is the platform gateway identifier
+     *                                     and the value is its corresponding deployment ID
+     */
+    public void setPlatformGatewayDeploymentIds(Map<String, String> platformGatewayDeploymentIds) {
+        if (platformGatewayDeploymentIds == null || platformGatewayDeploymentIds.isEmpty()) {
+            this.platformGatewayDeploymentIds = null;
+            return;
+        }
+        this.platformGatewayDeploymentIds = new HashMap<>(platformGatewayDeploymentIds);
     }
 }

@@ -35,6 +35,7 @@ public class HttpClientConfigurationDTO {
     private String proxyUsername;
     private char[] proxyPassword = new char[]{};
     private String[] nonProxyHosts = new String[]{};
+    private String[] targetProxyHosts = new String[]{};
     private String proxyProtocol;
     private HostnameVerifier hostnameVerifier;
 
@@ -88,6 +89,10 @@ public class HttpClientConfigurationDTO {
     public int getConnectionRequestTimeout() {
         return connectionRequestTimeout;
     }
+    
+    public String[] getTargetProxyHosts() {
+        return Arrays.copyOf(targetProxyHosts, targetProxyHosts.length);
+    }
 
     /**
      * Builder class for @code{HTTPClientConfigurationDTO}
@@ -104,6 +109,7 @@ public class HttpClientConfigurationDTO {
         private String proxyUsername;
         private char[] proxyPassword = new char[]{};
         private String[] nonProxyHosts = new String[]{};
+        private String[] targetProxyHosts = new String[]{};
         private String proxyProtocol;
         private HostnameVerifier hostnameVerifier;
 
@@ -121,8 +127,15 @@ public class HttpClientConfigurationDTO {
             return this;
         }
 
+        @Deprecated
         public Builder withProxy(String proxyHost, int proxyPort, String proxyUsername, String proxyPassword,
-                                 String proxyProtocol, String[] nonProxyHosts) {
+                String proxyProtocol, String[] nonProxyHosts) {
+            return withProxy(proxyHost, proxyPort, proxyUsername, proxyPassword, proxyProtocol, nonProxyHosts,
+                    new String[] {});
+        }
+
+        public Builder withProxy(String proxyHost, int proxyPort, String proxyUsername, String proxyPassword,
+                String proxyProtocol, String[] nonProxyHosts, String[] targetProxyHosts) {
             this.proxyEnabled = true;
             this.proxyHost = proxyHost;
             this.proxyPort = proxyPort;
@@ -131,6 +144,8 @@ public class HttpClientConfigurationDTO {
             this.proxyProtocol = proxyProtocol;
             this.nonProxyHosts = nonProxyHosts != null ?
                     Arrays.copyOf(nonProxyHosts, nonProxyHosts.length) : new String[]{};
+            this.targetProxyHosts = targetProxyHosts != null ?
+                    Arrays.copyOf(targetProxyHosts, targetProxyHosts.length) : new String[]{};
             return this;
         }
 
@@ -152,6 +167,7 @@ public class HttpClientConfigurationDTO {
             configuration.proxyPassword = this.proxyPassword;
             configuration.proxyProtocol = this.proxyProtocol;
             configuration.nonProxyHosts = this.nonProxyHosts;
+            configuration.targetProxyHosts = this.targetProxyHosts;
             configuration.hostnameVerifier = this.hostnameVerifier;
             return configuration;
         }

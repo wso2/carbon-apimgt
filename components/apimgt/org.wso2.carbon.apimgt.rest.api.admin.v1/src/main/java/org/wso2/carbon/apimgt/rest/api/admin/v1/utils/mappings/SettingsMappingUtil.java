@@ -63,20 +63,20 @@ public class SettingsMappingUtil {
         settingsDTO.setIsJWTEnabledForLoginTokens(APIUtil.isJWTEnabledForPortals());
         settingsDTO.setOrgAccessControlEnabled(APIUtil.isOrganizationAccessControlEnabled());
         settingsDTO.setIsGatewayNotificationEnabled(APIUtil.isGatewayNotificationEnabled());
-        settingsDTO.setUniversalGatewayVersion(resolveUniversalGatewayVersion());
+        settingsDTO.setPlatformGatewayVersions(resolvePlatformGatewayVersions());
         settingsDTO.setConsumptionExportEnabled(
                 ServiceReferenceHolder.getInstance().getConsumptionDataExportService() != null);
         return settingsDTO;
     }
 
-    private static String resolveUniversalGatewayVersion() {
+    private static List<String> resolvePlatformGatewayVersions() {
         PlatformGatewayConnectConfig config = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration().getPlatformGatewayConnectConfig();
         if (config == null) {
             return null;
         }
-        String global = config.getUniversalGatewayVersion();
-        return (global != null && !global.isEmpty()) ? global : null;
+        List<String> versions = config.getPlatformGatewayVersions();
+        return versions.isEmpty() ? null : versions;
     }
 
     private List<SettingsKeyManagerConfigurationDTO> getSettingsKeyManagerConfigurationDTOList() {

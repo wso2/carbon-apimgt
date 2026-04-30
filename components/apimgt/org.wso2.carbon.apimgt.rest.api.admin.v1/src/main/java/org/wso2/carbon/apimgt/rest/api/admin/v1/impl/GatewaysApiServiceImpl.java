@@ -53,7 +53,6 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
 
-import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -73,7 +72,7 @@ import java.util.stream.Collectors;
  * without schema changes:
  * <ul>
  *   <li><b>AM_GATEWAY_ENVIRONMENT</b> – one row per platform gateway (UUID=gatewayId, NAME, DISPLAY_NAME,
- *       DESCRIPTION, GATEWAY_TYPE='Universal', CONFIGURATION=JSON with organization, isActive, createdAt,
+ *       DESCRIPTION, GATEWAY_TYPE='APIPlatform', CONFIGURATION=JSON with organization, isActive, createdAt,
  *       updatedAt, properties).</li>
  *   <li><b>AM_GW_VHOST</b> – one row per env (GATEWAY_ENV_ID, HOST, HTTP_PORT, HTTPS_PORT, ...). Host and port
  *       come from parsed vhost URL; updated in {@link #updateDynamicEnvironmentForPlatformGateway} after create.</li>
@@ -199,8 +198,8 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
                 .anyMatch(gw -> StringUtils.equals(gw.getName(), gatewayName));
         if (gatewayExists) {
             throw new APIManagementException(
-                    String.format(ExceptionCodes.UNIVERSAL_GATEWAY_NAME_ALREADY_EXISTS.getErrorDescription(), gatewayName),
-                    ExceptionCodes.UNIVERSAL_GATEWAY_NAME_ALREADY_EXISTS);
+                    String.format(ExceptionCodes.PLATFORM_GATEWAY_NAME_ALREADY_EXISTS.getErrorDescription(), gatewayName),
+                    ExceptionCodes.PLATFORM_GATEWAY_NAME_ALREADY_EXISTS);
         }
 
         // Also check if a non-platform environment with this name exists
@@ -210,8 +209,8 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
                 .anyMatch(env -> StringUtils.equals(env.getName(), gatewayName));
         if (envExists) {
             throw new APIManagementException(
-                    String.format(ExceptionCodes.UNIVERSAL_GATEWAY_NAME_ALREADY_EXISTS.getErrorDescription(), gatewayName),
-                    ExceptionCodes.UNIVERSAL_GATEWAY_NAME_ALREADY_EXISTS);
+                    String.format(ExceptionCodes.PLATFORM_GATEWAY_NAME_ALREADY_EXISTS.getErrorDescription(), gatewayName),
+                    ExceptionCodes.PLATFORM_GATEWAY_NAME_ALREADY_EXISTS);
         }
     }
 
@@ -252,7 +251,7 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         if (StringUtils.isNotBlank(gatewayUrl)) {
             ParsedGatewayUrl parsed = parseGatewayUrl(gatewayUrl);
             if (parsed != null) {
-                return parsed.host;
+                return parsed.host + ":" + parsed.port;
             }
         }
         if (properties != null) {
@@ -261,7 +260,8 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
                 Object baseUrl = ((Map<?, ?>) controller).get(GATEWAY_PROP_BASE_URL);
                 if (baseUrl instanceof String && StringUtils.isNotBlank((String) baseUrl)) {
                     try {
-                        return new URL((String) baseUrl).getHost();
+                        URL baseUrlObject = new URL((String) baseUrl);
+                        return baseUrlObject.getHost() + ":" + baseUrlObject.getPort();
                     } catch (Exception ignored) {
                         // ignore
                     }
@@ -419,7 +419,7 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         PlatformGateway existing = service.getGatewayById(gatewayId);
         if (existing == null) {
             throw new APIManagementException("Platform gateway not found: " + gatewayId,
-                    ExceptionCodes.UNIVERSAL_GATEWAY_NOT_FOUND);
+                    ExceptionCodes.PLATFORM_GATEWAY_NOT_FOUND);
         }
         if (!Objects.equals(body.getName(), existing.getName())) {
             throw RestApiUtil.buildBadRequestException("name in body must match existing gateway (immutable)");

@@ -35,6 +35,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.zip.ZipEntry;
@@ -329,5 +330,49 @@ public class APIFileUtil {
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e, ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT);
         }
+    }
+
+    /**
+     * Resolves an untrusted user-specified path against the base directory.
+     * Paths that try to escape the base directory are rejected.
+     * @param baseDirPathString the absolute path of the base directory that all
+     *                     user-specified paths should be within
+     * @param userPathString  the untrusted path provided by the user
+     * @return Resolved Path
+     * @throws APIManagementException if resolution fails.
+     */
+    public static Path resolveFilePath(final String baseDirPathString,
+            final String userPathString) throws APIManagementException {
+        Path baseDirPath = Paths.get(baseDirPathString);
+        Path userPath = Paths.get(userPathString);
+        if (!baseDirPath.isAbsolute()) {
+            throw new APIManagementException("Invalid base path provided." +
+                    " Base path must be absolute. Base Path: " + baseDirPath);
+        }
+
+        if (userPath.isAbsolute()) {
+            throw new APIManagementException("Invalid user path provided." +
+                    " User path should not be absolute. User Path: " + userPath);
+        }
+
+        /*
+         * Combines the absolute base directory path and the user-specified relative path.
+         * Then, normalizes the path to handle any ".." elements in the userPath.
+         * For example, if the baseDirPath is "/foo/bar/baz" and userPath is "../attack",
+         * the resulting resolvedPath will be "/foo/bar/attack".
+         */
+        final Path resolvedPath = baseDirPath.resolve(userPath).normalize();
+
+        /*
+         * Verifies that the resolved path is still within the expected base directory.
+         * If the resolved path does not start with the base directory path,
+         * it indicates an attempt to escape the intended directory structure.
+         */
+        if (!resolvedPath.startsWith(baseDirPath.normalize())) {
+            throw new APIManagementException("Error resolving path. The user path attempts" +
+                    " to escape the base directory.");
+        }
+
+        return resolvedPath;
     }
 }

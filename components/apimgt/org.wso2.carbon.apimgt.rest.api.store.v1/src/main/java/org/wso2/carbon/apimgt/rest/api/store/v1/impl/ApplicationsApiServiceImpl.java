@@ -927,7 +927,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         String keyUUID = body.getKeyUUID();
         if (!StringUtils.isEmpty(keyUUID)) {
             try {
-                APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+                String organization = RestApiUtil.getValidatedOrganization(messageContext);
+                APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username, organization);
                 Application application = apiConsumer.getApplicationByUUID(applicationId);
                 if (application != null) {
                     if (orgWideAppUpdateEnabled || RestAPIStoreUtils.isUserOwnerOfApplication(application)
@@ -938,6 +939,11 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                             RestApiUtil.handleBadRequest("Invalid keyType. KeyType should be either PRODUCTION " +
                                     "or SANDBOX", log);
                         } else {
+                            if (APIConstants.API_KEY_TYPE_PRODUCTION.equalsIgnoreCase(keyType)) {
+                                application.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
+                            } else {
+                                application.setKeyType(APIConstants.API_KEY_TYPE_SANDBOX);
+                            }
                             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
                             APIKeyInfo apiKeyInfo = apiConsumer.regenerateApiKey(application, keyType, keyUUID,
                                     tenantDomain, username);

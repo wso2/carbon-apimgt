@@ -44,6 +44,18 @@ public class APIConstants {
     public static final String ENDPOINT_SECURITY_PRODUCTION = "production";
     public static final String ENDPOINT_SECURITY_SANDBOX = "sandbox";
     public static final String ENDPOINT_CONFIG_SESSION_TIMEOUT = "sessionTimeOut";
+    public static final String API_PUBLISHER = "APIPublisher.";
+    public static final String API_PUBLISHER_IMPORT_DEFINITION_FILE_SIZE_LIMIT = API_PUBLISHER + "ImportDefinitionFileSizeLimit.";
+    public static final String API_PUBLISHER_IMPORT_OAS_FILE_SIZE_LIMIT = API_PUBLISHER_IMPORT_DEFINITION_FILE_SIZE_LIMIT + "OAS";
+    public static final String API_PUBLISHER_IMPORT_OAS_FILE_SIZE_LIMIT_DEFAULT_MB = "10";
+    public static final String API_PUBLISHER_IMPORT_ASYNC_FILE_SIZE_LIMIT = API_PUBLISHER_IMPORT_DEFINITION_FILE_SIZE_LIMIT + "ASYNC";
+    public static final String API_PUBLISHER_IMPORT_ASYNC_FILE_SIZE_LIMIT_DEFAULT_MB = "10";
+    public static final String API_PUBLISHER_IMPORT_WSDL_FILE_SIZE_LIMIT = API_PUBLISHER_IMPORT_DEFINITION_FILE_SIZE_LIMIT + "WSDL";
+    public static final String API_PUBLISHER_IMPORT_WSDL_FILE_SIZE_LIMIT_DEFAULT_MB = "10";
+    public static final String API_PUBLISHER_IMPORT_GRAPHQL_FILE_SIZE_LIMIT = API_PUBLISHER_IMPORT_DEFINITION_FILE_SIZE_LIMIT + "GRAPHQL";
+    public static final String API_PUBLISHER_IMPORT_GRAPHQL_FILE_SIZE_LIMIT_DEFAULT_MB = "10";
+    public static final String API_PUBLISHER_IMPORT_MCP_FILE_SIZE_LIMIT = API_PUBLISHER_IMPORT_DEFINITION_FILE_SIZE_LIMIT + "MCP";
+    public static final String API_PUBLISHER_IMPORT_MCP_FILE_SIZE_LIMIT_DEFAULT_MB = "10";
     public static final String ENDPOINT_SECURITY_TYPE_AWS = "aws";
     public static final String LLM_PROVIDER_SERVICE_AWS_BEDROCK_SERVICE_NAME = "bedrock";
 

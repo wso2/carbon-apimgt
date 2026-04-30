@@ -36,6 +36,7 @@ import org.apache.http.message.BasicStatusLine;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
 import org.junit.Test;
+import org.wso2.carbon.apimgt.api.APIConstants;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -44,6 +45,7 @@ import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.AsyncApiParseOpti
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -127,79 +129,19 @@ public class AsyncApiParserUtilTest {
 
         ObjectMapper yamlWriter = new ObjectMapper(new YAMLFactory());
         Object obj = yamlWriter.readValue(VALID_ASYNCAPI_JSON, Object.class);
+        String yamlBody = yamlWriter.writeValueAsString(obj);
 
         try (FileWriter fw = new FileWriter(tmp)) {
             yamlWriter.writeValue(fw, obj);
         }
 
-        // Use a simple HttpClient stub that returns 200 OK for execute(...) calls.
-        HttpClient okHttpClient = new HttpClient() {
-            @Override
-            public HttpResponse execute(org.apache.http.HttpHost host, org.apache.http.HttpRequest request) {
-                return buildResponse(200);
-            }
-
-            @Override
-            public HttpResponse execute(org.apache.http.HttpHost host, org.apache.http.HttpRequest request,
-                                        org.apache.http.protocol.HttpContext context) {
-                return buildResponse(200);
-            }
-
-            @Override
-            public <T> T execute(HttpUriRequest httpUriRequest, ResponseHandler<? extends T> responseHandler) throws
-                    IOException, ClientProtocolException {
-                return null;
-            }
-
-            @Override
-            public <T> T execute(HttpUriRequest httpUriRequest, ResponseHandler<?
-                    extends T> responseHandler, HttpContext httpContext) throws IOException, ClientProtocolException {
-                return null;
-            }
-
-            @Override
-            public <T> T execute(HttpHost httpHost, HttpRequest httpRequest, ResponseHandler<?
-                    extends T> responseHandler) throws IOException, ClientProtocolException {
-                return null;
-            }
-
-            @Override
-            public <T> T execute(HttpHost httpHost, HttpRequest httpRequest, ResponseHandler<?
-                    extends T> responseHandler, HttpContext httpContext) throws IOException, ClientProtocolException {
-                return null;
-            }
-
-            @Override
-            public HttpParams getParams() {
-                return null;
-            }
-
-            @Override
-            public ClientConnectionManager getConnectionManager() {
-                return null;
-            }
-
-            @Override
-            public HttpResponse execute(HttpUriRequest request) {
-                return buildResponse(200);
-            }
-
-            @Override
-            public HttpResponse execute(HttpUriRequest request, org.apache.http.protocol.HttpContext context) {
-                return buildResponse(200);
-            }
-
-            private HttpResponse buildResponse(int status) {
-                return new BasicHttpResponse(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1),
-                        status, ""));
-            }
-        };
+        HttpClient okHttpClient = createHttpClient(200, yamlBody);
 
         String fileUrl = tmp.toURI().toURL().toString();
         AsyncApiParseOptions options =  new AsyncApiParseOptions();
         options.setPreserveLegacyAsyncApiParser(true);
-        APIDefinitionValidationResponse resp = AsyncApiParserUtil.validateAsyncAPISpecificationByURL(
-                fileUrl, okHttpClient, true, options);
+        APIDefinitionValidationResponse resp = AsyncApiParserUtil.validateAsyncAPISpecificationByURL(fileUrl,
+                okHttpClient, true, options, APIConstants.API_PUBLISHER_IMPORT_ASYNC_FILE_SIZE_LIMIT_DEFAULT_MB);
         assertNotNull(resp);
         assertTrue("Validation by URL with 200 status should succeed", resp.isValid());
     }
@@ -214,72 +156,12 @@ public class AsyncApiParserUtilTest {
         }
         String fileUrl = tmp.toURI().toURL().toString();
 
-        HttpClient nonOkHttpClient = new HttpClient() {
-            @Override
-            public HttpResponse execute(org.apache.http.HttpHost host, org.apache.http.HttpRequest request) {
-                return buildResponse(404);
-            }
-
-            @Override
-            public HttpResponse execute(org.apache.http.HttpHost host, org.apache.http.HttpRequest request,
-                                        org.apache.http.protocol.HttpContext context) {
-                return buildResponse(404);
-            }
-
-            @Override
-            public <T> T execute(HttpUriRequest httpUriRequest, ResponseHandler<? extends T> responseHandler)
-                    throws IOException, ClientProtocolException {
-                return null;
-            }
-
-            @Override
-            public <T> T execute(HttpUriRequest httpUriRequest, ResponseHandler<?
-                    extends T> responseHandler, HttpContext httpContext) throws IOException, ClientProtocolException {
-                return null;
-            }
-
-            @Override
-            public <T> T execute(HttpHost httpHost, HttpRequest httpRequest, ResponseHandler<?
-                    extends T> responseHandler) throws IOException, ClientProtocolException {
-                return null;
-            }
-
-            @Override
-            public <T> T execute(HttpHost httpHost, HttpRequest httpRequest, ResponseHandler<?
-                    extends T> responseHandler, HttpContext httpContext) throws IOException, ClientProtocolException {
-                return null;
-            }
-
-            @Override
-            public HttpParams getParams() {
-                return null;
-            }
-
-            @Override
-            public ClientConnectionManager getConnectionManager() {
-                return null;
-            }
-
-            @Override
-            public HttpResponse execute(HttpUriRequest request) {
-                return buildResponse(404);
-            }
-
-            @Override
-            public HttpResponse execute(HttpUriRequest request, org.apache.http.protocol.HttpContext context) {
-                return buildResponse(404);
-            }
-
-            private HttpResponse buildResponse(int status) {
-                return new BasicHttpResponse(new BasicStatusLine(
-                        new ProtocolVersion("HTTP", 1, 1), status, ""));
-            }
-        };
+        HttpClient nonOkHttpClient = createHttpClient(404, null);
 
         AsyncApiParseOptions options =  new AsyncApiParseOptions();
         options.setPreserveLegacyAsyncApiParser(true);
-        APIDefinitionValidationResponse resp = AsyncApiParserUtil.validateAsyncAPISpecificationByURL(
-                fileUrl, nonOkHttpClient, true, options);
+        APIDefinitionValidationResponse resp = AsyncApiParserUtil.validateAsyncAPISpecificationByURL(fileUrl,
+                nonOkHttpClient, true, options, APIConstants.API_PUBLISHER_IMPORT_ASYNC_FILE_SIZE_LIMIT_DEFAULT_MB);
         assertNotNull(resp);
         assertFalse("Expected validation to fail when HTTP status != 200", resp.isValid());
         // Ensure the known error code for URL not 200 is present in the response error items
@@ -353,6 +235,73 @@ public class AsyncApiParserUtilTest {
         // Passing null security scheme should cause an exception (or UnsupportedOperationException)
         AsyncApiParserUtil.setAsyncApiOAuthFlowsScopes(
                 null, Collections.emptyMap(), Collections.emptyMap());
+    }
+
+    private HttpClient createHttpClient(int statusCode, String body) {
+        return new HttpClient() {
+            @Override
+            public HttpResponse execute(HttpHost host, HttpRequest request) {
+                return buildResponse(statusCode, body);
+            }
+
+            @Override
+            public HttpResponse execute(HttpHost host, HttpRequest request, HttpContext context) {
+                return buildResponse(statusCode, body);
+            }
+
+            @Override
+            public <T> T execute(HttpUriRequest request, ResponseHandler<? extends T> responseHandler)
+                    throws IOException, ClientProtocolException {
+                throw new UnsupportedOperationException("Not used in this test");
+            }
+
+            @Override
+            public <T> T execute(HttpUriRequest request, ResponseHandler<? extends T> responseHandler,
+                    HttpContext context) throws IOException, ClientProtocolException {
+                throw new UnsupportedOperationException("Not used in this test");
+            }
+
+            @Override
+            public <T> T execute(HttpHost host, HttpRequest request, ResponseHandler<? extends T> responseHandler)
+                    throws IOException, ClientProtocolException {
+                throw new UnsupportedOperationException("Not used in this test");
+            }
+
+            @Override
+            public <T> T execute(HttpHost host, HttpRequest request, ResponseHandler<? extends T> responseHandler,
+                    HttpContext context) throws IOException, ClientProtocolException {
+                throw new UnsupportedOperationException("Not used in this test");
+            }
+
+            @Override
+            public HttpParams getParams() {
+                return null;
+            }
+
+            @Override
+            public ClientConnectionManager getConnectionManager() {
+                return null;
+            }
+
+            @Override
+            public HttpResponse execute(HttpUriRequest request) {
+                return buildResponse(statusCode, body);
+            }
+
+            @Override
+            public HttpResponse execute(HttpUriRequest request, HttpContext context) {
+                return buildResponse(statusCode, body);
+            }
+        };
+    }
+
+    private HttpResponse buildResponse(int statusCode, String body) {
+        BasicHttpResponse response = new BasicHttpResponse(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1),
+                statusCode, ""));
+        if (body != null) {
+            response.setEntity(new org.apache.http.entity.StringEntity(body, StandardCharsets.UTF_8));
+        }
+        return response;
     }
 
 }

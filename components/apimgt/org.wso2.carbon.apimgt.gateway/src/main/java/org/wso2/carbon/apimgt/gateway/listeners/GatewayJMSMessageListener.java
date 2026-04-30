@@ -71,15 +71,15 @@ import javax.jms.Topic;
 public class GatewayJMSMessageListener implements MessageListener, JMSConnectionEventListener {
 
     private static final Log log = LogFactory.getLog(GatewayJMSMessageListener.class);
-    private boolean debugEnabled = log.isDebugEnabled();
+    private final boolean debugEnabled = log.isDebugEnabled();
     private boolean refreshOnReconnect = false;
-    private InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
-    private EventHubConfigurationDto eventHubConfigurationDto = ServiceReferenceHolder.getInstance()
+    private final InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
+    private final EventHubConfigurationDto eventHubConfigurationDto = ServiceReferenceHolder.getInstance()
             .getAPIManagerConfiguration().getEventHubConfigurationDto();
-    private GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties = ServiceReferenceHolder
+    private final GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties = ServiceReferenceHolder
             .getInstance().getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties();
     ExecutorService executor = Executors.newSingleThreadExecutor(r -> new Thread(r, "DeploymentThread"));
-    private static GatewayNotifier gatewayNotifier = GatewayNotifier.getInstance();
+    private static final GatewayNotifier gatewayNotifier = GatewayNotifier.getInstance();
 
     public GatewayJMSMessageListener() {
     }
@@ -554,17 +554,30 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
                 return;
             }
             String lookupKey = apiKeyAssociationEvent.getApiKeyHash();
-            APIKeyInfo apiKeyInfo = DataHolder.getInstance().getOpaqueAPIKeyInfo(lookupKey);
-            if (apiKeyInfo != null) {
+            APIKeyInfo existingKeyInfo = DataHolder.getInstance().getOpaqueAPIKeyInfo(lookupKey);
+            if (existingKeyInfo != null) {
+                APIKeyInfo updatedKeyInfo = new APIKeyInfo(existingKeyInfo);
                 if (EventType.API_KEY_ASSOCIATION_CREATE.toString().equals(eventType)) {
-                    apiKeyInfo.setApplicationId(apiKeyAssociationEvent.getApplicationUUId());
-                    apiKeyInfo.setAppId(apiKeyAssociationEvent.getApplicationId());
+                    updatedKeyInfo.setApplicationId(apiKeyAssociationEvent.getApplicationUUId());
+                    updatedKeyInfo.setAppId(apiKeyAssociationEvent.getApplicationId());
                 } else {
-                    apiKeyInfo.setApplicationId(null);
-                    apiKeyInfo.setAppId(-1);
+                    updatedKeyInfo.setApplicationId(null);
+                    updatedKeyInfo.setAppId(-1);
                 }
-                DataHolder.getInstance().addOpaqueAPIKeyInfo(apiKeyInfo);
+                DataHolder.getInstance().addOpaqueAPIKeyInfo(updatedKeyInfo);
             }
+        } else if (EventType.API_KEY_REGENERATE.toString().equals(eventType)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Processing API key regeneration event. Event type: " + eventType);
+            }
+            APIKeyRegenerationEvent apiKeyRegenerationEvent =
+                    new Gson().fromJson(eventJson, APIKeyRegenerationEvent.class);
+            if (!TenantUtils.isTenantAvailable(apiKeyRegenerationEvent.getTenantDomain())) {
+                return;
+            }
+            String oldLookupKey = apiKeyRegenerationEvent.getOldApiKeyHash();
+            String newLookupKey = apiKeyRegenerationEvent.getNewApiKeyHash();
+            DataHolder.getInstance().replaceOpaqueAPIKeyEntry(oldLookupKey, newLookupKey);
         }
     }
 

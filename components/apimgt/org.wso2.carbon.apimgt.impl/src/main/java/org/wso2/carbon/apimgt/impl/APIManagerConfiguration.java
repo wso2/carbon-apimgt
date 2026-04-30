@@ -679,7 +679,37 @@ public class APIManagerConfiguration {
             } else if (elementHasText(element)) {
                 String key = getKey(nameStack);
                 String value = MiscellaneousUtil.resolve(element, secretResolver);
-                addToConfiguration(key, APIUtil.replaceSystemProperty(value));
+                if (org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_OAS_FILE_SIZE_LIMIT.equals(key)) {
+                    String maxFileSize = StringUtils.isNumeric(value) ?
+                            value :
+                            org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_OAS_FILE_SIZE_LIMIT_DEFAULT_MB;
+                    addToConfiguration(key, APIUtil.replaceSystemProperty(maxFileSize));
+                } else if (org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_ASYNC_FILE_SIZE_LIMIT.equals(
+                        key)) {
+                    String maxFileSize = StringUtils.isNumeric(value) ?
+                            value :
+                            org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_ASYNC_FILE_SIZE_LIMIT_DEFAULT_MB;
+                    addToConfiguration(key, APIUtil.replaceSystemProperty(maxFileSize));
+                } else if (org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_WSDL_FILE_SIZE_LIMIT.equals(
+                        key)) {
+                    String maxFileSize = StringUtils.isNumeric(value) ?
+                            value :
+                            org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_WSDL_FILE_SIZE_LIMIT_DEFAULT_MB;
+                    addToConfiguration(key, APIUtil.replaceSystemProperty(maxFileSize));
+                } else if (org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_GRAPHQL_FILE_SIZE_LIMIT.equals(key)) {
+                    String maxFileSize = StringUtils.isNumeric(value) ?
+                            value :
+                            org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_GRAPHQL_FILE_SIZE_LIMIT_DEFAULT_MB;
+                    addToConfiguration(key, APIUtil.replaceSystemProperty(maxFileSize));
+                } else if (org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_MCP_FILE_SIZE_LIMIT.equals(
+                        key)) {
+                    String maxFileSize = StringUtils.isNumeric(value) ?
+                            value :
+                            org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_MCP_FILE_SIZE_LIMIT_DEFAULT_MB;
+                    addToConfiguration(key, APIUtil.replaceSystemProperty(maxFileSize));
+                } else {
+                    addToConfiguration(key, APIUtil.replaceSystemProperty(value));
+                }
             } else if ("Environments".equals(localName)) {
                 Iterator environmentIterator = element.getChildrenWithLocalName("Environment");
                 apiGatewayEnvironments = new LinkedHashMap<String, Environment>();
@@ -3369,6 +3399,82 @@ public class APIManagerConfiguration {
             }
         }
 
+        // Parse deduplication configuration
+        OMElement dedupConfig = omElement
+                .getFirstChildWithName(new QName(APIConstants.APIMGovernance.DEDUPLICATION_CONFIG));
+        if (dedupConfig != null) {
+            OMElement dedupEnabled = dedupConfig
+                    .getFirstChildWithName(new QName(APIConstants.APIMGovernance.DEDUP_ENABLED));
+            if (dedupEnabled != null) {
+                apimGovConfigurationDto.setDeduplicationEnabled(Boolean.parseBoolean(dedupEnabled.getText()));
+            }
+
+            OMElement simThreshold = dedupConfig
+                    .getFirstChildWithName(new QName(APIConstants.APIMGovernance.DEDUP_SIMILARITY_THRESHOLD));
+            if (simThreshold != null) {
+                apimGovConfigurationDto.setDeduplicationSimilarityThreshold(
+                        Double.parseDouble(simThreshold.getText()));
+            }
+
+            OMElement highConfThreshold = dedupConfig
+                    .getFirstChildWithName(new QName(APIConstants.APIMGovernance.DEDUP_HIGH_CONFIDENCE_THRESHOLD));
+            if (highConfThreshold != null) {
+                apimGovConfigurationDto.setDeduplicationHighConfidenceThreshold(
+                        Double.parseDouble(highConfThreshold.getText()));
+            }
+
+            OMElement dedupMode = dedupConfig
+                    .getFirstChildWithName(new QName(APIConstants.APIMGovernance.DEDUP_MODE));
+            if (dedupMode != null) {
+                apimGovConfigurationDto.setDeduplicationMode(dedupMode.getText());
+            }
+
+            OMElement numHashFunctions = dedupConfig
+                    .getFirstChildWithName(new QName(APIConstants.APIMGovernance.DEDUP_NUM_HASH_FUNCTIONS));
+            if (numHashFunctions != null) {
+                apimGovConfigurationDto.setDeduplicationNumHashFunctions(
+                        Integer.parseInt(numHashFunctions.getText()));
+            }
+
+            OMElement numBands = dedupConfig
+                    .getFirstChildWithName(new QName(APIConstants.APIMGovernance.DEDUP_NUM_BANDS));
+            if (numBands != null) {
+                apimGovConfigurationDto.setDeduplicationNumBands(Integer.parseInt(numBands.getText()));
+            }
+
+            OMElement shingleSize = dedupConfig
+                    .getFirstChildWithName(new QName(APIConstants.APIMGovernance.DEDUP_SHINGLE_SIZE));
+            if (shingleSize != null) {
+                apimGovConfigurationDto.setDeduplicationShingleSize(Integer.parseInt(shingleSize.getText()));
+            }
+        }
+
+        // Parse deprecation guide configuration
+        OMElement deprecationConfig = omElement
+                .getFirstChildWithName(new QName(APIConstants.APIMGovernance.DEPRECATION_GUIDE_CONFIG));
+        if (deprecationConfig != null) {
+            OMElement depEnabled = deprecationConfig
+                    .getFirstChildWithName(new QName(APIConstants.APIMGovernance.DEPRECATION_GUIDE_ENABLED));
+            if (depEnabled != null) {
+                apimGovConfigurationDto.setDeprecationGuideEnabled(Boolean.parseBoolean(depEnabled.getText()));
+            }
+
+            OMElement scanInterval = deprecationConfig
+                    .getFirstChildWithName(new QName(APIConstants.APIMGovernance.DEPRECATION_GUIDE_SCAN_INTERVAL));
+            if (scanInterval != null) {
+                apimGovConfigurationDto.setDeprecationGuideScanIntervalMinutes(
+                        Integer.parseInt(scanInterval.getText()));
+            }
+
+            OMElement successorThreshold = deprecationConfig
+                    .getFirstChildWithName(new QName(
+                            APIConstants.APIMGovernance.DEPRECATION_GUIDE_SUCCESSOR_THRESHOLD));
+            if (successorThreshold != null) {
+                apimGovConfigurationDto.setDeprecationGuideSuccessorSimilarityThreshold(
+                        Double.parseDouble(successorThreshold.getText()));
+            }
+        }
+
     }
 
     /**
@@ -3461,6 +3567,91 @@ public class APIManagerConfiguration {
                         Integer.parseInt(batchProcessorQueueSizeElem.getText()));
             }
         }
+        org.apache.axiom.om.OMElement apiKeyNotification = omElement.getFirstChildWithName(
+                new QName(APIConstants.GatewayNotification.API_KEY_NOTIFICATION));
+        if (apiKeyNotification != null) {
+            org.apache.axiom.om.OMElement queueSizeElem = apiKeyNotification.getFirstChildWithName(
+                    new QName(APIConstants.GatewayNotification.QUEUE_SIZE));
+            if (queueSizeElem != null && StringUtils.isNotBlank(queueSizeElem.getText())) {
+                if (Integer.parseInt(queueSizeElem.getText()) > 0) {
+                    gatewayNotificationConfiguration.getApiKeyConfiguration().setQueueSize(
+                            Integer.parseInt(queueSizeElem.getText()));
+                }
+            }
+
+            org.apache.axiom.om.OMElement batchSizeElem = apiKeyNotification.getFirstChildWithName(
+                    new QName(APIConstants.GatewayNotification.BATCH_SIZE));
+            if (batchSizeElem != null && StringUtils.isNotBlank(batchSizeElem.getText())) {
+                if (Integer.parseInt(batchSizeElem.getText()) > 0) {
+                    gatewayNotificationConfiguration.getApiKeyConfiguration().setBatchSize(
+                            Integer.parseInt(batchSizeElem.getText()));
+                }
+            }
+            org.apache.axiom.om.OMElement batchIntervalElem = apiKeyNotification.getFirstChildWithName(
+                    new QName(APIConstants.GatewayNotification.BATCH_INTERVAL_MILLIS));
+            if (batchIntervalElem != null && StringUtils.isNotBlank(batchIntervalElem.getText()) &&
+                    Long.parseLong(batchIntervalElem.getText()) > 0) {
+                gatewayNotificationConfiguration.getApiKeyConfiguration().setBatchIntervalMillis(
+                        Long.parseLong(batchIntervalElem.getText()));
+            }
+            org.apache.axiom.om.OMElement maxRetryCountElem = apiKeyNotification.getFirstChildWithName(
+                    new QName(APIConstants.GatewayNotification.MAX_RETRY_COUNT));
+            if (maxRetryCountElem != null && StringUtils.isNotBlank(maxRetryCountElem.getText()) &&
+                    Integer.parseInt(maxRetryCountElem.getText()) >= 0) {
+                gatewayNotificationConfiguration.getApiKeyConfiguration().setMaxRetryCount(
+                        Integer.parseInt(maxRetryCountElem.getText()));
+            }
+            org.apache.axiom.om.OMElement retryDurationElem = apiKeyNotification.getFirstChildWithName(
+                    new QName(APIConstants.GatewayNotification.RETRY_DURATION));
+            if (retryDurationElem != null && StringUtils.isNotBlank(retryDurationElem.getText()) &&
+                    Long.parseLong(retryDurationElem.getText()) > 0) {
+                gatewayNotificationConfiguration.getApiKeyConfiguration().setRetryDuration(
+                        Long.parseLong(retryDurationElem.getText()));
+            }
+            org.apache.axiom.om.OMElement retryProgressionFactorElem = apiKeyNotification.getFirstChildWithName(
+                    new QName(APIConstants.GatewayNotification.RETRY_PROGRESSION_FACTOR));
+            if (retryProgressionFactorElem != null && StringUtils.isNotBlank(retryProgressionFactorElem.getText()) &&
+                    Double.parseDouble(retryProgressionFactorElem.getText()) > 0) {
+                gatewayNotificationConfiguration.getApiKeyConfiguration().setRetryProgressionFactor(
+                        Double.parseDouble(retryProgressionFactorElem.getText()));
+            }
+            org.apache.axiom.om.OMElement batchProcessorMinThreadElem = apiKeyNotification.getFirstChildWithName(
+                    new QName(APIConstants.GatewayNotification.BATCH_PROCESSOR_MIN_THREAD));
+            if (batchProcessorMinThreadElem != null && StringUtils.isNotBlank(batchProcessorMinThreadElem.getText()) &&
+                    Integer.parseInt(batchProcessorMinThreadElem.getText()) > 0) {
+                gatewayNotificationConfiguration.getApiKeyConfiguration().setBatchProcessorMinThread(
+                        Integer.parseInt(batchProcessorMinThreadElem.getText()));
+            }
+            org.apache.axiom.om.OMElement batchProcessorMaxThreadElem = apiKeyNotification.getFirstChildWithName(
+                    new QName(APIConstants.GatewayNotification.BATCH_PROCESSOR_MAX_THREAD));
+            if (batchProcessorMaxThreadElem != null && StringUtils.isNotBlank(batchProcessorMaxThreadElem.getText()) &&
+                    Integer.parseInt(batchProcessorMaxThreadElem.getText()) > 0) {
+                gatewayNotificationConfiguration.getApiKeyConfiguration().setBatchProcessorMaxThread(
+                        Integer.parseInt(batchProcessorMaxThreadElem.getText()));
+            }
+            if (gatewayNotificationConfiguration.getApiKeyConfiguration().getBatchProcessorMaxThread() <
+                    gatewayNotificationConfiguration.getApiKeyConfiguration().getBatchProcessorMinThread()) {
+                log.debug(
+                        "Batch Processor Max Thread value is less than Min Thread value. Hence setting Max Thread" +
+                                " value to Min Thread value.");
+                gatewayNotificationConfiguration.getApiKeyConfiguration().setBatchProcessorMaxThread(
+                        gatewayNotificationConfiguration.getApiKeyConfiguration().getBatchProcessorMinThread());
+            }
+            org.apache.axiom.om.OMElement batchProcessorKeepAliveElem = apiKeyNotification.getFirstChildWithName(
+                    new QName(APIConstants.GatewayNotification.BATCH_PROCESSOR_KEEP_ALIVE));
+            if (batchProcessorKeepAliveElem != null && StringUtils.isNotBlank(batchProcessorKeepAliveElem.getText()) &&
+                    Long.parseLong(batchProcessorKeepAliveElem.getText()) > 0) {
+                gatewayNotificationConfiguration.getApiKeyConfiguration().setBatchProcessorKeepAlive(
+                        Long.parseLong(batchProcessorKeepAliveElem.getText()));
+            }
+            org.apache.axiom.om.OMElement batchProcessorQueueSizeElem = apiKeyNotification.getFirstChildWithName(
+                    new QName(APIConstants.GatewayNotification.BATCH_PROCESSOR_QUEUE_SIZE));
+            if (batchProcessorQueueSizeElem != null && StringUtils.isNotBlank(batchProcessorQueueSizeElem.getText()) &&
+                    Integer.parseInt(batchProcessorQueueSizeElem.getText()) > 0) {
+                gatewayNotificationConfiguration.getApiKeyConfiguration().setBatchProcessorQueueSize(
+                        Integer.parseInt(batchProcessorQueueSizeElem.getText()));
+            }
+        }
 
         org.apache.axiom.om.OMElement registrationElem = omElement.getFirstChildWithName(
                 new QName(APIConstants.GatewayNotification.REGISTRATION));
@@ -3502,60 +3693,26 @@ public class APIManagerConfiguration {
             }
         }
 
-        // New: platform gateway connect-with-token configuration (separate element)
+        // Platform Gateway version metadata for UI quick-start (separate element under gateway notification).
         OMElement pgConnectElem = omElement.getFirstChildWithName(
                 new QName(APIConstants.GatewayNotification.PLATFORM_GATEWAY_CONNECT_CONFIGURATION));
         if (pgConnectElem != null) {
-            List<org.wso2.carbon.apimgt.impl.dto.ConnectGatewayConfig> connectGateways = new ArrayList<>();
-            OMElement globalVersionEl = pgConnectElem.getFirstChildWithName(new QName("UniversalGatewayVersion"));
-            if (globalVersionEl != null && globalVersionEl.getText() != null
-                    && !globalVersionEl.getText().trim().isEmpty()) {
-                platformGatewayConnectConfig.setUniversalGatewayVersion(globalVersionEl.getText().trim());
-            }
-            OMElement connectGatewaysElem = pgConnectElem.getFirstChildWithName(
-                    new QName(APIConstants.GatewayNotification.CONNECT_GATEWAYS));
-            if (connectGatewaysElem != null) {
-                Iterator<?> connectIt = connectGatewaysElem.getChildrenWithName(
-                        new QName(APIConstants.GatewayNotification.CONNECT));
-                while (connectIt != null && connectIt.hasNext()) {
-                    OMElement connectElem = (OMElement) connectIt.next();
-                    if (connectElem == null) {
-                        continue;
-                    }
-                    org.wso2.carbon.apimgt.impl.dto.ConnectGatewayConfig entry =
-                            new org.wso2.carbon.apimgt.impl.dto.ConnectGatewayConfig();
-                    OMElement rt = connectElem.getFirstChildWithName(
-                            new QName(APIConstants.GatewayNotification.REGISTRATION_TOKEN));
-                    if (rt != null && rt.getText() != null && !rt.getText().trim().isEmpty()) {
-                        entry.setRegistrationToken(rt.getText().trim());
-                    }
-                    OMElement nameEl = connectElem.getFirstChildWithName(
-                            new QName(APIConstants.GatewayNotification.CONNECT_NAME));
-                    if (nameEl != null && nameEl.getText() != null) {
-                        entry.setName(nameEl.getText().trim());
-                    }
-                    OMElement displayEl = connectElem.getFirstChildWithName(
-                            new QName(APIConstants.GatewayNotification.CONNECT_DISPLAY_NAME));
-                    if (displayEl != null && displayEl.getText() != null) {
-                        entry.setDisplayName(displayEl.getText().trim());
-                    }
-                    OMElement descEl = connectElem.getFirstChildWithName(
-                            new QName(APIConstants.GatewayNotification.CONNECT_DESCRIPTION));
-                    if (descEl != null && descEl.getText() != null) {
-                        entry.setDescription(descEl.getText().trim());
-                    }
-                    OMElement urlEl = connectElem.getFirstChildWithName(
-                            new QName(APIConstants.GatewayNotification.CONNECT_URL));
-                    if (urlEl != null && urlEl.getText() != null && !urlEl.getText().trim().isEmpty()) {
-                        entry.setUrl(urlEl.getText().trim());
-                    }
-                    if (!entry.getRegistrationToken().isEmpty()) {
-                        connectGateways.add(entry);
+            List<String> platformGatewayVersions = new ArrayList<>();
+            OMElement platformGatewayVersionsEl = pgConnectElem.getFirstChildWithName(
+                    new QName(APIConstants.GatewayNotification.PLATFORM_GATEWAY_VERSIONS));
+            if (platformGatewayVersionsEl != null) {
+                Iterator<?> versionIterator = platformGatewayVersionsEl.getChildrenWithName(
+                        new QName(APIConstants.GatewayNotification.VERSION));
+                while (versionIterator != null && versionIterator.hasNext()) {
+                    OMElement versionElement = (OMElement) versionIterator.next();
+                    if (versionElement != null && versionElement.getText() != null
+                            && !versionElement.getText().trim().isEmpty()) {
+                        platformGatewayVersions.add(versionElement.getText().trim());
                     }
                 }
             }
-            if (!connectGateways.isEmpty()) {
-                platformGatewayConnectConfig.setConnectGateways(connectGateways);
+            if (!platformGatewayVersions.isEmpty()) {
+                platformGatewayConnectConfig.setPlatformGatewayVersions(platformGatewayVersions);
             }
         }
     }
@@ -3565,8 +3722,7 @@ public class APIManagerConfiguration {
     }
 
     /**
-     * Connect-with-token config ([[apim.universal_gateway.connect]]). Use this for the connect flow only;
-     * notification/heartbeat code should use {@link #getGatewayNotificationConfiguration()}.
+     * API Platform Gateway metadata config (e.g. supported versions for UI).
      */
     public PlatformGatewayConnectConfig getPlatformGatewayConnectConfig() {
         return platformGatewayConnectConfig;

@@ -257,11 +257,22 @@
   "apim.gateway_notification.deployment_ack.batch_processor_max_thread": "8",
   "apim.gateway_notification.deployment_ack.batch_processor_keep_alive": "60000",
   "apim.gateway_notification.deployment_ack.batch_processor_queue_size": "50",
+  "apim.gateway_notification.api_key_notification.queue_size": "100000",
+  "apim.gateway_notification.api_key_notification.batch_size": "100",
+  "apim.gateway_notification.api_key_notification.batch_interval": "2000",
+  "apim.gateway_notification.api_key_notification.max_retry_count": "5",
+  "apim.gateway_notification.api_key_notification.retry_duration": "10000",
+  "apim.gateway_notification.api_key_notification.retry_progression_factor": "2.0",
+  "apim.gateway_notification.api_key_notification.batch_processor_min_thread": "2",
+  "apim.gateway_notification.api_key_notification.batch_processor_max_thread": "8",
+  "apim.gateway_notification.api_key_notification.batch_processor_keep_alive": "60000",
+  "apim.gateway_notification.api_key_notification.batch_processor_queue_size": "50",
   "apim.gateway_notification.registration.max_retry_count": "5",
   "apim.gateway_notification.registration.retry_duration": "10000",
   "apim.gateway_notification.registration.retry_progression_factor": "2.0",
   "apim.gateway_notification.cleanup.expiry_time": "120",
   "apim.gateway_notification.cleanup.data_retention_period": "2629800",
+
   "apim.rest_api.admin_permission_restricted_api": [
     {
       "uri_path": "/api/am/gateway/*",
@@ -273,5 +284,5 @@
   "apim.synapse_artifact_generator.thread_pool.keep_alive_time_ms": "60000",
   "apim.synapse_artifact_generator.thread_pool.queue_capacity": "50",
   "apim.certificate_manager.events_enabled": true,
-  "apim.universal_gateway.version": "0.11.0"
+  "apim.platform_gateway.versions": ["1.0.0"]
 }

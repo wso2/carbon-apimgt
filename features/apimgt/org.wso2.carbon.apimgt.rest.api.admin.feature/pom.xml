@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>9.33.98-SNAPSHOT</version>
+        <version>9.33.123-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -131,10 +131,6 @@
         <dependency>
             <groupId>org.wso2.orbit.io.swagger.v3</groupId>
             <artifactId>swagger-parser</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.usage.data.exporter</artifactId>
         </dependency>
     </dependencies>
     <build>
@@ -268,7 +264,6 @@
                                 <bundleDef>org.wso2.wsdl4j:wsdl4j.wso2:${wsdl4j.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector:${swagger.inflector.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector-oas3-jdk21:${swagger.inflector.oas3.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.usage.data.exporter</bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server:compatible:${carbon.kernel.feature.version}

@@ -46,8 +46,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This class represents a Validation Engine. This can be extended to implement a specific validation engine like
- * spectral
+ * This class represents the Spectral Validation Engine for SPECTRAL rulesets.
+ * <p>
+ * This engine handles validation of OpenAPI/AsyncAPI specifications using Spectral rules.
+ * GENERIC (deduplication) rulesets are handled by GenericValidationEngine and are
+ * routed via ValidationEngineFactory.
  */
 @Component(
         name = "org.wso2.carbon.apimgt.governance.engine.SpectralValidationEngine",
@@ -264,6 +267,5 @@ public class SpectralValidationEngine implements ValidationEngine {
         }
 
     }
-
 
 }

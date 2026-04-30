@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
+import org.wso2.carbon.apimgt.gateway.apikey.OpaqueApiKeyPublisher;
 import org.wso2.carbon.apimgt.gateway.dto.JWTTokenPayloadInfo;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
@@ -45,7 +46,7 @@ import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
-import org.wso2.carbon.apimgt.impl.publishers.OpaqueApiKeyPublisher;
+import org.wso2.carbon.apimgt.impl.notifier.events.APIKeyUsageEvent;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.SigningUtil;
 import org.wso2.carbon.base.MultitenantConstants;
@@ -56,7 +57,6 @@ import javax.cache.Cache;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.UUID;
 
 /**
@@ -165,17 +165,17 @@ public class ApiKeyAuthenticatorUtils {
      */
     public static void updateApiKeyLastUsedTime(String apiKeyHash, String tenantDomain) {
         OpaqueApiKeyPublisher apiKeyUsagePublisher = OpaqueApiKeyPublisher.getInstance();
-        Properties properties = new Properties();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-        String eventID = UUID.randomUUID().toString();
-        properties.put(APIConstants.NotificationEvent.EVENT_ID, eventID);
-        properties.put(APIConstants.NotificationEvent.EVENT_TYPE, APIConstants.API_KEY_AUTH_TYPE);
-        properties.put(APIConstants.NotificationEvent.TENANT_ID, tenantId);
-        properties.put(APIConstants.NotificationEvent.TENANT_DOMAIN, tenantDomain);
-        properties.put(APIConstants.NotificationEvent.STREAM_ID, APIConstants.API_KEY_USAGE_STREAM_ID);
-        properties.put(APIConstants.NotificationEvent.API_KEY_HASH, apiKeyHash);
-        properties.put(APIConstants.NotificationEvent.LAST_USED_TIME, System.currentTimeMillis());
-        apiKeyUsagePublisher.publishApiKeyUsageEvents(properties);
+        APIKeyUsageEvent apiKeyUsageEvent = new APIKeyUsageEvent();
+        apiKeyUsageEvent.setApikeyHash(apiKeyHash);
+        apiKeyUsageEvent.setLastAccessTime(System.currentTimeMillis());
+        apiKeyUsageEvent.setEventId(UUID.randomUUID().toString());
+        apiKeyUsageEvent.setTenantDomain(tenantDomain);
+        apiKeyUsageEvent.setTenantId(tenantId);
+        if (log.isDebugEnabled()) {
+            log.debug("Published API key usage event for tenant: " + tenantDomain);
+        }
+        apiKeyUsagePublisher.publishApiKeyUsageEvents(apiKeyUsageEvent);
     }
 
     /**

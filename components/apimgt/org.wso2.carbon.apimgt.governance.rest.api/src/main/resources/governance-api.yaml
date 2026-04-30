@@ -1003,6 +1003,7 @@ components:
           description: Category the rules included in ruleset.
           enum:
             - SPECTRAL
+            - GENERIC
           example: SPECTRAL
           default: SPECTRAL
         ruleType:
@@ -1060,6 +1061,7 @@ components:
           description: Category the rules included in ruleset.
           enum:
             - SPECTRAL
+            - GENERIC
           example: SPECTRAL
         ruleType:
           type: string

@@ -91,7 +91,6 @@ import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.GatewayArtifactsMgtDBUtil;
-import org.wso2.carbon.apimgt.impl.utils.GatewayManagementUtils;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.CarbonContext;
@@ -233,7 +232,6 @@ public class APIManagerComponent {
                     null);
             APIMgtDBUtil.initialize();
             APIUtil.init();
-            GatewayManagementUtils.performPlatformGatewayConnectFromConfigIfConfigured();
             String migrationEnabled = System.getProperty(APIConstants.MIGRATE);
             if (migrationEnabled == null) {
                 CommonConfigDeployer configDeployer = new CommonConfigDeployer();
@@ -1059,9 +1057,10 @@ public class APIManagerComponent {
             String proxyUsername = configuration.getFirstProperty(APIConstants.PROXY_USERNAME);
             String proxyPassword = configuration.getFirstProperty(APIConstants.PROXY_PASSWORD);
             String[] nonProxyHosts = getNonProxyHostsListByNonProxyHostsStringConfiguration(configuration);
+            String[] targetProxyHosts = getTargetProxyHostsListByTargetProxyHostsStringConfiguration(configuration);
             String proxyProtocol = configuration.getFirstProperty(APIConstants.PROXY_PROTOCOL);
             builder = builder.withProxy(proxyHost, proxyPort, proxyUsername, proxyPassword, proxyProtocol,
-                    nonProxyHosts);
+                    nonProxyHosts, targetProxyHosts);
         }
 
         String hostnameVerifierOption = System.getProperty(HOST_NAME_VERIFIER);
@@ -1131,6 +1130,11 @@ public class APIManagerComponent {
     String[] getNonProxyHostsListByNonProxyHostsStringConfiguration(APIManagerConfiguration config) {
         String nonProxyHostsString = config.getFirstProperty(APIConstants.NON_PROXY_HOSTS);
         return nonProxyHostsString != null ? nonProxyHostsString.split("\\|") : null;
+    }
+
+    String[] getTargetProxyHostsListByTargetProxyHostsStringConfiguration(APIManagerConfiguration config) {
+        String targetProxyHostsString = config.getFirstProperty(APIConstants.TARGET_PROXY_HOSTS);
+        return targetProxyHostsString != null ? targetProxyHostsString.split("\\|") : null;
     }
 
     @Reference(

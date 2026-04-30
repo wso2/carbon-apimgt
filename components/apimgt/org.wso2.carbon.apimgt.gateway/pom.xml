@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>9.33.98-SNAPSHOT</version>
+        <version>9.33.123-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -323,7 +323,7 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.com.atlassian.oai</groupId>
-            <artifactId>swagger-request-validator-core</artifactId>
+            <artifactId>swagger-request-validator-core-v3</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>

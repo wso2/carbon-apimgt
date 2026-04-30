@@ -22,6 +22,37 @@ import java.util.Map;
 
 public class APIKeyInfo {
 
+    /**
+     * Copy constructor – creates a new instance with all fields copied from {@code source}.
+     * Use this instead of mutating a shared instance to avoid data races.
+     */
+    public APIKeyInfo(APIKeyInfo source) {
+        this.keyUUID = source.keyUUID;
+        this.keyName = source.keyName;
+        this.appId = source.appId;
+        this.applicationId = source.applicationId;
+        this.applicationName = source.applicationName;
+        this.apiId = source.apiId;
+        this.apiName = source.apiName;
+        this.apiUUId = source.apiUUId;
+        this.origin = source.origin;
+        this.keyType = source.keyType;
+        this.lastUsedTime = source.lastUsedTime;
+        this.createdTime = source.createdTime;
+        this.lookupKey = source.lookupKey;
+        this.validityPeriod = source.validityPeriod;
+        this.expiresAt = source.expiresAt;
+        this.properties = source.properties;
+        this.additionalProperties = source.additionalProperties;
+        this.apiKeyHash = source.apiKeyHash;
+        this.apiKey = source.apiKey;
+        this.authUser = source.authUser;
+        this.status = source.status;
+        this.keyBoundary = source.keyBoundary;
+    }
+
+    public APIKeyInfo() {}
+
     private String keyUUID;
     private String keyName;
     private int appId;

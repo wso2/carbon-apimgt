@@ -78,15 +78,23 @@ public class PlatformGatewayArtifactServiceImpl implements PlatformGatewayArtifa
         }
         PlatformGatewayArtifactDAO artifactDAO = PlatformGatewayArtifactDAO.getInstance();
         String storedArtifact = artifactDAO.getArtifact(trimmedApiId, trimmedGatewayEnvUuid);
+        String cachedRevisionId = artifactDAO.getArtifactRevisionId(trimmedApiId, trimmedGatewayEnvUuid);
+        String revisionId = artifactDAO.getRevisionUuidByApiAndGatewayEnvUuid(trimmedApiId, trimmedGatewayEnvUuid);
         if (StringUtils.isNotBlank(storedArtifact)) {
-            if (log.isDebugEnabled()) {
-                log.debug("Serving cached platform gateway artifact for API " + trimmedApiId + " on gateway "
-                        + trimmedGatewayEnvUuid);
+            if (StringUtils.equals(StringUtils.trimToNull(cachedRevisionId), StringUtils.trimToNull(revisionId))) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Serving cached platform gateway artifact for API " + trimmedApiId + " on gateway "
+                            + trimmedGatewayEnvUuid + " for revision " + cachedRevisionId);
+                }
+                return storedArtifact;
             }
-            return storedArtifact;
+            if (log.isDebugEnabled()) {
+                log.debug("Refreshing stale platform gateway artifact for API " + trimmedApiId + " on gateway "
+                        + trimmedGatewayEnvUuid + ". Cached revision: " + cachedRevisionId
+                        + ", deployed revision: " + revisionId);
+            }
         }
 
-        String revisionId = artifactDAO.getRevisionUuidByApiAndGatewayEnvUuid(trimmedApiId, trimmedGatewayEnvUuid);
         if (StringUtils.isBlank(revisionId)) {
             return null;
         }
@@ -116,10 +124,18 @@ public class PlatformGatewayArtifactServiceImpl implements PlatformGatewayArtifa
         String trimmedApiId = apiId.trim();
         String trimmedGatewayEnvUuid = gatewayEnvUuid.trim();
         String storedArtifact = PlatformGatewayArtifactDAO.getInstance().getArtifact(trimmedApiId, trimmedGatewayEnvUuid);
-        if (StringUtils.isNotBlank(storedArtifact)) {
+        String cachedRevisionId = PlatformGatewayArtifactDAO.getInstance()
+                .getArtifactRevisionId(trimmedApiId, trimmedGatewayEnvUuid);
+        if (StringUtils.isNotBlank(storedArtifact)
+                && StringUtils.equals(StringUtils.trimToNull(cachedRevisionId), StringUtils.trimToNull(revisionId))) {
             return storedArtifact;
         }
         String trimmedRevisionId = revisionId.trim();
+        if (log.isDebugEnabled() && StringUtils.isNotBlank(storedArtifact)) {
+            log.debug("Refreshing cached platform gateway artifact for API " + trimmedApiId + " on gateway "
+                    + trimmedGatewayEnvUuid + ". Cached revision: " + cachedRevisionId
+                    + ", requested revision: " + trimmedRevisionId);
+        }
         String generatedArtifact = buildPlatformGatewayYamlOnTheFly(trimmedApiId, trimmedRevisionId);
         if (StringUtils.isBlank(generatedArtifact)) {
             return generatedArtifact;

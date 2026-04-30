@@ -187,10 +187,10 @@ public enum ExceptionCodes implements ErrorHandler {
             "Cannot delete the environment with UUID %s as active gateway policy deployment exist"),
     GATEWAY_ENVIRONMENT_API_REVISIONS_EXIST(900515, "API Revisions Deployed to Gateway Environment Exist", 409,
             "Cannot delete the environment with UUID %s as API revisions are deployed to it"),
-    UNIVERSAL_GATEWAY_NAME_ALREADY_EXISTS(900518, "Universal gateway name already exists", 409,
-            "A universal gateway with name '%s' already exists in the organization"),
-    UNIVERSAL_GATEWAY_NOT_FOUND(900519, "Universal gateway not found", 404,
-            "Universal gateway not found"),
+    PLATFORM_GATEWAY_NAME_ALREADY_EXISTS(900518, "API Platform gateway name already exists", 409,
+            "An API Platform gateway with name '%s' already exists in the organization"),
+    PLATFORM_GATEWAY_NOT_FOUND(900519, "API Platform gateway not found", 404,
+            "API Platform gateway not found"),
 
     // Workflow related codes
     WORKFLOW_EXCEPTION(900550, "Workflow error", 500,
@@ -427,6 +427,7 @@ public enum ExceptionCodes implements ErrorHandler {
     SCOPE_VALIDATION_FAILED(900986, "Scope validation failed", 412, "Scope validation failed"),
     SHARED_SCOPE_DISPLAY_NAME_NOT_SPECIFIED(900987, "Shared Scope display name not specified", 400,
             "Shared Scope display name not specified"),
+    INVALID_SCOPE_NAME(901004, "Invalid Scope name", 400, "Invalid Scope name"),
     BLOCK_CONDITION_RETRIEVE_PARAMS_EXCEPTION(900254, "Block conditions retrieval error", 400,
             "Provided query parameters are not valid"),
     BLOCK_CONDITION_RETRIEVE_FAILED(900255, "Failed to get Block conditions", 500,
@@ -827,6 +828,9 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_API_RESOURCES_FOR_API_PRODUCT(903246, "Cannot find API resources for some API Product " +
             "resources.", 404, "Some of the resources in the API Product are not found as API resources. %s"),
 
+    INVALID_API_FOR_API_PRODUCT(903251, "Unsupported API type for API Product", 400,
+            "Resources of %s APIs cannot be used in an API Product"),
+
     INVALID_ADDITIONAL_PROPERTIES_WITH_ERROR(903247, "Invalid additional properties", 400,
             "Invalid additional properties for API: %s:%s Error: %s"),
 
@@ -837,6 +841,8 @@ public enum ExceptionCodes implements ErrorHandler {
 
     ROLE_OF_SCOPE_DOES_NOT_EXIST(903250, "Role does not exist", 404,
             "Role %s does not exist"),
+    FILE_TOO_LARGE(902030, "Content retrieval from URL failed", 400,
+            "Maximum content size exceeded while retrieving content from URL"),
 
     OPERATION_OR_RESOURCE_TYPE_OR_METHOD_NOT_DEFINED(902031,
             "Operation type/http method is not specified for the operation/resource", 400,
@@ -927,7 +933,9 @@ public enum ExceptionCodes implements ErrorHandler {
                                                     "Error occurred while retrieving/persisting deployment status "
                                                             + "acknowledgment"),
     API_DEPLOYMENT_ERROR(902060, "Error while deploying API to Gateway", 207,
-            "Error while deploying API to Gateway. %s");
+            "Error while deploying API to Gateway. %s"),
+    API_KEY_ASSOCIATION_NOT_AVAILABLE(902061, "API key association not available", 404,
+                       "API key association not available for the given application and API.");
     private final long errorCode;
     private final String errorMessage;
     private final int httpStatusCode;

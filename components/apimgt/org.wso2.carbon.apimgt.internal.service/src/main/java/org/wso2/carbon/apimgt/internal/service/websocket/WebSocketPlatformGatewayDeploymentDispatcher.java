@@ -47,15 +47,17 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
 
     @Override
     public void dispatchDeploy(DeployAPIInGatewayEvent event, Set<String> platformGatewayIds) {
-        log.info("Dispatching API deploy event for API: " + event.getName() + " to " + platformGatewayIds.size()
-                + " platform gateways");
+        if (log.isDebugEnabled()) {
+            log.debug("Dispatching API deploy event for API: " + event.getName() + " to " + platformGatewayIds.size()
+                    + " platform gateways");
+        }
         PlatformGatewaySessionRegistry registry = PlatformGatewaySessionRegistry.getInstance();
         PlatformGatewayDeploymentEventService eventService =
                 ServiceReferenceHolder.getInstance().getPlatformGatewayDeploymentEventService();
         String apiId = event.getUuid();
         String revisionUuid = event.getEventId();
         for (String gatewayId : platformGatewayIds) {
-            String deploymentId = PlatformGatewayDeploymentIdUtil.generate(apiId, gatewayId, revisionUuid);
+            String deploymentId = resolveDeploymentId(event, gatewayId, apiId, revisionUuid);
             String message = buildDeployMessage(event, deploymentId);
             if (eventService != null) {
                 try {
@@ -78,7 +80,7 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
         String apiId = event.getUuid();
         String revisionUuid = event.getEventId();
         for (String gatewayId : platformGatewayIds) {
-            String deploymentId = PlatformGatewayDeploymentIdUtil.generate(apiId, gatewayId, revisionUuid);
+            String deploymentId = resolveDeploymentId(event, gatewayId, apiId, revisionUuid);
             String message = buildUndeployMessage(event, deploymentId);
             if (eventService != null) {
                 try {
@@ -95,8 +97,10 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
 
     @Override
     public void dispatchDelete(DeployAPIInGatewayEvent event, Set<String> platformGatewayIds) {
-        log.info("Dispatching API delete event for API: " + event.getName() + " to " + platformGatewayIds.size()
-                + " platform gateways");
+        if (log.isDebugEnabled()) {
+            log.debug("Dispatching API delete event for API: " + event.getName() + " to " + platformGatewayIds.size()
+                    + " platform gateways");
+        }
         PlatformGatewaySessionRegistry registry = PlatformGatewaySessionRegistry.getInstance();
         PlatformGatewayDeploymentEventService eventService =
                 ServiceReferenceHolder.getInstance().getPlatformGatewayDeploymentEventService();
@@ -125,7 +129,7 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
         if (log.isDebugEnabled()) {
             log.debug("Closing WebSocket connection for deleted gateway: " + gatewayId);
         }
-        // Force-close the session; gateway will see connection close and log "Connection lost" (no new message type)
+        // Force-close the session; gateway will see the connection close and log "Connection lost" (no new message type)
         PlatformGatewaySessionRegistry.getInstance().closeAndUnregister(gatewayId);
     }
 
@@ -147,17 +151,59 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
     }
 
     /**
+     * Resolves the deployment ID for a specific API, gateway, and revision. If an explicit deployment ID
+     * is provided for the given gateway in the platform deployment event, it is used. Otherwise, a new
+     * deployment ID is generated based on the API ID, gateway ID, and revision UUID.
+     *
+     * @param event The deployment event containing details of the API and platform gateway.
+     * @param gatewayId The unique identifier of the gateway where the API is being deployed.
+     * @param apiId The unique identifier of the API being deployed.
+     * @param revisionUuid The unique identifier of the API revision to be deployed.
+     * @return The resolved deployment ID, either explicitly provided or newly generated.
+     */
+    private static String resolveDeploymentId(DeployAPIInGatewayEvent event, String gatewayId, String apiId,
+                                              String revisionUuid) {
+        Map<String, String> explicitDeploymentIds = event.getPlatformGatewayDeploymentIds();
+        if (explicitDeploymentIds != null) {
+            String explicitDeploymentId = explicitDeploymentIds.get(gatewayId);
+            if (StringUtils.isNotBlank(explicitDeploymentId)) {
+                return explicitDeploymentId.trim();
+            }
+        }
+        return PlatformGatewayDeploymentIdUtil.generate(apiId, gatewayId, revisionUuid);
+    }
+
+    /**
+     * Resolves an operation event identifier based on the provided action and deployment ID.
+     * If both the action and deployment ID are non-blank, their trimmed concatenation is returned in the format "action:deploymentId".
+     * Otherwise, the fallback event ID is returned.
+     *
+     * @param action The action name associated with the operation event. This should be a non-blank string.
+     * @param deploymentId The unique identifier of the deployment associated with the operation event. This should be a non-blank string.
+     * @param fallbackEventId The identifier to return if either the action or deployment ID is blank.
+     * @return A concatenated string in the format "action:deploymentId" if both action and deployment ID are non-blank.
+     *         Otherwise, returns the fallback event ID.
+     */
+    private static String resolveOperationEventId(String action, String deploymentId, String fallbackEventId) {
+        if (StringUtils.isNotBlank(action) && StringUtils.isNotBlank(deploymentId)) {
+            return action.trim() + ":" + deploymentId.trim();
+        }
+        return fallbackEventId;
+    }
+
+    /**
      * Build message in the exact API Platform gateway-controller format:
      * type "api.deployed", payload { apiId, deploymentId, performedAt }, timestamp, correlationId.
      */
     private static String buildDeployMessage(DeployAPIInGatewayEvent event, String deploymentId) {
         String timestamp = Instant.now().toString();
+        String operationEventId = resolveOperationEventId("deploy", deploymentId, event.getEventId());
         PlatformGatewayWebSocketModels.ApiDeploymentPayload payload =
                 new PlatformGatewayWebSocketModels.ApiDeploymentPayload(event.getUuid(), deploymentId, timestamp);
         return PlatformGatewayWebSocketJsonUtil.toJson(
                 new PlatformGatewayWebSocketModels.EventEnvelope<>(
                         PlatformGatewayWebSocketConstants.EVENT_API_DEPLOYED, payload, timestamp,
-                        event.getEventId(), null));
+                        operationEventId, null));
     }
 
     /**
@@ -166,16 +212,17 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
      */
     private static String buildUndeployMessage(DeployAPIInGatewayEvent event, String deploymentId) {
         String timestamp = Instant.now().toString();
+        String operationEventId = resolveOperationEventId("undeploy", deploymentId, event.getEventId());
         PlatformGatewayWebSocketModels.ApiDeploymentPayload payload =
                 new PlatformGatewayWebSocketModels.ApiDeploymentPayload(event.getUuid(), deploymentId, timestamp);
         return PlatformGatewayWebSocketJsonUtil.toJson(
                 new PlatformGatewayWebSocketModels.EventEnvelope<>(
                         PlatformGatewayWebSocketConstants.EVENT_API_UNDEPLOYED, payload, timestamp,
-                        event.getEventId(), null));
+                        operationEventId, null));
     }
 
     /**
-     * Build message in the exact API Platform gateway-controller format:
+     * Build the message in the exact API Platform gateway-controller format:
      * type "api.deleted", payload { apiId }, timestamp, correlationId.
      */
     private static String buildDeleteMessage(DeployAPIInGatewayEvent event) {

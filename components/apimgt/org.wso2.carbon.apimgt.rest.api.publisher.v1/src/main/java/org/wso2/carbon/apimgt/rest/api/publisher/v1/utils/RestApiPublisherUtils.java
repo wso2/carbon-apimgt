@@ -28,7 +28,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
-import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
 import org.apache.tika.Tika;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.io.TikaInputStream;
@@ -53,6 +52,7 @@ import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.restapi.publisher.ApisApiServiceImplUtils;
+import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -68,12 +68,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OrganizationPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SecurityInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OAS3Parser;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
@@ -118,8 +112,7 @@ public class RestApiPublisherUtils {
         }
 
         try {
-            ContentDisposition contentDisposition = fileDetails.getContentDisposition();
-            String filename = contentDisposition.getParameter(RestApiConstants.CONTENT_DISPOSITION_FILENAME);
+            String filename = fileDetails == null ? null : fileDetails.getDataHandler().getName();
             if (StringUtils.isBlank(filename)) {
                 filename = RestApiConstants.DOC_NAME_DEFAULT + randomFolderName;
                 log.warn(
@@ -130,7 +123,7 @@ public class RestApiPublisherUtils {
             //APIIdentifier apiIdentifier = APIMappingUtil
             //        .getAPIIdentifierFromUUID(apiId, tenantDomain);
 
-            Path resolvedPath = resolveFilePath(docFile.getAbsolutePath(), filename);
+            Path resolvedPath = APIFileUtil.resolveFilePath(docFile.getAbsolutePath(), filename);
 
             RestApiUtil.transferFile(inputStream, resolvedPath.getFileName().toString(), resolvedPath.getParent().toString());
             byte[] fileBytes = FileUtils.readFileToByteArray(new File(resolvedPath.toString()));
@@ -208,8 +201,7 @@ public class RestApiPublisherUtils {
         }
 
         try {
-            ContentDisposition contentDisposition = fileDetails.getContentDisposition();
-            String filename = contentDisposition.getParameter(RestApiConstants.CONTENT_DISPOSITION_FILENAME);
+            String filename = fileDetails == null ? null : fileDetails.getDataHandler().getName();
             if (StringUtils.isBlank(filename)) {
                 filename = RestApiConstants.DOC_NAME_DEFAULT + randomFolderName;
                 log.warn(
@@ -219,7 +211,7 @@ public class RestApiPublisherUtils {
             //APIProductIdentifier productIdentifier = APIMappingUtil
             //        .getAPIProductIdentifierFromUUID(productId, tenantDomain);
 
-            Path resolvedPath = resolveFilePath(docFile.getAbsolutePath(), filename);
+            Path resolvedPath = APIFileUtil.resolveFilePath(docFile.getAbsolutePath(), filename);
 
             RestApiUtil.transferFile(inputStream, resolvedPath.getFileName().toString(), resolvedPath.getParent().toString());
             byte[] fileBytes = FileUtils.readFileToByteArray(new File(resolvedPath.toString()));
@@ -244,19 +236,9 @@ public class RestApiPublisherUtils {
      * @return true if the xml content is valid, false otherwise
      * @throws APIManagementException
      */
+    @Deprecated
     public static boolean validateXMLSchema(String xmlContent) throws APIManagementException {
-        xmlContent = "<xml>" + xmlContent + "</xml>";
-        DocumentBuilderFactory factory = APIUtil.getSecuredDocumentBuilder();
-        factory.setValidating(false);
-        factory.setNamespaceAware(false);
-        try {
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            builder.parse(new InputSource(new StringReader(xmlContent)));
-        } catch (ParserConfigurationException | IOException | SAXException e) {
-            log.error("Error occurred while parsing the provided xml content.", e);
-            return false;
-        }
-        return true;
+        return APIUtil.validateXMLSchema(xmlContent);
     }
 
     /**
@@ -308,16 +290,30 @@ public class RestApiPublisherUtils {
     }
 
     public static File exportCustomBackendData(String seq, String seqName) throws APIManagementException {
+        File tempDir = null;
+        boolean preventDeletion = false;
         try {
-            // Provided Sequence Name by the user
-            String customBackendName = seqName;
-            if (!customBackendName.contains(".xml")) {
-                customBackendName = seqName + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML;
+            tempDir = CommonUtil.createTempDirectory(null);
+            if (!seqName.endsWith(APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML)) {
+                seqName = seqName + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML;
             }
-            CommonUtil.writeFile(customBackendName, seq);
-            return new File(customBackendName);
-        } catch (APIImportExportException ex) {
-            throw new APIManagementException("Error when exporting Custom Backend: " + seqName, ex);
+            String safeFileName = Paths.get(seqName).getFileName().toString();
+            Path resolvedPath = APIFileUtil.resolveFilePath(tempDir.getAbsolutePath(), safeFileName);
+            if (APIUtil.validateXMLForSequenceBackend(seq)) {
+                CommonUtil.writeFile(resolvedPath.toString(), seq);
+                preventDeletion = true;
+                return new File(resolvedPath.toString());
+            } else {
+                FileUtils.deleteQuietly(tempDir);
+                RestApiUtil.handleBadRequest("Retrieved sequence content is not a valid XML file", log);
+                return null;
+            }
+        } catch (APIImportExportException e) {
+            throw new APIManagementException("Error while exporting custom backend sequence " + seqName, e);
+        } finally {
+            if (!preventDeletion && tempDir != null) {
+                FileUtils.deleteQuietly(tempDir);
+            }
         }
     }
 
@@ -508,50 +504,6 @@ public class RestApiPublisherUtils {
     }
 
     /**
-     * Resolves an untrusted user-specified path against the base directory.
-     * Paths that try to escape the base directory are rejected.
-     * @param baseDirPathString the absolute path of the base directory that all
-     *                     user-specified paths should be within
-     * @param userPathString  the untrusted path provided by the user
-     * @return Resolved Path
-     * @throws APIManagementException if resolution fails.
-     */
-    private static Path resolveFilePath(final String baseDirPathString,
-                                        final String userPathString) throws APIManagementException {
-        Path baseDirPath = Paths.get(baseDirPathString);
-        Path userPath = Paths.get(userPathString);
-        if (!baseDirPath.isAbsolute()) {
-            throw new APIManagementException("Invalid base path provided." +
-                    " Base path must be absolute. Base Path: " + baseDirPath);
-        }
-
-        if (userPath.isAbsolute()){
-            throw new APIManagementException("Invalid user path provided." +
-                    " User path should not be absolute. User Path: " + userPath);
-        }
-
-        /*
-         * Combines the absolute base directory path and the user-specified relative path.
-         * Then, normalizes the path to handle any ".." elements in the userPath.
-         * For example, if the baseDirPath is "/foo/bar/baz" and userPath is "../attack",
-         * the resulting resolvedPath will be "/foo/bar/attack".
-         */
-        final Path resolvedPath = baseDirPath.resolve(userPath).normalize();
-
-        /*
-         * Verifies that the resolved path is still within the expected base directory.
-         * If the resolved path does not start with the base directory path,
-         * it indicates an attempt to escape the intended directory structure.
-         */
-        if (!resolvedPath.startsWith(baseDirPath.normalize())) {
-            throw new APIManagementException("Error resolving path. The user path attempts" +
-                    " to escape the base directory.");
-        }
-
-        return resolvedPath;
-    }
-
-    /**
      * Fetches subscription policies for the relevant organization ID.
      * @param apiInfo           APIDTO object
      * @param organizationID    Organziation ID
@@ -592,6 +544,37 @@ public class RestApiPublisherUtils {
             }
         }
         return policies;
+    }
+
+    /**
+     * This method will attach the given sequence to the relevant API as a custom backend and update the relevant API
+     *
+     * @param api                 API object to which the sequence should be attached
+     * @param apiProvider         APIProvider instance to be used for updating the API with the custom
+     * @param endpointType        Type of the endpoint (production/sandbox) to which the custom backend is attached
+     * @param customBackend       InputStream of the sequence to be attached as the custom backend
+     * @param customBackendDetail Attachment containing details of the sequence to be attached as the custom backend
+     */
+    public static void attachSequenceToSequenceBackend(API api, APIProvider apiProvider, String endpointType,
+            InputStream customBackend, Attachment customBackendDetail) throws APIManagementException {
+
+        String apiId = api.getUuid();
+        try {
+            String customBackendContent = readInputStream(customBackend, customBackendDetail);
+            String fileName = customBackendDetail.getDataHandler().getName();
+            if (fileName.endsWith(APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML)
+                    && APIUtil.validateXMLForSequenceBackend(customBackendContent)) {
+                PublisherCommonUtils.updateCustomBackend(api, apiProvider, endpointType, customBackendContent,
+                        fileName);
+            } else {
+                RestApiUtil.handleBadRequest(
+                        "Provided sequence content for " + endpointType.toLowerCase() + " is not a valid XML file",
+                        log);
+            }
+        } catch (IOException e) {
+            RestApiUtil.handleInternalServerError(
+                    "Error processing file upload for " + endpointType.toLowerCase() + " sequence", e, log);
+        }
     }
 
     /**
@@ -767,7 +750,7 @@ public class RestApiPublisherUtils {
         OpenAPIDefinitionValidationResponseDTO responseDTO;
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
         if (fileDetail != null) {
-            fileName = fileDetail.getContentDisposition().getFilename();
+            fileName = fileDetail.getDataHandler().getName();
         }
         validationResponse = ApisApiServiceImplUtils.validateOpenAPIDefinition(url, fileInputStream, apiDefinition,
                 fileName, returnContent);
@@ -792,7 +775,7 @@ public class RestApiPublisherUtils {
 
         String msg = "";
         boolean isFileSpecified = (fileInputStream != null && fileDetail != null &&
-                fileDetail.getContentDisposition() != null && fileDetail.getContentDisposition().getFilename() != null)
+                fileDetail.getDataHandler() != null && fileDetail.getDataHandler().getName() != null)
                 || (fileInputStream != null && isServiceAPI);
         if (url == null && !isFileSpecified && apiDefinition == null) {
             msg = "One out of 'file' or 'url' or 'inline definition' should be specified";

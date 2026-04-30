@@ -170,10 +170,13 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                 if (Utils.isMCPRequest(synCtx)) {
                     List<VerbInfoDTO> existingInfoDTOList = (List<VerbInfoDTO>) synCtx.getProperty(APIConstants.VERB_INFO_DTO);
                     if (existingInfoDTOList != null) {
+                        List<VerbInfoDTO> clonedInfoDTOList = new ArrayList<>();
                         for (VerbInfoDTO verbInfo : existingInfoDTOList) {
-                            verbInfo.setAuthType(APIConstants.AUTH_NO_AUTHENTICATION);
+                            VerbInfoDTO clonedVerbInfo = new VerbInfoDTO(verbInfo);
+                            clonedVerbInfo.setAuthType(APIConstants.AUTH_NO_AUTHENTICATION);
+                            clonedInfoDTOList.add(clonedVerbInfo);
                         }
-                        synCtx.setProperty(APIConstants.VERB_INFO_DTO, existingInfoDTOList);
+                        synCtx.setProperty(APIConstants.VERB_INFO_DTO, clonedInfoDTOList);
                     }
                 } else {
                     String resourceCacheKey = APIUtil.getResourceInfoDTOCacheKey(apiContext, apiVersion,

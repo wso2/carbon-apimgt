@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.notification.event.ConsumerAppRevocationEvent;
 import org.wso2.carbon.apimgt.notification.event.SubjectEntityRevocationEvent;
+import org.wso2.carbon.apimgt.notification.event.TokenRevocationBatchEvent;
 import org.wso2.carbon.apimgt.notification.event.TokenRevocationEvent;
 
 import java.util.List;
@@ -37,7 +38,10 @@ public class DefaultKeyManagerEventHandlerImpl extends AbstractKeyManagerEventHa
     @Override
     public boolean handleEvent(String event, Map<String, List<String>> headers) throws APIManagementException {
 
-        if (StringUtils.isNotEmpty(event)
+        if (StringUtils.isNotEmpty(event) &&
+                event.contains(APIConstants.NotificationEvent.TOKEN_REVOCATION_BATCH_EVENT)) {
+            handleTokenRevocationBatchEvent(event);
+        } else if (StringUtils.isNotEmpty(event)
                 && event.contains(APIConstants.NotificationEvent.CONSUMER_APP_REVOCATION_EVENT)) {
             handleConsumerAppRevocationEvent(event);
         } else if (StringUtils.isNotEmpty(event)
@@ -54,6 +58,14 @@ public class DefaultKeyManagerEventHandlerImpl extends AbstractKeyManagerEventHa
     public String getType() {
 
         return APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE;
+    }
+
+    private boolean handleTokenRevocationBatchEvent(String event) throws APIManagementException {
+
+        TokenRevocationBatchEvent tokenRevocationBatchEvent =
+                new Gson().fromJson(event, TokenRevocationBatchEvent.class);
+        handleTokenRevocationBatchEvent(tokenRevocationBatchEvent);
+        return true;
     }
 
     private boolean handleTokenRevocationEvent(String event) throws APIManagementException {
