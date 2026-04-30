@@ -34,6 +34,9 @@
     <!--<ApplicationDeletion executor="org.wso2.carbon.apimgt.impl.workflow.ApplicationDeletionApprovalWorkflowExecutor"/>-->
     
     <!-- Publisher related workflows -->
+    <APIStateChange executor="org.wso2.carbon.apimgt.impl.workflow.APIStateChangeGovernanceWorkflowExecutor">
+        <Property name="stateList">Published:Deprecate,Deprecated:Retire</Property>
+    </APIStateChange>
     <APIStateChange executor="org.wso2.carbon.apimgt.impl.workflow.APIStateChangeSimpleWorkflowExecutor" />
     <!--APIStateChange executor="org.wso2.carbon.apimgt.impl.workflow.APIStateChangeApprovalWorkflowExecutor">
         <Property name="stateList">Created:Publish,Published:Block</Property>

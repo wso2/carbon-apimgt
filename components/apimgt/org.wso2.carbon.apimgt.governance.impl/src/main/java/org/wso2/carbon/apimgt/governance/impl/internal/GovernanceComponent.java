@@ -21,7 +21,6 @@ package org.wso2.carbon.apimgt.governance.impl.internal;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -30,11 +29,13 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
+import org.wso2.carbon.apimgt.governance.api.model.RuleCategory;
 import org.wso2.carbon.apimgt.governance.impl.APIMGovernanceConstants;
 import org.wso2.carbon.apimgt.governance.impl.ComplianceEvaluationScheduler;
 import org.wso2.carbon.apimgt.governance.impl.listener.APIMGovServerStartupShutdownListener;
 import org.wso2.carbon.apimgt.governance.impl.observer.APIMGovernanceConfigDeployer;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceDBUtil;
+import org.wso2.carbon.apimgt.governance.impl.validator.ValidationEngineFactory;
 import org.wso2.carbon.apimgt.governance.impl.validator.ValidationEngineService;
 import org.wso2.carbon.apimgt.governance.impl.validator.ValidationEngineServiceImpl;
 import org.wso2.carbon.apimgt.impl.APIMDependencyConfigurationService;
@@ -43,6 +44,7 @@ import org.wso2.carbon.apimgt.impl.jms.listener.JMSListenerShutDownService;
 import org.wso2.carbon.core.ServerShutdownHandler;
 import org.wso2.carbon.core.ServerStartupObserver;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * This class represents the Governance Component
@@ -53,40 +55,74 @@ import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 public class GovernanceComponent {
 
     private static final Log log = LogFactory.getLog(GovernanceComponent.class);
-    private ServiceRegistration registration;
+    private static final AtomicBoolean activated = new AtomicBoolean(false);
 
     @Activate
     protected void activate(ComponentContext componentContext) throws Exception {
 
-        if (log.isDebugEnabled()) {
-            log.debug("Governance component activated");
+        if (!activated.compareAndSet(false, true)) {
+            if (log.isDebugEnabled()) {
+                log.debug("GovernanceComponent already activated, skipping re-activation");
+            }
+            return;
         }
 
-        BundleContext bundleContext = componentContext.getBundleContext();
-        APIMGovServerStartupShutdownListener startupShutdownListener
-                = new APIMGovServerStartupShutdownListener();
-        registration = bundleContext
-                .registerService(ServerStartupObserver.class, startupShutdownListener, null);
-        registration = bundleContext
-                .registerService(ServerShutdownHandler.class, startupShutdownListener, null);
-        registration = bundleContext
-                .registerService(JMSListenerShutDownService.class, startupShutdownListener, null);
+        log.info("Activating Governance component...");
 
-        APIMGovernanceDBUtil.initialize();
+        // Initialize DB connection first (before service registrations that may trigger side-effects)
+        try {
+            APIMGovernanceDBUtil.initialize();
+            log.info("APIMGovernanceDBUtil initialized successfully");
+        } catch (Throwable e) {
+            log.error("APIMGovernanceDBUtil.initialize() FAILED", e);
+        }
 
-        String migrationEnabled = System.getProperty(APIMGovernanceConstants.MIGRATE);
-        if (migrationEnabled == null) {
-            ComplianceEvaluationScheduler.initialize();
-            APIMGovernanceConfigDeployer configDeployer = new APIMGovernanceConfigDeployer();
-            bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), configDeployer, null);
+        try {
+            BundleContext bundleContext = componentContext.getBundleContext();
+
+            // Initialize the scheduler FIRST (before listener registration that may fail
+            // due to EventHubConfigurationDto not being available in certain runtimes)
+            String migrationEnabled = System.getProperty(APIMGovernanceConstants.MIGRATE);
+            if (migrationEnabled == null) {
+                ComplianceEvaluationScheduler.initialize();
+                APIMGovernanceConfigDeployer configDeployer = new APIMGovernanceConfigDeployer();
+                bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(),
+                        configDeployer, null);
+                log.info("ComplianceEvaluationScheduler initialized successfully");
+            }
+
+            // Register startup/shutdown listeners (may fail if EventHubConfigurationDto
+            // is not available in the runtime, but this should not block governance)
+            try {
+                APIMGovServerStartupShutdownListener startupShutdownListener
+                        = new APIMGovServerStartupShutdownListener();
+                bundleContext
+                        .registerService(ServerStartupObserver.class, startupShutdownListener, null);
+                bundleContext
+                        .registerService(ServerShutdownHandler.class, startupShutdownListener, null);
+                bundleContext
+                        .registerService(JMSListenerShutDownService.class, startupShutdownListener, null);
+            } catch (Throwable listenerEx) {
+                log.warn("APIMGovServerStartupShutdownListener registration failed (non-fatal): "
+                        + listenerEx.getMessage());
+            }
+
+            log.info("Governance component activated successfully");
+        } catch (Throwable t) {
+            log.error("Error during GovernanceComponent activation", t);
         }
     }
 
     @Deactivate
     protected void deactivate(ComponentContext componentContext) {
-        ComplianceEvaluationScheduler.shutdown();
-        if (registration != null) {
-            registration.unregister();
+        if (log.isDebugEnabled()) {
+            log.debug("GovernanceComponent deactivate() called");
+        }
+        try {
+            ComplianceEvaluationScheduler.shutdown();
+            log.info("ComplianceEvaluationScheduler shut down successfully");
+        } catch (Throwable e) {
+            log.warn("Error shutting down ComplianceEvaluationScheduler: " + e.getMessage());
         }
     }
 
@@ -108,25 +144,39 @@ public class GovernanceComponent {
     @Reference(
             name = "org.wso2.carbon.apimgt.governance.engine.SpectralValidationEngine",
             service = ValidationEngine.class,
-            cardinality = ReferenceCardinality.MANDATORY,
+            cardinality = ReferenceCardinality.OPTIONAL,
             policy = ReferencePolicy.DYNAMIC,
             unbind = "unsetValidationEngineService"
     )
     protected void setValidationEngineService(ValidationEngine validationEngine) {
 
+        log.info("Setting ValidationEngineService with engine: " + validationEngine.getClass().getName());
         ValidationEngineService validationEngineService = new ValidationEngineServiceImpl(validationEngine);
         ServiceReferenceHolder.getInstance().setValidationEngineService(validationEngineService);
+
+        // Register Spectral engine as the default and for SPECTRAL category
+        ValidationEngineFactory.setDefaultEngine(validationEngine);
+        ValidationEngineFactory.registerValidationEngine(RuleCategory.SPECTRAL, validationEngine);
+        if (log.isDebugEnabled()) {
+            log.debug("Registered SpectralValidationEngine as default and for SPECTRAL category");
+        }
     }
 
     protected void unsetValidationEngineService(ValidationEngine validationEngine) {
 
         ServiceReferenceHolder.getInstance().setValidationEngineService(null);
+        // Do NOT null out the default engine or unregister SPECTRAL here.
+        // During OSGi reference oscillation, the engine is immediately re-set,
+        // and nulling it creates a race window where requests get NPE.
+        if (log.isDebugEnabled()) {
+            log.debug("ValidationEngine reference unset (engine remains cached in factory)");
+        }
     }
 
     @Reference(
             name = "apim.dependency.config.service",
             service = org.wso2.carbon.apimgt.impl.APIMDependencyConfigurationService.class,
-            cardinality = ReferenceCardinality.MANDATORY,
+            cardinality = ReferenceCardinality.OPTIONAL,
             policy = ReferencePolicy.DYNAMIC,
             unbind = "unsetAPIMDependencyConfigurationService")
     protected void setAPIMDependencyConfigurationService(APIMDependencyConfigurationService service) {
