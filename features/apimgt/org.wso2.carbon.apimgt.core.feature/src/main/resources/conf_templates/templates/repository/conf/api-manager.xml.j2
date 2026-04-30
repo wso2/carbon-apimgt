@@ -777,6 +777,25 @@
     </APIMGovernance>
     {% endif %}
 
+    {% if apim.governance.discovery.enabled is defined %}
+    <!-- WSO2 API Discovery Server (ADS) integration. Surfaces unmanaged
+         APIs detected in runtime traffic via the admin portal's
+         "Unmanaged APIs" tab. Disabled by default; the tab is hidden
+         in the UI until Enabled = true. -->
+    <APIDiscovery>
+        <Enabled>{{apim.governance.discovery.enabled}}</Enabled>
+        {% if apim.governance.discovery.endpoint is defined %}
+        <Endpoint>{{apim.governance.discovery.endpoint}}</Endpoint>
+        {% endif %}
+        {% if apim.governance.discovery.timeout_ms is defined %}
+        <TimeoutMs>{{apim.governance.discovery.timeout_ms}}</TimeoutMs>
+        {% endif %}
+        {% if apim.governance.discovery.verify_ssl is defined %}
+        <VerifySSL>{{apim.governance.discovery.verify_ssl}}</VerifySSL>
+        {% endif %}
+    </APIDiscovery>
+    {% endif %}
+
     <RESTAPI>
         <!--Configure allowed URIs of REST API. Accessing allowed URIs does not require credentials (does not require Authorization header). -->
         <AllowedURIs>

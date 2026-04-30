@@ -2471,6 +2471,135 @@ paths:
             - apim:admin
 
   ######################################################
+  # Unmanaged APIs (Governance / API Discovery)
+  ######################################################
+  /governance/discovery/summary:
+    get:
+      tags:
+        - Unmanaged APIs
+      summary: |
+        Get summary of discovered APIs by classification
+      description: |
+        Returns aggregate counts of discovered APIs by classification (shadow, drift),
+        reachability (external, internal), and service.
+      responses:
+        200:
+          description: |
+            OK. Summary returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiscoverySummary'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:admin_discovery_view
+      operationId: getDiscoverySummary
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://localhost:9443/api/am/admin/v4/governance/discovery/summary"'
+
+  /governance/discovery/apis:
+    get:
+      tags:
+        - Unmanaged APIs
+      summary: List discovered APIs
+      description: |
+        Paginated list of unmanaged discovered APIs. Filterable by classification,
+        service, and internal-only flag.
+      parameters:
+        - name: classification
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [shadow, drift]
+        - name: service
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: internal
+          in: query
+          required: false
+          description: |
+            Filter by internal flag. "true" = include internal, "false" = external only,
+            "only" = internal only. Omit for all.
+          schema:
+            type: string
+            enum: [true, false, only]
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiscoveredAPIList'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:admin_discovery_view
+      operationId: getDiscoveredAPIs
+
+  /governance/discovery/apis/{discoveredApiId}:
+    get:
+      tags:
+        - Unmanaged APIs
+      summary: Get discovered API detail
+      parameters:
+        - name: discoveredApiId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiscoveredAPI'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:admin_discovery_view
+      operationId: getDiscoveredAPIById
+
+  /governance/discovery/untrafficked:
+    get:
+      tags:
+        - Unmanaged APIs
+      summary: List untrafficked managed APIs
+      description: |
+        Managed APIs registered in APIM but with no observed traffic.
+        Useful for identifying dead APIs or DeepFlow coverage gaps.
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UntraffickedList'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:admin_discovery_view
+      operationId: getUntrafficked
+
+  ######################################################
   # The "Organizations" resource API
   ######################################################
   /organizations:
@@ -4934,6 +5063,180 @@ paths:
 
 components:
   schemas:
+    DiscoverySummary:
+      type: object
+      properties:
+        total:
+          type: integer
+        managed:
+          type: integer
+        unmanaged:
+          type: integer
+        skipInternal:
+          type: boolean
+        byType:
+          type: object
+          properties:
+            shadow:
+              type: integer
+            drift:
+              type: integer
+        byReachability:
+          type: object
+          properties:
+            external:
+              type: integer
+            internal:
+              type: integer
+        byService:
+          type: array
+          items:
+            type: object
+            properties:
+              serviceIdentity:
+                type: string
+              fullyGoverned:
+                type: boolean
+              shadow:
+                type: integer
+              drift:
+                type: integer
+
+    DiscoveredAPI:
+      type: object
+      properties:
+        id:
+          type: string
+        serviceIdentity:
+          type: string
+        envKind:
+          type: string
+          enum: [k8s, legacy, unknown]
+        namespace:
+          type: string
+        serviceName:
+          type: string
+        samplePod:
+          type: string
+        sampleWorkload:
+          type: string
+        method:
+          type: string
+        normalizedPath:
+          type: string
+        rawPathSamples:
+          type: array
+          items:
+            type: string
+        classification:
+          type: string
+          enum: [shadow, drift]
+        isInternal:
+          type: boolean
+        firstSeenAt:
+          type: string
+        lastSeenAt:
+          type: string
+        observationCount:
+          type: integer
+          format: int64
+        distinctClientCount:
+          type: integer
+        distinctClientsSample:
+          type: array
+          items:
+            type: string
+        statusCodes:
+          type: array
+          items:
+            type: integer
+        avgDurationUs:
+          type: number
+        matchedApimApiIds:
+          type: array
+          items:
+            type: string
+        serviceManagedAPIs:
+          type: array
+          items:
+            type: object
+            properties:
+              apimApiId:
+                type: string
+              apimApiName:
+                type: string
+              apimApiVersion:
+                type: string
+        topClients:
+          type: array
+          description: Top callers of this finding ranked by observation count, capped at 20 entries.
+          items:
+            type: object
+            properties:
+              identity:
+                type: string
+                description: Stable identity. "k8s:<namespace>/<workload>" for K8s pods or "host:<ip>" for legacy hosts.
+              kind:
+                type: string
+                enum: [k8s, legacy]
+              namespace:
+                type: string
+                description: K8s namespace (only when kind = k8s).
+              workload:
+                type: string
+                description: K8s workload name (only when kind = k8s).
+              ip:
+                type: string
+                description: Caller IP address.
+              port:
+                type: integer
+                format: int32
+                description: Sample source port. Source ports rotate per connection so this is illustrative only.
+              observations:
+                type: integer
+                format: int64
+                description: Observation count for this caller in the latest cycle window.
+
+    DiscoveredAPIList:
+      type: object
+      properties:
+        count:
+          type: integer
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiscoveredAPI'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    UntraffickedAPI:
+      type: object
+      properties:
+        apimApiId:
+          type: string
+        apimApiName:
+          type: string
+        apimApiVersion:
+          type: string
+        method:
+          type: string
+        gatewayPath:
+          type: string
+        serviceIdentity:
+          type: string
+        lastSyncedAt:
+          type: string
+
+    UntraffickedList:
+      type: object
+      properties:
+        count:
+          type: integer
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/UntraffickedAPI'
+
     Error:
       title: Error object returned with 4XX HTTP status
       required:
@@ -6749,6 +7052,11 @@ components:
           type: boolean
           description: To determine whether the transaction counter is enabled or not
           example: false
+        discoveryEnabled:
+          type: boolean
+          description: To determine whether the API Discovery integration is enabled (controls visibility of the Unmanaged APIs tab)
+          example: false
+          default: false
         isGatewayNotificationEnabled:
           type: boolean
           description: Is Gateway Notification Enabled
@@ -8147,3 +8455,5 @@ components:
             apim:gov_rule_manage: Manage governance rules
             apim:organization_manage: Manage Organizations
             apim:organization_read: Read Organizations
+            apim:admin_discovery_view: View discovered unmanaged APIs (Governance)
+            apim:admin_discovery_manage: Manage discovered unmanaged APIs (Governance)

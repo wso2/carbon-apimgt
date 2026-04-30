@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.SettingsApiService;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SettingsDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.impl.discovery.DiscoveryApiServerClient;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.SettingsMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 
@@ -53,6 +54,7 @@ public class SettingsApiServiceImpl implements SettingsApiService {
             SettingsMappingUtil settingsMappingUtil = new SettingsMappingUtil();
             SettingsDTO settingsDTO = settingsMappingUtil.fromSettingsToDTO(isUserAvailable);
             settingsDTO.setTransactionCounterEnable(APIUtil.getTransactionCounterEnable());
+            settingsDTO.setDiscoveryEnabled(DiscoveryApiServerClient.isEnabled());
             return Response.ok().entity(settingsDTO).build();
     }
 }

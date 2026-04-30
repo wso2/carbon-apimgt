@@ -65,6 +65,7 @@
             org.wso2.carbon.apimgt.rest.api.admin.v1.AiServiceProvidersApi,
             org.wso2.carbon.apimgt.rest.api.admin.v1.ApiKeysApi,
             org.wso2.carbon.apimgt.rest.api.admin.v1.ExportConsumptionApi,
+            org.wso2.carbon.apimgt.rest.api.admin.v1.GovernanceApi,
         </param-value>
     </init-param>
     <init-param>
