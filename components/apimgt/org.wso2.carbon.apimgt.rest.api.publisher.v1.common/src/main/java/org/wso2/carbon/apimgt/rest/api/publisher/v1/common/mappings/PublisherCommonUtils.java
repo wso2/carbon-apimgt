@@ -110,6 +110,7 @@ import org.wso2.carbon.apimgt.impl.MCPInitializerAndToolFetcher;
 import org.wso2.carbon.apimgt.impl.restapi.publisher.ApisApiServiceImplUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
+import org.wso2.carbon.apimgt.impl.utils.MCPUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -572,11 +573,7 @@ public class PublisherCommonUtils {
         }
         boolean isGraphql = originalAPI.getType() != null && APIConstants.APITransportType.GRAPHQL.toString()
                 .equals(originalAPI.getType());
-        boolean isAsyncAPI = originalAPI.getType() != null
-                && (APIConstants.APITransportType.WS.toString().equals(originalAPI.getType())
-                || APIConstants.APITransportType.WEBSUB.toString().equals(originalAPI.getType())
-                || APIConstants.APITransportType.SSE.toString().equals(originalAPI.getType())
-                || APIConstants.APITransportType.ASYNC.toString().equals(originalAPI.getType()));
+        boolean isAsyncAPI = isAsyncAPIType(originalAPI.getType());
         boolean isAIAPI = APIConstants.API_SUBTYPE_AI_API.equals(originalAPI.getSubtype());
 
         Scope[] apiDtoClassAnnotatedScopes = APIDTO.class.getAnnotationsByType(Scope.class);
@@ -750,17 +747,15 @@ public class PublisherCommonUtils {
         List<API> usedMcpServers =
                 apiProvider.getMCPServersUsedByAPI(originalAPI.getUuid(), originalAPI.getOrganization());
         if (!usedMcpServers.isEmpty()) {
+            if (log.isDebugEnabled()) {
+                log.debug("API: " + originalAPI.getUuid() + " is using MCP servers. Validating MCP resources.");
+            }
             List<APIOperationsDTO> updatedOperations = apiDtoToUpdate.getOperations();
             if (updatedOperations != null && !updatedOperations.isEmpty()) {
-                List<URITemplate> removedResources = getRemovedResources(
-                        APIMappingUtil.fromOperationListToURITemplateList(updatedOperations),
-                        originalAPI.getUriTemplates());
-                if (!removedResources.isEmpty()) {
-                    log.error("Cannot update API with removed resources when MCP servers are in use. API: "
-                            + originalAPI.getId().getUUID());
-                    throw new APIManagementException(
-                            ExceptionCodes.from(ExceptionCodes.API_UPDATE_FORBIDDEN_PER_MCP_USAGE));
-                }
+                Set<URITemplate> updatedUriTemplates =
+                        APIMappingUtil.fromOperationListToURITemplateList(updatedOperations);
+                MCPUtils.validateMCPResources(originalAPI.getId().getUUID(), originalAPI.getOrganization(),
+                        updatedUriTemplates);
             }
         }
 
@@ -2292,10 +2287,7 @@ public class PublisherCommonUtils {
         }
 
         boolean isWSAPI = dtoWrapper.isAPIDTO() && dtoWrapper.getType() == APIDTO.TypeEnum.WS;
-        boolean isAsyncAPI = isWSAPI || dtoWrapper.isAPIDTO() &&
-                (dtoWrapper.getType() == APIDTO.TypeEnum.WEBSUB ||
-                        dtoWrapper.getType() == APIDTO.TypeEnum.SSE ||
-                        dtoWrapper.getType() == APIDTO.TypeEnum.ASYNC);
+        boolean isAsyncAPI = dtoWrapper.isAPIDTO() && isAsyncAPIType(dtoWrapper.getType());
 
         username = StringUtils.isEmpty(username) ? RestApiCommonUtil.getLoggedInUsername() : username;
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -2452,21 +2444,15 @@ public class PublisherCommonUtils {
             apiToAdd.setVisibleOrganizations(organization);
         }
 
-        boolean isNotMCPServer = !APIConstants.API_TYPE_MCP.equals(apiToAdd.getType());
-
-        if (isNotMCPServer) {
-            Map<String, String> complianceResult = checkGovernanceComplianceSync(
-                    apiToAdd.getUuid(), APIMGovernableState.API_CREATE, ArtifactType.API, organization, null, null);
-            if (!complianceResult.isEmpty()
-                    && !Boolean.parseBoolean(complianceResult.get(GOVERNANCE_COMPLIANCE_KEY))) {
-                throw new APIComplianceException(complianceResult.get(GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
-            }
+        Map<String, String> complianceResult = checkGovernanceComplianceSync(
+                apiToAdd.getUuid(), APIMGovernableState.API_CREATE, ArtifactType.API, organization, null, null);
+        if (!complianceResult.isEmpty()
+                && !Boolean.parseBoolean(complianceResult.get(GOVERNANCE_COMPLIANCE_KEY))) {
+            throw new APIComplianceException(complianceResult.get(GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
         }
         apiProvider.addAPI(apiToAdd);
-        if (isNotMCPServer) {
-            checkGovernanceComplianceAsync(apiToAdd.getUuid(),
-                    APIMGovernableState.API_CREATE, ArtifactType.API, organization);
-        }
+        checkGovernanceComplianceAsync(apiToAdd.getUuid(),
+                APIMGovernableState.API_CREATE, ArtifactType.API, organization);
         // Remove parentOrgTiers from OrganizationTiers list
         Set<OrganizationTiers> updatedOrganizationTiers = apiToAdd.getAvailableTiersForOrganizations();
         if (updatedOrganizationTiers != null) {
@@ -3269,16 +3255,7 @@ public class PublisherCommonUtils {
                             existingAPI.getId().getVersion()));
         }
 
-        List<API> usedMcpServers = apiProvider.getMCPServersUsedByAPI(apiId, organization);
-        if (usedMcpServers != null && !usedMcpServers.isEmpty()) {
-            List<URITemplate> removedResources = getRemovedResources(uriTemplates, existingAPI.getUriTemplates());
-            if (!removedResources.isEmpty()) {
-                log.error("Cannot update API with removed resources when MCP servers are in use. API: "
-                        + existingAPI.getId().getUUID());
-                throw new APIManagementException(
-                        ExceptionCodes.from(ExceptionCodes.API_UPDATE_FORBIDDEN_PER_MCP_USAGE));
-            }
-        }
+        MCPUtils.validateMCPResources(apiId, organization, uriTemplates);
 
         //set existing operation policies to URI templates
         apiProvider.setOperationPoliciesToURITemplates(apiId, uriTemplates);
@@ -4087,13 +4064,26 @@ public class PublisherCommonUtils {
 
     public static boolean isStreamingAPI(APIDTO apidto) {
 
-        return APIDTO.TypeEnum.WS.equals(apidto.getType()) || APIDTO.TypeEnum.SSE.equals(apidto.getType()) ||
-                APIDTO.TypeEnum.WEBSUB.equals(apidto.getType()) || APIDTO.TypeEnum.ASYNC.equals(apidto.getType());
+        return isAsyncAPIType(apidto.getType());
     }
 
     public static boolean isThirdPartyAsyncAPI(APIDTO apidto) {
         return APIDTO.TypeEnum.ASYNC.equals(apidto.getType()) && apidto.getAdvertiseInfo() != null &&
                 apidto.getAdvertiseInfo().isAdvertised();
+    }
+
+    static boolean isAsyncAPIType(APIDTO.TypeEnum apiType) {
+        return APIDTO.TypeEnum.WS.equals(apiType) || APIDTO.TypeEnum.SSE.equals(apiType)
+                || APIDTO.TypeEnum.WEBSUB.equals(apiType) || APIDTO.TypeEnum.ASYNC.equals(apiType)
+                || APIDTO.TypeEnum.WEBHOOK.equals(apiType);
+    }
+
+    static boolean isAsyncAPIType(String apiType) {
+        return APIConstants.APITransportType.WS.toString().equals(apiType)
+                || APIConstants.APITransportType.SSE.toString().equals(apiType)
+                || APIConstants.APITransportType.WEBSUB.toString().equals(apiType)
+                || APIConstants.APITransportType.ASYNC.toString().equals(apiType)
+                || APIConstants.APITransportType.WEBHOOK.toString().equals(apiType);
     }
 
     /**

@@ -17,6 +17,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LabelListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
 import java.util.List;
@@ -25,6 +26,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerProxyRequestDTO
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerValidationRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.RequestLabelListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.McpServersApiService;
@@ -119,6 +121,25 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
     public Response addMCPServerDocumentContent(@ApiParam(value = "**MCP Server ID** consisting of the **UUID** of the MCP Server. ",required=true) @PathParam("mcpServerId") String mcpServerId, @ApiParam(value = "Document Identifier ",required=true) @PathParam("documentId") String documentId,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch,  @Multipart(value = "file", required = false) InputStream fileInputStream, @Multipart(value = "file" , required = false) Attachment fileDetail, @Multipart(value = "inlineContent", required = false)  String inlineContent) throws APIManagementException{
         return delegate.addMCPServerDocumentContent(mcpServerId, documentId, ifMatch, fileInputStream, fileDetail, inlineContent, securityContext);
+    }
+
+    @POST
+    @Path("/{mcpServerId}/attach-labels")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Attach Labels to an MCP Server", notes = "This operation can be used to attach labels to an MCP Server. ", response = LabelListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server")
+        })
+    }, tags={ "MCP Server Labels Attach",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Successful response with updated Label object list ", response = LabelListDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+    public Response attachLabelsToMCPServer(@ApiParam(value = "**MCP Server ID** consisting of the **UUID** of the MCP Server. ",required=true) @PathParam("mcpServerId") String mcpServerId, @ApiParam(value = "List of labels to be attached to the MCP Server " ,required=true) RequestLabelListDTO requestLabelListDTO) throws APIManagementException{
+        return delegate.attachLabelsToMCPServer(mcpServerId, requestLabelListDTO, securityContext);
     }
 
     @POST
@@ -374,6 +395,25 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
         return delegate.deployMCPServerRevision(mcpServerId, revisionId, apIRevisionDeploymentDTO, securityContext);
     }
 
+    @POST
+    @Path("/{mcpServerId}/detach-labels")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Detach Labels from an MCP Server", notes = "This operation can be used to detach labels from an MCP Server. ", response = LabelListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server")
+        })
+    }, tags={ "MCP Server Labels Detach",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Successful response with updated Label object list ", response = LabelListDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+    public Response detachLabelsFromMCPServer(@ApiParam(value = "**MCP Server ID** consisting of the **UUID** of the MCP Server. ",required=true) @PathParam("mcpServerId") String mcpServerId, @ApiParam(value = "List of labels to be detached from the MCP Server " ,required=true) RequestLabelListDTO requestLabelListDTO) throws APIManagementException{
+        return delegate.detachLabelsFromMCPServer(mcpServerId, requestLabelListDTO, securityContext);
+    }
+
     @PATCH
     @Path("/{mcpServerId}/comments/{commentId}")
     @Consumes({ "application/json" })
@@ -494,6 +534,25 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response getCommentOfMCPServer(@ApiParam(value = "Comment Id ",required=true) @PathParam("commentId") String commentId, @ApiParam(value = "**MCP Server ID** consisting of the **UUID** of the MCP Server. ",required=true) @PathParam("mcpServerId") String mcpServerId,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retirieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch,  @ApiParam(value = "Whether we need to display commentor details. ", defaultValue="false") @DefaultValue("false") @QueryParam("includeCommenterInfo") Boolean includeCommenterInfo,  @ApiParam(value = "Maximum size of replies array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("replyLimit") Integer replyLimit,  @ApiParam(value = "Starting point within the complete list of replies. ", defaultValue="0") @DefaultValue("0") @QueryParam("replyOffset") Integer replyOffset) throws APIManagementException{
         return delegate.getCommentOfMCPServer(commentId, mcpServerId, xWSO2Tenant, ifNoneMatch, includeCommenterInfo, replyLimit, replyOffset, securityContext);
+    }
+
+    @GET
+    @Path("/{mcpServerId}/labels")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get Labels of an MCP Server", notes = "This operation can be used to get the labels of an MCP Server. ", response = LabelListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
+            @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server")
+        })
+    }, tags={ "MCP Server Labels",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Successful response with Label object list ", response = LabelListDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+    public Response getLabelsOfMCPServer(@ApiParam(value = "**MCP Server ID** consisting of the **UUID** of the MCP Server. ",required=true) @PathParam("mcpServerId") String mcpServerId) throws APIManagementException{
+        return delegate.getLabelsOfMCPServer(mcpServerId, securityContext);
     }
 
     @GET

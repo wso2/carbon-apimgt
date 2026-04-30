@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.analytics.collectors.FaultDataCollector;
 import org.wso2.carbon.apimgt.common.analytics.collectors.RequestDataCollector;
 import org.wso2.carbon.apimgt.common.analytics.collectors.impl.fault.AuthFaultDataCollector;
+import org.wso2.carbon.apimgt.common.analytics.collectors.impl.fault.GuardrailFaultDataCollector;
 import org.wso2.carbon.apimgt.common.analytics.collectors.impl.fault.TargetFaultDataCollector;
 import org.wso2.carbon.apimgt.common.analytics.collectors.impl.fault.ThrottledFaultDataCollector;
 import org.wso2.carbon.apimgt.common.analytics.collectors.impl.fault.UnclassifiedFaultDataCollector;
@@ -43,6 +44,7 @@ public class FaultyRequestDataCollector extends CommonRequestDataCollector imple
     private FaultDataCollector authDataCollector;
     private FaultDataCollector throttledDataCollector;
     private FaultDataCollector targetDataCollector;
+    private FaultDataCollector guardrailDataCollector;
     private FaultDataCollector unclassifiedFaultDataCollector;
     private AnalyticsDataProvider provider;
 
@@ -52,6 +54,7 @@ public class FaultyRequestDataCollector extends CommonRequestDataCollector imple
         this.authDataCollector = new AuthFaultDataCollector(provider);
         this.throttledDataCollector = new ThrottledFaultDataCollector(provider);
         this.targetDataCollector = new TargetFaultDataCollector(provider);
+        this.guardrailDataCollector = new GuardrailFaultDataCollector(provider);
         this.unclassifiedFaultDataCollector = new UnclassifiedFaultDataCollector(provider);
     }
 
@@ -68,6 +71,9 @@ public class FaultyRequestDataCollector extends CommonRequestDataCollector imple
             break;
         case TARGET_CONNECTIVITY:
             targetDataCollector.collectFaultData(faultyEvent);
+            break;
+        case GUARDRAIL_FAULT:
+            guardrailDataCollector.collectFaultData(faultyEvent);
             break;
         case OTHER:
             unclassifiedFaultDataCollector.collectFaultData(faultyEvent);

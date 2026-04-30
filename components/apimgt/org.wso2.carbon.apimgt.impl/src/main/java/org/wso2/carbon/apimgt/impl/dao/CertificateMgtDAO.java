@@ -311,7 +311,13 @@ public class CertificateMgtDAO {
                     apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(resultSet.getString("API_PROVIDER")),
                             resultSet.getString("API_NAME"), resultSet.getString("API_VERSION"));
                 }
-                clientCertificateDTO.setApiIdentifier((APIIdentifier) apiIdentifier);
+                if (apiIdentifier instanceof APIIdentifier) {
+                    clientCertificateDTO.setApiIdentifier((APIIdentifier) apiIdentifier);
+                } else {
+                    APIIdentifier convertedApiIdentifier = new APIIdentifier(apiIdentifier.getProviderName(),
+                            apiIdentifier.getName(), apiIdentifier.getVersion(), apiIdentifier.getUUID());
+                    clientCertificateDTO.setApiIdentifier(convertedApiIdentifier);
+                }
                 clientCertificateDTOS.add(clientCertificateDTO);
             }
         } catch (SQLException e) {

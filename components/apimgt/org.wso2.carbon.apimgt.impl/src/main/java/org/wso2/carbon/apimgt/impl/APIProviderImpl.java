@@ -176,6 +176,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIStoreNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
 import org.wso2.carbon.apimgt.impl.utils.LifeCycleUtils;
+import org.wso2.carbon.apimgt.impl.utils.MCPUtils;
 import org.wso2.carbon.apimgt.impl.utils.SimpleContentSearchResultNameComparator;
 import org.wso2.carbon.apimgt.impl.workflow.APIStateWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
@@ -1355,6 +1356,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     private void updateAPI(API api, int tenantId, String username) throws APIManagementException {
 
+        MCPUtils.validateMCPResources(api.getUuid(), api.getOrganization(), api.getUriTemplates());
         apiMgtDAO.updateAPI(api, username);
         if (log.isDebugEnabled()) {
             log.debug("Successfully updated the API: " + api.getId() + " metadata in the database");
@@ -2624,6 +2626,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         existingAPI.setOrganization(organization);
         APIIdentifier existingAPIId = existingAPI.getId();
         String existingAPISwaggerDefinition = existingAPI.getSwaggerDefinition();
+        String existingAPIAsyncApiDefinition = existingAPI.getAsyncApiDefinition();
         String existingAPICreatedTime = existingAPI.getCreatedTime();
         String existingAPIStatus = existingAPI.getStatus();
         boolean isExsitingAPIdefaultVersion = existingAPI.isDefaultVersion();
@@ -2646,7 +2649,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         List<OperationPolicy> apiLevelPolicies = extractAndDropAPILevelPoliciesFromAPI(existingAPI);
         updateMCPServerBackends(existingAPI, existingApiId, organization);
         //update swagger definition with version
-        APIUtil.updateAPISwaggerWithVersion(existingAPI);
+        if (existingAPI.isAsync()) {
+            APIUtil.updateAPIAsyncAPISpecWithVersion(existingAPI);
+        } else {
+            APIUtil.updateAPISwaggerWithVersion(existingAPI);
+        }
         API newAPI = addAPI(existingAPI);
         String newAPIId = newAPI.getUuid();
         cloneAPIPoliciesForNewAPIVersion(existingApiId, newAPI, operationPoliciesMap, apiLevelPolicies);
@@ -2662,8 +2669,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     addDocumentationContent(newAPIId, newDoc.getId(), organization, content);
                 }
             }
-        }
-
+        } 
         // copy endpoints and endpoint mappings
         List<APIEndpointInfo> existingEndpointList = getAllAPIEndpointsByUUID(existingApiId, organization);
         addAPIEndpoints(newAPIId, existingEndpointList, organization);
@@ -2704,6 +2710,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         existingAPI.setContext(existingContext);
         existingAPI.setCreatedTime(existingAPICreatedTime);
         existingAPI.setSwaggerDefinition(existingAPISwaggerDefinition);
+        existingAPI.setAsyncApiDefinition(existingAPIAsyncApiDefinition);
         // update existing api with the original timestamp
         existingAPI.setVersionTimestamp(existingVersionTimestamp);
         if (isDefaultVersion) {
@@ -2717,9 +2724,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while updating API details", e);
         }
-        return getAPIbyUUID(newAPIId, organization);
+        return getAPIbyUUID(newAPIId, organization);   
     }
-
+        
     /**
      * Create a new API Product version from an existing API Product
      *
@@ -4033,8 +4040,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         stateWorkflowDTO.setWorkflowReference(Integer.toString(apiOrApiProductId));
         stateWorkflowDTO.setInvoker(this.username);
         stateWorkflowDTO.setApiUUID(uuid);
-        String workflowDescription = "Pending lifecycle state change action: " + action;
+
+        String workflowDescription = String.format(
+                "Approval request for %s state change action %s from %s state for the %s %s : %s by %s",
+                apiType,
+                stateWorkflowDTO.getApiLCAction(),
+                stateWorkflowDTO.getApiCurrentState(),
+                apiType,
+                stateWorkflowDTO.getApiName(),
+                stateWorkflowDTO.getApiVersion(),
+                stateWorkflowDTO.getApiProvider()
+        );
         stateWorkflowDTO.setWorkflowDescription(workflowDescription);
+
         return stateWorkflowDTO;
     }
 
@@ -7370,6 +7388,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             workflowDTO.setApiProvider(apiIdentifier.getProviderName());
             workflowDTO.setEnvironment(deployment.getDeployment());
             workflowDTO.setRevisionId(String.valueOf(revisionId));
+            workflowDTO.setInvoker(this.username);
+
+            String workflowDescription = String.format(
+                    "Approve revision %s deployment request from the user %s for the environment %s of the API %s",
+                    workflowDTO.getRevisionId(),
+                    workflowDTO.getUserName(),
+                    workflowDTO.getEnvironment(),
+                    workflowDTO.getApiName()
+            );
+            workflowDTO.setWorkflowDescription(workflowDescription);
 
             executor.execute(workflowDTO);
 
@@ -7799,6 +7827,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     + apiRevisionId, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, apiRevisionId));
         }
         apiIdentifier.setUuid(apiId);
+        Set<URITemplate> uriTemplatesOfAPIRevision = apiMgtDAO.getURITemplatesOfAPIRevision(apiRevision);
+        MCPUtils.validateMCPResources(apiId, organization, uriTemplatesOfAPIRevision);
         try {
             apiPersistenceInstance.restoreAPIRevision(new Organization(organization),
                     apiIdentifier.getUUID(), apiRevision.getRevisionUUID(), apiRevision.getId());

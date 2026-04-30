@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.KeyManagersApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerWellKnownResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.RestApiAdminUtils;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.KeyManagerMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -39,6 +40,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import javax.ws.rs.core.Response;
 
 public class KeyManagersApiServiceImpl implements KeyManagersApiService {
@@ -143,6 +145,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
                     KeyManagerMappingUtil.toKeyManagerConfigurationDTO(organization, body);
             KeyManagerPermissionConfigurationDTO keyManagerPermissionConfigurationDTO =
                     keyManagerConfigurationDTO.getPermissions();
+            RestApiAdminUtils.validateKeyManagerConstraints(keyManagerConfigurationDTO.getAdditionalProperties());
             this.validatePermissions(keyManagerPermissionConfigurationDTO);
             keyManagerConfigurationDTO.setUuid(keyManagerId);
             KeyManagerConfigurationDTO oldKeyManagerConfigurationDTO =
@@ -224,6 +227,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
                     KeyManagerMappingUtil.toKeyManagerConfigurationDTO(organization, body);
             KeyManagerPermissionConfigurationDTO keyManagerPermissionConfigurationDTO =
                     keyManagerConfigurationDTO.getPermissions();
+            RestApiAdminUtils.validateKeyManagerConstraints(keyManagerConfigurationDTO.getAdditionalProperties());
             this.validatePermissions(keyManagerPermissionConfigurationDTO);
             KeyManagerConfigurationDTO createdKeyManagerConfiguration =
                     apiAdmin.addKeyManagerConfiguration(keyManagerConfigurationDTO);

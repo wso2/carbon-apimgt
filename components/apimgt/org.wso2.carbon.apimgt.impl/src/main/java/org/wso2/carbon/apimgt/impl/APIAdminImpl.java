@@ -46,6 +46,7 @@ import org.wso2.carbon.apimgt.api.dto.KeyManagerPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.OrganizationDetailsDTO;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
 import org.wso2.carbon.apimgt.api.model.ApiResult;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationInfo;
@@ -67,6 +68,7 @@ import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.alertmgt.AlertMgtConstants;
+import org.wso2.carbon.apimgt.impl.dao.ApiKeyMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.LabelsDAO;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
@@ -143,10 +145,12 @@ public class APIAdminImpl implements APIAdmin {
 
     private static final Log log = LogFactory.getLog(APIAdminImpl.class);
     protected ApiMgtDAO apiMgtDAO;
+    protected ApiKeyMgtDAO apiKeyMgtDAO;
     protected LabelsDAO labelsDAO;
 
     public APIAdminImpl() {
         apiMgtDAO = ApiMgtDAO.getInstance();
+        apiKeyMgtDAO = ApiKeyMgtDAO.getInstance();
         labelsDAO = LabelsDAO.getInstance();
     }
 
@@ -253,6 +257,7 @@ public class APIAdminImpl implements APIAdmin {
                     + " as API revisions are deployed to it", ExceptionCodes.from(
                     ExceptionCodes.GATEWAY_ENVIRONMENT_API_REVISIONS_EXIST, String.format("UUID '%s'", uuid)));
         }
+        APIUtil.stopFederatedGatewayAPIDiscovery(existingEnv, tenantDomain);
         apiMgtDAO.deleteEnvironment(uuid);
     }
 
@@ -355,6 +360,36 @@ public class APIAdminImpl implements APIAdmin {
     public Application[] getAllApplicationsOfTenantForMigration(String appTenantDomain) throws APIManagementException {
 
         return apiMgtDAO.getAllApplicationsOfTenantForMigration(appTenantDomain);
+    }
+
+    /**
+     * Returns api keys of a given tenant
+     *
+     * @param tenantDomain Tenant Domain
+     * @return List of api keys related to the given tenant
+     */
+    @Override
+    public List<APIKeyInfo> getAllApiKeys(String tenantDomain) throws APIManagementException {
+
+        return apiKeyMgtDAO.getAllAPIKeys(tenantDomain);
+    }
+
+    /**
+     * Revokes a given api key
+     *
+     * @param keyUUId API key UUId
+     * @param tenantDomain Tenant domain
+     */
+    @Override
+    public void revokeAPIKey(String keyUUId, String tenantDomain) throws APIManagementException {
+
+        // Load existing metadata before revocation (revocation may remove/alter it)
+        APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getAPIKey(keyUUId, tenantDomain);
+        if (apiKeyInfo.getKeyUUID() == null) {
+            throw new APIMgtResourceNotFoundException("Active API key not found for UUID: " + keyUUId);
+        }
+        log.info("Revoking API key with UUID: " + keyUUId + " for tenant: " + tenantDomain);
+        apiKeyMgtDAO.revokeAPIKey(keyUUId, tenantDomain);
     }
 
     /**
@@ -1742,23 +1777,30 @@ public class APIAdminImpl implements APIAdmin {
     private void maskValues(KeyManagerConfigurationDTO keyManagerConfigurationDTO) {
         KeyManagerConnectorConfiguration keyManagerConnectorConfiguration = ServiceReferenceHolder.getInstance()
                 .getKeyManagerConnectorConfiguration(keyManagerConfigurationDTO.getType());
-
-        Map<String, Object> additionalProperties = keyManagerConfigurationDTO.getAdditionalProperties();
-        List<ConfigurationDto> connectionConfigurations =
-                keyManagerConnectorConfiguration.getConnectionConfigurations();
-        for (ConfigurationDto connectionConfiguration : connectionConfigurations) {
-            if (connectionConfiguration.isMask()) {
-                additionalProperties.replace(connectionConfiguration.getName(),
-                        APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD);
+        // When the KM is used for Token Exchange,there won't be any connection configurations to mask.
+        if (keyManagerConnectorConfiguration != null) {
+            Map<String, Object> additionalProperties = keyManagerConfigurationDTO.getAdditionalProperties();
+            List<ConfigurationDto> connectionConfigurations =
+                    keyManagerConnectorConfiguration.getConnectionConfigurations();
+            if (connectionConfigurations != null && !connectionConfigurations.isEmpty()) {
+                for (ConfigurationDto connectionConfiguration : connectionConfigurations) {
+                    if (connectionConfiguration.isMask()) {
+                        additionalProperties.replace(connectionConfiguration.getName(),
+                                APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD);
+                    }
+                }
             }
-        }
-        // if authConfiguration array is not empty, check for maskable values there as well
-        if (keyManagerConnectorConfiguration.getAuthConfigurations() != null
-                && !(keyManagerConnectorConfiguration.getAuthConfigurations().isEmpty())) {
-            List<ConfigurationDto> authConfigurations = keyManagerConnectorConfiguration.getAuthConfigurations();
-            // Recursively check nested objects in authConfigurations and apply masking
-            for (ConfigurationDto authConfiguration : authConfigurations) {
-                applyMaskToNestedFields(authConfiguration.getValues(), additionalProperties);
+
+            // if authConfiguration array is not empty, check for maskable values there as well
+            if (keyManagerConnectorConfiguration.getAuthConfigurations() != null
+                    && !(keyManagerConnectorConfiguration.getAuthConfigurations().isEmpty())) {
+                List<ConfigurationDto> authConfigurations = keyManagerConnectorConfiguration.getAuthConfigurations();
+                if (authConfigurations != null && !authConfigurations.isEmpty()) {
+                    // Recursively check nested objects in authConfigurations and apply masking
+                    for (ConfigurationDto authConfiguration : authConfigurations) {
+                        applyMaskToNestedFields(authConfiguration.getValues(), additionalProperties);
+                    }
+                }
             }
         }
     }

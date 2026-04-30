@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -73,7 +74,23 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     private boolean apisInitialized;
     private boolean apiPoliciesInitialized;
     private String tenantDomain;
-    private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(LOADING_POOL_SIZE);
+
+    private static final AtomicInteger POOL_NUMBER = new AtomicInteger(1);
+    private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(LOADING_POOL_SIZE,
+            new ThreadFactory() {
+                final AtomicInteger threadNumber = new AtomicInteger(1);
+                final ThreadGroup group = (System.getSecurityManager() != null) ?
+                        System.getSecurityManager().getThreadGroup() :
+                        Thread.currentThread().getThreadGroup();
+                final String namePrefix = "SubscriptionDataStore-pool-" + POOL_NUMBER.getAndIncrement() + "-thread-";
+
+                @Override
+                public Thread newThread(Runnable r) {
+
+                    return new Thread(group, r, namePrefix + threadNumber.getAndIncrement(), 0);
+                }
+            });
+
     private final ExecutorService subscriptionExecutorService = Executors.newFixedThreadPool(10,
             new InternalSubscriptionThreadFactory());
 
@@ -789,7 +806,24 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
     @Override
     public void destroy() {
-        executorService.shutdown();
+
+        shutdownExecutor(executorService);
+        shutdownExecutor(subscriptionExecutorService);
+    }
+
+    private void shutdownExecutor(ExecutorService executor) {
+
+        if (executor != null) {
+            executor.shutdown();
+            try {
+                if (!executor.awaitTermination(30, TimeUnit.SECONDS)) {
+                    executor.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                executor.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
+        }
     }
 
     @Override

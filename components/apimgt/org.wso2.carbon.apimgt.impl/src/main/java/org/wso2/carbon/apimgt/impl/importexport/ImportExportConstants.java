@@ -72,6 +72,7 @@ public final class ImportExportConstants {
 
     public static final String JSON_EXTENSION = ".json";
     public static final String YAML_EXTENSION = ".yaml";
+    public static final String YML_EXTENSION = ".yml";
 
     // Image resource
     public static final String IMAGE_RESOURCE = "Image";
@@ -211,7 +212,7 @@ public final class ImportExportConstants {
 
     public static final String TYPE_POLICY_SPECIFICATION = "operation_policy_specification";
 
-    public static final String APIM_VERSION = "v4.6.0";
+    public static final String APIM_VERSION = "v4.7.0";
 
     public static final String ENDPOINT_CONFIG = "endpointConfig";
 

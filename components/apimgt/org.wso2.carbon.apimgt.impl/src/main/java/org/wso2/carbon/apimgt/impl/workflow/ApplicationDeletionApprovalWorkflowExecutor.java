@@ -15,6 +15,9 @@
  */
 package org.wso2.carbon.apimgt.impl.workflow;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.model.Application;
@@ -27,6 +30,17 @@ import java.util.*;
 
 public class ApplicationDeletionApprovalWorkflowExecutor extends WorkflowExecutor {
 
+    private static final Log log = LogFactory.getLog(ApplicationDeletionApprovalWorkflowExecutor.class);
+    private boolean applicationAttributesVisibility = false;
+    private static final String APPLICATION_NAME_PROPERTY = "applicationName";
+    private static final String APPLICATION_OWNER_PROPERTY = "applicationOwner";
+    private static final String APPLICATION_TIER_PROPERTY = "applicationTier";
+    private static final String APPLICATION_STATUS_PROPERTY = "applicationStatus";
+    private static final String APPLICATION_DESCRIPTION_PROPERTY = "applicationDescription";
+    private static final String TENANT_DOMAIN_PROPERTY = "tenantDomain";
+    private static final String GROUP_ID_PROPERTY = "groupId";
+    private static final String SHARED_ORGANIZATION_PROPERTY = "sharedOrganization";
+
     @Override
     public String getWorkflowType() {
 
@@ -36,16 +50,45 @@ public class ApplicationDeletionApprovalWorkflowExecutor extends WorkflowExecuto
     @Override
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Executing application deletion approval workflow. Workflow reference: " + workflowDTO.getWorkflowReference());
+        }
+
         ApplicationWorkflowDTO appWorkFlowDTO = (ApplicationWorkflowDTO) workflowDTO;
+
         Application application = appWorkFlowDTO.getApplication();
-        String message = "Approve application " + application.getName() + " delete request from application creator -"
-                + appWorkFlowDTO.getUserName() + " with throttling tier - " + application.getTier();
+        String message = String.format(
+                "Approve application %s delete request from application creator - %s with throttling tier - %s",
+                application.getName(),
+                appWorkFlowDTO.getUserName(),
+                application.getTier()
+        );
         workflowDTO.setWorkflowDescription(message);
-        workflowDTO.setProperties("applicationName", application.getName());
-        workflowDTO.setProperties("userName", appWorkFlowDTO.getUserName());
-        workflowDTO.setProperties("applicationTier", application.getTier());
-        workflowDTO.setMetadata("applicationStatus",application.getStatus());
+        workflowDTO.setProperties(APPLICATION_NAME_PROPERTY, application.getName());
+        workflowDTO.setProperties(APPLICATION_TIER_PROPERTY, application.getTier());
+        workflowDTO.setProperties(APPLICATION_OWNER_PROPERTY, appWorkFlowDTO.getUserName());
+        workflowDTO.setMetadata(APPLICATION_STATUS_PROPERTY,application.getStatus());
+        workflowDTO.setProperties(TENANT_DOMAIN_PROPERTY, appWorkFlowDTO.getTenantDomain());
+
+        if (StringUtils.isNotBlank(appWorkFlowDTO.getApplication().getGroupId())) {
+            workflowDTO.setProperties(GROUP_ID_PROPERTY, appWorkFlowDTO.getApplication().getGroupId());
+        }
+
+        if (StringUtils.isNotBlank(appWorkFlowDTO.getApplication().getSharedOrganization())) {
+            workflowDTO.setProperties(SHARED_ORGANIZATION_PROPERTY, appWorkFlowDTO.getApplication().getSharedOrganization());
+        }
+
+        if (StringUtils.isNotBlank(application.getDescription())) {
+            workflowDTO.setProperties(APPLICATION_DESCRIPTION_PROPERTY, application.getDescription());
+        }
+
+        WorkflowUtils.populateApplicationAttributes(workflowDTO, application, applicationAttributesVisibility);
+
         super.execute(workflowDTO);
+        if (log.isDebugEnabled()) {
+            log.debug("Application deletion approval workflow executed successfully. Workflow reference: "
+                    + workflowDTO.getWorkflowReference());
+        }
 
         return new GeneralWorkflowResponse();
     }
@@ -74,9 +117,9 @@ public class ApplicationDeletionApprovalWorkflowExecutor extends WorkflowExecuto
         } else if (WorkflowStatus.REJECTED.equals(workflowDTO.getStatus())) {
             try {
                 if (applicationWorkflowDTO.getMetadata() != null &&
-                        applicationWorkflowDTO.getMetadata().containsKey("applicationStatus")) {
+                        applicationWorkflowDTO.getMetadata().containsKey(APPLICATION_STATUS_PROPERTY)) {
                     apiMgtDAO.updateApplicationStatus(Integer.parseInt(applicationWorkflowDTO.getWorkflowReference()),
-                            applicationWorkflowDTO.getMetadata("applicationStatus"));
+                            applicationWorkflowDTO.getMetadata(APPLICATION_STATUS_PROPERTY));
                 } else {
                     apiMgtDAO.updateApplicationStatus(Integer.parseInt(applicationWorkflowDTO.getWorkflowReference()),
                             APIConstants.ApplicationStatus.APPLICATION_APPROVED);
@@ -97,5 +140,13 @@ public class ApplicationDeletionApprovalWorkflowExecutor extends WorkflowExecuto
     public List<WorkflowDTO> getWorkflowDetails(String workflowStatus) throws WorkflowException {
 
         return Collections.emptyList();
+    }
+
+    public boolean getApplicationAttributesVisibility() {
+        return applicationAttributesVisibility;
+    }
+
+    public void setApplicationAttributesVisibility(boolean applicationAttributesVisibility) {
+        this.applicationAttributesVisibility = applicationAttributesVisibility;
     }
 }

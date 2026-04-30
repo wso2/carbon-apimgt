@@ -39,6 +39,11 @@ import org.wso2.carbon.apimgt.api.model.LLMProvider;
 public class GeminiLLMProviderService extends BuiltInLLMProviderService {
 
     @Override
+    public boolean isDeprecated() {
+        return true;
+    }
+
+    @Override
     public String getType() {
 
         return APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_GEMINI_CONNECTOR;
@@ -64,6 +69,7 @@ public class GeminiLLMProviderService extends BuiltInLLMProviderService {
             LLMProviderConfiguration llmProviderConfiguration = new LLMProviderConfiguration();
             llmProviderConfiguration.setAuthenticationConfiguration(getLlmProviderAuthenticationConfiguration());
             llmProviderConfiguration.setConnectorType(this.getType());
+            llmProviderConfiguration.setDeprecated(isDeprecated());
 
             List<LLMProviderMetadata> llmProviderMetadata = new ArrayList<>();
             llmProviderMetadata.add(new LLMProviderMetadata(

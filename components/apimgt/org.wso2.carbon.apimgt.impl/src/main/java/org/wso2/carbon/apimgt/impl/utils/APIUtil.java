@@ -320,6 +320,8 @@ import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.SSLContext;
 import java.security.cert.X509Certificate;
 import java.text.Normalizer;
@@ -392,6 +394,8 @@ public final class APIUtil {
 
     private static final Pattern NONLATIN = Pattern.compile("[^\\w-]");
     private static final Pattern WHITESPACE = Pattern.compile("[\\s]");
+    private static final int CONSUMER_SECRET_MASK_LENGTH = 16;
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     private APIUtil() {
 
@@ -466,6 +470,12 @@ public final class APIUtil {
                     eventPublisherFactory.getEventPublisher(EventPublisherType.NOTIFICATION));
             eventPublishers.putIfAbsent(EventPublisherType.TOKEN_REVOCATION,
                     eventPublisherFactory.getEventPublisher(EventPublisherType.TOKEN_REVOCATION));
+            eventPublishers.putIfAbsent(EventPublisherType.API_KEY_INFO,
+                    eventPublisherFactory.getEventPublisher(EventPublisherType.API_KEY_INFO));
+            eventPublishers.putIfAbsent(EventPublisherType.API_KEY_ASSOCIATION_INFO,
+                    eventPublisherFactory.getEventPublisher(EventPublisherType.API_KEY_ASSOCIATION_INFO));
+            eventPublishers.putIfAbsent(EventPublisherType.API_KEY_USAGE,
+                    eventPublisherFactory.getEventPublisher(EventPublisherType.API_KEY_USAGE));
             eventPublishers.putIfAbsent(EventPublisherType.BLOCKING_EVENT,
                     eventPublisherFactory.getEventPublisher(EventPublisherType.BLOCKING_EVENT));
             eventPublishers.putIfAbsent(EventPublisherType.KEY_TEMPLATE,
@@ -590,9 +600,13 @@ public final class APIUtil {
                 retryCount++;
                 if (retryCount <= maxRetryCount) {
                     retry = true;
-                    log.error("Failed to retrieve " + path + " from remote endpoint: " + ex.getMessage()
-                            + ". Retry attempt " + retryCount + " in " + (retryDuration / 1000) +
-                            " seconds.");
+                    String logMessage = "Failed to retrieve " + path + " from remote endpoint: " + ex.getMessage()
+                            + ". Retry attempt " + retryCount + " in " + (retryDuration / 1000) + " seconds.";
+                    if (retryCount >= 4) {
+                        log.error(logMessage);
+                    } else if (retryCount == 3) {
+                        log.warn(logMessage);
+                    }
                     try {
                         Thread.sleep(retryDuration);
                         retryDuration = (long) (retryDuration * retryProgressionFactor);
@@ -4889,6 +4903,33 @@ public final class APIUtil {
         return object.toString();
     }
 
+    public static String maskSecret(String secret) {
+
+        boolean isHashingEnabled = OAuthServerConfiguration.getInstance().isClientSecretHashEnabled();
+        if (log.isDebugEnabled()) {
+            log.debug("Masking secret. Client Secret Hashing enabled: " + isHashingEnabled);
+        }
+        if (secret == null || secret.isEmpty() || isHashingEnabled) {
+            // Always return a fixed length mask value if secret is null or empty or if hashing is enabled
+            return generateMask(CONSUMER_SECRET_MASK_LENGTH);
+        }
+
+        // Show first 3 characters, mask the rest so total = 16
+        int visibleChars = Math.min(3, secret.length());
+        int maskedPartLength = Math.max(CONSUMER_SECRET_MASK_LENGTH - visibleChars, 0);
+        String visiblePart = secret.substring(0, visibleChars);
+        return visiblePart + generateMask(maskedPartLength);
+    }
+
+    private static String generateMask(int length) {
+        // Generate mask dynamically for given length
+        StringBuilder sb = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            sb.append('*');
+        }
+        return sb.toString();
+    }
+
     private static String bytesToHex(byte[] bytes) {
 
         StringBuilder result = new StringBuilder();
@@ -9141,6 +9182,17 @@ public final class APIUtil {
         return apiKeySignKeyStoreName;
     }
 
+    public static boolean isLegacyApiKeysEnabled() {
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String legacyApiKeysEnabled = config.getFirstProperty(APIConstants.ENABLE_API_STORE_LEGACY_API_KEYS);
+        if (legacyApiKeysEnabled == null) {
+            return false;
+        }
+        return Boolean.parseBoolean(legacyApiKeysEnabled);
+    }
+
     /**
      * Get the workflow status information for the given api for the given workflow type
      *
@@ -9155,6 +9207,41 @@ public final class APIUtil {
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         int apiId = apiMgtDAO.getAPIID(uuid);
         return apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId), workflowType);
+    }
+
+    /**
+     * Generates the hash value using SHA-256 for a given API key.
+     *
+     * @param apiKey api key.
+     * @return the hashed api key.
+     */
+    public static String sha256Hash(String apiKey) throws APIManagementException {
+        if (StringUtils.isEmpty(apiKey)) {
+            throw new APIManagementException("API Key must not be null or empty.");
+        }
+        try {
+            MessageDigest digest = MessageDigest.getInstance(SHA_256);
+            byte[] hash = digest.digest(apiKey.getBytes(StandardCharsets.UTF_8));
+
+            // Convert hash to hex
+            String hashHex = convertBytesToHex(hash);
+
+            // Format: $sha256$<hash_hex>
+            return String.format("$sha256$%s", hashHex);
+
+        } catch (NoSuchAlgorithmException e) {
+            String msg = "Error in generating SHA-256 value";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+    }
+
+    public static String convertBytesToHex(byte[] bytes) {
+        StringBuilder hex = new StringBuilder(bytes.length * 2);
+        for (byte b : bytes) {
+            hex.append(String.format("%02x", b & 0xff));
+        }
+        return hex.toString();
     }
 
     /**
@@ -11269,8 +11356,8 @@ public final class APIUtil {
     }
 
     public static void initializeVelocityContext(VelocityEngine velocityEngine) {
-        velocityEngine.setProperty(RuntimeConstants.OLD_CHECK_EMPTY_OBJECTS, false);
-        velocityEngine.setProperty(RuntimeConstants.OLD_SPACE_GOBBLING, "bc");
+        velocityEngine.setProperty(RuntimeConstants.CHECK_EMPTY_OBJECTS, false);
+        velocityEngine.setProperty(RuntimeConstants.SPACE_GOBBLING, "bc");
         velocityEngine.setProperty("runtime.conversion.handler", "none");
     }
 
@@ -12020,6 +12107,26 @@ public final class APIUtil {
     }
 
     /**
+     * Check whether multiple client secret support is enabled or not.
+     *
+     * @return Whether multiple client secret support is enabled or not.
+     */
+    public static boolean isMultipleClientSecretsEnabled() {
+
+        return ServiceReferenceHolder.getInstance().getOauthServerConfiguration().isMultipleClientSecretsEnabled();
+    }
+
+    /**
+     * Get the number of client secrets allowed for an OAuth client.
+     *
+     * @return Number of client secrets allowed for an OAuth client.
+     */
+    public static int getClientSecretCount() {
+
+        return ServiceReferenceHolder.getInstance().getOauthServerConfiguration().getClientSecretCount();
+    }
+
+    /**
      * Validates the environment and schedules the federated gateway API discovery if applicable.
      *
      * @param environment   The environment to validate and schedule discovery for.
@@ -12039,6 +12146,30 @@ public final class APIUtil {
         } catch (APIManagementException e) {
             log.error("Error while validating and scheduling federated gateway API discovery for environment: "
                     + environment.getName() + " in organization: " + organization, e);
+        }
+    }
+
+    /**
+     * Stops the federated gateway API discovery for the given environment and organization.
+     *
+     * @param environment   The environment for which to stop the discovery.
+     * @param organization  The organization to which the environment belongs.
+     */
+    public static void stopFederatedGatewayAPIDiscovery(Environment environment, String organization) {
+        FederatedAPIDiscoveryService federatedAPIDiscoveryService = ServiceReferenceHolder
+                .getInstance().getFederatedAPIDiscoveryService();
+        if (APIConstants.EXTERNAL_GATEWAY_VENDOR.equals(environment.getProvider()) &&
+                federatedAPIDiscoveryService != null) {
+            try {
+                federatedAPIDiscoveryService.stopDiscovery(environment, organization);
+                if (log.isDebugEnabled()) {
+                    log.debug("Successfully stopped federated API discovery for environment: " +
+                            environment.getName());
+                }
+            } catch (Exception e) {
+                log.error("Error while stopping federated API discovery for environment: "
+                        + environment.getName(), e);
+            }
         }
     }
 
@@ -12110,7 +12241,7 @@ public final class APIUtil {
      */
     public static void updateAPISwaggerWithVersion(API api) {
         String swaggerDefinition = api.getSwaggerDefinition();
-
+        
         if (swaggerDefinition != null) {
             JsonObject apiSpec = JsonParser.parseString(swaggerDefinition).getAsJsonObject();
             JsonObject infoObject = apiSpec.has(SWAGGER_INFO) && apiSpec.get(SWAGGER_INFO).isJsonObject() ?
@@ -12127,6 +12258,31 @@ public final class APIUtil {
             api.setSwaggerDefinition(apiSpec.toString());
         } else {
             log.error("Swagger definition is null for API: " + api.getId().getApiName());
+        }
+    }
+
+    public static void updateAPIAsyncAPISpecWithVersion(API api) {
+        String asyncApiDefinition = api.getAsyncApiDefinition();
+
+        if (asyncApiDefinition != null && !asyncApiDefinition.trim().isEmpty()) {
+            JsonObject apiSpec = JsonParser.parseString(asyncApiDefinition).getAsJsonObject();
+            JsonObject infoObject = apiSpec.has(SWAGGER_INFO) && apiSpec.get(SWAGGER_INFO).isJsonObject() ?
+                    apiSpec.getAsJsonObject(SWAGGER_INFO) : null;
+            if (infoObject != null) {
+                infoObject.addProperty(SWAGGER_VER, api.getId().getVersion());
+            } else {
+                JsonObject newInfoObject = new JsonObject();
+                newInfoObject.addProperty(SWAGGER_TITLE, api.getId().getApiName());
+                newInfoObject.addProperty(SWAGGER_VER, api.getId().getVersion());
+                newInfoObject.addProperty(SWAGGER_DESCRIPTION, api.getDescription());
+                apiSpec.add(SWAGGER_INFO, newInfoObject);
+            }
+            api.setAsyncApiDefinition(apiSpec.toString());
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("AsyncAPI definition is null or empty for API: " + api.getId().getApiName() 
+                        + ". Skipping version update.");
+            }
         }
     }
 }

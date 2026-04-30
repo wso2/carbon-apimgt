@@ -45,6 +45,7 @@ import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.carbon.apimgt.impl.dao.ApiKeyMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.EnvironmentSpecificAPIPropertyDAO;
 import org.wso2.carbon.apimgt.impl.dao.LabelsDAO;
@@ -84,6 +85,7 @@ public abstract class AbstractAPIManager implements APIManager {
     // API definitions from swagger v2.0
     protected Log log = LogFactory.getLog(getClass());
     protected ApiMgtDAO apiMgtDAO;
+    protected ApiKeyMgtDAO apiKeyMgtDAO;
     protected LabelsDAO labelsDAO;
     protected EnvironmentSpecificAPIPropertyDAO environmentSpecificAPIPropertyDAO;
     protected ScopesDAO scopesDAO;
@@ -108,6 +110,7 @@ public abstract class AbstractAPIManager implements APIManager {
     public AbstractAPIManager(String username, String organization) throws APIManagementException {
 
         apiMgtDAO = ApiMgtDAO.getInstance();
+        apiKeyMgtDAO = ApiKeyMgtDAO.getInstance();
         scopesDAO = ScopesDAO.getInstance();
         environmentSpecificAPIPropertyDAO = EnvironmentSpecificAPIPropertyDAO.getInstance();
         labelsDAO = LabelsDAO.getInstance();

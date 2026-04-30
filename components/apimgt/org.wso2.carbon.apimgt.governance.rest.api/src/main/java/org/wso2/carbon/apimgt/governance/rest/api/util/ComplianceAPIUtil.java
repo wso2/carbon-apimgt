@@ -96,6 +96,8 @@ public class ComplianceAPIUtil {
         infoDTO.setName(APIMGovernanceUtil.getArtifactName(artifactRefId, artifactType, organization));
         infoDTO.setVersion(APIMGovernanceUtil.getArtifactVersion(artifactRefId, artifactType, organization));
         infoDTO.setType(ArtifactInfoDTO.TypeEnum.valueOf(String.valueOf(artifactType)));
+        infoDTO.setExtendedType(ArtifactInfoDTO.ExtendedTypeEnum.valueOf(String.valueOf(
+                APIMGovernanceUtil.getExtendedArtifactTypeForArtifact(artifactRefId, artifactType))));
         infoDTO.setOwner(APIMGovernanceUtil.getArtifactOwner(artifactRefId, artifactType, organization));
         artifactComplianceDetailsDTO.setInfo(infoDTO);
 
@@ -360,6 +362,8 @@ public class ComplianceAPIUtil {
         infoDTO.setName(APIMGovernanceUtil.getArtifactName(artifactRefId, artifactType, organization));
         infoDTO.setVersion(APIMGovernanceUtil.getArtifactVersion(artifactRefId, artifactType, organization));
         infoDTO.setType(ArtifactInfoDTO.TypeEnum.valueOf(String.valueOf(artifactType)));
+        infoDTO.setExtendedType(ArtifactInfoDTO.ExtendedTypeEnum.valueOf(String.valueOf(
+                APIMGovernanceUtil.getExtendedArtifactTypeForArtifact(artifactRefId, artifactType))));
         infoDTO.setOwner(APIMGovernanceUtil.getArtifactOwner(artifactRefId, artifactType, organization));
         complianceStatus.setInfo(infoDTO);
 

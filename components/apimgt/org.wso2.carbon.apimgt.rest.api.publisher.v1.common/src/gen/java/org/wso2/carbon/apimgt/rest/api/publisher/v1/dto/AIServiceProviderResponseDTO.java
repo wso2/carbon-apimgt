@@ -27,6 +27,7 @@ public class AIServiceProviderResponseDTO   {
     private String description = null;
     private String configurations = null;
     private String apiDefinition = null;
+    private Boolean deprecated = null;
 
   /**
    **/
@@ -150,6 +151,24 @@ public class AIServiceProviderResponseDTO   {
     this.apiDefinition = apiDefinition;
   }
 
+  /**
+   * Indicates if the LLM provider is deprecated
+   **/
+  public AIServiceProviderResponseDTO deprecated(Boolean deprecated) {
+    this.deprecated = deprecated;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "Indicates if the LLM provider is deprecated")
+  @JsonProperty("deprecated")
+  public Boolean isDeprecated() {
+    return deprecated;
+  }
+  public void setDeprecated(Boolean deprecated) {
+    this.deprecated = deprecated;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -166,12 +185,13 @@ public class AIServiceProviderResponseDTO   {
         Objects.equals(builtInSupport, aiServiceProviderResponse.builtInSupport) &&
         Objects.equals(description, aiServiceProviderResponse.description) &&
         Objects.equals(configurations, aiServiceProviderResponse.configurations) &&
-        Objects.equals(apiDefinition, aiServiceProviderResponse.apiDefinition);
+        Objects.equals(apiDefinition, aiServiceProviderResponse.apiDefinition) &&
+        Objects.equals(deprecated, aiServiceProviderResponse.deprecated);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, apiVersion, builtInSupport, description, configurations, apiDefinition);
+    return Objects.hash(id, name, apiVersion, builtInSupport, description, configurations, apiDefinition, deprecated);
   }
 
   @Override
@@ -186,6 +206,7 @@ public class AIServiceProviderResponseDTO   {
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    configurations: ").append(toIndentedString(configurations)).append("\n");
     sb.append("    apiDefinition: ").append(toIndentedString(apiDefinition)).append("\n");
+    sb.append("    deprecated: ").append(toIndentedString(deprecated)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -24,5 +24,6 @@ public enum FaultCategory {
     AUTH,
     TARGET_CONNECTIVITY,
     THROTTLED,
+    GUARDRAIL_FAULT,
     OTHER
 }

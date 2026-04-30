@@ -143,7 +143,6 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
             RelayUtils.buildMessage(axis2MC);
             if (JsonUtil.hasAJsonPayload(axis2MC)) {
                 messageBody = JsonUtil.jsonPayloadToString(axis2MC);
-
                 Gson gson = new GsonBuilder()
                         .registerTypeAdapter(McpRequest.class, new MCPRequestDeserializer())
                         .registerTypeAdapter(Params.class, new ParamsDeserializer())
@@ -157,17 +156,33 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
                             APIConstants.MCP.RpcConstants.INVALID_REQUEST_MESSAGE, "Invalid Request");
                 }
 
+                Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+
                 method = request.getMethod();
                 messageContext.setProperty(APIMgtGatewayConstants.MCP_METHOD, method);
                 messageContext.setProperty(APIMgtGatewayConstants.MCP_REQUEST_BODY, request);
+                if (headers != null) {
+                    messageContext.setProperty(APIMgtGatewayConstants.MCP_SESSION_ID_KEY,
+                            headers.get(APIConstants.MCP.HEADER_MCP_SESSION_ID));
+                    messageContext.setProperty(APIMgtGatewayConstants.MCP_REQUESTED_PROTOCOL_VERSION_KEY,
+                            headers.get(APIConstants.MCP.MCP_PROTOCOL_VERSION_HEADER));
+                    messageContext.setProperty(APIMgtGatewayConstants.MCP_REQUEST_SIZE_KEY,
+                            headers.get(APIConstants.HEADER_CONTENT_LENGTH));
+                }
+                if (StringUtils.equals(method, APIConstants.MCP.METHOD_INITIALIZE)) {
+                    Params params = request.getParams();
+                    messageContext.setProperty(APIMgtGatewayConstants.MCP_REQUESTED_PROTOCOL_VERSION_KEY, params.getProtocolVersion());
+                    messageContext.setProperty(APIMgtGatewayConstants.MCP_CLIENT_INFO_KEY, params.getClientInfo());
+                }
 
                 if (StringUtils.equals(method, APIConstants.MCP.METHOD_TOOL_CALL)) {
                     Params params = request.getParams();
-                    String toolName = params.getToolName();
+                    String capabilityName = params.getToolName();
+                    messageContext.setProperty(APIMgtGatewayConstants.MCP_CAPABILITY_NAME_KEY, capabilityName);
                     API api = GatewayUtils.getAPI(messageContext);
                     URLMapping extendedOperation = api.getUrlMappings()
                             .stream()
-                            .filter(operation -> operation.getUrlPattern().equals(toolName))
+                            .filter(operation -> operation.getUrlPattern().equals(capabilityName))
                             .findFirst()
                             .orElse(null);
 
@@ -183,8 +198,8 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
                             }
                         }
                         if (backendOperation != null) {
-                            messageContext.setProperty("MCP_HTTP_METHOD", backendOperation.getVerb());
-                            messageContext.setProperty("MCP_API_ELECTED_RESOURCE", backendOperation.getTarget());
+                            messageContext.setProperty(APIMgtGatewayConstants.MCP_HTTP_METHOD_KEY, backendOperation.getVerb());
+                            messageContext.setProperty(APIMgtGatewayConstants.MCP_API_ELECTED_RESOURCE_KEY, backendOperation.getTarget());
                         }
                     }
                 }

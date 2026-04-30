@@ -23,6 +23,7 @@ package org.wso2.carbon.apimgt.gateway;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -60,9 +61,23 @@ public class OpenAIEmbeddingProviderServiceImpl implements EmbeddingProviderServ
         endpointUrl = providerConfig.getProperties().get(APIConstants.AI.EMBEDDING_PROVIDER_EMBEDDING_ENDPOINT);
         model = providerConfig.getProperties().get(APIConstants.AI.EMBEDDING_PROVIDER_EMBEDDING_MODEL);
 
-        if (openAiApiKey == null || endpointUrl == null || model == null) {
-            throw new APIManagementException(
-                    "Missing required OpenAI configuration: 'apikey', 'embedding_endpoint', or 'embedding_model'");
+        boolean isApiKeyMissing = StringUtils.isEmpty(this.openAiApiKey);
+        boolean isEndpointMissing = StringUtils.isEmpty(this.endpointUrl);
+        boolean isModelMissing = StringUtils.isEmpty(this.model);
+
+        if (isApiKeyMissing || isEndpointMissing || isModelMissing) {
+            StringBuilder missingPropertiesBuilder = new StringBuilder();
+            if (isApiKeyMissing) {
+                missingPropertiesBuilder.append(APIConstants.AI.EMBEDDING_PROVIDER_API_KEY).append(", ");
+            }
+            if (isEndpointMissing) {
+                missingPropertiesBuilder.append(APIConstants.AI.EMBEDDING_PROVIDER_EMBEDDING_ENDPOINT).append(", ");
+            }
+            if (isModelMissing) {
+                missingPropertiesBuilder.append(APIConstants.AI.EMBEDDING_PROVIDER_EMBEDDING_MODEL).append(", ");
+            }
+            String missing = missingPropertiesBuilder.substring(0, missingPropertiesBuilder.length() - 2);
+            throw new APIManagementException("Missing required properties: " + missing);
         }
 
         // Retry parameters
@@ -75,8 +90,7 @@ public class OpenAIEmbeddingProviderServiceImpl implements EmbeddingProviderServ
                     .getOrDefault(APIConstants.AI.RETRY_PROGRESSION_FACTOR,
                             APIConstants.AI.DEFAULT_RETRY_PROGRESSION_FACTOR));
         } catch (NumberFormatException e) {
-            throw new APIManagementException("Invalid retry configuration provided: " +
-                    "'retrieval_timeout', 'retry_count', 'retry_progression_factor'");
+            throw new APIManagementException("Failed to parse retry configuration: " + e.getMessage(), e);
         }
 
         httpClient = APIUtil.getHttpClient(endpointUrl);
@@ -94,21 +108,20 @@ public class OpenAIEmbeddingProviderServiceImpl implements EmbeddingProviderServ
 
     @Override
     public double[] getEmbedding(String input) throws APIManagementException {
-        HttpPost post = new HttpPost(endpointUrl);
-        post.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
+        HttpPost httpPostRequest = new HttpPost(endpointUrl);
+        httpPostRequest.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
                 APIConstants.AUTHORIZATION_BEARER + openAiApiKey);
-        post.setHeader(APIConstants.HEADER_CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+        httpPostRequest.setHeader(APIConstants.HEADER_CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
 
         try {
-            // Build request JSON
             ObjectNode requestBody = objectMapper.createObjectNode();
             requestBody.put(APIConstants.AI.EMBEDDING_PROVIDER_EMBEDDING_REQUEST_MODEL, model);
             requestBody.put(APIConstants.AI.EMBEDDING_PROVIDER_EMBEDDING_REQUEST_INPUT, input);
             String json = objectMapper.writeValueAsString(requestBody);
-            post.setEntity(new StringEntity(json, StandardCharsets.UTF_8));
+            httpPostRequest.setEntity(new StringEntity(json, StandardCharsets.UTF_8));
 
             try (CloseableHttpResponse response = APIUtil.executeHTTPRequestWithRetries(
-                    post, httpClient, retrievalTimeout, maxRetryCount, retryProgressionFactor)) {
+                    httpPostRequest, httpClient, retrievalTimeout, maxRetryCount, retryProgressionFactor)) {
                 int statusCode = response.getStatusLine().getStatusCode();
                 String responseBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
 

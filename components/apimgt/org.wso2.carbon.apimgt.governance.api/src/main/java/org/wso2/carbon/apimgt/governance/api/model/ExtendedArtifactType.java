@@ -25,7 +25,8 @@ import java.util.Locale;
  */
 public enum ExtendedArtifactType {
     REST_API,
-    ASYNC_API;
+    ASYNC_API,
+    MCP;
 
     public static ExtendedArtifactType fromString(String text) {
         try {

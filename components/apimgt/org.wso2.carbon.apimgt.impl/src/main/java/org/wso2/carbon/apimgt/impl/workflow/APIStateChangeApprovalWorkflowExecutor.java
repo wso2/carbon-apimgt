@@ -36,7 +36,7 @@ import static org.wso2.carbon.apimgt.impl.workflow.WorkflowUtils.setWorkflowPara
  */
 public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor {
 
-    private static final Log log = LogFactory.getLog(APIStateChangeWSWorkflowExecutor.class);
+    private static final Log log = LogFactory.getLog(APIStateChangeApprovalWorkflowExecutor.class);
     private String stateList;
 
     public String getStateList() {
@@ -66,8 +66,9 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor {
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Executing API State change Workflow.");
+            log.debug("Executing API state change approval workflow. Workflow reference: " + workflowDTO.getWorkflowReference());
         }
+
         if (stateList != null) {
             Map<String, List<String>> stateActionMap = getSelectedStatesToApprove(stateList);
             APIStateWorkflowDTO apiStateWorkFlowDTO = (APIStateWorkflowDTO) workflowDTO;
@@ -77,6 +78,10 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor {
                     .contains(apiStateWorkFlowDTO.getApiLCAction())) {
                 setWorkflowParameters(apiStateWorkFlowDTO);
                 super.execute(workflowDTO);
+                if (log.isDebugEnabled()) {
+                    log.debug("API state change approval workflow executed successfully. Workflow reference: "
+                            + workflowDTO.getWorkflowReference());
+                }
             } else {
                 // For any other states, act as simple workflow executor.
                 workflowDTO.setStatus(WorkflowStatus.APPROVED);

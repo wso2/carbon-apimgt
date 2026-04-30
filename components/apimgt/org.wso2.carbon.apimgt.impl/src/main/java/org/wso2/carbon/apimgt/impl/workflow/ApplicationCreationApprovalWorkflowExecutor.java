@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.impl.workflow;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -26,7 +27,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
-
 import java.util.List;
 
 /**
@@ -35,6 +35,14 @@ import java.util.List;
 public class ApplicationCreationApprovalWorkflowExecutor extends WorkflowExecutor {
 
     private static final Log log = LogFactory.getLog(ApplicationCreationApprovalWorkflowExecutor.class);
+    private boolean applicationAttributesVisibility = false;
+    private static final String APPLICATION_NAME_PROPERTY = "applicationName";
+    private static final String APPLICATION_OWNER_PROPERTY = "applicationOwner";
+    private static final String APPLICATION_TIER_PROPERTY = "applicationTier";
+    private static final String APPLICATION_DESCRIPTION_PROPERTY = "applicationDescription";
+    private static final String TENANT_DOMAIN_PROPERTY = "tenantDomain";
+    private static final String GROUP_ID_PROPERTY = "groupId";
+    private static final String SHARED_ORGANIZATION_PROPERTY = "sharedOrganization";
 
     @Override
     public String getWorkflowType() {
@@ -48,18 +56,45 @@ public class ApplicationCreationApprovalWorkflowExecutor extends WorkflowExecuto
      */
     @Override
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
+
         if (log.isDebugEnabled()) {
-            log.debug("Executing Application creation Workflow.");
+            log.debug("Executing application creation approval workflow. Workflow reference: " + workflowDTO.getWorkflowReference());
         }
+
         ApplicationWorkflowDTO appWorkFlowDTO = (ApplicationWorkflowDTO) workflowDTO;
+
         Application application = appWorkFlowDTO.getApplication();
-        String message = "Approve application " + application.getName() + " creation request from application creator -"
-                + appWorkFlowDTO.getUserName() + " with throttling tier - " + application.getTier();
+        String message = String.format(
+                "Approve application %s creation request from application creator - %s with throttling tier - %s",
+                application.getName(),
+                appWorkFlowDTO.getUserName(),
+                application.getTier()
+        );
         workflowDTO.setWorkflowDescription(message);
-        workflowDTO.setProperties("applicationName", application.getName());
-        workflowDTO.setProperties("userName", appWorkFlowDTO.getUserName());
-        workflowDTO.setProperties("applicationTier", application.getTier());
+        workflowDTO.setProperties(APPLICATION_NAME_PROPERTY, appWorkFlowDTO.getApplication().getName());
+        workflowDTO.setProperties(APPLICATION_TIER_PROPERTY, appWorkFlowDTO.getApplication().getTier());
+        workflowDTO.setProperties(APPLICATION_OWNER_PROPERTY, appWorkFlowDTO.getUserName());
+        workflowDTO.setProperties(TENANT_DOMAIN_PROPERTY, appWorkFlowDTO.getTenantDomain());
+
+        if (StringUtils.isNotBlank(appWorkFlowDTO.getApplication().getGroupId())) {
+            workflowDTO.setProperties(GROUP_ID_PROPERTY, appWorkFlowDTO.getApplication().getGroupId());
+        }
+
+        if (StringUtils.isNotBlank(appWorkFlowDTO.getApplication().getSharedOrganization())) {
+            workflowDTO.setProperties(SHARED_ORGANIZATION_PROPERTY, appWorkFlowDTO.getApplication().getSharedOrganization());
+        }
+
+        if (StringUtils.isNotBlank(appWorkFlowDTO.getApplication().getDescription())) {
+            workflowDTO.setProperties(APPLICATION_DESCRIPTION_PROPERTY, application.getDescription());
+        }
+
+        WorkflowUtils.populateApplicationAttributes(workflowDTO, application, applicationAttributesVisibility);
+
         super.execute(workflowDTO);
+        if (log.isDebugEnabled()) {
+            log.debug("Application creation approval workflow executed successfully. Workflow reference: "
+                    + workflowDTO.getWorkflowReference());
+        }
 
         return new GeneralWorkflowResponse();
     }
@@ -139,5 +174,15 @@ public class ApplicationCreationApprovalWorkflowExecutor extends WorkflowExecuto
                     .getMessage();
             throw new WorkflowException(errorMsg, axisFault);
         }
+    }
+
+    public boolean getApplicationAttributesVisibility() {
+
+        return applicationAttributesVisibility;
+    }
+
+    public void setApplicationAttributesVisibility(boolean applicationAttributesVisibility) {
+
+        this.applicationAttributesVisibility = applicationAttributesVisibility;
     }
 }

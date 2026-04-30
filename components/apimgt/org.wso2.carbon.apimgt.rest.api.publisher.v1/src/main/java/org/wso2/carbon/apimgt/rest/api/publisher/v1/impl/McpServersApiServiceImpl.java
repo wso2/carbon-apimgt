@@ -51,11 +51,14 @@ import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
+import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
@@ -82,6 +85,7 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.CommentMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.DocumentationMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.LabelMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.PublisherCommonUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDTO;
@@ -97,6 +101,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorListItemDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ImportAPIResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LabelListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerProxyRequestDTO;
@@ -104,6 +109,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerValidationReque
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OrganizationPoliciesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.RequestLabelListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SecurityInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubtypeConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
@@ -207,6 +213,44 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
+    }
+
+    @Override
+    public Response getLabelsOfMCPServer(String mcpServerId, MessageContext messageContext)
+            throws APIManagementException {
+
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        List<Label> labelList = apiProvider.getAllLabelsOfApi(mcpServerId);
+        LabelListDTO labelListDTO = LabelMappingUtil.fromLabelListToLabelListDTO(labelList);
+        return Response.ok().entity(labelListDTO).build();
+    }
+
+    @Override
+    public Response attachLabelsToMCPServer(String mcpServerId, RequestLabelListDTO requestLabelListDTO,
+                                            MessageContext messageContext) throws APIManagementException {
+
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String tenantDomain = RestApiUtil.getValidatedOrganization(messageContext);
+        List<Label> updatedLabelList = apiProvider.attachApiLabels(mcpServerId, requestLabelListDTO.getLabels(),
+                tenantDomain);
+        LabelListDTO updatedLabelListDTO = LabelMappingUtil.fromLabelListToLabelListDTO(updatedLabelList);
+        PublisherCommonUtils.executeGovernanceOnLabelAttach(updatedLabelList, RestApiConstants.RESOURCE_API,
+                mcpServerId, tenantDomain);
+        return Response.ok().entity(updatedLabelListDTO).build();
+    }
+
+    @Override
+    public Response detachLabelsFromMCPServer(String mcpServerId, RequestLabelListDTO requestLabelListDTO,
+                                              MessageContext messageContext) throws APIManagementException {
+
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String tenantDomain = RestApiUtil.getValidatedOrganization(messageContext);
+        List<Label> updatedLabelList = apiProvider.detachApiLabels(mcpServerId, requestLabelListDTO.getLabels(),
+                tenantDomain);
+        LabelListDTO updatedLabelListDTO = LabelMappingUtil.fromLabelListToLabelListDTO(updatedLabelList);
+        PublisherCommonUtils.executeGovernanceOnLabelAttach(updatedLabelList, RestApiConstants.RESOURCE_API,
+                mcpServerId, tenantDomain);
+        return Response.ok().entity(updatedLabelListDTO).build();
     }
 
     /**
@@ -1314,8 +1358,25 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             ApiTypeWrapper apiWrapper =
                     new ApiTypeWrapper(apiProvider.getAPIbyUUID(mcpServerId, organization, APIConstants.API_TYPE_MCP));
+
+            if (APIConstants.PUBLISH.equals(action) || APIConstants.REPUBLISH.equals(action)) {
+                Map<String, String> complianceResult = PublisherCommonUtils.checkGovernanceComplianceSync(mcpServerId,
+                        APIMGovernableState.API_PUBLISH, ArtifactType.API, organization, null, null);
+                if (!complianceResult.isEmpty()
+                        && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
+                        && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
+                    throw new APIComplianceException(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
+                }
+            }
+
             APIStateChangeResponse stateChangeResponse = PublisherCommonUtils.changeApiOrApiProductLifecycle(action,
                     apiWrapper, lifecycleChecklist, organization);
+
+            if (APIConstants.PUBLISH.equals(action) || APIConstants.REPUBLISH.equals(action)) {
+                PublisherCommonUtils.checkGovernanceComplianceAsync(mcpServerId,
+                        APIMGovernableState.API_PUBLISH, ArtifactType.API, organization);
+            }
+
             LifecycleStateDTO stateDTO = getLifecycleState(mcpServerId, organization);
             WorkflowResponseDTO workflowResponseDTO = APIMappingUtil
                     .toWorkflowResponseDTO(stateDTO, stateChangeResponse);
@@ -1404,12 +1465,26 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             APIRevision apiRevision = new APIRevision();
             apiRevision.setApiUUID(mcpServerId);
             apiRevision.setDescription(apIRevisionDTO.getDescription());
+
+            Map<String, String> complianceResult = PublisherCommonUtils.checkGovernanceComplianceSync(mcpServerId,
+                    APIMGovernableState.API_DEPLOY, ArtifactType.API, organization, null, null);
+
+            if (!complianceResult.isEmpty()
+                    && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
+                    && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
+                throw new APIComplianceException(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
+            }
+
             String revisionId = apiProvider.addAPIRevision(apiRevision, organization);
             APIRevision createdApiRevision = apiProvider.getAPIRevision(revisionId);
             APIRevisionDTO createdApiRevisionDTO = APIMappingUtil.fromAPIRevisiontoDTO(createdApiRevision);
             URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_MCP_SERVERS
                     + "/" + createdApiRevisionDTO.getApiInfo().getId() + "/"
                     + RestApiConstants.RESOURCE_PATH_REVISIONS + "/" + createdApiRevisionDTO.getId());
+
+            PublisherCommonUtils.checkGovernanceComplianceAsync(mcpServerId, APIMGovernableState.API_DEPLOY,
+                    ArtifactType.API, organization);
+
             return Response.created(createdApiUri).entity(createdApiRevisionDTO).build();
         } catch (APIManagementException e) {
             if (e instanceof APIComplianceException) {
@@ -1503,6 +1578,8 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             //This URI used to set the location header of the POST response
             newVersionedApiUri =
                     new URI(RestApiConstants.RESOURCE_PATH_MCP_SERVERS + "/" + newVersionedApi.getId());
+            PublisherCommonUtils.checkGovernanceComplianceAsync(newVersionedApi.getId(), APIMGovernableState.API_CREATE,
+                    ArtifactType.API, organization);
             return Response.created(newVersionedApiUri).entity(newVersionedApi).build();
         } catch (APIManagementException e) {
             if (isAuthorizationFailure(e)) {
@@ -1843,6 +1920,13 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                             environments, environment, displayOnDevportal, vhost, true);
             apiRevisionDeployments.add(apiRevisionDeployment);
         }
+        Map<String, String> complianceResult = PublisherCommonUtils.checkGovernanceComplianceSync(mcpServerId,
+                APIMGovernableState.API_DEPLOY, ArtifactType.API, organization, null, null);
+        if (!complianceResult.isEmpty()
+                && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
+                && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
+            throw new APIComplianceException(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
+        }
         apiProvider.deployAPIRevision(mcpServerId, revisionId, apiRevisionDeployments, organization);
         List<APIRevisionDeployment> apiRevisionDeploymentsResponse =
                 apiProvider.getAPIRevisionsDeploymentList(mcpServerId);
@@ -1851,6 +1935,8 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             apiRevisionDeploymentDTOS.add(APIMappingUtil.fromAPIRevisionDeploymenttoDTO(apiRevisionDeployment));
         }
         Response.Status status = Response.Status.CREATED;
+        PublisherCommonUtils.checkGovernanceComplianceAsync(mcpServerId, APIMGovernableState.API_DEPLOY,
+                ArtifactType.API, organization);
         return Response.status(status).entity(apiRevisionDeploymentDTOS).build();
     }
 
@@ -2101,9 +2187,22 @@ public class McpServersApiServiceImpl implements McpServersApiService {
 
             validateAPIOperationsPerLC(originalAPI.getStatus());
 
+            Map<String, String> complianceResult = PublisherCommonUtils
+                    .checkGovernanceComplianceSync(originalAPI.getUuid(), APIMGovernableState.API_UPDATE,
+                            ArtifactType.API, originalAPI.getOrganization(),
+                            null, null);
+            if (!complianceResult.isEmpty()
+                    && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
+                    && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
+                throw new APIComplianceException(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
+            }
+
             API updatedApi =
                     PublisherCommonUtils.updateApi(originalAPI, new APIDTOTypeWrapper(body), apiProvider, tokenScopes,
                             organizationInfo);
+
+            PublisherCommonUtils.checkGovernanceComplianceAsync(originalAPI.getUuid(), APIMGovernableState.API_UPDATE,
+                    ArtifactType.API, originalAPI.getOrganization());
 
             return Response.ok().entity(APIMappingUtil.fromAPItoMCPServerDTO(updatedApi)).build();
         } catch (APIManagementException e) {

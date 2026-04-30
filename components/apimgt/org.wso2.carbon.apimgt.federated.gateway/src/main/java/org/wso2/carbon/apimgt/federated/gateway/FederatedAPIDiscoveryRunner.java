@@ -27,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIDefinitionProcessor;
 import org.wso2.carbon.apimgt.api.FederatedAPIDiscovery;
 import org.wso2.carbon.apimgt.api.FederatedAPIDiscoveryService;
 import org.wso2.carbon.apimgt.api.dto.ImportedAPIDTO;
@@ -69,6 +70,8 @@ import static org.wso2.carbon.apimgt.impl.APIConstants.DELEM_COLON;
 import static org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil.fromAPItoDTO;
 import static org.wso2.carbon.apimgt.federated.gateway.util.FederatedGatewayConstants.DISCOVERED_API_LIST;
 import static org.wso2.carbon.apimgt.federated.gateway.util.FederatedGatewayConstants.PUBLISHED_API_LIST;
+
+import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionProcessorFactory;
 
 /**
  * This class is responsible for scheduling and executing the discovery of APIs in a federated gateway environment.
@@ -292,10 +295,23 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     JsonObject apiJson = (JsonObject) new Gson().toJsonTree(apidto);
                     apiJson = CommonUtil.addTypeAndVersionToFile(ImportExportConstants.TYPE_API,
                             ImportExportConstants.APIM_VERSION, apiJson);
+                    
+                    APIDefinitionProcessor definitionProcessor = APIDefinitionProcessorFactory.getDefinitionProcessor(api);
+                    String definition = definitionProcessor.getDefinitionFromAPI(api);
+
+                    if (definition == null || StringUtils.isBlank(definition)) {
+                        log.warn("API definition is empty for: " + apidto.getName() + " version: "
+                            + apidto.getVersion());
+                        if (log.isDebugEnabled()) {
+                            log.debug("API type: " + apidto.getType() + ", API object: " + api.toString());
+                        }
+                        continue;
+                    }
+                    
                     InputStream apiZip = FederatedGatewayUtil.createZipAsInputStream(
-                            apiJson.toString(), api.getSwaggerDefinition(),
+                            apiJson.toString(), definition,
                             FederatedGatewayUtil.createDeploymentYaml(environment),
-                            apidto.getName());
+                            apidto.getName(), definitionProcessor.getDefinitionFileName());
 
                     ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
 
@@ -386,6 +402,32 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
             ttlUpdateExecutor.shutdownNow();
             Thread.currentThread().interrupt();
             log.error("Interrupted during federated API discovery shutdown", e);
+        }
+    }
+
+    /**
+     * Stops the federated API discovery task for the specified environment and organization.
+     * If a discovery task is currently running for the given environment and organization, it will be
+     * cancelled and removed from the scheduled tasks.
+     *
+     * @param environment  The environment for which the discovery task should be stopped.
+     * @param organization The organization context for which the discovery task should be stopped.
+     */
+    @Override
+    public void stopDiscovery(Environment environment, String organization) {
+        String taskKey = "FederatedAPIDiscovery" + DELEM_COLON + environment.getName() + DELEM_COLON
+                + organization;
+        if (scheduledDiscoveryTasks.containsKey(taskKey)) {
+            scheduledDiscoveryTasks.get(taskKey).cancel(true);
+            scheduledDiscoveryTasks.remove(taskKey);
+            // Cancel and remove associated heartbeat task
+            ScheduledFuture<?> heartbeat = scheduledHeartBeatTasks.get(taskKey);
+            if (heartbeat != null) {
+                heartbeat.cancel(true);
+                scheduledHeartBeatTasks.remove(taskKey);
+            }
+            log.info("Stopped federated API discovery task for environment: " + environment.getName()
+                    + " in organization: " + organization);
         }
     }
 

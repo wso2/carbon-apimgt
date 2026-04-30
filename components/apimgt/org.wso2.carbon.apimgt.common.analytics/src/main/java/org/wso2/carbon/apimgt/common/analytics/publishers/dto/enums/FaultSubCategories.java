@@ -69,4 +69,14 @@ public class FaultSubCategories {
         SUBSCRIPTION_VALIDATION_FAILURE,
         OTHER
     }
+
+    /**
+     * Enum for sub categories of GuardrailViolation category.
+     */
+    public enum GuardrailViolation implements FaultSubCategory {
+        GUARDRAIL_HIT,
+        RESPONSE_GUARDRAIL_HIT,
+        REQUEST_GUARDRAIL_HIT,
+        OTHER
+    }
 }

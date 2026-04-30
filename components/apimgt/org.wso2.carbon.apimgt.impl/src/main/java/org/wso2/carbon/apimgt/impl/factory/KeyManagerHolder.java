@@ -104,6 +104,10 @@ public class KeyManagerHolder {
                             keyManagerConfiguration.addParameter(APIConstants.KeyManager.ENABLE_APPLICATION_SCOPES,
                                     APIUtil.isApplicationScopesEnabledForResidentKM());
                         }
+                        if (APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE.equals(type)) {
+                            keyManagerConfiguration.addParameter(APIConstants.KeyManager.ENABLE_MULTIPLE_CLIENT_SECRETS,
+                                    APIUtil.isMultipleClientSecretsEnabled());
+                        }
                         keyManager.loadConfiguration(keyManagerConfiguration);
                     } catch (ClassNotFoundException | IllegalAccessException | InstantiationException
                             | NoSuchMethodException | InvocationTargetException e) {

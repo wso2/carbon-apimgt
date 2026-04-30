@@ -35,6 +35,8 @@ public class Constants {
     public static final String API_USER_NAME_KEY = "userName";
     public static final String API_CONTEXT_KEY = "apiContext";
     public static final String RESPONSE_SIZE = "responseSize";
+    public static final String REQUEST_SIZE = "requestSize";
+    public static final String RESOURCE_PATH = "RESOURCE_PATH";
     public static final String RESPONSE_CONTENT_TYPE = "responseContentType";
     public static final String API_ANALYTICS_CUSTOM_DATA_PROVIDER_CLASS = "publisher.custom.data.provider.class";
 
@@ -58,10 +60,14 @@ public class Constants {
 
         public static final int WS_TARGET_FAILURE_START = 1002;
         public static final int WS_TARGET_FAILURE__END = 1015;
+
+        public static final int GUARDRAIL_FAILURE_START = 900514;
+        public static final int GUARDRAIL_FAILURE__END = 900515;
     }
 
     public static final int RESOURCE_NOT_FOUND_ERROR_CODE = 404;
     public static final int METHOD_NOT_ALLOWED_ERROR_CODE = 405;
+    public static final int GUARDRAIL_ERROR_CODE = 900514;
     public static final int ENDPOINT_SUSPENDED_ERROR_CODE = 303001;
     public static final int RESOURCE_NOT_FOUND_APIM_ERROR_CODE = 900906;
 
@@ -95,5 +101,9 @@ public class Constants {
     public static final String AI_TOTAL_TOKEN_USAGE = "totalTokens";
     public static final String IS_EGRESS = "isEgress";
     public static final String SUBTYPE = "subtype";
+
+    public static final String MCP_METHOD = "jsonRpcMethod";
+    public static final String GUARDRAIL_NAME = "guardrailName";
+    public static final String IS_GUARDRAIL_HIT = "isGuardrailHit";
 
 }

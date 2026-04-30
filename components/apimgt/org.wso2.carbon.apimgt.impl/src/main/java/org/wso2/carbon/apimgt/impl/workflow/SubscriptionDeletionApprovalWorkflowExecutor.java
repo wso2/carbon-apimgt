@@ -31,6 +31,12 @@ import java.util.*;
 public class SubscriptionDeletionApprovalWorkflowExecutor extends WorkflowExecutor {
 
     private static final Log log = LogFactory.getLog(SubscriptionDeletionApprovalWorkflowExecutor.class);
+    private static final String API_NAME_PROPERTY = "apiName";
+    private static final String API_VERSION_PROPERTY = "apiVersion";
+    private static final String API_CONTEXT_PROPERTY = "apiContext";
+    private static final String SUBSCRIBER_PROPERTY = "subscriber";
+    private static final String APPLICATION_NAME_PROPERTY = "applicationName";
+    private static final String SUBSCRIPTION_TIER_PROPERTY = "subscriptionTier";
 
     @Override
     public String getWorkflowType() {
@@ -42,20 +48,28 @@ public class SubscriptionDeletionApprovalWorkflowExecutor extends WorkflowExecut
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Executing Subscription Delete Approval Workflow.. ");
+            log.debug("Executing subscription deletion approval workflow. Workflow reference: " + workflowDTO.getWorkflowReference());
         }
         SubscriptionWorkflowDTO subsWorkflowDTO = (SubscriptionWorkflowDTO) workflowDTO;
-        String message = "Approve API " + subsWorkflowDTO.getApiName() + " - " + subsWorkflowDTO.getApiVersion() +
-                " subscription delete request from subscriber - " + subsWorkflowDTO.getSubscriber() +
-                " for the application - " + subsWorkflowDTO.getApplicationName();
+        String message = String.format(
+                "Approve API %s - %s subscription delete request from subscriber - %s for the application - %s",
+                subsWorkflowDTO.getApiName(),
+                subsWorkflowDTO.getApiVersion(),
+                subsWorkflowDTO.getSubscriber(),
+                subsWorkflowDTO.getApplicationName()
+        );
         workflowDTO.setWorkflowDescription(message);
-        workflowDTO.setProperties("apiName", subsWorkflowDTO.getApiName());
-        workflowDTO.setProperties("apiVersion", subsWorkflowDTO.getApiVersion());
-        workflowDTO.setProperties("subscriber", subsWorkflowDTO.getSubscriber());
-        workflowDTO.setProperties("applicationName", subsWorkflowDTO.getApplicationName());
-        workflowDTO.setProperties("currentTier", subsWorkflowDTO.getTierName());
-        workflowDTO.setProperties("requestedTier", subsWorkflowDTO.getRequestedTierName());
+        workflowDTO.setProperties(API_NAME_PROPERTY, subsWorkflowDTO.getApiName());
+        workflowDTO.setProperties(API_VERSION_PROPERTY, subsWorkflowDTO.getApiVersion());
+        workflowDTO.setProperties(API_CONTEXT_PROPERTY, subsWorkflowDTO.getApiContext());
+        workflowDTO.setProperties(APPLICATION_NAME_PROPERTY, subsWorkflowDTO.getApplicationName());
+        workflowDTO.setProperties(SUBSCRIPTION_TIER_PROPERTY, subsWorkflowDTO.getTierName());
+        workflowDTO.setProperties(SUBSCRIBER_PROPERTY, subsWorkflowDTO.getSubscriber());
         super.execute(workflowDTO);
+        if (log.isDebugEnabled()) {
+            log.debug("Subscription deletion approval workflow executed successfully. Workflow reference: "
+                    + workflowDTO.getWorkflowReference());
+        }
 
         return new GeneralWorkflowResponse();
     }

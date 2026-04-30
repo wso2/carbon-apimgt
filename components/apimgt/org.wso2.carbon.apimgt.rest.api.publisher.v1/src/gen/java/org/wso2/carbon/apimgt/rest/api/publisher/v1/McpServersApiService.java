@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LabelListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
 import java.util.List;
@@ -34,6 +35,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerProxyRequestDTO
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerValidationRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.RequestLabelListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 
@@ -49,6 +51,7 @@ public interface McpServersApiService {
       public Response addCommentToMCPServer(String mcpServerId, CommentRequestDTO commentRequestDTO, String replyTo, MessageContext messageContext) throws APIManagementException;
       public Response addMCPServerDocument(String mcpServerId, DocumentDTO documentDTO, MessageContext messageContext) throws APIManagementException;
       public Response addMCPServerDocumentContent(String mcpServerId, String documentId, String ifMatch, InputStream fileInputStream, Attachment fileDetail, String inlineContent, MessageContext messageContext) throws APIManagementException;
+      public Response attachLabelsToMCPServer(String mcpServerId, RequestLabelListDTO requestLabelListDTO, MessageContext messageContext) throws APIManagementException;
       public Response changeMCPServerLifecycle(String action, String mcpServerId, String lifecycleChecklist, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response createMCPServerFromAPI(MCPServerDTO mcPServerDTO, String openAPIVersion, MessageContext messageContext) throws APIManagementException;
       public Response createMCPServerFromOpenAPI(InputStream fileInputStream, Attachment fileDetail, String url, String additionalProperties, MessageContext messageContext) throws APIManagementException;
@@ -62,12 +65,14 @@ public interface McpServersApiService {
       public Response deleteMCPServerRevision(String mcpServerId, String revisionId, MessageContext messageContext) throws APIManagementException;
       public Response deleteMCPServerRevisionDeploymentPendingTask(String mcpServerId, String revisionId, String envName, MessageContext messageContext) throws APIManagementException;
       public Response deployMCPServerRevision(String mcpServerId, String revisionId, List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTO, MessageContext messageContext) throws APIManagementException;
+      public Response detachLabelsFromMCPServer(String mcpServerId, RequestLabelListDTO requestLabelListDTO, MessageContext messageContext) throws APIManagementException;
       public Response editCommentOfMCPServer(String commentId, String mcpServerId, CommentRequestDTO commentRequestDTO, MessageContext messageContext) throws APIManagementException;
       public Response exportMCPServer(String mcpServerId, String name, String version, String revisionNumber, String providerName, String format, Boolean preserveStatus, Boolean latestRevision, String gatewayEnvironment, Boolean preserveCredentials, MessageContext messageContext) throws APIManagementException;
       public Response generateInternalAPIKeyMCPServer(String mcpServerId, MessageContext messageContext) throws APIManagementException;
       public Response getAllCommentsOfMCPServer(String mcpServerId, String xWSO2Tenant, Integer limit, Integer offset, Boolean includeCommenterInfo, MessageContext messageContext) throws APIManagementException;
       public Response getAllMCPServers(Integer limit, Integer offset, String xWSO2Tenant, String query, String ifNoneMatch, String accept, MessageContext messageContext) throws APIManagementException;
       public Response getCommentOfMCPServer(String commentId, String mcpServerId, String xWSO2Tenant, String ifNoneMatch, Boolean includeCommenterInfo, Integer replyLimit, Integer replyOffset, MessageContext messageContext) throws APIManagementException;
+      public Response getLabelsOfMCPServer(String mcpServerId, MessageContext messageContext) throws APIManagementException;
       public Response getMCPServer(String mcpServerId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getMCPServerBackend(String mcpServerId, String backendId, MessageContext messageContext) throws APIManagementException;
       public Response getMCPServerBackends(String mcpServerId, MessageContext messageContext) throws APIManagementException;

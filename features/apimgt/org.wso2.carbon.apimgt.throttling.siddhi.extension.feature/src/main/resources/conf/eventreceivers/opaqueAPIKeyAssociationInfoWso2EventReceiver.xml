@@ -1,0 +1,10 @@
+<eventReceiver name="OpaqueAPIKeyAssociationInfoWso2EventReceiver"
+               statistics="disable"
+               trace="disable"
+               xmlns="http://wso2.org/carbon/eventreceiver">
+    <from eventAdapterType="wso2event">
+        <property name="events.duplicated.in.cluster">false</property>
+    </from>
+    <mapping type="wso2event" customMapping="disable"/>
+    <to streamName="org.wso2.apimgt.api.key.association.info.stream" version="1.0.0"/>
+</eventReceiver>

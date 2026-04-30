@@ -173,11 +173,11 @@ public class JWTValidator {
 
         String apiType = (String) synCtx.getProperty(APIMgtGatewayConstants.API_TYPE);
         if (org.apache.commons.lang3.StringUtils.equals(APIConstants.API_TYPE_MCP, apiType)) {
-            Object mcpMethodProperty = synCtx.getProperty("MCP_HTTP_METHOD");
+            Object mcpMethodProperty = synCtx.getProperty(APIMgtGatewayConstants.MCP_HTTP_METHOD_KEY);
             if (mcpMethodProperty != null) {
                 httpMethod = mcpMethodProperty.toString();
             }
-            matchingResource = (String) synCtx.getProperty("MCP_API_ELECTED_RESOURCE");
+            matchingResource = (String) synCtx.getProperty(APIMgtGatewayConstants.MCP_API_ELECTED_RESOURCE_KEY);
         }
 
         // Check for CNF validation

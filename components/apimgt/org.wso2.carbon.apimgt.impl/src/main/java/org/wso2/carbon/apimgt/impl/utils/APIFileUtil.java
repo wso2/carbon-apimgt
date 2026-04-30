@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -296,5 +297,37 @@ public class APIFileUtil {
             }
         }
         return false;
+    }
+
+    /**
+     * Returns the root WSDL file from the extracted WSDL archive directory. The first found WSDL file is considered the
+     * root, consistent with the assumption made in WSDL11ProcessorImpl and WSDL20ProcessorImpl.
+     *
+     * @param extractedArchivePath path to the extracted WSDL archive directory
+     * @return the root WSDL input stream
+     */
+    public static InputStream getRootWSDLFileFromExtractedArchive(String extractedArchivePath)
+            throws APIManagementException {
+        try {
+            File extractedDir = new File(extractedArchivePath);
+            if (!extractedDir.exists() || !extractedDir.isDirectory()) {
+                throw new APIManagementException(
+                        "Extracted WSDL archive path is not a directory.", ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT);
+            }
+            Collection<File> wsdlFiles = searchFilesWithMatchingExtension(extractedDir, WSDL_FILE_EXTENSION);
+            if (wsdlFiles == null || wsdlFiles.isEmpty()) {
+                log.warn("No WSDL files found in extracted archive path " + extractedArchivePath);
+                throw new APIManagementException("", ExceptionCodes.NO_WSDL_FOUND_IN_WSDL_ARCHIVE);
+            }
+            File rootWsdl = wsdlFiles.iterator().next();
+            if (log.isDebugEnabled()) {
+                log.debug("Root WSDL file found in the extracted archive: " + rootWsdl.getAbsolutePath());
+            }
+            return Files.newInputStream(rootWsdl.toPath());
+        } catch (IOException e) {
+            String errorMsg = "Error while getting content of the main WSDL file.";
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT);
+        }
     }
 }

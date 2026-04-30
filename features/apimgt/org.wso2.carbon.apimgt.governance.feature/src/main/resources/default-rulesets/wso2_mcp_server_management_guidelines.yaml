@@ -1,0 +1,325 @@
+# Copyright (c) 2025, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
+#
+# This software is the property of WSO2 LLC. and its suppliers, if any.
+# Dissemination of any information or reproduction of any material contained
+# herein in any form is strictly forbidden, unless permitted by WSO2 expressly.
+# You may not alter or remove any copyright or other notice from copies of this content.
+
+name: WSO2 MCP Server Management Guidelines
+description: >-
+  A guide detailing best practices for creating robust, scalable, and secure
+  MCP Servers, ensuring alignment with industry standards for optimal design.
+ruleCategory: SPECTRAL
+ruleType: API_METADATA
+artifactType: MCP
+documentationLink: "https://apim.docs.wso2.com/en/4.5.0/reference/governance/wso2-api-management-guidelines/"
+provider: WSO2
+rulesetContent:
+  rules:
+    mcp-name-required:
+      description: "MCP Server name is required."
+      message: "MCP Server name is required."
+      severity: "error"
+      given: "$.data"
+      then:
+        field: "name"
+        function: "truthy"
+
+    mcp-name-no-special-characters:
+      description: "MCP Server name should not contain whitespaces or special characters except\
+        \ for hyphens, underscores and periods."
+      message: "MCP Server name contains spaces or special characters. Use only letters, numbers,\
+        \ hyphens, underscores and periods."
+      severity: "error"
+      given: "$.data.name"
+      then:
+        function: "pattern"
+        functionOptions:
+          match: "^[a-zA-Z0-9-_\\.]+$"
+
+    mcp-name-length:
+      description: "MCP Server name should be between 1 and 50 characters."
+      message: "MCP Server name must be between 1 and 50 characters."
+      severity: "error"
+      given: "$.data.name"
+      then:
+        function: "length"
+        functionOptions:
+          min: 1
+          max: 50
+
+    mcp-name-cannot-contain-version:
+      description: "MCP Server name should not contain a semantic version substring (e.g.,\
+        \ x.y.z). This helps keep the version separate from the API name.\n**Correct\
+        \ Example**: ```json {\n  \"data\": {\n    \"name\": \"CustomerProfileAPI\"\n\
+        \  }\n} ```\n**Incorrect Example**: ```json {\n  \"data\": {\n    \"name\":\
+        \ \"CustomerProfileAPI-1.2.3\"\n  }\n} ```\n"
+      message: "MCP Server name should not contain the version."
+      severity: "warn"
+      given: "$.data.name"
+      then:
+        function: "pattern"
+        functionOptions:
+          notMatch: "[0-9]+\\.[0-9]+\\.[0-9]+"
+
+    mcp-context-required:
+      description: "Checks that the MCP Server context field is present and starts with a slash."
+      message: "MCP Server 'context' must be present and begin with '/'."
+      severity: "error"
+      given: "$.data"
+      then:
+        field: "context"
+        function: "truthy"
+
+    mcp-context-no-special-characters:
+      description: "MCP Server context should not contain whitespaces or special characters\
+        \ except for hyphens, underscores, periods and forward slashes."
+      message: "MCP Server context contains spaces or special characters. Use only letters,\
+        \ numbers, hyphens, underscores, periods and forwards slashes."
+      severity: "error"
+      given: "$.data.context"
+      then:
+        function: "pattern"
+        functionOptions:
+          match: "^/[\\{\\}/a-zA-Z0-9-_\\\\.]+$"
+
+    mcp-context-length:
+      description: "MCP Server context should be between 1 and 200 characters."
+      message: "AMCP ServerPI context must be between 1 and 200 characters."
+      severity: "error"
+      given: "$.data.context"
+      then:
+        function: "length"
+        functionOptions:
+          min: 1
+          max: 200
+
+    mcp-context-cannot-end-with-slash:
+      description: "MCP Server context should not end with a slash. For example, `/myapi/`\
+        \ is disallowed.\n**Correct Example**: ```json {\n  \"data\": {\n    \"context\"\
+        : \"/myapi\"\n  }\n} ```\n**Incorrect Example**: ```json {\n  \"data\": {\n\
+        \    \"context\": \"/myapi/\"\n  }\n} ```\n"
+      message: "MCP Server context should not end with a slash."
+      severity: "error"
+      given: "$.data.context"
+      then:
+        function: "pattern"
+        functionOptions:
+          notMatch: "/$"
+
+    mcp-context-cannot-contain-version:
+      description: "MCP Server context should not contain the version (e.g., x.y.z) embedded.\
+        \ Instead, the version is specified separately in the 'version' field.\n**Correct\
+        \ Example**: ```json {\n  \"data\": {\n    \"context\": \"/customer\"\n  }\n\
+        } ```\n**Incorrect Example**: ```json {\n  \"data\": {\n    \"context\": \"\
+        /customer/1.2.3\"\n  }\n} ```\n"
+      message: "MCP Server context should not contain the version."
+      severity: "warn"
+      given: "$.data.context"
+      then:
+        function: "pattern"
+        functionOptions:
+          notMatch: "[0-9]+\\.[0-9]+\\.[0-9]+"
+
+    mcp-version-required:
+      description: "Verifies the MCP Server version is specified and not empty."
+      message: "MCP Server 'version' is missing or empty."
+      severity: "error"
+      given: "$.data"
+      then:
+        field: "version"
+        function: "truthy"
+
+    mcp-tool-name-character-length:
+      description: When feature is TOOL, target must be 2-5 characters long.
+      message: When feature is TOOL, target must be 2-5 characters long.
+      severity: error
+      given: $.data.operations[*]
+      then:
+        function: schema
+        functionOptions:
+          dialect: draft4
+          schema:
+            type: object
+            required:
+              - feature
+            anyOf:
+              - properties:
+                  feature:
+                    not:
+                      enum:
+                        - TOOL
+              - required:
+                  - target
+                properties:
+                  feature:
+                    enum:
+                      - TOOL
+                  target:
+                    type: string
+                    minLength: 1
+                    maxLength: 128
+
+    mcp-tool-name-allowed-characters:
+      description: When feature is TOOL, target may contain only ASCII letters, digits, underscore, hyphen, and dot.
+      message: When feature is TOOL, target may contain only A-Z, a-z, 0-9, _, -, and .
+      severity: error
+      given: $.data.operations[*]
+      then:
+        function: schema
+        functionOptions:
+          dialect: draft4
+          schema:
+            type: object
+            required:
+              - feature
+            anyOf:
+              - properties:
+                  feature:
+                    not:
+                      enum:
+                        - TOOL
+              - required:
+                  - target
+                properties:
+                  feature:
+                    enum:
+                      - TOOL
+                  target:
+                    type: string
+                    pattern: '^[A-Za-z0-9_.-]+$'
+
+    mcp-no-unlimited-business-plan:
+      description: "MCP server should not have an unlimited business plan."
+      message: "MCP server should not have an unlimited business plan."
+      severity: "warn"
+      given: "$.data.policies.*"
+      then:
+        function: "pattern"
+        functionOptions:
+          notMatch: "Unlimited"
+
+    mcp-no-insecure-transports:
+      description: "MCP Server should not have insecure transports."
+      message: "MCP Server should not have insecure transports."
+      severity: "warn"
+      given: "$.data.transport.*"
+      then:
+        function: "pattern"
+        functionOptions:
+          notMatch: "http$"
+
+    mcp-tags:
+      description: "MCP Server should have tags."
+      message: "MCP Server should have tags."
+      severity: "warn"
+      given: "$.data"
+      then:
+        field: "tags"
+        function: "truthy"
+
+    mcp-tags-count:
+      description: "MCP Server should have at least one tag."
+      message: "MCP Server should have at least one tag."
+      severity: "warn"
+      given: "$.data.tags"
+      then:
+        function: "length"
+        functionOptions:
+          min: 1
+
+    mcp-business-owner-email:
+      description: "Checks that the business owner’s email is set"
+      message: "Business owner email is missing or empty."
+      severity: "warn"
+      given: "$.data.businessInformation"
+      then:
+        field: "businessOwnerEmail"
+        function: "truthy"
+
+    mcp-business-owner-email-format:
+      description: "Checks that the business owner’s email is valid."
+      message: "Business owner email seems invalid. Please use a proper email format."
+      severity: "error"
+      given: "$.data.businessInformation"
+      then:
+        field: "businessOwnerEmail"
+        function: "pattern"
+        functionOptions:
+          match: "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"
+
+    mcp-business-owner:
+      description: "Checks that the business owner is set"
+      message: "Business owner is missing or empty."
+      severity: "warn"
+      given: "$.data.businessInformation"
+      then:
+        field: "businessOwner"
+        function: "truthy"
+
+    mcp-technical-owner:
+      description: "Checks that the technical owner is set"
+      message: "Technical owner is missing or empty."
+      severity: "warn"
+      given: "$.data.businessInformation"
+      then:
+        field: "technicalOwner"
+        function: "truthy"
+
+    mcp-technical-owner-email:
+      description: "Checks that the technical owner’s email is set"
+      message: "Technical owner email is missing or empty."
+      severity: "warn"
+      given: "$.data.businessInformation"
+      then:
+        field: "technicalOwnerEmail"
+        function: "truthy"
+
+    mcp-technical-owner-email-format:
+      description: "Checks that the technical owner’s email is valid."
+      message: "Technical owner email seems invalid. Please use a proper email format."
+      severity: "error"
+      given: "$.data.businessInformation"
+      then:
+        field: "technicalOwnerEmail"
+        function: "pattern"
+        functionOptions:
+          match: "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"
+
+    mcp-no-unlimited-throttling-policy:
+      description: "MCP Server should not have an unlimited throttling policy."
+      message: "MCP Server should not have an unlimited throttling policy."
+      severity: "warn"
+      given: "$.data.apiThrottlingPolicy"
+      then:
+        function: "pattern"
+        functionOptions:
+          notMatch: "^Unlimited$"
+
+    mcp-resources-security-required:
+      description: "Checks that security is enabled for all resources."
+      message: "Security is not enabled for all resources."
+      severity: "error"
+      given: "$.data.operations.*"
+      then:
+        field: "authType"
+        function: "pattern"
+        functionOptions:
+          notMatch: "None"
+
+    mcp-operations-description-defined:
+      description: "All MCP Server operations must have a description"
+      message: "All MCP Server operations must have a description"
+      severity: "error"
+      given: "$.data.operations.*"
+      then:
+        function: "defined"
+        field: "description"
+
+    mcp-operations-description-provided:
+      description: "All MCP Server operations must have a non-empty description provided"
+      message: "All MCP Server operations must have a non-empty description provided"
+      severity: "error"
+      given: $.data.operations.*.description
+      then:
+        function: truthy

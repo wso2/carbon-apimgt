@@ -32,6 +32,7 @@ public class APIMGovernanceConstants {
     public static final String ASYNC_API_FILE_NAME = "asyncapi.yaml";
     public static final String DOC_META_DATA_FILE_NAME = "document.yaml";
     public static final String API_FILE_NAME = "api.yaml";
+    public static final String MCP_FILE_NAME = "mcp_server.yaml";
 
     public static final String DEFAULT_RULESET_LOCATION = "repository" + File.separator
             + "resources" + File.separator + "governance" + File.separator + "default-rulesets";

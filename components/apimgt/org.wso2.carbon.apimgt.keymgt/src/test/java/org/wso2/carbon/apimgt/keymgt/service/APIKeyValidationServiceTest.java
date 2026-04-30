@@ -29,6 +29,7 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
@@ -183,6 +184,262 @@ public class APIKeyValidationServiceTest {
         } catch (Exception e) {
             Assert.assertEquals(e.getMessage(), e.getMessage());
         }
+    }
+
+    /**
+     * Test case for application tokens with opaque token validation when JWT generation is disabled.
+     * Validates that endUserName is correctly set to the subscriber when JWT generation is disabled.
+     */
+    @Test
+    public void testApplicationTokenWithJwtDisabled() throws Exception {
+        // Setup
+        KeyValidationHandler keyValidationHandler = Mockito.mock(DefaultKeyValidationHandler.class);
+        Mockito.when(serviceReferenceHolder.getKeyValidationHandler(TENANT_DOMAIN))
+                .thenReturn(keyValidationHandler);
+        
+        // Disable JWT generation
+        PowerMockito.when(APIKeyMgtDataHolder.isJwtGenerationEnabled()).thenReturn(false);
+        
+        // Setup AccessTokenInfo for application token
+        AccessTokenInfo tokenInfo = new AccessTokenInfo();
+        tokenInfo.setApplicationToken(true); // This is an application token
+        tokenInfo.setTokenValid(true);
+        tokenInfo.setConsumerKey(CONSUMER_KEY);
+        
+        // Mock validation handler to set tokenInfo and validation result
+        Mockito.when(keyValidationHandler.validateToken(Mockito.any(TokenValidationContext.class)))
+                .thenAnswer(invocation -> {
+                    TokenValidationContext ctx = invocation.getArgument(0);
+                    ctx.setTokenInfo(tokenInfo);
+                    APIKeyValidationInfoDTO dto = ctx.getValidationInfoDTO();
+                    dto.setAuthorized(true);
+                    dto.setSubscriber("subscriber1");
+                    dto.setSubscriberTenantDomain(TENANT_DOMAIN);
+                    return true;
+                });
+        Mockito.when(keyValidationHandler.validateSubscription(Mockito.any(TokenValidationContext.class)))
+                .thenReturn(true);
+        Mockito.when(keyValidationHandler.validateScopes(Mockito.any(TokenValidationContext.class)))
+                .thenReturn(true);
+        
+        // Clear cache to force non-cache hit
+        PowerMockito.when(APIKeyMgtUtil.getFromKeyManagerCache(Mockito.anyString())).thenReturn(null);
+        
+        APIKeyValidationService service = new APIKeyValidationService();
+        
+        // Call validateKey method
+        APIKeyValidationInfoDTO result = service.validateKey(API_CONTEXT, API_VERSION, ACCESS_TOKEN,
+                REQUIRED_AUTHENTICATION_LEVEL, "/resource", "GET", TENANT_DOMAIN, keymanagers);
+        
+        // Verify that endUserName is set correctly for application token even when JWT generation is disabled
+        Assert.assertNotNull("Result should not be null", result);
+        Assert.assertTrue("Token should be authorized", result.isAuthorized());
+        Assert.assertNotNull("End user should not be null for application token", result.getEndUserName());
+        Assert.assertEquals("End user should be subscriber for app token", "subscriber1", result.getEndUserName());
+    }
+
+    /**
+     * Test case for cache hit scenarios where tokenInfo may be null.
+     * Validates that endUserName is not overridden when tokenInfo is null (cache hit scenario).
+     */
+    @Test
+    public void testCacheHitWithNullTokenInfo() throws Exception {
+        // Setup
+        KeyValidationHandler keyValidationHandler = Mockito.mock(DefaultKeyValidationHandler.class);
+        Mockito.when(serviceReferenceHolder.getKeyValidationHandler(TENANT_DOMAIN))
+                .thenReturn(keyValidationHandler);
+        
+        // Disable JWT generation
+        PowerMockito.when(APIKeyMgtDataHolder.isJwtGenerationEnabled()).thenReturn(false);
+        
+        // Setup cached validation info with pre-existing endUserName
+        String cacheKey = APIUtil.getAccessTokenCacheKey(ACCESS_TOKEN, API_CONTEXT, API_VERSION, "/resource", "GET",
+                REQUIRED_AUTHENTICATION_LEVEL);
+        APIKeyValidationInfoDTO cachedInfo = new APIKeyValidationInfoDTO();
+        cachedInfo.setAuthorized(true);
+        cachedInfo.setEndUserName("cachedUser@domain.com");
+        cachedInfo.setApiPublisher(USER_NAME);
+        cachedInfo.setApiName(API_NAME);
+        
+        // Mock cache hit - returns cached info
+        PowerMockito.when(APIKeyMgtUtil.getFromKeyManagerCache(cacheKey)).thenReturn(cachedInfo);
+        
+        APIKeyValidationService service = new APIKeyValidationService();
+        
+        // Call validateKey method - should return cached info
+        APIKeyValidationInfoDTO result = service.validateKey(API_CONTEXT, API_VERSION, ACCESS_TOKEN,
+                REQUIRED_AUTHENTICATION_LEVEL, "/resource", "GET", TENANT_DOMAIN, keymanagers);
+        
+        // Verify that cached endUserName is preserved (tokenInfo is null in cache hits)
+        Assert.assertNotNull("Result should not be null", result);
+        Assert.assertTrue("Token should be authorized", result.isAuthorized());
+        Assert.assertEquals("End user should remain as cached value", "cachedUser@domain.com", 
+                result.getEndUserName());
+    }
+
+    /**
+     * Test case for non-application tokens (user tokens) to ensure correct endUserName is set.
+     * Validates that endUserName is set from token's endUserName field for user tokens.
+     */
+    @Test
+    public void testNonApplicationTokenEndUserName() throws Exception {
+        // Setup
+        KeyValidationHandler keyValidationHandler = Mockito.mock(DefaultKeyValidationHandler.class);
+        Mockito.when(serviceReferenceHolder.getKeyValidationHandler(TENANT_DOMAIN))
+                .thenReturn(keyValidationHandler);
+        
+        // Disable JWT generation
+        PowerMockito.when(APIKeyMgtDataHolder.isJwtGenerationEnabled()).thenReturn(false);
+        
+        // Setup AccessTokenInfo for user token (NOT application token)
+        AccessTokenInfo tokenInfo = new AccessTokenInfo();
+        tokenInfo.setApplicationToken(false); // This is a user token
+        tokenInfo.setTokenValid(true);
+        tokenInfo.setEndUserName("user1@domain.com");
+        tokenInfo.setConsumerKey(CONSUMER_KEY);
+        
+        // Mock validation handler to set tokenInfo and validation result
+        Mockito.when(keyValidationHandler.validateToken(Mockito.any(TokenValidationContext.class)))
+                .thenAnswer(invocation -> {
+                    TokenValidationContext ctx = invocation.getArgument(0);
+                    ctx.setTokenInfo(tokenInfo);
+                    APIKeyValidationInfoDTO dto = ctx.getValidationInfoDTO();
+                    dto.setAuthorized(true);
+                    dto.setEndUserName("user1@domain.com"); // Set from token introspection
+                    dto.setSubscriber("subscriber1");
+                    dto.setSubscriberTenantDomain(TENANT_DOMAIN);
+                    return true;
+                });
+        Mockito.when(keyValidationHandler.validateSubscription(Mockito.any(TokenValidationContext.class)))
+                .thenReturn(true);
+        Mockito.when(keyValidationHandler.validateScopes(Mockito.any(TokenValidationContext.class)))
+                .thenReturn(true);
+        
+        // Clear cache to force non-cache hit
+        PowerMockito.when(APIKeyMgtUtil.getFromKeyManagerCache(Mockito.anyString())).thenReturn(null);
+        
+        APIKeyValidationService service = new APIKeyValidationService();
+        
+        // Call validateKey method
+        APIKeyValidationInfoDTO result = service.validateKey(API_CONTEXT, API_VERSION, ACCESS_TOKEN,
+                REQUIRED_AUTHENTICATION_LEVEL, "/resource", "GET", TENANT_DOMAIN, keymanagers);
+        
+        // Verify that endUser is correctly set for user token (not application token)
+        Assert.assertNotNull("Result should not be null", result);
+        Assert.assertTrue("Token should be authorized", result.isAuthorized());
+        Assert.assertNotNull("End user should not be null for user token", result.getEndUserName());
+        Assert.assertEquals("End user should match token's endUserName for user token", 
+                "user1@domain.com", result.getEndUserName());
+    }
+
+    /**
+     * Test case for application tokens with super tenant domain.
+     * Validates that endUserName includes tenant domain suffix for super tenant.
+     */
+    @Test
+    public void testApplicationTokenWithSuperTenantDomain() throws Exception {
+        // Setup
+        KeyValidationHandler keyValidationHandler = Mockito.mock(DefaultKeyValidationHandler.class);
+        Mockito.when(serviceReferenceHolder.getKeyValidationHandler(APIConstants.SUPER_TENANT_DOMAIN))
+                .thenReturn(keyValidationHandler);
+        
+        // Disable JWT generation
+        PowerMockito.when(APIKeyMgtDataHolder.isJwtGenerationEnabled()).thenReturn(false);
+        
+        // Setup AccessTokenInfo for application token
+        AccessTokenInfo tokenInfo = new AccessTokenInfo();
+        tokenInfo.setApplicationToken(true); // This is an application token
+        tokenInfo.setTokenValid(true);
+        tokenInfo.setConsumerKey(CONSUMER_KEY);
+        
+        // Mock validation handler to set tokenInfo and validation result
+        Mockito.when(keyValidationHandler.validateToken(Mockito.any(TokenValidationContext.class)))
+                .thenAnswer(invocation -> {
+                    TokenValidationContext ctx = invocation.getArgument(0);
+                    ctx.setTokenInfo(tokenInfo);
+                    APIKeyValidationInfoDTO dto = ctx.getValidationInfoDTO();
+                    dto.setAuthorized(true);
+                    dto.setSubscriber("appOwner");
+                    dto.setSubscriberTenantDomain(APIConstants.SUPER_TENANT_DOMAIN);
+                    return true;
+                });
+        Mockito.when(keyValidationHandler.validateSubscription(Mockito.any(TokenValidationContext.class)))
+                .thenReturn(true);
+        Mockito.when(keyValidationHandler.validateScopes(Mockito.any(TokenValidationContext.class)))
+                .thenReturn(true);
+        
+        // Clear cache to force non-cache hit
+        PowerMockito.when(APIKeyMgtUtil.getFromKeyManagerCache(Mockito.anyString())).thenReturn(null);
+        
+        APIKeyValidationService service = new APIKeyValidationService();
+        
+        // Call validateKey method
+        APIKeyValidationInfoDTO result = service.validateKey(API_CONTEXT, API_VERSION, ACCESS_TOKEN,
+                REQUIRED_AUTHENTICATION_LEVEL, "/resource", "GET", 
+                APIConstants.SUPER_TENANT_DOMAIN, keymanagers);
+        
+        // Verify that endUser includes tenant domain for super tenant
+        Assert.assertNotNull("Result should not be null", result);
+        Assert.assertTrue("Token should be authorized", result.isAuthorized());
+        Assert.assertNotNull("End user should not be null", result.getEndUserName());
+        Assert.assertTrue("End user should include tenant domain for super tenant", 
+                result.getEndUserName().contains("@" + APIConstants.SUPER_TENANT_DOMAIN));
+        Assert.assertEquals("End user format should be subscriber@domain", 
+                "appOwner@" + APIConstants.SUPER_TENANT_DOMAIN, result.getEndUserName());
+    }
+
+    /**
+     * Test case for application tokens with non-super tenant domain.
+     * Validates that endUserName does not include tenant domain suffix for non-super tenant.
+     */
+    @Test
+    public void testApplicationTokenWithNonSuperTenantDomain() throws Exception {
+        // Setup
+        KeyValidationHandler keyValidationHandler = Mockito.mock(DefaultKeyValidationHandler.class);
+        Mockito.when(serviceReferenceHolder.getKeyValidationHandler(TENANT_DOMAIN))
+                .thenReturn(keyValidationHandler);
+        
+        // Disable JWT generation
+        PowerMockito.when(APIKeyMgtDataHolder.isJwtGenerationEnabled()).thenReturn(false);
+        
+        // Setup AccessTokenInfo for application token
+        AccessTokenInfo tokenInfo = new AccessTokenInfo();
+        tokenInfo.setApplicationToken(true); // This is an application token
+        tokenInfo.setTokenValid(true);
+        tokenInfo.setConsumerKey(CONSUMER_KEY);
+        
+        // Mock validation handler to set tokenInfo and validation result
+        Mockito.when(keyValidationHandler.validateToken(Mockito.any(TokenValidationContext.class)))
+                .thenAnswer(invocation -> {
+                    TokenValidationContext ctx = invocation.getArgument(0);
+                    ctx.setTokenInfo(tokenInfo);
+                    APIKeyValidationInfoDTO dto = ctx.getValidationInfoDTO();
+                    dto.setAuthorized(true);
+                    dto.setSubscriber("appOwner");
+                    dto.setSubscriberTenantDomain(TENANT_DOMAIN); // Non-super tenant
+                    return true;
+                });
+        Mockito.when(keyValidationHandler.validateSubscription(Mockito.any(TokenValidationContext.class)))
+                .thenReturn(true);
+        Mockito.when(keyValidationHandler.validateScopes(Mockito.any(TokenValidationContext.class)))
+                .thenReturn(true);
+        
+        // Clear cache to force non-cache hit
+        PowerMockito.when(APIKeyMgtUtil.getFromKeyManagerCache(Mockito.anyString())).thenReturn(null);
+        
+        APIKeyValidationService service = new APIKeyValidationService();
+        
+        // Call validateKey method
+        APIKeyValidationInfoDTO result = service.validateKey(API_CONTEXT, API_VERSION, ACCESS_TOKEN,
+                REQUIRED_AUTHENTICATION_LEVEL, "/resource", "GET", TENANT_DOMAIN, keymanagers);
+        
+        // Verify that endUser does not include tenant domain for non-super tenant
+        Assert.assertNotNull("Result should not be null", result);
+        Assert.assertTrue("Token should be authorized", result.isAuthorized());
+        Assert.assertNotNull("End user should not be null", result.getEndUserName());
+        Assert.assertFalse("End user should not include tenant domain for non-super tenant", 
+                result.getEndUserName().contains("@"));
+        Assert.assertEquals("End user should be just the subscriber name", "appOwner", result.getEndUserName());
     }
 
 }

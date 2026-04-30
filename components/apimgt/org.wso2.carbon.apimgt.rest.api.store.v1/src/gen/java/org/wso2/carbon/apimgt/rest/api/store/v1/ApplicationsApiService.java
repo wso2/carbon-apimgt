@@ -10,9 +10,15 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIInfoListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyAssociationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyAssociationListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyDissociateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyGenerateRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyRenewRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyRevokeRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AppAPIKeyAssociateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyDTO;
@@ -24,8 +30,13 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationThrottleResetDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenGenerateRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ConsumerSecretCreationRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ConsumerSecretDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ConsumerSecretDeletionRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ConsumerSecretListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ErrorDTO;
 import java.io.File;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscribedAPIWithApiKeyListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.WorkflowResponseDTO;
 
 import java.util.List;
@@ -38,7 +49,7 @@ import javax.ws.rs.core.SecurityContext;
 
 public interface ApplicationsApiService {
       public Response applicationsApplicationIdApiKeysKeyTypeGeneratePost(String applicationId, String keyType, String ifMatch, APIKeyGenerateRequestDTO apIKeyGenerateRequestDTO, MessageContext messageContext) throws APIManagementException;
-      public Response applicationsApplicationIdApiKeysKeyTypeRevokePost(String applicationId, String keyType, String ifMatch, APIKeyRevokeRequestDTO apIKeyRevokeRequestDTO, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsApplicationIdApiKeysKeyTypeRevokePost(String applicationId, String keyType, APIKeyRevokeRequestDTO apIKeyRevokeRequestDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdDelete(String applicationId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdGenerateKeysPost(String applicationId, ApplicationKeyGenerateRequestDTO applicationKeyGenerateRequestDTO, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdGet(String applicationId, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
@@ -62,4 +73,13 @@ public interface ApplicationsApiService {
       public Response applicationsGet(String groupId, String query, String sortBy, String sortOrder, Integer limit, Integer offset, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response applicationsImportPost(InputStream fileInputStream, Attachment fileDetail, Boolean preserveOwner, Boolean skipSubscriptions, String appOwner, Boolean skipApplicationKeys, Boolean update, Boolean ignoreTier, MessageContext messageContext) throws APIManagementException;
       public Response applicationsPost(ApplicationDTO applicationDTO, MessageContext messageContext) throws APIManagementException;
+      public Response associateAPIKeyToApp(String applicationId, String keyType, AppAPIKeyAssociateRequestDTO appAPIKeyAssociateRequestDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response dissociateAPIKeyFromApp(String applicationId, String keyType, APIKeyDissociateRequestDTO apIKeyDissociateRequestDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response generateConsumerSecret(String applicationId, String keyMappingId, ConsumerSecretCreationRequestDTO consumerSecretCreationRequestDTO, MessageContext messageContext) throws APIManagementException;
+      public Response getAPIKeyAssociationsForApp(String applicationId, String keyType, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response getAppBoundAPIKeys(String applicationId, String keyType, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response getConsumerSecrets(String applicationId, String keyMappingId, MessageContext messageContext) throws APIManagementException;
+      public Response getSubscribedAPIsWithAPIKeys(String applicationId, String keyType, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response regenerateAppBoundAPIKey(String applicationId, String keyType, APIKeyRenewRequestDTO apIKeyRenewRequestDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response revokeConsumerSecret(String applicationId, String keyMappingId, ConsumerSecretDeletionRequestDTO consumerSecretDeletionRequestDTO, MessageContext messageContext) throws APIManagementException;
 }

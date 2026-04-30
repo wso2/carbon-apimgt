@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
@@ -321,6 +322,43 @@ public class CertificateMgtDaoTest {
         Assert.assertEquals("The client certificate DTO list that matches the search criteria is not returned", 1,
                 clientCertificateDTOS.size());
         deleteClientCertificate();
+    }
+
+    /**
+     * This method tests the behaviour of getClientCertificates method for APIProductIdentifier.
+     *
+     * @throws CertificateManagementException Certificate Management Exception
+     */
+    @Test
+    public void testGetClientCertificatesWithAPIProductIdentifier() throws CertificateManagementException {
+        String organization = "org1";
+        APIProductIdentifier productIdentifier = new APIProductIdentifier("CERTIFICATE", "CERTAPI", "1.0.0");
+
+        // Add a certificate using an APIProductIdentifier
+        boolean added = certificateMgtDAO.addClientCertificate(certificate, productIdentifier, "testProductAlias",
+                "Gold", APIConstants.API_KEY_TYPE_PRODUCTION, TENANT_ID, "org1");
+        Assert.assertTrue("Certificate should be added successfully", added);
+
+        // Retrieve certificates
+        List<ClientCertificateDTO> clientCertificateDTOS = certificateMgtDAO.getClientCertificates(TENANT_ID,
+                "testProductAlias", APIConstants.API_KEY_TYPE_PRODUCTION, productIdentifier, organization);
+        Assert.assertEquals("The client certificate DTO list should contain one entry", 1,
+                clientCertificateDTOS.size());
+
+        // Verify the returned DTO
+        ClientCertificateDTO dto = clientCertificateDTOS.get(0);
+        Assert.assertNotNull("API identifier should not be null", dto.getApiIdentifier());
+        Assert.assertTrue("API identifier should be an instance of APIIdentifier",
+                dto.getApiIdentifier() instanceof APIIdentifier);
+        Assert.assertEquals("Provider name should match", productIdentifier.getProviderName(),
+                dto.getApiIdentifier().getProviderName());
+        Assert.assertEquals("API name should match", productIdentifier.getName(), dto.getApiIdentifier().getName());
+        Assert.assertEquals("Version should match", productIdentifier.getVersion(), dto.getApiIdentifier().getVersion());
+        Assert.assertEquals("UUID should be propagated", productIdentifier.getUUID(), dto.getApiIdentifier().getUUID());
+
+        boolean deleted = certificateMgtDAO.deleteClientCertificate(productIdentifier, "testProductAlias",
+                APIConstants.API_KEY_TYPE_PRODUCTION, TENANT_ID);
+        Assert.assertTrue("Certificate should be deleted successfully", deleted);
     }
 
     /**

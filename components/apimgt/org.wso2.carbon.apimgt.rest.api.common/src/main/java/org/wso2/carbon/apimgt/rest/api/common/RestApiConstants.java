@@ -38,6 +38,7 @@ public final class RestApiConstants {
     public static final String APPLICATION_XML = "application/xml";
     public static final String AUTHENTICATION_REQUIRED = "authentication_required";
     public static final String HEADER_X_WSO2_TENANT = "x-wso2-tenant";
+    public static final String QUERY_PARAM_X_WSO2_TENANT = "X-WSO2-Tenant-Q";
     public static final String ORGANIZATION = "organization";
     public static final String ORGANIZATION_INFO = "organization_info";
     public static final String SUB_ORGANIZATION = "sub_organization";
@@ -368,6 +369,9 @@ public final class RestApiConstants {
             Arrays.asList("image/jpeg", "image/png", "image/gif", "image/svg+xml"));
 
     public static final String SVG_MEDIA_TYPE = "image/svg+xml";
+    public static final String JPEG_MEDIA_TYPE = "image/jpeg";
+    public static final String PNG_MEDIA_TYPE = "image/png";
+    public static final String GIF_MEDIA_TYPE = "image/gif";
 
     public static final int TAG_LIMIT_DEFAULT = 1000;
     public static final int TAG_OFFSET_DEFAULT = 0;
