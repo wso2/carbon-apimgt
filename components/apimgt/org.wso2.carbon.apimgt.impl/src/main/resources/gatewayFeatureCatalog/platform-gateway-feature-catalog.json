@@ -1,0 +1,20 @@
+{
+  "APIPlatform": {
+    "apiTypes": [
+      "rest"
+    ],
+    "gatewayFeatures": {
+      "basic": [],
+      "runtime": [],
+      "resources": [],
+      "localScopes": [],
+      "policies": [],
+      "monetization": [],
+      "subscriptions": [],
+      "endpoints": [],
+      "endpointSecurity": [],
+      "tryout": []
+    }
+  }
+}
+

@@ -133,6 +133,12 @@ public class ApplicationKeyMappingUtil {
         applicationKeyDTO.setKeyType(ApplicationKeyDTO.KeyTypeEnum.valueOf(apiKey.getType()));
         applicationKeyDTO.setConsumerKey(apiKey.getConsumerKey());
         applicationKeyDTO.setConsumerSecret(apiKey.getConsumerSecret());
+        if (apiKey.getConsumerSecrets() != null) {
+            List<ConsumerSecretDTO> consumerSecretDTOs = apiKey.getConsumerSecrets().stream()
+                    .map(ApplicationKeyMappingUtil::fromConsumerSecretToDTO)
+                    .collect(Collectors.toList());
+            applicationKeyDTO.setConsumerSecrets(consumerSecretDTOs);
+        }
         applicationKeyDTO.setKeyState(apiKey.getState());
         applicationKeyDTO.setMode(ApplicationKeyDTO.ModeEnum.valueOf(apiKey.getCreateMode()));
         applicationKeyDTO.setKeyManager(apiKey.getKeyManager());
@@ -156,14 +162,14 @@ public class ApplicationKeyMappingUtil {
     }
 
     @Deprecated
-    public static APIKeyDTO formApiKeyToDTO(String apiKey, int validityTime){
+    public static APIKeyDTO formApiKeyToDTO(String apiKey, long validityTime){
         APIKeyDTO apiKeyDto = new APIKeyDTO();
         apiKeyDto.setApikey(apiKey);
         apiKeyDto.setValidityPeriod(validityTime);
         return apiKeyDto;
     }
 
-    public static APIKeyDTO formApiKeyToDTO(String apiKey, int validityTime, String keyName){
+    public static APIKeyDTO formApiKeyToDTO(String apiKey, long validityTime, String keyName){
         APIKeyDTO apiKeyDto = new APIKeyDTO();
         apiKeyDto.setApikey(apiKey);
         apiKeyDto.setValidityPeriod(validityTime);
@@ -281,8 +287,8 @@ public class ApplicationKeyMappingUtil {
                     dto.setKeyUUID(src.getKeyUUID());
                     dto.setKeyName(src.getKeyName());
                     dto.setIssuedOn(src.getCreatedTime());
-                    dto.setValidityPeriod(toSafeValidityPeriod(src.getValidityPeriod()));
-                    dto.setLastUsed(getLastUsedTimeOrDefault(src.getLastUsedTime()));
+                    dto.setValidityPeriod(src.getValidityPeriod());
+                    dto.setLastUsed(src.getLastUsedTime());
                     return dto;
                 })
                 .collect(Collectors.toList());
@@ -305,7 +311,7 @@ public class ApplicationKeyMappingUtil {
                     dto.setApiUUID(src.getApiUUId());
                     dto.setIssuedOn(src.getCreatedTime());
                     dto.setValidityPeriod(toSafeValidityPeriod(src.getValidityPeriod()));
-                    dto.setLastUsed(getLastUsedTimeOrDefault(src.getLastUsedTime()));
+                    dto.setLastUsed(src.getLastUsedTime());
                     return dto;
                 })
                 .collect(Collectors.toList());
@@ -325,8 +331,8 @@ public class ApplicationKeyMappingUtil {
                     dto.setKeyUUID(src.getKeyUUID());
                     dto.setKeyName(src.getKeyName());
                     dto.setIssuedOn(src.getCreatedTime());
-                    dto.setValidityPeriod(toSafeValidityPeriod(src.getValidityPeriod()));
-                    dto.setLastUsed(getLastUsedTimeOrDefault(src.getLastUsedTime()));
+                    dto.setValidityPeriod(src.getValidityPeriod());
+                    dto.setLastUsed(src.getLastUsedTime());
                     dto.setAssociatedApp(src.getApplicationName());
                     return dto;
                 })
@@ -354,11 +360,11 @@ public class ApplicationKeyMappingUtil {
         return apiApiKeyInfoDTOList;
     }
 
-    private static String getLastUsedTimeOrDefault(String lastUsedTime) {
-        return lastUsedTime == null ? "NOT_USED" : lastUsedTime;
+    private static String getLastUsedTimeOrDefault(Long lastUsedTime) {
+        return lastUsedTime == null ? "NOT_USED" : lastUsedTime.toString();
     }
 
-    private static int toSafeValidityPeriod(long validityPeriod) {
-        return (int) Math.min(validityPeriod, Integer.MAX_VALUE);
+    private static long toSafeValidityPeriod(long validityPeriod) {
+        return (long) Math.min(validityPeriod, Long.MAX_VALUE);
     }
 }

@@ -172,16 +172,6 @@ rulesetContent:
         field: "version"
         function: truthy
 
-    api-no-unlimited-business-plan:
-      description: API should not have an unlimited business plan.
-      message: "API should not have an unlimited business plan."
-      severity: warn
-      given: "$.data.policies.*"
-      then:
-        function: pattern
-        functionOptions:
-          notMatch: 'Unlimited'
-
     api-no-insecure-transports:
       description: API should not have insecure transports.
       message: "API should not have insecure transports."
@@ -286,16 +276,6 @@ rulesetContent:
       then:
         field: "sandbox_endpoints"
         function: truthy
-
-    api-no-unlimited-throttling-policy:
-      description: "API should not have an unlimited throttling policy."
-      message: "API should not have an unlimited throttling policy."
-      severity: "warn"
-      given: "$.data.apiThrottlingPolicy"
-      then:
-        function: "pattern"
-        functionOptions:
-          notMatch: "^Unlimited$"
 
     api-resources-security-required:
       description: Checks that security is enabled for all resources.

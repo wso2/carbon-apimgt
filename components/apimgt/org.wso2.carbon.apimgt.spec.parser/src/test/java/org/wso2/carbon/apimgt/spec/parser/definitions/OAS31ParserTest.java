@@ -164,7 +164,7 @@ public class OAS31ParserTest extends OASTestBase {
     public void testValidateOpenAPIDefinitionWithoutLicenceIdentifier() throws Exception {
         String relativePath = "definitions" + File.separator + "oas31" + File.separator + "oas31_with_no_licese_identifier.yaml";
         String openApi = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath), "UTF-8");
-        APIDefinitionValidationResponse response = oas31Parser.validateAPIDefinition(openApi, false);
+        APIDefinitionValidationResponse response = oas31Parser.validateAPIDefinition(openApi, false, null);
         Assert.assertFalse(response.isValid());
         Assert.assertTrue(response.getErrorItems().size() > 0);
     }
@@ -175,7 +175,7 @@ public class OAS31ParserTest extends OASTestBase {
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas31"
                         + File.separator + "openApi31_validation.json"),
                 String.valueOf(StandardCharsets.UTF_8));
-        APIDefinitionValidationResponse response = OASParserUtil.validateAPIDefinition(faultySwagger, true);
+        APIDefinitionValidationResponse response = OASParserUtil.validateAPIDefinition(faultySwagger, true, null);
 
         Assert.assertFalse(response.isValid());
         Assert.assertEquals(1, response.getErrorItems().size());
@@ -240,7 +240,7 @@ public class OAS31ParserTest extends OASTestBase {
                         + File.separator + "openApi31_without_info_validation.json"),
                 String.valueOf(StandardCharsets.UTF_8));
 
-        APIDefinitionValidationResponse response = OASParserUtil.validateAPIDefinition(faultySwagger, true);
+        APIDefinitionValidationResponse response = OASParserUtil.validateAPIDefinition(faultySwagger, true, null);
 
         Assert.assertTrue(response.isValid());
         Assert.assertTrue(response.getInfo().getName().startsWith("API-Title-"));

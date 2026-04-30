@@ -38,7 +38,6 @@ import graphql.schema.idl.errors.SchemaProblem;
 import graphql.schema.validation.SchemaValidationError;
 import graphql.schema.validation.SchemaValidator;
 import io.swagger.v3.parser.ObjectMapperFactory;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -50,7 +49,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -63,6 +61,8 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
+import org.wso2.carbon.apimgt.api.FileSizeLimitExceededException;
+import org.wso2.carbon.apimgt.api.SizeLimitedInputStream;
 import org.wso2.carbon.apimgt.api.TokenBasedThrottlingCountHolder;
 import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
@@ -150,14 +150,14 @@ import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import java.io.File;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -368,6 +368,24 @@ public class PublisherCommonUtils {
     }
 
     /**
+     * @param api                  API of the Custom Backend
+     * @param apiProvider          API Provider
+     * @param endpointType         Endpoint Type of the Custom Backend (SANDBOX, PRODUCTION)
+     * @param customBackendContent Custom Backend content
+     * @param fileName             fileName of the sequence file
+     * @throws APIManagementException If an error occurs while updating the sequence backend
+     */
+    public static void updateCustomBackend(API api, APIProvider apiProvider, String endpointType,
+            String customBackendContent, String fileName) throws APIManagementException {
+        if (StringUtils.isBlank(fileName)) {
+            throw new APIManagementException(
+                    "Error when retrieving sequence backend file name of API: " + api.getId().getApiName());
+        }
+        String customBackendUUID = UUID.randomUUID().toString();
+        apiProvider.updateCustomBackend(api.getUuid(), endpointType, customBackendContent, fileName, customBackendUUID);
+    }
+
+    /**
      * @param api           API of the Custom Backend
      * @param apiProvider   API Provider
      * @param endpointType  Endpoint Type of the Custom Backend (SANDBOX, PRODUCTION)
@@ -375,9 +393,9 @@ public class PublisherCommonUtils {
      * @param contentDecomp Header Content of the Request
      * @throws APIManagementException If an error occurs while updating the API and API definition
      */
+    @Deprecated
     public static void updateCustomBackend(API api, APIProvider apiProvider, String endpointType,
-                                           InputStream customBackend, String contentDecomp)
-            throws APIManagementException {
+            InputStream customBackend, String contentDecomp) throws APIManagementException {
         String fileName = getFileNameFromContentDisposition(contentDecomp);
         if (fileName == null) {
             throw new APIManagementException(
@@ -679,25 +697,6 @@ public class PublisherCommonUtils {
 
         encryptEndpointSecurityAWSSecretKey(endpointConfig, cryptoUtil, oldProductionAWSSecretKey,
                 oldSandboxAWSSecretKey, apiDtoToUpdate);
-        // update endpointConfig with the provided custom sequence
-        if (endpointConfig != null) {
-            if (APIConstants.ENDPOINT_TYPE_SEQUENCE.equalsIgnoreCase(
-                    (String) endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
-                try {
-                    if (endpointConfig.get("sequence_path") != null) {
-                        String pathToSequence = endpointConfig.get("sequence_path").toString();
-                        String sequence = FileUtils.readFileToString(new File(pathToSequence),
-                                Charset.defaultCharset());
-                        endpointConfig.put("sequence", sequence);
-                        apiDtoToUpdate.setEndpointConfig(endpointConfig);
-                    }
-                } catch (IOException ex) {
-                    throw new APIManagementException(
-                            "Error while reading Custom Sequence of API: " + apiDtoToUpdate.getId(), ex,
-                            ExceptionCodes.ERROR_READING_CUSTOM_SEQUENCE);
-                }
-            }
-        }
 
         // AWS Lambda: secret key encryption while updating the API
         if (apiDtoToUpdate.getEndpointConfig() != null) {
@@ -804,11 +803,8 @@ public class PublisherCommonUtils {
             }
         } else {
             if (apiSecurity != null) {
-                if (apiSecurity.contains(APIConstants.API_SECURITY_API_KEY) && condition) {
-                    throw new APIManagementException(
-                            "A tier should be defined if the API is not in CREATED or PROTOTYPED state",
-                            ExceptionCodes.TIER_CANNOT_BE_NULL);
-                } else if (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+                if ((apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) ||
+                        apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) && condition) {
                     // Internally set the default tier when no tiers are defined in order to support
                     // subscription validation disabling for OAuth2 secured APIs
                     if (tiersFromDTO != null && tiersFromDTO.isEmpty()) {
@@ -892,7 +888,9 @@ public class PublisherCommonUtils {
                     .getOpenAPIDefinition(apiToUpdate.getUuid(), originalAPI.getOrganization());
             APIDefinition apiDefinition = OASParserUtil.getOASParser(oldDefinition);
             SwaggerData swaggerData = new SwaggerData(apiToUpdate);
-            String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition);
+            String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition,
+                    ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
+                            .getAPIMDependencyConfigurations().getOasParserOptions());
             apiProvider.saveSwaggerDefinition(apiToUpdate, newDefinition, originalAPI.getOrganization());
             if (!isGraphql) {
                 Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(newDefinition);
@@ -1044,11 +1042,8 @@ public class PublisherCommonUtils {
             }
         } else {
             if (apiSecurity != null) {
-                if (apiSecurity.contains(APIConstants.API_SECURITY_API_KEY) && condition) {
-                    throw new APIManagementException(
-                            "A tier should be defined if the API is not in CREATED or PROTOTYPED state",
-                            ExceptionCodes.TIER_CANNOT_BE_NULL);
-                } else if (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+                if ((apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) ||
+                        apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) && condition) {
                     // Internally set the default tier when no tiers are defined in order to support
                     // subscription validation disabling for OAuth2 secured APIs
                     if (tiersFromDTO != null && tiersFromDTO.isEmpty()) {
@@ -2214,6 +2209,12 @@ public class PublisherCommonUtils {
                 }
             }
 
+            // Validate scope name for restricted prefixes
+            if (APIUtil.hasRestrictedScopePrefix(scopeName)) {
+                log.error("Invalid scope name with restricted prefix: " + scopeName);
+                throw new APIManagementException(ExceptionCodes.INVALID_SCOPE_NAME);
+            }
+
             //set display name as empty if it is not provided
             if (StringUtils.isBlank(scope.getName())) {
                 scope.setName(scopeName);
@@ -3193,7 +3194,9 @@ public class PublisherCommonUtils {
         //retrieves the updated swagger definition
         String apiSwagger = apiProvider.getOpenAPIDefinition(apiId, organization); // TODO see why we need to get it
         //instead of passing same
-        return oasParser.getOASDefinitionForPublisher(existingAPI, apiSwagger);
+        return oasParser.getOASDefinitionForPublisher(existingAPI, apiSwagger,
+                ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
+                        .getAPIMDependencyConfigurations().getOasParserOptions());
     }
 
     /**
@@ -3215,9 +3218,13 @@ public class PublisherCommonUtils {
 
         String apiDefinition = response.getJsonContent();
         if (isServiceAPI) {
-            apiDefinition = oasParser.copyVendorExtensions(existingAPI.getSwaggerDefinition(), apiDefinition);
+            apiDefinition = oasParser.copyVendorExtensions(existingAPI.getSwaggerDefinition(), apiDefinition,
+                    ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
+                            .getAPIMDependencyConfigurations().getOasParserOptions());
         } else {
-            apiDefinition = OASParserUtil.preProcess(apiDefinition);
+            apiDefinition = OASParserUtil.preProcess(apiDefinition,
+                    ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
+                            .getAPIMDependencyConfigurations().getOasParserOptions());
         }
         if (APIConstants.API_TYPE_SOAPTOREST.equals(existingAPI.getType()) && genSoapToRestSequence) {
             List<SOAPToRestSequence> sequenceList = SequenceGenerator.generateSequencesFromSwagger(apiDefinition);
@@ -3366,7 +3373,9 @@ public class PublisherCommonUtils {
         PublisherCommonUtils.validateScopes(existingAPI);
         APIUtil.validateAndUpdateURITemplates(existingAPI, APIUtil.getInternalOrganizationId(organization));
         SwaggerData swaggerData = new SwaggerData(existingAPI);
-        String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, swaggerData);
+        String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, swaggerData,
+                ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
+                        .getAPIMDependencyConfigurations().getOasParserOptions());
 
         //Validate API with Federated Gateway before persisting to registry
         APIUtil.validateApiWithFederatedGateway(existingAPI);
@@ -3513,13 +3522,43 @@ public class PublisherCommonUtils {
             HttpResponse response = httpClient.execute(httpPost);
 
             if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode()) {
-                String schemaResponse = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
-                Type type = new TypeToken<Map<String, Object>>() {
-                }.getType();
-                Map<String, Object> schemaMap = gson.fromJson(schemaResponse, type);
-                Document schemaDocument = new IntrospectionResultToSchema().createSchemaDefinition(
-                        (Map<String, Object>) schemaMap.get("data"));
-                schema = AstPrinter.printAst(schemaDocument);
+                if (response.getEntity() == null) {
+                    throw new IllegalArgumentException("Response entity is null for the provided URL: " + url);
+                }
+                String maxFileSizeStr = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
+                        .getFirstProperty(
+                                org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_GRAPHQL_FILE_SIZE_LIMIT);
+                if (maxFileSizeStr == null || maxFileSizeStr.trim().isEmpty()) {
+                    maxFileSizeStr = org.wso2.carbon.apimgt.api.
+                            APIConstants.API_PUBLISHER_IMPORT_GRAPHQL_FILE_SIZE_LIMIT_DEFAULT_MB;
+                }
+                long maxFileSize = Long.parseLong(maxFileSizeStr) * 1024L * 1024L;
+                try (InputStream responseStream = response.getEntity().getContent();
+                        BufferedInputStream bufferedStream = new BufferedInputStream(responseStream, 4096);
+                        SizeLimitedInputStream limitedStream = new SizeLimitedInputStream(bufferedStream, maxFileSize);
+                        ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
+                    byte[] chunk = new byte[4096];
+                    int n;
+                    while ((n = limitedStream.read(chunk)) != -1) {
+                        buffer.write(chunk, 0, n);
+                    }
+                    String schemaResponse = buffer.toString(StandardCharsets.UTF_8.name());
+                    Type type = new TypeToken<Map<String, Object>>() {
+                    }.getType();
+                    Map<String, Object> schemaMap = gson.fromJson(schemaResponse, type);
+                    Document schemaDocument = new IntrospectionResultToSchema().createSchemaDefinition(
+                            (Map<String, Object>) schemaMap.get("data"));
+                    schema = AstPrinter.printAst(schemaDocument);
+                } catch (FileSizeLimitExceededException ex) {
+                    log.error(
+                            "The GraphQL schema obtained from introspection exceeds the maximum allowed size of "
+                                    + maxFileSizeStr + " MB. Error: ",
+                            ex);
+                    throw new APIManagementException(
+                            "The GraphQL schema obtained from introspection exceeds the " + "maximum allowed size of "
+                                    + maxFileSizeStr + " MB.",
+                            ExceptionCodes.FILE_TOO_LARGE);
+                }
             } else {
                 if (log.isDebugEnabled()) {
                     log.debug(
@@ -3560,9 +3599,29 @@ public class PublisherCommonUtils {
             HttpClient httpClient = APIUtil.getHttpClient(urlObj.getPort(), urlObj.getProtocol());
             HttpGet httpGet = new HttpGet(url);
             HttpResponse response = httpClient.execute(httpGet);
-
             if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode()) {
-                schema = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+                if (response.getEntity() == null) {
+                    throw new IllegalArgumentException("Response entity is null for the provided URL: " + url);
+                }
+                String maxFileSizeStr = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
+                        .getFirstProperty(
+                                org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_GRAPHQL_FILE_SIZE_LIMIT);
+                if (maxFileSizeStr == null || maxFileSizeStr.trim().isEmpty()) {
+                    maxFileSizeStr = org.wso2.carbon.apimgt.api.
+                            APIConstants.API_PUBLISHER_IMPORT_GRAPHQL_FILE_SIZE_LIMIT_DEFAULT_MB;
+                }
+                long maxFileSize = Long.parseLong(maxFileSizeStr) * 1024L * 1024L;
+                try (SizeLimitedInputStream sizeLimitedInputStream = new SizeLimitedInputStream(
+                        response.getEntity().getContent(), maxFileSize)) {
+                    schema = IOUtils.toString(sizeLimitedInputStream, StandardCharsets.UTF_8);
+                } catch (FileSizeLimitExceededException ex) {
+                    log.error(
+                            "The GraphQL schema obtained from the URL exceeds the maximum allowed size of "
+                                    + maxFileSizeStr + " MB. Error: ", ex);
+                    throw new APIManagementException(
+                            "The GraphQL schema obtained from the URL exceeds the " + "maximum allowed size of "
+                                    + maxFileSizeStr + " MB.", ExceptionCodes.FILE_TOO_LARGE);
+                }
             } else {
                 if (log.isDebugEnabled()) {
                     log.debug(
@@ -3758,12 +3817,8 @@ public class PublisherCommonUtils {
                 }
             }
         } else {
-            if (apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
-                if (tiersFromDTO == null || tiersFromDTO.isEmpty()) {
-                    throw new APIManagementException("No tier defined for the API Product",
-                            ExceptionCodes.TIER_CANNOT_BE_NULL);
-                }
-            } else if (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+            if (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) ||
+                    apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
                 // Internally set the default tier when no tiers are defined in order to support
                 // subscription validation disabling for OAuth2 secured APIs
                 if (tiersFromDTO != null && tiersFromDTO.isEmpty()) {
@@ -3918,6 +3973,11 @@ public class PublisherCommonUtils {
                 apiUUID = apiProductResource.getApiId();
                 api = apiProvider.getAPIbyUUID(apiUUID, productToBeAdded.getOrganization());
                 // if API does not exist, getLightweightAPIByUUID() method throws exception.
+            }
+            if (APIConstants.API_SUBTYPE_AI_API.equals(api.getSubtype())) {
+                log.warn("Cannot create API Products using AI APIs.");
+                throw new APIManagementException(
+                        ExceptionCodes.from(ExceptionCodes.INVALID_API_FOR_API_PRODUCT, APIConstants.AI.AI));
             }
             validateApiLifeCycleForApiProducts(api);
         }
@@ -5242,5 +5302,12 @@ public class PublisherCommonUtils {
         options.setPreserveLegacyAsyncApiParser(Boolean.parseBoolean(
                 config.getFirstProperty(APIConstants.API_PUBLISHER_PRESERVE_LEGACY_ASYNC_PARSER)));
         return options;
+    }
+
+    private static void validateApiTypeForApiProducts(API api) throws APIManagementException {
+        if (APIConstants.API_SUBTYPE_AI_API.equals(api.getSubtype())) {
+            throw new APIManagementException(
+                    ExceptionCodes.from(ExceptionCodes.INVALID_API_FOR_API_PRODUCT, APIConstants.AI.AI));
+        }
     }
 }

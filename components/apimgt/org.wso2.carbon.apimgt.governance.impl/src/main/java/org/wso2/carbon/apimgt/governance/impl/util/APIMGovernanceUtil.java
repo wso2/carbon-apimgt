@@ -23,11 +23,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.model.OASParserOptions;
 import org.wso2.carbon.apimgt.governance.api.ArtifactGovernanceHandler;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.APIMDefaultGovPolicy;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernanceOptions;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.DefaultRuleset;
@@ -43,6 +45,8 @@ import org.wso2.carbon.apimgt.governance.impl.ArtifactGovernanceFactory;
 import org.wso2.carbon.apimgt.governance.impl.ComplianceManager;
 import org.wso2.carbon.apimgt.governance.impl.PolicyManager;
 import org.wso2.carbon.apimgt.governance.impl.RulesetManager;
+import org.wso2.carbon.apimgt.governance.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.APIMDependencyConfigurationService;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
@@ -656,5 +660,24 @@ public class APIMGovernanceUtil {
         return handler.isArtifactVisibleToUser(artifactRefId, username, organization);
     }
 
+    /**
+     * Build governance options initialized with configured OpenAPI parser options.
+     *
+     * @return {@link APIMGovernanceOptions} populated with parser-derived values when available; otherwise returns
+     *         default governance options
+     */
+    public static APIMGovernanceOptions getAPIMGovernanceOptions() {
+        APIMGovernanceOptions governanceOptions = APIMGovernanceOptions.defaults();
+        APIMDependencyConfigurationService configService = ServiceReferenceHolder.getInstance()
+                .getAPIMDependencyConfigurationService();
+        OASParserOptions parserOptions = null;
+        if (configService != null && configService.getAPIMDependencyConfigurations() != null) {
+            parserOptions = configService.getAPIMDependencyConfigurations().getOasParserOptions();
+        }
+        if (parserOptions != null) {
+            governanceOptions.setYamlCodePointLimit(parserOptions.getYamlCodePointLimit());
+        }
+        return governanceOptions;
+    }
 
 }

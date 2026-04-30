@@ -38,7 +38,7 @@ public class APIKeyMappingUtil {
     public static List<APIKeyDTO> fromAPIKeyInfoListToAPIKeyListDTO(
             List<APIKeyInfo> apiKeyInfoList) {
 
-        List<APIKeyDTO> apiKeyDTOList = apiKeyInfoList.stream()
+        return apiKeyInfoList.stream()
                 .map(src -> {
                     APIKeyDTO dto = new APIKeyDTO();
                     dto.setKeyUUID(src.getKeyUUID());
@@ -48,15 +48,10 @@ public class APIKeyMappingUtil {
                     dto.setKeyType(src.getKeyType() != null ? APIKeyDTO.KeyTypeEnum.fromValue(src.getKeyType()) : null);
                     dto.setUser(src.getAuthUser());
                     dto.setIssuedOn(src.getCreatedTime());
-                    dto.setValidityPeriod((int) Math.min(src.getValidityPeriod(), Integer.MAX_VALUE));
-                    if (src.getLastUsedTime() == null) {
-                        dto.setLastUsed("NOT_USED");
-                    } else {
+                    dto.setValidityPeriod(Math.min(src.getValidityPeriod(), Long.MAX_VALUE));
                         dto.setLastUsed(src.getLastUsedTime());
-                    }
                     return dto;
                 })
                 .collect(Collectors.toList());
-        return apiKeyDTOList;
     }
 }

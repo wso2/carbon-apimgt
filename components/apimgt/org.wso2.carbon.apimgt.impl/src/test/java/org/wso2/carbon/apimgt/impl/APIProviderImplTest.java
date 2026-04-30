@@ -37,6 +37,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.BlockConditionNotFoundException;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
+import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -124,6 +125,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -1264,19 +1266,48 @@ public class APIProviderImplTest {
     public void testRestoreAPIRevision() throws APIManagementException, APIPersistenceException {
         ImportExportAPI importExportAPI = Mockito.mock(ImportExportAPI.class);
         ArtifactSaver artifactSaver = Mockito.mock(ArtifactSaver.class);
-        APIProviderImplWrapper apiProvider =
-                new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, importExportAPI, gatewayArtifactsMgtDAO,
-                        artifactSaver);
         APIIdentifier apiId = new APIIdentifier("admin", "PizzaShackAPI", "1.0.0",
                 "63e1e37e-a5b8-4be6-86a5-d6ae0749f131");
+        APIIdentifier revisionedApiId = new APIIdentifier("admin", "PizzaShackAPI", "1.0.0",
+                "b55e0fc3-9829-4432-b99e-02056dc91838");
         API api = new API(apiId);
         api.setContext("/test");
         api.setStatus(APIConstants.CREATED);
         String apiPath = "/apimgt/applicationdata/provider/admin/PizzaShackAPI/1.0.0/api";
 
+        Set<URITemplate> uriTemplates = new HashSet<URITemplate>();
+
+        URITemplate uriTemplate1 = new URITemplate();
+        uriTemplate1.setHTTPVerb("POST");
+        uriTemplate1.setAuthType("Application");
+        uriTemplate1.setUriTemplate("/add");
+        uriTemplate1.setThrottlingTier("Gold");
+        uriTemplates.add(uriTemplate1);
+
+        List<APIResource> productResources = new ArrayList<>();
+
+        API revisionedApi = new API(revisionedApiId);
+        revisionedApi.setRevisionedApiId("63e1e37e-a5b8-4be6-86a5-d6ae0749f131");
+        revisionedApi.setRevision(true);
+        revisionedApi.setUriTemplates(uriTemplates);
+
         APIRevision apiRevision = new APIRevision();
         apiRevision.setApiUUID("63e1e37e-a5b8-4be6-86a5-d6ae0749f131");
         apiRevision.setDescription("test description revision 1");
+
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO,
+                importExportAPI, gatewayArtifactsMgtDAO, artifactSaver) {
+            @Override
+            public API getAPIbyUUID(String uuid, String org) {
+                return revisionedApi;
+            }
+
+            @Override
+            public List<APIResource> getUsedProductResources(String uuid) {
+                return productResources;
+            }
+        };
+
         Mockito.when(apimgtDAO.getRevisionCountByAPI(Mockito.anyString())).thenReturn(0);
         Mockito.when(apimgtDAO.getMostRecentRevisionId(Mockito.anyString())).thenReturn(0);
         Mockito.when(APIUtil.getAPIIdentifierFromUUID(Mockito.anyString())).thenReturn(apiId);
@@ -1727,6 +1758,70 @@ public class APIProviderImplTest {
                 "carbon.super", 1 , 6);
     }
 
+    @Test
+    public void testDeriveApiSecurityFromHubPoliciesForHeaderApiKeyPolicy() throws Exception {
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        API api = new API(new APIIdentifier("admin", "SampleAPI", "1.0.0"));
+        api.setGatewayType(APIConstants.WSO2_API_PLATFORM_GATEWAY);
+
+        List<OperationPolicy> hubPolicies = new ArrayList<>();
+        hubPolicies.add(createApiKeyAuthPolicy("header", "X-API-Key"));
+        api.setHubPolicies(hubPolicies);
+
+        invokeDeriveApiSecurityFromHubPolicies(apiProvider, api);
+
+        assertEquals(APIConstants.API_SECURITY_API_KEY, api.getApiSecurity());
+        assertEquals("X-API-Key", api.getApiKeyHeader());
+    }
+
+    @Test
+    public void testDeriveApiSecurityFromHubPoliciesForQueryApiKeyPolicy() throws Exception {
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        API api = new API(new APIIdentifier("admin", "SampleAPI", "1.0.0"));
+        api.setGatewayType(APIConstants.WSO2_API_PLATFORM_GATEWAY);
+
+        List<OperationPolicy> hubPolicies = new ArrayList<>();
+        hubPolicies.add(createApiKeyAuthPolicy("query", "api_key"));
+        api.setHubPolicies(hubPolicies);
+
+        invokeDeriveApiSecurityFromHubPolicies(apiProvider, api);
+
+        assertEquals(APIConstants.API_SECURITY_API_KEY, api.getApiSecurity());
+        assertNull(api.getApiKeyHeader());
+    }
+
+    @Test
+    public void testDeriveApiSecurityFromHubPoliciesDefaultsApiKeyHeaderForHeaderPolicyWithoutKey() throws Exception {
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        API api = new API(new APIIdentifier("admin", "SampleAPI", "1.0.0"));
+        api.setGatewayType(APIConstants.WSO2_API_PLATFORM_GATEWAY);
+
+        List<OperationPolicy> hubPolicies = new ArrayList<>();
+        hubPolicies.add(createApiKeyAuthPolicy("header", null));
+        api.setHubPolicies(hubPolicies);
+
+        invokeDeriveApiSecurityFromHubPolicies(apiProvider, api);
+
+        assertEquals(APIConstants.API_SECURITY_API_KEY, api.getApiSecurity());
+        assertEquals(APIConstants.API_KEY_HEADER_DEFAULT, api.getApiKeyHeader());
+    }
+
+    @Test
+    public void testDeriveApiSecurityFromHubPoliciesIgnoresInvalidApiKeyHeader() throws Exception {
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        API api = new API(new APIIdentifier("admin", "SampleAPI", "1.0.0"));
+        api.setGatewayType(APIConstants.WSO2_API_PLATFORM_GATEWAY);
+
+        List<OperationPolicy> hubPolicies = new ArrayList<>();
+        hubPolicies.add(createApiKeyAuthPolicy("header", "X API Key"));
+        api.setHubPolicies(hubPolicies);
+
+        invokeDeriveApiSecurityFromHubPolicies(apiProvider, api);
+
+        assertEquals(APIConstants.API_SECURITY_API_KEY, api.getApiSecurity());
+        assertEquals(APIConstants.API_KEY_HEADER_DEFAULT, api.getApiKeyHeader());
+    }
+
     private List<PublisherAPIInfo> createMockPublisherAPIInfoList(int num) {
         List<PublisherAPIInfo> list = new ArrayList<>();
         for(int i = 0; i < num; i++) {
@@ -1739,5 +1834,25 @@ public class APIProviderImplTest {
             list.add(publisherAPIInfo);
         }
         return list;
+    }
+
+    private void invokeDeriveApiSecurityFromHubPolicies(APIProviderImpl apiProvider, API api) throws Exception {
+        Method method = APIProviderImpl.class.getDeclaredMethod("deriveApiSecurityFromHubPolicies", API.class);
+        method.setAccessible(true);
+        method.invoke(apiProvider, api);
+    }
+
+    private OperationPolicy createApiKeyAuthPolicy(String in, String key) {
+        OperationPolicy policy = new OperationPolicy();
+        policy.setPolicyName("api-key-auth");
+        Map<String, Object> params = new HashMap<>();
+        if (in != null) {
+            params.put("in", in);
+        }
+        if (key != null) {
+            params.put("key", key);
+        }
+        policy.setParameters(params);
+        return policy;
     }
 }

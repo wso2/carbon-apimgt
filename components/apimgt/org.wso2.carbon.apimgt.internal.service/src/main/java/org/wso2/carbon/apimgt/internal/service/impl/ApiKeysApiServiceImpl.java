@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.internal.service.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
 import org.wso2.carbon.apimgt.impl.dao.ApiKeyMgtDAO;
@@ -31,30 +32,41 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response;
+import org.wso2.carbon.apimgt.internal.service.utils.SubscriptionValidationDataUtil;
 
 public class ApiKeysApiServiceImpl implements ApiKeysApiService {
 
     public Response apiKeysGet(String xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
-
+        xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
         List<APIKeyInfo> apiKeyInfoList = ApiKeyMgtDAO.getInstance().getAllAPIKeys(xWSO2Tenant);
         return Response.ok().entity(getAPIKeyInfoDTOList(apiKeyInfoList)).build();
     }
 
     private List<APIKeyDTO> getAPIKeyInfoDTOList(List<APIKeyInfo> apiKeyInfoList) {
 
-        List<APIKeyDTO> apiKeyDTOList = apiKeyInfoList.stream()
+        return apiKeyInfoList.stream()
                 .map(src -> {
                     APIKeyDTO dto = new APIKeyDTO();
                     dto.setApiKeyHash(src.getApiKeyHash());
                     dto.setKeyName(src.getKeyName());
                     dto.setKeyType(src.getKeyType());
                     dto.setStatus(src.getStatus());
-                    dto.setExpiresAt((int) Math.min(src.getExpiresAt(), Integer.MAX_VALUE));
+                    dto.setExpiresAt(src.getExpiresAt());
+                    dto.setValidityPeriod(src.getValidityPeriod());
+                    dto.setCreatedTime(src.getCreatedTime());
+                    dto.setApiId(src.getApiId());
+                    dto.setApiUUID(src.getApiUUId());
                     dto.setAppId(src.getAppId());
+                    dto.setApplicationUUID(src.getApplicationId());
                     dto.setAdditionalProperties(src.getProperties());
+                    dto.setAuthUser(src.getAuthUser());
+                    if (StringUtils.isNotEmpty(src.getApplicationId()) && StringUtils.isEmpty(src.getApiUUId())) {
+                        dto.setKeyBoundary(APIKeyDTO.KeyBoundaryEnum.APPLICATION);
+                    } else {
+                        dto.setKeyBoundary(APIKeyDTO.KeyBoundaryEnum.API);
+                    }
                     return dto;
                 })
                 .collect(Collectors.toList());
-        return apiKeyDTOList;
     }
 }

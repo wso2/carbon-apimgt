@@ -28,12 +28,14 @@ public class HttpClientConfigurationDTO {
     private int connectionLimit;
     private int maximumConnectionsPerRoute;
     private int connectionTimeout;
+    private int connectionRequestTimeout;
     private boolean proxyEnabled;
     private String proxyHost;
     private int proxyPort;
     private String proxyUsername;
     private char[] proxyPassword = new char[]{};
     private String[] nonProxyHosts = new String[]{};
+    private String[] targetProxyHosts = new String[]{};
     private String proxyProtocol;
     private HostnameVerifier hostnameVerifier;
 
@@ -84,6 +86,14 @@ public class HttpClientConfigurationDTO {
         return connectionTimeout;
     }
 
+    public int getConnectionRequestTimeout() {
+        return connectionRequestTimeout;
+    }
+    
+    public String[] getTargetProxyHosts() {
+        return Arrays.copyOf(targetProxyHosts, targetProxyHosts.length);
+    }
+
     /**
      * Builder class for @code{HTTPClientConfigurationDTO}
      */
@@ -92,25 +102,40 @@ public class HttpClientConfigurationDTO {
         private int connectionLimit;
         private int maximumConnectionsPerRoute;
         private int connectionTimeout;
+        private int connectionRequestTimeout;
         private boolean proxyEnabled;
         private String proxyHost;
         private int proxyPort;
         private String proxyUsername;
         private char[] proxyPassword = new char[]{};
         private String[] nonProxyHosts = new String[]{};
+        private String[] targetProxyHosts = new String[]{};
         private String proxyProtocol;
         private HostnameVerifier hostnameVerifier;
 
         public Builder withConnectionParams(int connectionLimit, int maximumConnectionsPerRoute,
-                                            int connectionTimeout) {
+                int connectionTimeout) {
+            return withConnectionParams(connectionLimit, maximumConnectionsPerRoute, connectionTimeout, -1);
+        }
+
+        public Builder withConnectionParams(int connectionLimit, int maximumConnectionsPerRoute, int connectionTimeout,
+                int connectionRequestTimeout) {
             this.connectionLimit = connectionLimit;
             this.maximumConnectionsPerRoute = maximumConnectionsPerRoute;
             this.connectionTimeout = connectionTimeout;
+            this.connectionRequestTimeout = connectionRequestTimeout;
             return this;
         }
 
+        @Deprecated
         public Builder withProxy(String proxyHost, int proxyPort, String proxyUsername, String proxyPassword,
-                                 String proxyProtocol, String[] nonProxyHosts) {
+                String proxyProtocol, String[] nonProxyHosts) {
+            return withProxy(proxyHost, proxyPort, proxyUsername, proxyPassword, proxyProtocol, nonProxyHosts,
+                    new String[] {});
+        }
+
+        public Builder withProxy(String proxyHost, int proxyPort, String proxyUsername, String proxyPassword,
+                String proxyProtocol, String[] nonProxyHosts, String[] targetProxyHosts) {
             this.proxyEnabled = true;
             this.proxyHost = proxyHost;
             this.proxyPort = proxyPort;
@@ -119,6 +144,8 @@ public class HttpClientConfigurationDTO {
             this.proxyProtocol = proxyProtocol;
             this.nonProxyHosts = nonProxyHosts != null ?
                     Arrays.copyOf(nonProxyHosts, nonProxyHosts.length) : new String[]{};
+            this.targetProxyHosts = targetProxyHosts != null ?
+                    Arrays.copyOf(targetProxyHosts, targetProxyHosts.length) : new String[]{};
             return this;
         }
 
@@ -132,6 +159,7 @@ public class HttpClientConfigurationDTO {
             configuration.connectionLimit = this.connectionLimit;
             configuration.maximumConnectionsPerRoute = this.maximumConnectionsPerRoute;
             configuration.connectionTimeout = this.connectionTimeout;
+            configuration.connectionRequestTimeout = this.connectionRequestTimeout;
             configuration.proxyEnabled = this.proxyEnabled;
             configuration.proxyHost = this.proxyHost;
             configuration.proxyPort = this.proxyPort;
@@ -139,6 +167,7 @@ public class HttpClientConfigurationDTO {
             configuration.proxyPassword = this.proxyPassword;
             configuration.proxyProtocol = this.proxyProtocol;
             configuration.nonProxyHosts = this.nonProxyHosts;
+            configuration.targetProxyHosts = this.targetProxyHosts;
             configuration.hostnameVerifier = this.hostnameVerifier;
             return configuration;
         }

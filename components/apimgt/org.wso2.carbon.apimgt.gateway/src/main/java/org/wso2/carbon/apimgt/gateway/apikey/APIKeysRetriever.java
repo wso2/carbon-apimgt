@@ -41,7 +41,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
@@ -88,8 +87,6 @@ public class APIKeysRetriever extends TimerTask {
                             mapper.readValue(responseString,
                                     new TypeReference<List<APIKeyDTO>>() {});
                     for (APIKeyDTO dto : dtoList) {
-                        Map<String, String> props = new HashMap<>();
-                        Map<String, String> oldProps = new HashMap<>();
                         // Convert DTO -> APIKeyInfo
                         APIKeyInfo info = new APIKeyInfo();
                         info.setLookupKey(dto.getApiKeyHash());
@@ -97,17 +94,27 @@ public class APIKeysRetriever extends TimerTask {
                         info.setKeyName(dto.getKeyName());
                         info.setKeyType(dto.getKeyType());
                         info.setStatus(dto.getStatus());
-                        info.setExpiresAt(dto.getExpiresAt());
-                        info.setAppId(dto.getAppId());
-                        byte[] apikeyProperties = dto.getAdditionalProperties();
-                        if (apikeyProperties != null && apikeyProperties.length != 0) {
-                            oldProps = mapper.readValue(apikeyProperties, new TypeReference<Map<String, String>>() {});
+                        if (dto.getExpiresAt() != null) {
+                            info.setExpiresAt(dto.getExpiresAt());
                         }
-                        props.put(APIConstants.JwtTokenConstants.PERMITTED_IP,
-                                oldProps.get(APIConstants.JwtTokenConstants.PERMITTED_IP));
-                        props.put(APIConstants.JwtTokenConstants.PERMITTED_REFERER,
-                                oldProps.get(APIConstants.JwtTokenConstants.PERMITTED_REFERER));
-                        info.setAdditionalProperties(props);
+                        if (dto.getAppId() != null) {
+                            info.setAppId(dto.getAppId());
+                        }
+                        if (dto.getApiId() != null) {
+                            info.setApiId(dto.getApiId());
+                        }
+                        info.setApiUUId(dto.getApiUUID());
+                        info.setApplicationId(dto.getApplicationUUID());
+                        if (dto.getCreatedTime() != null) {
+                            info.setCreatedTime(dto.getCreatedTime());
+                        }
+                        if (dto.getValidityPeriod() != null) {
+                            info.setValidityPeriod(dto.getValidityPeriod());
+                        }
+                        info.setAuthUser(dto.getAuthUser());
+                        info.setKeyBoundary(dto.getKeyBoundary());
+                        Map<String, String> properties = dto.getAdditionalProperties();
+                        info.setAdditionalProperties(properties);
                         DataHolder.getInstance().addOpaqueAPIKeyInfo(info);
                     }
                 } else {

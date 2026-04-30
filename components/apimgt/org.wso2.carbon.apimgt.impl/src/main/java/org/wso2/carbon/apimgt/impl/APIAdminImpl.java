@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.dto.GatewayVisibilityPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -78,6 +79,7 @@ import org.wso2.carbon.apimgt.impl.factory.PersistenceFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyMgtNotificationSender;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
+import org.wso2.carbon.apimgt.impl.notifier.events.APIKeyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.LabelEvent;
 import org.wso2.carbon.apimgt.impl.service.KeyMgtRegistrationService;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
@@ -267,14 +269,18 @@ public class APIAdminImpl implements APIAdmin {
         // name is the UUID of environments configured in api-manager.xml
         Environment env = APIUtil.getReadOnlyEnvironments().get(uuid);
         if (env == null) {
-            env = apiMgtDAO.getEnvironment(tenantDomain, uuid);
-            if (env == null) {
-                String errorMessage = String.format("Failed to retrieve Environment with UUID %s. " +
-                                "Environment not found", uuid);
-                throw new APIMgtResourceNotFoundException(errorMessage, ExceptionCodes.from(
-                        ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND, String.format("UUID '%s'", uuid))
-                );
+            if (log.isDebugEnabled()) {
+                log.debug("Environment with UUID " + uuid + " not found in read-only cache, checking database");
             }
+            env = apiMgtDAO.getEnvironment(tenantDomain, uuid);
+        }
+        if (env == null) {
+            log.error("Failed to retrieve Environment with UUID " + uuid + " for tenant domain " + tenantDomain);
+            String errorMessage = String.format("Failed to retrieve Environment with UUID %s. " +
+                            "Environment not found", uuid);
+            throw new APIMgtResourceNotFoundException(errorMessage, ExceptionCodes.from(
+                    ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND, String.format("UUID '%s'", uuid))
+            );
         }
         return env;
     }
@@ -382,14 +388,19 @@ public class APIAdminImpl implements APIAdmin {
      */
     @Override
     public void revokeAPIKey(String keyUUId, String tenantDomain) throws APIManagementException {
-
+        int tenantId = APIUtil.getTenantId(tenantDomain);
         // Load existing metadata before revocation (revocation may remove/alter it)
-        APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getAPIKey(keyUUId, tenantDomain);
-        if (apiKeyInfo.getKeyUUID() == null) {
+        APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getAPIKeyForTenant(keyUUId, tenantDomain);
+        if (apiKeyInfo == null || StringUtils.isEmpty(apiKeyInfo.getKeyUUID())) {
             throw new APIMgtResourceNotFoundException("Active API key not found for UUID: " + keyUUId);
         }
-        log.info("Revoking API key with UUID: " + keyUUId + " for tenant: " + tenantDomain);
+        if (log.isDebugEnabled()){
+            log.debug("Revoking API key with UUID: " + keyUUId + " for tenant: " + tenantDomain);
+        }
         apiKeyMgtDAO.revokeAPIKey(keyUUId, tenantDomain);
+        APIKeyEvent apiKeyEvent = new APIKeyEvent(APIConstants.EventType.API_KEY_DELETE.name(), tenantId, tenantDomain,
+                apiKeyInfo.getApiKeyHash(),apiKeyInfo.getKeyUUID(), apiKeyInfo.getKeyName(),apiKeyInfo.getKeyType());
+        APIUtil.sendNotification(apiKeyEvent, APIConstants.NotifierType.API_KEY.name());
     }
 
     /**
@@ -399,7 +410,7 @@ public class APIAdminImpl implements APIAdmin {
                                                        int offset, String applicationName, String sortBy,
                                                        String sortOrder) throws APIManagementException {
 
-        return apiMgtDAO.getApplicationsWithPagination(user, owner, tenantId, limit, offset, sortBy, sortOrder,
+        return apiMgtDAO.getApplicationsWithPaginationAndKMs(user, owner, tenantId, limit, offset, sortBy, sortOrder,
                 applicationName);
     }
 
@@ -1085,13 +1096,21 @@ public class APIAdminImpl implements APIAdmin {
             JsonElement encryptedJsonValue = new JsonParser().parse(value);
             if (encryptedJsonValue instanceof JsonObject) {
                 JsonObject jsonObject = (JsonObject) encryptedJsonValue;
-                JsonPrimitive encryptedValue = jsonObject.getAsJsonPrimitive(APIConstants.ENCRYPTED_VALUE);
-                if (encryptedValue.isBoolean()) {
-                    JsonPrimitive valueElement = jsonObject.getAsJsonPrimitive(APIConstants.VALUE);
-                    if (encryptedValue.getAsBoolean()) {
-                        if (valueElement.isString()) {
+                JsonElement encryptedElement = jsonObject.get(APIConstants.ENCRYPTED_VALUE);
+                if (encryptedElement == null || !encryptedElement.isJsonPrimitive()) {
+                    return value;
+                }
+                JsonPrimitive encryptedValue = encryptedElement.getAsJsonPrimitive();
+                if (!encryptedValue.isBoolean()) {
+                    return value;
+                }
+                if (encryptedValue.getAsBoolean()) {
+                    JsonElement valueElement = jsonObject.get(APIConstants.VALUE);
+                    if (valueElement != null && valueElement.isJsonPrimitive()) {
+                        JsonPrimitive valuePrimitive = valueElement.getAsJsonPrimitive();
+                        if (valuePrimitive.isString()) {
                             CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
-                            return new String(cryptoUtil.decrypt(valueElement.getAsString().getBytes()));
+                            return new String(cryptoUtil.decrypt(valuePrimitive.getAsString().getBytes()));
                         }
                     }
                 }
@@ -2056,12 +2075,37 @@ public class APIAdminImpl implements APIAdmin {
 
     public void updateApiProvider(String apiId, String provider, String organisation) throws APIManagementException {
         APIPersistence apiPersistenceInstance = PersistenceFactory.getAPIPersistenceInstance();
+        String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
+        APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(username);
+        API api;
+        try {
+            api = apiProvider.getAPIbyUUID(apiId, organisation);
+        } catch (APIManagementException e) {
+            throw new APIManagementException("Error while retrieving API for id: " + apiId, e);
+        }
+        if (api == null) {
+            throw new APIMgtResourceNotFoundException("API not found for id: " + apiId);
+        }
+
+        String oldProvider = api.getId() != null ? api.getId().getProviderName() : null;
         try {
             ApiMgtDAO.getInstance().updateApiProvider(apiId, provider);
             apiPersistenceInstance.changeApiProvider(provider, apiId, organisation);
-        } catch (APIPersistenceException e) {
+        } catch (APIPersistenceException | APIManagementException e) {
             throw new APIManagementException("Error while changing the API provider", e);
         }
+
+        JSONObject apiLogObject = new JSONObject();
+        apiLogObject.put(APIConstants.AuditLogConstants.NAME,
+                api.getId() != null ? api.getId().getApiName() : null);
+        apiLogObject.put(APIConstants.AuditLogConstants.VERSION,
+                api.getId() != null ? api.getId().getVersion() : null);
+        apiLogObject.put(APIConstants.AuditLogConstants.CONTEXT, api.getContext());
+        apiLogObject.put(APIConstants.AuditLogConstants.OLD_PROVIDER, oldProvider);
+        apiLogObject.put(APIConstants.AuditLogConstants.NEW_PROVIDER, provider);
+
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
+                APIConstants.AuditLogConstants.PROVIDER_CHANGED, username);
     }
 
     /**

@@ -35,7 +35,7 @@ public class RevokedJWTDataHolder {
     private static final Map<String, Long> revokedSubjectEntityAppMap = new ConcurrentHashMap<>();
     // User UUID (jwt claim) -> revoked timestamp
     private static final Map<String, Long> revokedSubjectEntityUserMap = new ConcurrentHashMap<>();
-    private static RevokedJWTDataHolder instance = new RevokedJWTDataHolder();
+    private static final RevokedJWTDataHolder instance = new RevokedJWTDataHolder();
 
     /**
      * Adds a given key,value pair to the revoke map.
@@ -56,15 +56,6 @@ public class RevokedJWTDataHolder {
      */
     public static boolean isJWTTokenSignatureExistsInRevokedMap(String jwtSignature) {
         return revokedJWTMap.containsKey(jwtSignature);
-    }
-
-    /**
-     * Checks whether a given api key is in the map.
-     * @param apiKeyHash Api key hash to be checked.
-     * @return true if it exists and false otherwise.
-     */
-    public static boolean isApiKeyExistsInRevokedMap(String apiKeyHash) {
-        return revokedJWTMap.containsKey(apiKeyHash);
     }
 
     private RevokedJWTDataHolder() {

@@ -18,11 +18,14 @@
 
 package org.wso2.carbon.apimgt.governance.rest.api.util;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.governance.api.APIMGovernanceAPIConstants;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
+import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.Rule;
 import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
@@ -58,6 +61,8 @@ import java.util.stream.Collectors;
  * This class represents the Results Mapping Utility
  */
 public class ComplianceAPIUtil {
+
+    private static final Log log = LogFactory.getLog(ComplianceAPIUtil.class);
 
     /**
      * Get the artifacts compliance details DTO using the Artifact Reference Id, artifact type,
@@ -320,9 +325,15 @@ public class ComplianceAPIUtil {
                 Math.min(offset + limit, allArtifacts.size()));
 
         for (String artifactId : paginatedArtifactIds) {
-            ArtifactComplianceStatusDTO complianceStatus = getArtifactComplianceStatus(artifactId,
-                    artifactType, organization);
-            complianceStatusList.add(complianceStatus);
+            try {
+                ArtifactComplianceStatusDTO complianceStatus = getArtifactComplianceStatus(artifactId,
+                        artifactType, organization);
+                complianceStatusList.add(complianceStatus);
+            } catch (APIMGovernanceException e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Error while fetching compliance status for artifact with id: " + artifactId, e);
+                }
+            }
         }
 
         ArtifactComplianceListDTO complianceListDTO = new ArtifactComplianceListDTO();
@@ -362,8 +373,12 @@ public class ComplianceAPIUtil {
         infoDTO.setName(APIMGovernanceUtil.getArtifactName(artifactRefId, artifactType, organization));
         infoDTO.setVersion(APIMGovernanceUtil.getArtifactVersion(artifactRefId, artifactType, organization));
         infoDTO.setType(ArtifactInfoDTO.TypeEnum.valueOf(String.valueOf(artifactType)));
-        infoDTO.setExtendedType(ArtifactInfoDTO.ExtendedTypeEnum.valueOf(String.valueOf(
-                APIMGovernanceUtil.getExtendedArtifactTypeForArtifact(artifactRefId, artifactType))));
+        ExtendedArtifactType extendedArtifactTypeValue =
+                APIMGovernanceUtil.getExtendedArtifactTypeForArtifact(artifactRefId, artifactType);
+        if (extendedArtifactTypeValue == null) {
+            throw new APIMGovernanceException("Unsupported artifact type: " + artifactType);
+        }
+        infoDTO.setExtendedType(ArtifactInfoDTO.ExtendedTypeEnum.valueOf(String.valueOf(extendedArtifactTypeValue)));
         infoDTO.setOwner(APIMGovernanceUtil.getArtifactOwner(artifactRefId, artifactType, organization));
         complianceStatus.setInfo(infoDTO);
 

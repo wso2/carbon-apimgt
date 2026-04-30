@@ -8,7 +8,11 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.GatewayVisibilityPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.PlatformGatewayService;
+import org.wso2.carbon.apimgt.api.model.PlatformGateway;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.EnvironmentsApiService;
 
@@ -21,7 +25,6 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.EnvironmentMappin
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.GatewayManagementDAO;
 import org.wso2.carbon.apimgt.impl.utils.GatewayManagementUtils;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.GatewayInstanceDTO;
@@ -32,6 +35,10 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response;
 
@@ -99,6 +106,29 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
             EnvironmentDTO environmentDTO = EnvironmentMappingUtil.fromEnvToEnvDTO(environment);
             return Response.ok().entity(environmentDTO).build();
         }
+
+        // Fallback: check if it's a platform gateway ID
+        PlatformGatewayService platformGatewayService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayService();
+        if (platformGatewayService != null) {
+            try {
+                PlatformGateway gateway = platformGatewayService.getGatewayById(environmentId);
+                if (gateway != null && organization.equals(gateway.getOrganizationId())) {
+                    // Fetch permissions from corresponding environment if exists
+                    GatewayVisibilityPermissionConfigurationDTO permissions = null;
+                    Environment env = apiAdmin.getEnvironment(organization, gateway.getId());
+                    if (env != null) {
+                        permissions = env.getPermissions();
+                    }
+                    EnvironmentDTO dto = EnvironmentMappingUtil.fromPlatformGatewayToEnvDTO(
+                            gateway, APIConstants.WSO2_API_PLATFORM_GATEWAY, permissions);
+                    return Response.ok().entity(dto).build();
+                }
+            } catch (APIManagementException e) {
+                log.debug("Platform gateway not found for id: " + environmentId, e);
+            }
+        }
+
         throw new APIManagementException("Requested Gateway Environment not found",
                 ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND);
     }
@@ -140,17 +170,24 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
     }
 
     /**
-     * Get list of gateway environments from config api-manager.xml and dynamic environments (from DB)
+     * Get list of gateway environments (non–platform-gateway only).
+     * Returns environments from config and DB excluding Platform gateway type.
+     * Platform gateways are loaded via GET /gateways; the UI should call both endpoints and combine as needed.
      *
      * @param messageContext message context
-     * @return created environment
+     * @return list of environments (Regular, APK, etc.; no platform gateways)
      * @throws APIManagementException if failed to get list
      */
     public Response environmentsGet(MessageContext messageContext) throws APIManagementException {
         APIAdmin apiAdmin = new APIAdminImpl();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
+
         List<Environment> envList = apiAdmin.getAllEnvironments(organization);
-        EnvironmentListDTO envListDTO = EnvironmentMappingUtil.fromEnvListToEnvListDTO(envList);
+        List<Environment> envListFiltered = envList.stream()
+                .filter(env -> !APIConstants.WSO2_API_PLATFORM_GATEWAY.equals(env.getGatewayType()))
+                .collect(Collectors.toList());
+        EnvironmentListDTO envListDTO = EnvironmentMappingUtil.fromEnvListToEnvListDTO(envListFiltered);
+
         return Response.ok().entity(envListDTO).build();
     }
 

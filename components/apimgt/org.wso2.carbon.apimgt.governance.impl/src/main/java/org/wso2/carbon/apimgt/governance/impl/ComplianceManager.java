@@ -561,8 +561,8 @@ public class ComplianceManager {
                     }
 
                     // Send target content and ruleset for validation
-                    List<RuleViolation> ruleViolations = validationEngine.validate(
-                            contentToValidate, ruleset);
+                    List<RuleViolation> ruleViolations = validationEngine.validate(contentToValidate, ruleset,
+                            APIMGovernanceUtil.getAPIMGovernanceOptions());
                     AuditLogger.log("Sync Eval Request", "Successfully evaluated artifact %s in organization %s " +
                             "against ruleset %s", artifactRefId, organization, ruleset.getId());
 
@@ -655,8 +655,8 @@ public class ComplianceManager {
                     }
 
                     // Send target content and ruleset for validation
-                    List<RuleViolation> ruleViolations = validationEngine.validate(
-                            contentToValidate, ruleset);
+                    List<RuleViolation> ruleViolations = validationEngine.validate(contentToValidate, ruleset,
+                            APIMGovernanceUtil.getAPIMGovernanceOptions());
                     AuditLogger.log("Dry Run Eval Request", "Successfully evaluated artifact in organization %s " +
                             "against ruleset %s", organization, ruleset.getId());
 

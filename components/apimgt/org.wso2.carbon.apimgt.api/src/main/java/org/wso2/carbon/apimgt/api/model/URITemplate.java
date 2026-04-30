@@ -17,6 +17,8 @@
 */
 package org.wso2.carbon.apimgt.api.model;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONValue;
 import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
@@ -27,6 +29,7 @@ import java.util.*;
 
 public class URITemplate implements Serializable{
 
+    private static final Log log = LogFactory.getLog(URITemplate.class);
     private static final long serialVersionUID = 1L;
 
     private String uriTemplate;
@@ -51,6 +54,11 @@ public class URITemplate implements Serializable{
     private int amznResourceTimeout;
     private boolean amznResourceContentEncoded;
     private List<OperationPolicy> operationPolicies = new ArrayList<>();
+    /**
+     * Policy Hub policies at resource level (not persisted to AM_API_OPERATION_POLICY_MAPPING).
+     * Set from API definition when building platform gateway YAML (Option B).
+     */
+    private List<OperationPolicy> hubPolicies = new ArrayList<>();
     private String description;
     private String schemaDefinition = null;
     private APIOperationMapping APIOperationMapping = null;
@@ -493,6 +501,17 @@ public class URITemplate implements Serializable{
 
     public void addOperationPolicy(OperationPolicy policy) {
         operationPolicies.add(policy);
+    }
+
+    public List<OperationPolicy> getHubPolicies() {
+        return hubPolicies;
+    }
+
+    public void setHubPolicies(List<OperationPolicy> hubPolicies) {
+        this.hubPolicies = hubPolicies != null ? hubPolicies : new ArrayList<>();
+        if (log.isDebugEnabled()) {
+            log.debug("Hub policies updated for URI template. Policy count: " + this.hubPolicies.size());
+        }
     }
 
     public String getDescription() {

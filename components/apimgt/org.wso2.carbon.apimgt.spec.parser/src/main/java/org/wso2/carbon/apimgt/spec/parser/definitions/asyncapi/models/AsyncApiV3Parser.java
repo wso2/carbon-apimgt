@@ -258,13 +258,6 @@ public class AsyncApiV3Parser extends AbstractAsyncApiParser {
             throw new APIManagementException(msg, e, ExceptionCodes.ERROR_VALIDATING_ASYNCAPI_SPECIFICATION);
         }
 
-        /**
-         * TODO Validation is currently not working since the Apicurio library does not yet include
-         * the AsyncAPI v3 model in its ValidationRuleSet. As a result, the validation (problems)
-         * returns null. Temporarily overriding the value as true until this is fixed.
-         */
-        validationSuccess = true;
-
         // Build the validation response
         if (validationSuccess) {
             AsyncApiDocument asyncApiDocument = (AsyncApiDocument) Library.readDocumentFromJSONString(apiDefinition);

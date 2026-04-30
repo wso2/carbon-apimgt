@@ -24,9 +24,9 @@ public class APIKeyAssociationInfoDTO   {
     private String keyName = null;
     private String apiName = null;
     private String apiUUID = null;
-    private String issuedOn = null;
-    private Integer validityPeriod = null;
-    private String lastUsed = null;
+    private Long issuedOn = null;
+    private Long validityPeriod = null;
+    private Long lastUsed = null;
 
   /**
    * The UUID of the API key
@@ -103,24 +103,24 @@ public class APIKeyAssociationInfoDTO   {
   /**
    * Created Time
    **/
-  public APIKeyAssociationInfoDTO issuedOn(String issuedOn) {
+  public APIKeyAssociationInfoDTO issuedOn(Long issuedOn) {
     this.issuedOn = issuedOn;
     return this;
   }
 
   
-  @ApiModelProperty(example = "2026-02-06 23:45:07", value = "Created Time")
+  @ApiModelProperty(value = "Created Time")
   @JsonProperty("issuedOn")
-  public String getIssuedOn() {
+  public Long getIssuedOn() {
     return issuedOn;
   }
-  public void setIssuedOn(String issuedOn) {
+  public void setIssuedOn(Long issuedOn) {
     this.issuedOn = issuedOn;
   }
 
   /**
    **/
-  public APIKeyAssociationInfoDTO validityPeriod(Integer validityPeriod) {
+  public APIKeyAssociationInfoDTO validityPeriod(Long validityPeriod) {
     this.validityPeriod = validityPeriod;
     return this;
   }
@@ -128,28 +128,28 @@ public class APIKeyAssociationInfoDTO   {
   
   @ApiModelProperty(example = "3600", value = "")
   @JsonProperty("validityPeriod")
-  public Integer getValidityPeriod() {
+  public Long getValidityPeriod() {
     return validityPeriod;
   }
-  public void setValidityPeriod(Integer validityPeriod) {
+  public void setValidityPeriod(Long validityPeriod) {
     this.validityPeriod = validityPeriod;
   }
 
   /**
-   * Last used time as epoch milliseconds (string), or &#x60;NOT_USED&#x60; if never used.
+   * Last used time as epoch milliseconds.
    **/
-  public APIKeyAssociationInfoDTO lastUsed(String lastUsed) {
+  public APIKeyAssociationInfoDTO lastUsed(Long lastUsed) {
     this.lastUsed = lastUsed;
     return this;
   }
 
   
-  @ApiModelProperty(example = "2026-02-06 23:45:07", value = "Last used time as epoch milliseconds (string), or `NOT_USED` if never used.")
+  @ApiModelProperty(value = "Last used time as epoch milliseconds.")
   @JsonProperty("lastUsed")
-  public String getLastUsed() {
+  public Long getLastUsed() {
     return lastUsed;
   }
-  public void setLastUsed(String lastUsed) {
+  public void setLastUsed(Long lastUsed) {
     this.lastUsed = lastUsed;
   }
 

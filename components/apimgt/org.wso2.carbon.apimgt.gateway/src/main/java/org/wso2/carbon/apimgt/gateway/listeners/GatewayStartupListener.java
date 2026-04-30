@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
 import org.wso2.carbon.apimgt.gateway.LLMProviderManager;
 import org.wso2.carbon.apimgt.gateway.TenancyLoader;
 import org.wso2.carbon.apimgt.gateway.apikey.APIKeysRetriever;
+import org.wso2.carbon.apimgt.gateway.apikey.OpaqueApiKeyPublisher;
 import org.wso2.carbon.apimgt.gateway.notifiers.DeploymentStatusNotifier;
 import org.wso2.carbon.apimgt.gateway.notifiers.GatewayNotifier;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
@@ -84,7 +85,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         implements ServerStartupObserver, ServerShutdownHandler, JMSListenerShutDownService {
 
     private static final Log log = LogFactory.getLog(GatewayStartupListener.class);
-    private boolean debugEnabled = log.isDebugEnabled();
+    private final boolean debugEnabled = log.isDebugEnabled();
     private JMSTransportHandler jmsTransportHandlerForTrafficManager;
     private JMSTransportHandler jmsTransportHandlerForEventHub;
     private ThrottleProperties throttleProperties;
@@ -104,6 +105,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
     private String synapseDeploymentPath = "synapse-configs" + File.separator + "default";
     private GatewayNotifier gatewayNotifier;
     private DeploymentStatusNotifier deploymentStatusNotifier;
+    private OpaqueApiKeyPublisher opaqueApiKeyPublisher;
 
     public GatewayStartupListener() {
 
@@ -127,6 +129,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
             this.jmsTransportHandlerForEventHub = new JMSTransportHandler(
                     eventHubReceiverConfiguration.getJmsConnectionParameters(), jmsTaskManagerProperties);
         }
+        opaqueApiKeyPublisher = OpaqueApiKeyPublisher.getInstance();
     }
 
     @Override
@@ -248,10 +251,6 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                     .subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_THROTTLE_DATA, new JMSMessageListener());
             jmsTransportHandlerForEventHub.subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_TOKEN_REVOCATION,
                     new GatewayTokenRevocationMessageListener());
-            jmsTransportHandlerForEventHub.subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_OPAQUE_API_KEY_INFO,
-                    new OpaqueAPIKeyInfoListener());
-            jmsTransportHandlerForEventHub.subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_OPAQUE_API_KEY_ASSOCIATION_INFO,
-                    new OpaqueAPIKeyAssociationInfoListener());
             jmsTransportHandlerForEventHub.subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_CACHE_INVALIDATION,
                     new APIMgtGatewayCacheMessageListener());
             jmsTransportHandlerForEventHub
@@ -425,7 +424,12 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         if (deploymentStatusNotifier != null) {
             deploymentStatusNotifier.shutdown();
         }
-
+        if (opaqueApiKeyPublisher != null){
+            if (log.isDebugEnabled()){
+                log.debug("Shutting down OpaqueApiKeyPublisher instance");
+            }
+            opaqueApiKeyPublisher.shutdownInstance();
+        }
     }
 
     public void deployAPIsInAsyncMode(String tenantDomain) {
@@ -592,6 +596,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
             }
         }).start();
         retrieveAndDeployArtifacts(tenantDomain);
+        retrieveApiKeys();
         ServiceReferenceHolder.getInstance().addLoadedTenant(tenantDomain);
     }
 

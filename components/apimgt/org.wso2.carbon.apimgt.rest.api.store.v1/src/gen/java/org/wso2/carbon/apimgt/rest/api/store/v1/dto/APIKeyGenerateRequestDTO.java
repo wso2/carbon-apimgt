@@ -21,7 +21,7 @@ import javax.validation.Valid;
 public class APIKeyGenerateRequestDTO   {
   
     private String keyName = null;
-    private Integer validityPeriod = null;
+    private Long validityPeriod = null;
     private Object additionalProperties = null;
 
   /**
@@ -45,7 +45,7 @@ public class APIKeyGenerateRequestDTO   {
   /**
    * API key validity period
    **/
-  public APIKeyGenerateRequestDTO validityPeriod(Integer validityPeriod) {
+  public APIKeyGenerateRequestDTO validityPeriod(Long validityPeriod) {
     this.validityPeriod = validityPeriod;
     return this;
   }
@@ -53,10 +53,10 @@ public class APIKeyGenerateRequestDTO   {
   
   @ApiModelProperty(example = "3600", value = "API key validity period")
   @JsonProperty("validityPeriod")
-  public Integer getValidityPeriod() {
+  public Long getValidityPeriod() {
     return validityPeriod;
   }
-  public void setValidityPeriod(Integer validityPeriod) {
+  public void setValidityPeriod(Long validityPeriod) {
     this.validityPeriod = validityPeriod;
   }
 

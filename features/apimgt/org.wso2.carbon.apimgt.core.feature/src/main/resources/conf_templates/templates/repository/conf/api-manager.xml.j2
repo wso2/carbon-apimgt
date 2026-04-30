@@ -23,6 +23,7 @@
          <MaxTotal>{{apim.http_client.max_total}}</MaxTotal>
          <DefaultMaxPerRoute>{{apim.http_client.default_max_per_route}}</DefaultMaxPerRoute>
          <ConnectionTimeout>{{apim.http_client.connection_timeout}}</ConnectionTimeout>
+         <ConnectionRequestTimeout>{{apim.http_client.connection_request_timeout}}</ConnectionRequestTimeout>
      </HttpClient>
 
 
@@ -690,6 +691,25 @@
         {% endif %}
         <!-- This parameter is used to enable/disable using legacy async api parser.-->
         <PreserveLegacyAsyncParser>{{apim.publisher.use_legacy_async_parser}}</PreserveLegacyAsyncParser>
+        {% if apim.publisher.import_definition_file_size_limit is defined %}
+        <ImportDefinitionFileSizeLimit>
+            {% if apim.publisher.import_definition_file_size_limit.oas is defined %}
+            <OAS>{{apim.publisher.import_definition_file_size_limit.oas}}</OAS>
+            {% endif %}
+            {% if apim.publisher.import_definition_file_size_limit.async is defined %}
+            <ASYNC>{{apim.publisher.import_definition_file_size_limit.async}}</ASYNC>
+            {% endif %}
+            {% if apim.publisher.import_definition_file_size_limit.wsdl is defined %}
+            <WSDL>{{apim.publisher.import_definition_file_size_limit.wsdl}}</WSDL>
+            {% endif %}
+            {% if apim.publisher.import_definition_file_size_limit.graphql is defined %}
+            <GRAPHQL>{{apim.publisher.import_definition_file_size_limit.graphql}}</GRAPHQL>
+            {% endif %}
+            {% if apim.publisher.import_definition_file_size_limit.mcp is defined %}
+            <MCP>{{apim.publisher.import_definition_file_size_limit.mcp}}</MCP>
+            {% endif %}
+        </ImportDefinitionFileSizeLimit>
+        {% endif %}
     </APIPublisher>
 
     <!-- Status observers can be registered against the API Publisher to listen for
@@ -768,6 +788,10 @@
                 </AllowedURI>
             {% endfor %}
          {% endif %}
+            <AllowedURI>
+                <URI>/internal/gateway/.well-known</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </AllowedURI>
              <AllowedURI>
                 <URI>/api/am/devportal/{version}/tenants</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
@@ -2093,6 +2117,27 @@
               <ExpireTimeSeconds>{{apim.gateway_notification.cleanup.expiry_time}}</ExpireTimeSeconds>
               <DataRetentionPeriodSeconds>{{apim.gateway_notification.cleanup.data_retention_period}}</DataRetentionPeriodSeconds>
           </GatewayCleanup>
+          {% if apim.platform_gateway.versions is defined and apim.platform_gateway.versions | length > 0 %}
+          <PlatformGatewayConnectConfiguration>
+              <PlatformGatewayVersions>
+              {% for version in apim.platform_gateway.versions %}
+                  <Version>{{ version }}</Version>
+              {% endfor %}
+              </PlatformGatewayVersions>
+          </PlatformGatewayConnectConfiguration>
+          {% endif %}
+          <APIKeyNotification>
+              <QueueSize>{{apim.gateway_notification.api_key_notification.queue_size}}</QueueSize>
+              <BatchSize>{{apim.gateway_notification.api_key_notification.batch_size}}</BatchSize>
+              <BatchIntervalMillis>{{apim.gateway_notification.api_key_notification.batch_interval}}</BatchIntervalMillis>
+              <MaxRetryCount>{{apim.gateway_notification.api_key_notification.max_retry_count}}</MaxRetryCount>
+              <RetryDuration>{{apim.gateway_notification.api_key_notification.retry_duration}}</RetryDuration>
+              <RetryProgressionFactor>{{apim.gateway_notification.api_key_notification.retry_progression_factor}}</RetryProgressionFactor>
+              <BatchProcessorMinThread>{{apim.gateway_notification.api_key_notification.batch_processor_min_thread}}</BatchProcessorMinThread>
+              <BatchProcessorMaxThread>{{apim.gateway_notification.api_key_notification.batch_processor_max_thread}}</BatchProcessorMaxThread>
+              <BatchProcessorKeepAlive>{{apim.gateway_notification.api_key_notification.batch_processor_keep_alive}}</BatchProcessorKeepAlive>
+              <BatchProcessorQueueSize>{{apim.gateway_notification.api_key_notification.batch_processor_queue_size}}</BatchProcessorQueueSize>
+          </APIKeyNotification>
       </GatewayNotificationConfiguration>
 
       <!-- SynapseArtifactGenerator thread pool configuration -->
@@ -2109,6 +2154,7 @@
       <EnableCertificateManagementEventListening>{{apim.certificate_manager.events_enabled}}</EnableCertificateManagementEventListening>
 
       <AWSLambdaConnector>
+          <EnableProxyResponseMapping>{{apim.aws_lambda.enable_proxy_response_mapping}}</EnableProxyResponseMapping>
           <HttpClient>
               <MaxConnections>{{apim.aws_lambda.http_client.max_connections}}</MaxConnections>
               <ConnectionTimeout>{{apim.aws_lambda.http_client.connection_timeout}}</ConnectionTimeout>
@@ -2116,5 +2162,8 @@
               <ConnectionAcquisitionTimeout>{{apim.aws_lambda.http_client.connection_acquisition_timeout}}</ConnectionAcquisitionTimeout>
           </HttpClient>
       </AWSLambdaConnector>
-
+      
+      <Mediation>
+        <EnableSecureXMLProcessing>{{apim.mediation.enable_secure_xml_processing}}</EnableSecureXMLProcessing>
+      </Mediation>
 </APIManager>

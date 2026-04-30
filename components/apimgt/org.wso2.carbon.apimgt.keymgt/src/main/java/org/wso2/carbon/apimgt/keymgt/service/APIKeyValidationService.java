@@ -29,7 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
-import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -539,5 +539,16 @@ public class APIKeyValidationService {
             return new HashMap<>();
         }
         return subscriptionDataStore.getScopesByTenant(tenantDomain);
+    }
+
+    public APIKeyValidationInfoDTO validateAPIKeySubscription(String apiContext, String apiVersion, String tenantDomain,
+                                                              APIKeyInfo apiKeyInfo) throws APIKeyMgtException {
+        KeyValidationHandler keyValidationHandler =
+                ServiceReferenceHolder.getInstance().getKeyValidationHandler(tenantDomain);
+        if (keyValidationHandler!= null){
+            return keyValidationHandler.validateAPISubscription(apiContext, apiVersion, apiKeyInfo);
+        }else {
+            throw new APIKeyMgtException("KeyValidationHandler is not initialized for tenant domain: " + tenantDomain);
+        }
     }
 }

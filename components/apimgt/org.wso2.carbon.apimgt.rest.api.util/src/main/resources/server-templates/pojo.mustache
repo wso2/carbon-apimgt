@@ -10,12 +10,22 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 {{#useBeanValidation}}
 import javax.validation.Valid;
 {{/useBeanValidation}}
-
+{{#jackson}}
+{{#ignoreUnknownProperties}}
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+{{/ignoreUnknownProperties}}
+{{/jackson}}
 {{#description}}@ApiModel(description = "{{{description}}}"){{/description}}
 
 {{#vendorExtensions.x-scopes}}
 @Scope(name = "{{.}}", description="", value ="")
 {{/vendorExtensions.x-scopes}}
+{{#jackson}}
+{{#ignoreUnknownProperties}}
+@JsonIgnoreProperties(ignoreUnknown = true)
+{{/ignoreUnknownProperties}}
+{{/jackson}}
+
 public class {{classname}} {{#parent}}extends {{{parent}}}{{/parent}} {{#serializableModel}}implements Serializable{{/serializableModel}} {
   {{#vars}}{{#isEnum}}
 

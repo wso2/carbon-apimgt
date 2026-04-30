@@ -146,7 +146,7 @@ public class GlobalThrowableMapper implements ExceptionMapper<Throwable> {
             return RestApiUtil.buildBadRequestException(errorMessage).getResponse();
         }
 
-        if (e instanceof APIManagementException) {
+        if (e instanceof APIManagementException || e instanceof OAuthAuthenticationInterceptorException) {
 
             ErrorHandler selectedErrorHandler = null;
             List<Throwable> throwableList = ExceptionUtils.getThrowableList(e);

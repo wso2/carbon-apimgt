@@ -23,6 +23,7 @@ import java.util.Map;
 public class ConsumerSecretRequest {
 
     private String clientId;
+    private String clientSecret;
     private Map<String, Object> parameters = new HashMap<String, Object>();
 
     public String getClientId() {
@@ -33,6 +34,16 @@ public class ConsumerSecretRequest {
     public void setClientId(String clientId) {
 
         this.clientId = clientId;
+    }
+
+    public String getClientSecret() {
+
+        return clientSecret;
+    }
+
+    public void setClientSecret(String clientSecret) {
+
+        this.clientSecret = clientSecret;
     }
 
     public void addParameter(String name, Object value) {

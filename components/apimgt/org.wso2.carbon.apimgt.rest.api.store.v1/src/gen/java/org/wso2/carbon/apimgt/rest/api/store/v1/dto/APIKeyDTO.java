@@ -22,7 +22,7 @@ public class APIKeyDTO   {
   
     private String keyName = null;
     private String apikey = null;
-    private Integer validityPeriod = null;
+    private Long validityPeriod = null;
 
   /**
    * API Key name
@@ -62,7 +62,7 @@ public class APIKeyDTO   {
 
   /**
    **/
-  public APIKeyDTO validityPeriod(Integer validityPeriod) {
+  public APIKeyDTO validityPeriod(Long validityPeriod) {
     this.validityPeriod = validityPeriod;
     return this;
   }
@@ -70,10 +70,10 @@ public class APIKeyDTO   {
   
   @ApiModelProperty(example = "3600", value = "")
   @JsonProperty("validityPeriod")
-  public Integer getValidityPeriod() {
+  public Long getValidityPeriod() {
     return validityPeriod;
   }
-  public void setValidityPeriod(Integer validityPeriod) {
+  public void setValidityPeriod(Long validityPeriod) {
     this.validityPeriod = validityPeriod;
   }
 

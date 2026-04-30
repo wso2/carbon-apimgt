@@ -36,7 +36,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApiResultDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SearchResultListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.SearchApiServiceImplUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.APIInfoMappingUtil;
@@ -84,43 +83,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         resultListDTO.setCount(allMatchedResults.size());
 
         // Create and set the PaginationDTO
-        PaginationDTO paginationDTO = new PaginationDTO();
-        paginationDTO.setLimit(limit);
-        paginationDTO.setOffset(offset);
-        
-        int total = 0;
-        Object len = result.get("length");
-        if (len instanceof Number) {
-            total = ((Number) len).intValue();
-        }
-        paginationDTO.setTotal(total);
-        
-        // Use RestApiCommonUtil to calculate pagination parameters
-        Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, total);
-        
-        // Build full URLs for next and previous
-        String nextUrl = null;
-        String previousUrl = null;
-        
-        if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
-            nextUrl = RestApiCommonUtil.getAPIPaginatedURL(
-                paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
-                paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT),
-                query
-            );
-        }
-        
-        if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
-            previousUrl = RestApiCommonUtil.getAPIPaginatedURL(
-                paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
-                paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT),
-                query
-            );
-        }
-        
-        paginationDTO.setNext(nextUrl);
-        paginationDTO.setPrevious(previousUrl);
-        resultListDTO.setPagination(paginationDTO);
+        APIInfoMappingUtil.setPaginationParams(resultListDTO, limit, offset, (Integer) result
+                .get(APIConstants.API_DATA_LENGTH), query);
 
         return Response.ok().entity(resultListDTO).build();
     }

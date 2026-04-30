@@ -19,13 +19,25 @@
 package org.wso2.carbon.apimgt.impl.notifier;
 
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.Event;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 
+/**
+ * Publishes deploy/undeploy events to the Event Hub (JMS) for Synapse gateways.
+ * Publishes only when the event has at least one Synapse target (non-empty gatewayLabels).
+ * Events that target only platform gateways (platformGatewayIds) are not published to JMS.
+ */
 public class DeployAPIInGatewayNotifier extends AbstractNotifier {
 
     @Override
     public boolean publishEvent(Event event) throws NotifierException {
+        if (event instanceof DeployAPIInGatewayEvent) {
+            DeployAPIInGatewayEvent deployEvent = (DeployAPIInGatewayEvent) event;
+            if (deployEvent.getGatewayLabels() == null || deployEvent.getGatewayLabels().isEmpty()) {
+                return true;
+            }
+        }
         publishEventToEventHub(event);
         return true;
     }

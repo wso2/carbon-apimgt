@@ -46,7 +46,7 @@ public class GatewayManagementUtils {
      */
     public static String validateGatewayStatus(Timestamp lastUpdated) {
         if (lastUpdated == null) {
-            return APIConstants.GatewayNotification.STATUS_EXPIRED;
+            return APIConstants.GatewayNotificationConfigurationConstants.STATUS_EXPIRED;
         }
         try {
             GatewayNotificationConfiguration config = ServiceReferenceHolder.getInstance()
@@ -55,11 +55,11 @@ public class GatewayManagementUtils {
             long expireTimeThreshold = currentTime - (config.getGatewayCleanupConfiguration().getExpireTimeSeconds() * 1000L);
 
             return lastUpdated.getTime() >= expireTimeThreshold
-                    ? APIConstants.GatewayNotification.STATUS_ACTIVE
-                    : APIConstants.GatewayNotification.STATUS_EXPIRED;
+                    ? APIConstants.GatewayNotificationConfigurationConstants.STATUS_ACTIVE
+                    : APIConstants.GatewayNotificationConfigurationConstants.STATUS_EXPIRED;
         } catch (Exception e) {
             log.warn("Error validating gateway status, assuming expired", e);
-            return APIConstants.GatewayNotification.STATUS_EXPIRED;
+            return APIConstants.GatewayNotificationConfigurationConstants.STATUS_EXPIRED;
         }
     }
 
@@ -81,7 +81,7 @@ public class GatewayManagementUtils {
             GatewayManagementDAO gatewayManagementDAO = GatewayManagementDAO.getInstance();
             int deletedCount = gatewayManagementDAO.deleteOldGatewayRecords(retentionTimestamp);
             
-            if (log.isInfoEnabled() && (deletedCount > 0)) {
+            if (deletedCount > 0) {
                 log.info("Gateway cleanup completed - Deleted: " + deletedCount);
             }
         } catch (APIManagementException e) {

@@ -30,7 +30,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
-import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
 import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.apache.http.client.HttpClient;
 import org.json.simple.JSONObject;
@@ -64,12 +63,16 @@ import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.importexport.utils.APIImportExportUtil;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
+import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayConstants;
+import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayAPIKeyEvents;
 import org.wso2.carbon.apimgt.impl.restapi.CommonUtils;
 import org.wso2.carbon.apimgt.impl.restapi.publisher.ApisApiServiceImplUtils;
 import org.wso2.carbon.apimgt.impl.restapi.publisher.OperationPoliciesApiServiceImplUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.AsyncApiParserImplUtil;
+import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayAPIKeyEventService;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
@@ -92,7 +95,6 @@ import org.wso2.carbon.core.util.CryptoUtil;
 import software.amazon.awssdk.core.exception.SdkClientException;
 
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.ByteArrayInputStream;
@@ -215,14 +217,15 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response getSequenceBackendContent(String type, String apiId, MessageContext messageContext) throws APIManagementException {
+    public Response getSequenceBackendContent(String type, String apiId, MessageContext messageContext)
+            throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         CommonUtils.validateAPIExistence(apiId);
 
         SequenceBackendData data = apiProvider.getCustomBackendByAPIUUID(apiId, type);
         if (data == null) {
             throw new APIMgtResourceNotFoundException(
-                    "Couldn't retrieve an existing Sequence Backend for API: " + apiId,
+                    "Couldn't retrieve an existing sequence backend for API: " + apiId,
                     ExceptionCodes.from(ExceptionCodes.CUSTOM_BACKEND_NOT_FOUND, apiId));
         }
         File file = RestApiPublisherUtils.exportCustomBackendData(data.getSequence(), data.getName());
@@ -504,17 +507,15 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response sequenceBackendUpdate(String apiId, InputStream sequenceInputStream,
-                                          Attachment sequenceDetail, String type, MessageContext messageContext) throws APIManagementException {
+    public Response sequenceBackendUpdate(String apiId, InputStream sequenceInputStream, Attachment sequenceDetail,
+            String type, MessageContext messageContext) throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
         APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         API api = apiProvider.getAPIbyUUID(apiId, organization, APIConstants.API_IDENTIFIER_TYPE);
         api.setOrganization(organization);
-        MultivaluedMap<String, String> headers = sequenceDetail.getHeaders();
-        String contentDecomp = headers.getFirst("Content-Disposition");
-
-        PublisherCommonUtils.updateCustomBackend(api, apiProvider, type, sequenceInputStream, contentDecomp);
+        RestApiPublisherUtils.attachSequenceToSequenceBackend(api, apiProvider, type, sequenceInputStream,
+                sequenceDetail);
         return Response.ok().build();
     }
 
@@ -1396,7 +1397,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             //validate if api exists
             CommonUtils.validateAPIExistence(apiId);
 
-            ContentDisposition contentDisposition;
             String fileName;
             String base64EncodedCert = null;
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -1409,9 +1409,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             int tenantId = APIUtil.getInternalOrganizationId(organization);
             ClientCertificateDTO clientCertificateDTO = CertificateRestApiUtils.preValidateClientCertificate(alias,
                     keyType, apiTypeWrapper, organization);
-            if (certificateDetail != null) {
-                contentDisposition = certificateDetail.getContentDisposition();
-                fileName = contentDisposition.getParameter(RestApiConstants.CONTENT_DISPOSITION_FILENAME);
+            if (certificateDetail != null && certificateInputStream != null) {
+                fileName = certificateDetail.getDataHandler().getName();
                 if (StringUtils.isNotBlank(fileName)) {
                     base64EncodedCert = CertificateRestApiUtils.generateEncodedCertificate(certificateInputStream);
                 }
@@ -1527,9 +1526,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                                                           MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            ContentDisposition contentDisposition = certificateDetail.getContentDisposition();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            String fileName = contentDisposition.getParameter(RestApiConstants.CONTENT_DISPOSITION_FILENAME);
+            String fileName = certificateDetail == null ? null : certificateDetail.getDataHandler().getName();
 
             //validate the input for key type
             validateKeyType(keyType);
@@ -1813,11 +1811,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             //add content depending on the availability of either input stream or inline content
-            if (inputStream != null) {
+            if (inputStream != null && fileDetail != null) {
                 if (!documentation.getSourceType().equals(Documentation.DocumentSourceType.FILE)) {
                     RestApiUtil.handleBadRequest("Source type of document " + documentId + " is not FILE", log);
                 }
-                String filename = fileDetail.getContentDisposition().getFilename();
+                String filename = fileDetail.getDataHandler().getName();
                 if (APIUtil.isSupportedFileType(filename)) {
                     RestApiPublisherUtils.attachFileToDocument(apiId, documentation, inputStream, fileDetail, organization);
                 } else {
@@ -2850,7 +2848,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                     String errorMessage = "Resource id should not be empty to update a resource policy.";
                     RestApiUtil.handleBadRequest(errorMessage, log);
                 }
-                boolean isValidSchema = RestApiPublisherUtils.validateXMLSchema(body.getContent());
+                String wrappedContent = "<xml>" + body.getContent() + "</xml>";
+                boolean isValidSchema = APIUtil.validateXMLSchema(wrappedContent);
                 if (isValidSchema) {
                     List<SOAPToRestSequence> sequence = api.getSoapToRestSequences();
                     for (SOAPToRestSequence soapToRestSequence : sequence) {
@@ -3039,8 +3038,9 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     private String updateSwagger(String apiId, String apiDefinition, String organization)
             throws APIManagementException, FaultGatewaysException {
-        APIDefinitionValidationResponse response = OASParserUtil
-                .validateAPIDefinition(apiDefinition, true);
+        OASParserOptions oasParserOptions = CommonUtil.getOasParserOptions();
+        APIDefinitionValidationResponse response = OASParserUtil.validateAPIDefinition(apiDefinition, true,
+                oasParserOptions);
         if (!response.isValid()) {
             RestApiUtil.handleBadRequest(response.getErrorItems(), log);
         }
@@ -3417,8 +3417,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             } catch (MalformedURLException e) {
                 RestApiUtil.handleBadRequest("Invalid/Malformed URL : " + url, log);
             }
-        } else if (fileInputStream != null && !isServiceAPI) {
-            String filename = fileDetail.getContentDisposition().getFilename();
+        } else if (fileInputStream != null && fileDetail != null && !isServiceAPI) {
+            String filename = fileDetail.getDataHandler().getName();
             try {
                 if (filename.endsWith(".zip")) {
                     validationResponse = APIMWSDLReader.extractAndValidateWSDLArchive(fileInputStream);
@@ -3639,7 +3639,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     ArtifactType.API, organization);
             String filename = null;
             if (fileDetail != null) {
-                filename = fileDetail.getContentDisposition().getFilename();
+                filename = fileDetail.getDataHandler().getName();
             }
             String swaggerStr = ApisApiServiceImplUtils.getSwaggerString(fileInputStream, url,
                     wsdlArchiveExtractedPath, filename);
@@ -3915,6 +3915,22 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIKeyDTO apiKeyDTO = new APIKeyDTO();
         apiKeyDTO.setApikey(token);
         apiKeyDTO.setValidityTime(60 * 1000);
+        // Notify connected platform gateways so they can add the key to their cache
+        PlatformGatewayAPIKeyEventService eventService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayAPIKeyEventService();
+        if (eventService != null) {
+            try {
+                eventService.broadcastAPIKeyCreated(
+                        new PlatformGatewayAPIKeyEvents.Created(organization, apiId, token,
+                                PlatformGatewayConstants.INTERNAL_API_KEY_NAME)
+                                .withUserId(userName));
+                log.info("Broadcast apikey.created to platform gateways for apiId=" + apiId);
+            } catch (Exception e) {
+                log.warn("Failed to broadcast apikey.created to platform gateways: " + e.getMessage(), e);
+            }
+        } else {
+            log.info("Platform gateway API key event service not available; skipping apikey.created broadcast for apiId=" + apiId);
+        }
         return Response.ok().entity(apiKeyDTO).build();
     }
 
@@ -4084,7 +4100,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         GraphQLValidationResponseDTO validationResponse = new GraphQLValidationResponseDTO();
         try {
             if (fileDetail != null) {
-                filename = fileDetail.getContentDisposition().getFilename();
+                filename = fileDetail.getDataHandler().getName();
                 schema = IOUtils.toString(fileInputStream, RestApiConstants.CHARSET);
             }
             validationResponse = PublisherCommonUtils.validateGraphQLSchema(filename, schema, url, useIntrospection);
@@ -4403,6 +4419,45 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     /**
+     * Merge platform gateways into the environments map used for deploy/undeploy-revision validation only.
+     * Same pattern as Synapse environments: request body has name, vhost, displayOnDevportal; we validate
+     * against this map. GET /environments stays Synapse-only; UI uses GET /gateways for platform targets
+     * and calls the same deploy-revision/undeploy-revision with those names (no cross: one request = one gateway type).
+     */
+    private void addPlatformGatewaysToEnvironmentsMap(Map<String, Environment> environments, String organization)
+            throws APIManagementException {
+        org.wso2.carbon.apimgt.api.PlatformGatewayService platformGatewayService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayService();
+        if (platformGatewayService == null) {
+            return;
+        }
+        try {
+            List<PlatformGateway> gateways = platformGatewayService.listGatewaysByOrganization(organization);
+            if (gateways == null) {
+                return;
+            }
+            for (PlatformGateway gw : gateways) {
+                if (gw == null || StringUtils.isBlank(gw.getName()) || environments.containsKey(gw.getName())) {
+                    continue;
+                }
+                Environment env = new Environment();
+                env.setName(gw.getName());
+                env.setDisplayName(gw.getDisplayName() != null ? gw.getDisplayName() : gw.getName());
+                env.setMode(GatewayMode.WRITE_ONLY.getMode());
+                String vhostHost = StringUtils.isNotBlank(gw.getVhost()) ? gw.getVhost() : "default";
+                VHost vhost = new VHost();
+                vhost.setHost(vhostHost);
+                vhost.setWsHost(vhostHost);
+                env.setVhosts(Collections.singletonList(vhost));
+                environments.put(gw.getName(), env);
+            }
+        } catch (Exception e) {
+            log.error("Could not add platform gateways to environments map", e);
+            throw new APIManagementException("Failed to resolve platform gateways for environments", e);
+        }
+    }
+
+    /**
      * Get revision deployment list
      *
      * @param apiId          UUID of the API
@@ -4613,15 +4668,22 @@ public class ApisApiServiceImpl implements ApisApiService {
             try {
                 URL urlObj = new URL(url);
                 HttpClient httpClient = APIUtil.getHttpClient(urlObj.getPort(), urlObj.getProtocol());
+                String maxFileSizeStr = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                        .getAPIManagerConfiguration().getFirstProperty(
+                                org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_ASYNC_FILE_SIZE_LIMIT);
+                if (maxFileSizeStr == null || maxFileSizeStr.trim().isEmpty()) {
+                    maxFileSizeStr = org.wso2.carbon.apimgt.api.
+                            APIConstants.API_PUBLISHER_IMPORT_ASYNC_FILE_SIZE_LIMIT_DEFAULT_MB;
+                }
                 // Validate URL
                 validationResponse = AsyncApiParserUtil.validateAsyncAPISpecificationByURL(url, httpClient,
-                        returnContent, AsyncApiParserImplUtil.getParserOptionsFromConfig());
+                        returnContent, AsyncApiParserImplUtil.getParserOptionsFromConfig(), maxFileSizeStr);
             } catch (MalformedURLException e) {
                 throw new APIManagementException("Error while processing the API definition URL", e);
             }
         } else if (fileInputStream != null) {
             //validate file
-            String fileName = fileDetail != null ? fileDetail.getContentDisposition().getFilename() : StringUtils.EMPTY;
+            String fileName = fileDetail != null ? fileDetail.getDataHandler().getName() : StringUtils.EMPTY;
             String schemaToBeValidated = ApisApiServiceImplUtils.getSchemaToBeValidated(fileInputStream,
                     isServiceAPI, fileName);
             validationResponse = AsyncApiParserUtil.validateAsyncAPISpecification(schemaToBeValidated,

@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.api;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class LLMProviderMetadata {
@@ -41,6 +43,7 @@ public class LLMProviderMetadata {
      *         instead.
      */
     @Deprecated
+    @JsonIgnore
     public LLMProviderMetadata(@JsonProperty("attributeName") String attributeName,
                                @JsonProperty("inputSource") String inputSource,
                                @JsonProperty("attributeIdentifier") String attributeIdentifier) {
@@ -50,6 +53,7 @@ public class LLMProviderMetadata {
         this.attributeIdentifier = attributeIdentifier;
     }
 
+    @JsonCreator
     public LLMProviderMetadata(@JsonProperty("attributeName") String attributeName,
             @JsonProperty("inputSource") String inputSource,
             @JsonProperty("attributeIdentifier") String attributeIdentifier,

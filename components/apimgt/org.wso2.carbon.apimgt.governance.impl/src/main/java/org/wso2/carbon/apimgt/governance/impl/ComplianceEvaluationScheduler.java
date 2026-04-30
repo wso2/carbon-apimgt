@@ -312,7 +312,8 @@ public class ComplianceEvaluationScheduler {
                 }
 
                 // Send target content and ruleset for validation
-                List<RuleViolation> violations = validationEngine.validate(contentToValidate, ruleset);
+                List<RuleViolation> violations = validationEngine.validate(contentToValidate, ruleset,
+                        APIMGovernanceUtil.getAPIMGovernanceOptions());
                 AuditLogger.log("Async Eval Request", "Validated artifact %s " +
                                 "in organization %s against ruleset %s", artifactRefId,
                         organization, ruleset.getId());

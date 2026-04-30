@@ -22,11 +22,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.LLMProviderConfiguration;
+import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.LLMProviderInfo;
 import org.wso2.carbon.apimgt.common.jms.JMSConnectionEventListener;
@@ -68,15 +71,15 @@ import javax.jms.Topic;
 public class GatewayJMSMessageListener implements MessageListener, JMSConnectionEventListener {
 
     private static final Log log = LogFactory.getLog(GatewayJMSMessageListener.class);
-    private boolean debugEnabled = log.isDebugEnabled();
+    private final boolean debugEnabled = log.isDebugEnabled();
     private boolean refreshOnReconnect = false;
-    private InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
-    private EventHubConfigurationDto eventHubConfigurationDto = ServiceReferenceHolder.getInstance()
+    private final InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
+    private final EventHubConfigurationDto eventHubConfigurationDto = ServiceReferenceHolder.getInstance()
             .getAPIManagerConfiguration().getEventHubConfigurationDto();
-    private GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties = ServiceReferenceHolder
+    private final GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties = ServiceReferenceHolder
             .getInstance().getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties();
     ExecutorService executor = Executors.newSingleThreadExecutor(r -> new Thread(r, "DeploymentThread"));
-    private static GatewayNotifier gatewayNotifier = GatewayNotifier.getInstance();
+    private static final GatewayNotifier gatewayNotifier = GatewayNotifier.getInstance();
 
     public GatewayJMSMessageListener() {
     }
@@ -518,7 +521,101 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
                     log.error("Error while loading tenant into gateway.", e);
                 }
             }
+        } else if (EventType.API_KEY_CREATE.toString().equals(eventType) ||
+                EventType.API_KEY_DELETE.toString().equals(eventType)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Processing API key event. Event type: " + eventType);
+            }
+            APIKeyEvent apiKeyEvent = new Gson().fromJson(eventJson, APIKeyEvent.class);
+            if (!TenantUtils.isTenantAvailable(apiKeyEvent.getTenantDomain())){
+                return;
+            }
+            APIKeyInfo apiKeyInfo = fromAPIKeyEventToAPIKeyInfo(apiKeyEvent);
+            if (EventType.API_KEY_DELETE.toString().equals(eventType)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Removing API key with lookup key: " + apiKeyInfo.getLookupKey() +
+                            " from the in-memory store");
+                }
+                DataHolder.getInstance().removeOpaqueAPIKeyInfo(apiKeyInfo.getLookupKey());
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug(
+                            "Adding API key with lookup key: " + apiKeyInfo.getLookupKey() + " to the in-memory store");
+                }
+                DataHolder.getInstance().addOpaqueAPIKeyInfo(apiKeyInfo);
+            }
+        } else if (EventType.API_KEY_ASSOCIATION_CREATE.toString().equals(eventType) ||
+                EventType.API_KEY_ASSOCIATION_DELETE.toString().equals(eventType)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Processing API key event. Event type: " + eventType);
+            }
+            APIKeyAssociationEvent apiKeyAssociationEvent = new Gson().fromJson(eventJson, APIKeyAssociationEvent.class);
+            if (!TenantUtils.isTenantAvailable(apiKeyAssociationEvent.getTenantDomain())){
+                return;
+            }
+            String lookupKey = apiKeyAssociationEvent.getApiKeyHash();
+            APIKeyInfo existingKeyInfo = DataHolder.getInstance().getOpaqueAPIKeyInfo(lookupKey);
+            if (existingKeyInfo != null) {
+                APIKeyInfo updatedKeyInfo = new APIKeyInfo(existingKeyInfo);
+                if (EventType.API_KEY_ASSOCIATION_CREATE.toString().equals(eventType)) {
+                    updatedKeyInfo.setApplicationId(apiKeyAssociationEvent.getApplicationUUId());
+                    updatedKeyInfo.setAppId(apiKeyAssociationEvent.getApplicationId());
+                } else {
+                    updatedKeyInfo.setApplicationId(null);
+                    updatedKeyInfo.setAppId(-1);
+                }
+                DataHolder.getInstance().addOpaqueAPIKeyInfo(updatedKeyInfo);
+            }
+        } else if (EventType.API_KEY_REGENERATE.toString().equals(eventType)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Processing API key regeneration event. Event type: " + eventType);
+            }
+            APIKeyRegenerationEvent apiKeyRegenerationEvent =
+                    new Gson().fromJson(eventJson, APIKeyRegenerationEvent.class);
+            if (!TenantUtils.isTenantAvailable(apiKeyRegenerationEvent.getTenantDomain())) {
+                return;
+            }
+            String oldLookupKey = apiKeyRegenerationEvent.getOldApiKeyHash();
+            String newLookupKey = apiKeyRegenerationEvent.getNewApiKeyHash();
+            DataHolder.getInstance().replaceOpaqueAPIKeyEntry(oldLookupKey, newLookupKey);
         }
+    }
+
+    private APIKeyInfo fromAPIKeyEventToAPIKeyInfo(APIKeyEvent apiKeyEvent) {
+        APIKeyInfo apiKeyInfo = new APIKeyInfo();
+        apiKeyInfo.setApiId(apiKeyEvent.getApiId());
+        apiKeyInfo.setApiKeyHash(apiKeyEvent.getApiKeyHash());
+        apiKeyInfo.setAuthUser(apiKeyEvent.getUser());
+        apiKeyInfo.setCreatedTime(apiKeyEvent.getTimeCreated());
+        long validityPeriodInSeconds = apiKeyEvent.getValidityPeriod();
+        if (validityPeriodInSeconds < 0) {
+            apiKeyInfo.setExpiresAt(Long.MAX_VALUE);
+        } else {
+            long validityPeriodInMillis = validityPeriodInSeconds * 1000L;
+            long createdTimeMillis = apiKeyEvent.getTimeCreated();
+            // Guard against arithmetic overflow before adding
+            if (validityPeriodInMillis < 0
+                    || validityPeriodInMillis > Long.MAX_VALUE - createdTimeMillis) {
+                apiKeyInfo.setExpiresAt(Long.MAX_VALUE);
+            } else {
+                apiKeyInfo.setExpiresAt(createdTimeMillis + validityPeriodInMillis);
+            }
+        }
+        apiKeyInfo.setValidityPeriod(validityPeriodInSeconds);
+        apiKeyInfo.setValidityPeriod(apiKeyEvent.getValidityPeriod());
+        apiKeyInfo.setKeyType(apiKeyEvent.getKeyType());
+        apiKeyInfo.setLookupKey(apiKeyEvent.getApiKeyHash());
+        apiKeyInfo.setApplicationId(apiKeyEvent.getApplicationUUId());
+        apiKeyInfo.setAppId(apiKeyEvent.getApplicationId());
+        apiKeyInfo.setApiUUId(apiKeyEvent.getApiUUId());
+        apiKeyInfo.setStatus(apiKeyEvent.getStatus());
+        apiKeyInfo.setProperties(apiKeyEvent.getProperties());
+        Map<String, String> additionalProperties = new HashMap<>();
+        additionalProperties.put(APIConstants.JwtTokenConstants.PERMITTED_IP, apiKeyEvent.getPermittedIP());
+        additionalProperties.put(APIConstants.JwtTokenConstants.PERMITTED_REFERER, apiKeyEvent.getPermittedReferer());
+        apiKeyInfo.setAdditionalProperties(additionalProperties);
+        apiKeyInfo.setKeyBoundary(apiKeyEvent.getBound());
+        return apiKeyInfo;
     }
 
     private void addOrUpdateTenant(TenantEvent tenantEvent) throws TenantMgtException, UserStoreException {

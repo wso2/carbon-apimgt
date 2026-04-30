@@ -31,10 +31,10 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import javax.validation.Valid;
 
 
-
 @Scope(name = "apim:mcp_server_create", description="", value ="")
 @Scope(name = "apim:mcp_server_import_export", description="", value ="")
 @Scope(name = "apim:mcp_server_manage", description="", value ="")
+
 public class MCPServerDTO   {
   
     private String id = null;

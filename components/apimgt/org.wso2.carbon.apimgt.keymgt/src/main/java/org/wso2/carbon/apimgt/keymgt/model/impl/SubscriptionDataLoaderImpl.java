@@ -290,9 +290,14 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
             throw new DataLoadingException(msg, e);
         }
         if (responseString != null && !responseString.isEmpty()) {
-            ApplicationList list = new Gson().fromJson(responseString, ApplicationList.class);
-            if (list.getList() != null && !list.getList().isEmpty()) {
-                application = list.getList().get(0);
+            ApplicationList applicationList = new Gson().fromJson(responseString, ApplicationList.class);
+            if (applicationList != null && applicationList.getList() != null && !applicationList.getList().isEmpty()) {
+                for (Application app : applicationList.getList()) {
+                    if (app.getId() == appId) {
+                        application = app;
+                        break;
+                    }
+                }
             }
         }
         return application;

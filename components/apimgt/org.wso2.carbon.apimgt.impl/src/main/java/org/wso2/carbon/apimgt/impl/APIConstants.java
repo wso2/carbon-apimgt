@@ -92,6 +92,8 @@ public final class APIConstants {
 
     public static final String APPLICATION_XML_MEDIA_TYPE = "application/xml";
 
+    public static final String APPLICATION_OCTET_STREAM_MEDIA_TYPE = "application/octet-stream";
+
     public static final String APPLICATION_WSDL_MEDIA_TYPE = "application/wsdl";
 
     public static final String APPLICATION_XML_SOAP_MEDIA_TYPE = "application/soap+xml";
@@ -873,7 +875,7 @@ public final class APIConstants {
     public static final String DEFAULT_ORGANIZATION_CLAIM_NAME = "http://wso2.org/claims/organization";
     public static final String DEFAULT_TOKEN_TYPE = "DEFAULT";
     public static final String TOKEN_TYPE_OAUTH = "OAUTH";
-    public static final String TOKEN_TYPE_DEFAULT = "Default";
+    public static final String TOKEN_TYPE_DEFAULT = "default";
     public static final String TOKEN_TYPE_JWT = "JWT";
 
     public static final String PASSWORD_RESOLVER_IMPL_CLASS = "PasswordResolverImpl";
@@ -1582,6 +1584,7 @@ public final class APIConstants {
     public static final String ENABLED = "Enabled";
     public static final String DISABLED = "Disabled";
     public static final int API_RESPONSE_CACHE_TIMEOUT = 300;
+    public static final String UTC_TIME_ZONE = "UTC";
 
     public static class ApplicationStatus {
 
@@ -1831,6 +1834,10 @@ public final class APIConstants {
     public static final String SOLACE_APIM_API_ENDPOINT = "SolaceApimApiEndpoint";
     public static final String SOLACE_TOKEN = "SolaceToken";
 
+    // Mediation Configuration
+    public static final String MEDIATION_CONFIG = "Mediation";
+    public static final String ENABLE_SECURE_XML_PROCESSING = "EnableSecureXMLProcessing";
+
     // Primary/Secondary Login configuration
     public static final String USERID_LOGIN = "UserIdLogin";
     public static final String EMAIL_LOGIN = "EmailLogin";
@@ -1848,6 +1855,7 @@ public final class APIConstants {
     public static final String HTTP_CLIENT_MAX_TOTAL = "HttpClient.MaxTotal";
     public static final String HTTP_CLIENT_DEFAULT_MAX_PER_ROUTE = "HttpClient.DefaultMaxPerRoute";
     public static final String HTTP_CLIENT_CONNECTION_TIMEOUT = "HttpClient.ConnectionTimeout";
+    public static final String HTTP_CLIENT_CONNECTION_REQUEST_TIMEOUT = "HttpClient.ConnectionRequestTimeout";
 
     public static final String PROXY_ENABLE = "ProxyConfig.Enable";
     public static final String PROXY_HOST = "ProxyConfig.Host";
@@ -1855,6 +1863,7 @@ public final class APIConstants {
     public static final String PROXY_USERNAME = "ProxyConfig.Username";
     public static final String PROXY_PASSWORD = "ProxyConfig.Password";
     public static final String NON_PROXY_HOSTS = "ProxyConfig.NonProxyHosts";
+    public static final String TARGET_PROXY_HOSTS = "ProxyConfig.TargetProxyHosts";
     public static final String PROXY_PROTOCOL = "ProxyConfig.Protocol";
 
     public static final String KEYMANAGER_HOSTNAME = "keyManagerHostname";
@@ -2515,6 +2524,7 @@ public final class APIConstants {
         public static final String DEPLOYED = "deployed";
         public static final String UNDEPLOYED = "undeployed";
         public static final String LIFECYCLE_CHANGED = "lifecycle-changed";
+        public static final String PROVIDER_CHANGED = "provider-changed";
 
         public static final String API = "API";
         public static final String SYSTEM = "SYSTEM";
@@ -2532,6 +2542,8 @@ public final class APIConstants {
         public static final String VERSION = "version";
         public static final String CONTEXT = "context";
         public static final String PROVIDER = "provider";
+        public static final String OLD_PROVIDER = "oldProvider";
+        public static final String NEW_PROVIDER = "newProvider";
         public static final String OWNER = "owner";
         public static final String TIER = "tier";
         public static final String API_ID = "apiId";
@@ -2559,6 +2571,7 @@ public final class APIConstants {
         public static final String LABELS = "Labels";
         public static final String APPLICATIONS = "Applications";
         public static final String GATEWAY_ENVIRONMENTS = "GatewayEnvironments";
+        public static final String PLATFORM_GATEWAY = "PlatformGateway";
         public static final String ROLES_FOR_SCOPE = "RolesForScope";
         public static final String ROLES_FOR_SCOPE_INFO = "User updated roles for a scope";
         public static final String SYSTEM_SCOPE_ROLE_ALIASES = "SystemScopesRoleAliases";
@@ -2657,6 +2670,7 @@ public final class APIConstants {
     public static final String API_TYPE_WEBSUB = "WEBSUB";
     public static final String API_TYPE_SSE = "SSE";
     public static final String API_TYPE_MCP = "MCP";
+    public static final String MCP_HTTP_METHOD = "MCP_HTTP_METHOD";
 
     public static final String API_TYPE_SOAP = "SOAP";
     public static final String API_TYPE_SOAPTOREST = "SOAPTOREST";
@@ -2968,6 +2982,7 @@ public final class APIConstants {
     public static final String APPLICATION_TOKEN_TYPE_JWT = "JWT";
     // AWS Lambda: HTTP Client Configuration Constants
     public static final String AWS_LAMBDA_HTTP_CLIENT = "AWSLambdaConnector.HttpClient.";
+    public static final String AWS_LAMBDA_PROXY_RESPONSE_ENABLED = "AWSLambdaConnector.EnableProxyResponseMapping";
     public static final String MAX_CONNECTIONS = "MaxConnections";
     public static final String CONNECTION_TIMEOUT = "ConnectionTimeout";
     public static final String SOCKET_TIMEOUT = "SocketTimeout";
@@ -3042,6 +3057,9 @@ public final class APIConstants {
 
     public static final String DEFAULT_SCOPE_TYPE = "OAUTH2";
     public static final String DEFAULT_BINDING_TYPE = "DEFAULT";
+    public static final String COOKIE = "cookie";
+    public static final String BINDING_REF = "binding_ref";
+    public static final String BINDING_TYPE = "binding_type";
 
     public static class TokenIssuer {
 
@@ -3240,7 +3258,8 @@ public final class APIConstants {
         GATEWAY_POLICY,
         LLM_PROVIDER,
         LABEL,
-        TENANT
+        TENANT,
+        API_KEY
     }
 
     // Supported Event Types
@@ -3288,7 +3307,13 @@ public final class APIConstants {
         TENANT_UPDATE,
         TENANT_DELETE,
         TENANT_ACTIVATION,
-        TENANT_DEACTIVATION
+        TENANT_DEACTIVATION,
+        API_KEY_CREATE,
+        API_KEY_ASSOCIATION_CREATE,
+        API_KEY_ASSOCIATION_DELETE,
+        API_KEY_REGENERATE,
+        API_KEY_DELETE
+        
     }
 
     public enum EventAction {
@@ -3346,9 +3371,6 @@ public final class APIConstants {
         public static final String TOPIC_CACHE_INVALIDATION = "cacheInvalidation";
         public static final String TOPIC_KEY_MANAGER = "keyManager";
         public static final String TOPIC_NOTIFICATION = "notification";
-        public static final String TOPIC_OPAQUE_API_KEY_INFO = "opaqueAPIKeyInfo";
-        public static final String TOPIC_OPAQUE_API_KEY_ASSOCIATION_INFO = "opaqueAPIKeyAssociationInfo";
-        public static final String TOPIC_API_KEY_USAGE = "apiKeyUsage";
         public static final String TOPIC_ASYNC_WEBHOOKS_DATA = "asyncWebhooksData";
     }
 
@@ -3425,6 +3447,7 @@ public final class APIConstants {
         public static final String USAGE_TYPE = "usage_type";
         public static final String INFO_TYPE = "info_type";
         public static final String TOKEN_REVOCATION_EVENT = "token_revocation";
+        public static final String TOKEN_REVOCATION_BATCH_EVENT = "token_revocation_batch";
         public static final String API_KEY_USAGE_EVENT = "api_key_usage";
         public static final String API_KEY_INFO_EVENT = "api_key_info";
         public static final String CONSUMER_APP_REVOCATION_EVENT
@@ -3446,12 +3469,14 @@ public final class APIConstants {
         public static final String EXPIRES_AT = "expiresAt";
         public static final String STATUS = "status";
         public static final String EVENT_ID = "eventId";
+        public static final String EVENT_TYPE = "eventType";
         public static final String TENANT_ID = "tenantId";
         public static final String TENANT_DOMAIN = "tenant_domain";
         public static final String ORG_ID = "org_id";
         public static final String APPLICATION_TOKEN_TYPE_OAUTH2 = "Default";
         public static final String EXPIRY_TIME = "expiryTime";
         public static final String REVOCATION_TIME = "revocationTime";
+        public static final String REVOKED_TOKENS_LIST = "revokedTokensList";
         public static final String LAST_USED_TIME = "lastUsedTime";
         public static final String ORGANIZATION = "organization";
         public static final String STREAM_ID = "streamId";
@@ -3459,7 +3484,6 @@ public final class APIConstants {
         public static final String ENTITY_TYPE = "entityType";
         public static final String ENTITY_TYPE_CLIENT_ID = "CLIENT_ID";
         public static final String ENTITY_TYPE_USER_ID = "USER_ID";
-        public static final String EVENT_TYPE = "eventType";
     }
 
     //Constants related to user password
@@ -3552,6 +3576,12 @@ public final class APIConstants {
         public static final String ENVIRONMENT_SPECIFIC_API_PROPERTY_KEY_NAME = "apis";
     }
 
+    public static class GatewayNotificationConfigurationConstants {
+        public static final String WSO2_ALL_TENANTS = "WSO2-ALL-TENANTS";
+        public static final String STATUS_ACTIVE = "ACTIVE";
+        public static final String STATUS_EXPIRED = "EXPIRED";
+    }
+
     public static class OrganizationDeletion {
         public static final String API_RETRIEVER = "APIRetriever";
         public static final String API_DB_DATA_REMOVER = "APIDataRemover";
@@ -3622,6 +3652,12 @@ public final class APIConstants {
     public static final String OPERATION_SEQUENCE_TYPE_REQUEST = "request";
     public static final String OPERATION_SEQUENCE_TYPE_RESPONSE = "response";
     public static final String OPERATION_SEQUENCE_TYPE_FAULT = "fault";
+    /**
+     * Policy Hub policies have no direction in the UI (flow is handled inside the policy).
+     * We persist them with direction "hub" in AM_API_POLICY_MAPPING / AM_API_OPERATION_POLICY_MAPPING
+     * so they can be loaded into apiHubPolicies / operationHubPolicies separately from request/response/fault.
+     */
+    public static final String OPERATION_SEQUENCE_TYPE_HUB = "hub";
     public static final String SYNAPSE_POLICY_DEFINITION_EXTENSION = ".j2";
     public static final String SYNAPSE_POLICY_DEFINITION_EXTENSION_XML = ".xml";
     public static final String CC_POLICY_DEFINITION_EXTENSION = ".gotmpl";
@@ -3639,11 +3675,11 @@ public final class APIConstants {
     public static final String DEFAULT_POLICY_VERSION = "v1";
     public static final String POLICY_FILENAME_INVALID_CHARS_REGEX = "[\\/:*?\"<>|]";
 
-
     public static final String WSO2_GATEWAY_ENVIRONMENT = "wso2";
     public static final String EXTERNAL_GATEWAY_VENDOR = "external";
     public static final String WSO2_APK_GATEWAY = "wso2/apk";
     public static final String WSO2_SYNAPSE_GATEWAY = "wso2/synapse";
+    public static final String WSO2_API_PLATFORM_GATEWAY = "APIPlatform";
     public static final String EXTERNAL_AWS_GATEWAY = "AWS";
     public static final List<String> API_TYPES = Arrays.asList("rest", "soap", "graphql", "ws", "wh", "sse", "ai", "mcp");
     public static final String SOLACE = "solace";
@@ -3932,6 +3968,12 @@ public final class APIConstants {
         public static final String DATA_RETENTION_PERIOD_SECONDS = "DataRetentionPeriodSeconds";
         public static final String CLEANUP_INTERVAL_SECONDS = "CleanupIntervalSeconds";
         public static final int DEFAULT_CLEANUP_STARTUP_DELAY = 60;
+
+        public static final String PLATFORM_GATEWAY_CONNECT_CONFIGURATION = "PlatformGatewayConnectConfiguration";
+        public static final String PLATFORM_GATEWAY_VERSIONS = "PlatformGatewayVersions";
+        public static final String VERSION = "Version";
+        public static final String API_KEY_NOTIFICATION = "APIKeyNotification";
+        public static final String QUEUE_SIZE = "QueueSize";
 
         public enum GatewayRegistrationResponse {
             NOT_RESPONDED,

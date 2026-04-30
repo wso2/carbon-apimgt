@@ -52,6 +52,9 @@ import org.wso2.carbon.apimgt.eventing.EventPublisherException;
 import org.wso2.carbon.apimgt.eventing.EventPublisherFactory;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIMDependencyConfiguration;
+import org.wso2.carbon.apimgt.impl.APIMDependencyConfigurationServiceImpl;
+import org.wso2.carbon.apimgt.impl.APIMDependencyConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
@@ -60,10 +63,10 @@ import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
+import org.wso2.carbon.apimgt.impl.DependencyConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.ExternalEnvironment;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
-import org.wso2.carbon.apimgt.impl.dto.GatewayNotificationConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
@@ -114,6 +117,7 @@ import org.wso2.carbon.registry.core.utils.AuthorizationUtils;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.registry.indexing.service.TenantIndexingLoader;
 import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
+import org.wso2.carbon.usage.data.exporter.ConsumptionDataExportService;
 import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserRealm;
@@ -162,6 +166,8 @@ public class APIManagerComponent {
 
     private APIManagerConfiguration configuration = new APIManagerConfiguration();
 
+    private APIMDependencyConfiguration dependencyConfigurations = new APIMDependencyConfiguration();
+
     public static final String APPLICATION_ROOT_PERMISSION = "applications";
 
     public static final String API_RXT = "api.rxt";
@@ -189,6 +195,7 @@ public class APIManagerComponent {
             String filePath = CarbonUtils.getCarbonConfigDirPath() + File.separator + "api-manager.xml";
             String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
             configuration.load(filePath);
+            dependencyConfigurations.load(DependencyConstants.DEPENDENCY_PROPERTIES_FILE);
 
             //Registering Notifiers
             bundleContext.registerService(Notifier.class.getName(), new SubscriptionsNotifier(), null);
@@ -197,6 +204,8 @@ public class APIManagerComponent {
             bundleContext.registerService(Notifier.class.getName(), new ApplicationRegistrationNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new PolicyNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new DeployAPIInGatewayNotifier(), null);
+            bundleContext.registerService(Notifier.class.getName(), new PlatformGatewayDeployNotifier(), null);
+            bundleContext.registerService(Notifier.class.getName(), new APIKeyNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new ScopesNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new CertificateNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new GoogleAnalyticsNotifier(), null);
@@ -216,6 +225,11 @@ public class APIManagerComponent {
             }
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(configuration);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
+            APIMDependencyConfigurationServiceImpl dependencyConfigurationService = new APIMDependencyConfigurationServiceImpl(
+                    dependencyConfigurations);
+            ServiceReferenceHolder.getInstance().setAPIMDependencyConfigurationService(dependencyConfigurationService);
+            bundleContext.registerService(APIMDependencyConfigurationService.class, dependencyConfigurationService,
+                    null);
             APIMgtDBUtil.initialize();
             APIUtil.init();
             String migrationEnabled = System.getProperty(APIConstants.MIGRATE);
@@ -1032,6 +1046,8 @@ public class APIManagerComponent {
         int maxTotal = Integer.parseInt(configuration.getFirstProperty(APIConstants.HTTP_CLIENT_MAX_TOTAL));
         int defaultMaxPerRoute = Integer.parseInt(configuration.getFirstProperty(APIConstants.HTTP_CLIENT_DEFAULT_MAX_PER_ROUTE));
         int connectionTimeout = Integer.parseInt(configuration.getFirstProperty(APIConstants.HTTP_CLIENT_CONNECTION_TIMEOUT));
+        int connectionRequestTimeout = Integer.parseInt(configuration.getFirstProperty(
+                APIConstants.HTTP_CLIENT_CONNECTION_REQUEST_TIMEOUT));
 
         boolean proxyEnabled = Boolean.parseBoolean(configuration.getFirstProperty(APIConstants.PROXY_ENABLE));
 
@@ -1041,9 +1057,10 @@ public class APIManagerComponent {
             String proxyUsername = configuration.getFirstProperty(APIConstants.PROXY_USERNAME);
             String proxyPassword = configuration.getFirstProperty(APIConstants.PROXY_PASSWORD);
             String[] nonProxyHosts = getNonProxyHostsListByNonProxyHostsStringConfiguration(configuration);
+            String[] targetProxyHosts = getTargetProxyHostsListByTargetProxyHostsStringConfiguration(configuration);
             String proxyProtocol = configuration.getFirstProperty(APIConstants.PROXY_PROTOCOL);
             builder = builder.withProxy(proxyHost, proxyPort, proxyUsername, proxyPassword, proxyProtocol,
-                    nonProxyHosts);
+                    nonProxyHosts, targetProxyHosts);
         }
 
         String hostnameVerifierOption = System.getProperty(HOST_NAME_VERIFIER);
@@ -1069,7 +1086,7 @@ public class APIManagerComponent {
                 hostnameVerifier = new BrowserHostnameVerifier();
         }
         configuration.setHttpClientConfiguration(builder
-                .withConnectionParams(maxTotal, defaultMaxPerRoute, connectionTimeout)
+                .withConnectionParams(maxTotal, defaultMaxPerRoute, connectionTimeout, connectionRequestTimeout)
                 .withHostnameVerifier(hostnameVerifier).build());
     }
 
@@ -1115,6 +1132,11 @@ public class APIManagerComponent {
         return nonProxyHostsString != null ? nonProxyHostsString.split("\\|") : null;
     }
 
+    String[] getTargetProxyHostsListByTargetProxyHostsStringConfiguration(APIManagerConfiguration config) {
+        String targetProxyHostsString = config.getFirstProperty(APIConstants.TARGET_PROXY_HOSTS);
+        return targetProxyHostsString != null ? targetProxyHostsString.split("\\|") : null;
+    }
+
     @Reference(
             name = "apim.workflow.task.service",
             service = org.wso2.carbon.apimgt.api.model.WorkflowTaskService.class,
@@ -1140,5 +1162,19 @@ public class APIManagerComponent {
     }
     protected void unsetFederatedAPIDiscovery(FederatedAPIDiscoveryService federatedAPIDiscoveryService) {
         ServiceReferenceHolder.getInstance().setFederatedAPIDiscovery(null);
+    }
+
+    @Reference(
+            name = "consumption.data.export.service",
+            service = ConsumptionDataExportService.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetConsumptionDataExportService")
+    protected void setConsumptionDataExportService(ConsumptionDataExportService consumptionDataExportService) {
+        ServiceReferenceHolder.getInstance().setConsumptionDataExportService(consumptionDataExportService);
+    }
+
+    protected void unsetConsumptionDataExportService(ConsumptionDataExportService consumptionDataExportService) {
+        ServiceReferenceHolder.getInstance().setConsumptionDataExportService(null);
     }
 }

@@ -14161,6 +14161,11 @@ components:
             $ref: '#/components/schemas/MediationPolicy'
         apiPolicies:
           $ref: '#/components/schemas/APIOperationPolicies'
+        apiHubPolicies:
+          type: array
+          description: Policy Hub policies at API level (sibling to apiPolicies; not persisted to operation policy mapping).
+          items:
+            $ref: '#/components/schemas/OperationPolicy'
         subscriptionAvailability:
           type: string
           description: The subscription availability. Accepts one of the following.
@@ -17155,6 +17160,11 @@ components:
           example: ""
         operationPolicies:
           $ref: '#/components/schemas/APIOperationPolicies'
+        operationHubPolicies:
+          type: array
+          description: Policy Hub policies at resource/operation level (sibling to operationPolicies).
+          items:
+            $ref: '#/components/schemas/OperationPolicy'
     BackendOperationMapping:
       title: API Operation Backend Mapping
       type: object

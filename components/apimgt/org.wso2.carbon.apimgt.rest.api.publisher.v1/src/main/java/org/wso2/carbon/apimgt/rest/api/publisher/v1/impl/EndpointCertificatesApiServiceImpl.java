@@ -23,7 +23,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
-import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
@@ -167,8 +166,7 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
                 RestApiUtil.handleBadRequest("The alias should not be empty", log);
             }
 
-            ContentDisposition contentDisposition = certificateDetail.getContentDisposition();
-            String fileName = contentDisposition.getParameter(RestApiConstants.CONTENT_DISPOSITION_FILENAME);
+            String fileName = certificateDetail == null ? null : certificateDetail.getDataHandler().getName();
 
             if (StringUtils.isBlank(fileName)) {
                 RestApiUtil.handleBadRequest("Certificate update failed. The Certificate should not be empty", log);
@@ -290,8 +288,7 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
                 RestApiUtil.handleBadRequest("The alias and/ or endpoint should not be empty", log);
             }
 
-            ContentDisposition contentDisposition = certificateDetail.getContentDisposition();
-            String fileName = contentDisposition.getParameter(RestApiConstants.CONTENT_DISPOSITION_FILENAME);
+            String fileName = certificateDetail == null ? null : certificateDetail.getDataHandler().getName();
 
             if (StringUtils.isBlank(fileName)) {
                 RestApiUtil.handleBadRequest("Certificate update failed. Proper Certificate file should be provided",

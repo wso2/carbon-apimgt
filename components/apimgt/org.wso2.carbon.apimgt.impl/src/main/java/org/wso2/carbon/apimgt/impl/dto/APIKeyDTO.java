@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.impl.dto;
 
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * This class represent the API Key DTO.
@@ -32,13 +33,14 @@ public class APIKeyDTO implements Serializable {
     private String applicationId;
     private String apiId;
     private String keyType;
-    private byte[] apiKeyProperties;
+    private Map<String, String> apiKeyProperties;
     private String authUser;
     private long validityPeriod;
     private long createdTime;
-    private String lastUsedTime;
+    private Long lastUsedTime;
     private String permittedIP;
     private String permittedReferer;
+    private String apikeyHash;
 
     public String getKeyId() {
         return keyId;
@@ -88,11 +90,11 @@ public class APIKeyDTO implements Serializable {
         this.keyType = keyType;
     }
 
-    public byte[] getApiKeyProperties() {
+    public Map<String, String> getApiKeyProperties() {
         return apiKeyProperties;
     }
 
-    public void setApiKeyProperties(byte[] apiKeyProperties) {
+    public void setApiKeyProperties(Map<String, String> apiKeyProperties) {
         this.apiKeyProperties = apiKeyProperties;
     }
 
@@ -120,11 +122,11 @@ public class APIKeyDTO implements Serializable {
         this.createdTime = createdTime;
     }
 
-    public String getLastUsedTime() {
+    public Long getLastUsedTime() {
         return lastUsedTime;
     }
 
-    public void setLastUsedTime(String lastUsedTime) {
+    public void setLastUsedTime(Long lastUsedTime) {
         this.lastUsedTime = lastUsedTime;
     }
 
@@ -142,5 +144,13 @@ public class APIKeyDTO implements Serializable {
 
     public void setPermittedReferer(String permittedReferer) {
         this.permittedReferer = permittedReferer;
+    }
+
+    public String getApikeyHash() {
+        return apikeyHash;
+    }
+
+    public void setApikeyHash(String apikeyHash) {
+        this.apikeyHash = apikeyHash;
     }
 }

@@ -93,6 +93,7 @@ public class CommonAPIUtil {
         int maxTotal = clientConfiguration.getConnectionLimit();
         int defaultMaxPerRoute = clientConfiguration.getMaximumConnectionsPerRoute();
         int connectionTimeout = clientConfiguration.getConnectionTimeout();
+        int connectionRequestTimeout = clientConfiguration.getConnectionRequestTimeout();
 
         boolean proxyEnabled = clientConfiguration.isProxyEnabled();
         String proxyHost = clientConfiguration.getProxyHost();
@@ -100,8 +101,14 @@ public class CommonAPIUtil {
         String proxyUsername = clientConfiguration.getProxyUsername();
         char[] proxyPassword = clientConfiguration.getProxyPassword();
         String[] nonProxyHosts = clientConfiguration.getNonProxyHosts();
+        String[] targetProxyHosts = clientConfiguration.getTargetProxyHosts();
         String proxyProtocol = clientConfiguration.getProxyProtocol();
-
+        if (log.isDebugEnabled()) {
+            log.debug(
+                    "Proxy configuration - proxyHost: " + proxyHost + ", proxyPort: " + proxyPort
+                            + ", nonProxyHosts count: " + nonProxyHosts.length + ", targetProxyHosts count: "
+                            + targetProxyHosts.length);
+        }
         if (proxyProtocol != null) {
             protocol = proxyProtocol;
         }
@@ -114,6 +121,7 @@ public class CommonAPIUtil {
 
         RequestConfig.Builder requestConfigBuilder = RequestConfig.custom();
         requestConfigBuilder.setConnectTimeout(connectionTimeout);
+        requestConfigBuilder.setConnectionRequestTimeout(connectionRequestTimeout);
         RequestConfig params = requestConfigBuilder.build();
 
         HttpClientBuilder clientBuilder = HttpClients.custom().setConnectionManager(pool)
@@ -122,7 +130,8 @@ public class CommonAPIUtil {
         if (proxyEnabled) {
             HttpHost host = new HttpHost(proxyHost, proxyPort, protocol);
             DefaultProxyRoutePlanner routePlanner;
-            if (nonProxyHosts.length > 0) {
+            if (nonProxyHosts.length > 0 || targetProxyHosts.length > 0) {
+                log.debug("Using ExtendedProxyRoutePlanner with custom proxy routing rules");
                 routePlanner = new ExtendedProxyRoutePlanner(host, clientConfiguration);
             } else {
                 routePlanner = new DefaultProxyRoutePlanner(host);

@@ -48,6 +48,15 @@ public class OrganizationInterceptor extends AbstractPhaseInterceptor {
     public void handleMessage(Message message) throws Fault {
 
         try {
+            // Preserve organization already set by platform gateway api-key auth (Internal Data Service).
+            if (RestApiConstants.PLATFORM_GATEWAY_API_KEY.equals(message.get(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME))) {
+                Object existing = message.get(RestApiConstants.ORGANIZATION);
+                if (existing != null && org.apache.commons.lang3.StringUtils.isNotBlank(existing.toString())) {
+                    logger.debug("Organization already set by platform gateway api-key");
+                    return;
+                }
+            }
+
             OrganizationResolver resolver = APIUtil.getOrganizationResolver();
             
             // populate properties needed for the resolver.
@@ -65,7 +74,9 @@ public class OrganizationInterceptor extends AbstractPhaseInterceptor {
                 RestApiUtil.handleInternalServerError("Error while resolving the organization resolver", e, logger);
             }
         }
-        logger.debug("Organization :" + message.get(RestApiConstants.ORGANIZATION));
+        if (logger.isDebugEnabled()) {
+            logger.debug("Organization resolved by OrganizationInterceptor");
+        }
     }
 
     public void setAllowTenantHeader(boolean allowTenantHeader) {

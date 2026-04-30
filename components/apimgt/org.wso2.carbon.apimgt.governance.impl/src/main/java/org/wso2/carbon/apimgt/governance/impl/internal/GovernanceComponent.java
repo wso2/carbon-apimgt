@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.governance.impl.observer.APIMGovernanceConfigDeplo
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceDBUtil;
 import org.wso2.carbon.apimgt.governance.impl.validator.ValidationEngineService;
 import org.wso2.carbon.apimgt.governance.impl.validator.ValidationEngineServiceImpl;
+import org.wso2.carbon.apimgt.impl.APIMDependencyConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.jms.listener.JMSListenerShutDownService;
 import org.wso2.carbon.core.ServerShutdownHandler;
@@ -120,6 +121,22 @@ public class GovernanceComponent {
     protected void unsetValidationEngineService(ValidationEngine validationEngine) {
 
         ServiceReferenceHolder.getInstance().setValidationEngineService(null);
+    }
+
+    @Reference(
+            name = "apim.dependency.config.service",
+            service = org.wso2.carbon.apimgt.impl.APIMDependencyConfigurationService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetAPIMDependencyConfigurationService")
+    protected void setAPIMDependencyConfigurationService(APIMDependencyConfigurationService service) {
+
+        log.debug("Setting APIM Dependency Configuration Service");
+        ServiceReferenceHolder.getInstance().setAPIMDependencyConfigurationService(service);
+    }
+
+    protected void unsetAPIMDependencyConfigurationService(APIMDependencyConfigurationService service) {
+        ServiceReferenceHolder.getInstance().setAPIMDependencyConfigurationService(null);
     }
 
 }

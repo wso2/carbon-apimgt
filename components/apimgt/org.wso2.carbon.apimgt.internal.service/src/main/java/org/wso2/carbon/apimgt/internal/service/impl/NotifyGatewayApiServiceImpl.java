@@ -27,8 +27,6 @@ import org.wso2.carbon.apimgt.impl.dao.GatewayManagementDAO;
 import org.wso2.carbon.apimgt.impl.utils.GatewayManagementUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
-import org.wso2.carbon.apimgt.impl.dto.GatewayNotificationConfiguration;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.internal.service.NotifyGatewayApiService;
 import org.wso2.carbon.apimgt.internal.service.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.NotifyGatewayPayloadDTO;
@@ -43,7 +41,6 @@ import javax.ws.rs.core.Response;
 public class NotifyGatewayApiServiceImpl implements NotifyGatewayApiService {
 
     private static final Log log = LogFactory.getLog(NotifyGatewayApiServiceImpl.class);
-    private GatewayNotificationConfiguration configuration;
     private GatewayManagementDAO gatewayManagementDAO;
 
     /**

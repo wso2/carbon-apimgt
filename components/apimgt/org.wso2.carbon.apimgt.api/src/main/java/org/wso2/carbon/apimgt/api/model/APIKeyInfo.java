@@ -22,6 +22,37 @@ import java.util.Map;
 
 public class APIKeyInfo {
 
+    /**
+     * Copy constructor – creates a new instance with all fields copied from {@code source}.
+     * Use this instead of mutating a shared instance to avoid data races.
+     */
+    public APIKeyInfo(APIKeyInfo source) {
+        this.keyUUID = source.keyUUID;
+        this.keyName = source.keyName;
+        this.appId = source.appId;
+        this.applicationId = source.applicationId;
+        this.applicationName = source.applicationName;
+        this.apiId = source.apiId;
+        this.apiName = source.apiName;
+        this.apiUUId = source.apiUUId;
+        this.origin = source.origin;
+        this.keyType = source.keyType;
+        this.lastUsedTime = source.lastUsedTime;
+        this.createdTime = source.createdTime;
+        this.lookupKey = source.lookupKey;
+        this.validityPeriod = source.validityPeriod;
+        this.expiresAt = source.expiresAt;
+        this.properties = source.properties;
+        this.additionalProperties = source.additionalProperties;
+        this.apiKeyHash = source.apiKeyHash;
+        this.apiKey = source.apiKey;
+        this.authUser = source.authUser;
+        this.status = source.status;
+        this.keyBoundary = source.keyBoundary;
+    }
+
+    public APIKeyInfo() {}
+
     private String keyUUID;
     private String keyName;
     private int appId;
@@ -32,17 +63,18 @@ public class APIKeyInfo {
     private String apiUUId;
     private String origin;
     private String keyType;
-    private String lastUsedTime;
-    private String createdTime;
+    private Long lastUsedTime;
+    private long createdTime;
     private String lookupKey;
     private long validityPeriod;
     private long expiresAt;
-    private byte[] properties;
+    private Map<String, String> properties;
     private Map<String, String> additionalProperties;
     private String apiKeyHash;
     private String apiKey;
     private String authUser;
     private String status;
+    private String keyBoundary;
 
     public String getKeyUUID() {
         return keyUUID;
@@ -124,19 +156,19 @@ public class APIKeyInfo {
         this.keyType = keyType;
     }
 
-    public String getLastUsedTime() {
+    public Long getLastUsedTime() {
         return lastUsedTime;
     }
 
-    public void setLastUsedTime(String lastUsedTime) {
+    public void setLastUsedTime(Long lastUsedTime) {
         this.lastUsedTime = lastUsedTime;
     }
 
-    public String getCreatedTime() {
+    public long getCreatedTime() {
         return createdTime;
     }
 
-    public void setCreatedTime(String createdTime) {
+    public void setCreatedTime(long createdTime) {
         this.createdTime = createdTime;
     }
 
@@ -164,11 +196,11 @@ public class APIKeyInfo {
         this.expiresAt = expiresAt;
     }
 
-    public byte[] getProperties() {
+    public Map<String, String> getProperties() {
         return properties;
     }
 
-    public void setProperties(byte[] properties) {
+    public void setProperties(Map<String, String> properties) {
         this.properties = properties;
     }
 
@@ -210,5 +242,13 @@ public class APIKeyInfo {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getKeyBoundary() {
+        return keyBoundary;
+    }
+
+    public void setKeyBoundary(String keyBoundary) {
+        this.keyBoundary = keyBoundary;
     }
 }

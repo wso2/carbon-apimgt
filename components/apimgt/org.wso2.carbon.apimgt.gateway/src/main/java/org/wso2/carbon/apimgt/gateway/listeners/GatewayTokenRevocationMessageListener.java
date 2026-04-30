@@ -27,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTDataHolder;
+import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTTokensRetriever;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import javax.jms.JMSException;
@@ -79,62 +80,68 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
     private void handleRevokedTokenMessage(String revokedToken, long expiryTime, String tokenType) {
 
         boolean isJwtToken = false;
-        if (StringUtils.isEmpty(revokedToken)) {
-            return;
-        }
-
-        if (APIConstants.NotificationEvent.CONSUMER_APP_REVOCATION_EVENT.equals(tokenType)) {
-            HashMap<String, Object> revokedTokenMap = base64Decode(revokedToken);
-            if (revokedTokenMap.containsKey(APIConstants.NotificationEvent.CONSUMER_KEY) &&
-                    revokedTokenMap.get(APIConstants.NotificationEvent.CONSUMER_KEY) != null &&
-                    revokedTokenMap.containsKey(APIConstants.NotificationEvent.REVOCATION_TIME) &&
-                    revokedTokenMap.get(APIConstants.NotificationEvent.REVOCATION_TIME) != null) {
-                try {
-                    RevokedJWTDataHolder.getInstance().addRevokedConsumerKeyToMap(
-                            (String) revokedTokenMap.get(APIConstants.NotificationEvent.CONSUMER_KEY),
-                            convertRevokedTime(revokedTokenMap));
-                } catch (NumberFormatException e) {
-                    log.warn("Event dropped due to unsupported value type for "
-                            + APIConstants.NotificationEvent.REVOCATION_TIME + " : "
-                            + revokedTokenMap.get(APIConstants.NotificationEvent.REVOCATION_TIME));
-                }
-            }
-        } else if (APIConstants.NotificationEvent.SUBJECT_ENTITY_REVOCATION_EVENT.equals(tokenType)) {
-            HashMap<String, Object> revokedTokenMap = base64Decode(revokedToken);
-            if (revokedTokenMap.get(APIConstants.NotificationEvent.ENTITY_TYPE) != null &&
-                    revokedTokenMap.get(APIConstants.NotificationEvent.REVOCATION_TIME) != null &&
-                    revokedTokenMap.get(APIConstants.NotificationEvent.ENTITY_ID) != null) {
-                String entityType = (String) revokedTokenMap.get(APIConstants.NotificationEvent.ENTITY_TYPE);
-                long revocationTime = 0;
-                try {
-                    revocationTime = convertRevokedTime(revokedTokenMap);
-                } catch (NumberFormatException e) {
-                    log.warn("Event dropped due to unsupported value type for "
-                            + APIConstants.NotificationEvent.REVOCATION_TIME + " : "
-                            + revokedTokenMap.get(APIConstants.NotificationEvent.REVOCATION_TIME));
-                }
-                String entityId = (String) revokedTokenMap.get(APIConstants.NotificationEvent.ENTITY_ID);
-                if (APIConstants.NotificationEvent.ENTITY_TYPE_USER_ID.equals(entityType)) {
-                    RevokedJWTDataHolder.getInstance().addRevokedSubjectEntityUserToMap(entityId, revocationTime);
-                } else if (APIConstants.NotificationEvent.ENTITY_TYPE_CLIENT_ID.equals(entityType)) {
-                    RevokedJWTDataHolder.getInstance()
-                            .addRevokedSubjectEntityConsumerAppToMap(entityId, revocationTime);
-                }
-            }
+        if (APIConstants.NotificationEvent.TOKEN_REVOCATION_BATCH_EVENT.equals(tokenType)) {
+            log.info("Batch token revocation event received at gateway.");
+            // Fetch revoked tokens from web services
+            new RevokedJWTTokensRetriever().run();
         } else {
-            //handle JWT tokens
-            if (APIConstants.API_KEY_AUTH_TYPE.equals(tokenType) || APIConstants.JWT.equals(tokenType)) {
-                ServiceReferenceHolder.getInstance().getRevokedTokenService()
-                        .addRevokedJWTIntoMap(revokedToken, expiryTime);
-                // Add revoked token to revoked JWT map
-                isJwtToken = true;
+            if (StringUtils.isEmpty(revokedToken)) {
+                return;
             }
-            if (APIConstants.API_KEY_AUTH_TYPE.equals(tokenType)) {
-                ServiceReferenceHolder.getInstance().getRevokedTokenService()
-                        .removeApiKeyFromGatewayCache(revokedToken);
+
+            if (APIConstants.NotificationEvent.CONSUMER_APP_REVOCATION_EVENT.equals(tokenType)) {
+                HashMap<String, Object> revokedTokenMap = base64Decode(revokedToken);
+                if (revokedTokenMap.containsKey(APIConstants.NotificationEvent.CONSUMER_KEY) &&
+                        revokedTokenMap.get(APIConstants.NotificationEvent.CONSUMER_KEY) != null &&
+                        revokedTokenMap.containsKey(APIConstants.NotificationEvent.REVOCATION_TIME) &&
+                        revokedTokenMap.get(APIConstants.NotificationEvent.REVOCATION_TIME) != null) {
+                    try {
+                        RevokedJWTDataHolder.getInstance().addRevokedConsumerKeyToMap(
+                                (String) revokedTokenMap.get(APIConstants.NotificationEvent.CONSUMER_KEY),
+                                convertRevokedTime(revokedTokenMap));
+                    } catch (NumberFormatException e) {
+                        log.warn("Event dropped due to unsupported value type for "
+                                + APIConstants.NotificationEvent.REVOCATION_TIME + " : "
+                                + revokedTokenMap.get(APIConstants.NotificationEvent.REVOCATION_TIME));
+                    }
+                }
+            } else if (APIConstants.NotificationEvent.SUBJECT_ENTITY_REVOCATION_EVENT.equals(tokenType)) {
+                HashMap<String, Object> revokedTokenMap = base64Decode(revokedToken);
+                if (revokedTokenMap.get(APIConstants.NotificationEvent.ENTITY_TYPE) != null &&
+                        revokedTokenMap.get(APIConstants.NotificationEvent.REVOCATION_TIME) != null &&
+                        revokedTokenMap.get(APIConstants.NotificationEvent.ENTITY_ID) != null) {
+                    String entityType = (String) revokedTokenMap.get(APIConstants.NotificationEvent.ENTITY_TYPE);
+                    long revocationTime = 0;
+                    try {
+                        revocationTime = convertRevokedTime(revokedTokenMap);
+                    } catch (NumberFormatException e) {
+                        log.warn("Event dropped due to unsupported value type for "
+                                + APIConstants.NotificationEvent.REVOCATION_TIME + " : "
+                                + revokedTokenMap.get(APIConstants.NotificationEvent.REVOCATION_TIME));
+                    }
+                    String entityId = (String) revokedTokenMap.get(APIConstants.NotificationEvent.ENTITY_ID);
+                    if (APIConstants.NotificationEvent.ENTITY_TYPE_USER_ID.equals(entityType)) {
+                        RevokedJWTDataHolder.getInstance().addRevokedSubjectEntityUserToMap(entityId, revocationTime);
+                    } else if (APIConstants.NotificationEvent.ENTITY_TYPE_CLIENT_ID.equals(entityType)) {
+                        RevokedJWTDataHolder.getInstance()
+                                .addRevokedSubjectEntityConsumerAppToMap(entityId, revocationTime);
+                    }
+                }
             } else {
-                ServiceReferenceHolder.getInstance().getRevokedTokenService()
-                        .removeTokenFromGatewayCache(revokedToken, isJwtToken);
+                //handle JWT tokens
+                if (APIConstants.API_KEY_AUTH_TYPE.equals(tokenType) || APIConstants.JWT.equals(tokenType)) {
+                    ServiceReferenceHolder.getInstance().getRevokedTokenService()
+                            .addRevokedJWTIntoMap(revokedToken, expiryTime);
+                    // Add revoked token to revoked JWT map
+                    isJwtToken = true;
+                }
+                if (APIConstants.API_KEY_AUTH_TYPE.equals(tokenType)) {
+                    ServiceReferenceHolder.getInstance().getRevokedTokenService()
+                            .removeApiKeyFromGatewayCache(revokedToken);
+                } else {
+                    ServiceReferenceHolder.getInstance().getRevokedTokenService()
+                            .removeTokenFromGatewayCache(revokedToken, isJwtToken);
+                }
             }
         }
     }

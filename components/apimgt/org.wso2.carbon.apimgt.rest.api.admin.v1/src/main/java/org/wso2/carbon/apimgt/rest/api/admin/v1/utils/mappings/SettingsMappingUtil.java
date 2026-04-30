@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dto.PlatformGatewayConnectConfig;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.*;
@@ -62,7 +63,20 @@ public class SettingsMappingUtil {
         settingsDTO.setIsJWTEnabledForLoginTokens(APIUtil.isJWTEnabledForPortals());
         settingsDTO.setOrgAccessControlEnabled(APIUtil.isOrganizationAccessControlEnabled());
         settingsDTO.setIsGatewayNotificationEnabled(APIUtil.isGatewayNotificationEnabled());
+        settingsDTO.setPlatformGatewayVersions(resolvePlatformGatewayVersions());
+        settingsDTO.setConsumptionExportEnabled(
+                ServiceReferenceHolder.getInstance().getConsumptionDataExportService() != null);
         return settingsDTO;
+    }
+
+    private static List<String> resolvePlatformGatewayVersions() {
+        PlatformGatewayConnectConfig config = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getPlatformGatewayConnectConfig();
+        if (config == null) {
+            return null;
+        }
+        List<String> versions = config.getPlatformGatewayVersions();
+        return versions.isEmpty() ? null : versions;
     }
 
     private List<SettingsKeyManagerConfigurationDTO> getSettingsKeyManagerConfigurationDTOList() {

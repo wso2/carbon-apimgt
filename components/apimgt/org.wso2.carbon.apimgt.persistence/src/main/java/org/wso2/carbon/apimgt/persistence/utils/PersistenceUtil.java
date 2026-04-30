@@ -24,10 +24,6 @@ import org.apache.poi.hwpf.extractor.WordExtractor;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.pdfbox.cos.COSDocument;
-import org.pdfbox.pdfparser.PDFParser;
-import org.pdfbox.pdmodel.PDDocument;
-import org.pdfbox.util.PDFTextStripper;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.APIConstants;
@@ -69,16 +65,6 @@ public class PersistenceUtil {
                                             APIConstants.EMAIL_DOMAIN_SEPARATOR);
         }
         return input;
-    }
-
-    public static String extractPDFText(InputStream inputStream) throws IOException {
-        PDFParser parser = new PDFParser(inputStream);
-        parser.parse();
-        COSDocument cosDoc = parser.getDocument();
-        PDFTextStripper stripper = new PDFTextStripper();
-        String text = stripper.getText(new PDDocument(cosDoc));
-        cosDoc.close();
-        return text;
     }
 
     public static String extractDocXText(InputStream inputStream) throws IOException {

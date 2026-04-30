@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   build-carbon:
-    runs-on: ubuntu-latest
+    runs-on: codebuild-wso2_carbon-apimgt-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - name: Run hostname
         run: hostname
@@ -52,7 +52,7 @@ jobs:
           flags: unit_tests
 
   build-product:
-    runs-on: ubuntu-latest
+    runs-on: codebuild-wso2_carbon-apimgt-${{ github.run_id }}-${{ github.run_attempt }}
     strategy:
       matrix:
         include:
@@ -129,7 +129,7 @@ jobs:
         with:
           flags: integration_tests
   run-benchmark-test:
-    runs-on: ubuntu-latest
+    runs-on: codebuild-wso2_carbon-apimgt-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - name: Run hostname
         run: hostname

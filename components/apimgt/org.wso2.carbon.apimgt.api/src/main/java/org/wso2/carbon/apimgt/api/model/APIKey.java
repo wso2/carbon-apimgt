@@ -16,10 +16,13 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
+import java.util.List;
+
 public class APIKey {
     private String mappingId;
     private String consumerKey;
     private String consumerSecret;
+    private List<ConsumerSecretInfo> consumerSecrets;
     private String accessToken;
     private String type;
     private String tokenScope;
@@ -57,6 +60,14 @@ public class APIKey {
 
     public void setConsumerSecret(String consumerSecret) {
         this.consumerSecret = consumerSecret;
+    }
+
+    public List<ConsumerSecretInfo> getConsumerSecrets() {
+        return consumerSecrets;
+    }
+
+    public void setConsumerSecrets(List<ConsumerSecretInfo> consumerSecrets) {
+        this.consumerSecrets = consumerSecrets;
     }
 
     public String getAccessToken() {

@@ -25,6 +25,8 @@ public class ClientSecretRequest {
     private Integer expiresIn;
     @SerializedName("description")
     private String description;
+    @SerializedName("client_secret")
+    private String clientSecret;
 
     public Integer getExpiresIn() {
 
@@ -44,5 +46,15 @@ public class ClientSecretRequest {
     public void setDescription(String description) {
 
         this.description = description;
+    }
+
+    public String getClientSecret() {
+
+        return clientSecret;
+    }
+
+    public void setClientSecret(String clientSecret) {
+
+        this.clientSecret = clientSecret;
     }
 }

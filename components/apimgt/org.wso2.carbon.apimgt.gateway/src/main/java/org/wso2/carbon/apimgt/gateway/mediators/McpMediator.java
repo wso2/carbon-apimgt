@@ -22,6 +22,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.google.gson.Gson;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.commons.lang3.StringUtils;
@@ -48,6 +50,7 @@ import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.utils.MCPPayloadGenerator;
 import org.wso2.carbon.apimgt.gateway.utils.MCPUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -73,6 +76,7 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
     private static final String OUT_FLOW = "OUT";
     private static final Pattern validHostHeaderPattern =
             Pattern.compile("^[A-Za-z0-9][A-Za-z0-9.-]*(:\\d{1,5})?$");
+    private Boolean buildResponseMessage = null;
 
     @Override
     public void init(SynapseEnvironment synapseEnvironment) {
@@ -107,14 +111,62 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
         String mcpMethod = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD);
 
         if (IN_FLOW.equals(mcpDirection)) {
-            if (StringUtils.equals(subType, APIConstants.API_SUBTYPE_SERVER_PROXY) &&
-                    !StringUtils.equals(APIConstants.MCP.METHOD_TOOL_LIST, mcpMethod)) {
-                // For server proxy APIs, we do not handle MCP requests
-                log.debug("Skipping MCP mediation for server proxy API: " + matchedAPI.getName() + ":" +
-                        matchedAPI.getVersion());
-                return true;
-            }
             if (path.startsWith(APIMgtGatewayConstants.MCP_RESOURCE) && httpMethod.equals(APIConstants.HTTP_POST)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Received MCP request for API: " + matchedAPI.getName() + ":" + matchedAPI.getVersion() +
+                            ". MCP Method: " + mcpMethod);
+                }
+                if (StringUtils.equals(subType, APIConstants.API_SUBTYPE_SERVER_PROXY) &&
+                        !StringUtils.equals(APIConstants.MCP.METHOD_TOOL_LIST, mcpMethod)) {
+                    if (APIConstants.MCP.METHOD_TOOL_CALL.equals(mcpMethod)) {
+                        // For server proxy APIs, modify the SOAP envelope to set the tool name
+                        try {
+                            org.apache.axis2.context.MessageContext axis2MC =
+                                    ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+
+                            String electedResource =
+                                    (String) messageContext.getProperty(APIMgtGatewayConstants
+                                            .MCP_API_ELECTED_RESOURCE_KEY);
+                            if (electedResource != null && JsonUtil.hasAJsonPayload(axis2MC)) {
+                                String jsonPayload = JsonUtil.jsonPayloadToString(axis2MC);
+
+                                // Parse JSON and modify the name field
+                                JsonObject jsonObject = new Gson().fromJson(jsonPayload,
+                                        com.google.gson.JsonObject.class);
+                                String originalToolName = null;
+                                if (jsonObject.has(APIConstants.MCP.PARAMS_KEY)) {
+                                    JsonObject params = jsonObject.getAsJsonObject(APIConstants.MCP.PARAMS_KEY);
+                                    // Capture original tool name before modifying
+                                    if (params.has(APIConstants.MCP.TOOL_NAME_KEY)) {
+                                        originalToolName = params.get(APIConstants.MCP.TOOL_NAME_KEY).getAsString();
+                                    }
+                                    params.addProperty(APIConstants.MCP.TOOL_NAME_KEY, electedResource);
+                                }
+
+                                // Replace the payload with modified JSON
+                                JsonUtil.removeJsonPayload(axis2MC);
+                                JsonUtil.getNewJsonPayload(axis2MC, jsonObject.toString(), true, true);
+
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Updated tool name from " + originalToolName + " to " + electedResource +
+                                            " for API: " + matchedAPI.getName() + ":" + matchedAPI.getVersion());
+                                }
+                            }
+                        } catch (Exception e) {
+                            log.error("Error while modifying payload for server proxy API: " + matchedAPI.getName()
+                                    + ":" + matchedAPI.getVersion(), e);
+                            MCPUtils.handleMCPFailure(messageContext,
+                                    new McpResponseDto("Error while modifying MCP tool call payload",
+                                            HttpStatus.SC_INTERNAL_SERVER_ERROR, null));
+                            return false;
+                        }
+                    }
+                    if (log.isDebugEnabled()) {
+                        log.debug("Skipping MCP mediation for server proxy API: " + matchedAPI.getName() + ":" +
+                                matchedAPI.getVersion());
+                    }
+                    return true;
+                }
                 handleMcpRequest(messageContext, matchedAPI);
             } else if (path.startsWith(APIMgtGatewayConstants.MCP_RESOURCE) &&
                     httpMethod.equals(APIConstants.HTTP_GET)) {
@@ -128,9 +180,12 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
             }
         } else if (OUT_FLOW.equals(mcpDirection)) {
             if (StringUtils.equals(subType, APIConstants.API_SUBTYPE_SERVER_PROXY)) {
-                // For server proxy APIs, we do not handle MCP requests
-                log.debug("Skipping MCP mediation for server proxy API: " + matchedAPI.getName() + ":" +
-                        matchedAPI.getVersion());
+                // For server proxy APIs, we only handle error details extraction
+                handleServerProxyBackendResponse(messageContext);
+                if (log.isDebugEnabled()) {
+                    log.debug("Skipping MCP mediation for server proxy API: " + matchedAPI.getName() + ":" +
+                            matchedAPI.getVersion());
+                }
                 return true;
             }
 
@@ -138,7 +193,8 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
                 handleMcpResponse(messageContext);
             } catch (McpException e) {
                 log.error("Error while handling MCP response", e);
-                MCPUtils.handleMCPFailure(messageContext, new McpResponseDto(e.getErrorMessage(), e.getErrorCode(), null));
+                MCPUtils.handleMCPFailure(messageContext,
+                        new McpResponseDto(e.getErrorMessage(), e.getErrorCode(), null));
                 return false;
             }
         }
@@ -152,10 +208,15 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
 
         McpResponseDto mcpResponse = McpRequestProcessor.processRequest(messageContext, matchedAPI, requestBody);
-
-        if (APIConstants.MCP.METHOD_INITIALIZE.equals(mcpMethod) || APIConstants.MCP.METHOD_TOOL_LIST.equals(mcpMethod)
-            || APIConstants.MCP.METHOD_PING.equals(mcpMethod) || APIConstants.MCP.METHOD_PROMPTS_LIST.equals(mcpMethod)
-            || (APIConstants.MCP.METHOD_TOOL_CALL.equals(mcpMethod) && mcpResponse != null)) {
+        if (log.isDebugEnabled()) {
+            log.debug("MCP request processing completed for API: " + matchedAPI.getName() + ":" +
+                    matchedAPI.getVersion() + ". MCP Method: " + mcpMethod + ". Response Status: " +
+                    (mcpResponse != null ? mcpResponse.getStatusCode() : "No response generated"));
+        }
+        if (APIConstants.MCP.METHOD_INITIALIZE.equals(mcpMethod) ||
+                APIConstants.MCP.METHOD_TOOL_LIST.equals(mcpMethod) || APIConstants.MCP.METHOD_PING.equals(mcpMethod) ||
+                APIConstants.MCP.METHOD_PROMPTS_LIST.equals(mcpMethod) ||
+                (APIConstants.MCP.METHOD_TOOL_CALL.equals(mcpMethod) && mcpResponse != null)) {
             messageContext.setProperty(MCP_PROCESSED, "true");
             if (mcpResponse != null) {
                 try {
@@ -177,8 +238,8 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
                     setMCPErrorDetails(messageContext, mcpResponse.getResponse());
 
                     if (log.isDebugEnabled()) {
-                        log.debug("MCP request processed successfully. Method: " + mcpMethod +
-                                ", Status: " + mcpResponse.getStatusCode());
+                        log.debug("MCP request processed successfully. Method: " + mcpMethod + ", Status: " +
+                                mcpResponse.getStatusCode());
                     }
                 } catch (AxisFault e) {
                     log.error("Error while generating mcp payload " + axis2MessageContext.getLogIDString(), e);
@@ -241,7 +302,7 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
         String resourceURL = serverURL + contextPath + APIMgtGatewayConstants.MCP_RESOURCE;
         oAuthProtectedResourceDTO.setResource(resourceURL);
 
-        if (APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS.equals(keyManagers.get(0))) {
+        if (!keyManagers.isEmpty() && APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS.equals(keyManagers.get(0))) {
             Map<String, KeyManagerDto> keyManagerMap =
                     KeyManagerHolder.getTenantKeyManagers(matchedAPI.getOrganization());
             if (keyManagerMap.size() > 1) {
@@ -249,7 +310,7 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
             } else {
                 oAuthProtectedResourceDTO.addAuthorizationServer(keyManagerMap.values().iterator().next().getIssuer());
             }
-        } else if (!skipAuthServersAttribute) {
+        } else if (!skipAuthServersAttribute && !keyManagers.isEmpty()) {
             KeyManagerDto keyManager =
                     KeyManagerHolder.getKeyManagerByName(matchedAPI.getOrganization(), keyManagers.get(0));
             if (keyManager != null) {
@@ -366,7 +427,108 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
                 }
             }
         }
+        // Determine key managers for this API
+        if (api.getUuid() != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Determining key managers for API with UUID: " + api.getUuid());
+            }
+            List<String> keyManagers = DataHolder.getInstance().getKeyManagersFromUUID(api.getUuid());
+
+        if (keyManagers != null && !keyManagers.isEmpty()) {
+            if (APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS.equals(keyManagers.get(0))
+                        || keyManagers.contains(APIConstants.KeyManager.DEFAULT_KEY_MANAGER)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Adding default scope for API with UUID: " + api.getUuid());
+                    }
+                    allScopes.add("default");
+                }
+            }
+        }
+
         return allScopes;
+    }
+
+    /**
+     * Extracts and sets MCP error details from the backend response for server proxy APIs.
+     *
+     * @param messageContext The Synapse message context
+     */
+    private void handleServerProxyBackendResponse(MessageContext messageContext) {
+        if (buildResponseMessage == null) {
+            Map<String,String> configs = APIManagerConfiguration.getAnalyticsProperties();
+            if (configs.containsKey(
+                    org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.BUILD_RESPONSE_MESSAGE_CONFIG)) {
+                buildResponseMessage = Boolean.parseBoolean(configs.get(
+                        org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.BUILD_RESPONSE_MESSAGE_CONFIG));
+            } else {
+                buildResponseMessage = false;
+            }
+        }
+        if (buildResponseMessage) {
+            if (log.isDebugEnabled()) {
+                log.debug("Building response message from axis2 message context for analytics extraction.");
+            }
+            try {
+                org.apache.axis2.context.MessageContext axis2MessageContext =
+                        ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+                RelayUtils.buildMessage(axis2MessageContext);
+                String responseBody;
+                // Check for JSON payload
+                if (JsonUtil.hasAJsonPayload(axis2MessageContext)) {
+                    responseBody = JsonUtil.jsonPayloadToString(axis2MessageContext);
+                } else {
+                    // Extract text from SOAP envelope's first element
+                    SOAPEnvelope envelope = axis2MessageContext.getEnvelope();
+                    if (envelope != null && envelope.getBody() != null) {
+                        envelope.buildWithAttachments();
+                        OMElement firstElement = envelope.getBody().getFirstElement();
+                        responseBody = firstElement != null ? firstElement.getText() : null;
+                    } else {
+                        responseBody = null;
+                    }
+                }
+                if (responseBody != null && !responseBody.trim().isEmpty()) {
+                    // Extract JSON from SSE format if present
+                    String jsonResponse = extractDataFromSSE(responseBody);
+                    setMCPErrorDetails(messageContext, jsonResponse);
+                }
+            } catch (IOException | XMLStreamException e) {
+                log.warn("Failed to build message from axis2 message context", e);
+            } catch (Exception e) {
+                log.warn("Failed to extract error details from server proxy backend response", e);
+            }
+        }
+    }
+
+    /**
+     * Extracts JSON data from Server-Sent Events (SSE) format.
+     * Prioritizes data: lines containing error information.
+     *
+     * @param responseBody The response body (potentially SSE formatted)
+     * @return Extracted JSON string or original response if not SSE
+     */
+    private String extractDataFromSSE(String responseBody) {
+        if (StringUtils.isBlank(responseBody) || !responseBody.contains("data:")) {
+            return responseBody;
+        }
+
+        String firstPayload = null;
+        for (String line : responseBody.split("\\R")) {
+            if (line.startsWith("data:")) {
+                String payload = line.substring(5).trim();
+                if (!payload.isEmpty()) {
+                    // If this line contains "error", return immediately
+                    if (payload.contains(APIMgtGatewayConstants.ERROR)) {
+                        return payload;
+                    }
+                    // Otherwise, use the first non-empty payload as fallback
+                    if (firstPayload == null) {
+                        firstPayload = payload;
+                    }
+                }
+            }
+        }
+        return firstPayload != null ? firstPayload : responseBody;
     }
 
     /**

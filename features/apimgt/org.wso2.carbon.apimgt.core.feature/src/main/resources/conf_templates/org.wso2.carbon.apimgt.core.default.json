@@ -21,6 +21,7 @@
   "apim.aws_lambda.http_client.connection_timeout": "2",
   "apim.aws_lambda.http_client.socket_timeout": "30",
   "apim.aws_lambda.http_client.connection_acquisition_timeout": "30",
+  "apim.aws_lambda.enable_proxy_response_mapping": "false",
   "apim.basic_authenticator.max_idle": "200",
   "apim.basic_authenticator.init_idle_capacity": "100",
   "apim.basic_authenticator.max_active": "110",
@@ -70,6 +71,7 @@
   "apim.http_client.max_total": "100",
   "apim.http_client.default_max_per_route": "50",
   "apim.http_client.connection_timeout": "-1",
+  "apim.http_client.connection_request_timeout": "-1",
   "apim.key_manager.service_url": "https://localhost:${mgt.transport.https.port}${carbon.context}services/",
   "apim.key_manager.username": "${admin.username}",
   "apim.key_manager.password": "${admin.password}",
@@ -220,6 +222,7 @@
   "apim.cache_invalidation.topic_name":"globalCacheInvalidation",
   "apim.auth_manager.check_permissions_remotely": false,
   "apim.auth_manager.iskm_reverseproxy_enabled": false,
+  "apim.mediation.enable_secure_xml_processing": true,
   "apim.sync_runtime_artifacts.gateway.gateway_labels": ["Default"],
   "apim.sync_runtime_artifacts.gateway.artifact_retriever": "DBRetriever",
   "apim.sync_runtime_artifacts.gateway.deployment_retry_duration": "15000",
@@ -255,11 +258,22 @@
   "apim.gateway_notification.deployment_ack.batch_processor_max_thread": "8",
   "apim.gateway_notification.deployment_ack.batch_processor_keep_alive": "60000",
   "apim.gateway_notification.deployment_ack.batch_processor_queue_size": "50",
+  "apim.gateway_notification.api_key_notification.queue_size": "100000",
+  "apim.gateway_notification.api_key_notification.batch_size": "100",
+  "apim.gateway_notification.api_key_notification.batch_interval": "2000",
+  "apim.gateway_notification.api_key_notification.max_retry_count": "5",
+  "apim.gateway_notification.api_key_notification.retry_duration": "10000",
+  "apim.gateway_notification.api_key_notification.retry_progression_factor": "2.0",
+  "apim.gateway_notification.api_key_notification.batch_processor_min_thread": "2",
+  "apim.gateway_notification.api_key_notification.batch_processor_max_thread": "8",
+  "apim.gateway_notification.api_key_notification.batch_processor_keep_alive": "60000",
+  "apim.gateway_notification.api_key_notification.batch_processor_queue_size": "50",
   "apim.gateway_notification.registration.max_retry_count": "5",
   "apim.gateway_notification.registration.retry_duration": "10000",
   "apim.gateway_notification.registration.retry_progression_factor": "2.0",
   "apim.gateway_notification.cleanup.expiry_time": "120",
   "apim.gateway_notification.cleanup.data_retention_period": "2629800",
+
   "apim.rest_api.admin_permission_restricted_api": [
     {
       "uri_path": "/api/am/gateway/*",
@@ -270,5 +284,6 @@
   "apim.synapse_artifact_generator.thread_pool.max_pool_size": "4",
   "apim.synapse_artifact_generator.thread_pool.keep_alive_time_ms": "60000",
   "apim.synapse_artifact_generator.thread_pool.queue_capacity": "50",
-  "apim.certificate_manager.events_enabled": true
+  "apim.certificate_manager.events_enabled": true,
+  "apim.platform_gateway.versions": ["1.0.0"]
 }

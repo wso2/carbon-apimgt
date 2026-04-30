@@ -16,27 +16,19 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security;
 
-import io.swagger.v3.oas.models.OpenAPI;
-import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
-import org.apache.http.HttpStatus;
 import org.apache.synapse.ManagedLifecycle;
-import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
-import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
-import org.apache.synapse.transport.passthru.PassThroughConstants;
-import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
@@ -50,12 +42,14 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.basicauth.BasicAuthAuthe
 import org.wso2.carbon.apimgt.gateway.handlers.security.oauth.OAuthAuthenticator;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
-import org.wso2.carbon.apimgt.gateway.utils.MCPUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.keymgt.model.entity.API;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
@@ -67,7 +61,6 @@ import org.wso2.carbon.metrics.manager.Timer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
@@ -100,7 +93,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     private SynapseEnvironment synapseEnvironment;
 
     private String authorizationHeader;
-    private Set<String> audiences = new HashSet<>();;
+    private Set<String> audiences = new HashSet<>();
     private String apiKeyHeader;
     private String apiSecurity;
     private String apiLevelPolicy;
@@ -108,14 +101,11 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     private String apiUUID;
     private String apiType = String.valueOf(APIConstants.ApiTypes.API); // Default API Type
     private String subType;
-    private OpenAPI openAPI;
     private String keyManagers;
     private final String type = ExtensionType.AUTHENTICATION.toString();
     private String securityContextHeader;
     protected APIKeyValidator keyValidator;
     protected boolean isOauthParamsInitialized = false;
-    private static final Pattern validHostHeaderPattern =
-            Pattern.compile("^[A-Za-z0-9][A-Za-z0-9.-]*(:\\d{1,5})?$");
 
     public String getApiUUID() {
         return apiUUID;
@@ -475,16 +465,20 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             }
 
             if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(apiType) && isMCPNoAuthRequest) {
-                log.debug("Skipping authentication for MCP request"
-                        + ", method: " + messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD));
-                // TODO: Check if we need to handle same as the no auth case for REST
-                return true;
+                if (log.isDebugEnabled()) {
+                    log.debug("Skipping authentication for MCP request"
+                            + ", method: " + messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD));
+                }
+                handleNoAuthentication(messageContext);
+                setAPIParametersToMessageContext(messageContext);
+                return ExtensionListenerUtil.postProcessRequest(messageContext, type);
             }
 
             if (ExtensionListenerUtil.preProcessRequest(messageContext, type)) {
                 if (!isAuthenticatorsInitialized) {
                     initializeAuthenticators();
                 }
+                messageContext.setProperty(APIMgtGatewayConstants.AUTHENTICATORS_CHALLENGE_STRING, getAuthenticatorsChallengeString());
                 if (!isOauthParamsInitialized) {
                     initOAuthParams();
                 }
@@ -731,105 +725,58 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     }
 
     private void handleAuthFailure(MessageContext messageContext, APISecurityException e) {
-        messageContext.setProperty(SynapseConstants.ERROR_CODE, e.getErrorCode());
-        messageContext.setProperty(SynapseConstants.ERROR_MESSAGE,
-                APISecurityConstants.getAuthenticationFailureMessage(e.getErrorCode()));
-        messageContext.setProperty(SynapseConstants.ERROR_EXCEPTION, e);
-
-        Mediator sequence = messageContext.getSequence(APISecurityConstants.API_AUTH_FAILURE_HANDLER);
-
-        //Setting error description which will be available to the handler
-        String errorDetail = APISecurityConstants.getFailureMessageDetailDescription(e.getErrorCode(), e.getMessage());
-        // if custom auth header is configured, the error message should specify its name instead of default value
-        if (e.getErrorCode() == APISecurityConstants.API_AUTH_MISSING_CREDENTIALS) {
-            errorDetail =
-                    APISecurityConstants.getFailureMessageDetailDescription(e.getErrorCode(), e.getMessage()) + "'"
-                            + authorizationHeader + " : Bearer ACCESS_TOKEN' or '" + authorizationHeader +
-                            " : Basic ACCESS_TOKEN' or '" + apiKeyHeader + " : API_KEY'";
-        }
-        messageContext.setProperty(SynapseConstants.ERROR_DETAIL, errorDetail);
-
-        // By default we send a 401 response back
-        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
-                getAxis2MessageContext();
-        // This property need to be set to avoid sending the content in pass-through pipe (request message)
-        // as the response.
-        axis2MC.setProperty(PassThroughConstants.MESSAGE_BUILDER_INVOKED, Boolean.TRUE);
+        GatewayUtils.handleAuthFailure(messageContext, e, this.authorizationHeader, this.apiKeyHeader,
+                getAuthenticatorsChallengeString(), apiType);
         try {
-            RelayUtils.consumeAndDiscardMessage(axis2MC);
-        } catch (AxisFault axisFault) {
-            //In case of an error it is logged and the process is continued because we're setting a fault message in the payload.
-            log.error("Error occurred while consuming and discarding the message", axisFault);
-        }
-        axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, "application/soap+xml");
-        int status;
-        if (e.getErrorCode() == APISecurityConstants.API_AUTH_GENERAL_ERROR ||
-                e.getErrorCode() == APISecurityConstants.API_AUTH_MISSING_OPEN_API_DEF) {
-            status = HttpStatus.SC_INTERNAL_SERVER_ERROR;
-        } else if (e.getErrorCode() == APISecurityConstants.API_AUTH_INCORRECT_API_RESOURCE ||
-                e.getErrorCode() == APISecurityConstants.API_AUTH_FORBIDDEN ||
-                e.getErrorCode() == APISecurityConstants.API_OAUTH_INVALID_AUDIENCES ||
-                e.getErrorCode() == APISecurityConstants.INVALID_SCOPE) {
-            status = HttpStatus.SC_FORBIDDEN;
-        } else {
-            status = HttpStatus.SC_UNAUTHORIZED;
-            Map<String, String> headers =
-                    (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-            if (headers != null) {
-                if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(apiType)) {
-                    String contextPath = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
-                    if (StringUtils.isEmpty(contextPath)) {
-                        headers.put(HttpHeaders.WWW_AUTHENTICATE, getAuthenticatorsChallengeString() +
-                                " error=\"invalid_token\"" +
-                                ", error_description=\"The provided token is invalid\"");
-                    } else {
-                        // Derive the outward facing host and port from host header
-                        String hostHeader = headers.get(APIMgtGatewayConstants.HOST);
+            // If this is an MCP API, try to add DCR resource metadata to WWW-Authenticate header
+            if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(this.apiType) && this.apiUUID != null) {
+                if(log.isDebugEnabled()) {
+                    log.debug("Adding DCR resource metadata to WWW-Authenticate header for MCP API: " + this.apiUUID);
+                }
+                org.apache.axis2.context.MessageContext axis2MC =
+                        ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+                @SuppressWarnings("unchecked")
+                Map<String, String> transportHeaders = (Map<String, String>)
+                        axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
 
-                        if (StringUtils.isBlank(hostHeader) || !validHostHeaderPattern.matcher(hostHeader).matches()) {
-                            if (log.isDebugEnabled()) {
-                                log.debug("Missing or malformed host header in request.Extracting host header " +
-                                        "from config.");
+                if (transportHeaders == null) {
+                    transportHeaders = new java.util.TreeMap<>();
+                    axis2MC.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, transportHeaders);
+                }
+
+                java.util.List<String> keyManagers = org.wso2.carbon.apimgt.gateway.internal.DataHolder.getInstance()
+                        .getKeyManagersFromUUID(this.apiUUID);
+                if (keyManagers != null && !keyManagers.isEmpty()) {
+                    String existing = transportHeaders.get("WWW-Authenticate");
+                    StringBuilder sb = new StringBuilder();
+                    if (existing != null) {
+                        sb.append(existing);
+                    }
+                    for (String kmName : keyManagers) {
+                        // pass an empty tenant domain string to match mocks that use Mockito.anyString()
+                        KeyManagerDto kmDto = KeyManagerHolder.getKeyManagerByName("", kmName);
+                        KeyManager keyManager = kmDto != null ? kmDto.getKeyManager() : null;
+                        KeyManagerConfiguration kmConfig = keyManager != null ? keyManager.getKeyManagerConfiguration() : null;
+                        if (kmConfig == null) continue;
+
+                        Object dcrEndpointParam = kmConfig.getParameter(
+                                APIConstants.KeyManager.CLIENT_REGISTRATION_ENDPOINT);
+                        String dcrEndpoint = dcrEndpointParam != null ? dcrEndpointParam.toString() : null;
+                        if (dcrEndpoint != null) {
+                            if (sb.length() > 0) {
+                                sb.append(", ");
                             }
-                            hostHeader = APIUtil.getHostAddress();
-                        }
-
-                        String gwURL = MCPUtils.getGatewayServerURL(hostHeader, contextPath);
-                        if (StringUtils.isEmpty(gwURL)) {
-                            headers.put(HttpHeaders.WWW_AUTHENTICATE, getAuthenticatorsChallengeString() +
-                                    " error=\"invalid_token\"" +
-                                    ", error_description=\"The provided token is invalid\"");
-                        } else {
-                            if (log.isDebugEnabled()) {
-                                log.debug("Constructed gateway URL for resource metadata: " + gwURL);
-                            }
-
-                            String resourceMetadata = gwURL + contextPath + APIMgtGatewayConstants.MCP_WELL_KNOWN_RESOURCE;
-                            headers.put(HttpHeaders.WWW_AUTHENTICATE, "Bearer resource_metadata=" +
-                                    "\"" + resourceMetadata + "\","
-                                    + " error=\"invalid_token\","
-                                    + " error_description=\"Access token is missing or expired\"");
+                            sb.append("resource_metadata=").append(dcrEndpoint);
                         }
                     }
-                } else {
-                    headers.put(HttpHeaders.WWW_AUTHENTICATE, getAuthenticatorsChallengeString() +
-                            " error=\"invalid_token\"" +
-                            ", error_description=\"The provided token is invalid\"");
+                    if (sb.length() > 0) {
+                        transportHeaders.put(HttpHeaders.WWW_AUTHENTICATE, sb.toString());
+                    }
                 }
-                axis2MC.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
             }
+        } catch (Exception ex) {
+            log.info("Error while adding DCR metadata to WWW-Authenticate header", ex);
         }
-
-        messageContext.setProperty(APIMgtGatewayConstants.HTTP_RESPONSE_STATUS_CODE, status);
-
-        // Invoke the custom error handler specified by the user
-        if (sequence != null && !sequence.mediate(messageContext)) {
-            // If needed user should be able to prevent the rest of the fault handling
-            // logic from getting executed
-            return;
-        }
-
-        sendFault(messageContext, status);
     }
 
     protected void sendFault(MessageContext messageContext, int status) {

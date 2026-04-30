@@ -33,6 +33,8 @@ public class SettingsDTO   {
     private Boolean analyticsEnabled = null;
     private Boolean transactionCounterEnable = null;
     private Boolean isGatewayNotificationEnabled = false;
+    private List<String> platformGatewayVersions = new ArrayList<String>();
+    private Boolean consumptionExportEnabled = null;
 
   /**
    **/
@@ -193,6 +195,42 @@ public class SettingsDTO   {
     this.isGatewayNotificationEnabled = isGatewayNotificationEnabled;
   }
 
+  /**
+   * API Platform Gateway versions for the quick-start guide.
+   **/
+  public SettingsDTO platformGatewayVersions(List<String> platformGatewayVersions) {
+    this.platformGatewayVersions = platformGatewayVersions;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "API Platform Gateway versions for the quick-start guide.")
+  @JsonProperty("platformGatewayVersions")
+  public List<String> getPlatformGatewayVersions() {
+    return platformGatewayVersions;
+  }
+  public void setPlatformGatewayVersions(List<String> platformGatewayVersions) {
+    this.platformGatewayVersions = platformGatewayVersions;
+  }
+
+  /**
+   * Whether the ConsumptionDataExportService OSGi service is available
+   **/
+  public SettingsDTO consumptionExportEnabled(Boolean consumptionExportEnabled) {
+    this.consumptionExportEnabled = consumptionExportEnabled;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "Whether the ConsumptionDataExportService OSGi service is available")
+  @JsonProperty("consumptionExportEnabled")
+  public Boolean isConsumptionExportEnabled() {
+    return consumptionExportEnabled;
+  }
+  public void setConsumptionExportEnabled(Boolean consumptionExportEnabled) {
+    this.consumptionExportEnabled = consumptionExportEnabled;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -211,12 +249,14 @@ public class SettingsDTO   {
         Objects.equals(gatewayConfiguration, settings.gatewayConfiguration) &&
         Objects.equals(analyticsEnabled, settings.analyticsEnabled) &&
         Objects.equals(transactionCounterEnable, settings.transactionCounterEnable) &&
-        Objects.equals(isGatewayNotificationEnabled, settings.isGatewayNotificationEnabled);
+        Objects.equals(isGatewayNotificationEnabled, settings.isGatewayNotificationEnabled) &&
+        Objects.equals(platformGatewayVersions, settings.platformGatewayVersions) &&
+        Objects.equals(consumptionExportEnabled, settings.consumptionExportEnabled);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(scopes, gatewayTypes, isJWTEnabledForLoginTokens, orgAccessControlEnabled, keyManagerConfiguration, gatewayConfiguration, analyticsEnabled, transactionCounterEnable, isGatewayNotificationEnabled);
+    return Objects.hash(scopes, gatewayTypes, isJWTEnabledForLoginTokens, orgAccessControlEnabled, keyManagerConfiguration, gatewayConfiguration, analyticsEnabled, transactionCounterEnable, isGatewayNotificationEnabled, platformGatewayVersions, consumptionExportEnabled);
   }
 
   @Override
@@ -233,6 +273,8 @@ public class SettingsDTO   {
     sb.append("    analyticsEnabled: ").append(toIndentedString(analyticsEnabled)).append("\n");
     sb.append("    transactionCounterEnable: ").append(toIndentedString(transactionCounterEnable)).append("\n");
     sb.append("    isGatewayNotificationEnabled: ").append(toIndentedString(isGatewayNotificationEnabled)).append("\n");
+    sb.append("    platformGatewayVersions: ").append(toIndentedString(platformGatewayVersions)).append("\n");
+    sb.append("    consumptionExportEnabled: ").append(toIndentedString(consumptionExportEnabled)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -330,11 +330,16 @@ public class GatewayArtifactsMgtDAO {
 
     public void deleteGatewayArtifacts(String apiId) throws APIManagementException {
 
-        String deleteGWArtifact = SQLConstants.DELETE_GW_PUBLISHED_API_DETAILS;
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection()) {
             connection.setAutoCommit(false);
             try {
-                try (PreparedStatement preparedStatement = connection.prepareStatement(deleteGWArtifact)) {
+                try (PreparedStatement preparedStatement =
+                             connection.prepareStatement(SQLConstants.DELETE_FROM_AM_GW_API_ARTIFACTS_BY_API_ID)) {
+                    preparedStatement.setString(1, apiId);
+                    preparedStatement.executeUpdate();
+                }
+                try (PreparedStatement preparedStatement =
+                             connection.prepareStatement(SQLConstants.DELETE_GW_PUBLISHED_API_DETAILS)) {
                     preparedStatement.setString(1, apiId);
                     preparedStatement.executeUpdate();
                 }
@@ -982,13 +987,20 @@ public class GatewayArtifactsMgtDAO {
 
         try (Connection artifactSynchronizerConn = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection()) {
             artifactSynchronizerConn.setAutoCommit(false);
-            // Delete gateway Artifacts from AM_GW_PUBLISHED_API_DETAILS, FK->AM_GW_API_ARTIFACTS,AM_GW_API_DEPLOYMENTS
-            try (PreparedStatement preparedStatement = artifactSynchronizerConn.prepareStatement(
-                    SQLConstants.DELETE_BULK_GW_PUBLISHED_API_DETAILS)) {
-                preparedStatement.setString(1, organization);
-                preparedStatement.executeUpdate();
+            try {
+                try (PreparedStatement preparedStatement = artifactSynchronizerConn.prepareStatement(
+                        SQLConstants.PlatformGatewayArtifactSQLConstants.DELETE_REVISION_ARTIFACTS_BY_ORG_SQL)) {
+                    preparedStatement.setString(1, organization);
+                    preparedStatement.executeUpdate();
+                }
+                try (PreparedStatement preparedStatement = artifactSynchronizerConn.prepareStatement(
+                        SQLConstants.DELETE_BULK_GW_PUBLISHED_API_DETAILS)) {
+                    preparedStatement.setString(1, organization);
+                    preparedStatement.executeUpdate();
+                }
                 artifactSynchronizerConn.commit();
             } catch (SQLException e) {
+                artifactSynchronizerConn.rollback();
                 throw e;
             }
         } catch (SQLException e) {
