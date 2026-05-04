@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.ConfigurationDto;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
+import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.api.model.Workflow;
 import org.wso2.carbon.apimgt.api.model.WorkflowTaskService;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
@@ -451,5 +452,105 @@ public class APIAdminImplTest {
     private void assertUpdateDisabledKeyManagerConfigurationModification(APIManagementException exception) {
         Assert.assertTrue(exception.getMessage().contains("Modification of the Key Manager configuration"));
         Assert.assertEquals(ExceptionCodes.KEY_MANAGER_UPDATE_VIOLATION, exception.getErrorHandler());
+    }
+
+    // ========================================================================
+    // Tests for updateLLMProvider (Issue #16287 - Notification always sent)
+    // ========================================================================
+
+    @Test
+    public void testUpdateLLMProvider_BuiltInProvider_NotificationSent() throws APIManagementException {
+
+        String organization = "carbon.super";
+        LLMProvider inputProvider = new LLMProvider();
+        inputProvider.setId("builtin-provider-id");
+        inputProvider.setName("AWSBedrock");
+        inputProvider.setApiVersion("v1");
+        inputProvider.setBuiltInSupport(true);
+        inputProvider.setConfigurations("{\"authenticationConfiguration\":{\"type\":\"apikey\"}}");
+
+        LLMProvider updatedResult = new LLMProvider();
+        updatedResult.setId("builtin-provider-id");
+        updatedResult.setName("AWSBedrock");
+        updatedResult.setApiVersion("v1");
+        updatedResult.setBuiltInSupport(true);
+        updatedResult.setConfigurations("{\"authenticationConfiguration\":{\"type\":\"apikey\"}}");
+
+        Mockito.when(apiMgtDAO.updateLLMProvider(organization, inputProvider)).thenReturn(updatedResult);
+        PowerMockito.doNothing().when(APIUtil.class);
+        APIUtil.sendNotification(Mockito.any(), Mockito.anyString());
+        PowerMockito.when(APIUtil.getInternalOrganizationId(organization)).thenReturn(1);
+
+        APIAdmin apiAdmin = new APIAdminImpl();
+        LLMProvider result = apiAdmin.updateLLMProvider(organization, inputProvider);
+
+        Assert.assertNotNull("Updated provider should not be null", result);
+        Assert.assertEquals("Provider ID should match", "builtin-provider-id", result.getId());
+        Mockito.verify(apiMgtDAO, Mockito.times(1)).updateLLMProvider(organization, inputProvider);
+    }
+
+    @Test
+    public void testUpdateLLMProvider_CustomProvider_NotificationSent() throws APIManagementException {
+
+        String organization = "carbon.super";
+        LLMProvider inputProvider = new LLMProvider();
+        inputProvider.setId("custom-provider-id");
+        inputProvider.setName("CustomAI");
+        inputProvider.setApiVersion("v2");
+        inputProvider.setBuiltInSupport(false);
+        inputProvider.setConfigurations("{\"authenticationConfiguration\":{\"type\":\"apikey\"}}");
+
+        LLMProvider updatedResult = new LLMProvider();
+        updatedResult.setId("custom-provider-id");
+        updatedResult.setName("CustomAI");
+        updatedResult.setApiVersion("v2");
+        updatedResult.setBuiltInSupport(false);
+        updatedResult.setConfigurations("{\"authenticationConfiguration\":{\"type\":\"apikey\"}}");
+
+        Mockito.when(apiMgtDAO.updateLLMProvider(organization, inputProvider)).thenReturn(updatedResult);
+        PowerMockito.doNothing().when(APIUtil.class);
+        APIUtil.sendNotification(Mockito.any(), Mockito.anyString());
+        PowerMockito.when(APIUtil.getInternalOrganizationId(organization)).thenReturn(1);
+
+        APIAdmin apiAdmin = new APIAdminImpl();
+        LLMProvider result = apiAdmin.updateLLMProvider(organization, inputProvider);
+
+        Assert.assertNotNull("Updated provider should not be null", result);
+        Assert.assertEquals("Provider ID should match", "custom-provider-id", result.getId());
+        Mockito.verify(apiMgtDAO, Mockito.times(1)).updateLLMProvider(organization, inputProvider);
+    }
+
+    @Test
+    public void testUpdateLLMProvider_ConfigurationsPassedToDAO() throws APIManagementException {
+
+        String organization = "carbon.super";
+        String newConfigurations = "{\"authenticationConfiguration\":" +
+                "{\"type\":\"apikey\",\"parameters\":{\"apiKeyIdentifier\":\"Authorization\"}}}";
+
+        LLMProvider inputProvider = new LLMProvider();
+        inputProvider.setId("provider-id");
+        inputProvider.setName("TestProvider");
+        inputProvider.setApiVersion("v1");
+        inputProvider.setBuiltInSupport(true);
+        inputProvider.setConfigurations(newConfigurations);
+
+        LLMProvider updatedResult = new LLMProvider();
+        updatedResult.setId("provider-id");
+        updatedResult.setName("TestProvider");
+        updatedResult.setApiVersion("v1");
+        updatedResult.setBuiltInSupport(true);
+        updatedResult.setConfigurations(newConfigurations);
+
+        Mockito.when(apiMgtDAO.updateLLMProvider(organization, inputProvider)).thenReturn(updatedResult);
+        PowerMockito.doNothing().when(APIUtil.class);
+        APIUtil.sendNotification(Mockito.any(), Mockito.anyString());
+        PowerMockito.when(APIUtil.getInternalOrganizationId(organization)).thenReturn(1);
+
+        APIAdmin apiAdmin = new APIAdminImpl();
+        LLMProvider result = apiAdmin.updateLLMProvider(organization, inputProvider);
+
+        Assert.assertNotNull("Updated provider should not be null", result);
+        Assert.assertEquals("Configurations should be passed through correctly",
+                newConfigurations, result.getConfigurations());
     }
 }
