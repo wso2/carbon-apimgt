@@ -19,8 +19,10 @@
 package org.wso2.carbon.apimgt.api.model;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -55,6 +57,15 @@ public interface GatewayAgentConfiguration {
         return null;
     }
     /**
+     * Get the implementation class of the external gateway API key agent
+     *
+     * @return String implementation class name
+     */
+    default String getApiKeyConnectorImplementation() {
+        return null;
+    }
+
+    /**
      * Get vendor type of the external gateway
      *
      * @return String vendor name
@@ -67,6 +78,30 @@ public interface GatewayAgentConfiguration {
      * @return  List<ConfigurationDto> connectionConfigurations
      */
     List<ConfigurationDto> getConnectionConfigurations();
+
+    /**
+     * This method returns the Configurations related to external gateway with subscription policies when needed.
+     *
+     * @param subscriptionPolicies tenant subscription policies used for connector-owned configuration generation
+     * @return List<ConfigurationDto> connectionConfigurations
+     */
+    default List<ConfigurationDto> getConnectionConfigurations(List<SubscriptionPolicy> subscriptionPolicies) {
+        // Default to normal implementation.
+        return getConnectionConfigurations();
+    }
+
+    /**
+     * Validate the configured gateway environment before it is used.
+     *
+     * @param environment gateway environment configuration
+     * @return validation result for the given environment
+     */
+    default GatewayEnvironmentValidationResult validateEnvironment(Environment environment) {
+        GatewayEnvironmentValidationResult validationResult = new GatewayEnvironmentValidationResult();
+        validationResult.setValid(true);
+        validationResult.setErrors(Collections.emptyMap());
+        return validationResult;
+    }
 
     /**
      * This method returns the Gateway Feature Catalog

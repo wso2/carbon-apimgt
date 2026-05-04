@@ -7125,6 +7125,10 @@ components:
         label:
           type: string
           example: Consumer Key
+        labels:
+          type: object
+          additionalProperties:
+            type: string
         type:
           type: string
           example: select

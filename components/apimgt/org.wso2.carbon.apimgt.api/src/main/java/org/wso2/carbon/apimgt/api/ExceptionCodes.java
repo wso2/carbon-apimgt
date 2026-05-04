@@ -191,6 +191,8 @@ public enum ExceptionCodes implements ErrorHandler {
             "An API Platform gateway with name '%s' already exists in the organization"),
     PLATFORM_GATEWAY_NOT_FOUND(900519, "API Platform gateway not found", 404,
             "API Platform gateway not found"),
+    FEDERATED_GATEWAY_ONBOARDING_VALIDATION_FAILED(900520, "Federated Gateway Environment Validation Failed",
+            400, "Third party gateway validation failed %s", false),
 
     // Workflow related codes
     WORKFLOW_EXCEPTION(900550, "Workflow error", 500,
