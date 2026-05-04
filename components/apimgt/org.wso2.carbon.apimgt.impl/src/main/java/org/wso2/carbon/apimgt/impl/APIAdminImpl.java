@@ -784,10 +784,8 @@ public class APIAdminImpl implements APIAdmin {
     public LLMProvider updateLLMProvider(String organization, LLMProvider provider) throws APIManagementException {
 
         LLMProvider result = apiMgtDAO.updateLLMProvider(organization, provider);
-        if (!result.isBuiltInSupport()) {
-            new LLMProviderNotificationSender().notify(result.getId(), result.getName(), result.getApiVersion(),
-                    provider.getConfigurations(), organization, APIConstants.EventType.LLM_PROVIDER_UPDATE.name());
-        }
+        new LLMProviderNotificationSender().notify(result.getId(), result.getName(), result.getApiVersion(),
+                provider.getConfigurations(), organization, APIConstants.EventType.LLM_PROVIDER_UPDATE.name());
         return result;
     }
 

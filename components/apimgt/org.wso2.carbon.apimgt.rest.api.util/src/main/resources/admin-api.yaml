@@ -1572,8 +1572,6 @@ paths:
         content:
           multipart/form-data:
             schema:
-              required:
-                - apiDefinition
               $ref: '#/components/schemas/LLMProviderRequest'
         required: true
       responses:
