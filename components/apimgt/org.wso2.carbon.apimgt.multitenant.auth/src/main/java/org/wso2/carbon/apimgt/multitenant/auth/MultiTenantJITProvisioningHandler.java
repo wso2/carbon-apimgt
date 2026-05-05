@@ -60,7 +60,9 @@ public class MultiTenantJITProvisioningHandler extends JITProvisioningPostAuthen
         // Execute JIT provisioning only if:
         // 1. USER_SELECTED_TENANT_DOMAIN property is not set (null or blank), OR
         // 2. USER_SELECTED_TENANT_DOMAIN equals "carbon.super"
-        if ((userSelectedTenantDomain == null && !SUPER_TENANT_DOMAIN.equals(context.getTenantDomain())) || SUPER_TENANT_DOMAIN.equals(userSelectedTenantDomain)) {
+        if ((userSelectedTenantDomain == null &&
+                !SUPER_TENANT_DOMAIN.equals(context.getTenantDomain()))
+                || SUPER_TENANT_DOMAIN.equals(userSelectedTenantDomain)) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("User selected tenant domain is '" + userSelectedTenantDomain +
                         "'. Proceeding with JIT provisioning.");
@@ -73,7 +75,7 @@ public class MultiTenantJITProvisioningHandler extends JITProvisioningPostAuthen
             LOG.debug("Skipping JIT provisioning for tenant domain: " + userSelectedTenantDomain);
         }
 
-        // Return SUCCESS_COMPLETED to indicate this handler has completed successfully
+        // Return UNSUCCESS_COMPLETED to indicate this handler has skipped
         // without performing any provisioning action
         return PostAuthnHandlerFlowStatus.UNSUCCESS_COMPLETED;
     }

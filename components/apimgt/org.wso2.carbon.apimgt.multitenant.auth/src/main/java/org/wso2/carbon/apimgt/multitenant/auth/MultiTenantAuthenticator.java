@@ -166,6 +166,8 @@ public class MultiTenantAuthenticator extends OpenIDConnectAuthenticator {
                                            AuthenticationContext context) throws AuthenticationFailedException,
             LogoutFailedException {
 
+        LOG.info("Processing authentication request for authenticator: " + getName());
+
         if (context.isLogoutRequest()) {
             String idTokenHint = this.getIdTokenHint(context);
             String tenantDomain = extractTenantDomainFromIdTokenHintSub(idTokenHint);
@@ -186,8 +188,10 @@ public class MultiTenantAuthenticator extends OpenIDConnectAuthenticator {
 
         try {
             Map<String, String[]> parameterMap = request.getParameterMap();
-            if (parameterMap != null && request.getParameterMap().containsKey("code")) {
-                // This is the callback from IS with the auth code, proceed with token exchange and user info retrieval.
+            if (parameterMap != null && (parameterMap.containsKey("code")
+                    || parameterMap.containsKey("error"))) {
+                // Callback from IdP with auth code or error. 
+                // Delegate to OIDC parent for token exchange and user info.
                 return super.process(request, response, context);
             }
             String tenantIdentifier = request.getParameter(TENANT_IDENTIFIER);
@@ -267,15 +271,6 @@ public class MultiTenantAuthenticator extends OpenIDConnectAuthenticator {
                 
                 if (StringUtils.isNotBlank(userSelectedTenantDomain)) {
                     String userStoreDomain = "PRIMARY";
-
-                    // If username still not found, use the subject identifier (UUID) as fallback
-                    if (StringUtils.isBlank(userName)) {
-                        String subjectIdentifier = user.getAuthenticatedSubjectIdentifier();
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Username not found in claims, using subject identifier: " + subjectIdentifier);
-                        }
-                        userName = subjectIdentifier;
-                    }
                     
                     // Extract user store domain if present (format: DOMAIN/username)
                     if (userName != null && userName.contains("/")) {
@@ -377,10 +372,12 @@ public class MultiTenantAuthenticator extends OpenIDConnectAuthenticator {
         String tenantSelectionUrl = authenticatorProperties.get(TENANT_SELECTION_URL_PROP);
         String sessionDataKey = context.getContextIdentifier();
 
-        String redirectUrl = tenantSelectionUrl
-                + "?" + SESSION_DATA_KEY_PARAM + "=" + sessionDataKey
-                + "&" + AUTHENTICATOR_PARAM + "=" + getName()
-                + "&" + IDP_PARAMETER + "=" + context.getExternalIdP().getIdPName();
+        Map<String, String> paramMap = new HashMap<>();
+        paramMap.put(SESSION_DATA_KEY_PARAM, sessionDataKey);
+        paramMap.put(AUTHENTICATOR_PARAM, getName());
+        paramMap.put(IDP_PARAMETER, context.getExternalIdP().getIdPName());
+
+        String redirectUrl = FrameworkUtils.buildURLWithQueryParams(tenantSelectionUrl, paramMap);
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("Redirecting to tenant selection page: " + redirectUrl);
@@ -552,14 +549,18 @@ public class MultiTenantAuthenticator extends OpenIDConnectAuthenticator {
         }
 
         String queryParams = context.getQueryParams();
-        String redirectUrl = Arrays.stream(queryParams.split("&"))
-                .filter(params -> params.startsWith("redirect_uri="))
-                .findFirst()
-                .orElse(null);
+        String redirectUrl = null;
+        if (StringUtils.isNotBlank(queryParams)) {
+            redirectUrl = Arrays.stream(queryParams.split("&"))
+                    .filter(params -> params.startsWith("redirect_uri="))
+                    .findFirst()
+                    .orElse(null);
+        }
 
         if (StringUtils.isNotBlank(redirectUrl)) {
             String serverBaseURL = getServerBaseURL();
-            paramBuilder.append("redirect_uri").append(EQUAL_SIGN).append(serverBaseURL + "/commonauth");
+            paramBuilder.append(AMPERSAND_SIGN).append("redirect_uri").append(EQUAL_SIGN)
+                    .append(serverBaseURL + "/commonauth");
         }
 
         return paramBuilder.toString();

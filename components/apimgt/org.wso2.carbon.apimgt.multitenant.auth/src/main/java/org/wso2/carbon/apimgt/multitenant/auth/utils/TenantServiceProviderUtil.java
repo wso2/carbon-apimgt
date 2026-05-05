@@ -50,6 +50,10 @@ public final class TenantServiceProviderUtil {
     public static ServiceProvider getServiceProvider(ApplicationManagementService appMgtService,
                                                      String tenantDomain, String appName) throws Exception {
 
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Retrieving service provider '" + appName + "' for tenant: " + tenantDomain);
+        }
+
         if (appMgtService == null) {
             throw new IllegalStateException(
                     "ApplicationManagementService is not available. Cannot retrieve service provider for tenant: "

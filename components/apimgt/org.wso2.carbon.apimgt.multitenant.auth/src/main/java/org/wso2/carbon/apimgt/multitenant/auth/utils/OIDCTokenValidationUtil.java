@@ -36,6 +36,7 @@ import org.wso2.carbon.idp.mgt.IdentityProviderManagementException;
 import org.wso2.carbon.idp.mgt.IdentityProviderManager;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Utility class for validating OIDC JWT tokens (audience, issuer, signature).
@@ -69,10 +70,23 @@ public final class OIDCTokenValidationUtil {
     public static void validateAudience(List<String> audienceList, IdentityProvider idp, String tenantDomain)
             throws AuthenticationFailedException {
 
+        if (LOG.isDebugEnabled()) {  
+            LOG.debug("Validating audience claim for IDP: " + idp.getIdentityProviderName() + 
+                      " in tenant domain: " + tenantDomain);  
+        }
+
         String tokenEndPointAlias = getTokenEndpointAlias(idp, tenantDomain);
 
+        if (StringUtils.isBlank(tokenEndPointAlias) || audienceList == null || audienceList.isEmpty()) {
+            throw new AuthenticationFailedException(
+                    OIDCErrorConstants.ErrorMessages.JWT_TOKEN_AUD_CLAIM_VALIDATION_FAILED.getCode(),
+                    String.format(
+                            OIDCErrorConstants.ErrorMessages.JWT_TOKEN_AUD_CLAIM_VALIDATION_FAILED.getMessage(),
+                            tokenEndPointAlias));
+        }
+
         for (String audience : audienceList) {
-            if (StringUtils.equals(tokenEndPointAlias, audience)) {
+            if (Objects.equals(tokenEndPointAlias, audience)) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug(tokenEndPointAlias + " of IDP was found in the list of audiences.");
                 }
