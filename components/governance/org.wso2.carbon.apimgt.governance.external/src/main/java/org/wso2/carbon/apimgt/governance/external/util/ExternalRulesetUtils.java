@@ -35,16 +35,17 @@ import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetContent;
 import org.wso2.carbon.apimgt.governance.external.model.ExternalEvaluationContext;
+import org.wso2.carbon.apimgt.governance.external.model.ExternalHeader;
 import org.wso2.carbon.apimgt.governance.external.model.ExternalPathMatch;
 import org.wso2.carbon.apimgt.governance.external.model.ExternalRequestPayload;
 import org.wso2.carbon.apimgt.governance.external.model.ExternalResponseDefinition;
 import org.wso2.carbon.apimgt.governance.external.model.ExternalRuleDefinition;
-import org.wso2.carbon.apimgt.governance.external.model.ExternalRulesetDefinition;
 import org.wso2.carbon.apimgt.governance.external.model.ExternalRulesetContentDefinition;
+import org.wso2.carbon.apimgt.governance.external.model.ExternalRulesetDefinition;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -191,14 +192,31 @@ public final class ExternalRulesetUtils {
         if (ruleDefinition == null) {
             return headers;
         }
+        
+        // Convert headers from payload
         ExternalRequestPayload payload = ruleDefinition.getPayload();
         if (payload != null && payload.getHeaders() != null) {
-            headers.putAll(payload.getHeaders());
+            convertExternalHeadersToMap(payload.getHeaders(), headers);
         }
+        
+        // Convert headers from rule definition
         if (ruleDefinition.getHeaders() != null) {
-            headers.putAll(ruleDefinition.getHeaders());
+            convertExternalHeadersToMap(ruleDefinition.getHeaders(), headers);
         }
+        
         return headers;
+    }
+
+    private static void convertExternalHeadersToMap(List<ExternalHeader> headerList, Map<String, Object> headerMap) {
+
+        if (headerList == null || headerList.isEmpty()) {
+            return;
+        }
+        for (ExternalHeader header : headerList) {
+            if (header != null && header.getKey() != null) {
+                headerMap.put(header.getKey(), header.getValue());
+            }
+        }
     }
 
     public static String deriveTargetIdentifier(JsonNode targetNode, String fallbackPath) {

@@ -18,7 +18,10 @@
 
 package org.wso2.carbon.apimgt.governance.external.model;
 
-import java.util.Map;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
+import java.util.List;
 
 /**
  * Model for a single external governance rule.
@@ -30,7 +33,8 @@ public class ExternalRuleDefinition {
     private String severity;
     private Integer timeout;
     private Integer retry;
-    private Map<String, Object> headers;
+    @JsonDeserialize(using = ExternalHeaderDeserializer.class)
+    private List<ExternalHeader> headers;
     private ExternalRequestPayload payload;
     private ExternalResponseDefinition response;
     private String description;
@@ -86,12 +90,14 @@ public class ExternalRuleDefinition {
         this.retry = retry;
     }
 
-    public Map<String, Object> getHeaders() {
+    @SuppressFBWarnings({"EI_EXPOSE_REP", "EI_EXPOSE_REP2"})
+    public List<ExternalHeader> getHeaders() {
 
         return headers;
     }
 
-    public void setHeaders(Map<String, Object> headers) {
+    @SuppressFBWarnings({"EI_EXPOSE_REP", "EI_EXPOSE_REP2"})
+    public void setHeaders(List<ExternalHeader> headers) {
 
         this.headers = headers;
     }

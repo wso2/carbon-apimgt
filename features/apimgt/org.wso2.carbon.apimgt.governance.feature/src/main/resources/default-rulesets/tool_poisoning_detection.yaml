@@ -23,9 +23,15 @@ rulesetContent:
       timeout: 50000
       retry: 5
       headers:
-        Content-Type: application/json
-        Accept: 
-        Test-Key: "test-value"
+        - key: "Content-Type"
+          value: "application/json"
+          category: "Standard"
+        - key: "Accept"
+          value: ""
+          category: "Standard"
+        - key: "Test-Key"
+          value: "test-value"
+          category: "Security"
       description: >-
         Tool descriptions in MCP server definitions can be exploited through tool poisoning
         attacks, where malicious or hidden instructions are embedded to manipulate AI agent

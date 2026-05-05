@@ -18,7 +18,10 @@
 
 package org.wso2.carbon.apimgt.governance.external.model;
 
-import java.util.Map;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
+import java.util.List;
 
 /**
  * Request payload configuration for an external rule call.
@@ -28,7 +31,8 @@ public class ExternalRequestPayload {
     private String method;
     private String contentPath;
     private Object template;
-    private Map<String, Object> headers;
+    @JsonDeserialize(using = ExternalHeaderDeserializer.class)
+    private List<ExternalHeader> headers;
 
     public String getMethod() {
 
@@ -60,12 +64,14 @@ public class ExternalRequestPayload {
         this.template = template;
     }
 
-    public Map<String, Object> getHeaders() {
+    @SuppressFBWarnings({"EI_EXPOSE_REP", "EI_EXPOSE_REP2"})
+    public List<ExternalHeader> getHeaders() {
 
         return headers;
     }
 
-    public void setHeaders(Map<String, Object> headers) {
+    @SuppressFBWarnings({"EI_EXPOSE_REP", "EI_EXPOSE_REP2"})
+    public void setHeaders(List<ExternalHeader> headers) {
 
         this.headers = headers;
     }
