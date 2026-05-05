@@ -1,0 +1,33 @@
+name: tool-poisoning-detection
+description: >-
+  The set of rules to detect tool definitions that are vulnerable to tool poisoning attacks.
+ruleCategory: EXTERNAL
+ruleType: API_DEFINITION
+artifactType: MCP
+documentationLink: "<service-documentation-link>"
+provider: WSO2
+rulesetContent:
+  rules:
+    description-poisoning-detection:
+      targetPath: "$.data.operations[*]"
+      severity: error
+      payload:
+        method: POST
+        contentPath: "$.description"
+        template:
+          - description: "{{value}}"
+      response:
+        resultPath: "$[0].is_poisoned"
+        expectedValue: true
+      serviceRef: "aee9480c-cbb9-48fc-9723-925bf454bc49"
+      description: >-
+        Tool descriptions in MCP server definitions can be exploited through tool poisoning
+        attacks, where malicious or hidden instructions are embedded to manipulate AI agent
+        behavior. Tool descriptions must not contain prompt injection attempts, hidden
+        directives, or instructions that override user intentions.
+      message: >-
+        Tool '{{target}}' description may contain poisoning content. Remove hidden instructions
+        or prompt-injection text.
+      resolved: true
+      formats:
+        - mcp_definition
