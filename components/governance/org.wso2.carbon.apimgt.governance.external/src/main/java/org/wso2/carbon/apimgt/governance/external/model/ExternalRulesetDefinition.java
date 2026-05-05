@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.governance.external.model;
 
-import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -117,9 +117,20 @@ public class ExternalRulesetDefinition {
 
     public Map<String, ExternalRuleDefinition> getRules() {
 
-        if (rulesetContent == null || rulesetContent.getRules() == null) {
-            return Collections.emptyMap();
+        if (rulesetContent == null) {
+            rulesetContent = new ExternalRulesetContentDefinition();
+        }
+        if (rulesetContent.getRules() == null) {
+            rulesetContent.setRules(new LinkedHashMap<>());
         }
         return rulesetContent.getRules();
+    }
+
+    public void setRules(Map<String, ExternalRuleDefinition> rules) {
+
+        if (rulesetContent == null) {
+            rulesetContent = new ExternalRulesetContentDefinition();
+        }
+        rulesetContent.setRules(rules);
     }
 }

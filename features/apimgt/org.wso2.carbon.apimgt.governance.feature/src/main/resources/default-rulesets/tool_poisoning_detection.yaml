@@ -4,11 +4,12 @@ description: >-
 ruleCategory: EXTERNAL
 ruleType: API_DEFINITION
 artifactType: MCP
-documentationLink: "<service-documentation-link>"
+documentationLink: "https://docs.wso2.com/governance/mcp/tool-poisoning"
 provider: WSO2
 rulesetContent:
   rules:
-    description-poisoning-detection:
+    'description-poisoning-detection':
+      serviceUrl: "https://e95488c8-8511-4882-967f-ec3ae2a0f86f-dev.e1-us-east-azure.choreoapis.dev/lgpt/tool-poisoning-detection/v1.0/batch_detect"
       targetPath: "$.data.operations[*]"
       severity: error
       payload:
@@ -19,7 +20,12 @@ rulesetContent:
       response:
         resultPath: "$[0].is_poisoned"
         expectedValue: true
-      serviceRef: "aee9480c-cbb9-48fc-9723-925bf454bc49"
+      timeout: 50000
+      retry: 5
+      headers:
+        Content-Type: application/json
+        Accept: 
+        Test-Key: "test-value"
       description: >-
         Tool descriptions in MCP server definitions can be exploited through tool poisoning
         attacks, where malicious or hidden instructions are embedded to manipulate AI agent
