@@ -38,7 +38,7 @@ import javax.ws.rs.core.Response;
  * Discovery endpoint for platform gateway connection details.
  * <p>
  * {@code gatewayPath} is the internal REST API base path (no {@code /ws} suffix), e.g. {@code internal/data/v1}.
- * The Universal Gateway client appends {@code /ws} when opening WebSocket connections. Control plane metadata
+ * The Platform Gateway client appends {@code /ws} when opening WebSocket connections. Control plane metadata
  * is included for client diagnostics.
  */
 @Path("/.well-known")
@@ -101,7 +101,7 @@ public class GatewayWellKnownApi {
 
     /**
      * Builds {@code gatewayPath}: internal web app base path without a leading slash and without a {@code /ws}
-     * suffix (Universal Gateway adds {@code /ws} when dialing WebSockets).
+     * suffix (Platform Gateway adds {@code /ws} when dialing WebSockets).
      *
      * @return base path (e.g. {@code internal/data/v1})
      */

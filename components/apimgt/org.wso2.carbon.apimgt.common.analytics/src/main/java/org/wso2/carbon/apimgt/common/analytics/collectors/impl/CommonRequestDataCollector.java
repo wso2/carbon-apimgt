@@ -22,10 +22,14 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.common.analytics.Constants;
 import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Application;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Event;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 import static org.wso2.carbon.apimgt.common.analytics.Constants.EMAIL_PROP_TYPE;
 import static org.wso2.carbon.apimgt.common.analytics.Constants.IPV4_MASK_VALUE;
@@ -116,5 +120,81 @@ public abstract class CommonRequestDataCollector extends AbstractRequestDataColl
             }
         }
         return null;
+    }
+
+    protected Event maskAnalyticsEvent(Event event, Map<String, String> maskData) {
+
+        if (maskData == null || maskData.isEmpty()) {
+            return event;
+        }
+
+        for (Map.Entry<String, String> entry : maskData.entrySet()) {
+            Map<String, Object> props = event.getProperties();
+            if (props != null) {
+                Object value = props.get(entry.getKey());
+                if (value != null) {
+                    String maskStr = maskAnalyticsData(entry.getValue(), value);
+                    if (maskStr != null) {
+                        props.replace(entry.getKey(), maskStr);
+                    }
+                }
+            }
+        }
+
+        // Mask UserName if configured
+        String userName = event.getUserName();
+        if (userName != null) {
+            String maskType = Stream.of("api.ut.userName", "api.ut.userId", "userName", "userId")
+                    .map(maskData::get)
+                    .filter(Objects::nonNull)
+                    .findFirst()
+                    .orElse(null);
+
+            if (maskType != null) {
+                userName = maskAnalyticsData(maskType, userName);
+            }
+            event.setUserName(userName);
+        }
+
+        // Mask Application Owner if configured
+        Application application = event.getApplication();
+        if (application != null && application.getApplicationOwner() != null
+                && maskData.containsKey("applicationOwner")) {
+            String appOwner = application.getApplicationOwner();
+            appOwner = maskAnalyticsData(maskData.get("applicationOwner"), appOwner);
+            application.setApplicationOwner(appOwner);
+        }
+
+        // Mask User IP if configured
+        String userIp = event.getUserIp();
+        if (userIp != null && !userIp.equals(Constants.UNKNOWN_VALUE)) {
+            String maskType = Stream.of("api.analytics.user.ip", "userIp")
+                    .map(maskData::get)
+                    .filter(Objects::nonNull)
+                    .findFirst()
+                    .orElse(null);
+
+            if (maskType != null) {
+                userIp = maskAnalyticsData(maskType, userIp);
+            }
+            event.setUserIp(userIp);
+        }
+
+        // Mask User Agent if configured
+        String userAgent = event.getUserAgentHeader();
+        if (userAgent != null && !userAgent.equals(Constants.UNKNOWN_VALUE)) {
+            String maskType = Stream.of("api.analytics.user.agent", "userAgent")
+                    .map(maskData::get)
+                    .filter(Objects::nonNull)
+                    .findFirst()
+                    .orElse(null);
+
+            if (maskType != null) {
+                userAgent = maskAnalyticsData(maskType, userAgent);
+            }
+            event.setUserAgentHeader(userAgent);
+        }
+
+        return event;
     }
 }

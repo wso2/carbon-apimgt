@@ -87,11 +87,13 @@ import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultyGatewayDeploymentException;
 import org.wso2.carbon.apimgt.api.FederatedAPIDiscoveryService;
+import org.wso2.carbon.apimgt.api.FileSizeLimitExceededException;
 import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
 import org.wso2.carbon.apimgt.api.PasswordResolver;
 import org.wso2.carbon.apimgt.api.PlatformGatewayService;
+import org.wso2.carbon.apimgt.api.SizeLimitedInputStream;
 import org.wso2.carbon.apimgt.api.doc.model.APIDefinition;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.doc.model.Operation;
@@ -263,6 +265,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -5322,9 +5325,17 @@ public final class APIUtil {
      * @return whether the provided URL content contains the string to match
      */
     public static boolean isURLContentContainsString(URL url, String match, int maxLines) {
-
-        try (BufferedReader in =
-                     new BufferedReader(new InputStreamReader(url.openStream(), Charset.defaultCharset()))) {
+        String maxWSDLSizeStr = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration()
+                .getFirstProperty(org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_WSDL_FILE_SIZE_LIMIT);
+        if (maxWSDLSizeStr == null || maxWSDLSizeStr.trim().isEmpty()) {
+            maxWSDLSizeStr = org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_WSDL_FILE_SIZE_LIMIT_DEFAULT_MB;
+        }
+        long maxFileSize = Long.parseLong(maxWSDLSizeStr) * 1024L * 1024L;
+        try (BufferedInputStream bufferedStream = new BufferedInputStream(url.openStream(), 4096);
+                SizeLimitedInputStream limitedStream = new SizeLimitedInputStream(bufferedStream, maxFileSize);
+                BufferedReader in = new BufferedReader(
+                        new InputStreamReader(limitedStream, Charset.defaultCharset()))) {
             String inputLine;
             StringBuilder urlContent = new StringBuilder();
             while ((inputLine = in.readLine()) != null && maxLines > 0) {
@@ -5334,6 +5345,10 @@ public final class APIUtil {
                     return true;
                 }
             }
+        } catch (FileSizeLimitExceededException e) {
+            log.error(
+                    "Error Reading Input from Stream from " + url + ". The file size exceeds the maximum limit of " + maxFileSize + " bytes.",
+                    e);
         } catch (IOException e) {
             log.error("Error Reading Input from Stream from " + url, e);
 
@@ -8795,17 +8810,6 @@ public final class APIUtil {
 
         Map<String, Environment> allEnvironments = new LinkedHashMap<>(getReadOnlyEnvironments());
         allEnvironments.putAll(envFromDB);
-
-        // Platform gateways created via connect-with-token are stored under WSO2-ALL-TENANTS.
-        // Publisher UI expects platform gateways to be present in the environments list for the logged-in org,
-        // so merge only those platform gateways here.
-        String allTenantsOrg = APIConstants.GatewayNotificationConfigurationConstants.WSO2_ALL_TENANTS;
-        if (organization != null && !organization.equals(allTenantsOrg)) {
-            Map<String, Environment> allTenantEnvs = ApiMgtDAO.getInstance().getAllEnvironments(allTenantsOrg).stream()
-                    .filter(env -> APIConstants.WSO2_API_PLATFORM_GATEWAY.equals(env.getGatewayType()))
-                    .collect(Collectors.toMap(Environment::getName, env -> env, (a, b) -> a));
-            allEnvironments.putAll(allTenantEnvs);
-        }
         return allEnvironments;
     }
 

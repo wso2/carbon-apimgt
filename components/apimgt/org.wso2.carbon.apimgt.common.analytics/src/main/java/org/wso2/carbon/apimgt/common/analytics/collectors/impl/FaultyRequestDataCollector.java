@@ -36,6 +36,8 @@ import org.wso2.carbon.apimgt.common.analytics.publishers.dto.MetaInfo;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Operation;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Target;
 
+import java.util.Map;
+
 /**
  * Faulty request data collector.
  */
@@ -84,6 +86,7 @@ public class FaultyRequestDataCollector extends CommonRequestDataCollector imple
     private Event getFaultyEvent() throws DataNotFoundException {
         long requestInTime = provider.getRequestTime();
         String offsetDateTime = getTimeInISO(requestInTime);
+        Map<String, String> maskData = provider.getMaskProperties();
 
         Event event = new Event();
         event.setProperties(provider.getProperties());
@@ -105,6 +108,6 @@ public class FaultyRequestDataCollector extends CommonRequestDataCollector imple
         event.setMetaInfo(metaInfo);
         event.setUserIp(userIp);
 
-        return event;
+        return maskAnalyticsEvent(event, maskData);
     }
 }

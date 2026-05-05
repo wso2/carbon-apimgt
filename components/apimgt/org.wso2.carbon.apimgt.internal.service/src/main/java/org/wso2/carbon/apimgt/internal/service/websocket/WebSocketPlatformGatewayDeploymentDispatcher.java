@@ -47,8 +47,10 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
 
     @Override
     public void dispatchDeploy(DeployAPIInGatewayEvent event, Set<String> platformGatewayIds) {
-        log.info("Dispatching API deploy event for API: " + event.getName() + " to " + platformGatewayIds.size()
-                + " platform gateways");
+        if (log.isDebugEnabled()) {
+            log.debug("Dispatching API deploy event for API: " + event.getName() + " to " + platformGatewayIds.size()
+                    + " platform gateways");
+        }
         PlatformGatewaySessionRegistry registry = PlatformGatewaySessionRegistry.getInstance();
         PlatformGatewayDeploymentEventService eventService =
                 ServiceReferenceHolder.getInstance().getPlatformGatewayDeploymentEventService();
@@ -95,8 +97,10 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
 
     @Override
     public void dispatchDelete(DeployAPIInGatewayEvent event, Set<String> platformGatewayIds) {
-        log.info("Dispatching API delete event for API: " + event.getName() + " to " + platformGatewayIds.size()
-                + " platform gateways");
+        if (log.isDebugEnabled()) {
+            log.debug("Dispatching API delete event for API: " + event.getName() + " to " + platformGatewayIds.size()
+                    + " platform gateways");
+        }
         PlatformGatewaySessionRegistry registry = PlatformGatewaySessionRegistry.getInstance();
         PlatformGatewayDeploymentEventService eventService =
                 ServiceReferenceHolder.getInstance().getPlatformGatewayDeploymentEventService();

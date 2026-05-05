@@ -6,7 +6,7 @@
     <groupId>org.wso2.carbon.apimgt</groupId>
     <artifactId>carbon-apimgt</artifactId>
     <packaging>pom</packaging>
-    <version>9.33.110-SNAPSHOT</version>
+    <version>9.33.123-SNAPSHOT</version>
     <name>WSO2 Carbon - API Management Aggregator POM</name>
     <url>https://wso2.org</url>
 
@@ -2071,11 +2071,11 @@
 
         <!-- APIM Component Version -->
         <hamcrest.version>1.3</hamcrest.version>
-        <carbon.apimgt.version>9.33.110-SNAPSHOT</carbon.apimgt.version>
+        <carbon.apimgt.version>9.33.123-SNAPSHOT</carbon.apimgt.version>
         <carbon.apimgt.imp.pkg.version>[9.0.0, 10.0.0)</carbon.apimgt.imp.pkg.version>
 
 
-        <carbon.analytics.common.version>5.4.4</carbon.analytics.common.version>
+        <carbon.analytics.common.version>5.4.9</carbon.analytics.common.version>
 
         <!-- Carbon kernel version -->
         <carbon.kernel.version>4.11.17</carbon.kernel.version>
@@ -2093,9 +2093,9 @@
         <mongodb.driver.version>4.1.0</mongodb.driver.version>
 
         <!-- Carbon Identity versions -->
-        <carbon.identity.version>5.27.18</carbon.identity.version>
+        <carbon.identity.version>5.27.21</carbon.identity.version>
         <carbon.identity.governance.version>1.14.1</carbon.identity.governance.version>
-        <carbon.identity-inbound-auth-oauth.version>6.14.12</carbon.identity-inbound-auth-oauth.version>
+        <carbon.identity-inbound-auth-oauth.version>6.14.14</carbon.identity-inbound-auth-oauth.version>
         <carbon.identity-oauth2-grant-jwt.version>2.2.5</carbon.identity-oauth2-grant-jwt.version>
         <carbon.identity-user-ws.version>5.10.0</carbon.identity-user-ws.version>
         <carbon.identity-data-publisher-application-authentication.version>5.9.0</carbon.identity-data-publisher-application-authentication.version>
@@ -2203,7 +2203,7 @@
         <google.code.gson.version>2.11.0</google.code.gson.version>
         <httpcomponents.version>4.5.10</httpcomponents.version>
         <commons-codec.version>1.16.0</commons-codec.version>
-        <com.nimbusds.wso2.version>9.37.3.wso2v1</com.nimbusds.wso2.version>
+        <com.nimbusds.wso2.version>9.37.4.wso2v1</com.nimbusds.wso2.version>
         <json-smart.version>2.6.0</json-smart.version>
         <org.slf4j.version>2.0.12</org.slf4j.version>
         <slf4j.api.version>2.0.12</slf4j.api.version>
@@ -2236,7 +2236,7 @@
         <cxf.version>3.6.10</cxf.version>
         <carbon.metrics.version>1.3.13</carbon.metrics.version>
         <!-- apache pdfbox version -->
-        <event.processor.version>2.4.2</event.processor.version>
+        <event.processor.version>2.4.6</event.processor.version>
         <pdfbox.version>3.0.1</pdfbox.version>
         <pdfbox.io.version>3.0.1.wso2v1</pdfbox.io.version>
         <swagger.inflector.version>1.0.16.wso2v1</swagger.inflector.version>
@@ -2257,7 +2257,7 @@
         <carbon.broker.version>3.3.40</carbon.broker.version>
         <andes.version>3.4.1</andes.version>
         <waffle-jna.version>1.6.wso2v1</waffle-jna.version>
-        <version.snake.yaml>2.2</version.snake.yaml>
+        <version.snake.yaml>2.5</version.snake.yaml>
         <wsdl4j.version>1.6.3.wso2v3</wsdl4j.version>
         <slf4j.test.version>2.0.12</slf4j.test.version>
         <reflection.version>0.9.11</reflection.version>
@@ -2298,7 +2298,7 @@
         <everit.version>1.5.0.wso2.v2</everit.version>
         <json.orbit.version>3.0.0.wso2v7</json.orbit.version>
         <wso2.securevault.version>1.2.0</wso2.securevault.version>
-        <com.jayway.jsonpath.version>2.9.0.wso2v1</com.jayway.jsonpath.version>
+        <com.jayway.jsonpath.version>2.10.0.wso2v1</com.jayway.jsonpath.version>
         <org.wso2.orbit.commons-text.version>1.10.0.wso2v2</org.wso2.orbit.commons-text.version>
         <commons.lang.version>2.6.0.wso2v1</commons.lang.version>
         <apache.felix.scr.ds.annotations.version>1.2.4</apache.felix.scr.ds.annotations.version>
@@ -2324,15 +2324,15 @@
         <version.checkstyle>8.34</version.checkstyle>
         <org.wso2.orbit.org.mapstruct.version>1.4.1.wso2v1</org.wso2.orbit.org.mapstruct.version>
         <org.mapstruct.version>1.4.1.Final</org.mapstruct.version>
-        <analytics.event.publisher.client.version>1.2.35</analytics.event.publisher.client.version>
+        <analytics.event.publisher.client.version>1.2.36</analytics.event.publisher.client.version>
         <analytics.event.publisher.client.version.range>[1.0.0,2.0.0)</analytics.event.publisher.client.version.range>
         <org.wso2.orbit.atlassian.oai.version>2.46.1.wso2v1</org.wso2.orbit.atlassian.oai.version>
         <maven.spotbugsplugin.exclude.file>${project.parent.basedir}/../../spotbugs-exclude.xml</maven.spotbugsplugin.exclude.file>
         <skip.aspectj>false</skip.aspectj>
         <org.aspectj.weaver.openarchives.limit>1500</org.aspectj.weaver.openarchives.limit>
         <javax.jms.version>2.0.1</javax.jms.version>
-        <com.damnhandy.version>2.1.6</com.damnhandy.version>
-        <damnhandy.version>${com.damnhandy.version}.wso2v2</damnhandy.version>
+        <com.damnhandy.version>2.1.8</com.damnhandy.version>
+        <damnhandy.version>${com.damnhandy.version}.wso2v1</damnhandy.version>
         <javax.annotation.verion>1.3.2</javax.annotation.verion>
         <log4j2.version>2.25.3</log4j2.version>
         <jinjava.version>2.7.6</jinjava.version>

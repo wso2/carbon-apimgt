@@ -31,11 +31,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.wso2.carbon.apimgt.api.APIConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.exceptions.APIMgtWSDLException;
@@ -103,9 +105,16 @@ public class WSDL20ProcessorImpl extends AbstractWSDLProcessor {
         }
 
         reader.setFeature(WSDLReader.FEATURE_VALIDATION, false);
-        Document document = getSecuredParsedDocumentFromURL(url);
-        WSDLSource wsdlSource = getWSDLSourceFromDocument(document, reader);
         try {
+            String maxWSDLSizeStr = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                    .getAPIManagerConfiguration()
+                    .getFirstProperty(APIConstants.API_PUBLISHER_IMPORT_WSDL_FILE_SIZE_LIMIT);
+            if (maxWSDLSizeStr == null || maxWSDLSizeStr.trim().isEmpty()) {
+                maxWSDLSizeStr = APIConstants.API_PUBLISHER_IMPORT_WSDL_FILE_SIZE_LIMIT_DEFAULT_MB;
+            }
+            long maxFileSize = Long.parseLong(maxWSDLSizeStr) * 1024L * 1024L;
+            Document document = getSecuredParsedDocumentFromURL(url, maxFileSize);
+            WSDLSource wsdlSource = getWSDLSourceFromDocument(document, reader);
             wsdlDescription = reader.readWSDL(wsdlSource);
         } catch (WSDLException e) {
             //This implementation class cannot process the WSDL.

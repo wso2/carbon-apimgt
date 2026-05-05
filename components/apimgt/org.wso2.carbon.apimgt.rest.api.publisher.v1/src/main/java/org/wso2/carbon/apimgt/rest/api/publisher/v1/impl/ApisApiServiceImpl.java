@@ -30,7 +30,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
-import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
 import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.apache.http.client.HttpClient;
 import org.json.simple.JSONObject;
@@ -1398,7 +1397,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             //validate if api exists
             CommonUtils.validateAPIExistence(apiId);
 
-            ContentDisposition contentDisposition;
             String fileName;
             String base64EncodedCert = null;
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -1411,9 +1409,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             int tenantId = APIUtil.getInternalOrganizationId(organization);
             ClientCertificateDTO clientCertificateDTO = CertificateRestApiUtils.preValidateClientCertificate(alias,
                     keyType, apiTypeWrapper, organization);
-            if (certificateDetail != null) {
-                contentDisposition = certificateDetail.getContentDisposition();
-                fileName = contentDisposition.getParameter(RestApiConstants.CONTENT_DISPOSITION_FILENAME);
+            if (certificateDetail != null && certificateInputStream != null) {
+                fileName = certificateDetail.getDataHandler().getName();
                 if (StringUtils.isNotBlank(fileName)) {
                     base64EncodedCert = CertificateRestApiUtils.generateEncodedCertificate(certificateInputStream);
                 }
@@ -1529,9 +1526,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                                                           MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            ContentDisposition contentDisposition = certificateDetail.getContentDisposition();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            String fileName = contentDisposition.getParameter(RestApiConstants.CONTENT_DISPOSITION_FILENAME);
+            String fileName = certificateDetail == null ? null : certificateDetail.getDataHandler().getName();
 
             //validate the input for key type
             validateKeyType(keyType);
@@ -1815,11 +1811,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             //add content depending on the availability of either input stream or inline content
-            if (inputStream != null) {
+            if (inputStream != null && fileDetail != null) {
                 if (!documentation.getSourceType().equals(Documentation.DocumentSourceType.FILE)) {
                     RestApiUtil.handleBadRequest("Source type of document " + documentId + " is not FILE", log);
                 }
-                String filename = fileDetail.getContentDisposition().getFilename();
+                String filename = fileDetail.getDataHandler().getName();
                 if (APIUtil.isSupportedFileType(filename)) {
                     RestApiPublisherUtils.attachFileToDocument(apiId, documentation, inputStream, fileDetail, organization);
                 } else {
@@ -3421,8 +3417,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             } catch (MalformedURLException e) {
                 RestApiUtil.handleBadRequest("Invalid/Malformed URL : " + url, log);
             }
-        } else if (fileInputStream != null && !isServiceAPI) {
-            String filename = fileDetail.getContentDisposition().getFilename();
+        } else if (fileInputStream != null && fileDetail != null && !isServiceAPI) {
+            String filename = fileDetail.getDataHandler().getName();
             try {
                 if (filename.endsWith(".zip")) {
                     validationResponse = APIMWSDLReader.extractAndValidateWSDLArchive(fileInputStream);
@@ -3643,7 +3639,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     ArtifactType.API, organization);
             String filename = null;
             if (fileDetail != null) {
-                filename = fileDetail.getContentDisposition().getFilename();
+                filename = fileDetail.getDataHandler().getName();
             }
             String swaggerStr = ApisApiServiceImplUtils.getSwaggerString(fileInputStream, url,
                     wsdlArchiveExtractedPath, filename);
@@ -4104,7 +4100,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         GraphQLValidationResponseDTO validationResponse = new GraphQLValidationResponseDTO();
         try {
             if (fileDetail != null) {
-                filename = fileDetail.getContentDisposition().getFilename();
+                filename = fileDetail.getDataHandler().getName();
                 schema = IOUtils.toString(fileInputStream, RestApiConstants.CHARSET);
             }
             validationResponse = PublisherCommonUtils.validateGraphQLSchema(filename, schema, url, useIntrospection);
@@ -4672,15 +4668,22 @@ public class ApisApiServiceImpl implements ApisApiService {
             try {
                 URL urlObj = new URL(url);
                 HttpClient httpClient = APIUtil.getHttpClient(urlObj.getPort(), urlObj.getProtocol());
+                String maxFileSizeStr = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                        .getAPIManagerConfiguration().getFirstProperty(
+                                org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_ASYNC_FILE_SIZE_LIMIT);
+                if (maxFileSizeStr == null || maxFileSizeStr.trim().isEmpty()) {
+                    maxFileSizeStr = org.wso2.carbon.apimgt.api.
+                            APIConstants.API_PUBLISHER_IMPORT_ASYNC_FILE_SIZE_LIMIT_DEFAULT_MB;
+                }
                 // Validate URL
                 validationResponse = AsyncApiParserUtil.validateAsyncAPISpecificationByURL(url, httpClient,
-                        returnContent, AsyncApiParserImplUtil.getParserOptionsFromConfig());
+                        returnContent, AsyncApiParserImplUtil.getParserOptionsFromConfig(), maxFileSizeStr);
             } catch (MalformedURLException e) {
                 throw new APIManagementException("Error while processing the API definition URL", e);
             }
         } else if (fileInputStream != null) {
             //validate file
-            String fileName = fileDetail != null ? fileDetail.getContentDisposition().getFilename() : StringUtils.EMPTY;
+            String fileName = fileDetail != null ? fileDetail.getDataHandler().getName() : StringUtils.EMPTY;
             String schemaToBeValidated = ApisApiServiceImplUtils.getSchemaToBeValidated(fileInputStream,
                     isServiceAPI, fileName);
             validationResponse = AsyncApiParserUtil.validateAsyncAPISpecification(schemaToBeValidated,

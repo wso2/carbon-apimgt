@@ -125,6 +125,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -1757,6 +1758,70 @@ public class APIProviderImplTest {
                 "carbon.super", 1 , 6);
     }
 
+    @Test
+    public void testDeriveApiSecurityFromHubPoliciesForHeaderApiKeyPolicy() throws Exception {
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        API api = new API(new APIIdentifier("admin", "SampleAPI", "1.0.0"));
+        api.setGatewayType(APIConstants.WSO2_API_PLATFORM_GATEWAY);
+
+        List<OperationPolicy> hubPolicies = new ArrayList<>();
+        hubPolicies.add(createApiKeyAuthPolicy("header", "X-API-Key"));
+        api.setHubPolicies(hubPolicies);
+
+        invokeDeriveApiSecurityFromHubPolicies(apiProvider, api);
+
+        assertEquals(APIConstants.API_SECURITY_API_KEY, api.getApiSecurity());
+        assertEquals("X-API-Key", api.getApiKeyHeader());
+    }
+
+    @Test
+    public void testDeriveApiSecurityFromHubPoliciesForQueryApiKeyPolicy() throws Exception {
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        API api = new API(new APIIdentifier("admin", "SampleAPI", "1.0.0"));
+        api.setGatewayType(APIConstants.WSO2_API_PLATFORM_GATEWAY);
+
+        List<OperationPolicy> hubPolicies = new ArrayList<>();
+        hubPolicies.add(createApiKeyAuthPolicy("query", "api_key"));
+        api.setHubPolicies(hubPolicies);
+
+        invokeDeriveApiSecurityFromHubPolicies(apiProvider, api);
+
+        assertEquals(APIConstants.API_SECURITY_API_KEY, api.getApiSecurity());
+        assertNull(api.getApiKeyHeader());
+    }
+
+    @Test
+    public void testDeriveApiSecurityFromHubPoliciesDefaultsApiKeyHeaderForHeaderPolicyWithoutKey() throws Exception {
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        API api = new API(new APIIdentifier("admin", "SampleAPI", "1.0.0"));
+        api.setGatewayType(APIConstants.WSO2_API_PLATFORM_GATEWAY);
+
+        List<OperationPolicy> hubPolicies = new ArrayList<>();
+        hubPolicies.add(createApiKeyAuthPolicy("header", null));
+        api.setHubPolicies(hubPolicies);
+
+        invokeDeriveApiSecurityFromHubPolicies(apiProvider, api);
+
+        assertEquals(APIConstants.API_SECURITY_API_KEY, api.getApiSecurity());
+        assertEquals(APIConstants.API_KEY_HEADER_DEFAULT, api.getApiKeyHeader());
+    }
+
+    @Test
+    public void testDeriveApiSecurityFromHubPoliciesIgnoresInvalidApiKeyHeader() throws Exception {
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        API api = new API(new APIIdentifier("admin", "SampleAPI", "1.0.0"));
+        api.setGatewayType(APIConstants.WSO2_API_PLATFORM_GATEWAY);
+
+        List<OperationPolicy> hubPolicies = new ArrayList<>();
+        hubPolicies.add(createApiKeyAuthPolicy("header", "X API Key"));
+        api.setHubPolicies(hubPolicies);
+
+        invokeDeriveApiSecurityFromHubPolicies(apiProvider, api);
+
+        assertEquals(APIConstants.API_SECURITY_API_KEY, api.getApiSecurity());
+        assertEquals(APIConstants.API_KEY_HEADER_DEFAULT, api.getApiKeyHeader());
+    }
+
     private List<PublisherAPIInfo> createMockPublisherAPIInfoList(int num) {
         List<PublisherAPIInfo> list = new ArrayList<>();
         for(int i = 0; i < num; i++) {
@@ -1769,5 +1834,25 @@ public class APIProviderImplTest {
             list.add(publisherAPIInfo);
         }
         return list;
+    }
+
+    private void invokeDeriveApiSecurityFromHubPolicies(APIProviderImpl apiProvider, API api) throws Exception {
+        Method method = APIProviderImpl.class.getDeclaredMethod("deriveApiSecurityFromHubPolicies", API.class);
+        method.setAccessible(true);
+        method.invoke(apiProvider, api);
+    }
+
+    private OperationPolicy createApiKeyAuthPolicy(String in, String key) {
+        OperationPolicy policy = new OperationPolicy();
+        policy.setPolicyName("api-key-auth");
+        Map<String, Object> params = new HashMap<>();
+        if (in != null) {
+            params.put("in", in);
+        }
+        if (key != null) {
+            params.put("key", key);
+        }
+        policy.setParameters(params);
+        return policy;
     }
 }

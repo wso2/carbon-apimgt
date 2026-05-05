@@ -33866,7 +33866,7 @@ components:
         response_format:
           $ref: '#/components/schemas/AssistantsApiResponseFormatOption'
           nullable: true
-      required: &ref_0
+      required:
         - assistant_id
     CreateSpeechRequest:
       type: object
@@ -34109,7 +34109,8 @@ components:
         response_format:
           $ref: '#/components/schemas/AssistantsApiResponseFormatOption'
           nullable: true
-      required: *ref_0
+      required:
+        - assistant_id
     CreateThreadRequest:
       type: object
       description: |
@@ -54555,7 +54556,8 @@ components:
         response_format:
           $ref: '#/components/schemas/AssistantsApiResponseFormatOption'
           nullable: true
-      required: *ref_0
+      required:
+        - assistant_id
     CreateRunRequestWithoutStream:
       type: object
       additionalProperties: false
@@ -54662,7 +54664,8 @@ components:
         response_format:
           $ref: '#/components/schemas/AssistantsApiResponseFormatOption'
           nullable: true
-      required: *ref_0
+      required:
+        - assistant_id
     SubmitToolOutputsRunRequestWithoutStream:
       type: object
       additionalProperties: false

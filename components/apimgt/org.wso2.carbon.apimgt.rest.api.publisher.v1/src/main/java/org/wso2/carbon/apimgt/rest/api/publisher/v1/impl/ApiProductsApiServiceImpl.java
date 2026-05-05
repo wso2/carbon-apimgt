@@ -216,11 +216,11 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             }
 
             //add content depending on the availability of either input stream or inline content
-            if (fileInputStream != null) {
+            if (fileInputStream != null && fileDetail != null) {
                 if (!documentation.getSourceType().equals(Documentation.DocumentSourceType.FILE)) {
                     RestApiUtil.handleBadRequest("Source type of product document " + documentId + " is not FILE", log);
                 }
-                String filename = fileDetail.getContentDisposition().getFilename();
+                String filename = fileDetail.getDataHandler().getName();
                 if (APIUtil.isSupportedFileType(filename)) {
                     RestApiPublisherUtils.attachFileToProductDocument(apiProductId, documentation, fileInputStream,
                             fileDetail, organization);

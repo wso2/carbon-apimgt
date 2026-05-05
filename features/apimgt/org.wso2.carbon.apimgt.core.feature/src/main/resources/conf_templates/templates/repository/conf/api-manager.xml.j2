@@ -691,6 +691,25 @@
         {% endif %}
         <!-- This parameter is used to enable/disable using legacy async api parser.-->
         <PreserveLegacyAsyncParser>{{apim.publisher.use_legacy_async_parser}}</PreserveLegacyAsyncParser>
+        {% if apim.publisher.import_definition_file_size_limit is defined %}
+        <ImportDefinitionFileSizeLimit>
+            {% if apim.publisher.import_definition_file_size_limit.oas is defined %}
+            <OAS>{{apim.publisher.import_definition_file_size_limit.oas}}</OAS>
+            {% endif %}
+            {% if apim.publisher.import_definition_file_size_limit.async is defined %}
+            <ASYNC>{{apim.publisher.import_definition_file_size_limit.async}}</ASYNC>
+            {% endif %}
+            {% if apim.publisher.import_definition_file_size_limit.wsdl is defined %}
+            <WSDL>{{apim.publisher.import_definition_file_size_limit.wsdl}}</WSDL>
+            {% endif %}
+            {% if apim.publisher.import_definition_file_size_limit.graphql is defined %}
+            <GRAPHQL>{{apim.publisher.import_definition_file_size_limit.graphql}}</GRAPHQL>
+            {% endif %}
+            {% if apim.publisher.import_definition_file_size_limit.mcp is defined %}
+            <MCP>{{apim.publisher.import_definition_file_size_limit.mcp}}</MCP>
+            {% endif %}
+        </ImportDefinitionFileSizeLimit>
+        {% endif %}
     </APIPublisher>
 
     <!-- Status observers can be registered against the API Publisher to listen for
@@ -2098,36 +2117,13 @@
               <ExpireTimeSeconds>{{apim.gateway_notification.cleanup.expiry_time}}</ExpireTimeSeconds>
               <DataRetentionPeriodSeconds>{{apim.gateway_notification.cleanup.data_retention_period}}</DataRetentionPeriodSeconds>
           </GatewayCleanup>
-          {% if (apim.universal_gateway.versions is defined and apim.universal_gateway.versions | length > 0) or (apim.universal_gateway.connect is defined and apim.universal_gateway.connect | length > 0) %}
+          {% if apim.platform_gateway.versions is defined and apim.platform_gateway.versions | length > 0 %}
           <PlatformGatewayConnectConfiguration>
-              {% if apim.universal_gateway.versions is defined and apim.universal_gateway.versions | length > 0 %}
-              <UniversalGatewayVersions>
-              {% for version in apim.universal_gateway.versions %}
+              <PlatformGatewayVersions>
+              {% for version in apim.platform_gateway.versions %}
                   <Version>{{ version }}</Version>
               {% endfor %}
-              </UniversalGatewayVersions>
-              {% endif %}
-              {% if apim.universal_gateway.connect is defined and apim.universal_gateway.connect | length > 0 %}
-              <ConnectGateways>
-              {% for c in apim.universal_gateway.connect %}
-                <Connect>
-                    <RegistrationToken>{{ c.registration_token }}</RegistrationToken>
-                    {% if c.name is defined and c.name %}
-                    <Name>{{ c.name }}</Name>
-                    {% endif %}
-                    {% if c.display_name is defined and c.display_name %}
-                    <DisplayName>{{ c.display_name }}</DisplayName>
-                    {% endif %}
-                    {% if c.description is defined and c.description %}
-                    <Description>{{ c.description }}</Description>
-                    {% endif %}
-                    {% if c.url is defined and c.url %}
-                    <Url>{{ c.url }}</Url>
-                    {% endif %}
-                </Connect>
-              {% endfor %}
-              </ConnectGateways>
-              {% endif %}
+              </PlatformGatewayVersions>
           </PlatformGatewayConnectConfiguration>
           {% endif %}
           <APIKeyNotification>
@@ -2158,6 +2154,7 @@
       <EnableCertificateManagementEventListening>{{apim.certificate_manager.events_enabled}}</EnableCertificateManagementEventListening>
 
       <AWSLambdaConnector>
+          <EnableProxyResponseMapping>{{apim.aws_lambda.enable_proxy_response_mapping}}</EnableProxyResponseMapping>
           <HttpClient>
               <MaxConnections>{{apim.aws_lambda.http_client.max_connections}}</MaxConnections>
               <ConnectionTimeout>{{apim.aws_lambda.http_client.connection_timeout}}</ConnectionTimeout>

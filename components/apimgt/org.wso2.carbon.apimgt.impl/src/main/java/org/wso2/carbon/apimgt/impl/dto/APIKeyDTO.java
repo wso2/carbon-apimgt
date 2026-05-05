@@ -40,6 +40,7 @@ public class APIKeyDTO implements Serializable {
     private Long lastUsedTime;
     private String permittedIP;
     private String permittedReferer;
+    private String apikeyHash;
 
     public String getKeyId() {
         return keyId;
@@ -143,5 +144,13 @@ public class APIKeyDTO implements Serializable {
 
     public void setPermittedReferer(String permittedReferer) {
         this.permittedReferer = permittedReferer;
+    }
+
+    public String getApikeyHash() {
+        return apikeyHash;
+    }
+
+    public void setApikeyHash(String apikeyHash) {
+        this.apikeyHash = apikeyHash;
     }
 }
