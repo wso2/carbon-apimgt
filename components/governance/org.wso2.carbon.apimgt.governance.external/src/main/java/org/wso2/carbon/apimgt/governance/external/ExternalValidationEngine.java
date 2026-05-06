@@ -66,6 +66,7 @@ public class ExternalValidationEngine implements ValidationEngine {
         ExternalRulesetDefinition rulesetDefinition = ExternalRulesetUtils.parseRuleset(ruleset);
         ExternalRulesetUtils.applyRulesetMetadata(ruleset, rulesetDefinition);
         ExternalRulesetUtils.validateRulesetDefinition(ruleset, rulesetDefinition);
+        ExternalRulesetUtils.encryptSecurityHeadersForStorage(ruleset, rulesetDefinition);
 
         if (log.isDebugEnabled()) {
             log.debug("Validated EXTERNAL ruleset content for ruleset: " + ruleset.getName()
@@ -115,6 +116,7 @@ public class ExternalValidationEngine implements ValidationEngine {
         ExternalRulesetDefinition rulesetDefinition = ExternalRulesetUtils.parseRuleset(ruleset);
         ExternalRulesetUtils.applyRulesetMetadata(ruleset, rulesetDefinition);
         ExternalRulesetUtils.validateRulesetDefinition(ruleset, rulesetDefinition);
+        ExternalRulesetUtils.decryptSecurityHeadersForExecution(rulesetDefinition);
 
         JsonNode targetDocument = ExternalRulesetUtils.parseTargetDocument(target);
         List<RuleViolation> violations = new ArrayList<>();

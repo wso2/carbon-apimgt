@@ -49,6 +49,11 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.nio.charset.StandardCharsets;
+import org.wso2.carbon.core.util.CryptoUtil;
+import org.wso2.carbon.core.util.CryptoException;
 
 /**
  * Implementation of the RulesetMgtDAO interface.
@@ -59,6 +64,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
 
     private RulesetMgtDAOImpl() {
     }
+    
 
     private static class SingletonHelper {
         private static final RulesetMgtDAO INSTANCE = new RulesetMgtDAOImpl();
@@ -247,6 +253,16 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
     private void addRuleContent(Connection connection, String rulesetId, RulesetContent rulesetContent)
             throws SQLException, IOException {
         String sqlQuery = SQLConstants.ADD_RULESET_CONTENT;
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("addRuleContent: Called for rulesetId=%s, content length=%d bytes",
+                    rulesetId, rulesetContent.getContent().length));
+        }
+        // Inspect content for security header values and log encryption detection
+        try {
+            inspectAndLogContentForSecurityValues(rulesetContent.getContent(), "addRuleContent:write");
+        } catch (Exception e) {
+            log.warn("Failed to inspect ruleset content for encryption markers before write", e);
+        }
         try (PreparedStatement prepStmt = connection.prepareStatement(sqlQuery);
              InputStream rulesetContentStream = new ByteArrayInputStream(rulesetContent.getContent())) {
             prepStmt.setString(1, rulesetId);
@@ -544,6 +560,11 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                     try (InputStream contentStream = rs.getBinaryStream("CONTENT")) {
                         byte[] content = IOUtils.toByteArray(contentStream);
                         rulesetContentObj.setContent(content);
+                        try {
+                            inspectAndLogContentForSecurityValues(content, "getRulesetContent:read");
+                        } catch (Exception e) {
+                            log.warn("Failed to inspect ruleset content for encryption markers after read", e);
+                        }
                     } catch (IOException e) {
                         throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_RULESET_CONTENT,
                                 e, rulesetId);
@@ -617,5 +638,33 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                     , e, rulesetId);
         }
     }
-}
 
+    private void inspectAndLogContentForSecurityValues(byte[] contentBytes, String context) {
+        if (!log.isDebugEnabled()) {
+            return;
+        }
+        String content = new String(contentBytes, StandardCharsets.UTF_8);
+        
+        // Log total content length and preview
+        String preview = content.length() > 300 ? content.substring(0, 300) : content;
+        log.debug(String.format("[%s] Content bytes length=%d, preview:\n%s", context, contentBytes.length, preview));
+        
+        Pattern pattern = Pattern.compile("(?m)^[ \t-]*value:\\s*\"?([^\"\\r\\n]+)\"?");
+        Matcher matcher = pattern.matcher(content);
+        CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+        int matchCount = 0;
+        while (matcher.find() && matchCount < 20) {
+            String val = matcher.group(1).trim();
+            boolean isEncrypted = false;
+            try {
+                isEncrypted = cryptoUtil.base64DecodeAndIsSelfContainedCipherText(val);
+            } catch (CryptoException e) {
+                log.debug("Error while checking if value is encrypted", e);
+            }
+            String sample = val.length() > 20 ? val.substring(0, 20) + "..." : val;
+            log.debug(String.format("[%s] detected 'value' occurrence, sample=%s encrypted=%s, full_length=%d",
+                    context, sample, isEncrypted, val.length()));
+            matchCount++;
+        }
+    }
+}

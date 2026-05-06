@@ -42,10 +42,13 @@ import org.wso2.carbon.apimgt.governance.external.model.ExternalResponseDefiniti
 import org.wso2.carbon.apimgt.governance.external.model.ExternalRuleDefinition;
 import org.wso2.carbon.apimgt.governance.external.model.ExternalRulesetContentDefinition;
 import org.wso2.carbon.apimgt.governance.external.model.ExternalRulesetDefinition;
+import org.wso2.carbon.core.util.CryptoException;
+import org.wso2.carbon.core.util.CryptoUtil;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,6 +64,7 @@ public final class ExternalRulesetUtils {
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
     private static final String ROOT_PATH = "$";
+    private static final String SECURITY_HEADER_CATEGORY = "Security";
     private static final int MAX_PATH_LENGTH = 1024;
     private static final int MAX_MESSAGE_LENGTH = 1024;
 
@@ -85,6 +89,48 @@ public final class ExternalRulesetUtils {
             return definition;
         } catch (IOException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_FAILED_TO_PARSE_RULESET_CONTENT, e);
+        }
+    }
+
+    public static void encryptSecurityHeadersForStorage(Ruleset ruleset, ExternalRulesetDefinition definition)
+            throws APIMGovernanceException {
+
+        if (definition == null || definition.getRules() == null || definition.getRules().isEmpty()) {
+            return;
+        }
+
+        for (Map.Entry<String, ExternalRuleDefinition> entry : definition.getRules().entrySet()) {
+            ExternalRuleDefinition ruleDefinition = entry.getValue();
+            if (ruleDefinition == null) {
+                continue;
+            }
+            encryptHeaderList(ruleDefinition.getHeaders(), ruleset.getName(), entry.getKey());
+            ExternalRequestPayload payload = ruleDefinition.getPayload();
+            if (payload != null) {
+                encryptHeaderList(payload.getHeaders(), ruleset.getName(), entry.getKey());
+            }
+        }
+
+        updateRulesetContent(ruleset, definition);
+    }
+
+    public static void decryptSecurityHeadersForExecution(ExternalRulesetDefinition definition)
+            throws APIMGovernanceException {
+
+        if (definition == null || definition.getRules() == null || definition.getRules().isEmpty()) {
+            return;
+        }
+
+        for (Map.Entry<String, ExternalRuleDefinition> entry : definition.getRules().entrySet()) {
+            ExternalRuleDefinition ruleDefinition = entry.getValue();
+            if (ruleDefinition == null) {
+                continue;
+            }
+            decryptHeaderList(ruleDefinition.getHeaders(), entry.getKey());
+            ExternalRequestPayload payload = ruleDefinition.getPayload();
+            if (payload != null) {
+                decryptHeaderList(payload.getHeaders(), entry.getKey());
+            }
         }
     }
 
@@ -365,6 +411,124 @@ public final class ExternalRulesetUtils {
 
         return new APIMGovernanceException(APIMGovExceptionCodes.INVALID_RULESET_CONTENT_DETAILED,
                 ruleset.getName(), message);
+    }
+
+    private static void encryptHeaderList(List<ExternalHeader> headers, String rulesetName, String ruleName)
+            throws APIMGovernanceException {
+
+        if (headers == null || headers.isEmpty()) {
+            return;
+        }
+
+        CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+        for (ExternalHeader header : headers) {
+            if (!isSecurityHeaderWithStringValue(header)) {
+                continue;
+            }
+
+            String headerValue = String.valueOf(header.getValue());
+            if (headerValue.isEmpty()) {
+                continue;
+            }
+
+            try {
+                if (!cryptoUtil.base64DecodeAndIsSelfContainedCipherText(headerValue)) {
+                    String encryptedValue = cryptoUtil.encryptAndBase64Encode(
+                            headerValue.getBytes(StandardCharsets.UTF_8));
+                    header.setValue(encryptedValue);
+                    if (log.isDebugEnabled()) {
+                        log.debug(String.format("Encrypted security header: ruleset=%s rule=%s header=%s",
+                                rulesetName, ruleName, header.getKey()));
+                    }
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug(String.format("Security header already encrypted: ruleset=%s rule=%s header=%s",
+                                rulesetName, ruleName, header.getKey()));
+                    }
+                }
+            } catch (CryptoException e) {
+                log.warn(String.format("Encryption failed for security header: ruleset=%s rule=%s header=%s",
+                        rulesetName, ruleName, header.getKey()), e);
+                throw new APIMGovernanceException("Failed to encrypt security header '"
+                        + header.getKey() + "' in external rule '" + ruleName + "' for ruleset '"
+                        + rulesetName + "'", e);
+            }
+        }
+    }
+
+    private static void decryptHeaderList(List<ExternalHeader> headers, String ruleName)
+            throws APIMGovernanceException {
+
+        if (headers == null || headers.isEmpty()) {
+            return;
+        }
+
+        CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+        for (ExternalHeader header : headers) {
+            if (!isSecurityHeaderWithStringValue(header)) {
+                continue;
+            }
+
+            String headerValue = String.valueOf(header.getValue());
+            if (headerValue.isEmpty()) {
+                continue;
+            }
+
+            try {
+                if (cryptoUtil.base64DecodeAndIsSelfContainedCipherText(headerValue)) {
+                    String decryptedValue = new String(cryptoUtil.base64DecodeAndDecrypt(headerValue),
+                            StandardCharsets.UTF_8);
+                    if (log.isDebugEnabled()) {
+                        log.debug(String.format("Decrypted security header for rule=%s header=%s", ruleName,
+                                header.getKey()));
+                    }
+                    header.setValue(decryptedValue);
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug(String.format("Security header not encrypted at runtime: rule=%s header=%s",
+                                ruleName, header.getKey()));
+                    }
+                }
+            } catch (CryptoException e) {
+                log.warn(String.format("Decryption failed for security header: rule=%s header=%s",
+                        ruleName, header.getKey()), e);
+                throw new APIMGovernanceException("Failed to decrypt security header '"
+                        + header.getKey() + "' in external rule '" + ruleName + "'", e);
+            }
+        }
+    }
+
+    private static boolean isSecurityHeaderWithStringValue(ExternalHeader header) {
+
+        return header != null
+                && header.getKey() != null
+                && SECURITY_HEADER_CATEGORY.equalsIgnoreCase(header.getCategory())
+                && header.getValue() instanceof String;
+    }
+
+    private static void updateRulesetContent(Ruleset ruleset, ExternalRulesetDefinition definition)
+            throws APIMGovernanceException {
+
+        try {
+            byte[] content = YAML_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsBytes(definition);
+            if (log.isDebugEnabled()) {
+                // Log first 500 chars of serialized YAML to verify encryption
+                String yamlPreview = new String(content, StandardCharsets.UTF_8);
+                String preview = yamlPreview.length() > 500 ? yamlPreview.substring(0, 500) : yamlPreview;
+                log.debug("updateRulesetContent: Serialized encrypted definition YAML preview (first 500 chars):\n" + preview);
+            }
+            RulesetContent updatedRulesetContent = ruleset.getRulesetContent();
+            if (updatedRulesetContent == null) {
+                updatedRulesetContent = new RulesetContent();
+            }
+            updatedRulesetContent.setContent(content);
+            ruleset.setRulesetContent(updatedRulesetContent);
+            if (log.isDebugEnabled()) {
+                log.debug("updateRulesetContent: Updated ruleset content bytes. New length=" + content.length);
+            }
+        } catch (IOException e) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_FAILED_TO_PARSE_RULESET_CONTENT, e);
+        }
     }
 
     private static String sanitizePath(String path) {
