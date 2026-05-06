@@ -43,6 +43,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -664,7 +665,8 @@ public class MultiTenantAuthenticator extends OpenIDConnectAuthenticator {
             if (tokenParts.length < 2) {
                 return null;
             }
-            String payload = new String(Base64.getDecoder().decode(tokenParts[1]));
+            String payload = new String(Base64.getUrlDecoder().decode(tokenParts[1]),
+                    StandardCharsets.UTF_8);
             JSONObject payloadJson = new JSONObject(payload);
             String tenantedQualifiedUsername = payloadJson.optString("sub", null);
             if (StringUtils.isBlank(tenantedQualifiedUsername) || !tenantedQualifiedUsername.contains("@")) {
