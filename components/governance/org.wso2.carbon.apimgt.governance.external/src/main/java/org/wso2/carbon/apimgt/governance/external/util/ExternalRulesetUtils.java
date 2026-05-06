@@ -78,10 +78,21 @@ public final class ExternalRulesetUtils {
             throw new APIMGovernanceException(APIMGovExceptionCodes.INVALID_RULESET_CONTENT, ruleset.getName());
         }
         try {
-            ExternalRulesetDefinition definition = YAML_MAPPER.readValue(rulesetContent.getContent(),
+            JsonNode rootNode = YAML_MAPPER.readTree(rulesetContent.getContent());
+            ExternalRulesetDefinition definition = YAML_MAPPER.treeToValue(rootNode,
                     ExternalRulesetDefinition.class);
             if (definition == null) {
                 throw new APIMGovernanceException(APIMGovExceptionCodes.INVALID_RULESET_CONTENT, ruleset.getName());
+            }
+            if ((definition.getRulesetContent() == null || definition.getRulesetContent().getRules() == null
+                    || definition.getRulesetContent().getRules().isEmpty()) && rootNode != null
+                    && rootNode.has("rules")) {
+                ExternalRulesetContentDefinition flattenedContent = YAML_MAPPER.treeToValue(rootNode,
+                        ExternalRulesetContentDefinition.class);
+                if (flattenedContent != null && flattenedContent.getRules() != null
+                        && !flattenedContent.getRules().isEmpty()) {
+                    definition.setRulesetContent(flattenedContent);
+                }
             }
             if (definition.getRulesetContent() == null) {
                 definition.setRulesetContent(new ExternalRulesetContentDefinition());
@@ -510,11 +521,29 @@ public final class ExternalRulesetUtils {
             throws APIMGovernanceException {
 
         try {
-            byte[] content = YAML_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsBytes(definition);
+            // Only store the rules, not the full definition with metadata
+            // Create a wrapper with only rules
+            Map<String, Object> rulesOnly = new java.util.LinkedHashMap<>();
+            if (definition.getRulesetContent() != null
+                    && definition.getRulesetContent().getRules() != null) {
+                rulesOnly.put("rules", definition.getRulesetContent().getRules());
+            }
+
+            byte[] content = YAML_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsBytes(rulesOnly);
             RulesetContent updatedRulesetContent = ruleset.getRulesetContent();
             if (updatedRulesetContent == null) {
                 updatedRulesetContent = new RulesetContent();
             }
+            String fileName = updatedRulesetContent.getFileName();
+            if (fileName == null || fileName.trim().isEmpty()) {
+                String rulesetName = ruleset.getName() != null && !ruleset.getName().trim().isEmpty()
+                        ? ruleset.getName().trim() : "ruleset";
+                fileName = rulesetName + ".yaml";
+            } else if (!fileName.endsWith(".yaml") && !fileName.endsWith(".yml")) {
+                fileName = fileName + ".yaml";
+            }
+            updatedRulesetContent.setFileName(fileName);
+            updatedRulesetContent.setContentType(RulesetContent.ContentType.YAML);
             updatedRulesetContent.setContent(content);
             ruleset.setRulesetContent(updatedRulesetContent);
         } catch (IOException e) {

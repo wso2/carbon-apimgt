@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.governance.external.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -115,6 +117,7 @@ public class ExternalRulesetDefinition {
         this.rulesetContent = rulesetContent;
     }
 
+    @JsonIgnore
     public Map<String, ExternalRuleDefinition> getRules() {
 
         if (rulesetContent == null) {
