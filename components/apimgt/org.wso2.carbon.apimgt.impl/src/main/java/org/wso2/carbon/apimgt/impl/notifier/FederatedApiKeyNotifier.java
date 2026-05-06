@@ -26,7 +26,6 @@ import org.wso2.carbon.apimgt.api.FederatedApiKeyConnector;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiKeyMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -37,7 +36,6 @@ import org.wso2.carbon.apimgt.impl.notifier.events.APIKeyRegenerationEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.Event;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -238,7 +236,7 @@ public class FederatedApiKeyNotifier implements Notifier {
         String apiUuid = event.getApiUUId();
         String applicationUuid = resolveApplicationUuid(event);
         String organization = resolveOrganization(event);
-        String localPolicyId = resolveSubscriptionPolicyId(applicationUuid, apiUuid, event.getTenantId());
+        String localPolicyName = resolveSubscriptionPolicyName(applicationUuid, apiUuid);
 
         int successCount = 0;
         for (Map.Entry<String, String> entry : apiKeyReferenceArtifacts.entrySet()) {
@@ -252,7 +250,7 @@ public class FederatedApiKeyNotifier implements Notifier {
             }
 
             FederatedApiKeyConnector connector = resolveConnector(organization, environmentId);
-            connector.associateSubscriptionPolicy(apiKeyReferenceArtifact, localPolicyId);
+            connector.associateSubscriptionPolicy(apiKeyReferenceArtifact, localPolicyName);
             successCount++;
         }
 
@@ -279,7 +277,7 @@ public class FederatedApiKeyNotifier implements Notifier {
         String apiUuid = event.getApiUUId();
         String applicationUuid = resolveApplicationUuid(event);
         String organization = resolveOrganization(event);
-        String localPolicyId = resolveSubscriptionPolicyId(applicationUuid, apiUuid, event.getTenantId());
+        String localPolicyName = resolveSubscriptionPolicyName(applicationUuid, apiUuid);
 
         int successCount = 0;
         for (Map.Entry<String, String> entry : apiKeyReferenceArtifacts.entrySet()) {
@@ -293,7 +291,7 @@ public class FederatedApiKeyNotifier implements Notifier {
             }
 
             FederatedApiKeyConnector connector = resolveConnector(organization, environmentId);
-            connector.dissociateSubscriptionPolicy(apiKeyReferenceArtifact, localPolicyId);
+            connector.dissociateSubscriptionPolicy(apiKeyReferenceArtifact, localPolicyName);
             successCount++;
         }
 
@@ -458,9 +456,9 @@ public class FederatedApiKeyNotifier implements Notifier {
     }
 
     /**
-     * Resolves the active local subscription policy UUID for the application and API pair.
+     * Resolves the active local subscription policy name for the application and API pair.
      */
-    private String resolveSubscriptionPolicyId(String applicationUuid, String apiUuid, int tenantId)
+    private String resolveSubscriptionPolicyName(String applicationUuid, String apiUuid)
             throws APIManagementException {
         if (StringUtils.isBlank(applicationUuid)) {
             throw new APIManagementException("Application UUID is required for federated API key association");
@@ -481,21 +479,10 @@ public class FederatedApiKeyNotifier implements Notifier {
             if (subscribedAPI.getTier() == null || StringUtils.isBlank(subscribedAPI.getTier().getName())) {
                 throw new APIManagementException("Subscription tier is required for federated external plan assignment");
             }
-            return resolveSubscriptionPolicyId(subscribedAPI.getTier().getName(), tenantId);
+            return subscribedAPI.getTier().getName();
         }
         throw new APIManagementException("No active subscription found for application " + applicationUuid
                 + " and API " + apiUuid);
-    }
-
-    private String resolveSubscriptionPolicyId(String policyName, int tenantId) throws APIManagementException {
-        if (tenantId == MultitenantConstants.INVALID_TENANT_ID) {
-            throw new APIManagementException("Tenant ID is required for federated API key association");
-        }
-        SubscriptionPolicy subscriptionPolicy = getApiMgtDAO().getSubscriptionPolicy(policyName, tenantId);
-        if (subscriptionPolicy == null || StringUtils.isBlank(subscriptionPolicy.getUUID())) {
-            throw new APIManagementException("Subscription policy UUID not found for tier: " + policyName);
-        }
-        return subscriptionPolicy.getUUID();
     }
 
     /**

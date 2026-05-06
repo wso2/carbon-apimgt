@@ -5,9 +5,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javax.validation.constraints.*;
 
 
@@ -26,7 +24,6 @@ public class GatewayConfigurationDTO   {
   
     private String name = null;
     private String label = null;
-    private Map<String, String> labels = new HashMap<String, String>();
     private String type = null;
     private Boolean required = null;
     private Boolean mask = null;
@@ -67,23 +64,6 @@ public class GatewayConfigurationDTO   {
   }
   public void setLabel(String label) {
     this.label = label;
-  }
-
-  /**
-   **/
-  public GatewayConfigurationDTO labels(Map<String, String> labels) {
-    this.labels = labels;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-  @JsonProperty("labels")
-  public Map<String, String> getLabels() {
-    return labels;
-  }
-  public void setLabels(Map<String, String> labels) {
-    this.labels = labels;
   }
 
   /**
@@ -218,7 +198,6 @@ public class GatewayConfigurationDTO   {
     GatewayConfigurationDTO gatewayConfiguration = (GatewayConfigurationDTO) o;
     return Objects.equals(name, gatewayConfiguration.name) &&
         Objects.equals(label, gatewayConfiguration.label) &&
-        Objects.equals(labels, gatewayConfiguration.labels) &&
         Objects.equals(type, gatewayConfiguration.type) &&
         Objects.equals(required, gatewayConfiguration.required) &&
         Objects.equals(mask, gatewayConfiguration.mask) &&
@@ -230,7 +209,7 @@ public class GatewayConfigurationDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, label, labels, type, required, mask, multiple, tooltip, _default, values);
+    return Objects.hash(name, label, type, required, mask, multiple, tooltip, _default, values);
   }
 
   @Override
@@ -240,7 +219,6 @@ public class GatewayConfigurationDTO   {
     
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    label: ").append(toIndentedString(label)).append("\n");
-    sb.append("    labels: ").append(toIndentedString(labels)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    required: ").append(toIndentedString(required)).append("\n");
     sb.append("    mask: ").append(toIndentedString(mask)).append("\n");
@@ -263,4 +241,3 @@ public class GatewayConfigurationDTO   {
     return o.toString().replace("\n", "\n    ");
   }
 }
-

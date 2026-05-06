@@ -23,16 +23,13 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.*;
-import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.PlatformGatewayConnectConfig;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
-import org.wso2.carbon.context.CarbonContext;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -193,7 +190,6 @@ public class SettingsMappingUtil {
 
     private static List<SettingsGatewayConfigurationDTO> getSettingsGatewayConfigurationDTOList() {
         List<SettingsGatewayConfigurationDTO> list = new ArrayList<>();
-        List<SubscriptionPolicy> subscriptionPolicies = buildSubscriptionPolicies();
         Map<String, GatewayAgentConfiguration> gatewayConfigurations =
                 ServiceReferenceHolder.getInstance().getExternalGatewayConnectorConfigurations();
         gatewayConfigurations.forEach((gatewayName, gatewayConfiguration) -> {
@@ -211,8 +207,17 @@ public class SettingsMappingUtil {
                 effectiveModes.add(GatewayMode.WRITE_ONLY.getMode());
             }
             settingsFederatedGatewayConfigurationDTO.setSupportedModes(effectiveModes);
-            List<ConfigurationDto> connectionConfigurations =
-                    gatewayConfiguration.getConnectionConfigurations(subscriptionPolicies);
+            try {
+                GatewayPortalConfiguration featureCatalog = gatewayConfiguration.getGatewayFeatureCatalog();
+                if (featureCatalog != null) {
+                    settingsFederatedGatewayConfigurationDTO.setSupportedApiTypes(
+                            featureCatalog.getSupportedAPITypes());
+                }
+            } catch (APIManagementException e) {
+                log.warn("Failed to resolve supported API types for gateway type '"
+                        + gatewayConfiguration.getType() + "'", e);
+            }
+            List<ConfigurationDto> connectionConfigurations = gatewayConfiguration.getConnectionConfigurations();
             if (connectionConfigurations != null) {
                 for (ConfigurationDto dto : connectionConfigurations) {
                     settingsFederatedGatewayConfigurationDTO.getConfigurations().add(fromConfigurationToConfigurationDTO(dto));
@@ -253,28 +258,8 @@ public class SettingsMappingUtil {
         dto.setMultiple(configuration.isMultiple());
         dto.setTooltip(configuration.getTooltip());
         dto.setDefault(configuration.getDefaultValue());
-        dto.setLabels(configuration.getLabels());
         dto.setValues(configuration.getValues());
         return dto;
-    }
-
-    private static List<SubscriptionPolicy> buildSubscriptionPolicies() {
-        String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        if (tenantDomain == null) {
-            return new ArrayList<>();
-        }
-        try {
-            int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-            SubscriptionPolicy[] policies = ApiMgtDAO.getInstance().getSubscriptionPolicies(tenantId);
-            List<SubscriptionPolicy> policyList = new ArrayList<>();
-            if (policies != null) {
-                policyList.addAll(Arrays.asList(policies));
-            }
-            return policyList;
-        } catch (APIManagementException e) {
-            log.warn("Failed to load subscription policies for gateway configuration enrichment", e);
-            return new ArrayList<>();
-        }
     }
 
     public List<String> GetRoleScopeList(String[] userRoles, Map<String, String> scopeRoleMapping) {

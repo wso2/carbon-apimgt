@@ -42,7 +42,7 @@ public interface FederatedApiKeyConnector {
      * @param apiKeyUuid           local API key UUID
      * @param apiKeyValue          the generated API key value to push
      * @param apiReferenceArtifact connector-owned API reference artifact
-     * @param localPolicyId        local subscription policy UUID for plan mapping (nullable)
+     * @param localPolicyId        local subscription policy name for plan mapping (nullable)
      * @param properties           additional metadata (apiKeyName, authzUser, validityPeriod, permittedIP, etc.)
      * @return connector-owned reference artifact
      * @throws APIManagementException if operation fails
@@ -75,7 +75,7 @@ public interface FederatedApiKeyConnector {
      * Applies a rate limiting policy to an API key.
      *
      * @param apiKeyReferenceArtifact connector-owned API key reference artifact
-     * @param localPolicyId           local subscription policy UUID for plan mapping
+     * @param localPolicyId           local subscription policy name for plan mapping
      * @throws APIManagementException if operation fails
      */
     void associateSubscriptionPolicy(String apiKeyReferenceArtifact, String localPolicyId)
@@ -85,7 +85,7 @@ public interface FederatedApiKeyConnector {
      * Removes rate limiting policy from an API key.
      *
      * @param apiKeyReferenceArtifact connector-owned API key reference artifact
-     * @param localPolicyId           local subscription policy UUID for plan mapping
+     * @param localPolicyId           local subscription policy name for plan mapping
      * @throws APIManagementException if operation fails
      */
     void dissociateSubscriptionPolicy(String apiKeyReferenceArtifact, String localPolicyId)

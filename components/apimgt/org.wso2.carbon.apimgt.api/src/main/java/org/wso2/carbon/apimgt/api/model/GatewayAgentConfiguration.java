@@ -19,8 +19,6 @@
 package org.wso2.carbon.apimgt.api.model;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -78,17 +76,6 @@ public interface GatewayAgentConfiguration {
      * @return  List<ConfigurationDto> connectionConfigurations
      */
     List<ConfigurationDto> getConnectionConfigurations();
-
-    /**
-     * This method returns the Configurations related to external gateway with subscription policies when needed.
-     *
-     * @param subscriptionPolicies tenant subscription policies used for connector-owned configuration generation
-     * @return List<ConfigurationDto> connectionConfigurations
-     */
-    default List<ConfigurationDto> getConnectionConfigurations(List<SubscriptionPolicy> subscriptionPolicies) {
-        // Default to normal implementation.
-        return getConnectionConfigurations();
-    }
 
     /**
      * Validate the configured gateway environment before it is used.

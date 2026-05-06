@@ -26,6 +26,7 @@ public class SettingsGatewayConfigurationDTO   {
     private String type = null;
     private String displayName = null;
     private List<String> supportedModes = new ArrayList<String>();
+    private List<String> supportedApiTypes = new ArrayList<String>();
     private List<GatewayConfigurationDTO> configurations = new ArrayList<GatewayConfigurationDTO>();
     private String defaultHostnameTemplate = null;
 
@@ -82,6 +83,23 @@ public class SettingsGatewayConfigurationDTO   {
 
   /**
    **/
+  public SettingsGatewayConfigurationDTO supportedApiTypes(List<String> supportedApiTypes) {
+    this.supportedApiTypes = supportedApiTypes;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("supportedApiTypes")
+  public List<String> getSupportedApiTypes() {
+    return supportedApiTypes;
+  }
+  public void setSupportedApiTypes(List<String> supportedApiTypes) {
+    this.supportedApiTypes = supportedApiTypes;
+  }
+
+  /**
+   **/
   public SettingsGatewayConfigurationDTO configurations(List<GatewayConfigurationDTO> configurations) {
     this.configurations = configurations;
     return this;
@@ -128,13 +146,14 @@ public class SettingsGatewayConfigurationDTO   {
     return Objects.equals(type, settingsGatewayConfiguration.type) &&
         Objects.equals(displayName, settingsGatewayConfiguration.displayName) &&
         Objects.equals(supportedModes, settingsGatewayConfiguration.supportedModes) &&
+        Objects.equals(supportedApiTypes, settingsGatewayConfiguration.supportedApiTypes) &&
         Objects.equals(configurations, settingsGatewayConfiguration.configurations) &&
         Objects.equals(defaultHostnameTemplate, settingsGatewayConfiguration.defaultHostnameTemplate);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(type, displayName, supportedModes, configurations, defaultHostnameTemplate);
+    return Objects.hash(type, displayName, supportedModes, supportedApiTypes, configurations, defaultHostnameTemplate);
   }
 
   @Override
@@ -145,6 +164,7 @@ public class SettingsGatewayConfigurationDTO   {
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    supportedModes: ").append(toIndentedString(supportedModes)).append("\n");
+    sb.append("    supportedApiTypes: ").append(toIndentedString(supportedApiTypes)).append("\n");
     sb.append("    configurations: ").append(toIndentedString(configurations)).append("\n");
     sb.append("    defaultHostnameTemplate: ").append(toIndentedString(defaultHostnameTemplate)).append("\n");
     sb.append("}");
