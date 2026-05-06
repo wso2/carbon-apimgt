@@ -102,7 +102,7 @@
                             org.wso2.carbon.context;version="${carbon.kernel.package.import.version.range}",
                             org.wso2.carbon.identity.application.authentication.framework.*;version="${carbon.identity.imp.pkg.version}",
                             org.wso2.carbon.identity.application.authenticator.oidc;
-                            version="${carbon.identity-application-authenticator-oidc}",
+                            version="${carbon.identity-outbound-auth-oidc.imp.pkg.version}",
                             org.wso2.carbon.identity.application.common.model;version="${carbon.identity.imp.pkg.version}",
                             org.wso2.carbon.identity.application.mgt;version="${carbon.identity.imp.pkg.version}",
                             org.wso2.carbon.identity.core.util;version="${carbon.identity.imp.pkg.version}"

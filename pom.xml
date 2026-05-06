@@ -2141,6 +2141,8 @@
         <carbon.identity-inbound-auth-oauth.imp.pkg.version>[6.0.0, 7.0.0)
         </carbon.identity-inbound-auth-oauth.imp.pkg.version>
         <carbon.identity-user-ws.imp.pkg.version>[5.3.0, 6.0.0)</carbon.identity-user-ws.imp.pkg.version>
+        <carbon.identity-outbound-auth-oidc.imp.pkg.version>[5.14.0,5.20.0)
+        </carbon.identity-outbound-auth-oidc.imp.pkg.version>
 
         <carbon.mediation.imp.pkg.version>[4.7.0, 5.0.0)</carbon.mediation.imp.pkg.version>
         <carbon.governance.imp.pkg.version>[4.8.0, 4.9.0)</carbon.governance.imp.pkg.version>
