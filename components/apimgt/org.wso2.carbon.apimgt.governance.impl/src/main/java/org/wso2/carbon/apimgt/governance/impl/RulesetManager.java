@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.apimgt.governance.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
@@ -39,14 +37,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.nio.charset.StandardCharsets;
 
 /**
  * This class implements the Ruleset Manager.
  */
 public class RulesetManager {
 
-    private static final Log log = LogFactory.getLog(RulesetManager.class);
     private RulesetMgtDAO rulesetMgtDAO;
 
     public RulesetManager() {
@@ -71,16 +67,7 @@ public class RulesetManager {
 
         // Use Factory to get the appropriate validation engine for this ruleset's category
         ValidationEngine validationEngine = ValidationEngineFactory.getValidationEngine(ruleset);
-        if (log.isDebugEnabled() && ruleset.getRulesetContent() != null && ruleset.getRulesetContent().getContent() != null) {
-            log.debug("createNewRuleset: before validate length=" + ruleset.getRulesetContent().getContent().length);
-        }
         validationEngine.validateRulesetContent(ruleset, APIMGovernanceUtil.getAPIMGovernanceOptions());
-        if (log.isDebugEnabled() && ruleset.getRulesetContent() != null && ruleset.getRulesetContent().getContent() != null) {
-            String preview = new String(ruleset.getRulesetContent().getContent(), StandardCharsets.UTF_8);
-            preview = preview.length() > 300 ? preview.substring(0, 300) : preview;
-            log.debug("createNewRuleset: after validate length=" + ruleset.getRulesetContent().getContent().length
-                    + " preview=\n" + preview);
-        }
         List<Rule> rules = validationEngine.extractRulesFromRuleset(ruleset);
 
         if (rules.isEmpty()) {
@@ -165,16 +152,7 @@ public class RulesetManager {
         // Use Factory to get the appropriate validation engine for this ruleset's category
         ValidationEngine validationEngine = ValidationEngineFactory.getValidationEngine(ruleset);
 
-        if (log.isDebugEnabled() && ruleset.getRulesetContent() != null && ruleset.getRulesetContent().getContent() != null) {
-            log.debug("updateRuleset: before validate length=" + ruleset.getRulesetContent().getContent().length);
-        }
         validationEngine.validateRulesetContent(ruleset, APIMGovernanceUtil.getAPIMGovernanceOptions());
-        if (log.isDebugEnabled() && ruleset.getRulesetContent() != null && ruleset.getRulesetContent().getContent() != null) {
-            String preview = new String(ruleset.getRulesetContent().getContent(), StandardCharsets.UTF_8);
-            preview = preview.length() > 300 ? preview.substring(0, 300) : preview;
-            log.debug("updateRuleset: after validate length=" + ruleset.getRulesetContent().getContent().length
-                    + " preview=\n" + preview);
-        }
         List<Rule> rules = validationEngine.extractRulesFromRuleset(ruleset);
 
         if (rules.isEmpty()) {

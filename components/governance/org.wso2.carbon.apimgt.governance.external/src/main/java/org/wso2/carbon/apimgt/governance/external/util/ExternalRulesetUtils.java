@@ -511,21 +511,12 @@ public final class ExternalRulesetUtils {
 
         try {
             byte[] content = YAML_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsBytes(definition);
-            if (log.isDebugEnabled()) {
-                // Log first 500 chars of serialized YAML to verify encryption
-                String yamlPreview = new String(content, StandardCharsets.UTF_8);
-                String preview = yamlPreview.length() > 500 ? yamlPreview.substring(0, 500) : yamlPreview;
-                log.debug("updateRulesetContent: Serialized encrypted definition YAML preview (first 500 chars):\n" + preview);
-            }
             RulesetContent updatedRulesetContent = ruleset.getRulesetContent();
             if (updatedRulesetContent == null) {
                 updatedRulesetContent = new RulesetContent();
             }
             updatedRulesetContent.setContent(content);
             ruleset.setRulesetContent(updatedRulesetContent);
-            if (log.isDebugEnabled()) {
-                log.debug("updateRulesetContent: Updated ruleset content bytes. New length=" + content.length);
-            }
         } catch (IOException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_FAILED_TO_PARSE_RULESET_CONTENT, e);
         }
