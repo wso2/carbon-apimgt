@@ -39,7 +39,8 @@ import static org.wso2.carbon.apimgt.multitenant.auth.MultiTenantAuthenticatorCo
  * <p>
  * JIT provisioning is only performed when:
  * <ul>
- *   <li>The {@code USER_SELECTED_TENANT_DOMAIN} context property is not set, OR</li>
+ *   <li>The {@code USER_SELECTED_TENANT_DOMAIN} context property is not set and the
+ *       authentication context tenant domain is not "carbon.super", OR</li>
  *   <li>The {@code USER_SELECTED_TENANT_DOMAIN} equals "carbon.super"</li>
  * </ul>
  * <p>
@@ -58,7 +59,7 @@ public class MultiTenantJITProvisioningHandler extends JITProvisioningPostAuthen
         String userSelectedTenantDomain = (String) context.getProperty(USER_SELECTED_TENANT_DOMAIN);
 
         // Execute JIT provisioning only if:
-        // 1. USER_SELECTED_TENANT_DOMAIN property is not set (null or blank), OR
+        // 1. USER_SELECTED_TENANT_DOMAIN is null AND the context tenant domain is not "carbon.super", OR
         // 2. USER_SELECTED_TENANT_DOMAIN equals "carbon.super"
         if ((userSelectedTenantDomain == null &&
                 !SUPER_TENANT_DOMAIN.equals(context.getTenantDomain()))
