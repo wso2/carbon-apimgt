@@ -456,7 +456,7 @@ public class APIAdminImplTest {
         Assert.assertEquals(ExceptionCodes.KEY_MANAGER_UPDATE_VIOLATION, exception.getErrorHandler());
     }
 
-    // ---------- Issue #16480: PEM cert was dropped on the IdP record (private createIdp / updatedIDP) ----------
+    // ---------- Issue #4990: PEM cert was dropped on the IdP record (private createIdp / updatedIDP) ----------
 
     private static final String SAMPLE_PEM =
             "-----BEGIN CERTIFICATE-----\n" +
@@ -484,17 +484,17 @@ public class APIAdminImplTest {
 
         Map<String, Object> additionalProps = new HashMap<>();
         if (certType != null) {
-            additionalProps.put("certificate_type", certType);
+            additionalProps.put(APIConstants.KeyManager.CERTIFICATE_TYPE, certType);
         }
         if (certValue != null) {
-            additionalProps.put("certificate_value", certValue);
+            additionalProps.put(APIConstants.KeyManager.CERTIFICATE_VALUE, certValue);
         }
         config.setAdditionalProperties(additionalProps);
         return config;
     }
 
     /**
-     * #16480 (create path): a KM with PEM cert must populate the IdP's {@code certificate}
+     * #4990 (create path): a KM with PEM cert must populate the IdP's {@code certificate}
      * field verbatim — pre-fix the inverted {@code String.join(certificate, "")} dropped it
      * to an empty string.
      */
@@ -507,7 +507,7 @@ public class APIAdminImplTest {
         IdentityProvider idp = Whitebox.invokeMethod(apiAdmin, "createIdp", km);
 
         Assert.assertNotNull("IdP should be created", idp);
-        Assert.assertEquals("PEM cert must be set verbatim on the IdP (issue #16480)",
+        Assert.assertEquals("PEM cert must be set verbatim on the IdP (issue #4990)",
                 SAMPLE_PEM, idp.getCertificate());
         // PEM branch must NOT add a JWKS_URI property
         IdentityProviderProperty[] props = idp.getIdpProperties();
@@ -519,7 +519,7 @@ public class APIAdminImplTest {
     }
 
     /**
-     * #16480 (update path): same expectation as create — the PEM cert must round-trip
+     * #4990 (update path): same expectation as create — the PEM cert must round-trip
      * onto the IdP record.
      */
     @Test
@@ -534,12 +534,12 @@ public class APIAdminImplTest {
         IdentityProvider idp = Whitebox.invokeMethod(apiAdmin, "updatedIDP", retrieved, km);
 
         Assert.assertNotNull("IdP should be returned from update", idp);
-        Assert.assertEquals("PEM cert must be set verbatim on update (issue #16480)",
+        Assert.assertEquals("PEM cert must be set verbatim on update (issue #4990)",
                 SAMPLE_PEM, idp.getCertificate());
     }
 
     /**
-     * #16480 regression guard: a PEM containing newlines, leading/trailing whitespace,
+     * #4990 regression guard: a PEM containing newlines, leading/trailing whitespace,
      * and embedded blank lines must round-trip without truncation or modification.
      * This is what the inverted {@code String.join} would silently mangle.
      */
@@ -571,15 +571,15 @@ public class APIAdminImplTest {
 
         Assert.assertNull("JWKS branch must not populate IdP.certificate", idp.getCertificate());
         IdentityProviderProperty[] props = idp.getIdpProperties();
-        Assert.assertNotNull("JWKS branch should add a jwksUri property", props);
+        Assert.assertNotNull("JWKS branch should add a " + APIConstants.JWKS_URI + " property", props);
         boolean jwksFound = false;
         for (IdentityProviderProperty p : props) {
-            if ("jwksUri".equals(p.getName())) {
+            if (APIConstants.JWKS_URI.equals(p.getName())) {
                 Assert.assertEquals(SAMPLE_JWKS_URL, p.getValue());
                 jwksFound = true;
             }
         }
-        Assert.assertTrue("Expected jwksUri property on JWKS branch", jwksFound);
+        Assert.assertTrue("Expected " + APIConstants.JWKS_URI + " property on JWKS branch", jwksFound);
     }
 
     /**
@@ -611,7 +611,8 @@ public class APIAdminImplTest {
 
         IdentityProvider idp = Whitebox.invokeMethod(apiAdmin, "createIdp", km);
 
-        Assert.assertNull("PEM without certificate_type must not be set", idp.getCertificate());
+        Assert.assertNull("PEM without " + APIConstants.KeyManager.CERTIFICATE_TYPE + " must not be set",
+                idp.getCertificate());
     }
 
     /**
@@ -634,11 +635,11 @@ public class APIAdminImplTest {
         Assert.assertNotNull(props);
         boolean jwksFound = false;
         for (IdentityProviderProperty p : props) {
-            if ("jwksUri".equals(p.getName())) {
+            if (APIConstants.JWKS_URI.equals(p.getName())) {
                 Assert.assertEquals(SAMPLE_JWKS_URL, p.getValue());
                 jwksFound = true;
             }
         }
-        Assert.assertTrue("Expected jwksUri property on JWKS update", jwksFound);
+        Assert.assertTrue("Expected " + APIConstants.JWKS_URI + " property on JWKS update", jwksFound);
     }
 }
