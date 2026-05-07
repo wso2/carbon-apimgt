@@ -21,9 +21,9 @@ package org.wso2.carbon.apimgt.api.model;
 import java.util.Map;
 
 public class GatewayEnvironmentValidationResult {
-    boolean isValid;
-    String description;
-    Map<String, String> errors;
+    private boolean isValid;
+    private String description;
+    private Map<String, String> errors;
 
     public boolean isValid() {
         return isValid;

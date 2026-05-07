@@ -73,7 +73,7 @@ public class GatewayHolder {
         return null;
     }
 
-    // We use environmentUuid instead of env name because persistant external mapping tables use envUuid
+    // We use environmentUuid instead of env name because persistent external mapping tables use envUuid
     public static FederatedApiKeyConnector getTenantApiKeyConnectorInstance(String organization, String environmentUuid)
             throws APIManagementException {
 

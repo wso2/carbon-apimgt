@@ -388,21 +388,6 @@ public class FederatedApiKeyNotifier implements Notifier {
     }
 
     /**
-     * Maps environment UUIDs to API reference artifacts by resolving environment names from the name-keyed API mapping.
-     */
-    private Map<String, String> resolveEnvIdToApiRefMap(Map<String, Environment> environments,
-                                                        Map<String, String> apiMappingsByName) {
-        Map<String, String> result = new HashMap<>();
-        for (Map.Entry<String, String> mapping : apiMappingsByName.entrySet()) {
-            Environment env = environments.get(mapping.getKey());
-            if (env != null) {
-                result.put(env.getUuid(), mapping.getValue());
-            }
-        }
-        return result;
-    }
-
-    /**
      * Builds the properties map for connector operations.
      */
     private Map<String, String> buildProperties(String apiUuid, String apiKeyName, String authzUser,
