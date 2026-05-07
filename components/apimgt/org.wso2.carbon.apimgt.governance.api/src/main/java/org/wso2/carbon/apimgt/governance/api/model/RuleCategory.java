@@ -31,6 +31,7 @@ public enum RuleCategory {
 
     public static RuleCategory fromString(String text) {
         if (text == null || text.equalsIgnoreCase("null")) {
+            log.debug("Received null or 'null' string for RuleCategory conversion");
             return null;
         }
         try {
