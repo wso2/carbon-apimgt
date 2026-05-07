@@ -140,10 +140,8 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
         } catch (APIManagementException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_APIS_FOR_LABEL, e, label);
         } catch (NoClassDefFoundError e) {
-            if (log.isDebugEnabled()) {
-                log.debug("LabelsDAO not available in runtime, returning empty artifacts for label "
-                        + label + ": " + e.getMessage());
-            }
+            log.info("LabelsDAO not available in runtime, returning empty artifacts for label "
+                    + label + ": " + e.getMessage());
             return apiIds;
         }
     }
@@ -459,6 +457,7 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
                 String tenantAdminUsername = RestApiCommonUtil.getLoggedInUsername();
                 APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
                 if (apiIdentifier == null) {
+                    log.error("Failed to get APIM project: API not found for UUID: " + apiId);
                     throw new APIMGovernanceException(
                             APIMGovExceptionCodes.ERROR_WHILE_GETTING_APIM_PROJECT,
                             new Exception("API not found: " + apiId),

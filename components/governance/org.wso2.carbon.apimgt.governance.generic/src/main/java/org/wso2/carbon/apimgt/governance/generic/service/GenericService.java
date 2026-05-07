@@ -20,8 +20,10 @@ package org.wso2.carbon.apimgt.governance.generic.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.ApiResult;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.generic.GenericConstants;
@@ -33,7 +35,6 @@ import org.wso2.carbon.apimgt.governance.generic.model.APISignature;
 import org.wso2.carbon.apimgt.governance.generic.model.ConflictReport;
 import org.wso2.carbon.apimgt.governance.generic.model.DeduplicationResult;
 import org.wso2.carbon.apimgt.governance.generic.model.DeprecationGuideResult;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 
@@ -51,7 +52,9 @@ public class GenericService {
 
     private static final Log log = LogFactory.getLog(GenericService.class);
 
-    private static volatile GenericService instance;
+    private static final class InstanceHolder {
+        private static final GenericService INSTANCE = new GenericService();
+    }
 
     private final LSHIndex lshIndex;
     private final MinHashGenerator minHashGenerator;
@@ -76,14 +79,7 @@ public class GenericService {
      * @return GenericService instance
      */
     public static GenericService getInstance() {
-        if (instance == null) {
-            synchronized (GenericService.class) {
-                if (instance == null) {
-                    instance = new GenericService();
-                }
-            }
-        }
-        return instance;
+        return InstanceHolder.INSTANCE;
     }
 
     /**
@@ -117,7 +113,7 @@ public class GenericService {
             try {
                 int[] signatureArray = MinHashGenerator.bytesToSignature(signature.getSignatureBlob());
                 lshIndex.addSignature(signature.getApiUuid(), signatureArray, signature.getOrganization());
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 log.warn("Failed to load signature for API: " + signature.getApiUuid(), e);
             }
         }
@@ -215,7 +211,7 @@ public class GenericService {
             DeduplicationConfigService.DeduplicationConfig conf =
                     DeduplicationConfigService.getInstance().getConfig(organization);
             highConfidenceThreshold = conf.getHighConfidenceThreshold();
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             log.debug("Could not read high confidence threshold from config, using default: 0.95");
         }
 
@@ -235,7 +231,7 @@ public class GenericService {
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (APIManagementException | RuntimeException e) {
             log.debug("Could not resolve creation time/name for query API " + apiUuid + ": " + e.getMessage());
         }
 
@@ -261,7 +257,7 @@ public class GenericService {
                         matchedApiStatus = matchedApi.getStatus();
                     }
                 }
-            } catch (Exception e) {
+            } catch (APIManagementException | RuntimeException e) {
                 log.debug("Could not resolve API name for UUID " + similar.getApiUuid()
                         + ": " + e.getMessage());
             }
@@ -274,7 +270,7 @@ public class GenericService {
                 lshIndex.removeSignature(similar.getApiUuid());
                 try {
                     minHashDAO.deleteSignature(similar.getApiUuid(), organization);
-                } catch (Exception cleanupEx) {
+                } catch (APIMGovernanceException | RuntimeException cleanupEx) {
                     log.debug("Could not clean up stale MinHash for " + similar.getApiUuid()
                             + ": " + cleanupEx.getMessage());
                 }
@@ -323,9 +319,11 @@ public class GenericService {
                 if (timeComparison < 0) {
                     // Query API was created BEFORE the matched API → query is the original, skip
                     if (log.isDebugEnabled()) {
-                        log.debug(String.format("First-In rule: Skipping match %s -> %s (query created at %s is older " +
+                        log.debug(String.format(
+                                "First-In rule: Skipping match %s -> %s (query created at %s is older " +
                                         "than match created at %s)",
-                                apiUuid, similar.getApiUuid(), queryApiCreatedTime, matchedApiCreatedTime));
+                                apiUuid, similar.getApiUuid(),
+                                queryApiCreatedTime, matchedApiCreatedTime));
                     }
                     continue;
                 } else if (timeComparison == 0) {
@@ -501,15 +499,6 @@ public class GenericService {
     }
 
     /**
-     * Gets the LSH index (for testing purposes).
-     *
-     * @return LSHIndex
-     */
-    public LSHIndex getLshIndex() {
-        return lshIndex;
-    }
-
-    /**
      * Gets the signature service.
      *
      * @return SignatureService
@@ -675,17 +664,17 @@ public class GenericService {
                                 log.warn("API definition not found for API: " + apiId + ". Skipping indexing.");
                                 skippedCount++;
                             }
-                        } catch (Exception e) {
+                        } catch (APIMGovernanceException | RuntimeException e) {
                             log.warn("Failed to index API " + apiId + ": " + e.getMessage());
                             errorCount++;
                         }
                     }
-                } catch (Exception e) {
+                } catch (APIManagementException | RuntimeException e) {
                     log.error("Error processing organization " + organization + ": " + e.getMessage(), e);
                 }
             }
             
-        } catch (Exception e) {
+        } catch (APIMGovernanceException | RuntimeException e) {
             log.error("Error indexing existing APIs: " + e.getMessage(), e);
         }
         
@@ -730,7 +719,7 @@ public class GenericService {
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (APIManagementException | RuntimeException e) {
             log.debug("Could not get API definition for " + apiId + ": " + e.getMessage());
         }
         return null;
@@ -864,7 +853,7 @@ public class GenericService {
                             + ", sunsetDays: " + sunsetPeriodDays);
                 }
             }
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             log.debug("[DEPRECATION-GUIDE] Could not read config from DB: "
                     + e.getMessage());
         }
@@ -877,7 +866,9 @@ public class GenericService {
                         + "/repository/resources/governance/default-rulesets/"
                         + "lifecycle-retirement-ruleset.yaml");
                 if (rulesetFile.exists()) {
-                    String content = new String(java.nio.file.Files.readAllBytes(rulesetFile.toPath()));
+                    String content = new String(java.nio.file.Files.readAllBytes(
+                            rulesetFile.toPath()),
+                            java.nio.charset.StandardCharsets.UTF_8);
                     for (String line : content.split("\n")) {
                         String trimmed = line.trim();
                         if (trimmed.startsWith("mode:")) {
@@ -910,7 +901,7 @@ public class GenericService {
                     log.debug("[DEPRECATION-GUIDE] lifecycle-retirement-ruleset.yaml not found. "
                             + "Using defaults.");
                 }
-            } catch (Exception e) {
+            } catch (java.io.IOException | RuntimeException e) {
                 log.debug("[DEPRECATION-GUIDE] Could not read YAML config: " + e.getMessage());
             }
         }
@@ -949,7 +940,8 @@ public class GenericService {
                             String cContext = carriedApi.getContext() != null
                                     ? carriedApi.getContext() : "/" + cName;
                             String linkHeader = "<" + cContext + ">; rel=\"successor-version\"";
-                            java.time.ZonedDateTime sunsetDate = java.time.ZonedDateTime.now().plusDays(finalSunsetDays);
+                            java.time.ZonedDateTime sunsetDate =
+                                    java.time.ZonedDateTime.now().plusDays(finalSunsetDays);
                             String sunsetHeader = java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME
                                     .format(sunsetDate);
 
@@ -975,7 +967,7 @@ public class GenericService {
                         }
                         log.debug("[DEPRECATION-GUIDE] Carried-over successor " + carriedSuccessorUuid
                                 + " is no longer PUBLISHED. Re-scanning...");
-                    } catch (Exception e) {
+                    } catch (APIManagementException | RuntimeException e) {
                         log.debug("[DEPRECATION-GUIDE] Could not resolve carried-over successor: "
                                 + e.getMessage() + ". Re-scanning...");
                     }
@@ -1072,7 +1064,7 @@ public class GenericService {
                             bestSemanticNeighborApi = matchedApi;
                         }
                     }
-                } catch (Exception e) {
+                } catch (APIManagementException | RuntimeException e) {
                     log.debug("[DEPRECATION-GUIDE] Could not resolve API " + matchedUuid
                             + ": " + e.getMessage());
                 }
@@ -1146,7 +1138,7 @@ public class GenericService {
                     successorStatus, successorType,
                     allCandidates, lifecycleAction, enforcementMode);
 
-        } catch (Exception e) {
+        } catch (APIManagementException | APIMGovernanceException | RuntimeException e) {
             log.error("[DEPRECATION-GUIDE] Error finding successor for API " + apiUuid, e);
             return DeprecationGuideResult.noSuccessor(
                     apiUuid, apiName, apiVersion, organization,
@@ -1192,7 +1184,7 @@ public class GenericService {
                         content = new String(bytes,
                                 java.nio.charset.StandardCharsets.UTF_8);
                     }
-                } catch (Exception blobEx) {
+                } catch (java.sql.SQLException | RuntimeException blobEx) {
                     // Not a BLOB — try as string
                 }
                 if (content == null) {
@@ -1214,18 +1206,30 @@ public class GenericService {
                 }
             }
             return bestContent;
-        } catch (Exception e) {
+        } catch (java.sql.SQLException e) {
             log.debug("[DEPRECATION-GUIDE] Could not read lifecycle "
                     + "ruleset content from DB: " + e.getMessage());
         } finally {
             if (rs != null) {
-                try { rs.close(); } catch (Exception ignored) { }
+                try {
+                    rs.close();
+                } catch (java.sql.SQLException | RuntimeException ignored) {
+                    log.debug("[DEPRECATION-GUIDE] Failed to close ResultSet: " + ignored.getMessage());
+                }
             }
             if (ps != null) {
-                try { ps.close(); } catch (Exception ignored) { }
+                try {
+                    ps.close();
+                } catch (java.sql.SQLException | RuntimeException ignored) {
+                    log.debug("[DEPRECATION-GUIDE] Failed to close PreparedStatement: " + ignored.getMessage());
+                }
             }
             if (conn != null) {
-                try { conn.close(); } catch (Exception ignored) { }
+                try {
+                    conn.close();
+                } catch (java.sql.SQLException | RuntimeException ignored) {
+                    log.debug("[DEPRECATION-GUIDE] Failed to close Connection: " + ignored.getMessage());
+                }
             }
         }
         return null;
@@ -1295,13 +1299,31 @@ public class GenericService {
                 }
                 return count > 0;
             }
-        } catch (Exception e) {
+        } catch (java.sql.SQLException e) {
             log.warn("[DEPRECATION-GUIDE] Error checking lifecycle policy membership: "
                     + e.getMessage());
         } finally {
-            if (rs != null) { try { rs.close(); } catch (Exception ignored) { } }
-            if (ps != null) { try { ps.close(); } catch (Exception ignored) { } }
-            if (conn != null) { try { conn.close(); } catch (Exception ignored) { } }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (java.sql.SQLException | RuntimeException ignored) {
+                    log.debug("[DEPRECATION-GUIDE] Failed to close ResultSet: " + ignored.getMessage());
+                }
+            }
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (java.sql.SQLException | RuntimeException ignored) {
+                    log.debug("[DEPRECATION-GUIDE] Failed to close PreparedStatement: " + ignored.getMessage());
+                }
+            }
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (java.sql.SQLException | RuntimeException ignored) {
+                    log.debug("[DEPRECATION-GUIDE] Failed to close Connection: " + ignored.getMessage());
+                }
+            }
         }
         // Fail-closed: if we cannot verify, do NOT enforce
         return false;
@@ -1372,7 +1394,7 @@ public class GenericService {
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             log.debug("[DEPRECATION-GUIDE] Could not read config "
                     + "from DB for known successor: "
                     + e.getMessage());
@@ -1385,7 +1407,9 @@ public class GenericService {
                         + "/repository/resources/governance/default-rulesets/"
                         + "lifecycle-retirement-ruleset.yaml");
                 if (rulesetFile.exists()) {
-                    String content = new String(java.nio.file.Files.readAllBytes(rulesetFile.toPath()));
+                    String content = new String(java.nio.file.Files.readAllBytes(
+                            rulesetFile.toPath()),
+                            java.nio.charset.StandardCharsets.UTF_8);
                     for (String line : content.split("\n")) {
                         String trimmed = line.trim();
                         if (trimmed.startsWith("mode:")) {
@@ -1404,7 +1428,7 @@ public class GenericService {
                         }
                     }
                 }
-            } catch (Exception e) {
+            } catch (java.io.IOException | RuntimeException e) {
                 log.debug("[DEPRECATION-GUIDE] Could not read YAML config for known successor: "
                         + e.getMessage());
             }
@@ -1478,7 +1502,7 @@ public class GenericService {
                     successorStatus, successorType,
                     candidates, lifecycleAction, enforcementMode);
 
-        } catch (Exception e) {
+        } catch (APIManagementException | RuntimeException e) {
             log.error("[DEPRECATION-GUIDE] Error building guide for known successor "
                     + successorUuid + " of API " + apiUuid, e);
             return DeprecationGuideResult.noSuccessor(

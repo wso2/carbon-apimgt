@@ -25,6 +25,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -53,7 +54,7 @@ public final class ShinglingUtil {
         }
 
         // Normalize text: lowercase, remove extra whitespace
-        String normalizedText = text.toLowerCase().trim().replaceAll("\\s+", " ");
+        String normalizedText = text.toLowerCase(Locale.ENGLISH).trim().replaceAll("\\s+", " ");
 
         // Split into words
         String[] words = normalizedText.split("\\s+");
@@ -104,7 +105,7 @@ public final class ShinglingUtil {
         }
 
         // Normalize: lowercase and remove non-alphanumeric except spaces
-        String normalizedText = text.toLowerCase().replaceAll("[^a-z0-9\\s]", "");
+        String normalizedText = text.toLowerCase(Locale.ENGLISH).replaceAll("[^a-z0-9\\s]", "");
 
         if (normalizedText.length() < n) {
             shingles.add(normalizedText);
@@ -132,7 +133,7 @@ public final class ShinglingUtil {
 
         for (String feature : features) {
             // Add the feature itself as a shingle
-            allShingles.add(feature.toLowerCase());
+            allShingles.add(feature.toLowerCase(Locale.ENGLISH));
 
             // Also create word n-grams from the feature
             allShingles.addAll(createWordNGrams(feature, n));

@@ -42,7 +42,6 @@ import org.wso2.rule.validator.validator.Validator;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -70,16 +69,6 @@ public class SpectralValidationEngine implements ValidationEngine {
     @Override
     @Deprecated
     public void validateRulesetContent(Ruleset ruleset) throws APIMGovernanceException {
-        
-        // Check if this is a deduplication ruleset - delegate to Generic validation
-        if (isDeduplicationRuleset(ruleset)) {
-            if (log.isDebugEnabled()) {
-                log.debug("Deduplication ruleset detected, using custom validation for: " + ruleset.getName());
-            }
-            validateDeduplicationRulesetContent(ruleset);
-            return;
-        }
-        
         validateRulesetContent(ruleset, null);
     }
 
@@ -132,15 +121,6 @@ public class SpectralValidationEngine implements ValidationEngine {
      */
     @Override
     public List<Rule> extractRulesFromRuleset(Ruleset ruleset) throws APIMGovernanceException {
-        
-        // Check if this is a deduplication ruleset - use custom extraction
-        if (isDeduplicationRuleset(ruleset)) {
-            if (log.isDebugEnabled()) {
-                log.debug("Deduplication ruleset detected, using custom extraction for: " + ruleset.getName());
-            }
-            return extractDeduplicationRules(ruleset);
-        }
-        
         String ruleContentString = new String(ruleset.getRulesetContent().getContent(),
                 StandardCharsets.UTF_8);
 
@@ -222,16 +202,6 @@ public class SpectralValidationEngine implements ValidationEngine {
     public List<RuleViolation> validate(String target, Ruleset ruleset, APIMGovernanceOptions governanceOptions)
             throws APIMGovernanceException {
 
-        // DEDUPLICATION rulesets are handled by the Generic module, not by Spectral.
-        // Return empty list as deduplication checks are done during API creation via event listeners.
-        if (isDeduplicationRuleset(ruleset)) {
-            if (log.isDebugEnabled()) {
-                log.debug("Skipping Spectral validation for DEDUPLICATION ruleset: " + ruleset.getName() +
-                        ". Deduplication is handled by the Generic module.");
-            }
-            return Collections.emptyList();
-        }
-
         try {
             RulesetContent rulesetContent = ruleset.getRulesetContent();
             String rulesetContentString = new String(rulesetContent.getContent(),
@@ -296,58 +266,6 @@ public class SpectralValidationEngine implements ValidationEngine {
             throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_READING_SPECTRAL_RESULTS, e);
         }
 
-    }
-
-    // ========================================================================================
-    // DEDUPLICATION RULESET DETECTION (DEPRECATED - Handled by ValidationEngineFactory)
-    // ========================================================================================
-
-    /**
-     * Checks if a ruleset is a deduplication/GENERIC ruleset.
-     * <p>
-     * NOTE: This method is DEPRECATED. GENERIC rulesets are now handled by the
-     * GenericValidationEngine via the ValidationEngineFactory. The factory
-     * routes rulesets to the appropriate engine based on their RuleCategory.
-     * <p>
-     * This method always returns false to ensure SpectralValidationEngine only
-     * processes SPECTRAL rulesets. If a GENERIC ruleset somehow reaches this engine,
-     * it should be routed through the Factory instead.
-     *
-     * @param ruleset The ruleset to check
-     * @return always false - GENERIC rulesets are handled by GenericValidationEngine
-     * @deprecated Use ValidationEngineFactory.getValidationEngine(ruleset) instead
-     */
-    @Deprecated
-    private boolean isDeduplicationRuleset(Ruleset ruleset) {
-        // GENERIC/Deduplication rulesets are now handled by GenericValidationEngine
-        // via the ValidationEngineFactory. This method always returns false.
-        // 
-        // If you need to check for deduplication rulesets, use:
-        //   RuleCategory.GENERIC.equals(ruleset.getRuleCategory())
-        // And route via ValidationEngineFactory.getValidationEngine(ruleset)
-        return false;
-    }
-
-    // NOTE: The following methods are deprecated and kept for backward compatibility.
-    // GENERIC/Deduplication rulesets are now handled by GenericValidationEngine.
-    // These methods are never called since isDeduplicationRuleset() always returns false.
-
-    /**
-     * @deprecated Deduplication validation is handled by GenericValidationEngine
-     */
-    @Deprecated
-    private void validateDeduplicationRulesetContent(Ruleset ruleset) throws APIMGovernanceException {
-        // This method is deprecated - deduplication validation is now handled by GenericValidationEngine
-        throw new APIMGovernanceException("Deduplication rulesets should be validated by GenericValidationEngine");
-    }
-
-    /**
-     * @deprecated Deduplication rule extraction is handled by GenericValidationEngine
-     */
-    @Deprecated
-    private List<Rule> extractDeduplicationRules(Ruleset ruleset) throws APIMGovernanceException {
-        // This method is deprecated - deduplication rule extraction is now handled by GenericValidationEngine
-        throw new APIMGovernanceException("Deduplication rulesets should be processed by GenericValidationEngine");
     }
 
 }

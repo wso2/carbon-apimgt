@@ -78,7 +78,7 @@ public class BackgroundHydrationService {
      */
     public void triggerHydration(String organization) {
         if (isRunning.compareAndSet(false, true)) {
-            executorService.submit(() -> {
+            executorService.execute(() -> {
                 try {
                     hydrateOrganization(organization);
                 } catch (Exception e) {

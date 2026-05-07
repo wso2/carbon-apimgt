@@ -21,6 +21,8 @@ package org.wso2.carbon.apimgt.governance.generic.listener;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.annotations.Component;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.generic.model.DuplicateCheckResult;
 import org.wso2.carbon.apimgt.governance.generic.service.BackgroundHydrationService;
 import org.wso2.carbon.apimgt.governance.generic.service.DeduplicationConfigService;
@@ -33,6 +35,7 @@ import org.wso2.carbon.apimgt.impl.notifier.events.Event;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 
 import java.util.List;
+import java.util.Locale;
 
 /**
  * API Event Listener that triggers the Generic engine for deduplication checks
@@ -92,7 +95,7 @@ public class GenericAPIEventListener implements Notifier {
             } else {
                 log.debug("Ignoring event type: " + eventType);
             }
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             log.error("Error processing API event for deduplication: " + e.getMessage(), e);
         }
     }
@@ -172,7 +175,7 @@ public class GenericAPIEventListener implements Notifier {
                                 similar.getApiId(),
                                 similar.getSimilarityScore() * 100));
                     }
-                    debugMsg.append("| Mode: ").append(config.getMode().toUpperCase());
+                    debugMsg.append("| Mode: ").append(config.getMode().toUpperCase(Locale.ENGLISH));
                     log.debug(debugMsg.toString());
                 }
                 // Violations will be recorded in GOV_RULE_VIOLATION during the next
@@ -189,7 +192,7 @@ public class GenericAPIEventListener implements Notifier {
                 log.debug("Indexed API for deduplication: " + apiName + " (ID: " + apiId + ")");
             }
 
-        } catch (Exception e) {
+        } catch (APIMGovernanceException | RuntimeException e) {
             log.error("Error during deduplication check for API " + apiName + ": " + e.getMessage(), e);
         }
     }
@@ -213,7 +216,7 @@ public class GenericAPIEventListener implements Notifier {
 
             // Also remove from skipped tracker if it was tracked
             SkippedApiTracker.getInstance().removeFromSkipped(apiId, organization);
-        } catch (Exception e) {
+        } catch (APIMGovernanceException | RuntimeException e) {
             log.error("Error removing API from index: " + e.getMessage(), e);
         }
     }
@@ -264,7 +267,7 @@ public class GenericAPIEventListener implements Notifier {
             } catch (InterruptedException ie) {
                 Thread.currentThread().interrupt();
                 break;
-            } catch (Exception e) {
+            } catch (APIManagementException | RuntimeException e) {
                 if (attempt == maxRetries) {
                     log.error("Error fetching API definition for API " + apiId + ": " + e.getMessage(), e);
                 } else {

@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.governance.generic;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.commons.logging.Log;
@@ -37,8 +38,8 @@ import org.wso2.carbon.apimgt.governance.generic.service.SemanticSimilarityClien
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -294,7 +295,7 @@ public class GenericValidationEngine implements ValidationEngine {
                 }
             }
 
-        } catch (Exception e) {
+        } catch (JsonProcessingException | RuntimeException e) {
             throw new APIMGovernanceException("Failed to extract rules from deduplication ruleset", e);
         }
 
@@ -399,7 +400,7 @@ public class GenericValidationEngine implements ValidationEngine {
                         organization = metadata.get("organization");
                         log.debug("Parsed metadata context: apiUuid=" + apiUuid
                                 + ", organization=" + organization);
-                    } catch (Exception e) {
+                    } catch (JsonProcessingException | RuntimeException e) {
                         log.debug("Could not parse metadata from target", e);
                     }
                     // Strip metadata prefix from the API definition
@@ -493,12 +494,15 @@ public class GenericValidationEngine implements ValidationEngine {
                                 + " match(es) for API in org=" + organization);
                     }
                 }
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 // Fail-open: semantic check failure must never block the overall dedup result
                 log.warn("Semantic similarity check failed — proceeding without it: " + e.getMessage());
             }
 
-        } catch (Exception e) {
+        } catch (APIMGovernanceException e) {
+            log.error("Error during deduplication validation", e);
+            throw e;
+        } catch (RuntimeException e) {
             log.error("Error during deduplication validation", e);
             throw new APIMGovernanceException("Deduplication validation failed: " + e.getMessage(), e);
         }
@@ -573,7 +577,7 @@ public class GenericValidationEngine implements ValidationEngine {
                         Map<String, String> metadata = jsonMapper.readValue(metadataJson, Map.class);
                         apiUuid = metadata.get("apiUuid");
                         organization = metadata.get("organization");
-                    } catch (Exception e) {
+                    } catch (JsonProcessingException | RuntimeException e) {
                         log.debug("Could not parse metadata from target for lifecycle check", e);
                     }
                 }
@@ -665,18 +669,6 @@ public class GenericValidationEngine implements ValidationEngine {
                 // If we can't check, assume no successor — safer to flag the violation
             }
 
-            // [DORMANT] Also check the AM_API_SUCCESSOR_MAPPING table — currently dormant
-            // but kept for future integration when successor persistence is re-enabled.
-            // if (!hasSuccessor) {
-            //     try {
-            //         String mappedSuccessor = org.wso2.carbon.apimgt.governance.generic.dao.impl
-            //                 .SuccessorMappingDAOImpl.getInstance().getSuccessorId(apiUuid, organization);
-            //         hasSuccessor = (mappedSuccessor != null && !mappedSuccessor.isEmpty());
-            //     } catch (Exception daoEx) {
-            //         log.debug("Could not check successor mapping table: " + daoEx.getMessage());
-            //     }
-            // }
-
             if (!hasSuccessor) {
                 // No successor found — produce a violation
                 RuleViolation violation = new RuleViolation();
@@ -703,7 +695,7 @@ public class GenericValidationEngine implements ValidationEngine {
                         + ". No lifecycle violation.");
             }
 
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             log.error("Error during lifecycle ruleset validation for "
                     + ruleset.getName() + ": " + e.getMessage(), e);
         }
@@ -738,7 +730,7 @@ public class GenericValidationEngine implements ValidationEngine {
                         isGeneric = true;
                     }
                 }
-            } catch (Exception e) {
+            } catch (JsonProcessingException | RuntimeException e) {
                 log.debug("Could not parse ruleset content for type detection", e);
             }
         }
@@ -755,7 +747,7 @@ public class GenericValidationEngine implements ValidationEngine {
      * @return True if it's a lifecycle ruleset
      */
     private boolean isLifecycleRuleset(Ruleset ruleset) {
-        String name = ruleset.getName() != null ? ruleset.getName().toLowerCase() : "";
+        String name = ruleset.getName() != null ? ruleset.getName().toLowerCase(Locale.ENGLISH) : "";
         if (name.contains("lifecycle") || name.contains("retirement") || name.contains("deprecation")) {
             return true;
         }
@@ -768,7 +760,7 @@ public class GenericValidationEngine implements ValidationEngine {
                     return true;
                 }
             }
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             log.debug("Could not parse ruleset content for lifecycle detection", e);
         }
         return false;
@@ -789,7 +781,7 @@ public class GenericValidationEngine implements ValidationEngine {
                 return contentString.contains("deduplication:")
                         && contentString.contains("lifecycle_retirement:");
             }
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             log.debug("Could not check for combined ruleset", e);
         }
         return false;
@@ -808,7 +800,7 @@ public class GenericValidationEngine implements ValidationEngine {
                     return Boolean.TRUE.equals(config.get(GenericConstants.RulesetConfig.ENABLED));
                 }
             }
-        } catch (Exception e) {
+        } catch (JsonProcessingException | RuntimeException e) {
             log.debug("Could not parse ruleset content for enabled check", e);
         }
         return true; // Default to enabled
@@ -827,7 +819,7 @@ public class GenericValidationEngine implements ValidationEngine {
                     return parseDouble(config.get(GenericConstants.RulesetConfig.SIMILARITY_THRESHOLD));
                 }
             }
-        } catch (Exception e) {
+        } catch (JsonProcessingException | RuntimeException e) {
             log.debug("Could not parse threshold from ruleset", e);
         }
         return GenericConstants.DEFAULT_SIMILARITY_THRESHOLD;
@@ -938,7 +930,7 @@ public class GenericValidationEngine implements ValidationEngine {
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (JsonProcessingException | RuntimeException e) {
             log.debug("Could not parse mode from ruleset", e);
         }
         return "audit"; // Default to audit mode
@@ -978,7 +970,7 @@ public class GenericValidationEngine implements ValidationEngine {
                     return String.valueOf(config.get(GenericConstants.RulesetConfig.MODE));
                 }
             }
-        } catch (Exception e) {
+        } catch (JsonProcessingException | RuntimeException e) {
             log.debug("Could not parse mode from lifecycle ruleset", e);
         }
         return "warn"; // Default to warn for lifecycle rulesets
@@ -1021,7 +1013,7 @@ public class GenericValidationEngine implements ValidationEngine {
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (JsonProcessingException | RuntimeException e) {
             log.debug("Could not parse custom rule message from ruleset", e);
         }
         return null;
@@ -1065,7 +1057,7 @@ public class GenericValidationEngine implements ValidationEngine {
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (JsonProcessingException | RuntimeException e) {
             log.debug("Could not parse configured severity from ruleset", e);
         }
         return null;
@@ -1094,7 +1086,7 @@ public class GenericValidationEngine implements ValidationEngine {
                     return Boolean.parseBoolean((String) enabled);
                 }
             }
-        } catch (Exception e) {
+        } catch (JsonProcessingException | RuntimeException e) {
             log.debug("Could not read semantic_check.enabled from ruleset", e);
         }
         return false;
@@ -1119,7 +1111,7 @@ public class GenericValidationEngine implements ValidationEngine {
                     return parseDouble(sc.get("threshold"));
                 }
             }
-        } catch (Exception e) {
+        } catch (JsonProcessingException | RuntimeException e) {
             log.debug("Could not read semantic_check.threshold from ruleset", e);
         }
         return 0.85;
@@ -1148,7 +1140,7 @@ public class GenericValidationEngine implements ValidationEngine {
                     return Integer.parseInt(String.valueOf(val));
                 }
             }
-        } catch (Exception e) {
+        } catch (JsonProcessingException | RuntimeException e) {
             log.debug("Could not read semantic_check.limit from ruleset", e);
         }
         return 3;

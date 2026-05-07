@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -393,9 +394,9 @@ public class ComplianceEvaluationScheduler {
                             organization, ruleset.getId());
                     ruleViolations.addAll(violations);
                     rulesetViolationsMap.put(ruleset.getId(), ruleViolations);
-                } catch (Exception e) {
+                } catch (APIMGovernanceException | RuntimeException e) {
                     log.error("Validation failed for ruleset " + ruleset.getId()
-                            + " on artifact " + artifactRefId + " — isolating failure", e);
+                            + " on artifact " + artifactRefId);
                     // Still add an empty list so the DAO's clear-all doesn't wipe
                     // this ruleset's result to "Unapplied"
                     rulesetViolationsMap.put(ruleset.getId(), ruleViolations);
@@ -569,8 +570,8 @@ public class ComplianceEvaluationScheduler {
                 }
                 // For lifecycle rulesets, still proceed with empty content + metadata
                 boolean isLifecycle = ruleset.getName() != null
-                        && (ruleset.getName().toLowerCase().contains("lifecycle")
-                        || ruleset.getName().toLowerCase().contains("retirement"));
+                        && (ruleset.getName().toLowerCase(Locale.ENGLISH).contains("lifecycle")
+                        || ruleset.getName().toLowerCase(Locale.ENGLISH).contains("retirement"));
                 if (isLifecycle) {
                     if (log.isDebugEnabled()) {
                         log.debug("Lifecycle ruleset detected — proceeding with metadata-only content.");

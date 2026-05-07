@@ -67,7 +67,7 @@ public class APISignature implements Serializable {
     }
 
     public byte[] getSignatureBlob() {
-        return signatureBlob != null ? signatureBlob.clone() : null;
+        return signatureBlob != null ? signatureBlob.clone() : new byte[0];
     }
 
     public void setSignatureBlob(byte[] signatureBlob) {

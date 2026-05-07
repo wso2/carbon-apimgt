@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -225,62 +226,138 @@ public class DeprecationGuideResult implements Serializable {
      *  Getters / Setters
      * ================================================================ */
 
-    public String getApiUuid() { return apiUuid; }
-    public void setApiUuid(String apiUuid) { this.apiUuid = apiUuid; }
+    public String getApiUuid() {
+        return apiUuid;
+    }
+    public void setApiUuid(String apiUuid) {
+        this.apiUuid = apiUuid;
+    }
 
-    public String getApiName() { return apiName; }
-    public void setApiName(String apiName) { this.apiName = apiName; }
+    public String getApiName() {
+        return apiName;
+    }
+    public void setApiName(String apiName) {
+        this.apiName = apiName;
+    }
 
-    public String getApiVersion() { return apiVersion; }
-    public void setApiVersion(String apiVersion) { this.apiVersion = apiVersion; }
+    public String getApiVersion() {
+        return apiVersion;
+    }
+    public void setApiVersion(String apiVersion) {
+        this.apiVersion = apiVersion;
+    }
 
-    public String getOrganization() { return organization; }
-    public void setOrganization(String organization) { this.organization = organization; }
+    public String getOrganization() {
+        return organization;
+    }
+    public void setOrganization(String organization) {
+        this.organization = organization;
+    }
 
-    public boolean isSuccessorFound() { return successorFound; }
-    public void setSuccessorFound(boolean successorFound) { this.successorFound = successorFound; }
+    public boolean isSuccessorFound() {
+        return successorFound;
+    }
+    public void setSuccessorFound(boolean successorFound) {
+        this.successorFound = successorFound;
+    }
 
-    public String getSuccessorApiUuid() { return successorApiUuid; }
-    public void setSuccessorApiUuid(String successorApiUuid) { this.successorApiUuid = successorApiUuid; }
+    public String getSuccessorApiUuid() {
+        return successorApiUuid;
+    }
+    public void setSuccessorApiUuid(String successorApiUuid) {
+        this.successorApiUuid = successorApiUuid;
+    }
 
-    public String getSuccessorApiName() { return successorApiName; }
-    public void setSuccessorApiName(String successorApiName) { this.successorApiName = successorApiName; }
+    public String getSuccessorApiName() {
+        return successorApiName;
+    }
+    public void setSuccessorApiName(String successorApiName) {
+        this.successorApiName = successorApiName;
+    }
 
-    public String getSuccessorApiVersion() { return successorApiVersion; }
-    public void setSuccessorApiVersion(String successorApiVersion) { this.successorApiVersion = successorApiVersion; }
+    public String getSuccessorApiVersion() {
+        return successorApiVersion;
+    }
+    public void setSuccessorApiVersion(String successorApiVersion) {
+        this.successorApiVersion = successorApiVersion;
+    }
 
-    public double getSimilarityPercentage() { return similarityPercentage; }
-    public void setSimilarityPercentage(double similarityPercentage) { this.similarityPercentage = similarityPercentage; }
+    public double getSimilarityPercentage() {
+        return similarityPercentage;
+    }
+    public void setSimilarityPercentage(double similarityPercentage) {
+        this.similarityPercentage = similarityPercentage;
+    }
 
-    public String getRfc8594LinkHeader() { return rfc8594LinkHeader; }
-    public void setRfc8594LinkHeader(String rfc8594LinkHeader) { this.rfc8594LinkHeader = rfc8594LinkHeader; }
+    public String getRfc8594LinkHeader() {
+        return rfc8594LinkHeader;
+    }
+    public void setRfc8594LinkHeader(String rfc8594LinkHeader) {
+        this.rfc8594LinkHeader = rfc8594LinkHeader;
+    }
 
-    public String getRfc8594SunsetHeader() { return rfc8594SunsetHeader; }
-    public void setRfc8594SunsetHeader(String rfc8594SunsetHeader) { this.rfc8594SunsetHeader = rfc8594SunsetHeader; }
+    public String getRfc8594SunsetHeader() {
+        return rfc8594SunsetHeader;
+    }
+    public void setRfc8594SunsetHeader(String rfc8594SunsetHeader) {
+        this.rfc8594SunsetHeader = rfc8594SunsetHeader;
+    }
 
-    public boolean isMigrationRisk() { return migrationRisk; }
-    public void setMigrationRisk(boolean migrationRisk) { this.migrationRisk = migrationRisk; }
+    public boolean isMigrationRisk() {
+        return migrationRisk;
+    }
+    public void setMigrationRisk(boolean migrationRisk) {
+        this.migrationRisk = migrationRisk;
+    }
 
-    public String getMessage() { return message; }
-    public void setMessage(String message) { this.message = message; }
+    public String getMessage() {
+        return message;
+    }
+    public void setMessage(String message) {
+        this.message = message;
+    }
 
-    public String getSuccessorStatus() { return successorStatus; }
-    public void setSuccessorStatus(String successorStatus) { this.successorStatus = successorStatus; }
+    public String getSuccessorStatus() {
+        return successorStatus;
+    }
+    public void setSuccessorStatus(String successorStatus) {
+        this.successorStatus = successorStatus;
+    }
 
-    public String getSuccessorType() { return successorType; }
-    public void setSuccessorType(String successorType) { this.successorType = successorType; }
+    public String getSuccessorType() {
+        return successorType;
+    }
+    public void setSuccessorType(String successorType) {
+        this.successorType = successorType;
+    }
 
-    public List<SuccessorCandidate> getAllCandidates() { return allCandidates; }
-    public void setAllCandidates(List<SuccessorCandidate> allCandidates) { this.allCandidates = allCandidates; }
+    public List<SuccessorCandidate> getAllCandidates() {
+        return allCandidates != null ? Collections.unmodifiableList(allCandidates) : null;
+    }
+    public void setAllCandidates(List<SuccessorCandidate> allCandidates) {
+        this.allCandidates = allCandidates != null ? new ArrayList<>(allCandidates) : null;
+    }
 
-    public String getLifecycleAction() { return lifecycleAction; }
-    public void setLifecycleAction(String lifecycleAction) { this.lifecycleAction = lifecycleAction; }
+    public String getLifecycleAction() {
+        return lifecycleAction;
+    }
+    public void setLifecycleAction(String lifecycleAction) {
+        this.lifecycleAction = lifecycleAction;
+    }
 
-    public String getEnforcementMode() { return enforcementMode; }
-    public void setEnforcementMode(String enforcementMode) { this.enforcementMode = enforcementMode; }
+    public String getEnforcementMode() {
+        return enforcementMode;
+    }
+    public void setEnforcementMode(String enforcementMode) {
+        this.enforcementMode = enforcementMode;
+    }
 
-    public boolean isSuccessorCarriedOver() { return successorCarriedOver; }
-    public void setSuccessorCarriedOver(boolean successorCarriedOver) { this.successorCarriedOver = successorCarriedOver; }
+    public boolean isSuccessorCarriedOver() {
+        return successorCarriedOver;
+    }
+    public void setSuccessorCarriedOver(boolean successorCarriedOver) {
+        this.successorCarriedOver = successorCarriedOver;
+    }
 
     @Override
     public String toString() {
@@ -346,26 +423,54 @@ public class DeprecationGuideResult implements Serializable {
             this.context = context;
         }
 
-        public String getApiUuid() { return apiUuid; }
-        public void setApiUuid(String apiUuid) { this.apiUuid = apiUuid; }
+        public String getApiUuid() {
+            return apiUuid;
+        }
+        public void setApiUuid(String apiUuid) {
+            this.apiUuid = apiUuid;
+        }
 
-        public String getApiName() { return apiName; }
-        public void setApiName(String apiName) { this.apiName = apiName; }
+        public String getApiName() {
+            return apiName;
+        }
+        public void setApiName(String apiName) {
+            this.apiName = apiName;
+        }
 
-        public String getApiVersion() { return apiVersion; }
-        public void setApiVersion(String apiVersion) { this.apiVersion = apiVersion; }
+        public String getApiVersion() {
+            return apiVersion;
+        }
+        public void setApiVersion(String apiVersion) {
+            this.apiVersion = apiVersion;
+        }
 
-        public double getSimilarityPercentage() { return similarityPercentage; }
-        public void setSimilarityPercentage(double similarityPercentage) { this.similarityPercentage = similarityPercentage; }
+        public double getSimilarityPercentage() {
+            return similarityPercentage;
+        }
+        public void setSimilarityPercentage(double similarityPercentage) {
+            this.similarityPercentage = similarityPercentage;
+        }
 
-        public String getSuccessorType() { return successorType; }
-        public void setSuccessorType(String successorType) { this.successorType = successorType; }
+        public String getSuccessorType() {
+            return successorType;
+        }
+        public void setSuccessorType(String successorType) {
+            this.successorType = successorType;
+        }
 
-        public String getStatus() { return status; }
-        public void setStatus(String status) { this.status = status; }
+        public String getStatus() {
+            return status;
+        }
+        public void setStatus(String status) {
+            this.status = status;
+        }
 
-        public String getContext() { return context; }
-        public void setContext(String context) { this.context = context; }
+        public String getContext() {
+            return context;
+        }
+        public void setContext(String context) {
+            this.context = context;
+        }
 
         @Override
         public String toString() {

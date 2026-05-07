@@ -163,6 +163,7 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
 
             RulesetManager rulesetManager = new RulesetManager();
             RulesetInfo updatedRuleset = rulesetManager.updateRuleset(rulesetId, ruleset, organization);
+            log.info("Successfully updated ruleset '" + updatedRuleset.getName() + "' (id: " + rulesetId + ") in organization: " + organization);
 
             // Trigger compliance re-evaluation for rulesets that are NOT lifecycle/transition-based.
             // Lifecycle rulesets have compliance_exclusion=true in their YAML and are evaluated
@@ -184,6 +185,7 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
                 isComplianceExcluded = true;
             }
             if (!isComplianceExcluded) {
+                log.info("Triggering compliance re-evaluation after update of ruleset: " + rulesetId);
                 new ComplianceManager().handleRulesetChangeEvent(rulesetId, organization);
             } else {
                 log.info("Skipping compliance re-evaluation for transition-based ruleset: " + resolvedRulesetName

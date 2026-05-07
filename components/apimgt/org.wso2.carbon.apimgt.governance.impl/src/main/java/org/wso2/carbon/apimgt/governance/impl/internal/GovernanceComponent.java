@@ -21,7 +21,6 @@ package org.wso2.carbon.apimgt.governance.impl.internal;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -45,6 +44,7 @@ import org.wso2.carbon.apimgt.impl.jms.listener.JMSListenerShutDownService;
 import org.wso2.carbon.core.ServerShutdownHandler;
 import org.wso2.carbon.core.ServerStartupObserver;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * This class represents the Governance Component
@@ -55,26 +55,24 @@ import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 public class GovernanceComponent {
 
     private static final Log log = LogFactory.getLog(GovernanceComponent.class);
-    private static volatile boolean activated = false;
-    private ServiceRegistration registration;
+    private static final AtomicBoolean activated = new AtomicBoolean(false);
 
     @Activate
     protected void activate(ComponentContext componentContext) throws Exception {
 
-        if (activated) {
+        if (!activated.compareAndSet(false, true)) {
             if (log.isDebugEnabled()) {
                 log.debug("GovernanceComponent already activated, skipping re-activation");
             }
             return;
         }
-        // Set flag immediately to prevent re-entrant activations from service registrations below
-        activated = true;
 
         log.info("Activating Governance component...");
 
         // Initialize DB connection first (before service registrations that may trigger side-effects)
         try {
             APIMGovernanceDBUtil.initialize();
+            log.info("APIMGovernanceDBUtil initialized successfully");
         } catch (Throwable e) {
             log.error("APIMGovernanceDBUtil.initialize() FAILED", e);
         }
@@ -98,11 +96,11 @@ public class GovernanceComponent {
             try {
                 APIMGovServerStartupShutdownListener startupShutdownListener
                         = new APIMGovServerStartupShutdownListener();
-                registration = bundleContext
+                bundleContext
                         .registerService(ServerStartupObserver.class, startupShutdownListener, null);
-                registration = bundleContext
+                bundleContext
                         .registerService(ServerShutdownHandler.class, startupShutdownListener, null);
-                registration = bundleContext
+                bundleContext
                         .registerService(JMSListenerShutDownService.class, startupShutdownListener, null);
             } catch (Throwable listenerEx) {
                 log.warn("APIMGovServerStartupShutdownListener registration failed (non-fatal): "
@@ -117,9 +115,14 @@ public class GovernanceComponent {
 
     @Deactivate
     protected void deactivate(ComponentContext componentContext) {
-        // Only perform real shutdown when the bundle is actually stopping
         if (log.isDebugEnabled()) {
             log.debug("GovernanceComponent deactivate() called");
+        }
+        try {
+            ComplianceEvaluationScheduler.shutdown();
+            log.info("ComplianceEvaluationScheduler shut down successfully");
+        } catch (Throwable e) {
+            log.warn("Error shutting down ComplianceEvaluationScheduler: " + e.getMessage());
         }
     }
 
@@ -147,6 +150,7 @@ public class GovernanceComponent {
     )
     protected void setValidationEngineService(ValidationEngine validationEngine) {
 
+        log.info("Setting ValidationEngineService with engine: " + validationEngine.getClass().getName());
         ValidationEngineService validationEngineService = new ValidationEngineServiceImpl(validationEngine);
         ServiceReferenceHolder.getInstance().setValidationEngineService(validationEngineService);
 

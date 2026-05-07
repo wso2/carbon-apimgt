@@ -24,6 +24,8 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.model.ApiResult;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.generic.internal.GenericServiceReferenceHolder;
 import org.wso2.carbon.apimgt.governance.generic.model.ConflictReport;
 import org.wso2.carbon.apimgt.governance.generic.model.DeduplicationResult;
@@ -31,7 +33,6 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIMGovernanceConfigDTO;
-import org.wso2.carbon.apimgt.api.model.ApiResult;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -166,7 +167,7 @@ public class DeprecationGuideScheduler {
             log.info("[DEPRECATION-GUIDE] Scheduler started. Will scan every " +
                     scanIntervalMinutes + " minutes.");
 
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             log.error("[DEPRECATION-GUIDE] Failed to initialize Deprecation Guide Scheduler", e);
         }
     }
@@ -234,7 +235,7 @@ public class DeprecationGuideScheduler {
                                     .equalsIgnoreCase(api.getStatus())) {
                                 deprecatedApiUuids.add(apiResult.getId());
                             }
-                        } catch (Exception e) {
+                        } catch (APIManagementException | RuntimeException e) {
                             log.debug("[DEPRECATION-GUIDE] Could not check status of API "
                                     + apiResult.getId() + ": " + e.getMessage());
                         }
@@ -264,7 +265,7 @@ public class DeprecationGuideScheduler {
                 }
             }
 
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             log.error("[DEPRECATION-GUIDE] Scan failed with unexpected error", e);
         }
 
@@ -346,7 +347,7 @@ public class DeprecationGuideScheduler {
                             deprecatedUuid, apiName, apiVersion, matchedUuid,
                             conflict.getSimilarityScore() * 100));
 
-                } catch (Exception e) {
+                } catch (APIManagementException | RuntimeException e) {
                     log.debug("[DEPRECATION-GUIDE] Could not resolve matched API " + matchedUuid
                             + ": " + e.getMessage());
                 }
@@ -361,7 +362,7 @@ public class DeprecationGuideScheduler {
 
             return suggestions.size();
 
-        } catch (Exception e) {
+        } catch (APIMGovernanceException | RuntimeException e) {
             log.warn("[DEPRECATION-GUIDE] Error processing deprecated API " + deprecatedUuid
                     + ": " + e.getMessage());
             if (log.isDebugEnabled()) {
@@ -412,7 +413,7 @@ public class DeprecationGuideScheduler {
             log.info("[DEPRECATION-GUIDE] Persisted " + suggestions.size() +
                     " successor suggestions for deprecated API " + deprecatedUuid);
 
-        } catch (Exception e) {
+        } catch (SQLException e) {
             if (connection != null) {
                 try {
                     connection.rollback();
@@ -448,12 +449,12 @@ public class DeprecationGuideScheduler {
                 log.debug("[DEPRECATION-GUIDE] Cleared " + deleted +
                         " stale suggestions for " + deprecatedUuid);
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             if (connection != null) {
                 try {
                     connection.rollback();
                 } catch (SQLException rollbackEx) {
-                    // ignore
+                    log.debug("Error rolling back: " + rollbackEx.getMessage(), rollbackEx);
                 }
             }
             log.warn("[DEPRECATION-GUIDE] Error clearing suggestions for " + deprecatedUuid, e);
@@ -492,7 +493,7 @@ public class DeprecationGuideScheduler {
                         rs.getString("SUCCESSOR_API_NAME"),
                         rs.getString("SUCCESSOR_API_VERSION")));
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             log.error("[DEPRECATION-GUIDE] Error querying successor suggestions", e);
         } finally {
             closeQuietly(rs);
@@ -530,12 +531,12 @@ public class DeprecationGuideScheduler {
             connection.commit();
             log.info("[DEPRECATION-GUIDE] Database table AM_DEPRECATION_GUIDE verified/created.");
 
-        } catch (Exception e) {
+        } catch (SQLException e) {
             if (connection != null) {
                 try {
                     connection.rollback();
                 } catch (SQLException rollbackEx) {
-                    // ignore
+                    log.debug("Error rolling back: " + rollbackEx.getMessage(), rollbackEx);
                 }
             }
             log.error("[DEPRECATION-GUIDE] Error ensuring table exists", e);
@@ -572,7 +573,7 @@ public class DeprecationGuideScheduler {
             try {
                 closeable.close();
             } catch (Exception e) {
-                // ignore
+                log.debug("Error closing resource: " + e.getMessage(), e);
             }
         }
     }

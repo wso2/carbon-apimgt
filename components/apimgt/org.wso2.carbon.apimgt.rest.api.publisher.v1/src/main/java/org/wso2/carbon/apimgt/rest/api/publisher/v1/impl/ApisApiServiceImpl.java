@@ -3744,8 +3744,43 @@ public class ApisApiServiceImpl implements ApisApiService {
             // APIStateChangeGovernanceWorkflowExecutor (execute() + complete()).
             // The executor runs successor checks in runGovernanceCheck() and
             // triggers compliance evaluation in triggerComplianceEvaluation()
-            // after admin approval. Direct GenericService calls removed to
-            // avoid NoClassDefFoundError from webapp classloader context.
+            // after admin approval.
+
+            // ── MinHash index: add newly published APIs so they are discoverable
+            // by the deduplication engine and as successor candidates for older versions.
+            // This is fail-open and uses Class.forName() which works from the OSGi
+            // webapp classloader context (same pattern as getDeprecationGuide).
+            if ("Publish".equalsIgnoreCase(action)) {
+                try {
+                    Class<?> gsClass = Class.forName(
+                            "org.wso2.carbon.apimgt.governance.generic.service.GenericService");
+                    java.lang.reflect.Method gsGetInstance = gsClass.getMethod("getInstance");
+                    Object genericService = gsGetInstance.invoke(null);
+                    java.lang.reflect.Method gsIsInit = gsClass.getMethod("isInitialized");
+                    if ((Boolean) gsIsInit.invoke(genericService)) {
+                        String apiDef = null;
+                        try {
+                            apiDef = apiProvider.getOpenAPIDefinition(apiId, organization);
+                        } catch (Exception defEx) {
+                            log.debug("[MINHASH-INDEX] Could not get API definition for " + apiId
+                                    + ": " + defEx.getMessage());
+                        }
+                        if (apiDef != null && !apiDef.isEmpty()) {
+                            java.lang.reflect.Method addToIndex = gsClass.getMethod(
+                                    "addApiToIndex",
+                                    String.class, String.class, String.class, boolean.class);
+                            addToIndex.invoke(genericService, apiDef, apiId, organization, true);
+                            log.info("[MINHASH-INDEX] Added published API " + apiId
+                                    + " to MinHash index (org=" + organization + ")");
+                        }
+                    }
+                } catch (ClassNotFoundException cnfe) {
+                    log.debug("[MINHASH-INDEX] GenericService not available — skipping index update.");
+                } catch (Exception e) {
+                    log.debug("[MINHASH-INDEX] Could not update MinHash index on publish (non-fatal): "
+                            + e.getMessage());
+                }
+            }
 
             //returns the current lifecycle state
             LifecycleStateDTO stateDTO = getLifecycleState(apiId, organization); // todo try to prevent this call

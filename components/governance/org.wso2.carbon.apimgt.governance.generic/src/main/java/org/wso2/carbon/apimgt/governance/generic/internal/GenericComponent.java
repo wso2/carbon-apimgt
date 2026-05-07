@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.governance.generic.service.DeprecationGuideSchedul
 import org.wso2.carbon.apimgt.governance.impl.validator.ValidationEngineFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.core.ServerStartupObserver;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * OSGi component for the Generic module.
@@ -48,13 +49,13 @@ import org.wso2.carbon.core.ServerStartupObserver;
 public class GenericComponent {
 
     private static final Log log = LogFactory.getLog(GenericComponent.class);
-    private static volatile boolean activated = false;
+    private static final AtomicBoolean activated = new AtomicBoolean(false);
     private ServiceRegistration<?> startupObserverRegistration;
     private GenericValidationEngine genericValidationEngine;
 
     @Activate
     protected void activate(ComponentContext componentContext) {
-        if (activated) {
+        if (!activated.compareAndSet(false, true)) {
             log.debug("API Generic component already activated, skipping");
             return;
         }
@@ -74,7 +75,6 @@ public class GenericComponent {
             ValidationEngineFactory.registerValidationEngine(RuleCategory.GENERIC, genericValidationEngine);
             log.info("Registered GenericValidationEngine for GENERIC rule category");
 
-            activated = true;
             log.info("API Generic component activated successfully");
 
         } catch (Exception e) {
@@ -96,7 +96,7 @@ public class GenericComponent {
         // Unregister the validation engine
         ValidationEngineFactory.unregisterValidationEngine(RuleCategory.GENERIC);
 
-        activated = false;
+        activated.set(false);
         log.info("API Generic component deactivated");
     }
 
