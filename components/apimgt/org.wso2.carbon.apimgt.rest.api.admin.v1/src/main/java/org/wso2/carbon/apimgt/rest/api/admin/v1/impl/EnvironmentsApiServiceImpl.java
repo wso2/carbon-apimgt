@@ -12,6 +12,7 @@ import org.wso2.carbon.apimgt.api.PlatformGatewayService;
 import org.wso2.carbon.apimgt.api.model.PlatformGateway;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
+import org.wso2.carbon.apimgt.impl.GatewayEnvironmentValidationException;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.EnvironmentsApiService;
@@ -24,6 +25,9 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.VHostDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.EnvironmentMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorListItemDTO;
+import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.apimgt.impl.dao.GatewayManagementDAO;
 import org.wso2.carbon.apimgt.impl.utils.GatewayManagementUtils;
@@ -151,10 +155,12 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
                 env.getPermissions();
         URI location = null;
         try {
-        this.validatePermissions(gatewayVisibilityPermissionConfigurationDTO);
-        apiAdmin.updateEnvironment(organization, env);
-        APIUtil.validateAndScheduleFederatedGatewayAPIDiscovery(env, organization);
-        location = new URI(RestApiConstants.RESOURCE_PATH_ENVIRONMENT + "/" + environmentId);
+            this.validatePermissions(gatewayVisibilityPermissionConfigurationDTO);
+            apiAdmin.updateEnvironment(organization, env);
+            APIUtil.validateAndScheduleFederatedGatewayAPIDiscovery(env, organization);
+            location = new URI(RestApiConstants.RESOURCE_PATH_ENVIRONMENT + "/" + environmentId);
+        } catch (GatewayEnvironmentValidationException e) {
+            throw buildGatewayEnvironmentValidationBadRequestException(e);
         } catch (URISyntaxException e) {
             String errorMessage = "Error while updating Environment : " + environmentId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -224,6 +230,8 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
             APIUtil.logAuditMessage(APIConstants.AuditLogConstants.GATEWAY_ENVIRONMENTS, new Gson().toJson(envDTO),
                     APIConstants.AuditLogConstants.CREATED, RestApiCommonUtil.getLoggedInUsername());
             return Response.created(location).entity(envDTO).build();
+        } catch (GatewayEnvironmentValidationException e) {
+            throw buildGatewayEnvironmentValidationBadRequestException(e);
         } catch (URISyntaxException e) {
             String errorMessage = "Error while adding gateway environment : " + body.getName() + "-" + e.getMessage();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -233,6 +241,25 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
             throw new APIManagementException(error, e, ExceptionCodes.ROLE_DOES_NOT_EXIST);
         }
         return null;
+    }
+
+    private BadRequestException buildGatewayEnvironmentValidationBadRequestException(
+            GatewayEnvironmentValidationException exception) {
+
+        ErrorDTO errorDTO = RestApiUtil.getErrorDTO(exception.getErrorHandler());
+        List<ErrorListItemDTO> errorItems = new ArrayList<>();
+        if (exception.getErrors() != null) {
+            exception.getErrors().forEach((fieldName, fieldDescription) -> {
+                ErrorListItemDTO errorListItemDTO = new ErrorListItemDTO();
+                errorListItemDTO.setCode(String.valueOf(
+                        ExceptionCodes.FEDERATED_GATEWAY_ONBOARDING_VALIDATION_FAILED.getErrorCode()));
+                errorListItemDTO.setMessage(fieldName);
+                errorListItemDTO.setDescription(fieldDescription);
+                errorItems.add(errorListItemDTO);
+            });
+        }
+        errorDTO.setError(errorItems);
+        return new BadRequestException(errorDTO);
     }
 
     private void validatePermissions(GatewayVisibilityPermissionConfigurationDTO permissionDTO)

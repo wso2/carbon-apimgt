@@ -154,11 +154,20 @@ public class APIKeyEvent extends Event {
         this.applicationId = applicationId;
     }
 
+    public String getApiKey() {
+        return apiKey;
+    }
+
+    public void setApiKey(String apiKey) {
+        this.apiKey = apiKey;
+    }
+
     private String apiKeyHash;
     private String uuid;
     private String name;
     private String keyType;
     private String user;
+    private transient String apiKey;
     private Map properties;
     private long timeCreated;
     private long validityPeriod;

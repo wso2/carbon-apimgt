@@ -18,12 +18,11 @@
 
 package org.wso2.carbon.apimgt.impl.dao;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -31,6 +30,10 @@ import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -39,8 +42,9 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Map;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 
 /**
@@ -819,6 +823,112 @@ public class ApiKeyMgtDAO {
             }
         } catch (SQLException e) {
             handleException("Failed to batch update last used time for API keys", e);
+        }
+    }
+
+    /**
+     * Add external API-key reference artifact for a local API key and gateway environment.
+     *
+     * @param apiKeyUuid UUID of the local API key
+     * @param environmentId gateway environment UUID
+     * @param referenceArtifact connector-owned opaque reference artifact
+     * @throws APIManagementException if an error occurs while adding the mapping
+     */
+    public void addApiKeyExternalApiKeyMapping(String apiKeyUuid, String environmentId,
+                                               String referenceArtifact) throws APIManagementException {
+
+        if (StringUtils.isAnyBlank(apiKeyUuid, environmentId, referenceArtifact)) {
+            throw new APIManagementException("API key UUID, gateway environment ID, and reference artifact are "
+                    + "required to add API key - External API key mappings");
+        }
+        Connection connection = null;
+        PreparedStatement insertStatement = null;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            byte[] referenceBytes = referenceArtifact.getBytes(StandardCharsets.UTF_8);
+            insertStatement = connection.prepareStatement(SQLConstants.ADD_API_KEY_EXTERNAL_API_KEY_MAPPING_SQL);
+            insertStatement.setString(1, apiKeyUuid);
+            insertStatement.setString(2, environmentId);
+            insertStatement.setBinaryStream(3, new ByteArrayInputStream(referenceBytes), referenceBytes.length);
+            insertStatement.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            try {
+                if (connection != null) {
+                    connection.rollback();
+                }
+            } catch (SQLException ex) {
+                log.error("Failed to rollback the add API key - External API key mapping for API key UUID: "
+                        + apiKeyUuid, ex);
+            }
+            handleException("Failed to add API key - External API key mapping for API key UUID: "
+                    + apiKeyUuid, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(insertStatement, connection, null);
+        }
+    }
+
+    /**
+     * Get all external API-key reference artifacts keyed by gateway environment UUID for a local API key.
+     *
+     * @param apiKeyUuid UUID of the local API key
+     * @return map of gateway environment UUID to connector-owned opaque reference artifact
+     * @throws APIManagementException if an error occurs while retrieving the mappings
+     */
+    public Map<String, String> getApiKeyExternalApiKeyMappings(String apiKeyUuid) throws APIManagementException {
+
+        Map<String, String> references = new HashMap<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement =
+                     connection.prepareStatement(SQLConstants.GET_API_KEY_EXTERNAL_API_KEY_MAPPINGS_SQL)) {
+            statement.setString(1, apiKeyUuid);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    String reference = "";
+                    try (InputStream referenceArtifactStream = resultSet.getBinaryStream("REFERENCE_ARTIFACT")) {
+                        if (referenceArtifactStream != null) {
+                            reference = IOUtils.toString(referenceArtifactStream, StandardCharsets.UTF_8);
+                        }
+                    }
+                    references.put(resultSet.getString("GATEWAY_ENV_ID"), reference);
+                }
+            }
+        } catch (SQLException | IOException e) {
+            handleException("Failed to fetch API key - External API key mappings for API key UUID: " + apiKeyUuid, e);
+        }
+        return references;
+    }
+
+    /**
+     * Delete all external API-key reference artifacts for a local API key.
+     *
+     * @param apiKeyUuid UUID of the local API key
+     * @throws APIManagementException if an error occurs while deleting the mappings
+     */
+    public void deleteApiKeyExternalApiKeyMappings(String apiKeyUuid) throws APIManagementException {
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            statement = connection.prepareStatement(SQLConstants.DELETE_API_KEY_EXTERNAL_API_KEY_MAPPINGS_SQL);
+            statement.setString(1, apiKeyUuid);
+            statement.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            try {
+                if (connection != null) {
+                    connection.rollback();
+                }
+            } catch (SQLException ex) {
+                log.error("Failed to rollback the delete API key - External API key mappings for API key UUID: "
+                        + apiKeyUuid, ex);
+            }
+            handleException("Failed to delete API key - External API key mappings for API key UUID: " + apiKeyUuid, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(statement, connection, null);
         }
     }
 

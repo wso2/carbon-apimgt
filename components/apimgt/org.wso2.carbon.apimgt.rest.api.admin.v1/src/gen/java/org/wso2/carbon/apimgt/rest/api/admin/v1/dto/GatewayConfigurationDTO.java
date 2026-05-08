@@ -241,4 +241,3 @@ public class GatewayConfigurationDTO   {
     return o.toString().replace("\n", "\n    ");
   }
 }
-

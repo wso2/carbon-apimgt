@@ -55,6 +55,7 @@ import org.wso2.carbon.apimgt.api.model.ApplicationInfoKeyManager;
 import org.wso2.carbon.apimgt.api.model.ConfigurationDto;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
+import org.wso2.carbon.apimgt.api.model.GatewayEnvironmentValidationResult;
 import org.wso2.carbon.apimgt.api.model.KeyManagerApplicationUsages;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
@@ -234,6 +235,7 @@ public class APIAdminImpl implements APIAdmin {
         }
         validateForUniqueVhostNames(environment);
         Environment environmentToStore =  new Environment(environment);
+        validateGatewayConfigurationValues(null, environmentToStore);
         encryptGatewayConfigurationValues(null, environmentToStore);
         return apiMgtDAO.addEnvironment(tenantDomain, environmentToStore);
     }
@@ -323,6 +325,7 @@ public class APIAdminImpl implements APIAdmin {
 
         validateForUniqueVhostNames(environment);
         environment.setId(existingEnv.getId());
+        validateGatewayConfigurationValues(existingEnv, environment);
         encryptGatewayConfigurationValues(existingEnv, environment);
         Environment updatedEnvironment = apiMgtDAO.updateEnvironment(environment);
         // If the update is successful without throwing an exception
@@ -991,6 +994,59 @@ public class APIAdminImpl implements APIAdmin {
             if (connectionConfigurations != null && !connectionConfigurations.isEmpty()) {
                 for (ConfigurationDto configurationDto : connectionConfigurations) {
                     applyGatewayConfigMaskingAndEncryption(configurationDto, additionalProperties,
+                            retrievedGatewayConfigurationDTO);
+                }
+            }
+        }
+    }
+
+    private void validateGatewayConfigurationValues(Environment retrievedGatewayConfigurationDTO,
+            Environment updatedGatewayConfigurationDto) throws APIManagementException {
+
+        GatewayAgentConfiguration gatewayConfiguration = ServiceReferenceHolder.getInstance()
+                .getExternalGatewayConnectorConfiguration(updatedGatewayConfigurationDto.getGatewayType());
+        if (gatewayConfiguration == null) {
+            return;
+        }
+        Environment validationEnvironment = new Environment(updatedGatewayConfigurationDto);
+        Map<String, String> additionalProperties = validationEnvironment.getAdditionalProperties();
+        List<ConfigurationDto> connectionConfigurations = gatewayConfiguration.getConnectionConfigurations();
+        if (retrievedGatewayConfigurationDTO != null && additionalProperties != null
+                && connectionConfigurations != null && !connectionConfigurations.isEmpty()) {
+            for (ConfigurationDto configurationDto : connectionConfigurations) {
+                restoreMaskedGatewayConfiguration(configurationDto, additionalProperties, retrievedGatewayConfigurationDTO);
+            }
+        }
+        GatewayEnvironmentValidationResult validationResult = gatewayConfiguration.validateEnvironment(validationEnvironment);
+        if (!validationResult.isValid()) {
+            String errorMessage = StringUtils.defaultIfBlank(validationResult.getDescription(),
+                    "Gateway environment validation failed.");
+            throw new GatewayEnvironmentValidationException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.FEDERATED_GATEWAY_ONBOARDING_VALIDATION_FAILED, errorMessage),
+                    validationResult.getErrors());
+        }
+    }
+
+    private void restoreMaskedGatewayConfiguration(ConfigurationDto configurationDto,
+            Map<String, String> additionalProperties, Environment retrievedGatewayConfigurationDTO)
+            throws APIManagementException {
+
+        if (configurationDto.isMask()) {
+            String value = additionalProperties.get(configurationDto.getName());
+            if (APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD.equals(value)) {
+                String unModifiedValue = retrievedGatewayConfigurationDTO.getAdditionalProperties()
+                        .get(configurationDto.getName());
+                if (unModifiedValue != null) {
+                    additionalProperties.replace(configurationDto.getName(),
+                            String.valueOf(decryptValue(unModifiedValue)));
+                }
+            }
+        }
+        List<Object> nestedConfigurationValues = configurationDto.getValues();
+        if (nestedConfigurationValues != null && !nestedConfigurationValues.isEmpty()) {
+            for (Object nestedConfiguration : nestedConfigurationValues) {
+                if (nestedConfiguration instanceof ConfigurationDto) {
+                    restoreMaskedGatewayConfiguration((ConfigurationDto) nestedConfiguration, additionalProperties,
                             retrievedGatewayConfigurationDTO);
                 }
             }
