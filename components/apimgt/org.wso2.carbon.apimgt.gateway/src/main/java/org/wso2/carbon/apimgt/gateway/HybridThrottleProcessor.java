@@ -140,25 +140,43 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
                                         + " message:" + syncModeInitMsg);
                             }
                             synchronized (callerContext.getId().intern()) {
-                                if (SharedParamManager.lockSharedKeys(callerContext.getId(), gatewayId)) {
-                                    long syncingStartTime = System.currentTimeMillis();
-                                    syncThrottleWindowParams(callerContext, false);
-                                    syncThrottleCounterParams(callerContext, false,
-                                            new RequestContext(System.currentTimeMillis()));
-                                    SharedParamManager.releaseSharedKeys(callerContext.getId());
-                                    long timeNow = System.currentTimeMillis();
-                                    if (log.isDebugEnabled()) {
-                                        log.debug("Current time:" + timeNow
-                                                + "In force syncing process, Lock released in " + (timeNow
-                                                - syncingStartTime) + " ms for callerContext: "
-                                                + callerContext.getId());
-                                    }
+                                boolean lockAcquired = false;
+                                try {
+                                    lockAcquired = SharedParamManager.lockSharedKeys(callerContext.getId(), gatewayId);
+                                    if (lockAcquired) {
+                                        if (log.isDebugEnabled()) {
+                                            log.debug("Successfully acquired Redis lock for forced sync of callerContext: " + callerContext.getId());
+                                        }
+                                        long syncingStartTime = System.currentTimeMillis();
+                                        syncThrottleWindowParams(callerContext, false);
+                                        syncThrottleCounterParams(callerContext, false,
+                                                new RequestContext(System.currentTimeMillis()));
+                                        long timeNow = System.currentTimeMillis();
+                                        if (log.isDebugEnabled()) {
+                                            log.debug("Current time:" + timeNow
+                                                    + "In force syncing process, Lock released in " + (timeNow
+                                                    - syncingStartTime) + " ms for callerContext: "
+                                                    + callerContext.getId());
+                                        }
 
-                                } else {
-                                    if (log.isTraceEnabled()) {
-                                        log.trace("Current time:" + System.currentTimeMillis()
-                                                + " Failed to acquire lock for callerContext: " + callerContext.getId()
-                                                + " message:" + syncModeInitMsg);
+                                    } else {
+                                        if (log.isTraceEnabled()) {
+                                            log.trace("Current time:" + System.currentTimeMillis()
+                                                    + " Failed to acquire lock for callerContext: " + callerContext.getId()
+                                                    + " message:" + syncModeInitMsg);
+                                        }
+                                    }
+                                } catch (Exception e) {
+                                    log.error("Could not acquire/release Redis lock for forced sync of callerContext: " 
+                                            + callerContext.getId() + ". Sync skipped, will retry on next message.", e);
+                                } finally {
+                                    if (lockAcquired) {
+                                        try {
+                                            SharedParamManager.releaseSharedKeys(callerContext.getId());
+                                        } catch (Exception ex) {
+                                            log.warn("Failed to release Redis lock for callerContext: "
+                                                    + callerContext.getId() + ". Lock will expire via TTL.", ex);
+                                        }
                                     }
                                 }
                             }
@@ -210,18 +228,22 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
     private class ChannelSubscriptionCounterTask implements Runnable {
 
         @Override public void run() {
-            Map<String, String> channelCountMap;
-            try (Jedis jedis = redisPool.getResource()) {
-                channelCountMap = jedis.pubsubNumSub(WSO2_SYNC_MODE_INIT_CHANNEL);
-            }
-            for (Map.Entry<String, String> entry : channelCountMap.entrySet()) {
-                String channel = entry.getKey();
-                long gatewayCount = Long.parseLong(entry.getValue());
-                ServiceReferenceHolder.getInstance().setGatewayCount(gatewayCount);
-                if (log.isTraceEnabled()) {
-                    log.trace("ChannelSubscriptionCounterTask : channel = " + channel + ". Set Gateway count to "
-                            + gatewayCount);
+            try {
+                Map<String, String> channelCountMap;
+                try (Jedis jedis = redisPool.getResource()) {
+                    channelCountMap = jedis.pubsubNumSub(WSO2_SYNC_MODE_INIT_CHANNEL);
                 }
+                for (Map.Entry<String, String> entry : channelCountMap.entrySet()) {
+                    String channel = entry.getKey();
+                    long gatewayCount = Long.parseLong(entry.getValue());
+                    ServiceReferenceHolder.getInstance().setGatewayCount(gatewayCount);
+                    if (log.isTraceEnabled()) {
+                        log.trace("ChannelSubscriptionCounterTask : channel = " + channel + ". Set Gateway count to "
+                                + gatewayCount);
+                    }
+                }
+            } catch (Exception e) {
+                log.error("Could not retrieve gateway count from Redis channel subscription. Continuing with existing count.", e);
             }
         }
     }
@@ -284,23 +306,38 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
                     log.trace("DataHolder is not null so running syncing tasks");
                 }
                 synchronized (callerContext.getId().intern()) {
-                    if (SharedParamManager.lockSharedKeys(callerContext.getId(), gatewayId)) {
-                        long syncingStartTime = System.currentTimeMillis();
-                        syncThrottleWindowParams(callerContext, true);
-                        syncThrottleCounterParams(callerContext, false, requestContext);
-                        SharedParamManager.releaseSharedKeys(callerContext.getId());
-                        long timeNow = System.currentTimeMillis();
-                        if (log.isDebugEnabled()) {
-                            log.debug("timeNow : " + timeNow
-                                    + ". Evaluating whether can access based on unit time. Lock released in " + (timeNow
-                                    - syncingStartTime) + " ms for callerContext " + callerContext.getId());
+                    boolean lockAcquired = false;
+                    try {
+                        lockAcquired = SharedParamManager.lockSharedKeys(callerContext.getId(), gatewayId);
+                        if (lockAcquired) {
+                            long syncingStartTime = System.currentTimeMillis();
+                            syncThrottleWindowParams(callerContext, true);
+                            syncThrottleCounterParams(callerContext, false, requestContext);
+                            long timeNow = System.currentTimeMillis();
+                            if (log.isDebugEnabled()) {
+                                log.debug("timeNow : " + timeNow
+                                        + ". Evaluating whether can access based on unit time. Lock released in " + (timeNow
+                                        - syncingStartTime) + " ms for callerContext " + callerContext.getId());
+                            }
+                        } else {
+                            if (log.isWarnEnabled()) {
+                                log.warn("Current time:" + System.currentTimeMillis()
+                                        + "Evaluating whether can access based on unit time."
+                                        + "  Failed to lock shared keys, hence skipped " + "syncing tasks. key =  "
+                                        + callerContext.getId());
+                            }
                         }
-                    } else {
-                        if (log.isWarnEnabled()) {
-                            log.warn("Current time:" + System.currentTimeMillis()
-                                    + "Evaluating whether can access based on unit time."
-                                    + "  Failed to lock shared keys, hence skipped " + "syncing tasks. key =  "
-                                    + callerContext.getId());
+                    } catch (Exception e) {
+                        log.error("Could not acquire/release Redis lock in canAccessBasedOnUnitTime for key: "
+                                + callerContext.getId() + ". Continuing without sync.", e);
+                    } finally {
+                        if (lockAcquired) {
+                            try {
+                                SharedParamManager.releaseSharedKeys(callerContext.getId());
+                            } catch (Exception ex) {
+                                log.warn("Failed to release Redis lock for key: "
+                                        + callerContext.getId() + ". Lock will expire via TTL.", ex);
+                            }
                         }
                     }
                 }
@@ -320,6 +357,9 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
                     log.trace("Publishing message to channel. message: " + message);
                 }
                 jedis.publish(WSO2_SYNC_MODE_INIT_CHANNEL, message);
+            } catch (Exception e) {
+                log.error("Could not publish sync mode message to Redis channel for key: " + callerContext.getId()
+                        + ". Other gateways will switch to sync mode based on their own local quota.", e);
             }
         }
         return canAccess;
@@ -345,26 +385,42 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
                     log.trace("Going to run throttle param syncing in sync mode");
                 }
                 synchronized (callerContext.getId().intern()) {
-                    if (SharedParamManager.lockSharedKeys(callerContext.getId(), gatewayId)) {
-                        long syncingStartTime = System.currentTimeMillis();
-                        syncThrottleWindowParams(callerContext, true);
-                        // add piled items and new request item to shared-counter (increments before allowing the request)
-                        syncThrottleCounterParams(callerContext, true, requestContext);
-                        SharedParamManager.releaseSharedKeys(callerContext.getId());
-                        long timeNow = System.currentTimeMillis();
-                        if (log.isDebugEnabled()) {
-                            log.debug("Current time:" + timeNow
-                                    + "Evaluating whether can access if unit time is not over. Lock released in " + (
-                                    System.currentTimeMillis() - syncingStartTime) + " ms for callerContext: "
-                                    + callerContext.getId());
-                        }
-                    } else {
-                        if (log.isWarnEnabled()) {
-                            log.warn("Current time : " + System.currentTimeMillis()
-                                    + " Evaluating whether can access if unit time is not over. Failed to lock shared keys, hence skipped syncing tasks. key="
-                                    + callerContext.getId());
+                    boolean lockAcquired = false;
+                    try {
+                        lockAcquired = SharedParamManager.lockSharedKeys(callerContext.getId(), gatewayId);
+                        if (lockAcquired) {
+                            long syncingStartTime = System.currentTimeMillis();
+                            syncThrottleWindowParams(callerContext, true);
+                            // add piled items and new request item to shared-counter (increments before allowing the request)
+                            syncThrottleCounterParams(callerContext, true, requestContext);
+                            long timeNow = System.currentTimeMillis();
+                            if (log.isDebugEnabled()) {
+                                log.debug("Current time:" + timeNow
+                                        + "Evaluating whether can access if unit time is not over. Lock released in " + (
+                                        System.currentTimeMillis() - syncingStartTime) + " ms for callerContext: "
+                                        + callerContext.getId());
+                            }
+                        } else {
+                            if (log.isWarnEnabled()) {
+                                log.warn("Current time : " + System.currentTimeMillis()
+                                        + " Evaluating whether can access if unit time is not over. Failed to lock shared keys, hence skipped syncing tasks. key="
+                                        + callerContext.getId());
+                            }
                             callerContext.incrementLocalCounter(); // increment local counter since, sync tasks didn't run
                             // where incrementing should have happened (https://github.com/wso2/api-manager/issues/1982#issuecomment-1624920455)
+                        }
+                    } catch (Exception e) {
+                        log.error("Could not acquire/release Redis lock in canAccessIfUnitTimeNotOver for key: "
+                                + callerContext.getId() + ". Falling back to local counter increment.", e);
+                        callerContext.incrementLocalCounter();
+                    } finally {
+                        if (lockAcquired) {
+                            try {
+                                SharedParamManager.releaseSharedKeys(callerContext.getId());
+                            } catch (Exception ex) {
+                                log.warn("Failed to release Redis lock for key: "
+                                        + callerContext.getId() + ". Lock will expire via TTL.", ex);
+                            }
                         }
                     }
                 }
@@ -395,8 +451,8 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
                 }
             }
 
-            if (callerContext.getGlobalCounter()
-                    <= maxRequest) {    //(If the globalCount is less than max request). // Very first requests to cluster hits into this block
+            //(If the globalCount is less than max request). // Very first requests to cluster hits into this block
+            if ((callerContext.getGlobalCounter() + callerContext.getLocalCounter()) <= maxRequest) {    
                 if (log.isTraceEnabled()) {
                     log.trace(
                             "If the globalCount is less than max request : (global count + local count) = "
@@ -560,29 +616,45 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
                 log.trace("Going to run throttle param syncing");
             }
             synchronized (callerContext.getId().intern()) {
-                if (SharedParamManager.lockSharedKeys(callerContext.getId(), gatewayId)) {
-                    long syncingStartTime = System.currentTimeMillis();
-                    syncThrottleWindowParams(callerContext, true);
-                    // add piled items and new request item to shared-counter (increments before allowing the request)
-                    syncThrottleCounterParams(callerContext, true, requestContext);
-                    SharedParamManager.releaseSharedKeys(callerContext.getId());
-                    long timeNow = System.currentTimeMillis();
+                boolean lockAcquired = false;
+                try {
+                    lockAcquired = SharedParamManager.lockSharedKeys(callerContext.getId(), gatewayId);
+                    if (lockAcquired) {
+                        long syncingStartTime = System.currentTimeMillis();
+                        syncThrottleWindowParams(callerContext, true);
+                        // add piled items and new request item to shared-counter (increments before allowing the request)
+                        syncThrottleCounterParams(callerContext, true, requestContext);
+                        long timeNow = System.currentTimeMillis();
 
-                    if (log.isDebugEnabled()) {
-                        log.debug("current time:" + timeNow
-                                + "Evaluating whether can access if unit time is over. Lock released in " + (timeNow
-                                - syncingStartTime) + " ms for callerContext " + callerContext.getId());
-                    }
+                        if (log.isDebugEnabled()) {
+                            log.debug("current time:" + timeNow
+                                    + "Evaluating whether can access if unit time is over. Lock released in " + (timeNow
+                                    - syncingStartTime) + " ms for callerContext " + callerContext.getId());
+                        }
 
-                } else {
-                    if (log.isWarnEnabled()) {
-                        log.warn("current time:" + System.currentTimeMillis()
-                                + " Evaluating whether can access if unit time is over. Failed to lock shared keys, "
-                                + "hence skipped syncing tasks. key = " + callerContext.getId());
+                    } else {
+                        if (log.isWarnEnabled()) {
+                            log.warn("current time:" + System.currentTimeMillis()
+                                    + " Evaluating whether can access if unit time is over. Failed to lock shared keys, "
+                                    + "hence skipped syncing tasks. key = " + callerContext.getId());
+                        }
+                        // increment local counter since, sync tasks didn't run where incrementing should have happened
+                        // (https://github.com/wso2/api-manager/issues/1982#issuecomment-1624920455)
+                        callerContext.incrementLocalCounter();
                     }
-                    // increment local counter since, sync tasks didn't run where incrementing should have happened
-                    // (https://github.com/wso2/api-manager/issues/1982#issuecomment-1624920455)
+                } catch (Exception e) {
+                    log.error("Could not acquire/release Redis lock in canAccessIfUnitTimeOver for key: "
+                            + callerContext.getId() + ". Falling back to local counter increment.", e);
                     callerContext.incrementLocalCounter();
+                } finally {
+                    if (lockAcquired) {
+                        try {
+                            SharedParamManager.releaseSharedKeys(callerContext.getId());
+                        } catch (Exception ex) {
+                            log.warn("Failed to release Redis lock for key: "
+                                    + callerContext.getId() + ". Lock will expire via TTL.", ex);
+                        }
+                    }
                 }
             }
         } else {
@@ -629,7 +701,7 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
                             + callerContext.getLocalCounter() + " Tier=" + configuration.getID() + ", nextAccessTime = "
                             + callerContext.getNextAccessTime());
                 }
-                if (callerContext.getGlobalCounter() <= maxRequest) {
+                if ((callerContext.getGlobalCounter() + callerContext.getLocalCounter()) <= maxRequest) {
                     canAccess = true;
                 }
                 //next time callers can access as a new one
@@ -673,7 +745,7 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
                                 + " has reset counters and added for replication when unit time is over");
                     }
 
-                    if (callerContext.getGlobalCounter() <= maxRequest) {
+                    if ((callerContext.getGlobalCounter() + callerContext.getLocalCounter()) <= maxRequest) {
                         canAccess = true;
                     }
                 } else {
@@ -758,36 +830,46 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
                     log.trace("When running syncing throttle counter params: Running counter sync task");
                 }
                 String id = callerContext.getId();
-                if (log.isTraceEnabled()) {
-                    log.trace("When running syncing throttle counter params: Initial Local counter = "
-                            + callerContext.getLocalCounter() + " , globalCounter = " + callerContext.getGlobalCounter()
-                            + ", distributedCounter = " + SharedParamManager.getDistributedCounter(id));
-                }
-
                 if (isInvocationFlow) {
                     callerContext.incrementLocalCounter(); // increment local counter to consider current request
                 }
                 long localCounter = callerContext.getLocalCounter();
-                if (log.isTraceEnabled()) {
-                    log.trace(
-                            "When running syncing throttle counter params: localCounter increased to " + localCounter);
-                }
+                try {
+                    if (log.isTraceEnabled()) {
+                        log.trace("When running syncing throttle counter params: Initial Local counter = "
+                                + callerContext.getLocalCounter() + " , globalCounter = " + callerContext.getGlobalCounter()
+                                + ", distributedCounter = " + SharedParamManager.getDistributedCounter(id));
+                    }
+                    if (log.isTraceEnabled()) {
+                        log.trace(
+                                "When running syncing throttle counter params: localCounter increased to " + localCounter);
+                    }
 
-                callerContext.resetLocalCounter();
-                Long distributedCounter = SharedParamManager.addAndGetDistributedCounter(id, localCounter);
+                    // Add to distributed counter BEFORE resetting local - critical for fallback
+                    Long distributedCounter = SharedParamManager.addAndGetDistributedCounter(id, localCounter);
 
-                if (log.isTraceEnabled()) {
-                    log.trace("When running syncing throttle counter params: Finally distributedCounter = "
-                            + distributedCounter);
-                }
+                    if (log.isTraceEnabled()) {
+                        log.trace("When running syncing throttle counter params: Finally distributedCounter = "
+                                + distributedCounter);
+                    }
 
-                //Update instance's global counter value with distributed counter
-                long oldGlobalCounter = callerContext.getGlobalCounter();
-                callerContext.setGlobalCounter(distributedCounter);
-                if (log.isTraceEnabled()) {
-                    log.trace("When running syncing throttle counter params: Finally globalCounter increased from "
-                            + oldGlobalCounter + " to " + callerContext.getGlobalCounter());
-                    log.trace("When running syncing throttle counter params: finally local counter reset to 0");
+                    //Update instance's global counter value with distributed counter
+                    long oldGlobalCounter = callerContext.getGlobalCounter();
+                    callerContext.setGlobalCounter(distributedCounter);
+                    
+                    // Only reset local counter AFTER successful sync to Redis
+                    callerContext.resetLocalCounter();
+                    if (log.isDebugEnabled()) {
+                        log.debug("Successfully synced counter params for callerContext: " + callerContext.getId() + ". Local counter reset after sync.");
+                    }
+                    
+                    if (log.isTraceEnabled()) {
+                        log.trace("When running syncing throttle counter params: Finally globalCounter increased from "
+                                + oldGlobalCounter + " to " + callerContext.getGlobalCounter());
+                        log.trace("When running syncing throttle counter params: finally local counter reset to 0");
+                    }
+                } catch (Exception e) {
+                    log.error("Could not sync throttle counter params to distributed storage. Falling back to local processing.", e);
                 }
             } else {
                 if (log.isTraceEnabled()) {
@@ -813,100 +895,105 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
             }
 
             String callerId = callerContext.getId();
-            long sharedTimestamp = SharedParamManager.getSharedTimestamp(
-                    callerContext.getId());  // this will be set 0 if the redis key-value pair is not available
-            if (log.isTraceEnabled()) {
-                log.trace("Got sharedTimestamp from redis. sharedTimestamp = " + sharedTimestamp);
-            }
-            long sharedNextWindow = sharedTimestamp + callerContext.getUnitTime();
-            long localFirstAccessTime = callerContext.getFirstAccessTime();
-
-            if (log.isTraceEnabled()) {
-                log.trace("Initial: sharedTimestamp = " + sharedTimestamp + ", sharedNextWindow = " + sharedNextWindow
-                        + ", localFirstAccessTime = " + localFirstAccessTime + ", unit time = "
-                        + callerContext.getUnitTime());
-            }
-
-            long distributedCounter = SharedParamManager.getDistributedCounter(callerId);
-            if (log.isTraceEnabled()) {
-                log.trace("When running syncing throttle window params : distributedCounter = " + distributedCounter
-                        + ", localCounter = " + callerContext.getLocalCounter() + ", globalCounter = "
-                        + callerContext.getGlobalCounter() + ", distributedCounter = " + distributedCounter
-                        + ", localHits = " + callerContext.getLocalHits());
-            }
-            // If this is a new time window. If a sync msg is received from another node, this will be true
-            if (localFirstAccessTime < sharedTimestamp) {
+            
+            try {
+                long sharedTimestamp = SharedParamManager.getSharedTimestamp(
+                        callerContext.getId());  // this will be set 0 if the redis key-value pair is not available
                 if (log.isTraceEnabled()) {
-                    log.trace(
-                            "When running syncing throttle window params: this is a new time window and a sync msg is received from "
-                                    + "another node");
+                    log.trace("Got sharedTimestamp from redis. sharedTimestamp = " + sharedTimestamp);
                 }
-                callerContext.setFirstAccessTime(sharedTimestamp);
-                callerContext.setNextTimeWindow(sharedNextWindow);
-                callerContext.setGlobalCounter(distributedCounter);
-                if (!isInvocationFlow) {
-                    // if localCounter was set 0 here, that premature throttling won't happen. But can't set 0 here too
-                    // since then already received request that should be counted will be lost.
-                    callerContext.setLocalHits(0);
-                }
-                if (log.isTraceEnabled()) {
-                    log.trace("When running syncing throttle window params: Setting time windows of caller context "
-                            + callerId + " when window already set at another GW");
-                }
-            /* If some request comes to a nodes after some node set the shared timestamp then this check whether the
-            first access time of local is in between the global time window if so this will set local caller context
-            time window to global */
-            } else if (localFirstAccessTime == sharedTimestamp) {
-                // if this node itself set the shared timestamp or if another node-sent sync msg had triggered setting
-                // sharedTimestamp and sharedTimestamp from that other node
-                if (log.isTraceEnabled()) {
-                    log.trace("When running syncing throttle window params: localFirstAccessTime == sharedTimestamp");
-                }
-                callerContext.setGlobalCounter(distributedCounter);
-                if (log.isTraceEnabled()) {
-                    log.trace("When running syncing throttle window params: globalCounter = "
-                            + callerContext.getGlobalCounter());
-                }
-            } else if (localFirstAccessTime > sharedTimestamp && localFirstAccessTime < sharedNextWindow) {
-                // if another node had set the shared timestamp, earlier
-                callerContext.setFirstAccessTime(sharedTimestamp);
-                callerContext.setNextTimeWindow(sharedNextWindow);
-                if (log.isTraceEnabled()) {
-                    log.trace("When running syncing throttle window params: distributedCounter = " + distributedCounter);
-                }
-                callerContext.setGlobalCounter(distributedCounter);
-                if (log.isTraceEnabled()) {
-                    log.trace("When running syncing throttle window params: Global Counter = "
-                            + callerContext.getGlobalCounter());
-                }
-            /* If above conditions are not met, this is the place where node set new window if
-             global first access time is 0, then it will be the beginning of the throttle time
-             window so present node will set shared timestamp and the distributed counter. Also, if time
-             window expired this will be the node who set the next time window starting time */
-            } else {
-                /* In the flow this is the first time that reaches throttleWindowParamSync method. And then at
-                 canAccessIfUnitTimeOver flow, the first call after the sharedTimestamp is removed from redis. */
-                if (log.isTraceEnabled()) {
-                    log.trace("Setting Shared Timestamp");
-                }
-                SharedParamManager.setSharedTimestampWithExpiry(callerId, localFirstAccessTime,
-                        callerContext.getUnitTime() + localFirstAccessTime);
-                if (log.isTraceEnabled()) {
-                    log.trace("Setting Distributed Counter With Expiry");
-                }
-                SharedParamManager.setDistributedCounterWithExpiry(callerId, 0,
-                        callerContext.getUnitTime() + localFirstAccessTime);
+                long sharedNextWindow = sharedTimestamp + callerContext.getUnitTime();
+                long localFirstAccessTime = callerContext.getFirstAccessTime();
 
                 if (log.isTraceEnabled()) {
-                    log.trace("Finished setting distributed counter. Set value 0. ");
-                    log.trace("When running syncing throttle window params: Completed resetting time window of "
-                            + callerId);
+                    log.trace("Initial: sharedTimestamp = " + sharedTimestamp + ", sharedNextWindow = " + sharedNextWindow
+                            + ", localFirstAccessTime = " + localFirstAccessTime + ", unit time = "
+                            + callerContext.getUnitTime());
                 }
-            }
-            if (log.isTraceEnabled()) {
-                log.trace("When running syncing throttle window params :" + SharedParamManager.getSharedTimestamp(
-                        callerId) + ", sharedNextWindow = " + sharedNextWindow + ", localFirstAccessTime = "
-                        + localFirstAccessTime);
+
+                long distributedCounter = SharedParamManager.getDistributedCounter(callerId);
+                if (log.isTraceEnabled()) {
+                    log.trace("When running syncing throttle window params : distributedCounter = " + distributedCounter
+                            + ", localCounter = " + callerContext.getLocalCounter() + ", globalCounter = "
+                            + callerContext.getGlobalCounter() + ", distributedCounter = " + distributedCounter
+                            + ", localHits = " + callerContext.getLocalHits());
+                }
+                // If this is a new time window. If a sync msg is received from another node, this will be true
+                if (localFirstAccessTime < sharedTimestamp) {
+                    if (log.isTraceEnabled()) {
+                        log.trace(
+                                "When running syncing throttle window params: this is a new time window and a sync msg is received from "
+                                        + "another node");
+                    }
+                    callerContext.setFirstAccessTime(sharedTimestamp);
+                    callerContext.setNextTimeWindow(sharedNextWindow);
+                    callerContext.setGlobalCounter(distributedCounter);
+                    if (!isInvocationFlow) {
+                        // if localCounter was set 0 here, that premature throttling won't happen. But can't set 0 here too
+                        // since then already received request that should be counted will be lost.
+                        callerContext.setLocalHits(0);
+                    }
+                    if (log.isTraceEnabled()) {
+                        log.trace("When running syncing throttle window params: Setting time windows of caller context "
+                                + callerId + " when window already set at another GW");
+                    }
+                /* If some request comes to a nodes after some node set the shared timestamp then this check whether the
+                first access time of local is in between the global time window if so this will set local caller context
+                time window to global */
+                } else if (localFirstAccessTime == sharedTimestamp) {
+                    // if this node itself set the shared timestamp or if another node-sent sync msg had triggered setting
+                    // sharedTimestamp and sharedTimestamp from that other node
+                    if (log.isTraceEnabled()) {
+                        log.trace("When running syncing throttle window params: localFirstAccessTime == sharedTimestamp");
+                    }
+                    callerContext.setGlobalCounter(distributedCounter);
+                    if (log.isTraceEnabled()) {
+                        log.trace("When running syncing throttle window params: globalCounter = "
+                                + callerContext.getGlobalCounter());
+                    }
+                } else if (localFirstAccessTime > sharedTimestamp && localFirstAccessTime < sharedNextWindow) {
+                    // if another node had set the shared timestamp, earlier
+                    callerContext.setFirstAccessTime(sharedTimestamp);
+                    callerContext.setNextTimeWindow(sharedNextWindow);
+                    if (log.isTraceEnabled()) {
+                        log.trace("When running syncing throttle window params: distributedCounter = " + distributedCounter);
+                    }
+                    callerContext.setGlobalCounter(distributedCounter);
+                    if (log.isTraceEnabled()) {
+                        log.trace("When running syncing throttle window params: Global Counter = "
+                                + callerContext.getGlobalCounter());
+                    }
+                /* If above conditions are not met, this is the place where node set new window if
+                 global first access time is 0, then it will be the beginning of the throttle time
+                 window so present node will set shared timestamp and the distributed counter. Also, if time
+                 window expired this will be the node who set the next time window starting time */
+                } else {
+                    /* In the flow this is the first time that reaches throttleWindowParamSync method. And then at
+                     canAccessIfUnitTimeOver flow, the first call after the sharedTimestamp is removed from redis. */
+                    if (log.isTraceEnabled()) {
+                        log.trace("Setting Shared Timestamp");
+                    }
+                    SharedParamManager.setSharedTimestampWithExpiry(callerId, localFirstAccessTime,
+                            callerContext.getUnitTime() + localFirstAccessTime);
+                    if (log.isTraceEnabled()) {
+                        log.trace("Setting Distributed Counter With Expiry");
+                    }
+                    SharedParamManager.setDistributedCounterWithExpiry(callerId, 0,
+                            callerContext.getUnitTime() + localFirstAccessTime);
+
+                    if (log.isTraceEnabled()) {
+                        log.trace("Finished setting distributed counter. Set value 0. ");
+                        log.trace("When running syncing throttle window params: Completed resetting time window of "
+                                + callerId);
+                    }
+                }
+                if (log.isTraceEnabled()) {
+                    log.trace("When running syncing throttle window params :" + SharedParamManager.getSharedTimestamp(
+                            callerId) + ", sharedNextWindow = " + sharedNextWindow + ", localFirstAccessTime = "
+                            + localFirstAccessTime);
+                }
+            } catch (Exception e) {
+                log.error("Could not sync throttle window params to distributed storage. Falling back to local processing.", e);
             }
             if (log.isDebugEnabled()) {
                 log.debug("Latency for running syncing throttle window params: " + (System.currentTimeMillis()
