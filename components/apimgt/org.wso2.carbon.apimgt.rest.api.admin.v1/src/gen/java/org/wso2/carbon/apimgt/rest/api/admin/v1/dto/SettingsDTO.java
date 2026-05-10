@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SettingsGatewayConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SettingsKeyManagerConfigurationDTO;
 import javax.validation.constraints.*;
@@ -23,7 +24,7 @@ import javax.validation.Valid;
 
 
 public class SettingsDTO   {
-  
+
     private List<String> scopes = new ArrayList<String>();
     private List<String> gatewayTypes = new ArrayList<String>();
     private Boolean isJWTEnabledForLoginTokens = false;
@@ -35,6 +36,8 @@ public class SettingsDTO   {
     private Boolean isGatewayNotificationEnabled = false;
     private List<String> platformGatewayVersions = new ArrayList<String>();
     private Boolean consumptionExportEnabled = null;
+    private Boolean applicationSharingEnabled = null;
+    private List<Map<String, Object>> applicationAttributes = new ArrayList<Map<String, Object>>();
 
   /**
    **/
@@ -43,7 +46,7 @@ public class SettingsDTO   {
     return this;
   }
 
-  
+
   @ApiModelProperty(value = "")
   @JsonProperty("scopes")
   public List<String> getScopes() {
@@ -60,7 +63,7 @@ public class SettingsDTO   {
     return this;
   }
 
-  
+
   @ApiModelProperty(value = "")
   @JsonProperty("gatewayTypes")
   public List<String> getGatewayTypes() {
@@ -77,7 +80,7 @@ public class SettingsDTO   {
     return this;
   }
 
-  
+
   @ApiModelProperty(value = "")
   @JsonProperty("IsJWTEnabledForLoginTokens")
   public Boolean isIsJWTEnabledForLoginTokens() {
@@ -88,14 +91,14 @@ public class SettingsDTO   {
   }
 
   /**
-   * Is Organization-based access control configuration enabled 
+   * Is Organization-based access control configuration enabled
    **/
   public SettingsDTO orgAccessControlEnabled(Boolean orgAccessControlEnabled) {
     this.orgAccessControlEnabled = orgAccessControlEnabled;
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "true", value = "Is Organization-based access control configuration enabled ")
   @JsonProperty("orgAccessControlEnabled")
   public Boolean isOrgAccessControlEnabled() {
@@ -112,7 +115,7 @@ public class SettingsDTO   {
     return this;
   }
 
-  
+
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("keyManagerConfiguration")
@@ -130,7 +133,7 @@ public class SettingsDTO   {
     return this;
   }
 
-  
+
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("gatewayConfiguration")
@@ -149,7 +152,7 @@ public class SettingsDTO   {
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "false", value = "To determine whether analytics is enabled or not")
   @JsonProperty("analyticsEnabled")
   public Boolean isAnalyticsEnabled() {
@@ -167,7 +170,7 @@ public class SettingsDTO   {
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "false", value = "To determine whether the transaction counter is enabled or not")
   @JsonProperty("transactionCounterEnable")
   public Boolean isTransactionCounterEnable() {
@@ -185,7 +188,7 @@ public class SettingsDTO   {
     return this;
   }
 
-  
+
   @ApiModelProperty(value = "Is Gateway Notification Enabled")
   @JsonProperty("isGatewayNotificationEnabled")
   public Boolean isIsGatewayNotificationEnabled() {
@@ -203,7 +206,7 @@ public class SettingsDTO   {
     return this;
   }
 
-  
+
   @ApiModelProperty(value = "API Platform Gateway versions for the quick-start guide.")
   @JsonProperty("platformGatewayVersions")
   public List<String> getPlatformGatewayVersions() {
@@ -221,7 +224,7 @@ public class SettingsDTO   {
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "false", value = "Whether the ConsumptionDataExportService OSGi service is available")
   @JsonProperty("consumptionExportEnabled")
   public Boolean isConsumptionExportEnabled() {
@@ -229,6 +232,43 @@ public class SettingsDTO   {
   }
   public void setConsumptionExportEnabled(Boolean consumptionExportEnabled) {
     this.consumptionExportEnabled = consumptionExportEnabled;
+  }
+
+  /**
+   * Whether application sharing (multi-group) is enabled
+   **/
+  public SettingsDTO applicationSharingEnabled(Boolean applicationSharingEnabled) {
+    this.applicationSharingEnabled = applicationSharingEnabled;
+    return this;
+  }
+
+
+  @ApiModelProperty(example = "false", value = "Whether application sharing (multi-group) is enabled")
+  @JsonProperty("applicationSharingEnabled")
+  public Boolean isApplicationSharingEnabled() {
+    return applicationSharingEnabled;
+  }
+  public void setApplicationSharingEnabled(Boolean applicationSharingEnabled) {
+    this.applicationSharingEnabled = applicationSharingEnabled;
+  }
+
+  /**
+   * Custom application attributes defined in the deployment configuration
+   **/
+  public SettingsDTO applicationAttributes(List<Map<String, Object>> applicationAttributes) {
+    this.applicationAttributes = applicationAttributes;
+    return this;
+  }
+
+
+  @ApiModelProperty(value = "Custom application attributes defined in the deployment configuration")
+      @Valid
+  @JsonProperty("applicationAttributes")
+  public List<Map<String, Object>> getApplicationAttributes() {
+    return applicationAttributes;
+  }
+  public void setApplicationAttributes(List<Map<String, Object>> applicationAttributes) {
+    this.applicationAttributes = applicationAttributes;
   }
 
 
@@ -251,19 +291,21 @@ public class SettingsDTO   {
         Objects.equals(transactionCounterEnable, settings.transactionCounterEnable) &&
         Objects.equals(isGatewayNotificationEnabled, settings.isGatewayNotificationEnabled) &&
         Objects.equals(platformGatewayVersions, settings.platformGatewayVersions) &&
-        Objects.equals(consumptionExportEnabled, settings.consumptionExportEnabled);
+        Objects.equals(consumptionExportEnabled, settings.consumptionExportEnabled) &&
+        Objects.equals(applicationSharingEnabled, settings.applicationSharingEnabled) &&
+        Objects.equals(applicationAttributes, settings.applicationAttributes);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(scopes, gatewayTypes, isJWTEnabledForLoginTokens, orgAccessControlEnabled, keyManagerConfiguration, gatewayConfiguration, analyticsEnabled, transactionCounterEnable, isGatewayNotificationEnabled, platformGatewayVersions, consumptionExportEnabled);
+    return Objects.hash(scopes, gatewayTypes, isJWTEnabledForLoginTokens, orgAccessControlEnabled, keyManagerConfiguration, gatewayConfiguration, analyticsEnabled, transactionCounterEnable, isGatewayNotificationEnabled, platformGatewayVersions, consumptionExportEnabled, applicationSharingEnabled, applicationAttributes);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class SettingsDTO {\n");
-    
+
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    gatewayTypes: ").append(toIndentedString(gatewayTypes)).append("\n");
     sb.append("    isJWTEnabledForLoginTokens: ").append(toIndentedString(isJWTEnabledForLoginTokens)).append("\n");
@@ -275,6 +317,8 @@ public class SettingsDTO   {
     sb.append("    isGatewayNotificationEnabled: ").append(toIndentedString(isGatewayNotificationEnabled)).append("\n");
     sb.append("    platformGatewayVersions: ").append(toIndentedString(platformGatewayVersions)).append("\n");
     sb.append("    consumptionExportEnabled: ").append(toIndentedString(consumptionExportEnabled)).append("\n");
+    sb.append("    applicationSharingEnabled: ").append(toIndentedString(applicationSharingEnabled)).append("\n");
+    sb.append("    applicationAttributes: ").append(toIndentedString(applicationAttributes)).append("\n");
     sb.append("}");
     return sb.toString();
   }

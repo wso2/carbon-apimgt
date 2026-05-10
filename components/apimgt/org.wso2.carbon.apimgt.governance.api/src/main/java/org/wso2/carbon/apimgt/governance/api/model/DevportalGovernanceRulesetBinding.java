@@ -30,6 +30,11 @@ public class DevportalGovernanceRulesetBinding {
     private String bindingId;
     private String templateId;
     private String rulesetId;
+    private String rulesetName;
+    private String rulesetDescription;
+    private String documentationLink;
+    private String ruleType;
+    private String artifactType;
     private int bindingOrder;
     private String createdBy;
     private String createdTime;
@@ -63,6 +68,56 @@ public class DevportalGovernanceRulesetBinding {
     public void setRulesetId(String rulesetId) {
 
         this.rulesetId = rulesetId;
+    }
+
+    public String getRulesetName() {
+
+        return rulesetName;
+    }
+
+    public void setRulesetName(String rulesetName) {
+
+        this.rulesetName = rulesetName;
+    }
+
+    public String getRulesetDescription() {
+
+        return rulesetDescription;
+    }
+
+    public void setRulesetDescription(String rulesetDescription) {
+
+        this.rulesetDescription = rulesetDescription;
+    }
+
+    public String getDocumentationLink() {
+
+        return documentationLink;
+    }
+
+    public void setDocumentationLink(String documentationLink) {
+
+        this.documentationLink = documentationLink;
+    }
+
+    public String getRuleType() {
+
+        return ruleType;
+    }
+
+    public void setRuleType(String ruleType) {
+
+        this.ruleType = ruleType;
+    }
+
+    public String getArtifactType() {
+
+        return artifactType;
+    }
+
+    public void setArtifactType(String artifactType) {
+
+        this.artifactType = artifactType;
     }
 
     public int getBindingOrder() {

@@ -58,6 +58,9 @@ public class ArtifactGovernanceFactory {
         if (ArtifactType.API.equals(artifactType)) {
             return new APIGovernanceHandler();
         }
+        if (ArtifactType.APPLICATION.equals(artifactType)) {
+            return new ApplicationGovernanceHandler();
+        }
         throw new APIMGovernanceException(APIMGovExceptionCodes.INVALID_ARTIFACT_TYPE, artifactType);
     }
 

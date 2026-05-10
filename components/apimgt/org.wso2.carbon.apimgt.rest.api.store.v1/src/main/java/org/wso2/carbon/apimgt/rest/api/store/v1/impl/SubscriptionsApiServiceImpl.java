@@ -53,7 +53,6 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.AdditionalSubscriptionInfoMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.SubscriptionMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.store.v1.utils.DevportalGovernanceValidationUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
@@ -191,6 +190,10 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             String userOrganization = RestApiUtil.getValidatedSubjectOrganization(messageContext);
             apiConsumer = RestApiCommonUtil.getConsumer(username, userOrganization);
+            // NOTE: Devportal Governance no longer enforces subscription-level rules.
+            // Subscriptions are out of scope for the current iteration of the feature; the
+            // helpers in TemplateDefaultsApplier and DevportalGovernanceValidationUtil are
+            // retained for binary compat with older snapshots but are no longer wired here.
             String applicationId = body.getApplicationId();
 
             //check whether user is permitted to access the API. If the API does not exist,
@@ -242,8 +245,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
 
             apiTypeWrapper.setTier(body.getThrottlingPolicy());
 
-            DevportalGovernanceValidationUtil.validateSubscriptionCreate(application, body, apiTypeWrapper,
-                    organization, log);
+            // (Subscription-level governance enforcement intentionally not invoked — see note above.)
             SubscriptionResponse subscriptionResponse = apiConsumer
                     .addSubscription(apiTypeWrapper, username, application);
             SubscribedAPI addedSubscribedAPI = apiConsumer

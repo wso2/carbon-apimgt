@@ -167,9 +167,8 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "Unlimited", required = true, value = "")
+  @ApiModelProperty(example = "Unlimited", value = "")
   @JsonProperty("throttlingPolicy")
-  @NotNull
   public String getThrottlingPolicy() {
     return throttlingPolicy;
   }

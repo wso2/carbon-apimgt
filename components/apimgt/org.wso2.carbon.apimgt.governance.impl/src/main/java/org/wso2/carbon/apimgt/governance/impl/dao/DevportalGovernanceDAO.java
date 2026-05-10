@@ -60,6 +60,8 @@ public class DevportalGovernanceDAO {
             .configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
     private static final TypeReference<Map<String, Object>> FORM_CONFIG_TYPE =
             new TypeReference<Map<String, Object>>() { };
+    private static final TypeReference<List<String>> TAGS_TYPE =
+            new TypeReference<List<String>>() { };
     private static final char[] HEX_ARRAY = "0123456789abcdef".toCharArray();
 
     private DevportalGovernanceDAO() {
@@ -285,6 +287,67 @@ public class DevportalGovernanceDAO {
     }
 
     /**
+     * Get all stored Devportal Governance templates without resolving global templates into each organization.
+     *
+     * @return template list
+     * @throws APIMGovernanceException if an error occurs while retrieving templates
+     */
+    public List<DevportalGovernanceTemplate> getAllTemplates() throws APIMGovernanceException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_ALL_DEVPORTAL_TEMPLATES);
+             ResultSet resultSet = prepStmt.executeQuery()) {
+            List<DevportalGovernanceTemplate> templates = new ArrayList<>();
+            while (resultSet.next()) {
+                templates.add(getTemplate(resultSet));
+            }
+            return templates;
+        } catch (JsonProcessingException | SQLException e) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_DEVPORTAL_TEMPLATES, e,
+                    "all");
+        }
+    }
+
+    /**
+     * Update only the template form configuration.
+     *
+     * @param templateId   template ID
+     * @param formConfig   reconciled form config
+     * @param organization organization
+     * @param updatedBy    updated by
+     * @throws APIMGovernanceException if an error occurs while updating the template
+     */
+    public void updateTemplateFormConfig(String templateId, Map<String, Object> formConfig, String organization,
+                                         String updatedBy) throws APIMGovernanceException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try {
+                connection.setAutoCommit(false);
+                DevportalGovernanceTemplate template = getTemplateById(connection, templateId, organization);
+                if (template == null) {
+                    rollbackConnection(connection,
+                            "Devportal Governance template not found while updating form config");
+                    throw new APIMGovernanceException(APIMGovExceptionCodes.DEVPORTAL_TEMPLATE_NOT_FOUND, templateId);
+                }
+                template.setFormConfig(formConfig);
+                template.setUpdatedBy(updatedBy);
+                updateTemplateMetadata(connection, templateId, template, template.getOrganization(),
+                        new Timestamp(System.currentTimeMillis()));
+                connection.commit();
+            } catch (JsonProcessingException | NoSuchAlgorithmException | SQLException e) {
+                rollbackConnection(connection, "Error while updating Devportal Governance template form config");
+                throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_UPDATING_DEVPORTAL_TEMPLATE, e,
+                        templateId);
+            } finally {
+                APIMgtDBUtil.setAutoCommit(connection, true);
+            }
+        } catch (SQLException e) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_UPDATING_DEVPORTAL_TEMPLATE, e,
+                    templateId);
+        }
+    }
+
+    /**
      * Check whether a ruleset belongs to the requested organization.
      *
      * @param rulesetId    ruleset ID
@@ -321,8 +384,11 @@ public class DevportalGovernanceDAO {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             DevportalGovernanceTemplate template = resolveSnapshotTemplate(connection, templateId, organization);
             if (template == null) {
+                if (templateId == null) {
+                    return new ArrayList<>();
+                }
                 throw new APIMGovernanceException(APIMGovExceptionCodes.DEVPORTAL_TEMPLATE_NOT_FOUND,
-                        templateId == null ? "default" : templateId);
+                        templateId);
             }
             return getRulesetSnapshotsForTemplate(connection, null, template.getId());
         } catch (JsonProcessingException | NoSuchAlgorithmException | SQLException e) {
@@ -353,8 +419,13 @@ public class DevportalGovernanceDAO {
                 connection.setAutoCommit(false);
                 DevportalGovernanceTemplate template = resolveSnapshotTemplate(connection, templateId, organization);
                 if (template == null) {
+                    if (templateId == null) {
+                        deleteApplicationSnapshot(connection, applicationId);
+                        connection.commit();
+                        return null;
+                    }
                     throw new APIMGovernanceException(APIMGovExceptionCodes.DEVPORTAL_TEMPLATE_NOT_FOUND,
-                            templateId == null ? "default" : templateId);
+                            templateId);
                 }
                 deleteApplicationSnapshot(connection, applicationId);
                 String snapshotId = APIMGovernanceUtil.generateUUID();
@@ -429,14 +500,16 @@ public class DevportalGovernanceDAO {
             prepStmt.setString(1, template.getId());
             prepStmt.setString(2, template.getName());
             prepStmt.setString(3, template.getDescription());
-            prepStmt.setString(4, formConfig);
-            prepStmt.setString(5, formConfigHash);
-            prepStmt.setString(6, template.getStatus());
-            prepStmt.setInt(7, template.isDefault() ? 1 : 0);
-            prepStmt.setInt(8, template.isGlobal() ? 1 : 0);
-            prepStmt.setString(9, organization);
-            prepStmt.setString(10, template.getCreatedBy());
-            prepStmt.setTimestamp(11, createdTime);
+            prepStmt.setString(4, getTagsAsJson(template.getTags()));
+            prepStmt.setString(5, template.getIcon());
+            prepStmt.setString(6, formConfig);
+            prepStmt.setString(7, formConfigHash);
+            prepStmt.setString(8, template.getStatus());
+            prepStmt.setInt(9, template.isDefault() ? 1 : 0);
+            prepStmt.setInt(10, template.isGlobal() ? 1 : 0);
+            prepStmt.setString(11, organization);
+            prepStmt.setString(12, template.getCreatedBy());
+            prepStmt.setTimestamp(13, createdTime);
             prepStmt.executeUpdate();
         }
         template.setFormConfigHash(formConfigHash);
@@ -453,15 +526,17 @@ public class DevportalGovernanceDAO {
         try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.UPDATE_DEVPORTAL_TEMPLATE)) {
             prepStmt.setString(1, template.getName());
             prepStmt.setString(2, template.getDescription());
-            prepStmt.setString(3, formConfig);
-            prepStmt.setString(4, formConfigHash);
-            prepStmt.setString(5, template.getStatus());
-            prepStmt.setInt(6, template.isDefault() ? 1 : 0);
-            prepStmt.setInt(7, template.isGlobal() ? 1 : 0);
-            prepStmt.setString(8, template.getUpdatedBy());
-            prepStmt.setTimestamp(9, updatedTime);
-            prepStmt.setString(10, templateId);
-            prepStmt.setString(11, organization);
+            prepStmt.setString(3, getTagsAsJson(template.getTags()));
+            prepStmt.setString(4, template.getIcon());
+            prepStmt.setString(5, formConfig);
+            prepStmt.setString(6, formConfigHash);
+            prepStmt.setString(7, template.getStatus());
+            prepStmt.setInt(8, template.isDefault() ? 1 : 0);
+            prepStmt.setInt(9, template.isGlobal() ? 1 : 0);
+            prepStmt.setString(10, template.getUpdatedBy());
+            prepStmt.setTimestamp(11, updatedTime);
+            prepStmt.setString(12, templateId);
+            prepStmt.setString(13, organization);
             prepStmt.executeUpdate();
         }
         template.setFormConfigHash(formConfigHash);
@@ -759,6 +834,8 @@ public class DevportalGovernanceDAO {
         template.setId(resultSet.getString("TEMPLATE_ID"));
         template.setName(resultSet.getString("NAME"));
         template.setDescription(resultSet.getString("DESCRIPTION"));
+        template.setTags(getTagsFromJson(resultSet.getString("TAGS")));
+        template.setIcon(resultSet.getString("ICON"));
         template.setFormConfig(getFormConfigFromJson(resultSet.getString("FORM_CONFIG")));
         template.setFormConfigHash(resultSet.getString("FORM_CONFIG_HASH"));
         template.setStatus(resultSet.getString("STATUS"));
@@ -790,6 +867,11 @@ public class DevportalGovernanceDAO {
                     binding.setBindingId(bindingId);
                     binding.setTemplateId(resultSet.getString("TEMPLATE_ID"));
                     binding.setRulesetId(resultSet.getString("RULESET_ID"));
+                    binding.setRulesetName(resultSet.getString("RULESET_NAME"));
+                    binding.setRulesetDescription(resultSet.getString("RULESET_DESCRIPTION"));
+                    binding.setDocumentationLink(resultSet.getString("DOCUMENTATION_LINK"));
+                    binding.setRuleType(resultSet.getString("RULE_TYPE"));
+                    binding.setArtifactType(resultSet.getString("ARTIFACT_TYPE"));
                     binding.setBindingOrder(resultSet.getInt("BINDING_ORDER"));
                     binding.setCreatedBy(resultSet.getString("CREATED_BY"));
                     Timestamp createdTime = resultSet.getTimestamp("CREATED_TIME");
@@ -920,6 +1002,22 @@ public class DevportalGovernanceDAO {
     private Map<String, Object> getFormConfigFromJson(String formConfig) throws JsonProcessingException {
 
         return JSON_MAPPER.readValue(formConfig, FORM_CONFIG_TYPE);
+    }
+
+    private String getTagsAsJson(List<String> tags) throws JsonProcessingException {
+
+        if (tags == null || tags.isEmpty()) {
+            return "[]";
+        }
+        return JSON_MAPPER.writeValueAsString(tags);
+    }
+
+    private List<String> getTagsFromJson(String tagsJson) throws JsonProcessingException {
+
+        if (tagsJson == null || tagsJson.isEmpty() || "[]".equals(tagsJson)) {
+            return new ArrayList<>();
+        }
+        return JSON_MAPPER.readValue(tagsJson, TAGS_TYPE);
     }
 
     private String getSha256Hash(String content) throws NoSuchAlgorithmException {

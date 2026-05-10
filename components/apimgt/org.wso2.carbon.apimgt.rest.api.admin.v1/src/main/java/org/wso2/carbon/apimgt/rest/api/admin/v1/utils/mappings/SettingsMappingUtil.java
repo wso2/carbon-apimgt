@@ -66,6 +66,7 @@ public class SettingsMappingUtil {
         settingsDTO.setPlatformGatewayVersions(resolvePlatformGatewayVersions());
         settingsDTO.setConsumptionExportEnabled(
                 ServiceReferenceHolder.getInstance().getConsumptionDataExportService() != null);
+        settingsDTO.setApplicationSharingEnabled(APIUtil.isMultiGroupAppSharingEnabled());
         return settingsDTO;
     }
 

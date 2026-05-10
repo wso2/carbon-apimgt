@@ -30,10 +30,13 @@ import java.util.Map;
 public class DevportalGovernanceTemplate {
 
     public static final String STATUS_DRAFT = "DRAFT";
+    public static final String STATUS_PUBLISHED = "PUBLISHED";
 
     private String id;
     private String name;
     private String description;
+    private List<String> tags = new ArrayList<>();
+    private String icon;
     private Map<String, Object> formConfig = new HashMap<>();
     private String formConfigHash;
     private String status = STATUS_DRAFT;
@@ -74,6 +77,26 @@ public class DevportalGovernanceTemplate {
     public void setDescription(String description) {
 
         this.description = description;
+    }
+
+    public List<String> getTags() {
+
+        return new ArrayList<>(tags);
+    }
+
+    public void setTags(List<String> tags) {
+
+        this.tags = tags == null ? new ArrayList<>() : new ArrayList<>(tags);
+    }
+
+    public String getIcon() {
+
+        return icon;
+    }
+
+    public void setIcon(String icon) {
+
+        this.icon = icon;
     }
 
     public Map<String, Object> getFormConfig() {

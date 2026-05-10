@@ -1,0 +1,64 @@
+# Copyright (c) 2026, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
+#
+# This software is the property of WSO2 LLC. and its suppliers, if any.
+# Dissemination of any information or reproduction of any material contained
+# herein in any form is strictly forbidden, unless permitted by WSO2 expressly.
+# You may not alter or remove any copyright or other notice from copies of this content.
+
+name: WSO2 DevPortal Application Baseline
+description: >-
+  Baseline metadata hygiene for Devportal applications: naming convention, mandatory
+  description, and rejection of placeholder values. Targets the canonical sync
+  payload root keys: application.name, application.description, application.groups,
+  application.attributes.<key>.
+ruleCategory: SPECTRAL
+ruleType: APP_INFO
+artifactType: APPLICATION
+provider: WSO2
+rulesetContent:
+  rules:
+
+    'application-naming-convention':
+      given:
+        - '$.application.name'
+      severity: error
+      then:
+        function: pattern
+        functionOptions:
+          match: '^[A-Za-z][A-Za-z0-9 _-]{2,49}$'
+      message: >-
+        Application name must be 3-50 characters, start with a letter, and contain
+        only letters, digits, spaces, hyphens, or underscores.
+
+    'application-description-required':
+      given:
+        - '$.application.description'
+      severity: error
+      then:
+        function: truthy
+      message: >-
+        Application description is required for traceability.
+
+    'application-description-min-length':
+      given:
+        - '$.application.description'
+      severity: warn
+      then:
+        function: length
+        functionOptions:
+          min: 10
+      message: >-
+        Application description should be at least 10 characters so reviewers
+        understand what the application is for.
+
+    'application-no-test-placeholder-name':
+      given:
+        - '$.application.name'
+      severity: error
+      then:
+        function: pattern
+        functionOptions:
+          notMatch: '(?i)^(test|sample|temp|untitled)[-_0-9]*$'
+      message: >-
+        Application names like 'test1', 'sample', or 'untitled' are not allowed for
+        production-eligible applications.

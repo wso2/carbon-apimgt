@@ -24,11 +24,14 @@ import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.DevportalGovernanceTemplate;
 import org.wso2.carbon.apimgt.governance.api.model.DevportalGovernanceTemplateList;
+import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 import org.wso2.carbon.apimgt.governance.impl.DevportalGovernanceManager;
 import org.wso2.carbon.apimgt.governance.rest.api.TemplatesApiService;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.DevportalGovernanceTemplateDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.DevportalGovernanceTemplateListDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.PaginationDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.TemplateDefaultViolationDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.TemplateDefaultViolationListDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.mappings.TemplateMappingUtil;
 import org.wso2.carbon.apimgt.governance.rest.api.util.APIMGovernanceAPIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
@@ -146,6 +149,30 @@ public class TemplatesApiServiceImpl implements TemplatesApiService {
         DevportalGovernanceTemplateListDTO paginatedTemplateList =
                 getPaginatedTemplates(templateList, limit, offset);
         return Response.status(Response.Status.OK).entity(paginatedTemplateList).build();
+    }
+
+    @Override
+    public Response validateTemplateDefaults(String templateId, MessageContext messageContext)
+            throws APIMGovernanceException {
+
+        String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
+        DevportalGovernanceManager manager = new DevportalGovernanceManager();
+        List<RuleViolation> violations = manager.validateTemplateDefaults(templateId, organization);
+
+        TemplateDefaultViolationListDTO result = new TemplateDefaultViolationListDTO();
+        result.setHasViolations(!violations.isEmpty());
+        for (RuleViolation v : violations) {
+            TemplateDefaultViolationDTO dto = new TemplateDefaultViolationDTO();
+            dto.setRuleName(v.getRuleName());
+            dto.setRulesetId(v.getRulesetId());
+            dto.setViolatedPath(v.getViolatedPath());
+            dto.setMessage(v.getRuleMessage());
+            if (v.getSeverity() != null) {
+                dto.setSeverity(TemplateDefaultViolationDTO.SeverityEnum.fromValue(v.getSeverity().toString()));
+            }
+            result.getViolations().add(dto);
+        }
+        return Response.status(Response.Status.OK).entity(result).build();
     }
 
     private DevportalGovernanceTemplateListDTO getPaginatedTemplates(

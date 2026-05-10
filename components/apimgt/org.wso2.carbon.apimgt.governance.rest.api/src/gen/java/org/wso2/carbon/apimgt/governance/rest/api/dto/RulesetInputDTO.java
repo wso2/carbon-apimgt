@@ -64,7 +64,10 @@ return null;
     public enum RuleTypeEnum {
         API_METADATA("API_METADATA"),
         API_DEFINITION("API_DEFINITION"),
-        API_DOCUMENTATION("API_DOCUMENTATION");
+        API_DOCUMENTATION("API_DOCUMENTATION"),
+        APP_INFO("APP_INFO"),
+        APP_SUBSCRIPTION("APP_SUBSCRIPTION"),
+        APP_OAUTH("APP_OAUTH");
         private String value;
 
         RuleTypeEnum (String v) {
@@ -97,7 +100,8 @@ return null;
     public enum ArtifactTypeEnum {
         REST_API("REST_API"),
         ASYNC_API("ASYNC_API"),
-        MCP("MCP");
+        MCP("MCP"),
+        APPLICATION("APPLICATION");
         private String value;
 
         ArtifactTypeEnum (String v) {

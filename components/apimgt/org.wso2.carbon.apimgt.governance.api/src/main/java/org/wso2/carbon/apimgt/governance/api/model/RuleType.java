@@ -26,7 +26,10 @@ import java.util.Locale;
 public enum RuleType {
     API_METADATA,
     API_DEFINITION,
-    API_DOCUMENTATION;
+    API_DOCUMENTATION,
+    APP_INFO,
+    APP_SUBSCRIPTION,
+    APP_OAUTH;
 
     public static RuleType fromString(String ruleTypeString) {
         try {

@@ -50,15 +50,17 @@ public class TemplateMappingUtil {
         template.setId(templateDTO.getId());
         template.setName(templateDTO.getName());
         template.setDescription(templateDTO.getDescription());
+        template.setTags(templateDTO.getTags());
+        template.setIcon(templateDTO.getIcon());
         template.setFormConfig(templateDTO.getFormConfig() == null ? Collections.emptyMap() :
                 templateDTO.getFormConfig());
         template.setFormConfigHash(templateDTO.getFormConfigHash());
         if (templateDTO.getStatus() != null) {
             template.setStatus(templateDTO.getStatus().toString());
         }
-        Boolean isDefault = templateDTO.getIsDefault();
+        Boolean isDefault = templateDTO.isIsDefault();
         template.setDefault(isDefault != null && isDefault);
-        Boolean isGlobal = templateDTO.getIsGlobal();
+        Boolean isGlobal = templateDTO.isIsGlobal();
         template.setGlobal(isGlobal != null && isGlobal);
         template.setCreatedBy(templateDTO.getCreatedBy());
         template.setCreatedTime(templateDTO.getCreatedTime());
@@ -84,6 +86,8 @@ public class TemplateMappingUtil {
         templateDTO.setId(template.getId());
         templateDTO.setName(template.getName());
         templateDTO.setDescription(template.getDescription());
+        templateDTO.setTags(template.getTags());
+        templateDTO.setIcon(template.getIcon());
         templateDTO.setFormConfig(template.getFormConfig());
         templateDTO.setFormConfigHash(template.getFormConfigHash());
         templateDTO.setStatus(DevportalGovernanceTemplateDTO.StatusEnum.fromValue(template.getStatus()));
@@ -109,6 +113,8 @@ public class TemplateMappingUtil {
             DevportalGovernanceRulesetBinding binding = new DevportalGovernanceRulesetBinding();
             binding.setBindingId(bindingDTO.getBindingId());
             binding.setRulesetId(bindingDTO.getRulesetId());
+            binding.setRulesetDescription(bindingDTO.getRulesetDescription());
+            binding.setDocumentationLink(bindingDTO.getDocumentationLink());
             binding.setBindingOrder(bindingDTO.getBindingOrder() == null ? i : bindingDTO.getBindingOrder());
             binding.setKeyManagerScopes(fromDTOListToKeyManagerScopeList(bindingDTO.getKeyManagerScopes()));
             bindings.add(binding);
@@ -127,6 +133,11 @@ public class TemplateMappingUtil {
             DevportalGovernanceRulesetBindingDTO bindingDTO = new DevportalGovernanceRulesetBindingDTO();
             bindingDTO.setBindingId(binding.getBindingId());
             bindingDTO.setRulesetId(binding.getRulesetId());
+            bindingDTO.setRulesetName(binding.getRulesetName());
+            bindingDTO.setRulesetDescription(binding.getRulesetDescription());
+            bindingDTO.setDocumentationLink(binding.getDocumentationLink());
+            bindingDTO.setRuleType(binding.getRuleType());
+            bindingDTO.setArtifactType(binding.getArtifactType());
             bindingDTO.setBindingOrder(binding.getBindingOrder());
             bindingDTO.setKeyManagerScopes(fromKeyManagerScopeListToDTOList(binding.getKeyManagerScopes()));
             bindingDTOs.add(bindingDTO);
