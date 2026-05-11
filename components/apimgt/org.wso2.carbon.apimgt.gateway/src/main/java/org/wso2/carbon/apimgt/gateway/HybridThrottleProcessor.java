@@ -451,7 +451,7 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
                 }
             }
 
-            //(If the globalCount is less than max request). // Very first requests to cluster hits into this block
+            //(If the sum of global and local counts is within the max request limit). // Very first requests to cluster hits into this block
             if ((callerContext.getGlobalCounter() + callerContext.getLocalCounter()) <= maxRequest) {    
                 if (log.isTraceEnabled()) {
                     log.trace(
@@ -569,7 +569,8 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
                     }
                 }
             }
-            // if throttle param processing was async and if the request was not allowed, then need to reset the local counter and hits
+            // if throttle param processing was async and if the request was not allowed, then need to undo the
+            // local counter and hits increments that were speculatively applied
             if (!localCounterResettingDone && canAccess == false) {
                 callerContext.setLocalCounter(callerContext.getLocalCounter() - 1);
                 callerContext.setLocalHits(callerContext.getLocalHits() - 1);
@@ -838,11 +839,8 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
                     if (log.isTraceEnabled()) {
                         log.trace("When running syncing throttle counter params: Initial Local counter = "
                                 + callerContext.getLocalCounter() + " , globalCounter = " + callerContext.getGlobalCounter()
-                                + ", distributedCounter = " + SharedParamManager.getDistributedCounter(id));
-                    }
-                    if (log.isTraceEnabled()) {
-                        log.trace(
-                                "When running syncing throttle counter params: localCounter increased to " + localCounter);
+                                + ", distributedCounter = " + SharedParamManager.getDistributedCounter(id)
+                                + ". localCounter increased to " + localCounter);
                     }
 
                     // Add to distributed counter BEFORE resetting local - critical for fallback

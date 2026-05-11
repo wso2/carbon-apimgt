@@ -431,7 +431,7 @@ public class RedisBaseDistributedCountManager implements DistributedCounterManag
             }
         } catch (JedisException e) {
             // Return -2 (key-not-found sentinel) as a safe fallback.
-            log.error("Redis error in getTtl for key: " + key + ". Returning -2.", e);
+            log.warn("Redis error in getTtl for key: " + key + ". Returning -2.", e);
             return -2;
         } finally {
             if (log.isTraceEnabled()) {
@@ -461,7 +461,7 @@ public class RedisBaseDistributedCountManager implements DistributedCounterManag
             }
         } catch (JedisException e) {
             // Return 0 (lock not acquired) as a safe fallback.
-            log.error("Redis error in setLock for key: " + key + ". Returning 0.", e);
+            log.warn("Redis error in setLock for key: " + key + ". Returning 0.", e);
             return 0;
         } finally {
             if (log.isTraceEnabled()) {
