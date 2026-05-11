@@ -312,7 +312,9 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                         subscribedStatus) || APIConstants.SubscriptionStatus.REJECTED.equals(
                         bodyStatus) || APIConstants.SubscriptionStatus.BLOCKED.equals(
                         subscribedStatus) || APIConstants.SubscriptionStatus.ON_HOLD.equals(
-                        subscribedStatus) || APIConstants.SubscriptionStatus.REJECTED.equals(subscribedStatus)) {
+                        subscribedStatus) || APIConstants.SubscriptionStatus.REJECTED.equals(
+                        subscribedStatus) || APIConstants.SubscriptionStatus.DELETE_PENDING.equals(subscribedStatus)
+                    ) {
                     RestApiUtil.handleBadRequest("Cannot update subscriptions with provided or existing status", log);
                     return null;
                 }

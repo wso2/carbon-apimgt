@@ -1508,6 +1508,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         WorkflowResponse workflowResponse = null;
         int subscriptionId;
         if (APIConstants.PUBLISHED.equals(state) || APIConstants.PROTOTYPED.equals(state)) {
+            SubscribedAPI existingSubscription = apiMgtDAO.getSubscriptionByUUID(inputSubscriptionId);
+            if (existingSubscription != null
+                    && APIConstants.SubscriptionStatus.DELETE_PENDING.equals(existingSubscription.getSubStatus())) {
+                throw new APIManagementException("Cannot update a subscription that is pending deletion");
+            }
             subscriptionId = apiMgtDAO.updateSubscription(apiTypeWrapper, inputSubscriptionId,
                     APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING, requestedThrottlingPolicy);
 
@@ -1779,6 +1784,25 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     // failed cleanup processes are ignored to prevent failing the deletion process
                     log.warn("Failed to clean pending subscription approval task");
                 }
+                try {
+                    if (apiIdentifier != null) {
+                        subId = apiMgtDAO.getSubscriptionId(apiIdentifier.getUUID(), applicationId);
+                    } else if (apiProdIdentifier != null) {
+                        subId = apiMgtDAO.getSubscriptionId(apiProdIdentifier.getUUID(), applicationId);
+                    }
+                } catch (APIManagementException ex) {
+                    log.warn("Failed to retrieve subscription id for ON_HOLD subscription");
+                }
+            } else if (APIConstants.SubscriptionStatus.REJECTED.equals(status)) {
+                try {
+                    if (apiIdentifier != null) {
+                        subId = apiMgtDAO.getSubscriptionId(apiIdentifier.getUUID(), applicationId);
+                    } else if (apiProdIdentifier != null) {
+                        subId = apiMgtDAO.getSubscriptionId(apiProdIdentifier.getUUID(), applicationId);
+                    }
+                } catch (APIManagementException ex) {
+                    log.warn("Failed to retrieve subscription id for REJECTED subscription");
+                }
             } else if (APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING.equals(status)) {
                 try {
                     if (apiIdentifier != null) {
@@ -1811,6 +1835,22 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     log.warn("Failed to retrive subscription id");
                 }
             }
+            // For ON_HOLD and REJECTED subscriptions, bypass the approval workflow and delete directly
+            if (APIConstants.SubscriptionStatus.ON_HOLD.equals(status)
+                    || APIConstants.SubscriptionStatus.REJECTED.equals(status)) {
+                if (subId != null) {
+                    apiMgtDAO.removeSubscriptionById(Integer.parseInt(subId));
+                }
+                JSONObject subsLogObject = new JSONObject();
+                subsLogObject.put(APIConstants.AuditLogConstants.API_NAME, identifier.getName());
+                subsLogObject.put(APIConstants.AuditLogConstants.PROVIDER, identifier.getProviderName());
+                subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_ID, applicationId);
+                subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_NAME, applicationName);
+                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SUBSCRIPTION, subsLogObject.toString(),
+                        APIConstants.AuditLogConstants.DELETED, this.username);
+                return;
+            }
+
             if (subId != null) {
                 apiMgtDAO.updateSubscriptionStatus(Integer.parseInt(subId),
                         APIConstants.SubscriptionStatus.DELETE_PENDING);
