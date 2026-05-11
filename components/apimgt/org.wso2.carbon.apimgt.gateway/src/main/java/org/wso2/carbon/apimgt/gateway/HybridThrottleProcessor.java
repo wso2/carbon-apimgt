@@ -571,8 +571,8 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
             }
             // if throttle param processing was async and if the request was not allowed, then need to reset the local counter and hits
             if (!localCounterResettingDone && canAccess == false) {
-                callerContext.resetLocalCounter(); //
-                callerContext.setLocalHits(0);
+                callerContext.setLocalCounter(callerContext.getLocalCounter() - 1);
+                callerContext.setLocalHits(callerContext.getLocalHits() - 1);
             }
         }
         if (log.isDebugEnabled()) {
