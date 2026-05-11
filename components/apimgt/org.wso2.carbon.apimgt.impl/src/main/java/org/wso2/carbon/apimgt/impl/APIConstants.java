@@ -92,6 +92,8 @@ public final class APIConstants {
 
     public static final String APPLICATION_XML_MEDIA_TYPE = "application/xml";
 
+    public static final String APPLICATION_OCTET_STREAM_MEDIA_TYPE = "application/octet-stream";
+
     public static final String APPLICATION_WSDL_MEDIA_TYPE = "application/wsdl";
 
     public static final String APPLICATION_XML_SOAP_MEDIA_TYPE = "application/soap+xml";
@@ -2980,6 +2982,7 @@ public final class APIConstants {
     public static final String APPLICATION_TOKEN_TYPE_JWT = "JWT";
     // AWS Lambda: HTTP Client Configuration Constants
     public static final String AWS_LAMBDA_HTTP_CLIENT = "AWSLambdaConnector.HttpClient.";
+    public static final String AWS_LAMBDA_PROXY_RESPONSE_ENABLED = "AWSLambdaConnector.EnableProxyResponseMapping";
     public static final String MAX_CONNECTIONS = "MaxConnections";
     public static final String CONNECTION_TIMEOUT = "ConnectionTimeout";
     public static final String SOCKET_TIMEOUT = "SocketTimeout";

@@ -108,6 +108,7 @@ import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIRevision;
+import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.ApiResult;
@@ -8810,6 +8811,20 @@ public final class APIUtil {
         Map<String, Environment> allEnvironments = new LinkedHashMap<>(getReadOnlyEnvironments());
         allEnvironments.putAll(envFromDB);
         return allEnvironments;
+    }
+
+    /**
+     * Get the list of environments that the API is deployed to
+     *
+     * @param apiUUID  API UUID
+     * @return set of environment names
+     * @throws APIManagementException Thrown if an error occurs while retrieving environments from the database
+     */
+    public static Set<String> getDeployedEnvironments(String apiUUID) throws APIManagementException {
+        return ApiMgtDAO.getInstance().getAPIRevisionDeploymentsByApiUUID(apiUUID)
+                .stream()
+                .map(APIRevisionDeployment::getDeployment)
+                .collect(Collectors.toSet());
     }
 
     // Federated Gateway related API Reference mapping methods

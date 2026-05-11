@@ -2154,6 +2154,7 @@
       <EnableCertificateManagementEventListening>{{apim.certificate_manager.events_enabled}}</EnableCertificateManagementEventListening>
 
       <AWSLambdaConnector>
+          <EnableProxyResponseMapping>{{apim.aws_lambda.enable_proxy_response_mapping}}</EnableProxyResponseMapping>
           <HttpClient>
               <MaxConnections>{{apim.aws_lambda.http_client.max_connections}}</MaxConnections>
               <ConnectionTimeout>{{apim.aws_lambda.http_client.connection_timeout}}</ConnectionTimeout>
