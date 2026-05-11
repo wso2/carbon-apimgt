@@ -516,6 +516,9 @@ public class MultiTenantAuthenticator extends OpenIDConnectAuthenticator {
     private String getScopes(AuthenticationContext context) {
 
         String queryParams = context.getQueryParams();
+        if (StringUtils.isBlank(queryParams)) {
+            return null;
+        }
         String scopeParams = Arrays.stream(queryParams.split("&"))
                 .filter(param -> param.startsWith("scope="))
                 .findFirst()
@@ -601,7 +604,7 @@ public class MultiTenantAuthenticator extends OpenIDConnectAuthenticator {
         if (StringUtils.isNotBlank(requestParamsString)) {
             String[] params = requestParamsString.split(AMPERSAND_SIGN);
             for (String param : params) {
-                String[] keyValue = param.split(EQUAL_SIGN);
+                String[] keyValue = param.split(EQUAL_SIGN, 2);
                 if (keyValue.length == 2) {
                     requestParams.put(keyValue[0], keyValue[1]);
                 }
