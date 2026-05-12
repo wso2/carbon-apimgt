@@ -1838,9 +1838,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             // For ON_HOLD and REJECTED subscriptions, bypass the approval workflow and delete directly
             if (APIConstants.SubscriptionStatus.ON_HOLD.equals(status)
                     || APIConstants.SubscriptionStatus.REJECTED.equals(status)) {
-                if (subId != null) {
-                    apiMgtDAO.removeSubscriptionById(Integer.parseInt(subId));
+                if (subId == null) {
+                    throw new APIManagementException("Failed to resolve subscription id for status: " + status);
                 }
+                apiMgtDAO.removeSubscriptionById(Integer.parseInt(subId));
                 JSONObject subsLogObject = new JSONObject();
                 subsLogObject.put(APIConstants.AuditLogConstants.API_NAME, identifier.getName());
                 subsLogObject.put(APIConstants.AuditLogConstants.PROVIDER, identifier.getProviderName());
