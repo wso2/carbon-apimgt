@@ -87,7 +87,3 @@ public class MultiTenantJITProvisioningHandler extends JITProvisioningPostAuthen
         return "MultiTenantJITProvisioningHandler";
     }
 }
-
-
-
-
