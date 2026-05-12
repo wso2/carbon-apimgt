@@ -1404,7 +1404,7 @@
             <dependency>
                 <groupId>org.wso2.carbon.identity.outbound.auth.oidc</groupId>
                 <artifactId>org.wso2.carbon.identity.application.authenticator.oidc</artifactId>
-                <version>${carbon.identity-application-authenticator-oidc}</version>
+                <version>${carbon.identity-application-authenticator-oidc.version}</version>
             </dependency>
 
             <dependency>
@@ -2117,7 +2117,7 @@
         <carbon.identity-oauth2-grant-jwt.version>2.2.5</carbon.identity-oauth2-grant-jwt.version>
         <carbon.identity-user-ws.version>5.10.0</carbon.identity-user-ws.version>
         <carbon.identity-data-publisher-application-authentication.version>5.9.0</carbon.identity-data-publisher-application-authentication.version>
-        <carbon.identity-application-authenticator-oidc>5.14.0</carbon.identity-application-authenticator-oidc>
+        <carbon.identity-application-authenticator-oidc.version>5.14.0</carbon.identity-application-authenticator-oidc.version>
 
         <!--SAML Common Utils Version-->
         <saml.common.util.version>1.5.0</saml.common.util.version>
