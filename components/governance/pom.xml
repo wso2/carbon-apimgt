@@ -35,5 +35,6 @@
     <modules>
         <module>org.wso2.carbon.apimgt.governance.engine</module>
         <module>org.wso2.carbon.apimgt.governance.generic</module>
+        <module>org.wso2.carbon.apimgt.governance.external</module>
     </modules>
 </project>

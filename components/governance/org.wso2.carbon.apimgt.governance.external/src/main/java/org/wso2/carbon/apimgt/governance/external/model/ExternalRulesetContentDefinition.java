@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025, WSO2 LLC. (http://www.wso2.com).
+ * Copyright (c) 2026, WSO2 LLC. (http://www.wso2.com).
  *
  * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -16,27 +16,24 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.governance.api.model;
+package org.wso2.carbon.apimgt.governance.external.model;
 
-import java.util.Locale;
+import java.util.Map;
 
 /**
- * This class represents a governance rule category
+ * Rule container for the external governance ruleset.
  */
-public enum RuleCategory {
-    SPECTRAL,
-    AI,
-    GENERIC,
-    EXTERNAL;
+public class ExternalRulesetContentDefinition {
 
-    public static RuleCategory fromString(String text) {
-        if (text == null || text.equalsIgnoreCase("null")) {
-            return null;
-        }
-        try {
-            return RuleCategory.valueOf(text.toUpperCase(Locale.ENGLISH));
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
+    private Map<String, ExternalRuleDefinition> rules;
+
+    public Map<String, ExternalRuleDefinition> getRules() {
+
+        return rules;
+    }
+
+    public void setRules(Map<String, ExternalRuleDefinition> rules) {
+
+        this.rules = rules;
     }
 }

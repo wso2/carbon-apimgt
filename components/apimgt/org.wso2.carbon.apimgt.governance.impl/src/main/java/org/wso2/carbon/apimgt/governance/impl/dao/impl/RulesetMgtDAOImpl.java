@@ -49,6 +49,8 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Implementation of the RulesetMgtDAO interface.
@@ -59,6 +61,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
 
     private RulesetMgtDAOImpl() {
     }
+    
 
     private static class SingletonHelper {
         private static final RulesetMgtDAO INSTANCE = new RulesetMgtDAOImpl();
@@ -617,5 +620,6 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                     , e, rulesetId);
         }
     }
-}
 
+
+}

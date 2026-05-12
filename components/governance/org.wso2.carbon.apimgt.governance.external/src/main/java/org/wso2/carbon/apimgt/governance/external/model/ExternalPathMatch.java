@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025, WSO2 LLC. (http://www.wso2.com).
+ * Copyright (c) 2026, WSO2 LLC. (http://www.wso2.com).
  *
  * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -16,27 +16,31 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.governance.api.model;
+package org.wso2.carbon.apimgt.governance.external.model;
 
-import java.util.Locale;
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
- * This class represents a governance rule category
+ * Match result for a simple JSON-path lookup.
  */
-public enum RuleCategory {
-    SPECTRAL,
-    AI,
-    GENERIC,
-    EXTERNAL;
+public class ExternalPathMatch {
 
-    public static RuleCategory fromString(String text) {
-        if (text == null || text.equalsIgnoreCase("null")) {
-            return null;
-        }
-        try {
-            return RuleCategory.valueOf(text.toUpperCase(Locale.ENGLISH));
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
+    private final JsonNode value;
+    private final String path;
+
+    public ExternalPathMatch(JsonNode value, String path) {
+
+        this.value = value;
+        this.path = path;
+    }
+
+    public JsonNode getValue() {
+
+        return value;
+    }
+
+    public String getPath() {
+
+        return path;
     }
 }
