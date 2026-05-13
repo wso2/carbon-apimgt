@@ -1521,7 +1521,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                 WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
                         deleteSubscriptionWFExecutor.cleanUpPendingTask(deleteWorkflowExtRef);
                     } catch (WorkflowException e) {
-                        log.warn(CLEAN_PENDING_SUB_APPROVAL_TASK_FAILED + e.getMessage());
+                        throw new APIManagementException(
+                                "Failed to clean pending subscription deletion workflow before update", e);
                     }
                 }
             }
@@ -1843,8 +1844,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         }
                     }
                 } catch (WorkflowException | APIManagementException ex) {
-                    // failed cleanup processes are ignored to prevent failing the deletion process
-                    log.warn(CLEAN_PENDING_SUB_APPROVAL_TASK_FAILED + ex.getMessage());
+                    throw new APIManagementException(
+                        "Failed to clean pending subscription update workflow before delete", ex);
                 }
             } else if (APIConstants.SubscriptionStatus.UNBLOCKED.equals(status)) {
                 try {
