@@ -1787,11 +1787,6 @@ public abstract class AbstractAPIManager implements APIManager {
                 String kmValidationValue = provisionedAppValidation.toString();
                 if ("false".equalsIgnoreCase(kmValidationValue)) {
                     return false;
-                } else if (!"true".equalsIgnoreCase(kmValidationValue)) {
-                    log.warn("Unrecognized value '" + kmValidationValue + "' for per-KM config '"
-                            + APIConstants.KeyManager.PROVISIONED_APP_VALIDATION
-                            + "' on key manager '" + keyManagerConfigurationDTO.getName()
-                            + "'. Defaulting to validation enabled.");
                 }
             }
         }
