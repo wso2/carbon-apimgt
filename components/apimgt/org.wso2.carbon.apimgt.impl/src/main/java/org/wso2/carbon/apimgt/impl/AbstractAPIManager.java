@@ -1764,13 +1764,22 @@ public abstract class AbstractAPIManager implements APIManager {
     protected boolean isOauthAppValidation(KeyManagerConfigurationDTO keyManagerConfigurationDTO) {
 
         // Check global validation config from deployment.toml
+        if (log.isDebugEnabled()) {
+            log.debug("Checking global provisioned app validation");
+        }
         String oauthAppValidation = getAPIManagerConfiguration()
                 .getFirstProperty(APIConstants.API_KEY_VALIDATOR_ENABLE_PROVISION_APP_VALIDATION);
         if (StringUtils.isNotEmpty(oauthAppValidation) && !Boolean.parseBoolean(oauthAppValidation)) {
             // Global validation disabled, skip validation
+            if (log.isDebugEnabled()) {
+                log.debug("Global provisioned app validation is disabled");
+            }
             return false;
         }
         // Check per-KM config: if provisionedAppValidation is explicitly set to false, skip validation for this KM
+        if (log.isDebugEnabled()) {
+            log.debug("Checking KM level provisioned app validation");
+        }
         if (keyManagerConfigurationDTO != null && keyManagerConfigurationDTO.getAdditionalProperties() != null) {
             // Get value of provisionedAppValidation from KM configuration
             Object provisionedAppValidation = keyManagerConfigurationDTO.getAdditionalProperties()
