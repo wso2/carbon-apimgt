@@ -1511,7 +1511,19 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             SubscribedAPI existingSubscription = apiMgtDAO.getSubscriptionByUUID(inputSubscriptionId);
             if (existingSubscription != null
                     && APIConstants.SubscriptionStatus.DELETE_PENDING.equals(existingSubscription.getSubStatus())) {
-                throw new APIManagementException("Cannot update a subscription that is pending deletion");
+                // Clean up the pending delete workflow to allow transition from DELETE_PENDING to TIER_UPDATE_PENDING
+                String deleteWorkflowExtRef = apiMgtDAO.getExternalWorkflowReferenceForSubscriptionAndWFType(
+                        existingSubscription.getSubscriptionId(),
+                        WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
+                if (deleteWorkflowExtRef != null) {
+                    try {
+                        WorkflowExecutor deleteSubscriptionWFExecutor = getWorkflowExecutor(
+                                WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
+                        deleteSubscriptionWFExecutor.cleanUpPendingTask(deleteWorkflowExtRef);
+                    } catch (WorkflowException e) {
+                        log.warn(CLEAN_PENDING_SUB_APPROVAL_TASK_FAILED + e.getMessage());
+                    }
+                }
             }
             subscriptionId = apiMgtDAO.updateSubscription(apiTypeWrapper, inputSubscriptionId,
                     APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING, requestedThrottlingPolicy);
@@ -1811,16 +1823,28 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         subId = apiMgtDAO.getSubscriptionId(apiProdIdentifier.getUUID(), applicationId);
                     }
                     if (subId != null) {
+                        SubscribedAPI sub = apiMgtDAO.getSubscriptionById(Integer.parseInt(subId));
+                        workflowDTO.setTierName(sub.getTier().getName());
+                    }
+                } catch (APIManagementException ex) {
+                    log.warn("Failed to retrieve subscription details for TIER_UPDATE_PENDING subscription", ex);
+                }
+                try {
+                    if (subId != null) {
                         WorkflowDTO wf = apiMgtDAO.retrieveWorkflowFromInternalReference(subId,
                                 WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE);
-                        WorkflowExecutor updateSubscriptionWFExecutor =
-                                getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE);
-                        updateSubscriptionWFExecutor.cleanUpPendingTask(wf.getExternalWorkflowReference());
+                        if (wf != null) {
+                            WorkflowExecutor updateSubscriptionWFExecutor = getWorkflowExecutor(
+                                    WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE);
+                            updateSubscriptionWFExecutor.cleanUpPendingTask(wf.getExternalWorkflowReference());
+                        } else {
+                            log.warn(CLEAN_PENDING_SUB_APPROVAL_TASK_FAILED
+                                    + "No pending update workflow found for subscription: " + subId);
+                        }
                     }
-
-                } catch (WorkflowException ex) {
+                } catch (WorkflowException | APIManagementException ex) {
                     // failed cleanup processes are ignored to prevent failing the deletion process
-                    log.warn("Failed to clean pending subscription update approval task");
+                    log.warn(CLEAN_PENDING_SUB_APPROVAL_TASK_FAILED + ex.getMessage());
                 }
             } else if (APIConstants.SubscriptionStatus.UNBLOCKED.equals(status)) {
                 try {
