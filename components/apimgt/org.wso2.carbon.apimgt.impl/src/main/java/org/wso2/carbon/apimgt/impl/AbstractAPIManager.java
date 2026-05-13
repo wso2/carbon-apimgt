@@ -1781,12 +1781,19 @@ public abstract class AbstractAPIManager implements APIManager {
             log.debug("Checking KM level provisioned app validation");
         }
         if (keyManagerConfigurationDTO != null && keyManagerConfigurationDTO.getAdditionalProperties() != null) {
-            // Get value of provisionedAppValidation from KM configuration
             Object provisionedAppValidation = keyManagerConfigurationDTO.getAdditionalProperties()
                     .get(APIConstants.KeyManager.PROVISIONED_APP_VALIDATION);
-            // If null, return true
-            // If not null, then return boolean of provisionedAppValidation
-            return provisionedAppValidation == null || Boolean.parseBoolean(provisionedAppValidation.toString());
+            if (provisionedAppValidation != null) {
+                String kmValidationValue = provisionedAppValidation.toString();
+                if ("false".equalsIgnoreCase(kmValidationValue)) {
+                    return false;
+                } else if (!"true".equalsIgnoreCase(kmValidationValue)) {
+                    log.warn("Unrecognized value '" + kmValidationValue + "' for per-KM config '"
+                            + APIConstants.KeyManager.PROVISIONED_APP_VALIDATION
+                            + "' on key manager '" + keyManagerConfigurationDTO.getName()
+                            + "'. Defaulting to validation enabled.");
+                }
+            }
         }
         return true;
     }
