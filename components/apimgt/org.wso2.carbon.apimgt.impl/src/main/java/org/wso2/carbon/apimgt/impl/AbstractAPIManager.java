@@ -1174,7 +1174,7 @@ public abstract class AbstractAPIManager implements APIManager {
             if (StringUtils.isNotEmpty(consumerKey)) {
                 if (keyManager != null) {
                     if (APIConstants.OAuthAppMode.MAPPED.name().equalsIgnoreCase(apiKey.getCreateMode())
-                            && !isOauthAppValidation()) {
+                            && !isOauthAppValidation(keyManagerConfigurationDTO)) {
                         resultantApiKeyList.add(apiKey);
                     } else {
                         OAuthApplicationInfo oAuthApplicationInfo = null;
@@ -1761,12 +1761,23 @@ public abstract class AbstractAPIManager implements APIManager {
         return null;
     }
 
-    protected boolean isOauthAppValidation() {
+    protected boolean isOauthAppValidation(KeyManagerConfigurationDTO keyManagerConfigurationDTO) {
 
+        // Check global validation config from deployment.toml
         String oauthAppValidation = getAPIManagerConfiguration()
                 .getFirstProperty(APIConstants.API_KEY_VALIDATOR_ENABLE_PROVISION_APP_VALIDATION);
-        if (StringUtils.isNotEmpty(oauthAppValidation)) {
-            return Boolean.parseBoolean(oauthAppValidation);
+        if (StringUtils.isNotEmpty(oauthAppValidation) && !Boolean.parseBoolean(oauthAppValidation)) {
+            // Global validation disabled, skip validation
+            return false;
+        }
+        // Check per-KM config: if provisionedAppValidation is explicitly set to false, skip validation for this KM
+        if (keyManagerConfigurationDTO != null && keyManagerConfigurationDTO.getAdditionalProperties() != null) {
+            // Get value of provisionedAppValidation from KM configuration
+            Object provisionedAppValidation = keyManagerConfigurationDTO.getAdditionalProperties()
+                    .get(APIConstants.KeyManager.PROVISIONED_APP_VALIDATION);
+            // If null, return true
+            // If not null, then return boolean of provisionedAppValidation
+            return provisionedAppValidation == null || Boolean.parseBoolean(provisionedAppValidation.toString());
         }
         return true;
     }
