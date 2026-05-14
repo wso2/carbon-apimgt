@@ -178,7 +178,7 @@ public class KeyManagerMappingUtil {
             jsonObject.remove(APIConstants.KeyManager.ENABLE_MAP_OAUTH_CONSUMER_APPS);
         }
         JsonElement enableProvisionedAppValidation = jsonObject.get(APIConstants.KeyManager.PROVISIONED_APP_VALIDATION);
-        if (enableProvisionedAppValidation != null) {
+        if (enableProvisionedAppValidation != null && !enableProvisionedAppValidation.isJsonNull()) {
             keyManagerDTO.setEnableProvisionedAppValidation(enableProvisionedAppValidation.getAsBoolean());
             jsonObject.remove(APIConstants.KeyManager.PROVISIONED_APP_VALIDATION);
         }
