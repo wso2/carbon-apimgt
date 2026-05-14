@@ -148,6 +148,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_rule_manage
+            - apim:gov_rule_create
   /rulesets/{rulesetId}:
     get:
       summary: Retrieves details of a specific ruleset.
@@ -240,6 +241,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_rule_manage
+            - apim:gov_rule_update
     delete:
       summary: Deletes a specific ruleset.
       description: Deletes an existing ruleset identified by the rulesetId.
@@ -278,6 +280,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_rule_manage
+            - apim:gov_rule_delete
   /rulesets/{rulesetId}/content:
     get:
       summary: Retrieves the content of a specific ruleset.
@@ -477,6 +480,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_policy_manage
+            - apim:gov_policy_create
   /policies/{policyId}:
     get:
       summary: Get a specific governance policy
@@ -569,6 +573,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_policy_manage
+            - apim:gov_policy_update
     delete:
       summary: Delete a specific governance policy
       description: Deletes an existing governance policy identified by the policyId.
@@ -607,6 +612,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_policy_manage
+            - apim:gov_policy_delete
   /artifact-compliance/api:
     get:
       summary: Retrieves compliance of all API artifacts
@@ -1635,6 +1641,12 @@ components:
             apim:gov_policy_read: Read governance policies
             apim:gov_policy_manage: Manage governance policies
             apim:gov_result_read: Read governance results
+            apim:gov_rule_create: Create governance rulesets
+            apim:gov_rule_update: Update governance rulesets
+            apim:gov_rule_delete: Delete governance rulesets
+            apim:gov_policy_create: Create governance policies
+            apim:gov_policy_update: Update governance policies
+            apim:gov_policy_delete: Delete governance policies
   parameters:
     artifactId:
       name: artifactId

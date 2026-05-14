@@ -44,7 +44,9 @@ LabelsApiService delegate = new LabelsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Add a new Label", notes = "Add a new Label ", response = LabelDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:label_create", description = "Create labels"),
+            @AuthorizationScope(scope = "apim:label_manage", description = "Manage all label operations")
         })
     }, tags={ "Label (Individual)",  })
     @ApiResponses(value = { 
@@ -61,7 +63,9 @@ LabelsApiService delegate = new LabelsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete a Label", notes = "Delete a Label by label id ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:label_delete", description = "Delete labels"),
+            @AuthorizationScope(scope = "apim:label_manage", description = "Manage all label operations")
         })
     }, tags={ "Label (Individual)",  })
     @ApiResponses(value = { 
@@ -78,7 +82,9 @@ LabelsApiService delegate = new LabelsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get all Labels", notes = "Get all Labels ", response = LabelListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:label_view", description = "View labels"),
+            @AuthorizationScope(scope = "apim:label_manage", description = "Manage all label operations")
         })
     }, tags={ "Labels (Collection)",  })
     @ApiResponses(value = { 
@@ -93,7 +99,9 @@ LabelsApiService delegate = new LabelsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get a Label Usage", notes = "Retrieve a single Label Usage. We should provide the Id of the Label as a path parameter. ", response = LabelUsageDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:label_view", description = "View labels"),
+            @AuthorizationScope(scope = "apim:label_manage", description = "Manage all label operations")
         })
     }, tags={ "Label (Individual)",  })
     @ApiResponses(value = { 
@@ -109,7 +117,9 @@ LabelsApiService delegate = new LabelsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Update a Label", notes = "Update a Label by label id ", response = LabelDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:label_update", description = "Update labels"),
+            @AuthorizationScope(scope = "apim:label_manage", description = "Manage all label operations")
         })
     }, tags={ "Label (Individual)" })
     @ApiResponses(value = { 
