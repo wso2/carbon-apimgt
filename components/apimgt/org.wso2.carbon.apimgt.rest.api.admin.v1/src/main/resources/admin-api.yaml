@@ -4238,6 +4238,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:admin_operations
+            - apim:keymanagers_manage
             - apim:keymanagers_delete
       x-code-samples:
         - lang: Shell
