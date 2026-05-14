@@ -2983,6 +2983,8 @@ public final class APIConstants {
     // AWS Lambda: HTTP Client Configuration Constants
     public static final String AWS_LAMBDA_HTTP_CLIENT = "AWSLambdaConnector.HttpClient.";
     public static final String AWS_LAMBDA_PROXY_RESPONSE_ENABLED = "AWSLambdaConnector.EnableProxyResponseMapping";
+    // AWS Lambda: SDK Configuration Constants
+    public static final String AWS_LAMBDA_RETRY_MAX_ATTEMPTS = "AWSLambdaConnector.Sdk.RetryMaxAttempts";
     public static final String MAX_CONNECTIONS = "MaxConnections";
     public static final String CONNECTION_TIMEOUT = "ConnectionTimeout";
     public static final String SOCKET_TIMEOUT = "SocketTimeout";
