@@ -22,6 +22,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
+import org.wso2.carbon.apimgt.multitenant.auth.internal.MultiTenantAuthDataHolder;
+import org.wso2.carbon.apimgt.multitenant.auth.utils.TenantServiceProviderUtil;
 import org.wso2.carbon.identity.application.authentication.framework.AuthenticatorFlowStatus;
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
 import org.wso2.carbon.identity.application.authentication.framework.exception.AuthenticationFailedException;
@@ -37,8 +39,6 @@ import org.wso2.carbon.identity.application.mgt.ApplicationManagementService;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.oauth.OAuthAdminServiceImpl;
 import org.wso2.carbon.identity.oauth.dto.OAuthConsumerAppDTO;
-import org.wso2.carbon.apimgt.multitenant.auth.internal.MultiTenantAuthDataHolder;
-import org.wso2.carbon.apimgt.multitenant.auth.utils.TenantServiceProviderUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.IOException;
@@ -56,11 +56,6 @@ import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import static org.wso2.carbon.identity.application.authenticator.oidc.OIDCAuthenticatorConstants.CLIENT_ID;
-import static org.wso2.carbon.identity.application.authenticator.oidc.OIDCAuthenticatorConstants.CLIENT_SECRET;
-import static org.wso2.carbon.identity.application.authenticator.oidc.OIDCAuthenticatorConstants.IdPConfParams.OIDC_LOGOUT_URL;
-import static org.wso2.carbon.identity.application.authenticator.oidc.OIDCAuthenticatorConstants.OAUTH2_AUTHZ_URL;
-import static org.wso2.carbon.identity.application.authenticator.oidc.OIDCAuthenticatorConstants.OAUTH2_TOKEN_URL;
 import static org.wso2.carbon.apimgt.multitenant.auth.MultiTenantAuthenticatorConstants.AMPERSAND_SIGN;
 import static org.wso2.carbon.apimgt.multitenant.auth.MultiTenantAuthenticatorConstants.AUTHENTICATOR_PARAM;
 import static org.wso2.carbon.apimgt.multitenant.auth.MultiTenantAuthenticatorConstants.COMMON_SP_NAME;
@@ -73,6 +68,11 @@ import static org.wso2.carbon.apimgt.multitenant.auth.MultiTenantAuthenticatorCo
 import static org.wso2.carbon.apimgt.multitenant.auth.MultiTenantAuthenticatorConstants.TENANT_SELECTION_URL_PROP;
 import static org.wso2.carbon.apimgt.multitenant.auth.MultiTenantAuthenticatorConstants.USERINFO_URL;
 import static org.wso2.carbon.apimgt.multitenant.auth.MultiTenantAuthenticatorConstants.USER_SELECTED_TENANT_DOMAIN;
+import static org.wso2.carbon.identity.application.authenticator.oidc.OIDCAuthenticatorConstants.CLIENT_ID;
+import static org.wso2.carbon.identity.application.authenticator.oidc.OIDCAuthenticatorConstants.CLIENT_SECRET;
+import static org.wso2.carbon.identity.application.authenticator.oidc.OIDCAuthenticatorConstants.IdPConfParams.OIDC_LOGOUT_URL;
+import static org.wso2.carbon.identity.application.authenticator.oidc.OIDCAuthenticatorConstants.OAUTH2_AUTHZ_URL;
+import static org.wso2.carbon.identity.application.authenticator.oidc.OIDCAuthenticatorConstants.OAUTH2_TOKEN_URL;
 
 /**
  * Multi Tenant Authenticator is a federated outbound authenticator that implements
@@ -288,7 +288,8 @@ public class MultiTenantAuthenticator extends OpenIDConnectAuthenticator {
                     // Set the updated user back into the context
                     context.setSubject(user);
                 } else {
-                    LOG.warn("User selected tenant domain not found in context. User may be authenticated in wrong tenant.");
+                    LOG.warn("User selected tenant domain not found in context. "
+                            + "User may be authenticated in wrong tenant.");
                 }
             }
         } catch (AuthenticationFailedException e) {
@@ -347,7 +348,8 @@ public class MultiTenantAuthenticator extends OpenIDConnectAuthenticator {
             } catch (IOException e) {
                 String idpName = context.getExternalIdP().getName();
                 String tenantDomain = context.getTenantDomain();
-                throw new LogoutFailedException("Error occurred while initiating the logout request to IdP: " + idpName + " of tenantDomain: " + tenantDomain, e);
+                throw new LogoutFailedException("Error occurred while initiating the logout request to IdP: "
+                        + idpName + " of tenantDomain: " + tenantDomain, e);
             }
         } else {
             super.initiateLogoutRequest(request, response, context);
@@ -469,7 +471,8 @@ public class MultiTenantAuthenticator extends OpenIDConnectAuthenticator {
      * callback URL path based on whether it's a publisher or devportal request.
      *
      * @param context The authentication context containing the original query parameters.
-     * @return The appropriate callback URL (e.g., /publisher/services/auth/callback/login or /devportal/services/auth/callback/login).
+     * @return The appropriate callback URL (e.g., /publisher/services/auth/callback/login
+     *         or /devportal/services/auth/callback/login).
      */
     private String resolveCallbackUrl(AuthenticationContext context, String tenantDomain) {
 

@@ -27,12 +27,12 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.wso2.carbon.apimgt.multitenant.auth.MultiTenantAuthenticator;
+import org.wso2.carbon.apimgt.multitenant.auth.MultiTenantJITProvisioningHandler;
 import org.wso2.carbon.identity.application.authentication.framework.ApplicationAuthenticator;
 import org.wso2.carbon.identity.application.authentication.framework.handler.request.PostAuthenticationHandler;
 import org.wso2.carbon.identity.application.mgt.ApplicationManagementService;
 import org.wso2.carbon.identity.oauth.OAuthAdminServiceImpl;
-import org.wso2.carbon.apimgt.multitenant.auth.MultiTenantAuthenticator;
-import org.wso2.carbon.apimgt.multitenant.auth.MultiTenantJITProvisioningHandler;
 
 import java.util.Hashtable;
 
