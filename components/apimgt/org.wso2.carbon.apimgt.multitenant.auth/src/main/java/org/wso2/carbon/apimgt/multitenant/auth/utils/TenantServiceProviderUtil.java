@@ -92,8 +92,12 @@ public final class TenantServiceProviderUtil {
                 getInboundAuthenticationRequestConfigs(sp, tenantDomain, appName);
 
         for (InboundAuthenticationRequestConfig config : authRequestConfigs) {
-            if (OAUTH2_INBOUND_AUTH_TYPE.equals(config.getInboundAuthType())) {
+            if (config != null && OAUTH2_INBOUND_AUTH_TYPE.equals(config.getInboundAuthType())) {
                 String clientId = config.getInboundAuthKey();
+                if (clientId == null || clientId.trim().isEmpty()) {
+                    throw new Exception("OAuth2 inbound authentication key is missing for SP '"
+                            + appName + "' in tenant: " + tenantDomain);
+                }
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Resolved client ID for tenant '" + tenantDomain
                             + "', app '" + appName + "': " + clientId);
