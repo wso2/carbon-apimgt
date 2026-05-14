@@ -46,8 +46,8 @@ TenantsApiService delegate = new TenantsApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
-            @AuthorizationScope(scope = "apim:api_view_only", description = "View APIs only (excludes API Products)"),
-            @AuthorizationScope(scope = "apim:api_product_view", description = "View API Products only (excludes APIs)")
+            @AuthorizationScope(scope = "apim:api_metadata_view", description = "View API metadata and configuration"),
+            @AuthorizationScope(scope = "apim:api_product_metadata_view", description = "View API Product metadata and configuration")
         })
     }, tags={ "Tenants",  })
     @ApiResponses(value = { 
@@ -67,8 +67,8 @@ TenantsApiService delegate = new TenantsApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
-            @AuthorizationScope(scope = "apim:api_view_only", description = "View APIs only (excludes API Products)"),
-            @AuthorizationScope(scope = "apim:api_product_view", description = "View API Products only (excludes APIs)")
+            @AuthorizationScope(scope = "apim:api_metadata_view", description = "View API metadata and configuration"),
+            @AuthorizationScope(scope = "apim:api_product_metadata_view", description = "View API Product metadata and configuration")
         })
     }, tags={ "Tenants" })
     @ApiResponses(value = { 

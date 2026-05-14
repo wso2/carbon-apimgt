@@ -191,7 +191,7 @@ paths:
             - apim:api_manage
             - apim:api_import_export
             - apim:api_list_view
-            - apim:api_view_only
+            - apim:api_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -400,7 +400,7 @@ paths:
             - apim:api_manage
             - apim:api_import_export
             - apim:api_product_import_export
-            - apim:api_view_only
+            - apim:api_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -565,6 +565,7 @@ paths:
             - apim:api_manage
             - apim:api_import_export
             - apim:api_definition_update
+            - apim:api_update
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -615,7 +616,7 @@ paths:
             - apim:api_manage
             - apim:api_import_export
             - apim:api_product_import_export
-            - apim:api_view_only
+            - apim:api_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -698,7 +699,7 @@ paths:
             - apim:api_manage
             - apim:api_import_export
             - apim:api_product_import_export
-            - apim:api_view_only
+            - apim:api_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -858,7 +859,7 @@ paths:
             - apim:api_view
             - apim:api_manage
             - apim:api_definition_view
-            - apim:api_view_only
+            - apim:api_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -934,6 +935,7 @@ paths:
             - apim:api_create
             - apim:api_manage
             - apim:api_definition_update
+            - apim:api_update
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1118,7 +1120,7 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:api_manage
-            - apim:api_view_only
+            - apim:api_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1178,7 +1180,7 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:api_manage
-            - apim:api_view_only
+            - apim:api_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1247,6 +1249,7 @@ paths:
             - apim:api_create
             - apim:api_manage
             - apim:api_definition_update
+            - apim:api_update
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1300,7 +1303,7 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:api_manage
-            - apim:api_view_only
+            - apim:api_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1429,7 +1432,7 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:api_manage
-            - apim:api_view_only
+            - apim:api_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2921,6 +2924,7 @@ paths:
             - apim:mcp_server_manage
             - apim:mcp_server_import_export
             - apim:mcp_server_list_view
+            - apim:mcp_server_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2979,6 +2983,7 @@ paths:
             - apim:mcp_server_view
             - apim:mcp_server_manage
             - apim:mcp_server_import_export
+            - apim:mcp_server_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3426,6 +3431,7 @@ paths:
             - apim:mcp_server_manage
             - apim:mcp_server_publish
             - apim:mcp_server_import_export
+            - apim:mcp_server_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3468,6 +3474,7 @@ paths:
             - apim:mcp_server_manage
             - apim:mcp_server_publish
             - apim:mcp_server_import_export
+            - apim:mcp_server_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4713,6 +4720,7 @@ paths:
         - OAuth2Security:
             - apim:mcp_server_view
             - apim:mcp_server_manage
+            - apim:mcp_server_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -5302,6 +5310,7 @@ paths:
         - OAuth2Security:
             - apim:mcp_server_view
             - apim:mcp_server_manage
+            - apim:mcp_server_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -5939,7 +5948,7 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:api_manage
-            - apim:api_view_only
+            - apim:api_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6007,6 +6016,7 @@ paths:
             - apim:api_create
             - apim:api_manage
             - apim:api_definition_update
+            - apim:api_update
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6051,7 +6061,7 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:api_manage
-            - apim:api_view_only
+            - apim:api_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6123,7 +6133,7 @@ paths:
             - apim:api_view
             - apim:api_publish
             - apim:api_manage
-            - apim:api_view_only
+            - apim:api_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6175,7 +6185,7 @@ paths:
             - apim:api_view
             - apim:api_publish
             - apim:api_manage
-            - apim:api_view_only
+            - apim:api_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6679,7 +6689,7 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:api_manage
-            - apim:api_view_only
+            - apim:api_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6729,7 +6739,7 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:api_manage
-            - apim:api_view_only
+            - apim:api_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6800,6 +6810,7 @@ paths:
             - apim:api_create
             - apim:api_manage
             - apim:api_definition_update
+            - apim:api_update
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6838,7 +6849,7 @@ paths:
             - apim:api_create
             - apim:api_manage
             - apim:api_publish
-            - apim:api_view_only
+            - apim:api_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6912,7 +6923,7 @@ paths:
             - apim:api_create
             - apim:api_manage
             - apim:api_publish
-            - apim:api_view_only
+            - apim:api_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6971,7 +6982,7 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:api_manage
-            - apim:api_view_only
+            - apim:api_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7038,7 +7049,7 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:api_manage
-            - apim:api_view_only
+            - apim:api_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7084,7 +7095,7 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:api_manage
-            - apim:api_view_only
+            - apim:api_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7886,7 +7897,7 @@ paths:
             - apim:api_manage
             - apim:client_certificates_view
             - apim:client_certificates_manage
-            - apim:api_view_only
+            - apim:api_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -8003,7 +8014,7 @@ paths:
             - apim:api_manage
             - apim:client_certificates_view
             - apim:client_certificates_manage
-            - apim:api_view_only
+            - apim:api_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -8163,7 +8174,7 @@ paths:
             - apim:api_manage
             - apim:client_certificates_view
             - apim:client_certificates_manage
-            - apim:api_view_only
+            - apim:api_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -8220,7 +8231,7 @@ paths:
             - apim:api_manage
             - apim:client_certificates_view
             - apim:client_certificates_manage
-            - apim:api_view_only
+            - apim:api_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -8341,7 +8352,7 @@ paths:
             - apim:api_manage
             - apim:client_certificates_view
             - apim:client_certificates_manage
-            - apim:api_view_only
+            - apim:api_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -8505,7 +8516,7 @@ paths:
             - apim:api_manage
             - apim:client_certificates_view
             - apim:client_certificates_manage
-            - apim:api_view_only
+            - apim:api_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -8952,8 +8963,8 @@ paths:
             - apim:mcp_server_manage
             - apim:mcp_server_import_export
             - apim:api_product_import_export
-            - apim:api_view_only
-            - apim:api_product_view
+            - apim:api_metadata_view
+            - apim:api_product_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -9012,7 +9023,7 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:api_manage
-            - apim:api_product_view
+            - apim:api_product_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -9128,7 +9139,7 @@ paths:
             - apim:api_publish
             - apim:api_manage
             - apim:api_product_import_export
-            - apim:api_product_view
+            - apim:api_product_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -9285,7 +9296,7 @@ paths:
             - apim:api_view
             - apim:api_publish
             - apim:api_manage
-            - apim:api_product_view
+            - apim:api_product_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -9411,7 +9422,7 @@ paths:
             - apim:api_view
             - apim:api_publish
             - apim:api_manage
-            - apim:api_product_view
+            - apim:api_product_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -9469,7 +9480,7 @@ paths:
             - apim:api_view
             - apim:api_publish
             - apim:api_manage
-            - apim:api_product_view
+            - apim:api_product_metadata_view
       operationId: getIsAPIProductOutdated
 
   /api-products/{apiProductId}/documents:
@@ -10614,7 +10625,7 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:api_manage
-            - apim:api_view_only
+            - apim:api_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -10698,7 +10709,7 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:mcp_server_view
-            - apim:api_view_only
+            - apim:api_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -10755,8 +10766,8 @@ paths:
             - apim:api_manage
             - apim:mcp_server_view
             - apim:mcp_server_manage
-            - apim:api_view_only
-            - apim:api_product_view
+            - apim:api_metadata_view
+            - apim:api_product_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -10784,8 +10795,8 @@ paths:
             - apim:api_manage
             - apim:mcp_server_view
             - apim:mcp_server_manage
-            - apim:api_view_only
-            - apim:api_product_view
+            - apim:api_metadata_view
+            - apim:api_product_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -I -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -10816,8 +10827,8 @@ paths:
             - apim:api_manage
             - apim:mcp_server_view
             - apim:mcp_server_manage
-            - apim:api_view_only
-            - apim:api_product_view
+            - apim:api_metadata_view
+            - apim:api_product_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -11110,8 +11121,8 @@ paths:
             - apim:mcp_server_view
             - apim:mcp_server_create
             - apim:mcp_server_manage
-            - apim:api_view_only
-            - apim:api_product_view
+            - apim:api_metadata_view
+            - apim:api_product_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -11293,7 +11304,7 @@ paths:
             - apim:api_view
             - apim:api_manage
             - apim:api_definition_view
-            - apim:api_view_only
+            - apim:api_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -11368,6 +11379,7 @@ paths:
             - apim:api_create
             - apim:api_manage
             - apim:api_definition_update
+            - apim:api_update
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -11551,7 +11563,7 @@ paths:
             - apim:mediation_policy_view
             - apim:mediation_policy_manage
             - apim:api_mediation_policy_manage
-            - apim:api_view_only
+            - apim:api_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -11665,7 +11677,7 @@ paths:
             - apim:mediation_policy_view
             - apim:mediation_policy_manage
             - apim:api_mediation_policy_manage
-            - apim:api_view_only
+            - apim:api_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -11743,7 +11755,7 @@ paths:
             - apim:mediation_policy_view
             - apim:mediation_policy_manage
             - apim:api_mediation_policy_manage
-            - apim:api_view_only
+            - apim:api_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -11791,7 +11803,7 @@ paths:
             - apim:api_manage
             - apim:api_publish
             - apim:api_import_export
-            - apim:api_view_only
+            - apim:api_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -11876,7 +11888,7 @@ paths:
             - apim:api_manage
             - apim:api_publish
             - apim:api_import_export
-            - apim:api_view_only
+            - apim:api_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -11996,7 +12008,7 @@ paths:
             - apim:api_create
             - apim:api_manage
             - apim:api_publish
-            - apim:api_view_only
+            - apim:api_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -12128,7 +12140,7 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:api_manage
-            - apim:api_view_only
+            - apim:api_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X GET -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://127.0.0.1:9443/api/am/publisher/v4/apis/{apiId}/api-themes"'
@@ -12212,7 +12224,7 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:api_manage
-            - apim:api_view_only
+            - apim:api_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X GET -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://127.0.0.1:9443/api/am/publisher/v4/apis/{apiId}/api-themes/{id}/content" -o api-theme.zip'
@@ -13581,8 +13593,8 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:api_manage
-            - apim:api_view_only
-            - apim:api_product_view
+            - apim:api_metadata_view
+            - apim:api_product_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -19741,7 +19753,7 @@ components:
             apim:mcp_server_publish: Publish MCP Server
             apim:mcp_server_manage: Manage all MCP Server related operations
             apim:mcp_server_import_export: Import and export MCP Server related operations
-            apim:api_view_only: View APIs only (excludes API Products)
+            apim:api_metadata_view: View API metadata and configuration
             apim:api_create_only: Create new APIs only (does not grant update access)
             apim:api_update: Update existing APIs
             apim:api_definition_update: Update API definitions (swagger, graphql schema, wsdl, asyncapi, topics, resource policies)
@@ -19752,7 +19764,7 @@ components:
             apim:api_deploy_view: View API revisions and deployments
             apim:api_lifecycle_view: View API lifecycle state and history
             apim:api_lifecycle_manage: Change API lifecycle state
-            apim:api_product_view: View API Products only (excludes APIs)
+            apim:api_product_metadata_view: View API Product metadata and configuration
             apim:api_product_create: Create API Product
             apim:api_product_update: Update API Product
             apim:api_product_delete: Delete API Product
@@ -19784,3 +19796,4 @@ components:
             apim:mcp_server_deploy_view: View MCP Server revisions and deployments
             apim:mcp_server_lifecycle_view: View MCP Server lifecycle state and history
             apim:mcp_server_lifecycle_manage: Change MCP Server lifecycle state
+            apim:mcp_server_metadata_view: View MCP Server metadata and configuration

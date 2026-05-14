@@ -49,8 +49,8 @@ SearchApiService delegate = new SearchApiServiceImpl();
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
             @AuthorizationScope(scope = "apim:mcp_server_import_export", description = "Import and export MCP Server related operations"),
             @AuthorizationScope(scope = "apim:api_product_import_export", description = "Import and export API Products related operations"),
-            @AuthorizationScope(scope = "apim:api_view_only", description = "View APIs only (excludes API Products)"),
-            @AuthorizationScope(scope = "apim:api_product_view", description = "View API Products only (excludes APIs)")
+            @AuthorizationScope(scope = "apim:api_metadata_view", description = "View API metadata and configuration"),
+            @AuthorizationScope(scope = "apim:api_product_metadata_view", description = "View API Product metadata and configuration")
         })
     }, tags={ "Unified Search" })
     @ApiResponses(value = { 

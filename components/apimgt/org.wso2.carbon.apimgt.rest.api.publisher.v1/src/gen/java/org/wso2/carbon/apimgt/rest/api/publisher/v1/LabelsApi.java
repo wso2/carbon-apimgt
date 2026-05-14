@@ -43,8 +43,8 @@ LabelsApiService delegate = new LabelsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
-            @AuthorizationScope(scope = "apim:api_view_only", description = "View APIs only (excludes API Products)"),
-            @AuthorizationScope(scope = "apim:api_product_view", description = "View API Products only (excludes APIs)")
+            @AuthorizationScope(scope = "apim:api_metadata_view", description = "View API metadata and configuration"),
+            @AuthorizationScope(scope = "apim:api_product_metadata_view", description = "View API Product metadata and configuration")
         })
     }, tags={ "Labels (Collection)" })
     @ApiResponses(value = { 

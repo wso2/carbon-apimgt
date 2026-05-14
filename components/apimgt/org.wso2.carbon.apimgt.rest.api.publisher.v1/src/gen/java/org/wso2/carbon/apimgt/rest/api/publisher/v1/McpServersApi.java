@@ -520,7 +520,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
             @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
             @AuthorizationScope(scope = "apim:mcp_server_import_export", description = "Import and export MCP Server related operations"),
-            @AuthorizationScope(scope = "apim:mcp_server_list_view", description = "View, Retrieve MCP Server list")
+            @AuthorizationScope(scope = "apim:mcp_server_list_view", description = "View, Retrieve MCP Server list"),
+            @AuthorizationScope(scope = "apim:mcp_server_metadata_view", description = "View MCP Server metadata and configuration")
         })
     }, tags={ "MCP Servers",  })
     @ApiResponses(value = { 
@@ -580,7 +581,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
-            @AuthorizationScope(scope = "apim:mcp_server_import_export", description = "Import and export MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_import_export", description = "Import and export MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:mcp_server_metadata_view", description = "View MCP Server metadata and configuration")
         })
     }, tags={ "MCP Servers",  })
     @ApiResponses(value = { 
@@ -602,7 +604,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
             @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_import_export", description = "Import and export MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_import_export", description = "Import and export MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:mcp_server_metadata_view", description = "View MCP Server metadata and configuration")
         })
     }, tags={ "MCP Server Backends",  })
     @ApiResponses(value = { 
@@ -623,7 +626,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
             @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_import_export", description = "Import and export MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_import_export", description = "Import and export MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:mcp_server_metadata_view", description = "View MCP Server metadata and configuration")
         })
     }, tags={ "MCP Server Backends",  })
     @ApiResponses(value = { 
@@ -808,7 +812,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     @ApiOperation(value = "Get Details of the Subscription Throttling Policies of a MCP Server ", notes = "This operation can be used to retrieve details of the subscription throttling policy of a MCP server by  specifying the API Id.  `X-WSO2-Tenant` header can be used to retrive MCP server subscription throttling policies that belongs to a  different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used. ", response = ThrottlingPolicyDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:mcp_server_metadata_view", description = "View MCP Server metadata and configuration")
         })
     }, tags={ "MCP Servers",  })
     @ApiResponses(value = { 
@@ -827,7 +832,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     @ApiOperation(value = "Get Thumbnail Image of a MCP Server", notes = "This operation can be used to download a thumbnail image of a MCP Server ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:mcp_server_metadata_view", description = "View MCP Server metadata and configuration")
         })
     }, tags={ "MCP Servers",  })
     @ApiResponses(value = { 

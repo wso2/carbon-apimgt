@@ -43,7 +43,7 @@ LinterCustomRulesApiService delegate = new LinterCustomRulesApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
             @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
-            @AuthorizationScope(scope = "apim:api_view_only", description = "View APIs only (excludes API Products)")
+            @AuthorizationScope(scope = "apim:api_metadata_view", description = "View API metadata and configuration")
         })
     }, tags={ "Linter Custom Rules" })
     @ApiResponses(value = { 
