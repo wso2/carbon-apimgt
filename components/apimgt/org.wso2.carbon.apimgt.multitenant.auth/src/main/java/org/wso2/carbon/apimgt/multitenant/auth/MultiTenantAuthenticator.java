@@ -35,7 +35,6 @@ import org.wso2.carbon.identity.application.authenticator.oidc.OpenIDConnectAuth
 import org.wso2.carbon.identity.application.authenticator.oidc.model.OIDCStateInfo;
 import org.wso2.carbon.identity.application.common.model.Property;
 import org.wso2.carbon.identity.application.common.util.IdentityApplicationConstants;
-import org.wso2.carbon.identity.application.mgt.ApplicationManagementService;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.oauth.OAuthAdminServiceImpl;
 import org.wso2.carbon.identity.oauth.dto.OAuthConsumerAppDTO;
@@ -402,8 +401,6 @@ public class MultiTenantAuthenticator extends OpenIDConnectAuthenticator {
     private void overrideTenantAuthenticatorProperties(AuthenticationContext context) throws Exception {
 
         Map<String, String> authenticatorProperties = context.getAuthenticatorProperties();
-        ApplicationManagementService appMgtService =
-                MultiTenantAuthDataHolder.getInstance().getApplicationManagementService();
 
         // Get the user-selected tenant domain from the unique property
         String tenantDomain = (String) context.getProperty(USER_SELECTED_TENANT_DOMAIN);
@@ -413,7 +410,7 @@ public class MultiTenantAuthenticator extends OpenIDConnectAuthenticator {
         }
         String spName = authenticatorProperties.get(COMMON_SP_NAME);
 
-        String resolvedClientId = TenantServiceProviderUtil.resolveClientId(appMgtService, tenantDomain, spName);
+        String resolvedClientId = TenantServiceProviderUtil.resolveClientId(tenantDomain, spName);
         if (StringUtils.isBlank(resolvedClientId)) {
             throw new Exception(String.format(
                     MultiTenantAuthenticatorConstants.ErrorMessages.CLIENT_ID_RESOLUTION_FAILED

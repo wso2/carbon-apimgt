@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.multitenant.auth.utils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.multitenant.auth.internal.MultiTenantAuthDataHolder;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.application.common.model.InboundAuthenticationConfig;
 import org.wso2.carbon.identity.application.common.model.InboundAuthenticationRequestConfig;
@@ -41,15 +42,15 @@ public final class TenantServiceProviderUtil {
     /**
      * Retrieve the service provider for the given application name within the specified tenant.
      *
-     * @param appMgtService The application management service instance.
-     * @param tenantDomain  The tenant domain (e.g., "abc.com").
-     * @param appName       The name of the service provider.
+     * @param tenantDomain The tenant domain (e.g., "abc.com").
+     * @param appName      The name of the service provider.
      * @return The resolved {@link ServiceProvider}.
      * @throws Exception If the service is unavailable or the SP is not found.
      */
-    public static ServiceProvider getServiceProvider(ApplicationManagementService appMgtService,
-                                                     String tenantDomain, String appName) throws Exception {
+    public static ServiceProvider getServiceProvider(String tenantDomain, String appName) throws Exception {
 
+        ApplicationManagementService appMgtService =
+                MultiTenantAuthDataHolder.getInstance().getApplicationManagementService();
         if (LOG.isDebugEnabled()) {
             LOG.debug("Retrieving service provider '" + appName + "' for tenant: " + tenantDomain);
         }
@@ -79,16 +80,14 @@ public final class TenantServiceProviderUtil {
      * Resolve the OAuth2 client ID for a given tenant domain by looking up the
      * specified application name in that tenant's application registry.
      *
-     * @param appMgtService The application management service instance.
-     * @param tenantDomain  The tenant domain (e.g., "abc.com").
-     * @param appName       The name of the service provider / application registered in the tenant.
+     * @param tenantDomain The tenant domain (e.g., "abc.com").
+     * @param appName      The name of the service provider / application registered in the tenant.
      * @return The OAuth2 client ID (consumer key) of the application.
      * @throws Exception If the SP is not found or has no OAuth2 inbound config.
      */
-    public static String resolveClientId(ApplicationManagementService appMgtService,
-                                         String tenantDomain, String appName) throws Exception {
+    public static String resolveClientId(String tenantDomain, String appName) throws Exception {
 
-        ServiceProvider sp = getServiceProvider(appMgtService, tenantDomain, appName);
+        ServiceProvider sp = getServiceProvider(tenantDomain, appName);
         InboundAuthenticationRequestConfig[] authRequestConfigs =
                 getInboundAuthenticationRequestConfigs(sp, tenantDomain, appName);
 
