@@ -254,6 +254,7 @@ paths:
             - apim:admin
             - apim:tier_manage
             - apim:admin_tier_manage
+            - apim:admin_tier_create
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -372,6 +373,7 @@ paths:
             - apim:admin
             - apim:tier_manage
             - apim:admin_tier_manage
+            - apim:admin_tier_update
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -399,6 +401,7 @@ paths:
             - apim:tier_manage
             - apim:admin_tier_manage
             - apim:policies_import_export
+            - apim:admin_tier_delete
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -508,6 +511,7 @@ paths:
             - apim:admin
             - apim:tier_manage
             - apim:admin_tier_manage
+            - apim:admin_tier_create
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -636,6 +640,7 @@ paths:
             - apim:admin
             - apim:tier_manage
             - apim:admin_tier_manage
+            - apim:admin_tier_update
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -663,6 +668,7 @@ paths:
             - apim:tier_manage
             - apim:admin_tier_manage
             - apim:policies_import_export
+            - apim:admin_tier_delete
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -771,6 +777,7 @@ paths:
             - apim:admin
             - apim:tier_manage
             - apim:admin_tier_manage
+            - apim:admin_tier_create
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -893,6 +900,7 @@ paths:
             - apim:admin
             - apim:tier_manage
             - apim:admin_tier_manage
+            - apim:admin_tier_update
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -923,6 +931,7 @@ paths:
             - apim:tier_manage
             - apim:admin_tier_manage
             - apim:policies_import_export
+            - apim:admin_tier_delete
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1026,6 +1035,7 @@ paths:
             - apim:admin
             - apim:tier_manage
             - apim:admin_tier_manage
+            - apim:admin_tier_create
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1144,6 +1154,7 @@ paths:
             - apim:admin
             - apim:tier_manage
             - apim:admin_tier_manage
+            - apim:admin_tier_update
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1171,6 +1182,7 @@ paths:
             - apim:tier_manage
             - apim:admin_tier_manage
             - apim:policies_import_export
+            - apim:admin_tier_delete
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1413,6 +1425,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:bl_manage
+            - apim:bl_create
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1478,6 +1491,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:bl_manage
+            - apim:bl_delete
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1517,6 +1531,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:bl_manage
+            - apim:bl_update
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PATCH -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1783,6 +1798,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:llm_provider_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1818,6 +1834,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:llm_provider_manage
+            - apim:llm_provider_create
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer <ACCESS_TOKEN>" -H "Content-Type: multipart/form-data" 
@@ -1863,6 +1880,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:llm_provider_manage
+            - apim:llm_provider_update
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" \
@@ -1893,6 +1911,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:llm_provider_manage
+            - apim:llm_provider_delete
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1919,6 +1938,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:llm_provider_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1948,6 +1968,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:llm_provider_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1989,6 +2010,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:llm_provider_manage
+            - apim:llm_provider_create
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2035,6 +2057,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:llm_provider_manage
+            - apim:llm_provider_update
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2062,6 +2085,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:llm_provider_manage
+            - apim:llm_provider_delete
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2088,6 +2112,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:llm_provider_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2151,6 +2176,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:environment_manage
+            - apim:environment_create
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2191,6 +2217,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:environment_manage
+            - apim:environment_read
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2228,6 +2255,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:environment_manage
+            - apim:environment_update
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2253,6 +2281,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:environment_manage
+            - apim:environment_delete
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2527,6 +2556,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:organization_manage
+            - apim:organization_create
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2598,6 +2628,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:organization_manage
+            - apim:organization_update
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2623,6 +2654,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:organization_manage
+            - apim:organization_delete
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3026,6 +3058,7 @@ paths:
             - apim:admin
             - apim:admin_operations
             - apim:api_category
+            - apim:api_category_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3061,6 +3094,7 @@ paths:
             - apim:admin
             - apim:admin_operations
             - apim:api_category
+            - apim:api_category_create
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3104,6 +3138,7 @@ paths:
             - apim:admin
             - apim:admin_operations
             - apim:api_category
+            - apim:api_category_update
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3130,6 +3165,7 @@ paths:
             - apim:admin
             - apim:admin_operations
             - apim:api_category
+            - apim:api_category_delete
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4058,6 +4094,7 @@ paths:
             - apim:admin
             - apim:admin_operations
             - apim:keymanagers_manage
+            - apim:keymanagers_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4093,6 +4130,7 @@ paths:
             - apim:admin
             - apim:admin_operations
             - apim:keymanagers_manage
+            - apim:keymanagers_create
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4134,6 +4172,7 @@ paths:
             - apim:admin
             - apim:admin_operations
             - apim:keymanagers_manage
+            - apim:keymanagers_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4173,6 +4212,7 @@ paths:
             - apim:admin
             - apim:admin_operations
             - apim:keymanagers_manage
+            - apim:keymanagers_update
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4198,6 +4238,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:admin_operations
+            - apim:keymanagers_delete
       x-code-samples:
         - lang: Shell
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4227,6 +4268,7 @@ paths:
             - apim:admin
             - apim:admin_operations
             - apim:keymanagers_manage
+            - apim:keymanagers_view
       x-code-samples:
         - lang: Shell
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4262,6 +4304,7 @@ paths:
             - apim:admin
             - apim:admin_operations
             - apim:keymanagers_manage
+            - apim:keymanagers_create
       x-code-samples:
         - lang: Shell
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4305,6 +4348,7 @@ paths:
             - apim:admin
             - apim:admin_operations
             - apim:keymanagers_manage
+            - apim:keymanagers_view
       x-code-samples:
         - lang: Shell
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4344,6 +4388,7 @@ paths:
             - apim:admin
             - apim:admin_operations
             - apim:keymanagers_manage
+            - apim:keymanagers_update
       x-code-samples:
         - lang: Shell
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4370,6 +4415,7 @@ paths:
             - apim:admin
             - apim:admin_operations
             - apim:keymanagers_manage
+            - apim:keymanagers_delete
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4409,6 +4455,7 @@ paths:
             - apim:admin
             - apim:admin_operations
             - apim:keymanagers_manage
+            - apim:keymanagers_create
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4449,6 +4496,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:admin_operations
+            - apim:keymanagers_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4489,6 +4537,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:admin_operations
+            - apim:keymanagers_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4719,6 +4768,8 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:label_view
+            - apim:label_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4755,6 +4806,8 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:label_create
+            - apim:label_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4799,6 +4852,8 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:label_update
+            - apim:label_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4826,6 +4881,8 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:label_delete
+            - apim:label_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4858,6 +4915,8 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:label_view
+            - apim:label_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -8147,3 +8206,38 @@ components:
             apim:gov_rule_manage: Manage governance rules
             apim:organization_manage: Manage Organizations
             apim:organization_read: Read Organizations
+            apim:environment_create: Create gateway environments
+            apim:environment_update: Update gateway environments
+            apim:environment_delete: Delete gateway environments
+            apim:api_category_view: View API categories
+            apim:api_category_create: Create API categories
+            apim:api_category_update: Update API categories
+            apim:api_category_delete: Delete API categories
+            apim:admin_tier_create: Create throttling policies
+            apim:admin_tier_update: Update throttling policies
+            apim:admin_tier_delete: Delete throttling policies
+            apim:bl_create: Create deny policies
+            apim:bl_update: Update deny policies
+            apim:bl_delete: Delete deny policies
+            apim:keymanagers_view: View key manager configurations
+            apim:keymanagers_create: Create key managers
+            apim:keymanagers_update: Update key managers
+            apim:keymanagers_delete: Delete key managers
+            apim:organization_create: Create organizations
+            apim:organization_update: Update organizations
+            apim:organization_delete: Delete organizations
+            apim:llm_provider_view: View AI and LLM service providers
+            apim:llm_provider_create: Create AI and LLM service providers
+            apim:llm_provider_update: Update AI and LLM service providers
+            apim:llm_provider_delete: Delete AI and LLM service providers
+            apim:label_view: View labels
+            apim:label_create: Create labels
+            apim:label_update: Update labels
+            apim:label_delete: Delete labels
+            apim:label_manage: Manage all label operations
+            apim:gov_rule_create: Create governance rulesets
+            apim:gov_rule_update: Update governance rulesets
+            apim:gov_rule_delete: Delete governance rulesets
+            apim:gov_policy_create: Create governance policies
+            apim:gov_policy_update: Update governance policies
+            apim:gov_policy_delete: Delete governance policies
