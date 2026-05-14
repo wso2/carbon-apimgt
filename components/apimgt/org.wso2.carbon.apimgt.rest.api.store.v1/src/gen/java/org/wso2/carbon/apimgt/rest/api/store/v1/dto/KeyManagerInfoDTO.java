@@ -38,6 +38,7 @@ public class KeyManagerInfoDTO   {
     private Boolean enableTokenHashing = false;
     private Boolean enableOAuthAppCreation = true;
     private Boolean enableMapOAuthConsumerApps = false;
+    private Boolean enableProvisionedAppValidation = true;
     private List<KeyManagerApplicationConfigurationDTO> applicationConfiguration = new ArrayList<KeyManagerApplicationConfigurationDTO>();
     private String alias = null;
     private Object additionalProperties = null;
@@ -335,6 +336,23 @@ return null;
 
   /**
    **/
+  public KeyManagerInfoDTO enableProvisionedAppValidation(Boolean enableProvisionedAppValidation) {
+    this.enableProvisionedAppValidation = enableProvisionedAppValidation;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "true", value = "")
+  @JsonProperty("enableProvisionedAppValidation")
+  public Boolean isEnableProvisionedAppValidation() {
+    return enableProvisionedAppValidation;
+  }
+  public void setEnableProvisionedAppValidation(Boolean enableProvisionedAppValidation) {
+    this.enableProvisionedAppValidation = enableProvisionedAppValidation;
+  }
+
+  /**
+   **/
   public KeyManagerInfoDTO applicationConfiguration(List<KeyManagerApplicationConfigurationDTO> applicationConfiguration) {
     this.applicationConfiguration = applicationConfiguration;
     return this;
@@ -430,6 +448,7 @@ return null;
         Objects.equals(enableTokenHashing, keyManagerInfo.enableTokenHashing) &&
         Objects.equals(enableOAuthAppCreation, keyManagerInfo.enableOAuthAppCreation) &&
         Objects.equals(enableMapOAuthConsumerApps, keyManagerInfo.enableMapOAuthConsumerApps) &&
+        Objects.equals(enableProvisionedAppValidation, keyManagerInfo.enableProvisionedAppValidation) &&
         Objects.equals(applicationConfiguration, keyManagerInfo.applicationConfiguration) &&
         Objects.equals(alias, keyManagerInfo.alias) &&
         Objects.equals(additionalProperties, keyManagerInfo.additionalProperties) &&
@@ -438,7 +457,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, type, displayName, description, enabled, availableGrantTypes, tokenEndpoint, revokeEndpoint, userInfoEndpoint, enableTokenGeneration, enableTokenEncryption, enableTokenHashing, enableOAuthAppCreation, enableMapOAuthConsumerApps, applicationConfiguration, alias, additionalProperties, tokenType);
+    return Objects.hash(id, name, type, displayName, description, enabled, availableGrantTypes, tokenEndpoint, revokeEndpoint, userInfoEndpoint, enableTokenGeneration, enableTokenEncryption, enableTokenHashing, enableOAuthAppCreation, enableMapOAuthConsumerApps, enableProvisionedAppValidation, applicationConfiguration, alias, additionalProperties, tokenType);
   }
 
   @Override
@@ -461,6 +480,7 @@ return null;
     sb.append("    enableTokenHashing: ").append(toIndentedString(enableTokenHashing)).append("\n");
     sb.append("    enableOAuthAppCreation: ").append(toIndentedString(enableOAuthAppCreation)).append("\n");
     sb.append("    enableMapOAuthConsumerApps: ").append(toIndentedString(enableMapOAuthConsumerApps)).append("\n");
+    sb.append("    enableProvisionedAppValidation: ").append(toIndentedString(enableProvisionedAppValidation)).append("\n");
     sb.append("    applicationConfiguration: ").append(toIndentedString(applicationConfiguration)).append("\n");
     sb.append("    alias: ").append(toIndentedString(alias)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
