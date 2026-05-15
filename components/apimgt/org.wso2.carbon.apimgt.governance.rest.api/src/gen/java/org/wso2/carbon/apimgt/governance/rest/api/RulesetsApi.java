@@ -44,7 +44,8 @@ RulesetsApiService delegate = new RulesetsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Create a new ruleset.", notes = "Creates a new ruleset in the user's organization.", response = RulesetInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:gov_rule_manage", description = "Manage governance rulesets")
+            @AuthorizationScope(scope = "apim:gov_rule_manage", description = "Manage governance rulesets"),
+            @AuthorizationScope(scope = "apim:gov_rule_create", description = "Create governance rulesets")
         })
     }, tags={ "Rulesets",  })
     @ApiResponses(value = { 
@@ -63,7 +64,8 @@ RulesetsApiService delegate = new RulesetsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Deletes a specific ruleset.", notes = "Deletes an existing ruleset identified by the rulesetId.", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:gov_rule_manage", description = "Manage governance rulesets")
+            @AuthorizationScope(scope = "apim:gov_rule_manage", description = "Manage governance rulesets"),
+            @AuthorizationScope(scope = "apim:gov_rule_delete", description = "Delete governance rulesets")
         })
     }, tags={ "Rulesets",  })
     @ApiResponses(value = { 
@@ -158,7 +160,8 @@ RulesetsApiService delegate = new RulesetsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Updates a specific ruleset.", notes = "Updates the details of the ruleset identified by the `rulesetId`.", response = RulesetInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:gov_rule_manage", description = "Manage governance rulesets")
+            @AuthorizationScope(scope = "apim:gov_rule_manage", description = "Manage governance rulesets"),
+            @AuthorizationScope(scope = "apim:gov_rule_update", description = "Update governance rulesets")
         })
     }, tags={ "Rulesets" })
     @ApiResponses(value = { 

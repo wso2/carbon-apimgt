@@ -52,7 +52,8 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
             @AuthorizationScope(scope = "apim:ep_certificates_add", description = "Add backend endpoint certificates"),
             @AuthorizationScope(scope = "apim:ep_certificates_manage", description = "View, create, update and remove endpoint certificates"),
-            @AuthorizationScope(scope = "apim:api_update", description = "Update existing APIs")
+            @AuthorizationScope(scope = "apim:api_update", description = "Update existing APIs"),
+            @AuthorizationScope(scope = "apim:mcp_server_update", description = "Update existing MCP Servers")
         })
     }, tags={ "Endpoint Certificates",  })
     @ApiResponses(value = { 
@@ -75,7 +76,8 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
             @AuthorizationScope(scope = "apim:ep_certificates_update", description = "Update and delete backend endpoint certificates"),
             @AuthorizationScope(scope = "apim:ep_certificates_manage", description = "View, create, update and remove endpoint certificates"),
-            @AuthorizationScope(scope = "apim:api_update", description = "Update existing APIs")
+            @AuthorizationScope(scope = "apim:api_update", description = "Update existing APIs"),
+            @AuthorizationScope(scope = "apim:mcp_server_update", description = "Update existing MCP Servers")
         })
     }, tags={ "Endpoint Certificates",  })
     @ApiResponses(value = { 
@@ -98,7 +100,9 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
             @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
             @AuthorizationScope(scope = "apim:ep_certificates_view", description = "View backend endpoint certificates"),
-            @AuthorizationScope(scope = "apim:ep_certificates_manage", description = "View, create, update and remove endpoint certificates")
+            @AuthorizationScope(scope = "apim:ep_certificates_manage", description = "View, create, update and remove endpoint certificates"),
+            @AuthorizationScope(scope = "apim:api_metadata_view", description = "View API metadata and configuration"),
+            @AuthorizationScope(scope = "apim:mcp_server_metadata_view", description = "View MCP Server metadata and configuration")
         })
     }, tags={ "Endpoint Certificates",  })
     @ApiResponses(value = { 
@@ -121,7 +125,9 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
             @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
             @AuthorizationScope(scope = "apim:ep_certificates_view", description = "View backend endpoint certificates"),
-            @AuthorizationScope(scope = "apim:ep_certificates_manage", description = "View, create, update and remove endpoint certificates")
+            @AuthorizationScope(scope = "apim:ep_certificates_manage", description = "View, create, update and remove endpoint certificates"),
+            @AuthorizationScope(scope = "apim:api_metadata_view", description = "View API metadata and configuration"),
+            @AuthorizationScope(scope = "apim:mcp_server_metadata_view", description = "View MCP Server metadata and configuration")
         })
     }, tags={ "Endpoint Certificates",  })
     @ApiResponses(value = { 
@@ -144,7 +150,9 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
             @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
             @AuthorizationScope(scope = "apim:ep_certificates_view", description = "View backend endpoint certificates"),
-            @AuthorizationScope(scope = "apim:ep_certificates_manage", description = "View, create, update and remove endpoint certificates")
+            @AuthorizationScope(scope = "apim:ep_certificates_manage", description = "View, create, update and remove endpoint certificates"),
+            @AuthorizationScope(scope = "apim:api_metadata_view", description = "View API metadata and configuration"),
+            @AuthorizationScope(scope = "apim:mcp_server_metadata_view", description = "View MCP Server metadata and configuration")
         })
     }, tags={ "Endpoint Certificates",  })
     @ApiResponses(value = { 
@@ -167,7 +175,9 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
             @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
             @AuthorizationScope(scope = "apim:ep_certificates_view", description = "View backend endpoint certificates"),
-            @AuthorizationScope(scope = "apim:ep_certificates_manage", description = "View, create, update and remove endpoint certificates")
+            @AuthorizationScope(scope = "apim:ep_certificates_manage", description = "View, create, update and remove endpoint certificates"),
+            @AuthorizationScope(scope = "apim:api_metadata_view", description = "View API metadata and configuration"),
+            @AuthorizationScope(scope = "apim:mcp_server_metadata_view", description = "View MCP Server metadata and configuration")
         })
     }, tags={ "Endpoint Certificates",  })
     @ApiResponses(value = { 
@@ -191,7 +201,8 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
             @AuthorizationScope(scope = "apim:ep_certificates_update", description = "Update and delete backend endpoint certificates"),
             @AuthorizationScope(scope = "apim:ep_certificates_manage", description = "View, create, update and remove endpoint certificates"),
-            @AuthorizationScope(scope = "apim:api_update", description = "Update existing APIs")
+            @AuthorizationScope(scope = "apim:api_update", description = "Update existing APIs"),
+            @AuthorizationScope(scope = "apim:mcp_server_update", description = "Update existing MCP Servers")
         })
     }, tags={ "Endpoint Certificates" })
     @ApiResponses(value = { 

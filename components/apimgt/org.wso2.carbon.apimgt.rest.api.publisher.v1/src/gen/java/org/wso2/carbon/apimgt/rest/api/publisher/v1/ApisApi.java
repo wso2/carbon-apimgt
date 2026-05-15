@@ -1548,7 +1548,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
-            @AuthorizationScope(scope = "apim:api_update", description = "Update existing APIs")
+            @AuthorizationScope(scope = "apim:api_update", description = "Update existing APIs"),
+            @AuthorizationScope(scope = "apim:api_metadata_view", description = "View API metadata and configuration")
         })
     }, tags={ "APIs",  })
     @ApiResponses(value = { 
