@@ -74,7 +74,7 @@ public class ExtendedProxyRoutePlanner extends DefaultProxyRoutePlanner {
                 if ("*".equals(nonProxyHost)) {
                     return true;
                 }
-                if (uriHost.matches(nonProxyHost)) {
+                if (matchesPattern(uriHost, nonProxyHost)) {
                     if (log.isDebugEnabled()) {
                         log.debug(
                                 "scheme:'" + uriScheme + "', host:'" + uriHost + "' matches nonProxyHost '"
@@ -93,7 +93,7 @@ public class ExtendedProxyRoutePlanner extends DefaultProxyRoutePlanner {
                     }
                     return false;
                 }
-                if (uriHost.matches(targetProxyHost)) {
+                if (matchesPattern(uriHost, targetProxyHost)) {
                     if (log.isDebugEnabled()) {
                         log.debug("scheme:'" + uriScheme + "', host:'" + uriHost + "' matches targetProxyHost '"
                                 + targetProxyHost + "' : PROXY");
@@ -112,6 +112,11 @@ public class ExtendedProxyRoutePlanner extends DefaultProxyRoutePlanner {
                             + nonProxyHostsLength + " non proxy host)");
         }
         return false;
+    }
+
+    private boolean matchesPattern(String hostname, String pattern) {
+        String regex = pattern.replace(".", "\\.").replace("*", ".*");
+        return hostname.matches(regex);
     }
 
     @Override
