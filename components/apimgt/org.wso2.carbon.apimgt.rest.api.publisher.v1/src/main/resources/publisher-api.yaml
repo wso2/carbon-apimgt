@@ -1050,6 +1050,7 @@ paths:
             - apim:api_create
             - apim:api_manage
             - apim:api_update
+            - apim:api_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -8575,6 +8576,8 @@ paths:
             - apim:mcp_server_manage
             - apim:ep_certificates_view
             - apim:ep_certificates_manage
+            - apim:api_metadata_view
+            - apim:mcp_server_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -8642,6 +8645,7 @@ paths:
             - apim:ep_certificates_add
             - apim:ep_certificates_manage
             - apim:api_update
+            - apim:mcp_server_update
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -8690,6 +8694,8 @@ paths:
             - apim:mcp_server_manage
             - apim:ep_certificates_view
             - apim:ep_certificates_manage
+            - apim:api_metadata_view
+            - apim:mcp_server_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -8758,6 +8764,7 @@ paths:
             - apim:ep_certificates_update
             - apim:ep_certificates_manage
             - apim:api_update
+            - apim:mcp_server_update
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -8805,6 +8812,7 @@ paths:
             - apim:ep_certificates_update
             - apim:ep_certificates_manage
             - apim:api_update
+            - apim:mcp_server_update
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -8849,6 +8857,8 @@ paths:
             - apim:mcp_server_manage
             - apim:ep_certificates_view
             - apim:ep_certificates_manage
+            - apim:api_metadata_view
+            - apim:mcp_server_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -8899,6 +8909,8 @@ paths:
             - apim:mcp_server_manage
             - apim:ep_certificates_view
             - apim:ep_certificates_manage
+            - apim:api_metadata_view
+            - apim:mcp_server_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
