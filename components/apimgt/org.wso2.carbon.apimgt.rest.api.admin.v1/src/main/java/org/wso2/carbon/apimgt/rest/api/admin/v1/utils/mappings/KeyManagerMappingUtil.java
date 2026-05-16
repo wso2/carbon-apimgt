@@ -177,6 +177,11 @@ public class KeyManagerMappingUtil {
             keyManagerDTO.setEnableMapOAuthConsumerApps(enableMapOauthConsumerApps.getAsBoolean());
             jsonObject.remove(APIConstants.KeyManager.ENABLE_MAP_OAUTH_CONSUMER_APPS);
         }
+        JsonElement enableProvisionedAppValidation = jsonObject.get(APIConstants.KeyManager.PROVISIONED_APP_VALIDATION);
+        if (enableProvisionedAppValidation != null && !enableProvisionedAppValidation.isJsonNull()) {
+            keyManagerDTO.setEnableProvisionedAppValidation(enableProvisionedAppValidation.getAsBoolean());
+            jsonObject.remove(APIConstants.KeyManager.PROVISIONED_APP_VALIDATION);
+        }
         JsonElement enableTokenEncryption = jsonObject.get(APIConstants.KeyManager.ENABLE_TOKEN_ENCRYPTION);
         if (enableTokenEncryption != null) {
             keyManagerDTO.setEnableTokenEncryption(enableTokenEncryption.getAsBoolean());
@@ -329,6 +334,8 @@ public class KeyManagerMappingUtil {
                 .put(APIConstants.KeyManager.ENABLE_OAUTH_APP_CREATION, keyManagerDTO.isEnableOAuthAppCreation());
         additionalProperties.put(APIConstants.KeyManager.ENABLE_MAP_OAUTH_CONSUMER_APPS,
                 keyManagerDTO.isEnableMapOAuthConsumerApps());
+        additionalProperties.put(APIConstants.KeyManager.PROVISIONED_APP_VALIDATION,
+                keyManagerDTO.isEnableProvisionedAppValidation());
 
         additionalProperties
                 .put(APIConstants.KeyManager.ENABLE_TOKEN_GENERATION, keyManagerDTO.isEnableTokenGeneration());
@@ -381,6 +388,7 @@ public class KeyManagerMappingUtil {
             keyManagerDto.setEnableTokenGeneration(true);
             keyManagerDto.setEnableMapOAuthConsumerApps(true);
             keyManagerDto.setEnableOAuthAppCreation(true);
+            keyManagerDto.setEnableProvisionedAppValidation(true);
             keyManagerDto.setEnableSelfValidationJWT(true);
             keyManagerDto.setAvailableGrantTypes(openIdConnectConfiguration.getGrantTypesSupported());
             if (StringUtils.isNotEmpty(openIdConnectConfiguration.getJwksEndpoint())){
