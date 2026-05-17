@@ -2073,6 +2073,11 @@
                 <artifactId>org.wso2.carbon.usage.data.exporter</artifactId>
                 <version>${carbon.usage.data.exporter.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.com.azure.resourcemanager</groupId>
+                <artifactId>azure-resourcemanager-apimanagement</artifactId>
+                <version>${org.wso2.orbit.azure.resourcemanager.apimanagement.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -2364,5 +2369,6 @@
         <mcp.transformer.version>0.9.1</mcp.transformer.version>
         <netty.version>4.2.12.Final</netty.version>
         <apicurio.version>2.2.7</apicurio.version>
+        <org.wso2.orbit.azure.resourcemanager.apimanagement.version>2.0.0.wso2v4</org.wso2.orbit.azure.resourcemanager.apimanagement.version>
     </properties>
 </project>

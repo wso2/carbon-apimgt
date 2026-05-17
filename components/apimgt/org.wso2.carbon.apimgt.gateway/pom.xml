@@ -346,6 +346,10 @@
             <groupId>org.wso2.carbon.mcp.transformer</groupId>
             <artifactId>mcp-transformer-java</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.azure.resourcemanager</groupId>
+            <artifactId>azure-resourcemanager-apimanagement</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
