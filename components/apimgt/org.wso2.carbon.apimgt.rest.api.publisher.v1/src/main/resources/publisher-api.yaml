@@ -115,6 +115,93 @@ security:
       - apim:api_view
 paths:
   ######################################################
+  # The "Federated API Discovery" resource APIs
+  ######################################################
+  /federated-apis/discover:
+    post:
+      tags:
+        - Federated APIs
+      summary: Discover federated APIs
+      description: Discover federated APIs from a specified federated gateway and return NEW and UPDATE 
+      parameters:
+        - name: environment
+          in: query
+          description: Name of the environment/gateway
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+      operationId: discoverFederatedAPIs
+
+  /federated-apis/import:
+    post:
+      tags:
+        - Federated APIs
+      summary: Import discovered APIs
+      description: Import explicitly selected new APIs
+      parameters:
+        - name: environment
+          in: query
+          description: Name of the environment/gateway
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: List of API IDs to import
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+      responses:
+        200:
+          description: OK
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+      operationId: importFederatedAPIs
+
+  /federated-apis/update:
+    post:
+      tags:
+        - Federated APIs
+      summary: Update existing federated APIs
+      description: Update explicitly selected APIs from a specified federated gateway
+      parameters:
+        - name: environment
+          in: query
+          description: Name of the environment/gateway
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: List of API IDs to update
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+      responses:
+        200:
+          description: OK
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+      operationId: updateFederatedAPIs
+      
+  ######################################################
   # The "API Collection" resource APIs
   ######################################################
   /apis:

@@ -53,6 +53,7 @@ import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -142,8 +143,13 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                                                         " APIs for environment: " + environment.getName() +
                                                         " and organization: " + organization);
                                             }
-                                            processDiscoveredAPIs(discoveredAPIs, environment, organization,
-                                                    federatedAPIDiscovery);
+                                            // ON-DEMAND MODE: Do NOT auto-import.
+                                            // The old processDiscoveredAPIs() call has been disabled.
+                                            // All imports/updates now require explicit user action
+                                            // via POST /federated-apis/import or /update endpoints.
+                                            log.info("Federated discovery check completed for environment: "
+                                                    + environment.getName() + ". Found " + discoveredAPIs.size()
+                                                    + " APIs. Awaiting user action via Publisher UI.");
                                         } else {
                                             if (log.isDebugEnabled()) {
                                                 log.debug("No APIs discovered in environment: "
@@ -527,4 +533,227 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
         }
         return APIUtil.getApiExternalApiMappingReferenceByApiId(apiResult.getId(), environment.getUuid());
     }
+     /**
+  * Helper to initialize the correct Gateway Connector dynamically.
+  */
+ private FederatedAPIDiscovery getFederatedAPIDiscovery(Environment environment, String organization) throws APIManagementException {
+     GatewayAgentConfiguration gatewayConfiguration = ServiceReferenceHolder.getInstance().
+             getExternalGatewayConnectorConfiguration(environment.getGatewayType());
+     if (gatewayConfiguration == null || StringUtils.isEmpty(gatewayConfiguration.getDiscoveryImplementation())) {
+         throw new APIManagementException("No discovery implementation configured for gateway type: " + environment.getGatewayType());
+     }
+     try {
+         FederatedAPIDiscovery federatedAPIDiscovery = (FederatedAPIDiscovery)
+                 Class.forName(gatewayConfiguration.getDiscoveryImplementation())
+                         .getDeclaredConstructor().newInstance();
+         federatedAPIDiscovery.init(environment, organization);
+         return federatedAPIDiscovery;
+     } catch (Exception e) {
+         throw new APIManagementException("Error initializing Federated API Discovery connector", e);
+     }
+ }
+ public Map<String, List<DiscoveredAPI>> discoverExternalAPIs(Environment environment, String organization)
+         throws APIManagementException {
+     FederatedAPIDiscovery discovery = getFederatedAPIDiscovery(environment, organization);
+     List<DiscoveredAPI> allAPIs = discovery.discoverAPI();
+     List<DiscoveredAPI> newAPIs = new ArrayList<>();
+     List<DiscoveredAPI> updatedAPIs = new ArrayList<>();
+     Map<String, List<DiscoveredAPI>> categorizedApis = new HashMap<>();
+     categorizedApis.put("NEW", newAPIs);
+     categorizedApis.put("UPDATE", updatedAPIs);
+     if (allAPIs == null || allAPIs.isEmpty()) {
+         return categorizedApis;
+     }
+     try {
+         String adminUsername = APIUtil.getTenantAdminUserName(organization);
+         FederatedGatewayUtil.startTenantFlow(organization, adminUsername);
+         Map<String, Map<String, ApiResult>> alreadyAvailableAPIs =
+                 FederatedGatewayUtil.getDiscoveredAPIsFromFederatedGateway(environment, organization);
+         List<String> alreadyDiscoveredAPIsList = new ArrayList<>(alreadyAvailableAPIs.get(DISCOVERED_API_LIST).keySet());
+         List<String> publishedAPIsList = new ArrayList<>(alreadyAvailableAPIs.get(PUBLISHED_API_LIST).keySet());
+         Map<String, ApiResult> allTrackedAPIs = new ConcurrentHashMap<>();
+         allTrackedAPIs.putAll(alreadyAvailableAPIs.get(DISCOVERED_API_LIST));
+         allTrackedAPIs.putAll(alreadyAvailableAPIs.get(PUBLISHED_API_LIST));
+         for (DiscoveredAPI discoveredAPI : allAPIs) {
+             if (discoveredAPI == null || discoveredAPI.getApi() == null) continue;
+             
+             String apiKey = discoveredAPI.getApi().getId().getApiName() + DELEM_COLON + discoveredAPI.getApi().getId().getVersion();
+             String envScopedKey = discoveredAPI.getApi().getId().getApiName() + APIConstants.KEY_SEPARATOR
+                     + environment.getName() + DELEM_COLON + discoveredAPI.getApi().getId().getVersion();
+             boolean isExists = alreadyDiscoveredAPIsList.contains(apiKey)
+                 || alreadyDiscoveredAPIsList.contains(envScopedKey)
+                 || publishedAPIsList.contains(apiKey)
+                 || publishedAPIsList.contains(envScopedKey);
+             if (!isExists) {
+                 stripHeavyDefinition(discoveredAPI);
+                 newAPIs.add(discoveredAPI);
+                 continue;
+             }
+             String matchedKey = null;
+             if (allTrackedAPIs.containsKey(envScopedKey)) matchedKey = envScopedKey;
+             else if (allTrackedAPIs.containsKey(apiKey)) matchedKey = apiKey;
+             if (matchedKey != null) {
+                 ApiResult wso2ApiResult = allTrackedAPIs.get(matchedKey);
+                 String existingReferenceArtifact = getReferenceObjectForExistingAPIs(environment, wso2ApiResult);
+                 
+                 if (discovery.isAPIUpdated(existingReferenceArtifact, discoveredAPI.getReferenceArtifact())) {
+                     stripHeavyDefinition(discoveredAPI);
+                     updatedAPIs.add(discoveredAPI);
+                 }
+             }
+         }
+     } finally {
+         PrivilegedCarbonContext.endTenantFlow();
+     }
+     return categorizedApis;
+ }
+ private void stripHeavyDefinition(DiscoveredAPI discoveredAPI) {
+     if (discoveredAPI != null && discoveredAPI.getApi() != null) {
+         discoveredAPI.getApi().setSwaggerDefinition(null);
+     }
+ }
+ /**
+  * Imports brand-new APIs from the external gateway into WSO2.
+  * <p>
+  * Calls discoverAPI() on the connector to get the full DiscoveredAPI list (which includes
+  * each connector's own reference artifact). Then filters for the user-selected IDs and imports
+  * only those. This ensures the reference artifact stored in AM_EXTERNAL_API_MAPPING matches
+  * the format that isAPIUpdated() expects on future discovery cycles.
+  *
+  * @param apiIds       the external gateway API identifiers selected by the user
+  * @param environment  the federated environment
+  * @param organization the organization
+  * @throws APIManagementException if an error occurs during import
+  */
+ public void importNewExternalAPIs(List<String> apiIds, Environment environment, String organization)
+         throws APIManagementException {
+     FederatedAPIDiscovery discovery = getFederatedAPIDiscovery(environment, organization);
+     String adminUsername = APIUtil.getTenantAdminUserName(organization);
+     FederatedGatewayUtil.startTenantFlow(organization, adminUsername);
+     try {
+         // Fetch the full list of DiscoveredAPIs from the connector.
+         // This gives us both the API object AND the connector-specific reference artifact.
+         List<DiscoveredAPI> allDiscoveredAPIs = discovery.discoverAPI();
+         // Build a lookup map: key the APIs by multiple identifiers so the UI can match by any of them
+         Map<String, DiscoveredAPI> apiLookup = new HashMap<>();
+         for (DiscoveredAPI discovered : allDiscoveredAPIs) {
+             API api = discovered.getApi();
+             // Index by UUID (the gateway's native ID)
+             if (api.getUuid() != null) {
+                 apiLookup.put(api.getUuid(), discovered);
+             }
+             // Index by API name (fallback)
+             apiLookup.put(api.getId().getApiName(), discovered);
+             // Index by name:version (another fallback)
+             apiLookup.put(api.getId().getApiName() + ":" + api.getId().getVersion(), discovered);
+         }
+         ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
+         for (String apiId : apiIds) {
+             try {
+                 DiscoveredAPI discoveredAPI = apiLookup.get(apiId);
+                 if (discoveredAPI == null) {
+                     log.error("Could not find discovered API matching ID: " + apiId + ". Skipping.");
+                     continue;
+                 }
+                 API api = discoveredAPI.getApi();
+                 APIDTO apidto = fromAPItoDTO(api);
+                 if (apidto.getPolicies() == null || apidto.getPolicies().isEmpty()) {
+                     apidto.setPolicies(Collections.singletonList(DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS));
+                 }
+                 // Build deployment ZIP
+                 JsonObject apiJson = (JsonObject) new Gson().toJsonTree(apidto);
+                 apiJson = CommonUtil.addTypeAndVersionToFile(ImportExportConstants.TYPE_API,
+                         ImportExportConstants.APIM_VERSION, apiJson);
+                 InputStream apiZip = FederatedGatewayUtil.createZipAsInputStream(
+                         apiJson.toString(), api.getSwaggerDefinition(),
+                         FederatedGatewayUtil.createDeploymentYaml(environment),
+                         apidto.getName());
+                 // Import as NEW API (update=false)
+                 ImportedAPIDTO importedApi = importExportAPI.importAPI(apiZip, false,
+                         true, false, true,
+                         new String[]{APIConstants.APIM_PUBLISHER_SCOPE, APIConstants.APIM_CREATOR_SCOPE},
+                         organization);
+                 // Record the mapping using the CONNECTOR'S OWN reference artifact
+                 // (same format as the old processDiscoveredAPIs flow — line 317-318)
+                 APIUtil.addApiExternalApiMapping(importedApi.getApi().getUuid(),
+                         environment.getUuid(), discoveredAPI.getReferenceArtifact());
+                 log.info("Successfully imported new API: " + api.getId().getApiName()
+                         + " from environment: " + environment.getName());
+             } catch (Exception e) {
+                 log.error("Error importing API with ID: " + apiId
+                         + " from environment: " + environment.getName(), e);
+             }
+         }
+     } finally {
+         PrivilegedCarbonContext.endTenantFlow();
+     }
+ }
+ /**
+  * Updates existing WSO2 APIs whose definitions have changed on the external gateway.
+  * <p>
+  * Same approach as importNewExternalAPIs: calls discoverAPI() to get the connector's own
+  * reference artifact, then imports with update=true.
+  *
+  * @param apiIds       the external gateway API identifiers selected by the user
+  * @param environment  the federated environment
+  * @param organization the organization
+  * @throws APIManagementException if an error occurs during update
+  */
+ public void updateExternalAPIs(List<String> apiIds, Environment environment, String organization)
+         throws APIManagementException {
+     FederatedAPIDiscovery discovery = getFederatedAPIDiscovery(environment, organization);
+     String adminUsername = APIUtil.getTenantAdminUserName(organization);
+     FederatedGatewayUtil.startTenantFlow(organization, adminUsername);
+     try {
+         List<DiscoveredAPI> allDiscoveredAPIs = discovery.discoverAPI();
+         Map<String, DiscoveredAPI> apiLookup = new HashMap<>();
+         for (DiscoveredAPI discovered : allDiscoveredAPIs) {
+             API api = discovered.getApi();
+             if (api.getUuid() != null) {
+                 apiLookup.put(api.getUuid(), discovered);
+             }
+             apiLookup.put(api.getId().getApiName(), discovered);
+             apiLookup.put(api.getId().getApiName() + ":" + api.getId().getVersion(), discovered);
+         }
+         ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
+         for (String apiId : apiIds) {
+             try {
+                 DiscoveredAPI discoveredAPI = apiLookup.get(apiId);
+                 if (discoveredAPI == null) {
+                     log.error("Could not find discovered API matching ID: " + apiId + ". Skipping.");
+                     continue;
+                 }
+                 API api = discoveredAPI.getApi();
+                 APIDTO apidto = fromAPItoDTO(api);
+                 if (apidto.getPolicies() == null || apidto.getPolicies().isEmpty()) {
+                     apidto.setPolicies(Collections.singletonList(DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS));
+                 }
+                 // Build deployment ZIP
+                 JsonObject apiJson = (JsonObject) new Gson().toJsonTree(apidto);
+                 apiJson = CommonUtil.addTypeAndVersionToFile(ImportExportConstants.TYPE_API,
+                         ImportExportConstants.APIM_VERSION, apiJson);
+                 InputStream apiZip = FederatedGatewayUtil.createZipAsInputStream(
+                         apiJson.toString(), api.getSwaggerDefinition(),
+                         FederatedGatewayUtil.createDeploymentYaml(environment),
+                         apidto.getName());
+                 // Import as UPDATE (update=true)
+                 ImportedAPIDTO importedApi = importExportAPI.importAPI(apiZip, false,
+                         true, true, true,
+                         new String[]{APIConstants.APIM_PUBLISHER_SCOPE, APIConstants.APIM_CREATOR_SCOPE},
+                         organization);
+                 // Update the mapping using the CONNECTOR'S OWN reference artifact
+                 // (same format as the old processDiscoveredAPIs flow — line 313-314)
+                 APIUtil.updateApiExternalApiMapping(importedApi.getApi().getUuid(),
+                         environment.getUuid(), discoveredAPI.getReferenceArtifact());
+                 log.info("Successfully updated API: " + api.getId().getApiName()
+                         + " from environment: " + environment.getName());
+             } catch (Exception e) {
+                 log.error("Error updating API with ID: " + apiId
+                         + " from environment: " + environment.getName(), e);
+             }
+         }
+     } finally {
+         PrivilegedCarbonContext.endTenantFlow();
+     }
+ }
 }

@@ -21,9 +21,12 @@
 package org.wso2.carbon.apimgt.api;
 
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.DiscoveredAPI;
+
+import java.util.List;
 
 /**
- * This interface provides functionality to schedule the discovery of APIs from a federated environment.
+ * This interface provides functionality to schedule or manually trigger the discovery of APIs from a federated environment.
  */
 public interface FederatedAPIDiscoveryService {
 
@@ -42,4 +45,43 @@ public interface FederatedAPIDiscoveryService {
      * @param organization the organization associated with the specified environment
      */
     void stopDiscovery(Environment environment, String organization);
+
+/**
+ * Discovers APIs from the gateway and classifies them into NEW or UPDATE categories.
+ *
+ * @param environment the federated environment
+ * @param organization the organization
+ * @return A map with keys NEW and UPDATE and corresponding lightweight DiscoveredAPI lists
+ * @throws APIManagementException if an error occurs
+ */
+default java.util.Map<String, List<DiscoveredAPI>> discoverExternalAPIs(Environment environment, String organization)
+        throws APIManagementException {
+    throw new APIManagementException("discoverExternalAPIs is not supported.");
+}
+
+/**
+ * Imports brand-new APIs from the external gateway into WSO2.
+ * For each API ID, the full definition is fetched on-demand, then persisted.
+ *
+ * @param apiIds       the list of external gateway API identifiers to import
+ * @param environment  the federated environment
+ * @param organization the organization
+ * @throws APIManagementException if an error occurs
+ */
+default void importNewExternalAPIs(List<String> apiIds, Environment environment, String organization) throws APIManagementException {
+    throw new APIManagementException("importNewExternalAPIs is not supported.");
+}
+
+/**
+ * Updates existing WSO2 APIs whose definitions have changed on the external gateway.
+ * For each API ID, the full definition is fetched on-demand and the existing entry is updated.
+ *
+ * @param apiIds       the list of external gateway API identifiers to update
+ * @param environment  the federated environment
+ * @param organization the organization
+ * @throws APIManagementException if an error occurs
+ */
+default void updateExternalAPIs(List<String> apiIds, Environment environment, String organization) throws APIManagementException {
+    throw new APIManagementException("updateExternalAPIs is not supported.");
+}
 }
