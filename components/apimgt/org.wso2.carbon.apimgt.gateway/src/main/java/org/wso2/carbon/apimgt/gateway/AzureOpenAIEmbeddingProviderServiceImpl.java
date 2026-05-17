@@ -32,16 +32,19 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.EmbeddingProviderService;
+import org.wso2.carbon.apimgt.api.ManagedIdentityTokenProvider;
 import org.wso2.carbon.apimgt.api.dto.EmbeddingProviderConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 
 /**
  * Azure OpenAI Embedding Provider Service.
  * This service interacts with the Azure OpenAI API to generate embeddings for given input text.
+ * Supports both API-key authentication and Azure Workload Identity (UMI) authentication.
  */
 public class AzureOpenAIEmbeddingProviderServiceImpl implements EmbeddingProviderService {
     private HttpClient httpClient;
@@ -53,26 +56,39 @@ public class AzureOpenAIEmbeddingProviderServiceImpl implements EmbeddingProvide
     private int maxRetryCount;
     private double retryProgressionFactor;
 
+    /** Non-null when {@code auth_type=umi} is configured; null for API-key auth. */
+    private ManagedIdentityTokenProvider umiTokenProvider;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public void init(EmbeddingProviderConfigurationDTO providerConfig) throws APIManagementException {
-        azureApiKey = providerConfig.getProperties().get(APIConstants.AI.EMBEDDING_PROVIDER_API_KEY);
         endpointUrl = providerConfig.getProperties().get(APIConstants.AI.EMBEDDING_PROVIDER_EMBEDDING_ENDPOINT);
 
-        boolean isApiKeyMissing = StringUtils.isEmpty(this.azureApiKey);
-        boolean isEndpointMissing = StringUtils.isEmpty(this.endpointUrl);
+        if (StringUtils.isEmpty(endpointUrl)) {
+            throw new APIManagementException("Missing required properties: "
+                    + APIConstants.AI.EMBEDDING_PROVIDER_EMBEDDING_ENDPOINT);
+        }
 
-        if (isApiKeyMissing || isEndpointMissing) {
-            StringBuilder missingPropertiesBuilder = new StringBuilder();
-            if (isApiKeyMissing) {
-                missingPropertiesBuilder.append(APIConstants.AI.EMBEDDING_PROVIDER_API_KEY).append(", ");
+        String authType = providerConfig.getProperties().getOrDefault(
+                APIConstants.AI.AUTH_TYPE, APIConstants.AI.AUTH_TYPE_API_KEY);
+
+        if (APIConstants.AI.AUTH_TYPE_UMI.equalsIgnoreCase(authType)) {
+            umiTokenProvider = new AzureUmiTokenProvider();
+            // *.openai.azure.com requires cognitiveservices.azure.com scope.
+            // Override via umi_scope in provider properties if needed.
+            String scope = providerConfig.getProperties().getOrDefault(
+                    APIConstants.AI.AZURE_UMI_SCOPE_KEY,
+                    APIConstants.AI.AZURE_UMI_COGNITIVE_SERVICES_SCOPE);
+            umiTokenProvider.init(Collections.singletonMap(APIConstants.AI.AZURE_UMI_SCOPE_KEY, scope));
+            azureApiKey = null;
+        } else {
+            azureApiKey = providerConfig.getProperties().get(APIConstants.AI.EMBEDDING_PROVIDER_API_KEY);
+            if (StringUtils.isEmpty(azureApiKey)) {
+                throw new APIManagementException("Missing required properties: "
+                        + APIConstants.AI.EMBEDDING_PROVIDER_API_KEY);
             }
-            if (isEndpointMissing) {
-                missingPropertiesBuilder.append(APIConstants.AI.EMBEDDING_PROVIDER_EMBEDDING_ENDPOINT).append(", ");
-            }
-            String missing = missingPropertiesBuilder.substring(0, missingPropertiesBuilder.length() - 2);
-            throw new APIManagementException("Missing required properties: " + missing);
+            umiTokenProvider = null;
         }
 
         // Retry parameters
@@ -104,7 +120,12 @@ public class AzureOpenAIEmbeddingProviderServiceImpl implements EmbeddingProvide
     @Override
     public double[] getEmbedding(String input) throws APIManagementException {
         HttpPost httpPostRequest = new HttpPost(endpointUrl);
-        httpPostRequest.setHeader(APIConstants.API_KEY_AUTH, azureApiKey);
+        if (umiTokenProvider != null) {
+            httpPostRequest.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
+                    APIConstants.AUTHORIZATION_BEARER + umiTokenProvider.getAccessToken());
+        } else {
+            httpPostRequest.setHeader(APIConstants.API_KEY_AUTH, azureApiKey);
+        }
         httpPostRequest.setHeader(APIConstants.HEADER_CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
 
         try {
