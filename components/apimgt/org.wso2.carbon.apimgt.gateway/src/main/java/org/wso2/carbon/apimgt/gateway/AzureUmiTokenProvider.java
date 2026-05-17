@@ -26,12 +26,14 @@ import com.azure.core.http.netty.NettyAsyncHttpClientBuilder;
 import com.azure.identity.CredentialUnavailableException;
 import com.azure.identity.WorkloadIdentityCredential;
 import com.azure.identity.WorkloadIdentityCredentialBuilder;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ManagedIdentityTokenProvider;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.Map;
 
@@ -49,15 +51,30 @@ public class AzureUmiTokenProvider implements ManagedIdentityTokenProvider {
 
     private WorkloadIdentityCredential credential;
     private TokenRequestContext tokenRequestContext;
+    private HttpClient httpClient;
 
     @Override
     public void init(Map<String, String> properties) throws APIManagementException {
+        String scope = (properties != null) ? properties.get(APIConstants.AI.AZURE_UMI_SCOPE_KEY) : null;
+        if (StringUtils.isBlank(scope)) {
+            throw new APIManagementException(
+                    "Azure UMI: missing required property '" + APIConstants.AI.AZURE_UMI_SCOPE_KEY
+                            + "'. Provide a valid OAuth2 scope (e.g. https://ai.azure.com/.default).");
+        }
         validateEnvVar(APIConstants.AI.AZURE_UMI_ENV_TENANT_ID);
         validateEnvVar(APIConstants.AI.AZURE_UMI_ENV_CLIENT_ID);
         validateEnvVar(APIConstants.AI.AZURE_UMI_ENV_FEDERATED_TOKEN_FILE);
-        String scope = properties.get(APIConstants.AI.AZURE_UMI_SCOPE_KEY);
 
-        HttpClient httpClient = new NettyAsyncHttpClientBuilder().build();
+        // Close any previously held client before recreating, to avoid leaking Netty event-loop
+        // resources if init() is called more than once.
+        if (httpClient instanceof java.io.Closeable) {
+            try {
+                ((java.io.Closeable) httpClient).close();
+            } catch (IOException e) {
+                log.warn("AzureUmiTokenProvider: error closing previous HTTP client during re-init", e);
+            }
+        }
+        httpClient = new NettyAsyncHttpClientBuilder().build();
         credential = new WorkloadIdentityCredentialBuilder()
                 .httpClient(httpClient)
                 .build();
@@ -106,6 +123,20 @@ public class AzureUmiTokenProvider implements ManagedIdentityTokenProvider {
             throw new APIManagementException(
                     "Azure UMI: token acquisition failed — Azure endpoint may be unreachable or the "
                             + "request timed out after " + TOKEN_ACQUISITION_TIMEOUT_SECONDS + "s.", e);
+        }
+    }
+
+    /**
+     * Releases the Netty event-loop resources held by the HTTP client and closes the credential.
+     * Must be called when this provider is no longer needed (e.g. on mediator destroy).
+     */
+    @Override
+    public void close() throws IOException {
+        credential = null;
+        tokenRequestContext = null;
+        if (httpClient instanceof java.io.Closeable) {
+            ((java.io.Closeable) httpClient).close();
+            httpClient = null;
         }
     }
 

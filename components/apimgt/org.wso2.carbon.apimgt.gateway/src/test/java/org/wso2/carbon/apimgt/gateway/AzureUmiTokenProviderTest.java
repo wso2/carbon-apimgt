@@ -28,9 +28,9 @@ import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-import reactor.core.publisher.Mono;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import reactor.core.publisher.Mono;
 
 import java.lang.reflect.Field;
 import java.time.Duration;
@@ -173,6 +173,34 @@ public class AzureUmiTokenProviderTest {
         } catch (APIManagementException e) {
             Assert.assertTrue("Exception message should name the missing env var",
                     e.getMessage().contains(APIConstants.AI.AZURE_UMI_ENV_TENANT_ID));
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // init() — scope validation
+    // -------------------------------------------------------------------------
+
+    @Test
+    public void testInit_nullScope_throwsAPIManagementException() {
+        AzureUmiTokenProvider fresh = new AzureUmiTokenProvider();
+        try {
+            fresh.init(Collections.singletonMap(APIConstants.AI.AZURE_UMI_SCOPE_KEY, null));
+            Assert.fail("Expected APIManagementException for null scope");
+        } catch (APIManagementException e) {
+            Assert.assertTrue("Exception message should name the missing property",
+                    e.getMessage().contains(APIConstants.AI.AZURE_UMI_SCOPE_KEY));
+        }
+    }
+
+    @Test
+    public void testInit_emptyScope_throwsAPIManagementException() {
+        AzureUmiTokenProvider fresh = new AzureUmiTokenProvider();
+        try {
+            fresh.init(Collections.singletonMap(APIConstants.AI.AZURE_UMI_SCOPE_KEY, ""));
+            Assert.fail("Expected APIManagementException for empty scope");
+        } catch (APIManagementException e) {
+            Assert.assertTrue("Exception message should name the missing property",
+                    e.getMessage().contains(APIConstants.AI.AZURE_UMI_SCOPE_KEY));
         }
     }
 

@@ -63,15 +63,15 @@ public class AzureOpenAIEmbeddingProviderServiceImpl implements EmbeddingProvide
 
     @Override
     public void init(EmbeddingProviderConfigurationDTO providerConfig) throws APIManagementException {
-        endpointUrl = providerConfig.getProperties().get(APIConstants.AI.EMBEDDING_PROVIDER_EMBEDDING_ENDPOINT);
-
-        if (StringUtils.isEmpty(endpointUrl)) {
-            throw new APIManagementException("Missing required properties: "
+        endpointUrl = StringUtils.trimToNull(providerConfig.getProperties()
+                .get(APIConstants.AI.EMBEDDING_PROVIDER_EMBEDDING_ENDPOINT));
+        if (endpointUrl == null) {
+            throw new APIManagementException("Missing required Embedding Provider configuration: "
                     + APIConstants.AI.EMBEDDING_PROVIDER_EMBEDDING_ENDPOINT);
         }
 
-        String authType = providerConfig.getProperties().getOrDefault(
-                APIConstants.AI.AUTH_TYPE, APIConstants.AI.AUTH_TYPE_API_KEY);
+        String authType = StringUtils.trimToEmpty(providerConfig.getProperties().getOrDefault(
+                APIConstants.AI.AUTH_TYPE, APIConstants.AI.AUTH_TYPE_API_KEY));
 
         if (APIConstants.AI.AUTH_TYPE_UMI.equalsIgnoreCase(authType)) {
             umiTokenProvider = new AzureUmiTokenProvider();
@@ -83,9 +83,10 @@ public class AzureOpenAIEmbeddingProviderServiceImpl implements EmbeddingProvide
             umiTokenProvider.init(Collections.singletonMap(APIConstants.AI.AZURE_UMI_SCOPE_KEY, scope));
             azureApiKey = null;
         } else {
-            azureApiKey = providerConfig.getProperties().get(APIConstants.AI.EMBEDDING_PROVIDER_API_KEY);
-            if (StringUtils.isEmpty(azureApiKey)) {
-                throw new APIManagementException("Missing required properties: "
+            azureApiKey = StringUtils.trimToNull(providerConfig.getProperties()
+                    .get(APIConstants.AI.EMBEDDING_PROVIDER_API_KEY));
+            if (azureApiKey == null) {
+                throw new APIManagementException("Missing required Embedding Provider configuration: "
                         + APIConstants.AI.EMBEDDING_PROVIDER_API_KEY);
             }
             umiTokenProvider = null;

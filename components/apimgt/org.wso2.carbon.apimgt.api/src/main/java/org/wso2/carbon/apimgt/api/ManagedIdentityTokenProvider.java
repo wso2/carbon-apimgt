@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.api;
 
+import java.io.Closeable;
 import java.util.Map;
 
 /**
@@ -26,12 +27,18 @@ import java.util.Map;
  * The same interface can be implemented for different cloud providers (e.g. Azure UMI, AWS IAM
  * instance roles) so that callers such as embedding providers or guardrail providers remain
  * independent of the underlying cloud credential mechanism.
+ *
+ * Implementations must be thread-safe as instances will be shared and accessed concurrently
+ * in the gateway environment.
  */
-public interface ManagedIdentityTokenProvider {
+public interface ManagedIdentityTokenProvider extends Closeable {
 
     /**
      * Initialises the provider. Credentials are read from environment variables injected by the
      * cloud workload identity mechanism. The properties map may contain optional overrides.
+     * This method must be called before {@link #getAccessToken()}.
+     * Calling this method multiple times is permitted and will re-initialize the provider,
+     * replacing any previously built credentials and scopes.
      *
      * @param properties key-value configuration map from the provider's Property block.
      * @throws APIManagementException if required environment variables or properties are missing.
@@ -49,6 +56,8 @@ public interface ManagedIdentityTokenProvider {
      * Returns a valid bearer access token for the configured target scope.
      * Implementations must cache the token and return the cached value until it is close to
      * expiry, then transparently refresh it.
+     * {@link #init(Map)} must be called successfully before invoking this method;
+     * behaviour is undefined if called on an uninitialised provider.
      *
      * @return an access token string without the "Bearer " prefix.
      * @throws APIManagementException if the token cannot be acquired or refreshed.
