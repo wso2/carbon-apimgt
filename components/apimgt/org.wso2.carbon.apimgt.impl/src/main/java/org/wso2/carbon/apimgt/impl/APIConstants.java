@@ -759,10 +759,12 @@ public final class APIConstants {
         public static final String AZURE_UMI_TOKEN_PROVIDER_TYPE = "azure-umi";
         // Scope for Azure OpenAI / Content Safety (*.openai.azure.com, *.cognitiveservices.azure.com) endpoints.
         public static final String AZURE_UMI_COGNITIVE_SERVICES_SCOPE = "https://cognitiveservices.azure.com/.default";
-        // AI Foundry (*.services.ai.azure.com) scope defaults via default.json.
-        public static final String AZURE_UMI_SCOPE = "AI.AzureUMI.Scope";
+        // XML path prefix for the AzureUMI config block.
+        public static final String AZURE_UMI = AI + ".AzureUMI.";
+        // AI Foundry (*.services.ai.azure.com) scope — defaults via default.json.
+        public static final String AZURE_UMI_SCOPE = AZURE_UMI + "Scope";
         // Key used in the properties map
-        public static final String AZURE_UMI_SCOPE_KEY = "umi_scope";
+        public static final String AZURE_UMI_SCOPE_KEY = "azure_umi_scope";
         // Environment variables injected by the AKS Workload Identity mutating webhook
         public static final String AZURE_UMI_ENV_TENANT_ID = "AZURE_TENANT_ID";
         public static final String AZURE_UMI_ENV_CLIENT_ID = "AZURE_CLIENT_ID";

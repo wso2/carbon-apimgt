@@ -22,6 +22,7 @@ package org.wso2.carbon.apimgt.gateway;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -65,16 +66,16 @@ public class AzureContentSafetyGuardrailProviderServiceImpl implements Guardrail
             throw new APIManagementException("Azure content safety provider configuration not found");
         }
 
-        contentSafetyEndpoint = providerConfig.getProperties()
-                .get(APIConstants.AI.GUARDRAIL_PROVIDER_AZURE_CONTENTSAFETY_ENDPOINT);
+        contentSafetyEndpoint = StringUtils.trimToNull(providerConfig.getProperties()
+                .get(APIConstants.AI.GUARDRAIL_PROVIDER_AZURE_CONTENTSAFETY_ENDPOINT));
 
         if (contentSafetyEndpoint == null) {
-            throw new APIManagementException(
-                    "Missing required Azure content safety configuration: 'endpoint'");
+            throw new APIManagementException("Missing required Azure content safety configuration: "
+                    + APIConstants.AI.GUARDRAIL_PROVIDER_AZURE_CONTENTSAFETY_ENDPOINT);
         }
 
-        String authType = providerConfig.getProperties().getOrDefault(
-                APIConstants.AI.AUTH_TYPE, APIConstants.AI.AUTH_TYPE_API_KEY);
+        String authType = StringUtils.trimToEmpty(providerConfig.getProperties().getOrDefault(
+                APIConstants.AI.AUTH_TYPE, APIConstants.AI.AUTH_TYPE_API_KEY));
 
         if (APIConstants.AI.AUTH_TYPE_UMI.equalsIgnoreCase(authType)) {
             umiTokenProvider = new AzureUmiTokenProvider();
@@ -86,11 +87,11 @@ public class AzureContentSafetyGuardrailProviderServiceImpl implements Guardrail
             umiTokenProvider.init(Collections.singletonMap(APIConstants.AI.AZURE_UMI_SCOPE_KEY, scope));
             contentSafetyApiKey = null;
         } else {
-            contentSafetyApiKey = providerConfig.getProperties()
-                    .get(APIConstants.AI.GUARDRAIL_PROVIDER_AZURE_CONTENTSAFETY_KEY);
+            contentSafetyApiKey = StringUtils.trimToNull(providerConfig.getProperties()
+                    .get(APIConstants.AI.GUARDRAIL_PROVIDER_AZURE_CONTENTSAFETY_KEY));
             if (contentSafetyApiKey == null) {
-                throw new APIManagementException(
-                        "Missing required Azure content safety configuration: 'key'");
+                throw new APIManagementException("Missing required Azure content safety configuration: "
+                        + APIConstants.AI.GUARDRAIL_PROVIDER_AZURE_CONTENTSAFETY_KEY);
             }
             umiTokenProvider = null;
         }

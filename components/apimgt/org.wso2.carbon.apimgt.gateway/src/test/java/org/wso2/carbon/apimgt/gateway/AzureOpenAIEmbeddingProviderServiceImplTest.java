@@ -38,7 +38,6 @@ import org.wso2.carbon.apimgt.api.dto.EmbeddingProviderConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
-import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;

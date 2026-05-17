@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -44,9 +45,10 @@ import java.util.Map;
  * outgoing backend request. It is inserted into the Synapse sequence at API-deploy time
  * when the endpoint security type is {@code "umi"}.
  *
- * <p>The mediator lazily initialises an {@link AzureUmiTokenProvider} on the first
- * request; the provider (and the Azure Identity SDK behind it) handles token caching
- * and proactive refresh automatically.
+ * <p>The mediator eagerly initialises an {@link AzureUmiTokenProvider} in {@link #init},
+ * so misconfigured env vars or a missing scope are caught at API-deploy time rather than
+ * on the first live request. The provider (and the Azure Identity SDK behind it) handles
+ * token caching and proactive refresh automatically.
  *
  * <p>Required AKS Workload Identity environment variables must be injected into the
  * gateway pod by the mutating webhook:
@@ -64,17 +66,40 @@ public class AzureUMIMediator extends AbstractMediator implements ManagedLifecyc
 
     private static final Log log = LogFactory.getLog(AzureUMIMediator.class);
 
-    /** Lazily initialised; volatile for safe publication without full synchronisation. */
-    private volatile AzureUmiTokenProvider tokenProvider;
+    private AzureUmiTokenProvider tokenProvider;
 
+    /**
+     * Eagerly creates and initialises the {@link AzureUmiTokenProvider} so that missing
+     * env vars or an invalid scope are caught at API-deploy time.
+     * Synapse calls this method in a single-threaded deployment context before any
+     * concurrent {@link #mediate} calls, so no synchronisation is required.
+     */
     @Override
     public void init(SynapseEnvironment synapseEnvironment) {
         log.debug("AzureUMIMediator: init");
+        try {
+            String scope = ServiceReferenceHolder.getInstance()
+                    .getApiManagerConfigurationService().getAPIManagerConfiguration()
+                    .getFirstProperty(APIConstants.AI.AZURE_UMI_SCOPE);
+            AzureUmiTokenProvider provider = new AzureUmiTokenProvider();
+            provider.init(Collections.singletonMap(APIConstants.AI.AZURE_UMI_SCOPE_KEY, scope));
+            tokenProvider = provider;
+        } catch (APIManagementException e) {
+            // Re-throw as unchecked — a misconfigured mediator must not silently pass deployment.
+            throw new RuntimeException("AzureUMIMediator: failed to initialise token provider — " + e.getMessage(), e);
+        }
     }
 
     @Override
     public void destroy() {
-        tokenProvider = null;
+        if (tokenProvider != null) {
+            try {
+                tokenProvider.close();
+            } catch (IOException e) {
+                log.warn("AzureUMIMediator: error closing token provider during destroy", e);
+            }
+            tokenProvider = null;
+        }
     }
 
     /**
@@ -88,13 +113,9 @@ public class AzureUMIMediator extends AbstractMediator implements ManagedLifecyc
     @Override
     public boolean mediate(MessageContext messageContext) {
 
-        if (log.isDebugEnabled()) {
-            log.debug("AzureUMIMediator: injecting UMI Bearer token");
-        }
-
+        log.debug("AzureUMIMediator: injecting UMI Bearer token");
         try {
-            AzureUmiTokenProvider provider = getOrCreateTokenProvider();
-            String token = provider.getAccessToken();
+            String token = tokenProvider.getAccessToken();
 
             @SuppressWarnings("unchecked")
             Map<String, Object> transportHeaders =
@@ -111,9 +132,7 @@ public class AzureUMIMediator extends AbstractMediator implements ManagedLifecyc
             transportHeaders.put(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
                     APIConstants.AUTHORIZATION_BEARER + token);
 
-            if (log.isDebugEnabled()) {
-                log.debug("AzureUMIMediator: Authorization header injected successfully");
-            }
+            log.debug("AzureUMIMediator: Authorization header injected successfully");
             return true;
 
         } catch (APIManagementException e) {
@@ -134,27 +153,5 @@ public class AzureUMIMediator extends AbstractMediator implements ManagedLifecyc
     @Override
     public boolean isContentAware() {
         return false;
-    }
-
-    /**
-     * Lazily creates and initialises the {@link AzureUmiTokenProvider}.
-     * Double-checked locking is safe here because {@code tokenProvider} is volatile.
-     * Scope is always populated as {@code default.json} supplies {@code https://ai.azure.com/.default}.
-     */
-    private AzureUmiTokenProvider getOrCreateTokenProvider() throws APIManagementException {
-
-        if (tokenProvider == null) {
-            synchronized (this) {
-                if (tokenProvider == null) {
-                    String scope = ServiceReferenceHolder.getInstance()
-                            .getApiManagerConfigurationService().getAPIManagerConfiguration()
-                            .getFirstProperty(APIConstants.AI.AZURE_UMI_SCOPE);
-                    AzureUmiTokenProvider provider = new AzureUmiTokenProvider();
-                    provider.init(Collections.singletonMap(APIConstants.AI.AZURE_UMI_SCOPE_KEY, scope));
-                    tokenProvider = provider;
-                }
-            }
-        }
-        return tokenProvider;
     }
 }

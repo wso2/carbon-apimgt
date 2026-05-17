@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.gateway.mediators;
 
 import org.apache.http.HttpStatus;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,7 +37,6 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.apache.synapse.transport.passthru.util.RelayUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -50,6 +50,10 @@ import java.util.Map;
  *   <li>Intercept {@code new AzureUmiTokenProvider()} and inject a mock</li>
  *   <li>Stub the static {@link Utils#send} and {@link RelayUtils#discardRequestMessage} calls</li>
  * </ul>
+ * <p>
+ * The mediator now eagerly initialises the token provider in {@link AzureUMIMediator#init},
+ * so {@code setUp()} calls {@code mediator.init(null)} to replicate the Synapse deploy-time
+ * lifecycle before each test.
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ServiceReferenceHolder.class, AzureUMIMediator.class, Utils.class, RelayUtils.class})
@@ -84,7 +88,7 @@ public class AzureUMIMediatorTest {
         Mockito.when(configService.getAPIManagerConfiguration()).thenReturn(config);
         Mockito.when(config.getFirstProperty(APIConstants.AI.AZURE_UMI_SCOPE)).thenReturn(SCOPE);
 
-        // AzureUmiTokenProvider mock
+        // AzureUmiTokenProvider mock — must be set up before init() is called
         mockProvider = Mockito.mock(AzureUmiTokenProvider.class);
         Mockito.when(mockProvider.getAccessToken()).thenReturn(TEST_TOKEN);
         PowerMockito.whenNew(AzureUmiTokenProvider.class).withNoArguments().thenReturn(mockProvider);
@@ -92,6 +96,33 @@ public class AzureUMIMediatorTest {
         // Static utilities
         PowerMockito.mockStatic(Utils.class);
         PowerMockito.mockStatic(RelayUtils.class);
+
+        // Eager initialisation — mirrors Synapse deploying the sequence
+        mediator.init(null);
+    }
+
+    // -------------------------------------------------------------------------
+    // init() — eager initialisation at deploy time
+    // -------------------------------------------------------------------------
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testInit_createsProviderAndPropagatesScopeFromConfig() throws Exception {
+        // Provider constructor must have been called once during setUp → init()
+        PowerMockito.verifyNew(AzureUmiTokenProvider.class, Mockito.times(1)).withNoArguments();
+
+        // Scope read from APIManagerConfiguration must be forwarded to provider.init()
+        ArgumentCaptor<Map> scopeCaptor = ArgumentCaptor.forClass(Map.class);
+        Mockito.verify(mockProvider).init(scopeCaptor.capture());
+        Assert.assertEquals(
+                "Scope read from APIManagerConfiguration must be forwarded to provider.init()",
+                SCOPE,
+                scopeCaptor.getValue().get(APIConstants.AI.AZURE_UMI_SCOPE_KEY));
+    }
+
+    @Test
+    public void testIsContentAware_returnsFalse() {
+        Assert.assertFalse(mediator.isContentAware());
     }
 
     // -------------------------------------------------------------------------
@@ -161,71 +192,24 @@ public class AzureUMIMediatorTest {
     }
 
     // -------------------------------------------------------------------------
-    // Scope propagation — scope from config is passed to provider.init()
+    // destroy() — closes provider; re-init creates a fresh one
     // -------------------------------------------------------------------------
 
     @Test
-    @SuppressWarnings("unchecked")
-    public void testMediate_scopePropagatedToProviderInit() throws Exception {
-        Map<String, Object> headers = new HashMap<>();
-        Mockito.when(axis2Ctx.getProperty(
-                org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS)).thenReturn(headers);
+    public void testDestroy_closesProvider() throws Exception {
+        mediator.destroy();
 
-        mediator.mediate(synapseCtx);
-
-        ArgumentCaptor<Map> scopeCaptor = ArgumentCaptor.forClass(Map.class);
-        Mockito.verify(mockProvider).init(scopeCaptor.capture());
-        Assert.assertEquals(
-                "Scope read from APIManagerConfiguration must be forwarded to provider.init()",
-                SCOPE,
-                scopeCaptor.getValue().get(APIConstants.AI.AZURE_UMI_SCOPE_KEY));
+        // provider.close() must have been called exactly once
+        Mockito.verify(mockProvider, Mockito.times(1)).close();
     }
 
-    // -------------------------------------------------------------------------
-    // Lazy initialisation — provider created once and reused
-    // -------------------------------------------------------------------------
-
     @Test
-    public void testMediate_tokenProviderInitialisedOnce_reusedAcrossRequests() throws Exception {
-        Map<String, Object> headers = new HashMap<>();
-        Mockito.when(axis2Ctx.getProperty(
-                org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS)).thenReturn(headers);
+    public void testDestroy_thenInit_createsNewProvider() throws Exception {
+        mediator.destroy();           // close and null the provider
+        mediator.init(null);          // re-deploy — must create a fresh provider
 
-        mediator.mediate(synapseCtx);
-        mediator.mediate(synapseCtx);
-
-        // constructor should have been called exactly once
-        PowerMockito.verifyNew(AzureUmiTokenProvider.class, Mockito.times(1)).withNoArguments();
-    }
-
-    // -------------------------------------------------------------------------
-    // destroy()
-    // -------------------------------------------------------------------------
-
-    @Test
-    public void testDestroy_nullsTokenProvider_causingReinitOnNextMediate() throws Exception {
-        Map<String, Object> headers = new HashMap<>();
-        Mockito.when(axis2Ctx.getProperty(
-                org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS)).thenReturn(headers);
-
-        mediator.mediate(synapseCtx); // first call — creates provider
-        mediator.destroy();           // clear provider
-        mediator.mediate(synapseCtx); // second call — must create a new provider
-
+        // provider.close() once during destroy, constructor called twice total
+        Mockito.verify(mockProvider, Mockito.times(1)).close();
         PowerMockito.verifyNew(AzureUmiTokenProvider.class, Mockito.times(2)).withNoArguments();
-    }
-
-    // -------------------------------------------------------------------------
-    // init() / isContentAware()
-    // -------------------------------------------------------------------------
-
-    @Test
-    public void testInit_doesNotThrow() {
-        mediator.init(null); // SynapseEnvironment is unused; must not throw
-    }
-
-    @Test
-    public void testIsContentAware_returnsFalse() {
-        Assert.assertFalse(mediator.isContentAware());
     }
 }
