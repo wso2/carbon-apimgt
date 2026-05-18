@@ -30,6 +30,7 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.reflect.Whitebox;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
@@ -48,6 +49,8 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.workflow.DefaultWorkflowTaskService;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.identity.application.common.model.IdentityProvider;
+import org.wso2.carbon.identity.application.common.model.IdentityProviderProperty;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -451,5 +454,192 @@ public class APIAdminImplTest {
     private void assertUpdateDisabledKeyManagerConfigurationModification(APIManagementException exception) {
         Assert.assertTrue(exception.getMessage().contains("Modification of the Key Manager configuration"));
         Assert.assertEquals(ExceptionCodes.KEY_MANAGER_UPDATE_VIOLATION, exception.getErrorHandler());
+    }
+
+    // ---------- Issue #4990: PEM cert was dropped on the IdP record (private createIdp / updatedIDP) ----------
+
+    private static final String SAMPLE_PEM =
+            "-----BEGIN CERTIFICATE-----\n" +
+                    "MIIDazCCAlOgAwIBAgIUJ+abcDEFghIJklMNopQRsTUVwxYwDQYJKoZIhvcNAQEL\n" +
+                    "BQAwRTELMAkGA1UEBhMCQVUxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoM\n" +
+                    "GEludGVybmV0IFdpZGdpdHMgUHR5IEx0ZDAeFw0yNjA1MDUwMDAwMDBaFw0yNzA1\n" +
+                    "MDUwMDAwMDBaMEUxCzAJBgNVBAYTAkFVMRMwEQYDVQQIDApTb21lLVN0YXRlMSEw\n" +
+                    "HwYDVQQKDBhJbnRlcm5ldCBXaWRnaXRzIFB0eSBMdGQwggEiMA0GCSqGSIb3DQEB\n" +
+                    "AQUAA4IBDwAwggEKAoIBAQDtESTcert==\n" +
+                    "-----END CERTIFICATE-----";
+
+    private static final String SAMPLE_JWKS_URL = "https://idp.example.com/oauth2/jwks";
+
+    private KeyManagerConfigurationDTO buildExchangedKM(String certType, String certValue) {
+        KeyManagerConfigurationDTO config = new KeyManagerConfigurationDTO();
+        config.setName("TestKM");
+        config.setDisplayName("Test KM");
+        config.setDescription("");
+        config.setOrganization("carbon.super");
+        config.setType("WSO2-IS");
+        config.setEnabled(true);
+        config.setTokenType("EXCHANGED");
+        config.setAlias("https://localhost:9443/oauth2/token");
+        config.setUuid("11111111-2222-3333-4444-555555555555");
+
+        Map<String, Object> additionalProps = new HashMap<>();
+        if (certType != null) {
+            additionalProps.put(APIConstants.KeyManager.CERTIFICATE_TYPE, certType);
+        }
+        if (certValue != null) {
+            additionalProps.put(APIConstants.KeyManager.CERTIFICATE_VALUE, certValue);
+        }
+        config.setAdditionalProperties(additionalProps);
+        return config;
+    }
+
+    /**
+     * #4990 (create path): a KM with PEM cert must populate the IdP's {@code certificate}
+     * field verbatim — pre-fix the inverted {@code String.join(certificate, "")} dropped it
+     * to an empty string.
+     */
+    @Test
+    public void testCreateIdpSetsCertificateForPemType() throws Exception {
+
+        APIAdminImpl apiAdmin = new APIAdminImpl();
+        KeyManagerConfigurationDTO km = buildExchangedKM("PEM", SAMPLE_PEM);
+
+        IdentityProvider idp = Whitebox.invokeMethod(apiAdmin, "createIdp", km);
+
+        Assert.assertNotNull("IdP should be created", idp);
+        Assert.assertEquals("PEM cert must be set verbatim on the IdP (issue #4990)",
+                SAMPLE_PEM, idp.getCertificate());
+        // PEM branch must NOT add a JWKS_URI property
+        IdentityProviderProperty[] props = idp.getIdpProperties();
+        if (props != null) {
+            for (IdentityProviderProperty p : props) {
+                Assert.assertNotEquals("PEM branch must not set JWKS_URI", "jwksUri", p.getName());
+            }
+        }
+    }
+
+    /**
+     * #4990 (update path): same expectation as create — the PEM cert must round-trip
+     * onto the IdP record.
+     */
+    @Test
+    public void testUpdatedIDPSetsCertificateForPemType() throws Exception {
+
+        APIAdminImpl apiAdmin = new APIAdminImpl();
+        IdentityProvider retrieved = new IdentityProvider();
+        retrieved.setIdentityProviderName("existing");
+        retrieved.setCertificate(""); // simulate the prior empty placeholder
+        KeyManagerConfigurationDTO km = buildExchangedKM("PEM", SAMPLE_PEM);
+
+        IdentityProvider idp = Whitebox.invokeMethod(apiAdmin, "updatedIDP", retrieved, km);
+
+        Assert.assertNotNull("IdP should be returned from update", idp);
+        Assert.assertEquals("PEM cert must be set verbatim on update (issue #4990)",
+                SAMPLE_PEM, idp.getCertificate());
+    }
+
+    /**
+     * #4990 regression guard: a PEM containing newlines, leading/trailing whitespace,
+     * and embedded blank lines must round-trip without truncation or modification.
+     * This is what the inverted {@code String.join} would silently mangle.
+     */
+    @Test
+    public void testCreateIdpPreservesPemWithNewlinesAndWhitespace() throws Exception {
+
+        APIAdminImpl apiAdmin = new APIAdminImpl();
+        String multilinePem = "  \n-----BEGIN CERTIFICATE-----\nLINE1\n\nLINE2\n   \n-----END CERTIFICATE-----\n";
+        KeyManagerConfigurationDTO km = buildExchangedKM("PEM", multilinePem);
+
+        IdentityProvider idp = Whitebox.invokeMethod(apiAdmin, "createIdp", km);
+
+        Assert.assertEquals("Multi-line PEM must round-trip verbatim",
+                multilinePem, idp.getCertificate());
+    }
+
+    /**
+     * JWKS branch: with {@code certificate_type=JWKS}, the cert value goes into the
+     * {@code jwksUri} IdP property and {@code IdentityProvider.certificate} must remain unset.
+     * Sanity check that the fix is scoped to the PEM arm only.
+     */
+    @Test
+    public void testCreateIdpJwksTypeDoesNotSetCertificate() throws Exception {
+
+        APIAdminImpl apiAdmin = new APIAdminImpl();
+        KeyManagerConfigurationDTO km = buildExchangedKM("JWKS", SAMPLE_JWKS_URL);
+
+        IdentityProvider idp = Whitebox.invokeMethod(apiAdmin, "createIdp", km);
+
+        Assert.assertNull("JWKS branch must not populate IdP.certificate", idp.getCertificate());
+        IdentityProviderProperty[] props = idp.getIdpProperties();
+        Assert.assertNotNull("JWKS branch should add a " + APIConstants.JWKS_URI + " property", props);
+        boolean jwksFound = false;
+        for (IdentityProviderProperty p : props) {
+            if (APIConstants.JWKS_URI.equals(p.getName())) {
+                Assert.assertEquals(SAMPLE_JWKS_URL, p.getValue());
+                jwksFound = true;
+            }
+        }
+        Assert.assertTrue("Expected " + APIConstants.JWKS_URI + " property on JWKS branch", jwksFound);
+    }
+
+    /**
+     * Edge case: an empty {@code certificate_value} must NOT cause
+     * {@code setCertificate} to be invoked — the existing {@code StringUtils.isNotEmpty}
+     * guard should short-circuit. The IdP's certificate field remains at its
+     * default (null).
+     */
+    @Test
+    public void testCreateIdpEmptyCertificateValueIsSkipped() throws Exception {
+
+        APIAdminImpl apiAdmin = new APIAdminImpl();
+        KeyManagerConfigurationDTO km = buildExchangedKM("PEM", "");
+
+        IdentityProvider idp = Whitebox.invokeMethod(apiAdmin, "createIdp", km);
+
+        Assert.assertNull("Empty PEM must not be set on the IdP", idp.getCertificate());
+    }
+
+    /**
+     * Edge case: a missing {@code certificate_type} (with a non-empty value) must also
+     * skip {@code setCertificate} — the outer guard checks both type and value.
+     */
+    @Test
+    public void testCreateIdpMissingCertificateTypeIsSkipped() throws Exception {
+
+        APIAdminImpl apiAdmin = new APIAdminImpl();
+        KeyManagerConfigurationDTO km = buildExchangedKM(null, SAMPLE_PEM);
+
+        IdentityProvider idp = Whitebox.invokeMethod(apiAdmin, "createIdp", km);
+
+        Assert.assertNull("PEM without " + APIConstants.KeyManager.CERTIFICATE_TYPE + " must not be set",
+                idp.getCertificate());
+    }
+
+    /**
+     * Update path JWKS sanity: confirm the update path also preserves the PEM-only
+     * scope of the fix — JWKS path stays unchanged.
+     */
+    @Test
+    public void testUpdatedIDPJwksTypeDoesNotSetCertificate() throws Exception {
+
+        APIAdminImpl apiAdmin = new APIAdminImpl();
+        IdentityProvider retrieved = new IdentityProvider();
+        retrieved.setIdentityProviderName("existing");
+        KeyManagerConfigurationDTO km = buildExchangedKM("JWKS", SAMPLE_JWKS_URL);
+
+        IdentityProvider idp = Whitebox.invokeMethod(apiAdmin, "updatedIDP", retrieved, km);
+
+        Assert.assertNull("JWKS update branch must not populate IdP.certificate",
+                idp.getCertificate());
+        IdentityProviderProperty[] props = idp.getIdpProperties();
+        Assert.assertNotNull(props);
+        boolean jwksFound = false;
+        for (IdentityProviderProperty p : props) {
+            if (APIConstants.JWKS_URI.equals(p.getName())) {
+                Assert.assertEquals(SAMPLE_JWKS_URL, p.getValue());
+                jwksFound = true;
+            }
+        }
+        Assert.assertTrue("Expected " + APIConstants.JWKS_URI + " property on JWKS update", jwksFound);
     }
 }

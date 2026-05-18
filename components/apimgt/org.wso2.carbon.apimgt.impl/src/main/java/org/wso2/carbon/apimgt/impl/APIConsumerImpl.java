@@ -1070,8 +1070,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         //createApplication on oAuthorization server.
         OAuthApplicationInfo oAuthApplication =
-                isOauthAppValidation() ? keyManager.mapOAuthApplication(oauthAppRequest) :
+                isOauthAppValidation(keyManagerConfiguration) ?
+                        keyManager.mapOAuthApplication(oauthAppRequest) :
                         oauthAppRequest.getOAuthApplicationInfo();
+
+        if (log.isDebugEnabled()) {
+            log.debug("Create application on oAuthorization server is completed");
+        }
 
         //Do application mapping with consumerKey.
         String keyMappingId = UUID.randomUUID().toString();
