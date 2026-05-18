@@ -1517,8 +1517,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
                 if (deleteWorkflowExtRef != null) {
                     try {
+                        String deleteWfProviderDomain = MultitenantUtils.getTenantDomain(
+                                APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+                        String deleteWfDomain = APIUtil.isCrossTenantSubscriptionsEnabled()
+                                && deleteWfProviderDomain != null ? deleteWfProviderDomain : tenantDomain;
                         WorkflowExecutor deleteSubscriptionWFExecutor = getWorkflowExecutor(
-                                WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
+                                WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION, deleteWfDomain);
                         deleteSubscriptionWFExecutor.cleanUpPendingTask(deleteWorkflowExtRef);
                     } catch (WorkflowException e) {
                         throw new APIManagementException(
@@ -2001,8 +2005,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         // Clean up the stuck delete workflow and delete the subscription directly,
                         // consistent with how REJECTED subscriptions are now handled.
                         try {
+                            String deleteWfProviderDomain = MultitenantUtils.getTenantDomain(
+                                    APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+                            String deleteWfDomain = APIUtil.isCrossTenantSubscriptionsEnabled()
+                                    && deleteWfProviderDomain != null ? deleteWfProviderDomain : tenantDomain;
                             WorkflowExecutor deleteSubscriptionWFExecutor = getWorkflowExecutor(
-                                    WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
+                                    WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION, deleteWfDomain);
                             deleteSubscriptionWFExecutor.cleanUpPendingTask(deleteWorkflowExtRef);
                         } catch (WorkflowException e) {
                             log.warn(CLEAN_PENDING_SUB_APPROVAL_TASK_FAILED + e.getMessage());
