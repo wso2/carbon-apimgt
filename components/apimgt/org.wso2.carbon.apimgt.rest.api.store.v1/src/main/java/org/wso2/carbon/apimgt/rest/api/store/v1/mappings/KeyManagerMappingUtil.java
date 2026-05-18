@@ -51,10 +51,6 @@ public class KeyManagerMappingUtil {
             keyManagerInfoDTO.setEnableMapOAuthConsumerApps(
                     jsonObject.get(APIConstants.KeyManager.ENABLE_MAP_OAUTH_CONSUMER_APPS).getAsBoolean());
         }
-        if (jsonObject.has(APIConstants.KeyManager.PROVISIONED_APP_VALIDATION)){
-            keyManagerInfoDTO.setEnableProvisionedAppValidation(
-                    jsonObject.get(APIConstants.KeyManager.PROVISIONED_APP_VALIDATION).getAsBoolean());
-        }
 
         if (jsonObject.has(APIConstants.KeyManager.ENABLE_TOKEN_ENCRYPTION)){
             keyManagerInfoDTO.setEnableTokenEncryption(
