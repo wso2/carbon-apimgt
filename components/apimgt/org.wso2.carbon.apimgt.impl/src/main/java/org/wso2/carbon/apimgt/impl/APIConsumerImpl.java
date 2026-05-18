@@ -1978,20 +1978,51 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         if (subscription != null) {
             String uuid = subscription.getUUID();
+            Application application = subscription.getApplication();
+            Identifier identifier = subscription.getAPIIdentifier() != null ? subscription.getAPIIdentifier()
+                    : subscription.getProductId();
             String deleteWorkflowExtRef =
                     apiMgtDAO.getExternalWorkflowReferenceForSubscriptionAndWFType(subscription.getSubscriptionId(),
                             WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
             if (deleteWorkflowExtRef != null) {
                 WorkflowDTO deleteWorkflow = apiMgtDAO.retrieveWorkflow(deleteWorkflowExtRef);
                 if (deleteWorkflow != null && WorkflowStatus.CREATED.equals(deleteWorkflow.getStatus())) {
+                    // Check if this is a pre-fix stuck state: a REJECTED subscription that erroneously
+                    // went through the delete workflow path before the REJECTED bypass was introduced.
+                    boolean isStuckRejectedSubscription = false;
+                    String creationWorkflowExtRef = apiMgtDAO.getExternalWorkflowReferenceForSubscription(
+                            identifier, application.getId(), organization);
+                    if (creationWorkflowExtRef != null) {
+                        WorkflowDTO creationWorkflow = apiMgtDAO.retrieveWorkflow(creationWorkflowExtRef);
+                        isStuckRejectedSubscription = creationWorkflow != null
+                                && WorkflowStatus.REJECTED.equals(creationWorkflow.getStatus());
+                    }
+                    if (isStuckRejectedSubscription) {
+                        // Clean up the stuck delete workflow and delete the subscription directly,
+                        // consistent with how REJECTED subscriptions are now handled.
+                        try {
+                            WorkflowExecutor deleteSubscriptionWFExecutor = getWorkflowExecutor(
+                                    WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
+                            deleteSubscriptionWFExecutor.cleanUpPendingTask(deleteWorkflowExtRef);
+                        } catch (WorkflowException e) {
+                            log.warn(CLEAN_PENDING_SUB_APPROVAL_TASK_FAILED + e.getMessage());
+                        }
+                        apiMgtDAO.removeSubscriptionById(subscription.getSubscriptionId());
+                        JSONObject subsLogObject = new JSONObject();
+                        subsLogObject.put(APIConstants.AuditLogConstants.API_NAME, identifier.getName());
+                        subsLogObject.put(APIConstants.AuditLogConstants.PROVIDER, identifier.getProviderName());
+                        subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_ID, application.getId());
+                        subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_NAME, application.getName());
+                        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SUBSCRIPTION, subsLogObject.toString(),
+                                APIConstants.AuditLogConstants.DELETED, this.username);
+                        return;
+                    }
+                    // A legitimate pending delete approval workflow exists — preserve governance guard.
                     subscription.setSubscriptionId(-1);
                     subscription.setSubStatus(APIConstants.SubscriptionStatus.DELETE_PENDING);
                     return;
                 }
             }
-            Application application = subscription.getApplication();
-            Identifier identifier = subscription.getAPIIdentifier() != null ? subscription.getAPIIdentifier() :
-                    subscription.getProductId();
             String userId = application.getSubscriber().getName();
             removeSubscription(identifier, userId, application.getId(), organization);
             SubscribedAPI subscriptionAfterDeletion = apiMgtDAO.getSubscriptionById(subscription.getSubscriptionId());
