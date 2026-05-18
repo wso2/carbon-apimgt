@@ -84,7 +84,8 @@ RulesetsApiService delegate = new RulesetsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieves details of a specific ruleset.", notes = "Retrieves details of the ruleset identified by the rulesetId.", response = RulesetInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:gov_rule_read", description = "Read governance rulesets")
+            @AuthorizationScope(scope = "apim:gov_rule_read", description = "Read governance rulesets"),
+            @AuthorizationScope(scope = "apim:gov_rule_manage", description = "Manage governance rulesets")
         })
     }, tags={ "Rulesets",  })
     @ApiResponses(value = { 
@@ -103,7 +104,8 @@ RulesetsApiService delegate = new RulesetsApiServiceImpl();
     @Produces({ "application/x-yaml", "application/json" })
     @ApiOperation(value = "Retrieves the content of a specific ruleset.", notes = "Retrieves the content of the ruleset identified by the rulesetId.", response = String.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:gov_rule_read", description = "Read governance rulesets")
+            @AuthorizationScope(scope = "apim:gov_rule_read", description = "Read governance rulesets"),
+            @AuthorizationScope(scope = "apim:gov_rule_manage", description = "Manage governance rulesets")
         })
     }, tags={ "Rulesets",  })
     @ApiResponses(value = { 
@@ -122,7 +124,8 @@ RulesetsApiService delegate = new RulesetsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieves the policy usage of a specific ruleset.", notes = "Retrieves the list of policies using the ruleset identified by the rulesetId.", response = String.class, responseContainer = "List", authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:gov_rule_read", description = "Read governance rulesets")
+            @AuthorizationScope(scope = "apim:gov_rule_read", description = "Read governance rulesets"),
+            @AuthorizationScope(scope = "apim:gov_rule_manage", description = "Manage governance rulesets")
         })
     }, tags={ "Rulesets",  })
     @ApiResponses(value = { 
@@ -141,7 +144,8 @@ RulesetsApiService delegate = new RulesetsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieves a list of rulesets.", notes = "Returns a list of all rulesets associated with the requested organization.", response = RulesetListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:gov_rule_read", description = "Read governance rulesets")
+            @AuthorizationScope(scope = "apim:gov_rule_read", description = "Read governance rulesets"),
+            @AuthorizationScope(scope = "apim:gov_rule_manage", description = "Manage governance rulesets")
         })
     }, tags={ "Rulesets",  })
     @ApiResponses(value = { 
