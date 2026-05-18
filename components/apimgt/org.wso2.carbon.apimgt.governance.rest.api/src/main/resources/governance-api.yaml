@@ -101,6 +101,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_rule_read
+            - apim:gov_rule_manage
     post:
       summary: Create a new ruleset.
       description: Creates a new ruleset in the user's organization.
@@ -192,6 +193,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_rule_read
+            - apim:gov_rule_manage
     put:
       summary: Updates a specific ruleset.
       description: Updates the details of the ruleset identified by the `rulesetId`.
@@ -327,6 +329,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_rule_read
+            - apim:gov_rule_manage
   /rulesets/{rulesetId}/usage:
     get:
       summary: Retrieves the policy usage of a specific ruleset.
@@ -374,6 +377,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_rule_read
+            - apim:gov_rule_manage
   /policies:
     get:
       summary: Retrieves a list of all governance policies.
@@ -433,6 +437,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_policy_read
+            - apim:gov_policy_manage
     post:
       summary: Creates a new governance policy.
       description: Creates a new governance policy for the user's organization.
