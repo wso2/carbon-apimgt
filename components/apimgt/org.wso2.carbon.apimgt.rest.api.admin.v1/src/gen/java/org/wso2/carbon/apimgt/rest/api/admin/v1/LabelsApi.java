@@ -46,7 +46,7 @@ LabelsApiService delegate = new LabelsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:label_create", description = "Create labels"),
-            @AuthorizationScope(scope = "apim:label_manage", description = "Manage all label operations")
+            @AuthorizationScope(scope = "apim:label_manage", description = "Full access to all label operations")
         })
     }, tags={ "Label (Individual)",  })
     @ApiResponses(value = { 
@@ -65,7 +65,7 @@ LabelsApiService delegate = new LabelsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:label_delete", description = "Delete labels"),
-            @AuthorizationScope(scope = "apim:label_manage", description = "Manage all label operations")
+            @AuthorizationScope(scope = "apim:label_manage", description = "Full access to all label operations")
         })
     }, tags={ "Label (Individual)",  })
     @ApiResponses(value = { 
@@ -84,7 +84,7 @@ LabelsApiService delegate = new LabelsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:label_view", description = "View labels"),
-            @AuthorizationScope(scope = "apim:label_manage", description = "Manage all label operations")
+            @AuthorizationScope(scope = "apim:label_manage", description = "Full access to all label operations")
         })
     }, tags={ "Labels (Collection)",  })
     @ApiResponses(value = { 
@@ -101,7 +101,7 @@ LabelsApiService delegate = new LabelsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:label_view", description = "View labels"),
-            @AuthorizationScope(scope = "apim:label_manage", description = "Manage all label operations")
+            @AuthorizationScope(scope = "apim:label_manage", description = "Full access to all label operations")
         })
     }, tags={ "Label (Individual)",  })
     @ApiResponses(value = { 
@@ -119,7 +119,7 @@ LabelsApiService delegate = new LabelsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:label_update", description = "Update labels"),
-            @AuthorizationScope(scope = "apim:label_manage", description = "Manage all label operations")
+            @AuthorizationScope(scope = "apim:label_manage", description = "Full access to all label operations")
         })
     }, tags={ "Label (Individual)" })
     @ApiResponses(value = { 

@@ -44,7 +44,7 @@ ExternalStoresApiService delegate = new ExternalStoresApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
-            @AuthorizationScope(scope = "apim:api_metadata_view", description = "View API metadata and configuration")
+            @AuthorizationScope(scope = "apim:api_metadata_view", description = "View API listing and configuration (excludes documents, deployments, lifecycle)")
         })
     }, tags={ "External Stores" })
     @ApiResponses(value = { 

@@ -47,8 +47,8 @@ KeyManagersApiService delegate = new KeyManagersApiServiceImpl();
             @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
-            @AuthorizationScope(scope = "apim:api_metadata_view", description = "View API metadata and configuration"),
-            @AuthorizationScope(scope = "apim:api_product_metadata_view", description = "View API Product metadata and configuration")
+            @AuthorizationScope(scope = "apim:api_metadata_view", description = "View API listing and configuration (excludes documents, deployments, lifecycle)"),
+            @AuthorizationScope(scope = "apim:api_product_metadata_view", description = "View API Product listing and configuration (excludes documents, deployments, lifecycle)")
         })
     }, tags={ "Key Managers (Collection)" })
     @ApiResponses(value = { 

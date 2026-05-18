@@ -78,7 +78,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:document_create", description = "Create API documents"),
-            @AuthorizationScope(scope = "apim:document_update", description = "Update documents")
+            @AuthorizationScope(scope = "apim:document_update", description = "Update API, Product, and MCP Server documents")
         })
     }, tags={ "API Product Documents",  })
     @ApiResponses(value = { 
@@ -200,7 +200,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
-            @AuthorizationScope(scope = "apim:document_delete", description = "Delete documents")
+            @AuthorizationScope(scope = "apim:document_delete", description = "Delete API, Product, and MCP Server documents")
         })
     }, tags={ "API Product Documents",  })
     @ApiResponses(value = { 
@@ -300,7 +300,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:api_product_import_export", description = "Import and export API Products related operations"),
-            @AuthorizationScope(scope = "apim:api_product_metadata_view", description = "View API Product metadata and configuration")
+            @AuthorizationScope(scope = "apim:api_product_metadata_view", description = "View API Product listing and configuration (excludes documents, deployments, lifecycle)")
         })
     }, tags={ "API Products",  })
     @ApiResponses(value = { 
@@ -321,7 +321,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
-            @AuthorizationScope(scope = "apim:document_view", description = "View documents")
+            @AuthorizationScope(scope = "apim:document_view", description = "View API, Product, and MCP Server documents")
         })
     }, tags={ "API Product Documents",  })
     @ApiResponses(value = { 
@@ -342,7 +342,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
-            @AuthorizationScope(scope = "apim:document_view", description = "View documents")
+            @AuthorizationScope(scope = "apim:document_view", description = "View API, Product, and MCP Server documents")
         })
     }, tags={ "API Product Documents",  })
     @ApiResponses(value = { 
@@ -364,7 +364,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
-            @AuthorizationScope(scope = "apim:document_view", description = "View documents")
+            @AuthorizationScope(scope = "apim:document_view", description = "View API, Product, and MCP Server documents")
         })
     }, tags={ "API Product Documents",  })
     @ApiResponses(value = { 
@@ -384,7 +384,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
-            @AuthorizationScope(scope = "apim:api_product_lifecycle_view", description = "View API Product lifecycle state and history")
+            @AuthorizationScope(scope = "apim:api_product_lifecycle_view", description = "View API Product lifecycle state and transition history")
         })
     }, tags={ "API Product Lifecycle",  })
     @ApiResponses(value = { 
@@ -405,7 +405,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
-            @AuthorizationScope(scope = "apim:api_product_lifecycle_view", description = "View API Product lifecycle state and history")
+            @AuthorizationScope(scope = "apim:api_product_lifecycle_view", description = "View API Product lifecycle state and transition history")
         })
     }, tags={ "API Product Lifecycle",  })
     @ApiResponses(value = { 
@@ -427,7 +427,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
-            @AuthorizationScope(scope = "apim:api_product_deploy_view", description = "View API Product revisions and deployments")
+            @AuthorizationScope(scope = "apim:api_product_deploy_view", description = "View API Product deployment status and revisions")
         })
     }, tags={ "API Product Revisions",  })
     @ApiResponses(value = { 
@@ -447,7 +447,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
-            @AuthorizationScope(scope = "apim:api_product_deploy_view", description = "View API Product revisions and deployments")
+            @AuthorizationScope(scope = "apim:api_product_deploy_view", description = "View API Product deployment status and revisions")
         })
     }, tags={ "API Product Revisions",  })
     @ApiResponses(value = { 
@@ -468,7 +468,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:api_product_import_export", description = "Import and export API Products related operations"),
-            @AuthorizationScope(scope = "apim:api_product_deploy_view", description = "View API Product revisions and deployments")
+            @AuthorizationScope(scope = "apim:api_product_deploy_view", description = "View API Product deployment status and revisions")
         })
     }, tags={ "API Product Revisions",  })
     @ApiResponses(value = { 
@@ -487,7 +487,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
-            @AuthorizationScope(scope = "apim:api_product_metadata_view", description = "View API Product metadata and configuration")
+            @AuthorizationScope(scope = "apim:api_product_metadata_view", description = "View API Product listing and configuration (excludes documents, deployments, lifecycle)")
         })
     }, tags={ "API Products",  })
     @ApiResponses(value = { 
@@ -508,7 +508,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
-            @AuthorizationScope(scope = "apim:api_product_metadata_view", description = "View API Product metadata and configuration")
+            @AuthorizationScope(scope = "apim:api_product_metadata_view", description = "View API Product listing and configuration (excludes documents, deployments, lifecycle)")
         })
     }, tags={ "API Products",  })
     @ApiResponses(value = { 
@@ -528,7 +528,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
-            @AuthorizationScope(scope = "apim:api_product_metadata_view", description = "View API Product metadata and configuration")
+            @AuthorizationScope(scope = "apim:api_product_metadata_view", description = "View API Product listing and configuration (excludes documents, deployments, lifecycle)")
         })
     }, tags={ "API Products",  })
     @ApiResponses(value = { 
@@ -548,7 +548,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
-            @AuthorizationScope(scope = "apim:api_product_metadata_view", description = "View API Product metadata and configuration")
+            @AuthorizationScope(scope = "apim:api_product_metadata_view", description = "View API Product listing and configuration (excludes documents, deployments, lifecycle)")
         })
     }, tags={ "API Products",  })
     @ApiResponses(value = { 
@@ -628,7 +628,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
-            @AuthorizationScope(scope = "apim:api_product_update", description = "Update API Product")
+            @AuthorizationScope(scope = "apim:api_product_update", description = "Update API Product configuration (metadata, thumbnail)")
         })
     }, tags={ "API Products",  })
     @ApiResponses(value = { 
@@ -668,7 +668,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
-            @AuthorizationScope(scope = "apim:document_update", description = "Update documents")
+            @AuthorizationScope(scope = "apim:document_update", description = "Update API, Product, and MCP Server documents")
         })
     }, tags={ "API Product Documents",  })
     @ApiResponses(value = { 
@@ -688,7 +688,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
-            @AuthorizationScope(scope = "apim:api_product_update", description = "Update API Product")
+            @AuthorizationScope(scope = "apim:api_product_update", description = "Update API Product configuration (metadata, thumbnail)")
         })
     }, tags={ "API Products" })
     @ApiResponses(value = { 

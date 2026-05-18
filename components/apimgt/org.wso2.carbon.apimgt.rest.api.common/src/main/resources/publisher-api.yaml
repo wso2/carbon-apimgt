@@ -19767,47 +19767,47 @@ components:
             apim:mcp_server_publish: Publish MCP Server
             apim:mcp_server_manage: Manage all MCP Server related operations
             apim:mcp_server_import_export: Import and export MCP Server related operations
-            apim:api_metadata_view: View API metadata and configuration
-            apim:api_create_only: Create new APIs only (does not grant update access)
-            apim:api_update: Update existing APIs
-            apim:api_definition_update: Update API definitions (swagger, graphql schema, wsdl, asyncapi, topics, resource policies)
+            apim:api_metadata_view: View API listing and configuration (excludes documents, deployments, lifecycle)
+            apim:api_create_only: Create new APIs
+            apim:api_update: Update API configuration (metadata, endpoints, certificates, labels, themes)
+            apim:api_definition_update: Update API definition (swagger, graphql, wsdl, asyncapi)
             apim:api_version_create: Create new API version
             apim:api_revision_create: Create API revision
             apim:api_revision_delete: Delete API revision
             apim:api_deploy: Deploy, undeploy, and restore API revisions
-            apim:api_deploy_view: View API revisions and deployments
-            apim:api_lifecycle_view: View API lifecycle state and history
+            apim:api_deploy_view: View API deployment status and revisions
+            apim:api_lifecycle_view: View API lifecycle state and transition history
             apim:api_lifecycle_manage: Change API lifecycle state
-            apim:api_product_metadata_view: View API Product metadata and configuration
+            apim:api_product_metadata_view: View API Product listing and configuration (excludes documents, deployments, lifecycle)
             apim:api_product_create: Create API Product
-            apim:api_product_update: Update API Product
+            apim:api_product_update: Update API Product configuration (metadata, thumbnail)
             apim:api_product_delete: Delete API Product
             apim:api_product_version_create: Create new API Product version
             apim:api_product_revision_create: Create API Product revision
             apim:api_product_revision_delete: Delete API Product revision
             apim:api_product_deploy: Deploy, undeploy, and restore API Product revisions
-            apim:api_product_deploy_view: View API Product revisions and deployments
-            apim:api_product_lifecycle_view: View API Product lifecycle state and history
+            apim:api_product_deploy_view: View API Product deployment status and revisions
+            apim:api_product_lifecycle_view: View API Product lifecycle state and transition history
             apim:api_product_lifecycle_manage: Change API Product lifecycle state
-            apim:document_view: View documents
-            apim:document_update: Update documents
-            apim:document_delete: Delete documents
-            apim:shared_scope_view: View shared scopes
-            apim:shared_scope_create: Create shared scopes
-            apim:shared_scope_update: Update shared scopes
-            apim:shared_scope_delete: Delete shared scopes
+            apim:document_view: View API, Product, and MCP Server documents
+            apim:document_update: Update API, Product, and MCP Server documents
+            apim:document_delete: Delete API, Product, and MCP Server documents
+            apim:shared_scope_view: View shared OAuth2 scopes
+            apim:shared_scope_create: Create shared OAuth2 scopes
+            apim:shared_scope_update: Update shared OAuth2 scope details
+            apim:shared_scope_delete: Delete shared OAuth2 scopes
             apim:common_operation_policy_create: Create common operation policies
             apim:common_operation_policy_delete: Delete common operation policies
             apim:gateway_policy_create: Create gateway policies
             apim:gateway_policy_update: Update gateway policies
             apim:gateway_policy_delete: Delete gateway policies
-            apim:mcp_server_create_only: Create new MCP Servers only (does not grant update access)
-            apim:mcp_server_update: Update existing MCP Servers
+            apim:mcp_server_create_only: Create new MCP Servers
+            apim:mcp_server_update: Update MCP Server configuration (metadata, thumbnails, backends)
             apim:mcp_server_version_create: Create new MCP Server version
             apim:mcp_server_revision_create: Create MCP Server revision
             apim:mcp_server_revision_delete: Delete MCP Server revision
             apim:mcp_server_deploy: Deploy, undeploy, and restore MCP Server revisions
-            apim:mcp_server_deploy_view: View MCP Server revisions and deployments
-            apim:mcp_server_lifecycle_view: View MCP Server lifecycle state and history
+            apim:mcp_server_deploy_view: View MCP Server deployment status and revisions
+            apim:mcp_server_lifecycle_view: View MCP Server lifecycle state and transition history
             apim:mcp_server_lifecycle_manage: Change MCP Server lifecycle state
-            apim:mcp_server_metadata_view: View MCP Server metadata and configuration
+            apim:mcp_server_metadata_view: View MCP Server listing and configuration (excludes documents, deployments, lifecycle)

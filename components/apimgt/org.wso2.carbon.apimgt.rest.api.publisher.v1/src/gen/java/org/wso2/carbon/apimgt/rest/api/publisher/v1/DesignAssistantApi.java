@@ -47,7 +47,7 @@ DesignAssistantApiService delegate = new DesignAssistantApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
-            @AuthorizationScope(scope = "apim:api_create_only", description = "Create new APIs only (does not grant update access)")
+            @AuthorizationScope(scope = "apim:api_create_only", description = "Create new APIs")
         })
     }, tags={ "API Design Assistant",  })
     @ApiResponses(value = { 
@@ -66,7 +66,7 @@ DesignAssistantApiService delegate = new DesignAssistantApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
-            @AuthorizationScope(scope = "apim:api_create_only", description = "Create new APIs only (does not grant update access)")
+            @AuthorizationScope(scope = "apim:api_create_only", description = "Create new APIs")
         })
     }, tags={ "API Design Assistant" })
     @ApiResponses(value = { 

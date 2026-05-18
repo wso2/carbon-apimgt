@@ -8214,9 +8214,9 @@ components:
             apim:api_category_create: Create API categories
             apim:api_category_update: Update API categories
             apim:api_category_delete: Delete API categories
-            apim:admin_tier_create: Create throttling policies
-            apim:admin_tier_update: Update throttling policies
-            apim:admin_tier_delete: Delete throttling policies
+            apim:admin_tier_create: Create rate limiting policies
+            apim:admin_tier_update: Update rate limiting policies
+            apim:admin_tier_delete: Delete rate limiting policies
             apim:bl_create: Create deny policies
             apim:bl_update: Update deny policies
             apim:bl_delete: Delete deny policies
@@ -8235,7 +8235,7 @@ components:
             apim:label_create: Create labels
             apim:label_update: Update labels
             apim:label_delete: Delete labels
-            apim:label_manage: Manage all label operations
+            apim:label_manage: Full access to all label operations
             apim:gov_rule_create: Create governance rulesets
             apim:gov_rule_update: Update governance rulesets
             apim:gov_rule_delete: Delete governance rulesets
