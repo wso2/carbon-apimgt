@@ -5933,6 +5933,10 @@ definitions:
         type: boolean
         example: false
         default: false
+      enableProvisionedAppValidation:
+          type: boolean
+          example: true
+          default: true
       applicationConfiguration:
         type: array
         items:
