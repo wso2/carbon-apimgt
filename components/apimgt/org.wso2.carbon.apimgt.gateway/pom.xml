@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>9.33.124-SNAPSHOT</version>
+        <version>9.33.125-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -512,6 +512,7 @@
                             software.amazon.awssdk.services.lambda.*; version="${org.wso2.orbit.com.amazonaws.version.range}"; resolution:=optional,
                             software.amazon.awssdk.core.*; version="${org.wso2.orbit.com.amazonaws.version.range}"; resolution:=optional,
                             software.amazon.awssdk.awscore.*; version="${org.wso2.orbit.com.amazonaws.version.range}"; resolution:=optional,
+                            software.amazon.awssdk.retries.*; version="${org.wso2.orbit.com.amazonaws.version.range}"; resolution:=optional,
                             org.apache.servicemix.bundles.jedis.*; version="${servicemix.bundles.jedis.version}",
                             com.nimbusds.jwt.*,
                             org.apache.commons.codec.*,
