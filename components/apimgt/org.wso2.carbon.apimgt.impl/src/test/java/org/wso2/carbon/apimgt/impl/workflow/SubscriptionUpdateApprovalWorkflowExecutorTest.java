@@ -173,7 +173,52 @@ public class SubscriptionUpdateApprovalWorkflowExecutorTest {
             executor.cleanUpPendingTask(workflowExtRef);
             Assert.fail("Expected WorkflowException was not thrown");
         } catch (WorkflowException e) {
-            Assert.assertNotNull(e.getMessage());
+            Assert.assertTrue("Expected error message to mention cancellation of pending update approval",
+                    e.getMessage().contains("cancel pending subscription update"));
         }
+    }
+
+    /**
+     * Verifies that execute() sets the human-readable workflow description and the
+     * tier-name properties consumed by the admin workflow UI.
+     */
+    @Test
+    public void testExecuteSubscriptionUpdateSetsDescriptionAndTierProperties() throws WorkflowException {
+        SubscriptionWorkflowDTO workflowDTO = new SubscriptionWorkflowDTO();
+        workflowDTO.setWorkflowReference("1");
+        workflowDTO.setApiName("WeatherAPI");
+        workflowDTO.setApiVersion("v1");
+        workflowDTO.setSubscriber("testUser");
+        workflowDTO.setApplicationName("TestApp");
+        workflowDTO.setTierName("Gold");
+        workflowDTO.setRequestedTierName("Silver");
+
+        executor.execute(workflowDTO);
+
+        String description = workflowDTO.getWorkflowDescription();
+        Assert.assertNotNull("Workflow description must be set by execute()", description);
+        Assert.assertTrue(description.contains("WeatherAPI"));
+        Assert.assertTrue(description.contains("v1"));
+        Assert.assertTrue(description.contains("testUser"));
+        Assert.assertTrue(description.contains("TestApp"));
+    }
+
+    /**
+     * Verifies that complete() with a neutral status (e.g. CREATED) is a no-op —
+     * neither updateSubscriptionStatusAndTier nor updateSubscriptionStatus is called.
+     */
+    @Test
+    public void testCompleteSubscriptionUpdateWithNeutralStatus_isNoOp()
+            throws APIManagementException, WorkflowException {
+        SubscriptionWorkflowDTO workflowDTO = new SubscriptionWorkflowDTO();
+        workflowDTO.setWorkflowReference("3");
+        workflowDTO.setStatus(WorkflowStatus.CREATED);
+
+        executor.complete(workflowDTO);
+
+        Mockito.verify(apiMgtDAO, Mockito.never())
+                .updateSubscriptionStatusAndTier(Mockito.anyInt(), Mockito.anyString());
+        Mockito.verify(apiMgtDAO, Mockito.never())
+                .updateSubscriptionStatus(Mockito.anyInt(), Mockito.anyString());
     }
 }

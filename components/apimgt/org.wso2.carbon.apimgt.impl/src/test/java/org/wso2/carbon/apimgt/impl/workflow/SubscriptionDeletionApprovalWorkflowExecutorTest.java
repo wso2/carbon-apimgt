@@ -105,7 +105,8 @@ public class SubscriptionDeletionApprovalWorkflowExecutorTest {
             executor.complete(workflowDTO);
             Assert.fail("Expected WorkflowException was not thrown");
         } catch (WorkflowException e) {
-            Assert.assertNotNull(e.getMessage());
+            Assert.assertTrue("Expected error message to mention subscription deletion workflow",
+                    e.getMessage().contains("subscription deletion workflow"));
         }
     }
 
@@ -142,8 +143,113 @@ public class SubscriptionDeletionApprovalWorkflowExecutorTest {
             executor.complete(workflowDTO);
             Assert.fail("Expected WorkflowException was not thrown");
         } catch (WorkflowException e) {
-            Assert.assertNotNull(e.getMessage());
+            // When the DAO exception has a message, it is propagated directly as the WorkflowException message
+            Assert.assertEquals("DB error", e.getMessage());
         }
+    }
+
+    /**
+     * When the DAO exception has a null message (uncommon but possible), the executor falls back
+     * to a hardcoded message rather than propagating null.
+     */
+    @Test
+    public void testCompleteSubscriptionDeletionRejectedNullExceptionMessage_fallsBackToHardcodedMessage()
+            throws APIManagementException {
+        SubscriptionWorkflowDTO workflowDTO = new SubscriptionWorkflowDTO();
+        workflowDTO.setWorkflowReference("7");
+        workflowDTO.setStatus(WorkflowStatus.REJECTED);
+
+        APIManagementException nullMsgException = Mockito.mock(APIManagementException.class);
+        Mockito.when(nullMsgException.getMessage()).thenReturn(null);
+        Mockito.doThrow(nullMsgException)
+                .when(apiMgtDAO).updateSubscriptionStatus(7, APIConstants.SubscriptionStatus.UNBLOCKED);
+
+        try {
+            executor.complete(workflowDTO);
+            Assert.fail("Expected WorkflowException was not thrown");
+        } catch (WorkflowException e) {
+            Assert.assertNotNull("WorkflowException must have a non-null message even when DAO exception message is null",
+                    e.getMessage());
+            Assert.assertTrue(e.getMessage().contains("simple application deletion workflow"));
+        }
+    }
+
+    /**
+     * Verifies that complete() with a neutral status (e.g. CREATED) is a no-op —
+     * neither removeSubscriptionById nor updateSubscriptionStatus is called.
+     */
+    @Test
+    public void testCompleteSubscriptionDeletionWithNeutralStatus_isNoOp()
+            throws APIManagementException, WorkflowException {
+        SubscriptionWorkflowDTO workflowDTO = new SubscriptionWorkflowDTO();
+        workflowDTO.setWorkflowReference("7");
+        workflowDTO.setStatus(WorkflowStatus.CREATED);
+
+        executor.complete(workflowDTO);
+
+        Mockito.verify(apiMgtDAO, Mockito.never()).removeSubscriptionById(Mockito.anyInt());
+        Mockito.verify(apiMgtDAO, Mockito.never()).updateSubscriptionStatus(Mockito.anyInt(), Mockito.anyString());
+    }
+
+    /**
+     * Verifies that execute() sets the human-readable workflow description and the
+     * tier-name properties consumed by the admin workflow UI.
+     */
+    @Test
+    public void testExecuteSubscriptionDeletionSetsDescriptionAndTierProperties() throws WorkflowException {
+        SubscriptionWorkflowDTO workflowDTO = new SubscriptionWorkflowDTO();
+        workflowDTO.setWorkflowReference("1");
+        workflowDTO.setApiName("WeatherAPI");
+        workflowDTO.setApiVersion("v1");
+        workflowDTO.setSubscriber("testUser");
+        workflowDTO.setApplicationName("TestApp");
+        workflowDTO.setTierName("Gold");
+        workflowDTO.setRequestedTierName("Silver");
+
+        executor.execute(workflowDTO);
+
+        String description = workflowDTO.getWorkflowDescription();
+        Assert.assertNotNull("Workflow description must be set by execute()", description);
+        Assert.assertTrue(description.contains("WeatherAPI"));
+        Assert.assertTrue(description.contains("v1"));
+        Assert.assertTrue(description.contains("testUser"));
+        Assert.assertTrue(description.contains("TestApp"));
+    }
+
+    /**
+     * deleteMonetizedSubscription(API) delegates to execute() and must return a non-null response.
+     */
+    @Test
+    public void testDeleteMonetizedSubscriptionWithAPI_delegatesToExecute() throws WorkflowException {
+        SubscriptionWorkflowDTO workflowDTO = new SubscriptionWorkflowDTO();
+        workflowDTO.setWorkflowReference("1");
+        workflowDTO.setApiName("WeatherAPI");
+        workflowDTO.setApiVersion("v1");
+        workflowDTO.setSubscriber("testUser");
+        workflowDTO.setApplicationName("TestApp");
+
+        org.wso2.carbon.apimgt.api.model.API api =
+                Mockito.mock(org.wso2.carbon.apimgt.api.model.API.class);
+
+        Assert.assertNotNull(executor.deleteMonetizedSubscription(workflowDTO, api));
+    }
+
+    /**
+     * deleteMonetizedSubscription(APIProduct) delegates to execute() and must return a non-null response.
+     */
+    @Test
+    public void testDeleteMonetizedSubscriptionWithAPIProduct_delegatesToExecute() throws WorkflowException {
+        SubscriptionWorkflowDTO workflowDTO = new SubscriptionWorkflowDTO();
+        workflowDTO.setWorkflowReference("1");
+        workflowDTO.setApiName("WeatherAPI");
+        workflowDTO.setApiVersion("v1");
+        workflowDTO.setSubscriber("testUser");
+        workflowDTO.setApplicationName("TestApp");
+
+        org.wso2.carbon.apimgt.api.model.APIProduct product =
+                Mockito.mock(org.wso2.carbon.apimgt.api.model.APIProduct.class);
+
+        Assert.assertNotNull(executor.deleteMonetizedSubscription(workflowDTO, product));
     }
 
     @Test
@@ -167,7 +273,8 @@ public class SubscriptionDeletionApprovalWorkflowExecutorTest {
             executor.cleanUpPendingTask(workflowExtRef);
             Assert.fail("Expected WorkflowException was not thrown");
         } catch (WorkflowException e) {
-            Assert.assertNotNull(e.getMessage());
+            Assert.assertTrue("Expected error message to mention cancellation of pending deletion approval",
+                    e.getMessage().contains("cancel pending subscription deletion"));
         }
     }
 }
