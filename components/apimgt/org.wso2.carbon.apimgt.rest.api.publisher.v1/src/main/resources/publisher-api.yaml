@@ -13255,6 +13255,8 @@ paths:
       security:
         - OAuth2Security:
             - apim:gateway_policy_manage
+            - apim:gateway_policy_create
+            - apim:gateway_policy_update
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"

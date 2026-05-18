@@ -85,7 +85,9 @@ GatewayPoliciesApiService delegate = new GatewayPoliciesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Engage gateway policy mapping to the gateways", notes = "This operation can be used to engage gateway policy mapping to the gateway/s. ", response = GatewayPolicyDeploymentDTO.class, responseContainer = "List", authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:gateway_policy_manage", description = "Add, Update and Delete gateway policies")
+            @AuthorizationScope(scope = "apim:gateway_policy_manage", description = "Add, Update and Delete gateway policies"),
+            @AuthorizationScope(scope = "apim:gateway_policy_create", description = "Create gateway policies"),
+            @AuthorizationScope(scope = "apim:gateway_policy_update", description = "Update gateway policies")
         })
     }, tags={ "Gateway Policies",  })
     @ApiResponses(value = { 
