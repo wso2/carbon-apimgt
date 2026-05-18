@@ -1761,6 +1761,11 @@ public abstract class AbstractAPIManager implements APIManager {
         return null;
     }
 
+    @Deprecated
+    protected boolean isOauthAppValidation() {
+        return isOauthAppValidation((KeyManagerConfigurationDTO) null);
+    }
+
     protected boolean isOauthAppValidation(KeyManagerConfigurationDTO keyManagerConfigurationDTO) {
 
         // Check global validation config from deployment.toml
