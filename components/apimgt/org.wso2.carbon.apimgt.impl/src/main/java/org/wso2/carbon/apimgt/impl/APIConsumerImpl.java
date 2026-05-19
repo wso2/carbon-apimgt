@@ -1847,9 +1847,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                     + "No pending update workflow found for subscription: " + subId);
                         }
                     }
-                } catch (WorkflowException | APIManagementException ex) {
-                    throw new APIManagementException(
-                        "Failed to clean pending subscription update workflow before delete", ex);
+                } catch (WorkflowException ex) {
+                    // failed cleanup processes are ignored to prevent failing the deletion process
+                    log.warn("Failed to clean pending subscription update approval task");
                 }
             } else if (APIConstants.SubscriptionStatus.UNBLOCKED.equals(status)) {
                 try {
