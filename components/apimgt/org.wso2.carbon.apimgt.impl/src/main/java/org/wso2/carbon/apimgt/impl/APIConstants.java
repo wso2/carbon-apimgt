@@ -92,6 +92,8 @@ public final class APIConstants {
 
     public static final String APPLICATION_XML_MEDIA_TYPE = "application/xml";
 
+    public static final String APPLICATION_OCTET_STREAM_MEDIA_TYPE = "application/octet-stream";
+
     public static final String APPLICATION_WSDL_MEDIA_TYPE = "application/wsdl";
 
     public static final String APPLICATION_XML_SOAP_MEDIA_TYPE = "application/soap+xml";
@@ -2980,6 +2982,9 @@ public final class APIConstants {
     public static final String APPLICATION_TOKEN_TYPE_JWT = "JWT";
     // AWS Lambda: HTTP Client Configuration Constants
     public static final String AWS_LAMBDA_HTTP_CLIENT = "AWSLambdaConnector.HttpClient.";
+    public static final String AWS_LAMBDA_PROXY_RESPONSE_ENABLED = "AWSLambdaConnector.EnableProxyResponseMapping";
+    // AWS Lambda: SDK Configuration Constants
+    public static final String AWS_LAMBDA_RETRY_MAX_ATTEMPTS = "AWSLambdaConnector.Sdk.RetryMaxAttempts";
     public static final String MAX_CONNECTIONS = "MaxConnections";
     public static final String CONNECTION_TIMEOUT = "ConnectionTimeout";
     public static final String SOCKET_TIMEOUT = "SocketTimeout";
@@ -3144,6 +3149,7 @@ public final class APIConstants {
         public static final String API_LEVEL_ALL_KEY_MANAGERS = "all";
         public static final String REGISTERED_TENANT_DOMAIN = "tenantDomain";
         public static final String ENABLE_MAP_OAUTH_CONSUMER_APPS = "enable_map_oauth_consumer_apps";
+        public static final String PROVISIONED_APP_VALIDATION = "provisionedAppValidation";
         public static final String KEY_MANAGER_TYPE = "type";
         public static final String UUID_REGEX = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F" +
                 "]{3}-[0-9a-fA-F]{12}";

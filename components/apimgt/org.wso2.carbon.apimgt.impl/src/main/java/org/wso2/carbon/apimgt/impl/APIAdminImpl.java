@@ -1259,7 +1259,7 @@ public class APIAdminImpl implements APIAdmin {
                     idpProperties.add(jwksProperty);
                 }
             } else if (APIConstants.KeyManager.CERTIFICATE_TYPE_PEM_FILE.equals(certificateType)) {
-                identityProvider.setCertificate(String.join(certificate, ""));
+                identityProvider.setCertificate(certificate);
             }
         }
 
@@ -2282,7 +2282,7 @@ public class APIAdminImpl implements APIAdmin {
                     idpProperties.add(jwksProperty);
                 }
             } else if (APIConstants.KeyManager.CERTIFICATE_TYPE_PEM_FILE.equals(certificateType)) {
-                identityProvider.setCertificate(String.join(certificate, ""));
+                identityProvider.setCertificate(certificate);
             }
         }
 

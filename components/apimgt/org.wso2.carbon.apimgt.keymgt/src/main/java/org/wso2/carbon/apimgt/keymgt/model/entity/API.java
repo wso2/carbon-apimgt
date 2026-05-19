@@ -43,7 +43,7 @@ public class API implements CacheableEntity<String> {
     private String apiType = null;
     private String status;
     private String organization;
-    private boolean deployed = false;
+    private volatile boolean deployed = false;
     private boolean isDefaultVersion = false;
     private String securityScheme;
     private String revisionId;
