@@ -1437,6 +1437,7 @@ paths:
             - apim:api_view
             - apim:api_manage
             - apim:api_metadata_view
+            - apim:api_product_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4837,6 +4838,7 @@ paths:
             - apim:mcp_server_create
             - apim:mcp_server_manage
             - apim:mcp_server_create_only
+            - apim:mcp_server_update
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -5688,6 +5690,8 @@ paths:
             - apim:api_create
             - apim:api_manage
             - apim:api_create_only
+            - apim:api_definition_update
+            - apim:api_update
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -5737,6 +5741,7 @@ paths:
             - apim:api_create
             - apim:api_manage
             - apim:api_create_only
+            - apim:api_update
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -5840,6 +5845,8 @@ paths:
             - apim:api_create
             - apim:api_manage
             - apim:api_create_only
+            - apim:api_definition_update
+            - apim:api_update
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -5897,6 +5904,8 @@ paths:
             - apim:api_create
             - apim:api_manage
             - apim:api_create_only
+            - apim:api_definition_update
+            - apim:api_update
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -5954,6 +5963,7 @@ paths:
             - apim:api_view
             - apim:api_manage
             - apim:api_metadata_view
+            - apim:api_definition_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6106,6 +6116,7 @@ paths:
             - apim:api_publish
             - apim:api_manage
             - apim:api_update
+            - apim:api_product_update
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6139,6 +6150,7 @@ paths:
             - apim:api_publish
             - apim:api_manage
             - apim:api_metadata_view
+            - apim:api_product_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6191,6 +6203,7 @@ paths:
             - apim:api_publish
             - apim:api_manage
             - apim:api_metadata_view
+            - apim:api_product_metadata_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -14237,6 +14250,7 @@ components:
           x-otherScopes:
             - apim:api_publish
             - apim:api_manage
+            - apim:api_lifecycle_manage
         wsdlInfo:
           $ref: '#/components/schemas/WSDLInfo'
         wsdlUrl:
@@ -14744,6 +14758,8 @@ components:
         - apim:api_create
         - apim:api_import_export
         - apim:api_manage
+        - apim:api_update
+        - apim:api_create_only
 
     MCPServer:
       title: MCP Server object
@@ -14798,6 +14814,7 @@ components:
           x-otherScopes:
             - apim:mcp_server_publish
             - apim:mcp_server_manage
+            - apim:mcp_server_lifecycle_manage
         hasThumbnail:
           type: boolean
           example: false
@@ -15063,6 +15080,8 @@ components:
         - apim:mcp_server_create
         - apim:mcp_server_import_export
         - apim:mcp_server_manage
+        - apim:mcp_server_update
+        - apim:mcp_server_create_only
 
     MCPServerMetadataList:
       title: MCP Server metadata List
@@ -19802,9 +19821,9 @@ components:
             apim:mcp_server_publish: Publish MCP Server
             apim:mcp_server_manage: Manage all MCP Server related operations
             apim:mcp_server_import_export: Import and export MCP Server related operations
-            apim:api_metadata_view: View API listing and configuration (excludes documents, deployments, lifecycle)
+            apim:api_metadata_view: View API listing and configuration (excludes documents, deployments, lifecycle, comments)
             apim:api_create_only: Create new APIs
-            apim:api_update: Update API configuration (metadata, endpoints, certificates, labels, themes)
+            apim:api_update: Update API configuration (metadata, endpoints, certificates, labels, themes, definition)
             apim:api_definition_update: Update API definition (swagger, graphql, wsdl, asyncapi)
             apim:api_version_create: Create new API version
             apim:api_revision_create: Create API revision
