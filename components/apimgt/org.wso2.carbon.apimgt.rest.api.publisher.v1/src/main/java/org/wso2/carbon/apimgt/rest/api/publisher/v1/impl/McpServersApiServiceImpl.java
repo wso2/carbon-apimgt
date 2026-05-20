@@ -30,6 +30,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIConstants.UnifiedSearchConstants;
 import org.wso2.carbon.apimgt.api.APIComplianceException;
+import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
@@ -115,6 +116,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubtypeConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
+import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.core.util.CryptoException;
@@ -2419,6 +2421,24 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                 backend.setEndpointConfigFromMap((Map<String, Object>) parsedEndpointConfig);
             } else {
                 RestApiUtil.handleBadRequest("Endpoint config is not in correct format", log);
+            }
+            String definition = backendAPIDTO.getDefinition();
+            if (StringUtils.isNotBlank(definition)) {
+                APIDefinitionValidationResponse validationResponse =
+                        OASParserUtil.validateAPIDefinition(definition, Boolean.TRUE);
+                if (!validationResponse.isValid()) {
+                    StringBuilder errorDescription = new StringBuilder();
+                    for (org.wso2.carbon.apimgt.api.ErrorHandler errorHandler
+                            : validationResponse.getErrorItems()) {
+                        if (errorDescription.length() > 0) {
+                            errorDescription.append(". ");
+                        }
+                        errorDescription.append(errorHandler.getErrorDescription());
+                    }
+                    RestApiUtil.handleBadRequest(
+                            "Invalid backend API definition: " + errorDescription, log);
+                }
+                backend.setDefinition(definition);
             }
             PublisherCommonUtils.updateMCPServerBackend(mcpServerId, oldBackend, backend, organization, apiProvider);
             return Response.ok().entity(APIMappingUtil.fromBackendAPIToDTO(backend, organization, false)).build();

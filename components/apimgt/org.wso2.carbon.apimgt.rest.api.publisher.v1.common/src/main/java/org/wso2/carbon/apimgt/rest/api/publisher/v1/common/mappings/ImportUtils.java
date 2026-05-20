@@ -820,6 +820,11 @@ public class ImportUtils {
                     Backend importedBackend = importedBackends.get(0);
                     Backend backend = new Backend(oldBackend);
                     backend.setEndpointConfig(importedBackend.getEndpointConfig());
+                    String importedDefinition = importedBackend.getDefinition();
+                    if (StringUtils.isNotBlank(importedDefinition)) {
+                        retrieveValidatedSwaggerDefinition(importedDefinition);
+                        backend.setDefinition(importedDefinition);
+                    }
                     PublisherCommonUtils.updateMCPServerBackend(targetApi.getUuid(), oldBackend, backend,
                             organization, apiProvider);
                 }
