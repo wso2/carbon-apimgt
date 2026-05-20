@@ -46,7 +46,13 @@ RolesApiService delegate = new RolesApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:api_create_only", description = "Create new APIs"),
+            @AuthorizationScope(scope = "apim:api_update", description = "Update API configuration (metadata, endpoints, certificates, labels, themes, definition)"),
+            @AuthorizationScope(scope = "apim:api_product_create", description = "Create API Product"),
+            @AuthorizationScope(scope = "apim:api_product_update", description = "Update API Product configuration (metadata, thumbnail)"),
+            @AuthorizationScope(scope = "apim:mcp_server_create_only", description = "Create new MCP Servers"),
+            @AuthorizationScope(scope = "apim:mcp_server_update", description = "Update MCP Server configuration (metadata, thumbnails, backends)")
         })
     }, tags={ "Roles" })
     @ApiResponses(value = { 

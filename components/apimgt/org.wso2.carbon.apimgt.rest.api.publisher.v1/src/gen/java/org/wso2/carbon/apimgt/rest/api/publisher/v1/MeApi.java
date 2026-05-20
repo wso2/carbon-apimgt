@@ -44,7 +44,11 @@ MeApiService delegate = new MeApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_create_only", description = "Create new APIs"),
+            @AuthorizationScope(scope = "apim:api_update", description = "Update API configuration (metadata, endpoints, certificates, labels, themes, definition)"),
+            @AuthorizationScope(scope = "apim:api_product_update", description = "Update API Product configuration (metadata, thumbnail)"),
+            @AuthorizationScope(scope = "apim:api_product_create", description = "Create API Product")
         })
     }, tags={ "Users",  })
     @ApiResponses(value = { 
@@ -61,7 +65,16 @@ MeApiService delegate = new MeApiServiceImpl();
     @ApiOperation(value = "Validate Whether the Logged-in User has the Given Role", notes = "Using this operation, logged-in user can check whether he has given role. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
-            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:api_create_only", description = "Create new APIs"),
+            @AuthorizationScope(scope = "apim:api_update", description = "Update API configuration (metadata, endpoints, certificates, labels, themes, definition)"),
+            @AuthorizationScope(scope = "apim:api_product_update", description = "Update API Product configuration (metadata, thumbnail)"),
+            @AuthorizationScope(scope = "apim:api_product_create", description = "Create API Product"),
+            @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
+            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:mcp_server_create_only", description = "Create new MCP Servers"),
+            @AuthorizationScope(scope = "apim:mcp_server_update", description = "Update MCP Server configuration (metadata, thumbnails, backends)")
         })
     }, tags={ "Roles" })
     @ApiResponses(value = { 
