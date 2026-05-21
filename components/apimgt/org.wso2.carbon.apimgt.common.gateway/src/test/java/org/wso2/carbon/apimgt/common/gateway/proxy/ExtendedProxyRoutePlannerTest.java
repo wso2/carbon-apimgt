@@ -167,6 +167,33 @@ public class ExtendedProxyRoutePlannerTest {
     }
 
     @Test
+    public void testNonProxyHostsBracketPatternDoesNotThrow() {
+        ExtendedProxyRoutePlanner planner = createPlanner(
+                new String[]{"host[1].internal.com"}, new String[]{});
+        HttpHost result = planner.determineProxy(
+                new HttpHost("anything.example.com", 443, "https"), REQUEST, CONTEXT);
+        Assert.assertNotNull("Pattern with literal brackets should not crash; host should use proxy", result);
+    }
+
+    @Test
+    public void testNonProxyHostsBracketPatternMatchesLiteral() {
+        ExtendedProxyRoutePlanner planner = createPlanner(
+                new String[]{"host[1].internal.com"}, new String[]{});
+        HttpHost result = planner.determineProxy(
+                new HttpHost("host[1].internal.com", 443, "https"), REQUEST, CONTEXT);
+        Assert.assertNull("Literal bracketed host should match the same bracketed pattern", result);
+    }
+
+    @Test
+    public void testNonProxyHostsRegexMetacharsDoNotThrow() {
+        ExtendedProxyRoutePlanner planner = createPlanner(
+                new String[]{"foo?+.example.(com)"}, new String[]{});
+        HttpHost result = planner.determineProxy(
+                new HttpHost("api.example.com", 443, "https"), REQUEST, CONTEXT);
+        Assert.assertNotNull("Pattern with regex metacharacters should not crash; host should use proxy", result);
+    }
+
+    @Test
     public void testNonProxyHostsTakesPrecedenceOverTargetProxyHosts() {
         ExtendedProxyRoutePlanner planner = createPlanner(
                 new String[]{"localhost"}, new String[]{"localhost"});
