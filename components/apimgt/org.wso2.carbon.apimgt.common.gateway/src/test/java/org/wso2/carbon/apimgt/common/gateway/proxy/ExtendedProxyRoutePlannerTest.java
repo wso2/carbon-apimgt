@@ -91,6 +91,15 @@ public class ExtendedProxyRoutePlannerTest {
     }
 
     @Test
+    public void testNonProxyHostsCaseInsensitiveMatch() {
+        ExtendedProxyRoutePlanner planner = createPlanner(
+                new String[]{"*.INTERNAL.com"}, new String[]{});
+        HttpHost result = planner.determineProxy(
+                new HttpHost("API.internal.COM", 443, "https"), REQUEST, CONTEXT);
+        Assert.assertNull("Host should match nonProxyHosts regardless of case", result);
+    }
+
+    @Test
     public void testNonProxyHostsMultipleEntries() {
         ExtendedProxyRoutePlanner planner = createPlanner(
                 new String[]{"localhost", "*.internal.com", "10.0.*"}, new String[]{});
@@ -146,6 +155,15 @@ public class ExtendedProxyRoutePlannerTest {
         HttpHost result = planner.determineProxy(
                 new HttpHost("anything.example.com", 443, "https"), REQUEST, CONTEXT);
         Assert.assertNotNull("* targetProxyHosts should proxy all hosts", result);
+    }
+
+    @Test
+    public void testTargetProxyHostsCaseInsensitiveMatch() {
+        ExtendedProxyRoutePlanner planner = createPlanner(
+                new String[]{}, new String[]{"*.EXTERNAL.com"});
+        HttpHost result = planner.determineProxy(
+                new HttpHost("API.external.COM", 443, "https"), REQUEST, CONTEXT);
+        Assert.assertNotNull("Host should match targetProxyHosts regardless of case", result);
     }
 
     @Test

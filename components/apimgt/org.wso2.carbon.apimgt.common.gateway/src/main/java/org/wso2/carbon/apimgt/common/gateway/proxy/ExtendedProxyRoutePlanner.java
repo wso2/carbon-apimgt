@@ -27,6 +27,8 @@ import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
 import org.apache.http.protocol.HttpContext;
 import org.wso2.carbon.apimgt.common.gateway.configdto.HttpClientConfigurationDTO;
 
+import java.util.Locale;
+
 /**
  * Extended ProxyRoutePlanner class to handle non proxy hosts implementation
  */
@@ -115,8 +117,10 @@ public class ExtendedProxyRoutePlanner extends DefaultProxyRoutePlanner {
     }
 
     private boolean matchesPattern(String hostname, String pattern) {
-        String regex = pattern.replace(".", "\\.").replace("*", ".*");
-        return hostname.matches(regex);
+        String normalizedHost = hostname.toLowerCase(Locale.ROOT);
+        String normalizedPattern = pattern.toLowerCase(Locale.ROOT);
+        String regex = normalizedPattern.replace(".", "\\.").replace("*", ".*");
+        return normalizedHost.matches(regex);
     }
 
     @Override
