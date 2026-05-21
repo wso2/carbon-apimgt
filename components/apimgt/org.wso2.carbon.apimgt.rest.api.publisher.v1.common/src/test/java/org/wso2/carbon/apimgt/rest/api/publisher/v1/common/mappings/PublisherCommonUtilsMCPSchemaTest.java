@@ -17,11 +17,11 @@
  */
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -39,8 +39,9 @@ import java.util.Set;
  * - New tools (not in originalAPI) get empty schema so OAS3Parser can regenerate
  * - Behavior is consistent for both DIRECT_BACKEND and EXISTING_API subtypes
  */
-@RunWith(PowerMockRunner.class)
 public class PublisherCommonUtilsMCPSchemaTest {
+
+    private static final Log log = LogFactory.getLog(PublisherCommonUtilsMCPSchemaTest.class);
 
     private static final String OLD_SCHEMA =
             "{\"type\":\"object\",\"properties\":{\"query_city\":{\"type\":\"string\"}}}";
@@ -55,6 +56,7 @@ public class PublisherCommonUtilsMCPSchemaTest {
         populateExistingSchemaDefinitions = PublisherCommonUtils.class.getDeclaredMethod(
                 "populateExistingSchemaDefinitions", API.class, Set.class);
         populateExistingSchemaDefinitions.setAccessible(true);
+        log.debug("Successfully initialized populateExistingSchemaDefinitions method for testing");
     }
 
     private URITemplate createToolTemplate(String name, String schema) {
@@ -89,6 +91,8 @@ public class PublisherCommonUtilsMCPSchemaTest {
         API apiToUpdate = createApiWithTemplates(importedTemplates);
 
         populateExistingSchemaDefinitions.invoke(null, apiToUpdate, existingTemplates);
+        log.info("Populated existing schema definitions for API: " + apiToUpdate.getId().getApiName()
+                + " with " + existingTemplates.size() + " existing templates");
 
         URITemplate result = apiToUpdate.getUriTemplates().iterator().next();
         Assert.assertEquals("Existing tool schema should be preserved from originalAPI",
@@ -106,6 +110,8 @@ public class PublisherCommonUtilsMCPSchemaTest {
         API apiToUpdate = createApiWithTemplates(importedTemplates);
 
         populateExistingSchemaDefinitions.invoke(null, apiToUpdate, existingTemplates);
+        log.info("Populated existing schema definitions for API: " + apiToUpdate.getId().getApiName()
+                + " with " + existingTemplates.size() + " existing templates");
 
         URITemplate result = apiToUpdate.getUriTemplates().iterator().next();
         Assert.assertEquals("User-modified schema should be overwritten by existing schema",
@@ -124,6 +130,8 @@ public class PublisherCommonUtilsMCPSchemaTest {
         API apiToUpdate = createApiWithTemplates(importedTemplates);
 
         populateExistingSchemaDefinitions.invoke(null, apiToUpdate, existingTemplates);
+        log.info("Populated existing schema definitions for API: " + apiToUpdate.getId().getApiName()
+                + " with " + existingTemplates.size() + " existing templates");
 
         for (URITemplate t : apiToUpdate.getUriTemplates()) {
             if ("getWeather".equals(t.getUriTemplate())) {
@@ -148,6 +156,8 @@ public class PublisherCommonUtilsMCPSchemaTest {
         API apiToUpdate = createApiWithTemplates(importedTemplates);
 
         populateExistingSchemaDefinitions.invoke(null, apiToUpdate, existingTemplates);
+        log.info("Populated existing schema definitions for API: " + apiToUpdate.getId().getApiName()
+                + " with " + existingTemplates.size() + " existing templates");
 
         Assert.assertEquals("Only imported tools should remain", 1, apiToUpdate.getUriTemplates().size());
         URITemplate result = apiToUpdate.getUriTemplates().iterator().next();
@@ -171,6 +181,8 @@ public class PublisherCommonUtilsMCPSchemaTest {
         API apiToUpdate = createApiWithTemplates(importedTemplates);
 
         populateExistingSchemaDefinitions.invoke(null, apiToUpdate, existingTemplates);
+        log.info("Populated existing schema definitions for API: " + apiToUpdate.getId().getApiName()
+                + " with " + existingTemplates.size() + " existing templates");
 
         URITemplate result = apiToUpdate.getUriTemplates().iterator().next();
         Assert.assertEquals("Non-TOOL verb templates should not be modified",
@@ -187,6 +199,8 @@ public class PublisherCommonUtilsMCPSchemaTest {
         API apiToUpdate = createApiWithTemplates(importedTemplates);
 
         populateExistingSchemaDefinitions.invoke(null, apiToUpdate, existingTemplates);
+        log.info("Populated existing schema definitions for API: " + apiToUpdate.getId().getApiName()
+                + " with " + existingTemplates.size() + " existing templates");
 
         URITemplate result = apiToUpdate.getUriTemplates().iterator().next();
         Assert.assertEquals("With no existing templates, schema should be empty for regeneration",
@@ -210,6 +224,8 @@ public class PublisherCommonUtilsMCPSchemaTest {
         API apiToUpdate = createApiWithTemplates(importedTemplates);
 
         populateExistingSchemaDefinitions.invoke(null, apiToUpdate, existingTemplates);
+        log.info("Populated existing schema definitions for API: " + apiToUpdate.getId().getApiName()
+                + " with " + existingTemplates.size() + " existing templates");
 
         for (URITemplate t : apiToUpdate.getUriTemplates()) {
             switch (t.getUriTemplate()) {

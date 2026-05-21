@@ -27,7 +27,7 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -43,7 +43,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.List;
 
 /**
  * Tests for backend definition update handling during MCP server import (apictl flow).
@@ -69,11 +68,13 @@ public class ImportUtilsMCPDefinitionUpdateTest {
     private static final String EXTRACTED_PATH = "/tmp/test-mcp-def-import";
     private static final String BACKEND_ID = "backend-def-1";
 
-    private static final String OLD_DEFINITION = "{\"openapi\":\"3.0.1\",\"info\":{\"title\":\"Old\",\"version\":\"1.0\"}"
+    private static final String OLD_DEFINITION =
+            "{\"openapi\":\"3.0.1\",\"info\":{\"title\":\"Old\",\"version\":\"1.0\"}"
             + ",\"paths\":{\"/get\":{\"get\":{\"parameters\":[{\"name\":\"city\",\"in\":\"query\","
             + "\"schema\":{\"type\":\"string\"}}],\"responses\":{\"200\":{\"description\":\"OK\"}}}}}}";
 
-    private static final String NEW_DEFINITION = "{\"openapi\":\"3.0.1\",\"info\":{\"title\":\"New\",\"version\":\"1.0\"}"
+    private static final String NEW_DEFINITION =
+            "{\"openapi\":\"3.0.1\",\"info\":{\"title\":\"New\",\"version\":\"1.0\"}"
             + ",\"paths\":{\"/get\":{\"get\":{\"parameters\":[{\"name\":\"city\",\"in\":\"query\","
             + "\"schema\":{\"type\":\"string\"}},{\"name\":\"units\",\"in\":\"query\","
             + "\"schema\":{\"type\":\"string\"}}],\"responses\":{\"200\":{\"description\":\"OK\"}}}}}}";
@@ -168,6 +169,11 @@ public class ImportUtilsMCPDefinitionUpdateTest {
         PowerMockito.doNothing().when(ImportUtils.class, "addThumbnailImage",
                 ArgumentMatchers.anyString(), ArgumentMatchers.any(),
                 ArgumentMatchers.any(APIProvider.class));
+
+        APIDefinitionValidationResponse validResponse = new APIDefinitionValidationResponse();
+        validResponse.setValid(true);
+        PowerMockito.doReturn(validResponse).when(ImportUtils.class,
+                "retrieveValidatedSwaggerDefinition", ArgumentMatchers.anyString());
     }
 
     private void setupMCPServerDTOMock(MCPServerDTO dto) throws Exception {
@@ -220,6 +226,9 @@ public class ImportUtilsMCPDefinitionUpdateTest {
         Backend capturedBackend = newBackendCaptor.getValue();
         Assert.assertEquals("Backend definition should be updated to imported definition",
                 NEW_DEFINITION, capturedBackend.getDefinition());
+
+        PowerMockito.verifyPrivate(ImportUtils.class)
+                .invoke("retrieveValidatedSwaggerDefinition", NEW_DEFINITION);
     }
 
     @Test
@@ -251,6 +260,9 @@ public class ImportUtilsMCPDefinitionUpdateTest {
         Backend capturedBackend = newBackendCaptor.getValue();
         Assert.assertEquals("Backend definition should remain unchanged when not provided in import",
                 OLD_DEFINITION, capturedBackend.getDefinition());
+
+        PowerMockito.verifyPrivate(ImportUtils.class, Mockito.never())
+                .invoke("retrieveValidatedSwaggerDefinition", ArgumentMatchers.anyString());
     }
 
     @Test
@@ -282,6 +294,9 @@ public class ImportUtilsMCPDefinitionUpdateTest {
         Backend capturedBackend = newBackendCaptor.getValue();
         Assert.assertEquals("Backend definition should remain unchanged when blank string provided",
                 OLD_DEFINITION, capturedBackend.getDefinition());
+
+        PowerMockito.verifyPrivate(ImportUtils.class, Mockito.never())
+                .invoke("retrieveValidatedSwaggerDefinition", ArgumentMatchers.anyString());
     }
 
     // -------------------------------------------------------------------------
@@ -317,6 +332,9 @@ public class ImportUtilsMCPDefinitionUpdateTest {
         Backend capturedBackend = newBackendCaptor.getValue();
         Assert.assertEquals("SERVER_PROXY backend definition should be updated",
                 NEW_DEFINITION, capturedBackend.getDefinition());
+
+        PowerMockito.verifyPrivate(ImportUtils.class)
+                .invoke("retrieveValidatedSwaggerDefinition", NEW_DEFINITION);
     }
 
     // -------------------------------------------------------------------------

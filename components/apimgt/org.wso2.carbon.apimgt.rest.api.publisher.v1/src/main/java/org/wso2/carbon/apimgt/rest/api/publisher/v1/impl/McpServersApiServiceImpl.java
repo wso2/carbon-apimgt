@@ -116,6 +116,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubtypeConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -2425,23 +2426,26 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             String definition = backendAPIDTO.getDefinition();
             if (StringUtils.isNotBlank(definition)) {
                 APIDefinitionValidationResponse validationResponse =
-                        OASParserUtil.validateAPIDefinition(definition, Boolean.TRUE);
+                        OASParserUtil.validateAPIDefinition(definition, Boolean.TRUE,
+                                ServiceReferenceHolder.getInstance()
+                                        .getAPIMDependencyConfigurationService()
+                                        .getAPIMDependencyConfigurations().getOasParserOptions());
                 if (!validationResponse.isValid()) {
-                    StringBuilder errorDescription = new StringBuilder();
-                    for (org.wso2.carbon.apimgt.api.ErrorHandler errorHandler
-                            : validationResponse.getErrorItems()) {
-                        if (errorDescription.length() > 0) {
-                            errorDescription.append(". ");
-                        }
-                        errorDescription.append(errorHandler.getErrorDescription());
-                    }
-                    RestApiUtil.handleBadRequest(
-                            "Invalid backend API definition: " + errorDescription, log);
+                    List<ErrorListItemDTO> errorListItemDTOs =
+                            APIMappingUtil.getErrorListItemsDTOsFromErrorHandlers(
+                                    validationResponse.getErrorItems());
+                    ErrorDTO errorDTO =
+                            APIMappingUtil.getErrorDTOFromErrorListItems(errorListItemDTOs);
+                    throw RestApiUtil.buildBadRequestException(errorDTO);
                 }
                 backend.setDefinition(definition);
             }
             PublisherCommonUtils.updateMCPServerBackend(mcpServerId, oldBackend, backend, organization, apiProvider);
-            return Response.ok().entity(APIMappingUtil.fromBackendAPIToDTO(backend, organization, false)).build();
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully updated backend API: " + backendApiId + " for MCP server: " + mcpServerId);
+            }
+            return Response.ok().entity(APIMappingUtil.fromBackendAPIToDTO(
+                    backend, organization, false)).build();
         } catch (ParseException e) {
             RestApiUtil.handleBadRequest("Endpoint config is not in correct format", e, log);
         }
