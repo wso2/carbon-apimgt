@@ -661,21 +661,32 @@ public class APIHandlerServiceComponent {
         jedisPoolConfig.setMinIdle(redisConfig.getMinIdle());
         jedisPoolConfig.setTestOnBorrow(redisConfig.isTestOnBorrow());
         jedisPoolConfig.setBlockWhenExhausted(redisConfig.isBlockWhenExhausted());
+        jedisPoolConfig.setMaxWaitMillis(redisConfig.getMaxWaitMillis());
         jedisPoolConfig.setMinEvictableIdleTimeMillis(redisConfig.getMinEvictableIdleTimeMillis());
         jedisPoolConfig.setTimeBetweenEvictionRunsMillis(redisConfig.getTimeBetweenEvictionRunsMillis());
         jedisPoolConfig.setNumTestsPerEvictionRun(redisConfig.getNumTestsPerEvictionRun());
         JedisPool jedisPool;
         if (StringUtils.isNotEmpty(redisConfig.getUser()) && redisConfig.getPassword() != null) {
             jedisPool = new JedisPool(jedisPoolConfig, redisConfig.getHost(), redisConfig.getPort(),
-                    redisConfig.getConnectionTimeout(), redisConfig.getUser(),
-                    String.valueOf(redisConfig.getPassword()), redisConfig.getDatabaseId(), redisConfig.isSslEnabled());
+                    redisConfig.getConnectionTimeout(), redisConfig.getSocketTimeout(),
+                    redisConfig.getUser(), String.valueOf(redisConfig.getPassword()),
+                    redisConfig.getDatabaseId(), null, redisConfig.isSslEnabled());
         } else if (redisConfig.getPassword() != null) {
             jedisPool = new JedisPool(jedisPoolConfig, redisConfig.getHost(), redisConfig.getPort(),
-                    redisConfig.getConnectionTimeout(), String.valueOf(redisConfig.getPassword()),
-                    redisConfig.getDatabaseId(), redisConfig.isSslEnabled());
+                    redisConfig.getConnectionTimeout(), redisConfig.getSocketTimeout(),
+                    String.valueOf(redisConfig.getPassword()), redisConfig.getDatabaseId(), null,
+                    redisConfig.isSslEnabled());
         } else {
             jedisPool = new JedisPool(jedisPoolConfig, redisConfig.getHost(), redisConfig.getPort(),
-                    redisConfig.getConnectionTimeout(), null, redisConfig.getDatabaseId(), redisConfig.isSslEnabled());
+                    redisConfig.getConnectionTimeout(), redisConfig.getSocketTimeout(),
+                    null, redisConfig.getDatabaseId(), null, redisConfig.isSslEnabled());
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Redis connection pool initialized with connection timeout: "
+                    + redisConfig.getConnectionTimeout() + "ms, socket timeout: "
+                    + redisConfig.getSocketTimeout() + "ms, max wait: "
+                    + redisConfig.getMaxWaitMillis() + "ms, block when exhausted: "
+                    + redisConfig.isBlockWhenExhausted());
         }
         return jedisPool;
     }

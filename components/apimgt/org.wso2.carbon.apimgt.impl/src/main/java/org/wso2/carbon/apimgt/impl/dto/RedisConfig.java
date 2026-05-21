@@ -29,8 +29,10 @@ public class RedisConfig {
     private String user;
     private char[] password;
     private int databaseId = 0;
-    private int connectionTimeout;
+    private int connectionTimeout = 2000;
+    private int socketTimeout = 2000;
     private boolean isSslEnabled;
+    private long maxWaitMillis = 3000L;
     private int maxTotal = 8;
     private int maxIdle = 8;
     private int minIdle = 0;
@@ -222,6 +224,22 @@ public class RedisConfig {
         this.connectionTimeout = connectionTimeout;
     }
 
+    public int getSocketTimeout() {
+        return socketTimeout;
+    }
+
+    public void setSocketTimeout(int socketTimeout) {
+        this.socketTimeout = socketTimeout;
+    }
+
+    public long getMaxWaitMillis() {
+        return maxWaitMillis;
+    }
+
+    public void setMaxWaitMillis(long maxWaitMillis) {
+        this.maxWaitMillis = maxWaitMillis;
+    }
+
     public boolean isSslEnabled() {
 
         return isSslEnabled;
@@ -243,6 +261,7 @@ public class RedisConfig {
     public void setMinGatewayCount(long minGatewayCount) {
         this.minGatewayCount = minGatewayCount;
     }
+
     public long getMinGatewayCount() {
         return minGatewayCount;
     }
