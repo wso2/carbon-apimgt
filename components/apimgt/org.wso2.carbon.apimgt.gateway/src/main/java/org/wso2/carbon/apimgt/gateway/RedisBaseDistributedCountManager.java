@@ -25,6 +25,8 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.Response;
 import redis.clients.jedis.Transaction;
+import redis.clients.jedis.exceptions.JedisException;
+import redis.clients.jedis.params.SetParams;
 import org.wso2.carbon.apimgt.gateway.throttling.util.ThrottleUtils;
 import org.wso2.carbon.apimgt.impl.dto.RedisConfig;
 
@@ -71,6 +73,10 @@ public class RedisBaseDistributedCountManager implements DistributedCounterManag
                 log.trace("shared counter key didn't exist. But returning:" + 0);
                 return 0;
             }
+        } catch (JedisException e) {
+            // Non-critical read; return 0 (zero counts) as safe fallback.
+            log.warn("Redis error in getCounter for key: " + key + ". Returning 0.", e);
+            return 0;
         } finally {
             if (log.isTraceEnabled()) {
                 log.trace("Time Taken to getDistributedCounter :" + (System.currentTimeMillis() - startTime));
@@ -84,6 +90,9 @@ public class RedisBaseDistributedCountManager implements DistributedCounterManag
         try {
             startTime = System.currentTimeMillis();
             asyncGetAndAlterCounter(key, value); // this should remove the expiry time as new key is created by this
+        } catch (JedisException e) {
+            // Non-critical background update; log and allow caller to retry.
+            log.warn("Redis error in setCounter for key: " + key + ". Update skipped.", e);
         } finally {
             if (log.isTraceEnabled()) {
                 log.trace("Time Taken to setDistributedCounter :" + (System.currentTimeMillis() - startTime));
@@ -97,6 +106,9 @@ public class RedisBaseDistributedCountManager implements DistributedCounterManag
             startTime = System.currentTimeMillis();
             // this removes the expiry time as new key is created by this
             asyncGetAlterAndSetExpiryOfCounter(key, value, expiryTime);
+        } catch (JedisException e) {
+            // Non-critical background update; log and allow caller to retry.
+            log.warn("Redis error in setCounterWithExpiry for key: " + key + ". Update skipped.", e);
         } finally {
             if (log.isTraceEnabled()) {
                 log.trace("Set DistributedCounter : key:" + key + ", value:" + value + ", expiryTime:" + expiryTime);
@@ -301,6 +313,10 @@ public class RedisBaseDistributedCountManager implements DistributedCounterManag
                 }
                 return 0;
             }
+        } catch (JedisException e) {
+            // Non-critical read; return 0 (epoch start) as safe fallback.
+            log.warn("Redis error in getTimestamp for key: " + key + ". Returning 0.", e);
+            return 0;
         } finally {
             if (log.isTraceEnabled()) {
                 log.trace("Time Taken to getSharedTimestamp :" + (System.currentTimeMillis() - startTime));
@@ -320,6 +336,9 @@ public class RedisBaseDistributedCountManager implements DistributedCounterManag
                 transaction.set(key, String.valueOf(timeStamp));
                 transaction.exec();
             }
+        } catch (JedisException e) {
+            // Non-critical background update; log and allow caller to retry.
+            log.warn("Redis error in setTimestamp for key: " + key + ". Update skipped.", e);
         } finally {
             if (log.isTraceEnabled()) {
                 log.trace(
@@ -349,6 +368,9 @@ public class RedisBaseDistributedCountManager implements DistributedCounterManag
                 }
                 log.trace("setTimestamp :" + timeStamp);
             }
+        } catch (JedisException e) {
+            // Non-critical background update; log and allow caller to retry.
+            log.warn("Redis error in setTimestampWithExpiry for key: " + key + ". Update skipped.", e);
         } finally {
             if (log.isTraceEnabled()) {
                 log.trace("Time Taken to setTimestamp :" + (System.currentTimeMillis() - startTime));
@@ -398,6 +420,9 @@ public class RedisBaseDistributedCountManager implements DistributedCounterManag
                     log.trace("Expire timeout was not set");
                 }
             }
+        } catch (JedisException e) {
+            // Non-critical: Key expires naturally via TTL if Redis unavailable.
+            log.warn("Redis error in setExpiry for key: " + key + ". Key will expire naturally.", e);
         } finally {
             if (log.isTraceEnabled()) {
                 log.trace("Time Taken to perform Redis setExpiry operation:" + (System.currentTimeMillis() - startTime));
@@ -461,32 +486,22 @@ public class RedisBaseDistributedCountManager implements DistributedCounterManag
         try {
             startTime = System.currentTimeMillis();
             try (Jedis jedis = redisPool.getResource()) {
-                Transaction transaction = jedis.multi();
-                transaction.setnx(key, value);
-                Response<Long> pexpireAtResponse = transaction.pexpireAt(key, expiryTimeStamp);
-                transaction.exec();
-                long pexpireAtResponseCode = pexpireAtResponse.get();
-                if (pexpireAtResponseCode == 1) {
-                    if (log.isTraceEnabled()) {
-                        log.trace("expiry time of key:" + key + " was set successfully.");
+                long ttlMillis = Math.max(expiryTimeStamp - System.currentTimeMillis(), 1L);
+                // Atomic NX + expiry: only the client that creates the key gets "OK".
+                String result = jedis.set(key, value, SetParams.setParams().nx().px(ttlMillis));
+                boolean acquired = "OK".equals(result);
+                if (log.isTraceEnabled()) {
+                    if (acquired) {
+                        log.trace("Lock acquired for key:" + key);
+                    } else {
+                        log.trace("Lock not acquired for key:" + key + " (already held by another node)");
                     }
-                    return true;
-                } else if (pexpireAtResponseCode == 0) {
-                    if (log.isTraceEnabled()) {
-                        log.trace("expiry time was not set of key:" + key
-                                + " e.g. key doesn't exist, or operation skipped due to the provided arguments.");
-                    }
-                    return false;
-                } else {
-                    if (log.isTraceEnabled()) {
-                        log.trace("expiry time was not set of key:" + key);
-                    }
-                    return false;
                 }
+                return acquired;
             }
         } finally {
             if (log.isTraceEnabled()) {
-                log.trace("Time Taken to setLock :" + (System.currentTimeMillis() - startTime));
+                log.trace("Time Taken to setLockWithExpiry :" + (System.currentTimeMillis() - startTime));
             }
         }
     }
