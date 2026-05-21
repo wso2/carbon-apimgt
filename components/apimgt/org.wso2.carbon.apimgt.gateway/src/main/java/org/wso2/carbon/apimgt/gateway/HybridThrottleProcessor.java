@@ -282,7 +282,7 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
          async and requests are not yet throttled. "canAccess == true" condition is checked to avoid unnecessary syncings
          and publishing messages to redis when the requests are already throttled. (after the requests are
          throttled, next requests are processed in async mode) */
-        if (callerContext.getLocalHits() == callerContext.getLocalQuota()
+        if (callerContext.getLocalHits() >= callerContext.getLocalQuota()
                 && !callerContext.isThrottleParamSyncingModeSync() && canAccess == true) {
             if (log.isTraceEnabled()) {
                 log.trace("Local quota reached. SWITCHED TO SYNC MODE !!! local hits = "
@@ -334,6 +334,12 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
                     log.trace("Publishing message to channel. message: " + message);
                 }
                 jedis.publish(WSO2_SYNC_MODE_INIT_CHANNEL, message);
+            } catch (Exception e) {
+                // Publish is best-effort: failure must not propagate to the caller since the access
+                // decision (canAccess=true) and local sync-mode state are already finalized.
+                // Peer gateways will self-switch when they hit their own local quota.
+                log.warn("Failed to publish sync-mode notification for callerContext: "
+                        + callerContext.getId() + ". Peer gateways will self-switch on their own local quota.", e);
             }
         }
         return canAccess;
@@ -579,8 +585,10 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
                     long syncingStartTime = System.currentTimeMillis();
                     syncThrottleWindowParams(callerContext, true);
                     // add piled items and new request item to shared-counter (increments before allowing the request)
+                    // Counter sync only runs when still within the window; track whether it actually executed.
+                    boolean withinWindow = callerContext.getNextTimeWindow() > requestContext.getRequestTime();
                     syncThrottleCounterParams(callerContext, true, requestContext);
-                    syncExecutedSuccessfully = true;
+                    syncExecutedSuccessfully = withinWindow;
                     SharedParamManager.releaseSharedKeys(callerContext.getId());
                     long timeNow = System.currentTimeMillis();
 
@@ -735,22 +743,43 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
             if (requestContext.getRequestTime() > callerContext.getNextTimeWindow()) {
                 if (log.isTraceEnabled()) {
                     log.trace(
-                            "currentTime has exceeded NextTimeWindow. So setting it to false. So setting it to false.");
+                            "currentTime has exceeded NextTimeWindow. So setting it to false.");
                 }
                 callerContext.setIsThrottleParamSyncingModeSync(false);
-                syncModeNotifiedMap.remove(callerContext.getId());
+                // Only remove the map entry if it belongs to the expired window or an older one.
+                // A stored value greater than the current nextTimeWindow means a peer already published
+                // a sync-mode notification for the next window — keep it so the check below can
+                // re-enable sync mode immediately for that window.
+                String storedNextWindow = syncModeNotifiedMap.get(callerContext.getId());
+                if (storedNextWindow == null
+                        || Long.parseLong(storedNextWindow) <= callerContext.getNextTimeWindow()) {
+                    syncModeNotifiedMap.remove(callerContext.getId());
+                }
+                // Fall through to the check below: re-enable sync mode if a future-window entry is present.
+            } else {
+                return; // Still within the window in sync mode — nothing to change.
             }
-        } else {
-            // if a sync mode switching msg has been received or own node exceeded local quota
-            if (syncModeNotifiedMap.containsKey(callerContext.getId())) {
-                long nextTimeWindowOfSyncMessage = Long.parseLong(syncModeNotifiedMap.get(callerContext.getId()));
-                // still within the time window that the sync message was sent by some other GW node or mode switched by own node
-                if (nextTimeWindowOfSyncMessage >= requestContext.getRequestTime()) {
-                    callerContext.setIsThrottleParamSyncingModeSync(true);
-                    if (log.isTraceEnabled()) {
-                        log.trace(
-                                "Set ThrottleParamSyncingModeSync to true for callerContext: " + callerContext.getId());
-                    }
+        }
+        // Reached when: (a) callerContext was already in async mode, or (b) sync mode was just reset above.
+        // if a sync mode switching msg has been received or own node exceeded local quota
+        // Use get-then-null-check rather than containsKey+get: ConcurrentHashMap does not make the
+        // compound check atomic, so another thread can remove the entry between the two calls,
+        // causing get() to return null and Long.parseLong(null) to throw NullPointerException.
+        String notifiedNextWindow = syncModeNotifiedMap.get(callerContext.getId());
+        if (notifiedNextWindow != null) {
+            long nextTimeWindowOfSyncMessage = Long.parseLong(notifiedNextWindow);
+            // still within the time window that the sync message was sent by some other GW node or mode switched by own node
+            if (nextTimeWindowOfSyncMessage >= requestContext.getRequestTime()) {
+                callerContext.setIsThrottleParamSyncingModeSync(true);
+                if (log.isTraceEnabled()) {
+                    log.trace(
+                            "Set ThrottleParamSyncingModeSync to true for callerContext: " + callerContext.getId());
+                }
+            } else {
+                // The window referenced by the map entry has already passed — remove the stale entry.
+                syncModeNotifiedMap.remove(callerContext.getId());
+                if (log.isTraceEnabled()) {
+                    log.trace("Removed stale syncModeNotifiedMap entry for callerContext: " + callerContext.getId());
                 }
             }
         }
@@ -816,7 +845,7 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
                                 + oldGlobalCounter + " to " + callerContext.getGlobalCounter());
                     }
                 } catch (Exception e) {
-                    callerContext.incrementLocalCounterBy(localCounter);
+                    callerContext.incrementLocalCounterBy(localCounter); // atomic restore on Redis failure
                     log.error("Could not sync throttle counter params to distributed storage. Restored "
                             + localCounter + " counts to local counter for retry.", e);
                 }

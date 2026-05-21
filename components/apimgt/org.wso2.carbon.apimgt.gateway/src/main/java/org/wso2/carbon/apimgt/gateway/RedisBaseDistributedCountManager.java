@@ -21,14 +21,14 @@ package org.wso2.carbon.apimgt.gateway;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.commons.throttle.core.DistributedCounterManager;
+import org.wso2.carbon.apimgt.gateway.throttling.util.ThrottleUtils;
+import org.wso2.carbon.apimgt.impl.dto.RedisConfig;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.Response;
 import redis.clients.jedis.Transaction;
 import redis.clients.jedis.exceptions.JedisException;
 import redis.clients.jedis.params.SetParams;
-import org.wso2.carbon.apimgt.gateway.throttling.util.ThrottleUtils;
-import org.wso2.carbon.apimgt.impl.dto.RedisConfig;
 
 /**
  * Redis Base Distributed Counter Manager for Throttler.
@@ -499,6 +499,10 @@ public class RedisBaseDistributedCountManager implements DistributedCounterManag
                 }
                 return acquired;
             }
+        } catch (JedisException e) {
+            // Treat Redis failure as lock-not-acquired so the caller can fall back gracefully.
+            log.warn("Redis error in setLockWithExpiry for key: " + key + ". Treating as lock not acquired.", e);
+            return false;
         } finally {
             if (log.isTraceEnabled()) {
                 log.trace("Time Taken to setLockWithExpiry :" + (System.currentTimeMillis() - startTime));
