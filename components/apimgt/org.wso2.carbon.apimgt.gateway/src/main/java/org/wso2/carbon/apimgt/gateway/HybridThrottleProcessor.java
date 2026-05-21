@@ -54,12 +54,14 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
     private ThrottleDataHolder dataHolder;
     private String gatewayId;
     private static final String SYNC_MODE_MSG_PART_DELIMITER = "___";
+    private final long minGatewayCount;
 
     public HybridThrottleProcessor() {
         redisPool = ServiceReferenceHolder.getInstance().getRedisPool();
         RedisConfig redisConfig = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration().getRedisConfig();
         gatewayId = redisConfig.getGatewayId();
+        minGatewayCount = redisConfig.getMinGatewayCount();
 
         ScheduledExecutorService syncModeInitChannelSubscriptionExecutor = Executors.newScheduledThreadPool(1);
         syncModeInitChannelSubscriptionExecutor.scheduleAtFixedRate(new SyncModeInitChannelSubscription(), 0, 1,
@@ -213,14 +215,26 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
             Map<String, String> channelCountMap;
             try (Jedis jedis = redisPool.getResource()) {
                 channelCountMap = jedis.pubsubNumSub(WSO2_SYNC_MODE_INIT_CHANNEL);
+            } catch (Exception e) {
+                log.error("ChannelSubscriptionCounterTask: failed to query pubsubNumSub", e);
+                return;
             }
             for (Map.Entry<String, String> entry : channelCountMap.entrySet()) {
                 String channel = entry.getKey();
                 long gatewayCount = Long.parseLong(entry.getValue());
-                ServiceReferenceHolder.getInstance().setGatewayCount(gatewayCount);
-                if (log.isTraceEnabled()) {
-                    log.trace("ChannelSubscriptionCounterTask : channel = " + channel + ". Set Gateway count to "
-                            + gatewayCount);
+                if (gatewayCount > 0) {
+                    ServiceReferenceHolder.getInstance().setGatewayCount(gatewayCount);
+                    if (log.isTraceEnabled()) {
+                        log.trace("ChannelSubscriptionCounterTask : channel = " + channel + ". Set Gateway count to "
+                                + gatewayCount);
+                    }
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("ChannelSubscriptionCounterTask : channel = " + channel
+                                + ". Skipping gateway count update as pubsubNumSub returned 0."
+                                + " Subscriptions may not yet be established. Keeping existing count: "
+                                + ServiceReferenceHolder.getInstance().getGatewayCount());
+                    }
                 }
             }
         }
@@ -555,6 +569,7 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
                     + ", nextAccessTime = " + callerContext.getNextAccessTime());
         }
 
+        boolean syncExecutedSuccessfully = false;
         if (callerContext.isThrottleParamSyncingModeSync()) {
             if (log.isTraceEnabled()) {
                 log.trace("Going to run throttle param syncing");
@@ -565,6 +580,7 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
                     syncThrottleWindowParams(callerContext, true);
                     // add piled items and new request item to shared-counter (increments before allowing the request)
                     syncThrottleCounterParams(callerContext, true, requestContext);
+                    syncExecutedSuccessfully = true;
                     SharedParamManager.releaseSharedKeys(callerContext.getId());
                     long timeNow = System.currentTimeMillis();
 
@@ -606,7 +622,9 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
                     //remove previous callercontext instance
                     throttleContext.removeCallerContext(callerContext.getId());
                     callerContext.setGlobalCounter(0);// can access the system   and this is same as first access
-                    callerContext.setLocalCounter(1);
+                    if (!syncExecutedSuccessfully) {
+                        callerContext.setLocalCounter(1);
+                    }
                     callerContext.setLocalHits(0);
                     callerContext.setFirstAccessTime(requestContext.getRequestTime());
                     callerContext.setNextTimeWindow(requestContext.getRequestTime() + configuration.getUnitTime());
@@ -657,7 +675,9 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
                     canAccess = true;
                     callerContext.setLocalHits(0);
                     callerContext.setGlobalCounter(0);// can access the system and this is same as first access
-                    callerContext.setLocalCounter(1);
+                    if (!syncExecutedSuccessfully) {
+                        callerContext.setLocalCounter(1);
+                    }
                     callerContext.setFirstAccessTime(requestContext.getRequestTime());
 
                     callerContext.setNextTimeWindow(requestContext.getRequestTime() + configuration.getUnitTime());
@@ -718,6 +738,7 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
                             "currentTime has exceeded NextTimeWindow. So setting it to false. So setting it to false.");
                 }
                 callerContext.setIsThrottleParamSyncingModeSync(false);
+                syncModeNotifiedMap.remove(callerContext.getId());
             }
         } else {
             // if a sync mode switching msg has been received or own node exceeded local quota
@@ -767,27 +788,37 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
                 if (isInvocationFlow) {
                     callerContext.incrementLocalCounter(); // increment local counter to consider current request
                 }
-                long localCounter = callerContext.getLocalCounter();
-                if (log.isTraceEnabled()) {
-                    log.trace(
-                            "When running syncing throttle counter params: localCounter increased to " + localCounter);
-                }
+                long localCounter = callerContext.getAndSetLocalCounter(0); // atomic snapshot-and-zero
+                try {
+                    if (log.isTraceEnabled()) {
+                        log.trace("When running syncing throttle counter params: Initial Local counter = "
+                                + localCounter + " , globalCounter = " + callerContext.getGlobalCounter()
+                                + ", distributedCounter = " + SharedParamManager.getDistributedCounter(id)
+                                + ". localCounter increased to " + localCounter);
+                    }
 
-                callerContext.resetLocalCounter();
-                Long distributedCounter = SharedParamManager.addAndGetDistributedCounter(id, localCounter);
+                    Long distributedCounter = SharedParamManager.addAndGetDistributedCounter(id, localCounter);
 
-                if (log.isTraceEnabled()) {
-                    log.trace("When running syncing throttle counter params: Finally distributedCounter = "
-                            + distributedCounter);
-                }
+                    if (log.isTraceEnabled()) {
+                        log.trace("When running syncing throttle counter params: Finally distributedCounter = "
+                                + distributedCounter);
+                    }
 
-                //Update instance's global counter value with distributed counter
-                long oldGlobalCounter = callerContext.getGlobalCounter();
-                callerContext.setGlobalCounter(distributedCounter);
-                if (log.isTraceEnabled()) {
-                    log.trace("When running syncing throttle counter params: Finally globalCounter increased from "
-                            + oldGlobalCounter + " to " + callerContext.getGlobalCounter());
-                    log.trace("When running syncing throttle counter params: finally local counter reset to 0");
+                    long oldGlobalCounter = callerContext.getGlobalCounter();
+                    callerContext.setGlobalCounter(distributedCounter);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Successfully synced counter params for callerContext: " + callerContext.getId()
+                                + ". Snapshot=" + localCounter + " distributedCounter=" + distributedCounter);
+                    }
+
+                    if (log.isTraceEnabled()) {
+                        log.trace("When running syncing throttle counter params: Finally globalCounter increased from "
+                                + oldGlobalCounter + " to " + callerContext.getGlobalCounter());
+                    }
+                } catch (Exception e) {
+                    callerContext.incrementLocalCounterBy(localCounter);
+                    log.error("Could not sync throttle counter params to distributed storage. Restored "
+                            + localCounter + " counts to local counter for retry.", e);
                 }
             } else {
                 if (log.isTraceEnabled()) {
@@ -921,12 +952,15 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
      */
     public void setLocalQuota(CallerContext callerContext, CallerConfiguration configuration) {
         long maxRequests = configuration.getMaximumRequestPerUnitTime();
-        long gatewayCount = ServiceReferenceHolder.getInstance().getGatewayCount();
+        int gatewayCount = (int) ServiceReferenceHolder.getInstance().getGatewayCount();
 
-        RedisConfig redisConfig = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getRedisConfig();
-        if (gatewayCount < redisConfig.getMinGatewayCount()) {
-            gatewayCount = redisConfig.getMinGatewayCount();
+        if (gatewayCount <= 0) {
+            gatewayCount = (int) ((minGatewayCount > 0) ? minGatewayCount : 1);
+            if (log.isTraceEnabled()) {
+                log.trace("Set gateway count to " + gatewayCount + " as the calculated gateway count is less than 1");
+            }
+        } else if (gatewayCount < minGatewayCount) {
+            gatewayCount = (int) minGatewayCount;
             if (log.isTraceEnabled()) {
                 log.trace("Set gateway count to " + gatewayCount + " as the calculated gateway count is less than the"
                         + " min_gateway_count configuration");
@@ -935,10 +969,24 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
         short localQuotaBufferPercentage = Short.parseShort(
                 ThrottleServiceDataHolder.getInstance().getThrottleProperties().getLocalQuotaBufferPercentage());
         long localQuota = (maxRequests - maxRequests * localQuotaBufferPercentage / 100) / gatewayCount;
+        long previousLocalQuota = callerContext.getLocalQuota();
+        callerContext.setLocalQuota(localQuota);
         if (log.isTraceEnabled()) {
             log.trace("Set local quota to " + localQuota + " for " + callerContext.getId() + " in hybrid throttling");
         }
-        callerContext.setLocalQuota(localQuota);
+        if (localQuota < previousLocalQuota
+                && callerContext.getLocalHits() >= localQuota
+                && !callerContext.isThrottleParamSyncingModeSync()) {
+            callerContext.setIsThrottleParamSyncingModeSync(true);
+            if (gatewayId != null && !gatewayId.isEmpty()) {
+                syncModeNotifiedMap.put(callerContext.getId(), String.valueOf(callerContext.getNextTimeWindow()));
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("gatewayCount increased mid-window (newQuota=" + localQuota
+                        + " previousQuota=" + previousLocalQuota + " localHits=" + callerContext.getLocalHits()
+                        + "). Forcing sync mode for callerContext: " + callerContext.getId());
+            }
+        }
     }
 
     @Override
