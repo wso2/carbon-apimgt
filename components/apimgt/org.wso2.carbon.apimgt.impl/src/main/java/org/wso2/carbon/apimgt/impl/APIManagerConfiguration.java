@@ -493,6 +493,7 @@ public class APIManagerConfiguration {
                 OMElement redisPassword = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_PASSWORD));
                 OMElement redisDatabaseId = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_DATABASE_ID));
                 OMElement redisConnectionTimeout = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_CONNECTION_TIMEOUT));
+                OMElement redisSocketTimeout = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_SOCKET_TIMEOUT));
                 OMElement redisIsSslEnabled = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_IS_SSL_ENABLED));
                 OMElement propertiesElement = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_PROPERTIES));
                 OMElement gatewayId = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_GATEWAY_ID));
@@ -527,6 +528,9 @@ public class APIManagerConfiguration {
                 if (redisConnectionTimeout != null) {
                     redisConfig.setConnectionTimeout(Integer.parseInt(redisConnectionTimeout.getText()));
                 }
+                if (redisSocketTimeout != null) {
+                    redisConfig.setSocketTimeout(Integer.parseInt(redisSocketTimeout.getText()));
+                }
                 if (redisIsSslEnabled != null) {
                     redisConfig.setSslEnabled(Boolean.parseBoolean(redisIsSslEnabled.getText()));
                 }
@@ -541,6 +545,8 @@ public class APIManagerConfiguration {
                                 redisConfig.setMaxIdle(Integer.parseInt(propertyNode.getText()));
                             } else if (APIConstants.CONFIG_REDIS_MIN_IDLE.equals(propertyNode.getLocalName())) {
                                 redisConfig.setMinIdle(Integer.parseInt(propertyNode.getText()));
+                            } else if (APIConstants.CONFIG_REDIS_MAX_WAIT_MILLIS.equals(propertyNode.getLocalName())) {
+                                redisConfig.setMaxWaitMillis(Long.parseLong(propertyNode.getText()));
                             } else if (APIConstants.CONFIG_REDIS_TEST_ON_BORROW.equals(propertyNode.getLocalName())) {
                                 redisConfig.setTestOnBorrow(Boolean.parseBoolean(propertyNode.getText()));
                             } else if (APIConstants.CONFIG_REDIS_TEST_ON_RETURN.equals(propertyNode.getLocalName())) {
