@@ -8,6 +8,7 @@ public class ConfigurationDto {
 
     private String name;
     private String label;
+    private Map<String, String> labels;
     private String type;
     private String tooltip;
     private Object defaultValue;
@@ -51,6 +52,16 @@ public class ConfigurationDto {
     public void setLabel(String label) {
 
         this.label = label;
+    }
+
+    public Map<String, String> getLabels() {
+
+        return labels;
+    }
+
+    public void setLabels(Map<String, String> labels) {
+
+        this.labels = labels;
     }
 
     public String getType() {

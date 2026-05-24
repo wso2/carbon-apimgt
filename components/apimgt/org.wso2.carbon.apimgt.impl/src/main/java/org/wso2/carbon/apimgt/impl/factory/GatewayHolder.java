@@ -18,9 +18,11 @@
 
 package org.wso2.carbon.apimgt.impl.factory;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.FederatedApiKeyConnector;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
 import org.wso2.carbon.apimgt.api.model.GatewayDeployer;
@@ -69,5 +71,44 @@ public class GatewayHolder {
             }
         }
         return null;
+    }
+
+    // We use environmentUuid instead of env name because persistent external mapping tables use envUuid
+    public static FederatedApiKeyConnector getTenantApiKeyConnectorInstance(String organization, String environmentUuid)
+            throws APIManagementException {
+
+        synchronized (environmentUuid.intern()) {
+            try {
+                APIAdminImpl apiAdmin = new APIAdminImpl();
+                Environment resolvedEnvironment = apiAdmin.getEnvironmentWithoutPropertyMasking(organization,
+                        environmentUuid);
+                if (resolvedEnvironment != null) {
+                    resolvedEnvironment = apiAdmin.decryptGatewayConfigurationValues(resolvedEnvironment);
+
+                    GatewayAgentConfiguration gatewayAgentConfiguration = ServiceReferenceHolder.getInstance()
+                            .getExternalGatewayConnectorConfiguration(resolvedEnvironment.getGatewayType());
+                    if (gatewayAgentConfiguration != null) {
+                        String connectorImplementation = StringUtils.trimToNull(
+                                gatewayAgentConfiguration.getApiKeyConnectorImplementation());
+                        if (connectorImplementation == null) {
+                            throw new APIManagementException("No federated API key connector implementation is "
+                                    + "configured for gateway type: " + resolvedEnvironment.getGatewayType());
+                        }
+                        FederatedApiKeyConnector connector = (FederatedApiKeyConnector) Class.forName(
+                                connectorImplementation).getDeclaredConstructor().newInstance();
+                        connector.init(resolvedEnvironment);
+                        return connector;
+                    }
+                    throw new APIManagementException("No gateway agent configuration found for gateway type: "
+                            + resolvedEnvironment.getGatewayType());
+                }
+                throw new APIManagementException("Gateway environment not found for UUID: " + environmentUuid);
+            } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException |
+                     IllegalAccessException | InvocationTargetException | ClassCastException e) {
+                String msg = "Error while loading environments for tenant " + organization;
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
+            }
+        }
     }
 }

@@ -207,6 +207,16 @@ public class SettingsMappingUtil {
                 effectiveModes.add(GatewayMode.WRITE_ONLY.getMode());
             }
             settingsFederatedGatewayConfigurationDTO.setSupportedModes(effectiveModes);
+            try {
+                GatewayPortalConfiguration featureCatalog = gatewayConfiguration.getGatewayFeatureCatalog();
+                if (featureCatalog != null) {
+                    settingsFederatedGatewayConfigurationDTO.setSupportedApiTypes(
+                            featureCatalog.getSupportedAPITypes());
+                }
+            } catch (APIManagementException e) {
+                log.warn("Failed to resolve supported API types for gateway type '"
+                        + gatewayConfiguration.getType() + "'", e);
+            }
             List<ConfigurationDto> connectionConfigurations = gatewayConfiguration.getConnectionConfigurations();
             if (connectionConfigurations != null) {
                 for (ConfigurationDto dto : connectionConfigurations) {

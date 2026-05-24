@@ -6734,6 +6734,11 @@ components:
                 items:
                   type: string
                   example: 'READ_WRITE'
+              supportedApiTypes:
+                type: array
+                items:
+                  type: string
+                  example: 'rest'
               configurations:
                 type: array
                 items:
