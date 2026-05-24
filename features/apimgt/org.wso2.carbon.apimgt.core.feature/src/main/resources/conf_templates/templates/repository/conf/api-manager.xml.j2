@@ -1581,6 +1581,9 @@
         {% if apim.redis_config.connection_timeout is defined %}
         <RedisConnectionTimeout>{{apim.redis_config.connection_timeout}}</RedisConnectionTimeout>
         {% endif %}
+        {% if apim.redis_config.socket_timeout is defined %}
+        <RedisSocketTimeout>{{apim.redis_config.socket_timeout}}</RedisSocketTimeout>
+        {% endif %}
         {% if apim.redis_config.ssl is defined %}
         <RedisIsSslEnabled>{{apim.redis_config.ssl}}</RedisIsSslEnabled>
         {% endif %}
@@ -1605,6 +1608,9 @@
                 {% endif %}
                 {% if apim.redis_config.pool_options.min_idle is defined %}
                 <MinIdle>{{apim.redis_config.pool_options.min_idle}}</MinIdle>
+                {% endif %}
+                {% if apim.redis_config.pool_options.max_wait_millis is defined %}
+                <MaxWaitMillis>{{apim.redis_config.pool_options.max_wait_millis}}</MaxWaitMillis>
                 {% endif %}
                 {% if apim.redis_config.pool_options.block_when_exhausted is defined %}
                 <BlockWhenExhausted>{{apim.redis_config.pool_options.block_when_exhausted}}</BlockWhenExhausted>
