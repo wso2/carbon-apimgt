@@ -162,11 +162,7 @@ ScopesApiService delegate = new ScopesApiServiceImpl();
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
             @AuthorizationScope(scope = "apim:shared_scope_manage", description = "Manage shared scopes"),
             @AuthorizationScope(scope = "apim:shared_scope_create", description = "Create shared OAuth2 scopes"),
-            @AuthorizationScope(scope = "apim:shared_scope_update", description = "Update shared OAuth2 scope details"),
-            @AuthorizationScope(scope = "apim:api_update", description = "Update API configuration (metadata, endpoints, certificates, labels, themes, definition)"),
-            @AuthorizationScope(scope = "apim:api_create_only", description = "Create new APIs"),
-            @AuthorizationScope(scope = "apim:mcp_server_create_only", description = "Create new MCP Servers"),
-            @AuthorizationScope(scope = "apim:mcp_server_update", description = "Update MCP Server configuration (metadata, thumbnails, backends)")
+            @AuthorizationScope(scope = "apim:shared_scope_update", description = "Update shared OAuth2 scope details")
         })
     }, tags={ "Scopes" })
     @ApiResponses(value = { 

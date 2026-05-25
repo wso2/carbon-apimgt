@@ -119,7 +119,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:client_certificates_add", description = "Add client certificates"),
             @AuthorizationScope(scope = "apim:client_certificates_manage", description = "View, create, update and remove client certificates"),
-            @AuthorizationScope(scope = "apim:api_update", description = "Update API configuration (metadata, endpoints, certificates, labels, themes, definition)")
+            @AuthorizationScope(scope = "apim:api_update", description = "Update API configuration (metadata, endpoints, certificates, labels, themes, definition)"),
+            @AuthorizationScope(scope = "apim:api_product_update", description = "Update API Product configuration (metadata, thumbnail)")
         })
     }, tags={ "Client Certificates",  })
     @ApiResponses(value = { 
@@ -349,7 +350,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
-            @AuthorizationScope(scope = "apim:api_update", description = "Update API configuration (metadata, endpoints, certificates, labels, themes, definition)")
+            @AuthorizationScope(scope = "apim:api_update", description = "Update API configuration (metadata, endpoints, certificates, labels, themes, definition)"),
+            @AuthorizationScope(scope = "apim:api_product_update", description = "Update API Product configuration (metadata, thumbnail)")
         })
     }, tags={ "API Labels Attach",  })
     @ApiResponses(value = { 
@@ -494,7 +496,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:client_certificates_update", description = "Update and delete client certificates"),
-            @AuthorizationScope(scope = "apim:api_update", description = "Update API configuration (metadata, endpoints, certificates, labels, themes, definition)")
+            @AuthorizationScope(scope = "apim:api_update", description = "Update API configuration (metadata, endpoints, certificates, labels, themes, definition)"),
+            @AuthorizationScope(scope = "apim:api_product_update", description = "Update API Product configuration (metadata, thumbnail)")
         })
     }, tags={ "Client Certificates",  })
     @ApiResponses(value = { 
@@ -701,7 +704,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
-            @AuthorizationScope(scope = "apim:api_update", description = "Update API configuration (metadata, endpoints, certificates, labels, themes, definition)")
+            @AuthorizationScope(scope = "apim:api_update", description = "Update API configuration (metadata, endpoints, certificates, labels, themes, definition)"),
+            @AuthorizationScope(scope = "apim:api_product_update", description = "Update API Product configuration (metadata, thumbnail)")
         })
     }, tags={ "API Labels Detach",  })
     @ApiResponses(value = { 
@@ -849,7 +853,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:client_certificates_view", description = "View client certificates"),
             @AuthorizationScope(scope = "apim:client_certificates_manage", description = "View, create, update and remove client certificates"),
-            @AuthorizationScope(scope = "apim:api_metadata_view", description = "View API listing and configuration (excludes documents, deployments, lifecycle, comments)")
+            @AuthorizationScope(scope = "apim:api_metadata_view", description = "View API listing and configuration (excludes documents, deployments, lifecycle, comments)"),
+            @AuthorizationScope(scope = "apim:api_product_metadata_view", description = "View API Product listing and configuration (excludes documents, deployments, lifecycle)")
         })
     }, tags={ "Client Certificates",  })
     @ApiResponses(value = { 
@@ -893,7 +898,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:client_certificates_view", description = "View client certificates"),
             @AuthorizationScope(scope = "apim:client_certificates_manage", description = "View, create, update and remove client certificates"),
-            @AuthorizationScope(scope = "apim:api_metadata_view", description = "View API listing and configuration (excludes documents, deployments, lifecycle, comments)")
+            @AuthorizationScope(scope = "apim:api_metadata_view", description = "View API listing and configuration (excludes documents, deployments, lifecycle, comments)"),
+            @AuthorizationScope(scope = "apim:api_product_metadata_view", description = "View API Product listing and configuration (excludes documents, deployments, lifecycle)")
         })
     }, tags={ "Client Certificates",  })
     @ApiResponses(value = { 
@@ -936,7 +942,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:client_certificates_view", description = "View client certificates"),
             @AuthorizationScope(scope = "apim:client_certificates_manage", description = "View, create, update and remove client certificates"),
-            @AuthorizationScope(scope = "apim:api_metadata_view", description = "View API listing and configuration (excludes documents, deployments, lifecycle, comments)")
+            @AuthorizationScope(scope = "apim:api_metadata_view", description = "View API listing and configuration (excludes documents, deployments, lifecycle, comments)"),
+            @AuthorizationScope(scope = "apim:api_product_metadata_view", description = "View API Product listing and configuration (excludes documents, deployments, lifecycle)")
         })
     }, tags={ "Client Certificates",  })
     @ApiResponses(value = { 
@@ -1654,7 +1661,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
-            @AuthorizationScope(scope = "apim:api_metadata_view", description = "View API listing and configuration (excludes documents, deployments, lifecycle, comments)")
+            @AuthorizationScope(scope = "apim:api_metadata_view", description = "View API listing and configuration (excludes documents, deployments, lifecycle, comments)"),
+            @AuthorizationScope(scope = "apim:api_product_metadata_view", description = "View API Product listing and configuration (excludes documents, deployments, lifecycle)")
         })
     }, tags={ "API Labels",  })
     @ApiResponses(value = { 
@@ -1954,8 +1962,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Publish an API to External Stores", notes = "This operation can be used to publish an API to a list of external stores. ", response = APIExternalStoreListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
-            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
-            @AuthorizationScope(scope = "apim:api_lifecycle_manage", description = "Change API lifecycle state")
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "External Stores",  })
     @ApiResponses(value = { 
@@ -2126,7 +2133,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:client_certificates_update", description = "Update and delete client certificates"),
             @AuthorizationScope(scope = "apim:client_certificates_manage", description = "View, create, update and remove client certificates"),
-            @AuthorizationScope(scope = "apim:api_update", description = "Update API configuration (metadata, endpoints, certificates, labels, themes, definition)")
+            @AuthorizationScope(scope = "apim:api_update", description = "Update API configuration (metadata, endpoints, certificates, labels, themes, definition)"),
+            @AuthorizationScope(scope = "apim:api_product_update", description = "Update API Product configuration (metadata, thumbnail)")
         })
     }, tags={ "Client Certificates",  })
     @ApiResponses(value = { 
