@@ -1786,11 +1786,13 @@ public final class APIConstants {
     public static final String CONFIG_REDIS_PASSWORD =  "RedisPassword";
     public static final String CONFIG_REDIS_DATABASE_ID =  "RedisDatabaseId";
     public static final String CONFIG_REDIS_CONNECTION_TIMEOUT =  "RedisConnectionTimeout";
+    public static final String CONFIG_REDIS_SOCKET_TIMEOUT =  "RedisSocketTimeout";
     public static final String CONFIG_REDIS_IS_SSL_ENABLED =  "RedisIsSslEnabled";
     public static final String CONFIG_REDIS_PROPERTIES = "Properties";
     public static final String CONFIG_REDIS_MAX_TOTAL = "MaxTotal";
     public static final String CONFIG_REDIS_MAX_IDLE = "MaxIdle";
     public static final String CONFIG_REDIS_MIN_IDLE = "MinIdle";
+    public static final String CONFIG_REDIS_MAX_WAIT_MILLIS = "MaxWaitMillis";
     public static final String CONFIG_REDIS_TEST_ON_BORROW = "TestOnBorrow";
     public static final String CONFIG_REDIS_TEST_ON_RETURN = "TestOnReturn";
     public static final String CONFIG_REDIS_TEST_WHILE_IDLE = "TestWhileIdle";
