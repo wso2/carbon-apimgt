@@ -124,6 +124,14 @@ public class APIMgtGatewayConstants {
     public static final String GATEWAY_TYPE = "SYNAPSE";
 
     /**
+     * Lock key prefix used by APILockManager to coordinate concurrent on-demand API deployments.
+     * Appended with the API context to form a unique per-API key.
+     *
+     * @see org.wso2.carbon.apimgt.gateway.utils.APILockManager
+     */
+    public static final String API_LOADING_ON_DEMAND = "LoadAPI_OnDemand";
+
+    /**
      * Constants for Open Tracing
      */
     public static final String SERVICE_NAME = "API:Gateway";

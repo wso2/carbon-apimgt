@@ -21,6 +21,7 @@
   "apim.aws_lambda.http_client.connection_timeout": "2",
   "apim.aws_lambda.http_client.socket_timeout": "30",
   "apim.aws_lambda.http_client.connection_acquisition_timeout": "30",
+  "apim.aws_lambda.enable_proxy_response_mapping": "false",
   "apim.basic_authenticator.max_idle": "200",
   "apim.basic_authenticator.init_idle_capacity": "100",
   "apim.basic_authenticator.max_active": "110",

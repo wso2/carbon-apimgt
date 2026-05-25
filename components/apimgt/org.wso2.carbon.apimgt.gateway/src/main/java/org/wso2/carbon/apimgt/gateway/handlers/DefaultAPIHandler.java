@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.utils.APILockManager;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
@@ -38,6 +39,8 @@ import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.inbound.endpoint.protocol.websocket.InboundWebsocketConstants;
 
 import java.util.TreeMap;
+
+import static org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants.API_LOADING_ON_DEMAND;
 
 /**
  * Default API Handler to handle Default Version.
@@ -92,16 +95,24 @@ public class DefaultAPIHandler extends AbstractSynapseHandler {
                 messageContext.setProperty(APIMgtGatewayConstants.API_OBJECT, selectedAPI);
                 if (GatewayUtils.isOnDemandLoading()) {
                     if (!selectedAPI.isDeployed()) {
-                        synchronized ("LoadAPI_".concat(selectedAPI.getContext()).intern()) {
-                            if(!selectedAPI.isDeployed()) {
+                        // APILockManager provides per-API-context mutual exclusion for both
+                        // passthrough threads (blocking lock) and the tenant-loading / JMS thread
+                        // (non-blocking tryLockNow). The outer isDeployed() check is a volatile
+                        // fast-path to skip lock acquisition once the API is already live.
+                        String key = API_LOADING_ON_DEMAND.concat(selectedAPI.getContext());
+                        APILockManager.getInstance().lock(key);
+                        try {
+                            // Re-check: tenant-loading thread may have deployed while we waited
+                            if (!selectedAPI.isDeployed()) {
                                 InMemoryAPIDeployer inMemoryAPIDeployer = new InMemoryAPIDeployer();
-                                try {
-                                    inMemoryAPIDeployer.deployAPI(selectedAPI.getUuid());
-                                } catch (ArtifactSynchronizerException e) {
-                                    log.error("Error while retrieve and deploy artifact for API : " + selectedAPI.getApiId(), e);
-                                    return false;
-                                }
+                                inMemoryAPIDeployer.deployAPI(selectedAPI.getUuid());
                             }
+                        } catch (ArtifactSynchronizerException e) {
+                            log.error("Error while retrieve and deploy artifact for API : "
+                                    + selectedAPI.getApiId(), e);
+                            return false;
+                        } finally {
+                            APILockManager.getInstance().unlock(key);
                         }
                     }
                 }
