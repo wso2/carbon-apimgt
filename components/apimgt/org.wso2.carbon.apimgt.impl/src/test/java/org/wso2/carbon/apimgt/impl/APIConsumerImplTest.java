@@ -812,23 +812,45 @@ public class APIConsumerImplTest {
 
     }
 
+    /**
+     * Tests that a subscription stuck in DELETE_PENDING because it was REJECTED and went through the
+     * delete workflow path before the REJECTED bypass was introduced gets cleaned up and deleted directly.
+     * The distinguishing signal is that its creation workflow is in REJECTED state.
+     */
     @Test
-    public void testRemoveSubscriptionWhenDeletePending() throws APIManagementException, WorkflowException, APIPersistenceException {
+    public void testRemoveSubscriptionWhenDeletePendingWithRejectedCreationWorkflowDeletesDirectly()
+            throws APIManagementException, WorkflowException, APIPersistenceException {
         String uuid = UUID.randomUUID().toString();
         String apiUUID = UUID.randomUUID().toString();
         final String deletionWorkflowRef = "SUB_DELETION_WORKFLOW_REF";
+        final String creationWorkflowRef = "SUB_CREATION_WORKFLOW_REF";
+        final int subscriptionId = 42;
+
         WorkflowDTO deletionWorkflow = new SubscriptionWorkflowDTO();
         deletionWorkflow.setStatus(org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus.CREATED);
+
+        WorkflowDTO creationWorkflow = new SubscriptionWorkflowDTO();
+        creationWorkflow.setStatus(org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus.REJECTED);
+
         Subscriber subscriber = new Subscriber("sub1");
         Application application = new Application("app1", subscriber);
         application.setId(1);
         APIIdentifier identifier = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
         identifier.setUuid(apiUUID);
-        SubscribedAPI subscribedAPIOld = new SubscribedAPI(subscriber, identifier);
-        subscribedAPIOld.setApplication(application);
-        Mockito.when(apiMgtDAO.getExternalWorkflowReferenceForSubscriptionAndWFType(Mockito.anyInt(), Mockito.anyString()))
+
+        SubscribedAPI subscribedAPINew = new SubscribedAPI(subscriber, identifier);
+        subscribedAPINew.setUUID(uuid);
+        subscribedAPINew.setApplication(application);
+        subscribedAPINew.setSubscriptionId(subscriptionId);
+
+        Mockito.when(apiMgtDAO.getExternalWorkflowReferenceForSubscriptionAndWFType(
+                Mockito.eq(subscriptionId), Mockito.anyString()))
                 .thenReturn(deletionWorkflowRef);
         Mockito.when(apiMgtDAO.retrieveWorkflow(deletionWorkflowRef)).thenReturn(deletionWorkflow);
+        Mockito.when(apiMgtDAO.getExternalWorkflowReferenceForSubscription(
+                (APIIdentifier) Mockito.any(), Mockito.eq(1), Mockito.anyString()))
+                .thenReturn(creationWorkflowRef);
+        Mockito.when(apiMgtDAO.retrieveWorkflow(creationWorkflowRef)).thenReturn(creationWorkflow);
 
         PowerMockito.mockStatic(ApiMgtDAO.class);
         PowerMockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
@@ -836,15 +858,163 @@ public class APIConsumerImplTest {
         DevPortalAPI devPortalAPI = Mockito.mock(DevPortalAPI.class);
         Mockito.when(apiPersistenceInstance.getDevPortalAPI(any(Organization.class), any(String.class)))
                 .thenReturn(devPortalAPI);
+
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO, apiPersistenceInstance);
+        apiConsumer.removeSubscription(subscribedAPINew, "org1");
+
+        // Stuck delete workflow should be cleaned up and subscription deleted directly
+        Mockito.verify(apiMgtDAO, Mockito.times(1)).removeSubscriptionById(subscriptionId);
+        Mockito.verify(apiMgtDAO, Mockito.never()).updateSubscriptionStatus(
+                Mockito.anyInt(), Mockito.eq(APIConstants.SubscriptionStatus.DELETE_PENDING));
+    }
+
+    /**
+     * Tests that when a subscription is legitimately in DELETE_PENDING (an active subscription going
+     * through admin delete approval), the governance guard is preserved — the subscription is not
+     * deleted and the subscriptionId is set to -1 to signal DELETE_PENDING to the caller.
+     */
+    @Test
+    public void testRemoveSubscriptionWhenDeletePendingWithActiveCreationWorkflowPreservesGuard()
+            throws APIManagementException, WorkflowException, APIPersistenceException {
+        String uuid = UUID.randomUUID().toString();
+        String apiUUID = UUID.randomUUID().toString();
+        final String deletionWorkflowRef = "SUB_DELETION_WORKFLOW_REF";
+        final String creationWorkflowRef = "SUB_CREATION_WORKFLOW_REF";
+        final int subscriptionId = 42;
+
+        WorkflowDTO deletionWorkflow = new SubscriptionWorkflowDTO();
+        deletionWorkflow.setStatus(org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus.CREATED);
+
+        // Creation workflow was APPROVED (normal active subscription going through delete approval)
+        WorkflowDTO creationWorkflow = new SubscriptionWorkflowDTO();
+        creationWorkflow.setStatus(org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus.APPROVED);
+
+        Subscriber subscriber = new Subscriber("sub1");
+        Application application = new Application("app1", subscriber);
+        application.setId(1);
+        APIIdentifier identifier = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
+        identifier.setUuid(apiUUID);
+
         SubscribedAPI subscribedAPINew = new SubscribedAPI(subscriber, identifier);
         subscribedAPINew.setUUID(uuid);
         subscribedAPINew.setApplication(application);
-        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO, apiPersistenceInstance);
+        subscribedAPINew.setSubscriptionId(subscriptionId);
+
+        Mockito.when(apiMgtDAO.getExternalWorkflowReferenceForSubscriptionAndWFType(
+                Mockito.eq(subscriptionId), Mockito.anyString()))
+                .thenReturn(deletionWorkflowRef);
+        Mockito.when(apiMgtDAO.retrieveWorkflow(deletionWorkflowRef)).thenReturn(deletionWorkflow);
+        Mockito.when(apiMgtDAO.getExternalWorkflowReferenceForSubscription(
+                (APIIdentifier) Mockito.any(), Mockito.eq(1), Mockito.anyString()))
+                .thenReturn(creationWorkflowRef);
+        Mockito.when(apiMgtDAO.retrieveWorkflow(creationWorkflowRef)).thenReturn(creationWorkflow);
+
+        PowerMockito.mockStatic(ApiMgtDAO.class);
+        PowerMockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
+
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO, SAMPLE_TENANT_DOMAIN_1);
         apiConsumer.removeSubscription(subscribedAPINew, "org1");
+
+        // Governance guard: subscription must NOT be deleted directly
+        Mockito.verify(apiMgtDAO, Mockito.never()).removeSubscriptionById(Mockito.anyInt());
+        // Signal to the REST layer that the delete is still pending approval
         Assert.assertEquals(-1, subscribedAPINew.getSubscriptionId());
         Assert.assertEquals(APIConstants.SubscriptionStatus.DELETE_PENDING, subscribedAPINew.getSubStatus());
     }
 
+    @Test
+    public void testRemoveSubscriptionWhenOnHoldDeletesDirectly()
+            throws APIManagementException, WorkflowException, APIPersistenceException {
+        String subscriptionUUID = UUID.randomUUID().toString();
+        String apiUUID = UUID.randomUUID().toString();
+        String creationWorkflowExtRef = "creation_wf_ref";
+
+        Subscriber subscriber = new Subscriber("sub1");
+        Application application = new Application("app1", subscriber);
+        application.setId(1);
+        APIIdentifier identifier = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
+        identifier.setUuid(apiUUID);
+
+        SubscribedAPI subscribedAPINew = new SubscribedAPI(subscriber, identifier);
+        subscribedAPINew.setUUID(subscriptionUUID);
+        subscribedAPINew.setApplication(application);
+
+        PowerMockito.mockStatic(ApiMgtDAO.class);
+        PowerMockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
+        Mockito.when(apiMgtDAO.checkAPIUUIDIsARevisionUUID(Mockito.anyString())).thenReturn(null);
+
+        DevPortalAPI devPortalAPI = Mockito.mock(DevPortalAPI.class);
+        Mockito.when(apiPersistenceInstance.getDevPortalAPI(any(Organization.class), any(String.class)))
+                .thenReturn(devPortalAPI);
+
+        // Subscription creation workflow reference exists (ON_HOLD state has a pending creation workflow)
+        Mockito.when(apiMgtDAO.getExternalWorkflowReferenceForSubscription(
+                (APIIdentifier) Mockito.any(), Mockito.anyInt(), Mockito.anyString()))
+                .thenReturn(creationWorkflowExtRef);
+        SubscriptionWorkflowDTO subscriptionWorkflowDTO = new SubscriptionWorkflowDTO();
+        subscriptionWorkflowDTO.setWorkflowReference("1");
+        Mockito.when(apiMgtDAO.retrieveWorkflow(creationWorkflowExtRef)).thenReturn(subscriptionWorkflowDTO);
+
+        SubscribedAPI existingSubscription = new SubscribedAPI(subscriptionUUID);
+        existingSubscription.setTier(new Tier("Gold"));
+        Mockito.when(apiMgtDAO.getSubscriptionById(1)).thenReturn(existingSubscription);
+
+        Mockito.when(apiMgtDAO.getSubscriptionStatus(apiUUID, 1))
+                .thenReturn(APIConstants.SubscriptionStatus.ON_HOLD);
+        Mockito.when(apiMgtDAO.getSubscriptionId(apiUUID, 1)).thenReturn("1");
+
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO, apiPersistenceInstance);
+        apiConsumer.removeSubscription(subscribedAPINew, "org1");
+
+        // Verify the subscription was deleted directly, bypassing the approval workflow
+        Mockito.verify(apiMgtDAO, Mockito.times(1)).removeSubscriptionById(1);
+        // Verify no DELETE_PENDING status update was written (no approval workflow started)
+        Mockito.verify(apiMgtDAO, Mockito.never()).updateSubscriptionStatus(
+                Mockito.anyInt(), Mockito.eq(APIConstants.SubscriptionStatus.DELETE_PENDING));
+    }
+
+    @Test
+    public void testRemoveSubscriptionWhenRejectedDeletesDirectly()
+            throws APIManagementException, WorkflowException, APIPersistenceException {
+        String subscriptionUUID = UUID.randomUUID().toString();
+        String apiUUID = UUID.randomUUID().toString();
+
+        Subscriber subscriber = new Subscriber("sub1");
+        Application application = new Application("app1", subscriber);
+        application.setId(1);
+        APIIdentifier identifier = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
+        identifier.setUuid(apiUUID);
+
+        SubscribedAPI subscribedAPINew = new SubscribedAPI(subscriber, identifier);
+        subscribedAPINew.setUUID(subscriptionUUID);
+        subscribedAPINew.setApplication(application);
+
+        PowerMockito.mockStatic(ApiMgtDAO.class);
+        PowerMockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
+        Mockito.when(apiMgtDAO.checkAPIUUIDIsARevisionUUID(Mockito.anyString())).thenReturn(null);
+
+        DevPortalAPI devPortalAPI = Mockito.mock(DevPortalAPI.class);
+        Mockito.when(apiPersistenceInstance.getDevPortalAPI(any(Organization.class), any(String.class)))
+                .thenReturn(devPortalAPI);
+
+        // No pending creation workflow for a REJECTED subscription
+        Mockito.when(apiMgtDAO.getExternalWorkflowReferenceForSubscription(
+                (APIIdentifier) Mockito.any(), Mockito.anyInt(), Mockito.anyString()))
+                .thenReturn(null);
+
+        Mockito.when(apiMgtDAO.getSubscriptionStatus(apiUUID, 1))
+                .thenReturn(APIConstants.SubscriptionStatus.REJECTED);
+        Mockito.when(apiMgtDAO.getSubscriptionId(apiUUID, 1)).thenReturn("1");
+
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO, apiPersistenceInstance);
+        apiConsumer.removeSubscription(subscribedAPINew, "org1");
+
+        // Verify the subscription was deleted directly, bypassing the approval workflow
+        Mockito.verify(apiMgtDAO, Mockito.times(1)).removeSubscriptionById(1);
+        // Verify no DELETE_PENDING status update was written (no approval workflow started)
+        Mockito.verify(apiMgtDAO, Mockito.never()).updateSubscriptionStatus(
+                Mockito.anyInt(), Mockito.eq(APIConstants.SubscriptionStatus.DELETE_PENDING));
+    }
 
     @Test
     public void testAddSubscription() throws APIManagementException {
@@ -1008,5 +1178,848 @@ public class APIConsumerImplTest {
         assertNotNull(apiKeySet);
         assertEquals(apiKeySet.size(), 2);
         assertNotNull(apiKeySet.iterator().next().getAccessToken());
+    }
+
+    /**
+     * Tests that when a subscription is in TIER_UPDATE_PENDING state and the user requests deletion,
+     * the pending tier-update workflow is cleaned up before transitioning the subscription to DELETE_PENDING.
+     */
+    @Test
+    public void testRemoveSubscriptionWhenTierUpdatePendingCleansUpUpdateWorkflow()
+            throws APIManagementException, WorkflowException, APIPersistenceException {
+        String subscriptionUUID = UUID.randomUUID().toString();
+        String apiUUID = UUID.randomUUID().toString();
+        String updateWorkflowExtRef = "update_wf_ref";
+
+        Subscriber subscriber = new Subscriber("sub1");
+        Application application = new Application("app1", subscriber);
+        application.setId(1);
+        APIIdentifier identifier = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
+        identifier.setUuid(apiUUID);
+
+        SubscribedAPI subscribedAPINew = new SubscribedAPI(subscriber, identifier);
+        subscribedAPINew.setUUID(subscriptionUUID);
+        subscribedAPINew.setApplication(application);
+
+        PowerMockito.mockStatic(ApiMgtDAO.class);
+        PowerMockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
+        Mockito.when(apiMgtDAO.checkAPIUUIDIsARevisionUUID(Mockito.anyString())).thenReturn(null);
+
+        DevPortalAPI devPortalAPI = Mockito.mock(DevPortalAPI.class);
+        Mockito.when(apiPersistenceInstance.getDevPortalAPI(any(Organization.class), any(String.class)))
+                .thenReturn(devPortalAPI);
+
+        // No pending creation workflow for TIER_UPDATE_PENDING state
+        Mockito.when(apiMgtDAO.getExternalWorkflowReferenceForSubscription(
+                (APIIdentifier) Mockito.any(), Mockito.anyInt(), Mockito.anyString()))
+                .thenReturn(null);
+
+        Mockito.when(apiMgtDAO.getSubscriptionStatus(apiUUID, 1))
+                .thenReturn(APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING);
+
+        String subId = "42";
+        Mockito.when(apiMgtDAO.getSubscriptionId(apiUUID, 1)).thenReturn(subId);
+
+        // The subscription carries the current tier name (needed for monetization checks later)
+        SubscribedAPI existingSubscription = new SubscribedAPI(subscriptionUUID);
+        existingSubscription.setTier(new Tier("Gold"));
+        Mockito.when(apiMgtDAO.getSubscriptionById(Integer.parseInt(subId))).thenReturn(existingSubscription);
+
+        // The pending tier-update workflow
+        SubscriptionWorkflowDTO updateWfDTO = new SubscriptionWorkflowDTO();
+        updateWfDTO.setExternalWorkflowReference(updateWorkflowExtRef);
+        updateWfDTO.setWorkflowReference(subId);
+        Mockito.when(apiMgtDAO.retrieveWorkflowFromInternalReference(subId,
+                org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE))
+                .thenReturn(updateWfDTO);
+
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO, apiPersistenceInstance);
+        apiConsumer.removeSubscription(subscribedAPINew, "org1");
+
+        // The pending update workflow entry should have been cleaned up before deletion proceeds
+        Mockito.verify(apiMgtDAO, Mockito.times(1))
+                .retrieveWorkflowFromInternalReference(subId,
+                        org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE);
+        // Subscription should be transitioned to DELETE_PENDING (not deleted directly)
+        Mockito.verify(apiMgtDAO, Mockito.times(1))
+                .updateSubscriptionStatus(Integer.parseInt(subId), APIConstants.SubscriptionStatus.DELETE_PENDING);
+        Mockito.verify(apiMgtDAO, Mockito.never()).removeSubscriptionById(Mockito.anyInt());
+    }
+
+    /**
+     * Tests that when a subscription is in TIER_UPDATE_PENDING state and the pending update
+     * workflow record does not exist in the DB, removal still proceeds gracefully to DELETE_PENDING.
+     */
+    @Test
+    public void testRemoveSubscriptionWhenTierUpdatePendingWithNoWorkflowRecord()
+            throws APIManagementException, WorkflowException, APIPersistenceException {
+        String subscriptionUUID = UUID.randomUUID().toString();
+        String apiUUID = UUID.randomUUID().toString();
+
+        Subscriber subscriber = new Subscriber("sub1");
+        Application application = new Application("app1", subscriber);
+        application.setId(1);
+        APIIdentifier identifier = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
+        identifier.setUuid(apiUUID);
+
+        SubscribedAPI subscribedAPINew = new SubscribedAPI(subscriber, identifier);
+        subscribedAPINew.setUUID(subscriptionUUID);
+        subscribedAPINew.setApplication(application);
+
+        PowerMockito.mockStatic(ApiMgtDAO.class);
+        PowerMockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
+        Mockito.when(apiMgtDAO.checkAPIUUIDIsARevisionUUID(Mockito.anyString())).thenReturn(null);
+
+        DevPortalAPI devPortalAPI = Mockito.mock(DevPortalAPI.class);
+        Mockito.when(apiPersistenceInstance.getDevPortalAPI(any(Organization.class), any(String.class)))
+                .thenReturn(devPortalAPI);
+
+        Mockito.when(apiMgtDAO.getExternalWorkflowReferenceForSubscription(
+                (APIIdentifier) Mockito.any(), Mockito.anyInt(), Mockito.anyString()))
+                .thenReturn(null);
+
+        Mockito.when(apiMgtDAO.getSubscriptionStatus(apiUUID, 1))
+                .thenReturn(APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING);
+
+        String subId = "42";
+        Mockito.when(apiMgtDAO.getSubscriptionId(apiUUID, 1)).thenReturn(subId);
+
+        SubscribedAPI existingSubscription = new SubscribedAPI(subscriptionUUID);
+        existingSubscription.setTier(new Tier("Gold"));
+        Mockito.when(apiMgtDAO.getSubscriptionById(Integer.parseInt(subId))).thenReturn(existingSubscription);
+
+        // Return null to simulate no workflow record found (e.g., simple workflow executor path)
+        Mockito.when(apiMgtDAO.retrieveWorkflowFromInternalReference(subId,
+                org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE))
+                .thenReturn(null);
+
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO, apiPersistenceInstance);
+        // Should complete without throwing an exception
+        apiConsumer.removeSubscription(subscribedAPINew, "org1");
+
+        // Subscription should still be transitioned to DELETE_PENDING
+        Mockito.verify(apiMgtDAO, Mockito.times(1))
+                .updateSubscriptionStatus(Integer.parseInt(subId), APIConstants.SubscriptionStatus.DELETE_PENDING);
+    }
+
+    /**
+     * Tests that when a subscription is in DELETE_PENDING state and the user requests a tier update,
+     * the pending delete workflow is cleaned up and the subscription transitions to TIER_UPDATE_PENDING.
+     */
+    @Test
+    public void testUpdateSubscriptionWhenDeletePendingCleansUpDeleteWorkflow() throws APIManagementException {
+        String subscriptionUUID = UUID.randomUUID().toString();
+        String apiUUID = UUID.randomUUID().toString();
+        String deleteWorkflowExtRef = "delete_wf_ext_ref";
+
+        API api = new API(new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION));
+        api.setSubscriptionAvailability(APIConstants.SUBSCRIPTION_TO_ALL_TENANTS);
+        api.setStatus(APIConstants.PUBLISHED);
+        Set<Tier> tiers = new HashSet<>();
+        tiers.add(new Tier("Gold"));
+        tiers.add(new Tier("Silver"));
+        api.setAvailableTiers(tiers);
+        api.setUuid(apiUUID);
+
+        ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
+        apiTypeWrapper.setTier("Silver");
+
+        Application application = new Application(1);
+
+        // Existing subscription is currently in DELETE_PENDING
+        SubscribedAPI existingSubscription = new SubscribedAPI(subscriptionUUID);
+        existingSubscription.setSubscriptionId(10);
+        existingSubscription.setSubStatus(APIConstants.SubscriptionStatus.DELETE_PENDING);
+        Mockito.when(apiMgtDAO.getSubscriptionByUUID(subscriptionUUID)).thenReturn(existingSubscription);
+
+        // A pending deletion workflow exists for this subscription
+        Mockito.when(apiMgtDAO.getExternalWorkflowReferenceForSubscriptionAndWFType(
+                existingSubscription.getSubscriptionId(),
+                org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION))
+                .thenReturn(deleteWorkflowExtRef);
+
+        // updateSubscription writes TIER_UPDATE_PENDING and returns a subscription id
+        int newSubId = 10;
+        Mockito.when(apiMgtDAO.updateSubscription(
+                Mockito.eq(apiTypeWrapper), Mockito.eq(subscriptionUUID),
+                Mockito.eq(APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING), Mockito.eq("Silver")))
+                .thenReturn(newSubId);
+
+        SubscribedAPI updatedSubscription = new SubscribedAPI(subscriptionUUID);
+        updatedSubscription.setSubStatus(APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING);
+        Mockito.when(apiMgtDAO.getSubscriptionById(newSubId)).thenReturn(updatedSubscription);
+
+        PowerMockito.mockStatic(ApiMgtDAO.class);
+        PowerMockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
+
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO, SAMPLE_TENANT_DOMAIN_1);
+        SubscriptionResponse response = apiConsumer.updateSubscription(
+                apiTypeWrapper, "user1", application, subscriptionUUID, "Gold", "Silver");
+
+        // The delete workflow cleanup should have been attempted
+        Mockito.verify(apiMgtDAO, Mockito.times(1)).getExternalWorkflowReferenceForSubscriptionAndWFType(
+                existingSubscription.getSubscriptionId(),
+                org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
+
+        // The subscription should now be set to TIER_UPDATE_PENDING, not blocked
+        Assert.assertEquals(APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING, response.getSubscriptionStatus());
+    }
+
+    /**
+     * Tests that when a subscription is in UNBLOCKED (active/approved) state and the user requests deletion,
+     * the deletion workflow is triggered and the subscription is first transitioned to DELETE_PENDING.
+     * This covers the scenario where only the deletion workflow is enabled (or all workflows enabled
+     * and the subscription has already been approved by the creation workflow).
+     */
+    @Test
+    public void testRemoveSubscriptionWhenUnblockedTransitionsToDeletePending()
+            throws APIManagementException, WorkflowException, APIPersistenceException {
+        String subscriptionUUID = UUID.randomUUID().toString();
+        String apiUUID = UUID.randomUUID().toString();
+        String subId = "10";
+
+        Subscriber subscriber = new Subscriber("sub1");
+        Application application = new Application("app1", subscriber);
+        application.setId(1);
+        APIIdentifier identifier = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
+        identifier.setUuid(apiUUID);
+
+        SubscribedAPI subscribedAPINew = new SubscribedAPI(subscriber, identifier);
+        subscribedAPINew.setUUID(subscriptionUUID);
+        subscribedAPINew.setApplication(application);
+
+        PowerMockito.mockStatic(ApiMgtDAO.class);
+        PowerMockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
+        Mockito.when(apiMgtDAO.checkAPIUUIDIsARevisionUUID(Mockito.anyString())).thenReturn(null);
+
+        DevPortalAPI devPortalAPI = Mockito.mock(DevPortalAPI.class);
+        Mockito.when(apiPersistenceInstance.getDevPortalAPI(any(Organization.class), any(String.class)))
+                .thenReturn(devPortalAPI);
+
+        // No pending creation workflow — subscription was already approved
+        Mockito.when(apiMgtDAO.getExternalWorkflowReferenceForSubscription(
+                (APIIdentifier) Mockito.any(), Mockito.anyInt(), Mockito.anyString()))
+                .thenReturn(null);
+
+        Mockito.when(apiMgtDAO.getSubscriptionStatus(apiUUID, 1))
+                .thenReturn(APIConstants.SubscriptionStatus.UNBLOCKED);
+        Mockito.when(apiMgtDAO.getSubscriptionId(apiUUID, 1)).thenReturn(subId);
+
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO, apiPersistenceInstance);
+        apiConsumer.removeSubscription(subscribedAPINew, "org1");
+
+        // Subscription should be transitioned to DELETE_PENDING before the deletion workflow runs
+        Mockito.verify(apiMgtDAO, Mockito.times(1))
+                .updateSubscriptionStatus(Integer.parseInt(subId), APIConstants.SubscriptionStatus.DELETE_PENDING);
+        // Subscription should NOT be deleted directly (deletion workflow handles the actual removal)
+        Mockito.verify(apiMgtDAO, Mockito.never()).removeSubscriptionById(Mockito.anyInt());
+    }
+
+
+    /**
+     * Tests that when a subscription is in a normal UNBLOCKED state (no pending deletion workflow),
+     * calling updateSubscription transitions it to TIER_UPDATE_PENDING without attempting any cleanup.
+     * This covers the scenario where only the update workflow is enabled, or the update + creation
+     * workflows are both enabled.
+     */
+    @Test
+    public void testUpdateSubscriptionNormalFlowTransitionsToTierUpdatePending() throws APIManagementException {
+        String subscriptionUUID = UUID.randomUUID().toString();
+        String apiUUID = UUID.randomUUID().toString();
+
+        API api = new API(new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION));
+        api.setSubscriptionAvailability(APIConstants.SUBSCRIPTION_TO_ALL_TENANTS);
+        api.setStatus(APIConstants.PUBLISHED);
+        Set<Tier> tiers = new HashSet<>();
+        tiers.add(new Tier("Gold"));
+        tiers.add(new Tier("Silver"));
+        api.setAvailableTiers(tiers);
+        api.setUuid(apiUUID);
+
+        ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
+        apiTypeWrapper.setTier("Gold");
+
+        Application application = new Application(1);
+
+        // Subscription is currently UNBLOCKED (active, approved) — not in DELETE_PENDING
+        SubscribedAPI existingSubscription = new SubscribedAPI(subscriptionUUID);
+        existingSubscription.setSubscriptionId(5);
+        existingSubscription.setSubStatus(APIConstants.SubscriptionStatus.UNBLOCKED);
+        Mockito.when(apiMgtDAO.getSubscriptionByUUID(subscriptionUUID)).thenReturn(existingSubscription);
+
+        int updatedSubId = 5;
+        Mockito.when(apiMgtDAO.updateSubscription(
+                Mockito.eq(apiTypeWrapper), Mockito.eq(subscriptionUUID),
+                Mockito.eq(APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING), Mockito.eq("Silver")))
+                .thenReturn(updatedSubId);
+
+        SubscribedAPI updatedSubscription = new SubscribedAPI(subscriptionUUID);
+        updatedSubscription.setSubStatus(APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING);
+        Mockito.when(apiMgtDAO.getSubscriptionById(updatedSubId)).thenReturn(updatedSubscription);
+
+        PowerMockito.mockStatic(ApiMgtDAO.class);
+        PowerMockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
+
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO, SAMPLE_TENANT_DOMAIN_1);
+        SubscriptionResponse response = apiConsumer.updateSubscription(
+                apiTypeWrapper, "user1", application, subscriptionUUID, "Gold", "Silver");
+
+        // No deletion workflow cleanup should have been attempted since status is not DELETE_PENDING
+        Mockito.verify(apiMgtDAO, Mockito.never()).getExternalWorkflowReferenceForSubscriptionAndWFType(
+                Mockito.anyInt(),
+                Mockito.eq(org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION));
+        Assert.assertEquals(APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING, response.getSubscriptionStatus());
+    }
+
+    /**
+     * Tests that when a subscription is in DELETE_PENDING state but no corresponding deletion
+     * workflow reference is found in the DB (e.g., already cleaned up or simple workflow executor path),
+     * updateSubscription proceeds normally and transitions the subscription to TIER_UPDATE_PENDING.
+     * This covers the update + deletion workflow combination where the deletion workflow record is absent.
+     */
+    @Test
+    public void testUpdateSubscriptionWhenDeletePendingWithNoWorkflowRef() throws APIManagementException {
+        String subscriptionUUID = UUID.randomUUID().toString();
+        String apiUUID = UUID.randomUUID().toString();
+
+        API api = new API(new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION));
+        api.setSubscriptionAvailability(APIConstants.SUBSCRIPTION_TO_ALL_TENANTS);
+        api.setStatus(APIConstants.PUBLISHED);
+        Set<Tier> tiers = new HashSet<>();
+        tiers.add(new Tier("Gold"));
+        tiers.add(new Tier("Silver"));
+        api.setAvailableTiers(tiers);
+        api.setUuid(apiUUID);
+
+        ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
+        apiTypeWrapper.setTier("Gold");
+
+        Application application = new Application(1);
+
+        // Subscription is currently in DELETE_PENDING
+        SubscribedAPI existingSubscription = new SubscribedAPI(subscriptionUUID);
+        existingSubscription.setSubscriptionId(8);
+        existingSubscription.setSubStatus(APIConstants.SubscriptionStatus.DELETE_PENDING);
+        Mockito.when(apiMgtDAO.getSubscriptionByUUID(subscriptionUUID)).thenReturn(existingSubscription);
+
+        // No deletion workflow reference exists (e.g., simple executor path or already cleaned up)
+        Mockito.when(apiMgtDAO.getExternalWorkflowReferenceForSubscriptionAndWFType(
+                existingSubscription.getSubscriptionId(),
+                org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION))
+                .thenReturn(null);
+
+        int updatedSubId = 8;
+        Mockito.when(apiMgtDAO.updateSubscription(
+                Mockito.eq(apiTypeWrapper), Mockito.eq(subscriptionUUID),
+                Mockito.eq(APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING), Mockito.eq("Silver")))
+                .thenReturn(updatedSubId);
+
+        SubscribedAPI updatedSubscription = new SubscribedAPI(subscriptionUUID);
+        updatedSubscription.setSubStatus(APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING);
+        Mockito.when(apiMgtDAO.getSubscriptionById(updatedSubId)).thenReturn(updatedSubscription);
+
+        PowerMockito.mockStatic(ApiMgtDAO.class);
+        PowerMockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
+
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO, SAMPLE_TENANT_DOMAIN_1);
+        SubscriptionResponse response = apiConsumer.updateSubscription(
+                apiTypeWrapper, "user1", application, subscriptionUUID, "Gold", "Silver");
+
+        // The lookup was made but no cleanup was triggered (no ref returned)
+        Mockito.verify(apiMgtDAO, Mockito.times(1)).getExternalWorkflowReferenceForSubscriptionAndWFType(
+                existingSubscription.getSubscriptionId(),
+                org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
+        Assert.assertEquals(APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING, response.getSubscriptionStatus());
+    }
+
+    /**
+     * Tests that when a subscription is in ON_HOLD state (pending creation workflow approval)
+     * but its workflow reference is not found (e.g., already expired or cleaned up),
+     * the subscription is still deleted directly without going through the deletion workflow.
+     * This covers the creation-only workflow scenario where the pending task cleanup is a no-op.
+     */
+    @Test
+    public void testRemoveSubscriptionWhenOnHoldWithNoWorkflowRefDeletesDirectly()
+            throws APIManagementException, WorkflowException, APIPersistenceException {
+        String subscriptionUUID = UUID.randomUUID().toString();
+        String apiUUID = UUID.randomUUID().toString();
+        String subId = "3";
+
+        Subscriber subscriber = new Subscriber("sub1");
+        Application application = new Application("app1", subscriber);
+        application.setId(1);
+        APIIdentifier identifier = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
+        identifier.setUuid(apiUUID);
+
+        SubscribedAPI subscribedAPINew = new SubscribedAPI(subscriber, identifier);
+        subscribedAPINew.setUUID(subscriptionUUID);
+        subscribedAPINew.setApplication(application);
+
+        PowerMockito.mockStatic(ApiMgtDAO.class);
+        PowerMockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
+        Mockito.when(apiMgtDAO.checkAPIUUIDIsARevisionUUID(Mockito.anyString())).thenReturn(null);
+
+        DevPortalAPI devPortalAPI = Mockito.mock(DevPortalAPI.class);
+        Mockito.when(apiPersistenceInstance.getDevPortalAPI(any(Organization.class), any(String.class)))
+                .thenReturn(devPortalAPI);
+
+        // No workflow reference found for this subscription (e.g., creation WF already cleaned up)
+        Mockito.when(apiMgtDAO.getExternalWorkflowReferenceForSubscription(
+                (APIIdentifier) Mockito.any(), Mockito.anyInt(), Mockito.anyString()))
+                .thenReturn(null);
+
+        Mockito.when(apiMgtDAO.getSubscriptionStatus(apiUUID, 1))
+                .thenReturn(APIConstants.SubscriptionStatus.ON_HOLD);
+        Mockito.when(apiMgtDAO.getSubscriptionId(apiUUID, 1)).thenReturn(subId);
+
+        SubscribedAPI existingSubscription = new SubscribedAPI(subscriptionUUID);
+        existingSubscription.setTier(new Tier("Gold"));
+        Mockito.when(apiMgtDAO.getSubscriptionById(Integer.parseInt(subId))).thenReturn(existingSubscription);
+
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO, apiPersistenceInstance);
+        apiConsumer.removeSubscription(subscribedAPINew, "org1");
+
+        // Subscription should be deleted directly regardless of missing workflow reference
+        Mockito.verify(apiMgtDAO, Mockito.times(1)).removeSubscriptionById(Integer.parseInt(subId));
+        // No DELETE_PENDING transition should occur
+        Mockito.verify(apiMgtDAO, Mockito.never()).updateSubscriptionStatus(
+                Mockito.anyInt(), Mockito.eq(APIConstants.SubscriptionStatus.DELETE_PENDING));
+    }
+
+    /**
+     * Tests the addSubscription creation workflow path: when the workflow executor throws a
+     * WorkflowException, the subscription entry added to the DB is rolled back via removeSubscriptionById.
+     * This covers the creation-workflow-only scenario where the executor fails.
+     */
+    @Test
+    public void testAddSubscriptionWorkflowExceptionRollsBackSubscription() throws APIManagementException {
+        final int newSubscriptionId = 99;
+
+        API api = new API(new APIIdentifier(API_PROVIDER, "published_api", SAMPLE_API_VERSION));
+        api.setSubscriptionAvailability(APIConstants.SUBSCRIPTION_TO_ALL_TENANTS);
+        api.setStatus(APIConstants.PUBLISHED);
+        Set<Tier> tiers = new HashSet<>();
+        tiers.add(new Tier("tier1"));
+        api.setAvailableTiers(tiers);
+        ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
+        apiTypeWrapper.setTier("tier1");
+
+        Application application = new Application(1);
+
+        String tenantAwareUsername = "user1@" + SAMPLE_TENANT_DOMAIN_1;
+        Mockito.when(MultitenantUtils.getTenantAwareUsername(Mockito.eq("user1"))).thenReturn(tenantAwareUsername);
+        Mockito.when(apiMgtDAO.addSubscription(apiTypeWrapper, application,
+                APIConstants.SubscriptionStatus.ON_HOLD, tenantAwareUsername)).thenReturn(newSubscriptionId);
+
+        // Use a wrapper whose workflow executor throws WorkflowException
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO, SAMPLE_TENANT_DOMAIN_1) {
+            @Override
+            protected org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor getWorkflowExecutor(
+                    String workflowType, String tenant)
+                    throws org.wso2.carbon.apimgt.impl.workflow.WorkflowException {
+                return new org.wso2.carbon.apimgt.impl.workflow.SampleWorkFlowExecutor() {
+                    @Override
+                    public org.wso2.carbon.apimgt.api.WorkflowResponse execute(
+                            org.wso2.carbon.apimgt.impl.dto.WorkflowDTO workflowDTO)
+                            throws org.wso2.carbon.apimgt.impl.workflow.WorkflowException {
+                        throw new org.wso2.carbon.apimgt.impl.workflow.WorkflowException(
+                                "Simulated workflow failure");
+                    }
+                };
+            }
+
+            @Override
+            protected org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor getWorkflowExecutor(
+                    String workflowType)
+                    throws org.wso2.carbon.apimgt.impl.workflow.WorkflowException {
+                return getWorkflowExecutor(workflowType, SAMPLE_TENANT_DOMAIN_1);
+            }
+        };
+
+        try {
+            apiConsumer.addSubscription(apiTypeWrapper, "user1", application);
+            Assert.fail("Expected APIManagementException due to workflow failure");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("Could not execute Workflow"));
+        }
+
+        // The subscription entry must be rolled back on workflow failure
+        Mockito.verify(apiMgtDAO, Mockito.times(1)).removeSubscriptionById(newSubscriptionId);
+    }
+
+    // =========================================================================
+    // Workflow combination tests (8 permutations of creation/deletion/update WF)
+    // =========================================================================
+
+    /**
+     * Creation approval WF active.
+     * addSubscription: the approval executor does not immediately update the subscription
+     * status, so the subscription stays ON_HOLD until an admin completes the workflow.
+     */
+    @Test
+    public void testAddSubscriptionCreationWorkflowActive_subscriptionStaysOnHold()
+            throws APIManagementException {
+        API api = new API(new APIIdentifier(API_PROVIDER, "published_api", SAMPLE_API_VERSION));
+        api.setSubscriptionAvailability(APIConstants.SUBSCRIPTION_TO_ALL_TENANTS);
+        api.setStatus(APIConstants.PUBLISHED);
+        Set<Tier> tiers = new HashSet<>();
+        tiers.add(new Tier("tier1"));
+        api.setAvailableTiers(tiers);
+        ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
+        apiTypeWrapper.setTier("tier1");
+        Application application = new Application(1);
+
+        String tenantAwareUsername = "user1@" + SAMPLE_TENANT_DOMAIN_1;
+        Mockito.when(MultitenantUtils.getTenantAwareUsername(Mockito.eq("user1"))).thenReturn(tenantAwareUsername);
+        Mockito.when(apiMgtDAO.addSubscription(apiTypeWrapper, application,
+                APIConstants.SubscriptionStatus.ON_HOLD, tenantAwareUsername)).thenReturn(1);
+
+        SubscribedAPI subscribedAPI = new SubscribedAPI(UUID.randomUUID().toString());
+        subscribedAPI.setSubStatus(APIConstants.SubscriptionStatus.ON_HOLD);
+        Mockito.when(apiMgtDAO.getSubscriptionById(1)).thenReturn(subscribedAPI);
+
+        // SampleWorkFlowExecutor simulates the approval executor: execute() does not
+        // immediately update the subscription status — admin approval is required.
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO, SAMPLE_TENANT_DOMAIN_1);
+        SubscriptionResponse response = apiConsumer.addSubscription(apiTypeWrapper, "user1", application);
+
+        Assert.assertEquals(APIConstants.SubscriptionStatus.ON_HOLD, response.getSubscriptionStatus());
+        Mockito.verify(apiMgtDAO, Mockito.never())
+                .updateSubscriptionStatus(Mockito.anyInt(),
+                        Mockito.eq(APIConstants.SubscriptionStatus.UNBLOCKED));
+    }
+
+    /**
+     * No creation approval WF (simple/default executor).
+     * addSubscription: the executor immediately approves and transitions the subscription
+     * to UNBLOCKED without waiting for admin action.
+     */
+    @Test
+    public void testAddSubscriptionNoCreationWorkflow_subscriptionImmediatelyUnblocked()
+            throws APIManagementException {
+        API api = new API(new APIIdentifier(API_PROVIDER, "published_api", SAMPLE_API_VERSION));
+        api.setSubscriptionAvailability(APIConstants.SUBSCRIPTION_TO_ALL_TENANTS);
+        api.setStatus(APIConstants.PUBLISHED);
+        Set<Tier> tiers = new HashSet<>();
+        tiers.add(new Tier("tier1"));
+        api.setAvailableTiers(tiers);
+        ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
+        apiTypeWrapper.setTier("tier1");
+        Application application = new Application(1);
+
+        String tenantAwareUsername = "user1@" + SAMPLE_TENANT_DOMAIN_1;
+        Mockito.when(MultitenantUtils.getTenantAwareUsername(Mockito.eq("user1"))).thenReturn(tenantAwareUsername);
+        Mockito.when(apiMgtDAO.addSubscription(apiTypeWrapper, application,
+                APIConstants.SubscriptionStatus.ON_HOLD, tenantAwareUsername)).thenReturn(1);
+
+        SubscribedAPI subscribedAPI = new SubscribedAPI(UUID.randomUUID().toString());
+        subscribedAPI.setSubStatus(APIConstants.SubscriptionStatus.UNBLOCKED);
+        Mockito.when(apiMgtDAO.getSubscriptionById(1)).thenReturn(subscribedAPI);
+
+        // Custom executor simulates a simple/default WF that immediately approves:
+        // it calls updateSubscriptionStatus(UNBLOCKED) inline, just as the real simple executor would.
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO, SAMPLE_TENANT_DOMAIN_1) {
+            @Override
+            protected org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor getWorkflowExecutor(
+                    String workflowType, String tenant)
+                    throws org.wso2.carbon.apimgt.impl.workflow.WorkflowException {
+                return new org.wso2.carbon.apimgt.impl.workflow.SampleWorkFlowExecutor() {
+                    @Override
+                    public org.wso2.carbon.apimgt.api.WorkflowResponse execute(
+                            org.wso2.carbon.apimgt.impl.dto.WorkflowDTO workflowDTO)
+                            throws org.wso2.carbon.apimgt.impl.workflow.WorkflowException {
+                        try {
+                            apiMgtDAO.updateSubscriptionStatus(
+                                    Integer.parseInt(workflowDTO.getWorkflowReference()),
+                                    APIConstants.SubscriptionStatus.UNBLOCKED);
+                        } catch (APIManagementException e) {
+                            throw new org.wso2.carbon.apimgt.impl.workflow.WorkflowException(
+                                    "Immediate approval failed", e);
+                        }
+                        return super.execute(workflowDTO);
+                    }
+                };
+            }
+
+            @Override
+            protected org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor getWorkflowExecutor(
+                    String workflowType)
+                    throws org.wso2.carbon.apimgt.impl.workflow.WorkflowException {
+                return getWorkflowExecutor(workflowType, SAMPLE_TENANT_DOMAIN_1);
+            }
+        };
+
+        SubscriptionResponse response = apiConsumer.addSubscription(apiTypeWrapper, "user1", application);
+
+        Assert.assertEquals(APIConstants.SubscriptionStatus.UNBLOCKED, response.getSubscriptionStatus());
+        Mockito.verify(apiMgtDAO, Mockito.times(1))
+                .updateSubscriptionStatus(1, APIConstants.SubscriptionStatus.UNBLOCKED);
+    }
+
+    /**
+     * No deletion approval WF (simple/default executor).
+     * removeSubscription from UNBLOCKED: the executor immediately removes the subscription
+     * from the DB instead of waiting for admin approval.
+     */
+    @Test
+    public void testRemoveSubscriptionWhenUnblockedNoDeletionWorkflow_subscriptionRemovedImmediately()
+            throws APIManagementException, WorkflowException, APIPersistenceException {
+        String subscriptionUUID = UUID.randomUUID().toString();
+        String apiUUID = UUID.randomUUID().toString();
+        String subId = "10";
+
+        Subscriber subscriber = new Subscriber("sub1");
+        Application application = new Application("app1", subscriber);
+        application.setId(1);
+        APIIdentifier identifier = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
+        identifier.setUuid(apiUUID);
+
+        SubscribedAPI subscribedAPINew = new SubscribedAPI(subscriber, identifier);
+        subscribedAPINew.setUUID(subscriptionUUID);
+        subscribedAPINew.setApplication(application);
+
+        PowerMockito.mockStatic(ApiMgtDAO.class);
+        PowerMockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
+        Mockito.when(apiMgtDAO.checkAPIUUIDIsARevisionUUID(Mockito.anyString())).thenReturn(null);
+
+        DevPortalAPI devPortalAPI = Mockito.mock(DevPortalAPI.class);
+        Mockito.when(apiPersistenceInstance.getDevPortalAPI(any(Organization.class), any(String.class)))
+                .thenReturn(devPortalAPI);
+
+        Mockito.when(apiMgtDAO.getExternalWorkflowReferenceForSubscription(
+                (APIIdentifier) Mockito.any(), Mockito.anyInt(), Mockito.anyString()))
+                .thenReturn(null);
+        Mockito.when(apiMgtDAO.getSubscriptionStatus(apiUUID, 1))
+                .thenReturn(APIConstants.SubscriptionStatus.UNBLOCKED);
+        Mockito.when(apiMgtDAO.getSubscriptionId(apiUUID, 1)).thenReturn(subId);
+
+        // Custom executor simulates a simple/default deletion WF that immediately removes
+        // the subscription from the DB upon execution.
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO, apiPersistenceInstance) {
+            @Override
+            protected org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor getWorkflowExecutor(
+                    String workflowType, String tenant)
+                    throws org.wso2.carbon.apimgt.impl.workflow.WorkflowException {
+                if (org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants
+                        .WF_TYPE_AM_SUBSCRIPTION_DELETION.equals(workflowType)) {
+                    return new org.wso2.carbon.apimgt.impl.workflow.SampleWorkFlowExecutor() {
+                        @Override
+                        public org.wso2.carbon.apimgt.api.WorkflowResponse execute(
+                                org.wso2.carbon.apimgt.impl.dto.WorkflowDTO workflowDTO)
+                                throws org.wso2.carbon.apimgt.impl.workflow.WorkflowException {
+                            try {
+                                apiMgtDAO.removeSubscriptionById(
+                                        Integer.parseInt(workflowDTO.getWorkflowReference()));
+                            } catch (APIManagementException e) {
+                                throw new org.wso2.carbon.apimgt.impl.workflow.WorkflowException(
+                                        "Immediate removal failed", e);
+                            }
+                            return super.execute(workflowDTO);
+                        }
+                    };
+                }
+                return new org.wso2.carbon.apimgt.impl.workflow.SampleWorkFlowExecutor();
+            }
+
+            @Override
+            protected org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor getWorkflowExecutor(
+                    String workflowType)
+                    throws org.wso2.carbon.apimgt.impl.workflow.WorkflowException {
+                return getWorkflowExecutor(workflowType, "");
+            }
+        };
+
+        apiConsumer.removeSubscription(subscribedAPINew, "org1");
+
+        // Subscription transitions to DELETE_PENDING first, then is removed immediately by the simple executor
+        Mockito.verify(apiMgtDAO, Mockito.times(1))
+                .updateSubscriptionStatus(Integer.parseInt(subId),
+                        APIConstants.SubscriptionStatus.DELETE_PENDING);
+        Mockito.verify(apiMgtDAO, Mockito.times(1)).removeSubscriptionById(Integer.parseInt(subId));
+    }
+
+    /**
+     * No update approval WF (simple/default executor).
+     * updateSubscription: the executor immediately applies the new tier and transitions
+     * the subscription back to UNBLOCKED without admin approval.
+     */
+    @Test
+    public void testUpdateSubscriptionNoUpdateWorkflow_tierAppliedImmediately()
+            throws APIManagementException {
+        String subscriptionUUID = UUID.randomUUID().toString();
+        String apiUUID = UUID.randomUUID().toString();
+        int updatedSubId = 5;
+
+        API api = new API(new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION));
+        api.setSubscriptionAvailability(APIConstants.SUBSCRIPTION_TO_ALL_TENANTS);
+        api.setStatus(APIConstants.PUBLISHED);
+        Set<Tier> tiers = new HashSet<>();
+        tiers.add(new Tier("Gold"));
+        tiers.add(new Tier("Silver"));
+        api.setAvailableTiers(tiers);
+        api.setUuid(apiUUID);
+
+        ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
+        apiTypeWrapper.setTier("Gold");
+
+        Application application = new Application(1);
+
+        // Subscription is currently UNBLOCKED — no pending deletion workflow
+        SubscribedAPI existingSubscription = new SubscribedAPI(subscriptionUUID);
+        existingSubscription.setSubscriptionId(updatedSubId);
+        existingSubscription.setSubStatus(APIConstants.SubscriptionStatus.UNBLOCKED);
+        Mockito.when(apiMgtDAO.getSubscriptionByUUID(subscriptionUUID)).thenReturn(existingSubscription);
+
+        Mockito.when(apiMgtDAO.updateSubscription(
+                Mockito.eq(apiTypeWrapper), Mockito.eq(subscriptionUUID),
+                Mockito.eq(APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING), Mockito.eq("Silver")))
+                .thenReturn(updatedSubId);
+
+        SubscribedAPI updatedSubscription = new SubscribedAPI(subscriptionUUID);
+        updatedSubscription.setSubStatus(APIConstants.SubscriptionStatus.UNBLOCKED);
+        Mockito.when(apiMgtDAO.getSubscriptionById(updatedSubId)).thenReturn(updatedSubscription);
+
+        PowerMockito.mockStatic(ApiMgtDAO.class);
+        PowerMockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
+
+        // Custom executor simulates a simple/default update WF that immediately applies
+        // the tier change by calling updateSubscriptionStatusAndTier(UNBLOCKED).
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO, SAMPLE_TENANT_DOMAIN_1) {
+            @Override
+            protected org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor getWorkflowExecutor(
+                    String workflowType, String tenant)
+                    throws org.wso2.carbon.apimgt.impl.workflow.WorkflowException {
+                return new org.wso2.carbon.apimgt.impl.workflow.SampleWorkFlowExecutor() {
+                    @Override
+                    public org.wso2.carbon.apimgt.api.WorkflowResponse execute(
+                            org.wso2.carbon.apimgt.impl.dto.WorkflowDTO workflowDTO)
+                            throws org.wso2.carbon.apimgt.impl.workflow.WorkflowException {
+                        try {
+                            apiMgtDAO.updateSubscriptionStatusAndTier(
+                                    Integer.parseInt(workflowDTO.getWorkflowReference()),
+                                    APIConstants.SubscriptionStatus.UNBLOCKED);
+                        } catch (APIManagementException e) {
+                            throw new org.wso2.carbon.apimgt.impl.workflow.WorkflowException(
+                                    "Immediate tier update failed", e);
+                        }
+                        return super.execute(workflowDTO);
+                    }
+                };
+            }
+
+            @Override
+            protected org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor getWorkflowExecutor(
+                    String workflowType)
+                    throws org.wso2.carbon.apimgt.impl.workflow.WorkflowException {
+                return getWorkflowExecutor(workflowType, SAMPLE_TENANT_DOMAIN_1);
+            }
+        };
+
+        SubscriptionResponse response = apiConsumer.updateSubscription(
+                apiTypeWrapper, "user1", application, subscriptionUUID, "Gold", "Silver");
+
+        // Tier is applied immediately — no admin approval step
+        Mockito.verify(apiMgtDAO, Mockito.times(1))
+                .updateSubscriptionStatusAndTier(updatedSubId, APIConstants.SubscriptionStatus.UNBLOCKED);
+        Assert.assertEquals(APIConstants.SubscriptionStatus.UNBLOCKED, response.getSubscriptionStatus());
+    }
+
+    /**
+     * Update approval WF was active (TIER_UPDATE_PENDING), no deletion approval WF.
+     * removeSubscription: the pending update workflow is cleaned up, then the simple deletion
+     * executor immediately removes the subscription from the DB.
+     */
+    @Test
+    public void testRemoveSubscriptionWhenTierUpdatePendingNoDeletionWorkflow_cleanupThenImmediateRemoval()
+            throws APIManagementException, WorkflowException, APIPersistenceException {
+        String subscriptionUUID = UUID.randomUUID().toString();
+        String apiUUID = UUID.randomUUID().toString();
+        String subId = "42";
+        String updateWorkflowExtRef = "update_wf_ext_ref_combo46";
+
+        Subscriber subscriber = new Subscriber("sub1");
+        Application application = new Application("app1", subscriber);
+        application.setId(1);
+        APIIdentifier identifier = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
+        identifier.setUuid(apiUUID);
+
+        SubscribedAPI subscribedAPINew = new SubscribedAPI(subscriber, identifier);
+        subscribedAPINew.setUUID(subscriptionUUID);
+        subscribedAPINew.setApplication(application);
+
+        PowerMockito.mockStatic(ApiMgtDAO.class);
+        PowerMockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
+        Mockito.when(apiMgtDAO.checkAPIUUIDIsARevisionUUID(Mockito.anyString())).thenReturn(null);
+
+        DevPortalAPI devPortalAPI = Mockito.mock(DevPortalAPI.class);
+        Mockito.when(apiPersistenceInstance.getDevPortalAPI(any(Organization.class), any(String.class)))
+                .thenReturn(devPortalAPI);
+
+        // No pending creation workflow
+        Mockito.when(apiMgtDAO.getExternalWorkflowReferenceForSubscription(
+                (APIIdentifier) Mockito.any(), Mockito.anyInt(), Mockito.anyString()))
+                .thenReturn(null);
+
+        Mockito.when(apiMgtDAO.getSubscriptionStatus(apiUUID, 1))
+                .thenReturn(APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING);
+        Mockito.when(apiMgtDAO.getSubscriptionId(apiUUID, 1)).thenReturn(subId);
+
+        SubscribedAPI existingSubscription = new SubscribedAPI(subscriptionUUID);
+        existingSubscription.setTier(new Tier("Gold"));
+        Mockito.when(apiMgtDAO.getSubscriptionById(Integer.parseInt(subId))).thenReturn(existingSubscription);
+
+        // Pending update workflow that can be cleaned up
+        SubscriptionWorkflowDTO updateWfDTO = new SubscriptionWorkflowDTO();
+        updateWfDTO.setExternalWorkflowReference(updateWorkflowExtRef);
+        updateWfDTO.setWorkflowReference(subId);
+        Mockito.when(apiMgtDAO.retrieveWorkflowFromInternalReference(subId,
+                org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE))
+                .thenReturn(updateWfDTO);
+
+        // Custom executor simulates simple deletion WF: immediately removes the subscription
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO, apiPersistenceInstance) {
+            @Override
+            protected org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor getWorkflowExecutor(
+                    String workflowType, String tenant)
+                    throws org.wso2.carbon.apimgt.impl.workflow.WorkflowException {
+                if (org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants
+                        .WF_TYPE_AM_SUBSCRIPTION_DELETION.equals(workflowType)) {
+                    return new org.wso2.carbon.apimgt.impl.workflow.SampleWorkFlowExecutor() {
+                        @Override
+                        public org.wso2.carbon.apimgt.api.WorkflowResponse execute(
+                                org.wso2.carbon.apimgt.impl.dto.WorkflowDTO workflowDTO)
+                                throws org.wso2.carbon.apimgt.impl.workflow.WorkflowException {
+                            try {
+                                apiMgtDAO.removeSubscriptionById(
+                                        Integer.parseInt(workflowDTO.getWorkflowReference()));
+                            } catch (APIManagementException e) {
+                                throw new org.wso2.carbon.apimgt.impl.workflow.WorkflowException(
+                                        "Immediate removal failed", e);
+                            }
+                            return super.execute(workflowDTO);
+                        }
+                    };
+                }
+                return new org.wso2.carbon.apimgt.impl.workflow.SampleWorkFlowExecutor();
+            }
+
+            @Override
+            protected org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor getWorkflowExecutor(
+                    String workflowType)
+                    throws org.wso2.carbon.apimgt.impl.workflow.WorkflowException {
+                return getWorkflowExecutor(workflowType, "");
+            }
+        };
+
+        apiConsumer.removeSubscription(subscribedAPINew, "org1");
+
+        // The pending update workflow was cleaned up first
+        Mockito.verify(apiMgtDAO, Mockito.times(1)).retrieveWorkflowFromInternalReference(
+                subId, org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE);
+        // Subscription transitioned to DELETE_PENDING, then immediately removed by the simple executor
+        Mockito.verify(apiMgtDAO, Mockito.times(1))
+                .updateSubscriptionStatus(Integer.parseInt(subId),
+                        APIConstants.SubscriptionStatus.DELETE_PENDING);
+        Mockito.verify(apiMgtDAO, Mockito.times(1)).removeSubscriptionById(Integer.parseInt(subId));
     }
 }
