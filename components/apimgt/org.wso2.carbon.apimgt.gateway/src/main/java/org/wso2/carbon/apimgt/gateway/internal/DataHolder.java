@@ -324,6 +324,11 @@ public class DataHolder {
     }
 
     public void markAPIAsDeployed(GatewayAPIDTO gatewayAPIDTO) {
+        if (gatewayAPIDTO.getApiContext() == null) {
+            // Internal/special-purpose APIs (e.g. JWKS endpoint) may not have an API context set;
+            // they are not tracked in tenantAPIMap, so nothing to mark.
+            return;
+        }
         Map<String, API> apiMap = tenantAPIMap.get(gatewayAPIDTO.getTenantDomain());
         if (apiMap != null) {
             API api = apiMap.get(gatewayAPIDTO.getApiContext());
@@ -349,6 +354,10 @@ public class DataHolder {
      *         {@code true}; {@code false} otherwise
      */
     public boolean isDeployed(GatewayAPIDTO gatewayAPIDTO) {
+        if (gatewayAPIDTO.getApiContext() == null) {
+            // Internal/special-purpose APIs (e.g. JWKS endpoint) are not tracked in tenantAPIMap.
+            return false;
+        }
         Map<String, API> apiMap = tenantAPIMap.get(gatewayAPIDTO.getTenantDomain());
         if (apiMap != null) {
             API api = apiMap.get(gatewayAPIDTO.getApiContext());
