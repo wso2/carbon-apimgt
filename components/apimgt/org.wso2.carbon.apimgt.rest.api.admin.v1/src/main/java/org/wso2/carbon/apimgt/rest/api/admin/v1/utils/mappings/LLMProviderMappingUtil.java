@@ -17,6 +17,10 @@
 package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.io.IOException;
 import java.util.Collections;
 import org.wso2.carbon.apimgt.api.APIConstants;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
@@ -33,6 +37,9 @@ import java.util.stream.Collectors;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ModelProviderDTO;
 
 public class LLMProviderMappingUtil {
+
+    private static final String AUTHENTICATION_CONFIGURATION = "authenticationConfiguration";
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     /**
      * Converts a list of LLMProvider objects to an LLMProviderSummaryResponseListDTO.
@@ -187,6 +194,44 @@ public class LLMProviderMappingUtil {
                     configJson.optBoolean(APIConstants.AIAPIConstants.LLM_PROVIDER_DEPRECATED, false));
         }
         return aiServiceProviderSummaryResponseDTO;
+    }
+
+    /**
+     * Resolves provider configurations while allowing only authentication configuration changes for built-in providers.
+     *
+     * @param retrievedProvider Existing provider.
+     * @param configurations    Requested configuration payload.
+     * @return The resolved configuration payload.
+     * @throws IOException If configuration JSON cannot be parsed.
+     */
+    public static String resolveProviderConfigurations(LLMProvider retrievedProvider, String configurations)
+            throws IOException {
+
+        if (!retrievedProvider.isBuiltInSupport()) {
+            return configurations != null ? configurations : retrievedProvider.getConfigurations();
+        }
+        if (configurations == null) {
+            return retrievedProvider.getConfigurations();
+        }
+
+        JsonNode updatedConfigurations = OBJECT_MAPPER.readTree(configurations);
+        JsonNode updatedAuthenticationConfig = updatedConfigurations.get(AUTHENTICATION_CONFIGURATION);
+        if (updatedAuthenticationConfig == null) {
+            return retrievedProvider.getConfigurations();
+        }
+
+        String existingConfigurationString = retrievedProvider.getConfigurations();
+        if (existingConfigurationString == null) {
+            return configurations;
+        }
+
+        JsonNode existingConfigurations = OBJECT_MAPPER.readTree(existingConfigurationString);
+        if (!existingConfigurations.isObject()) {
+            return configurations;
+        }
+        ObjectNode resolvedConfigurations = (ObjectNode) existingConfigurations;
+        resolvedConfigurations.set(AUTHENTICATION_CONFIGURATION, updatedAuthenticationConfig);
+        return OBJECT_MAPPER.writeValueAsString(resolvedConfigurations);
     }
 
 }

@@ -247,7 +247,7 @@ public class AiServiceProvidersApiServiceImpl implements AiServiceProvidersApiSe
         try (InputStream apiDefStream = apiDefinitionInputStream) {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             ObjectMapper objectMapper = new ObjectMapper();
-            List<ModelProviderDTO> llmModel = new ArrayList<>();
+            List<ModelProviderDTO> llmModel = null;
             if (StringUtils.isNotEmpty(modelProviders)) {
                 llmModel = objectMapper.readValue(modelProviders, new TypeReference<List<ModelProviderDTO>>() {
                 });
@@ -317,24 +317,26 @@ public class AiServiceProvidersApiServiceImpl implements AiServiceProvidersApiSe
         String apiDefinition = getApiDefinitionFromStream(apiDefinitionInputStream);
         boolean isBuiltIn = retrievedProvider.isBuiltInSupport();
 
-        if (isBuiltIn && apiDefinition == null) {
+        if (isBuiltIn && apiDefinition == null && configurations == null) {
             return null;
         }
 
         provider.setApiDefinition(apiDefinition != null ? apiDefinition : retrievedProvider.getApiDefinition());
         provider.setDescription(isBuiltIn ? retrievedProvider.getDescription() :
                 (description != null ? description : retrievedProvider.getDescription()));
-        provider.setConfigurations(isBuiltIn ? retrievedProvider.getConfigurations() :
-                (configurations != null ? configurations : retrievedProvider.getConfigurations()));
-        List<LLMModel> llmModels = new ArrayList<>();
-        if (modelList != null) {
+        provider.setConfigurations(LLMProviderMappingUtil.resolveProviderConfigurations(retrievedProvider,
+                configurations));
+        if (modelList == null) {
+            provider.setModelList(retrievedProvider.getModelList());
+        } else {
+            List<LLMModel> llmModels = new ArrayList<>();
             for (ModelProviderDTO modelDTO : modelList) {
                 if (modelDTO != null && modelDTO.getName() != null && modelDTO.getModels() != null) {
                     llmModels.add(new LLMModel(modelDTO.getName(), modelDTO.getModels()));
                 }
             }
+            provider.setModelList(llmModels);
         }
-        provider.setModelList(llmModels);
         return provider;
     }
 
