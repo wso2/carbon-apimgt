@@ -563,7 +563,7 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
             @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_update", description = "Update MCP Server configuration (metadata, thumbnails, backends)")
+            @AuthorizationScope(scope = "apim:mcp_server_metadata_view", description = "View MCP Server listing and configuration (excludes documents, deployments, lifecycle)")
         })
     }, tags={ "MCP Server Labels",  })
     @ApiResponses(value = { 
