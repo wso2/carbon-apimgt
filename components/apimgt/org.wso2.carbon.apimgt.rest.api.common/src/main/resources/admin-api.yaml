@@ -4598,6 +4598,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:api_provider_change
+            - apim:admin_api_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -8198,7 +8199,8 @@ components:
             apim:role_manage: Manage system roles
             apim:admin_application_view: View Applications
             apim:keymanagers_manage: Manage Key Managers
-            apim:api_provider_change: Retrieve and manage applications
+            apim:api_provider_change: Retrieve and manage apis
+            apim:admin_api_view: View Apis
             apim:llm_provider_manage: Manage LLM Providers
             apim:gov_policy_read: Retrieve governance policies
             apim:gov_policy_manage: Manage governance policies
