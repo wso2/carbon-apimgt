@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Collections;
@@ -265,6 +266,9 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
             }
             return Response.status(Response.Status.NO_CONTENT).build();
 
+        } catch (JsonProcessingException e) {
+            log.warn("Error occurred while parsing provider configurations", e);
+            return Response.status(Response.Status.BAD_REQUEST).build();
         } catch (IOException e) {
             log.warn("Error occurred while reading the API definition file", e);
             return Response.status(Response.Status.BAD_REQUEST).build();

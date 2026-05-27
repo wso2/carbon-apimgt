@@ -282,6 +282,9 @@ public class AiServiceProvidersApiServiceImpl implements AiServiceProvidersApiSe
             }
             return Response.status(Response.Status.NO_CONTENT).build();
 
+        } catch (JsonProcessingException e) {
+            log.warn("Error occurred while parsing provider configurations", e);
+            return Response.status(Response.Status.BAD_REQUEST).build();
         } catch (IOException e) {
             log.warn("Error occurred while reading the API definition file", e);
             return Response.status(Response.Status.BAD_REQUEST).build();
