@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2026, WSO2 LLC. (https://www.wso2.com)
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -22,9 +22,21 @@ import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifactImpl;
 
 public class GenericArtifactWrapper extends GenericArtifactImpl {
 
+    private String artifactPath;
+
     public GenericArtifactWrapper(QName qName, String mediaType) {
         super(qName, mediaType);
     }
+
+    public void setArtifactPath(String path) {
+        this.artifactPath = path;
+    }
+
+    @Override
+    public String getPath() {
+        return artifactPath;
+    }
+
     @Override
     public String getLifecycleState() throws GovernanceException {
         return null;
