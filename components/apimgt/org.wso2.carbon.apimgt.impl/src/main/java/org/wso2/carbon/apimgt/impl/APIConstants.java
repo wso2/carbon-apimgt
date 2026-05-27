@@ -1786,11 +1786,13 @@ public final class APIConstants {
     public static final String CONFIG_REDIS_PASSWORD =  "RedisPassword";
     public static final String CONFIG_REDIS_DATABASE_ID =  "RedisDatabaseId";
     public static final String CONFIG_REDIS_CONNECTION_TIMEOUT =  "RedisConnectionTimeout";
+    public static final String CONFIG_REDIS_SOCKET_TIMEOUT =  "RedisSocketTimeout";
     public static final String CONFIG_REDIS_IS_SSL_ENABLED =  "RedisIsSslEnabled";
     public static final String CONFIG_REDIS_PROPERTIES = "Properties";
     public static final String CONFIG_REDIS_MAX_TOTAL = "MaxTotal";
     public static final String CONFIG_REDIS_MAX_IDLE = "MaxIdle";
     public static final String CONFIG_REDIS_MIN_IDLE = "MinIdle";
+    public static final String CONFIG_REDIS_MAX_WAIT_MILLIS = "MaxWaitMillis";
     public static final String CONFIG_REDIS_TEST_ON_BORROW = "TestOnBorrow";
     public static final String CONFIG_REDIS_TEST_ON_RETURN = "TestOnReturn";
     public static final String CONFIG_REDIS_TEST_WHILE_IDLE = "TestWhileIdle";
@@ -2983,6 +2985,8 @@ public final class APIConstants {
     // AWS Lambda: HTTP Client Configuration Constants
     public static final String AWS_LAMBDA_HTTP_CLIENT = "AWSLambdaConnector.HttpClient.";
     public static final String AWS_LAMBDA_PROXY_RESPONSE_ENABLED = "AWSLambdaConnector.EnableProxyResponseMapping";
+    // AWS Lambda: SDK Configuration Constants
+    public static final String AWS_LAMBDA_RETRY_MAX_ATTEMPTS = "AWSLambdaConnector.Sdk.RetryMaxAttempts";
     public static final String MAX_CONNECTIONS = "MaxConnections";
     public static final String CONNECTION_TIMEOUT = "ConnectionTimeout";
     public static final String SOCKET_TIMEOUT = "SocketTimeout";
@@ -3147,6 +3151,7 @@ public final class APIConstants {
         public static final String API_LEVEL_ALL_KEY_MANAGERS = "all";
         public static final String REGISTERED_TENANT_DOMAIN = "tenantDomain";
         public static final String ENABLE_MAP_OAUTH_CONSUMER_APPS = "enable_map_oauth_consumer_apps";
+        public static final String PROVISIONED_APP_VALIDATION = "provisionedAppValidation";
         public static final String KEY_MANAGER_TYPE = "type";
         public static final String UUID_REGEX = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F" +
                 "]{3}-[0-9a-fA-F]{12}";
