@@ -23,7 +23,6 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.cache.Cache;
@@ -62,11 +61,6 @@ import com.google.gson.JsonParser;
 public class APIMConfigServiceImpl implements APIMConfigService {
 
     private static final Log log = LogFactory.getLog(APIMConfigServiceImpl.class);
-    private static final String SUBSCRIPTION_APPROVAL_VIEW_SCOPE = "apim:subscription_approval_view";
-    private static final String SUBSCRIPTION_APPROVAL_MANAGE_SCOPE = "apim:subscription_approval_manage";
-    private static final String PUBLISHER_ORG_READ = "apim:publisher_organization_read";
-    private static final String ADMIN_ORG_READ = "apim:organization_read";
-    private static final String ADMIN_ORG_MANAGE = "apim:organization_manage";
     
     protected SystemConfigurationsDAO systemConfigurationsDAO;
 
@@ -198,47 +192,14 @@ public class APIMConfigServiceImpl implements APIMConfigService {
     /*
      *  This method facilitates the on-the-fly migration of the scope section in the tenant-config.json. This
      *  checks whether RESTAPIScopes section has newly introduced scopes and add them to the json String if it
-     *  is not available. 
+     *  is not available.
      */
     private String addMissingScopes(String systemConfig) {
         if (systemConfig == null) {
             return null;
         }
 
-        // List of newly introduced scopes
-        Map<String, String> scopesToCheck = new HashMap<>();
-        scopesToCheck.put("apim:admin_tier_view", "admin");
-        scopesToCheck.put("apim:admin_tier_manage", "admin");
-        scopesToCheck.put("apim:keymanagers_manage", "admin");
-        scopesToCheck.put("apim:api_category", "admin");
-        scopesToCheck.put("apim:api_provider_change", "admin");
-        scopesToCheck.put("apim:app_settings_change", "admin");
-        scopesToCheck.put("apim:gateway_policy_manage", "admin");
-        scopesToCheck.put("apim:gateway_policy_view", "admin,Internal/creator,Internal/publisher,Internal/observer");
-        scopesToCheck.put("apim:llm_provider_manage", "admin");
-        scopesToCheck.put("apim:llm_provider_read", "admin,Internal/publisher,Internal/creator");
-        scopesToCheck.put("apim:gov_rule_manage", "admin");
-        scopesToCheck.put("apim:gov_rule_read", "admin,Internal/publisher,Internal/creator,Internal/observer");
-        scopesToCheck.put("apim:gov_result_read", "admin,Internal/publisher,Internal/creator,Internal/observer");
-        scopesToCheck.put("apim:gov_policy_manage", "admin");
-        scopesToCheck.put("apim:gov_policy_read", "admin,Internal/publisher,Internal/creator,Internal/observer");
-
-        // MCP Server specific scopes
-        scopesToCheck.put("apim:mcp_server_create", "admin,Internal/creator");
-        scopesToCheck.put("apim:mcp_server_manage", "admin");
-        scopesToCheck.put("apim:mcp_server_view", "admin,Internal/publisher,Internal/creator,Internal/analytics,Internal/observer");
-        scopesToCheck.put("apim:mcp_server_list_view", "admin,Internal/integration_dev");
-        scopesToCheck.put("apim:mcp_server_import_export", "admin,Internal/devops");
-        scopesToCheck.put("apim:mcp_server_publish", "admin,Internal/publisher");
-        scopesToCheck.put("apim:mcp_server_delete", "admin,Internal/creator");
-        scopesToCheck.put("apim:mcp_server_generate_key", "admin,Internal/creator,Internal/publisher");
-
-        scopesToCheck.put(SUBSCRIPTION_APPROVAL_VIEW_SCOPE, "admin,Internal/publisher");
-        scopesToCheck.put(SUBSCRIPTION_APPROVAL_MANAGE_SCOPE, "admin,Internal/publisher");
-        scopesToCheck.put(PUBLISHER_ORG_READ, "admin,Internal/creator");
-        scopesToCheck.put(ADMIN_ORG_MANAGE, "admin");
-        scopesToCheck.put(ADMIN_ORG_READ, "admin");
-        
+        Map<String, String> scopesToCheck = RESTAPIScopeDefaultRoles.MISSING_SCOPE_ROLE_MAPPINGS;
         ArrayList<String> missingScopesList = new ArrayList<>(scopesToCheck.keySet());
         
         JsonParser jsonParser = new JsonParser();
