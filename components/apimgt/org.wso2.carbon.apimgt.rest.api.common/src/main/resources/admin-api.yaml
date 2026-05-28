@@ -3501,6 +3501,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:scope_manage
+            - apim:app_owner_change
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
