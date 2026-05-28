@@ -320,6 +320,18 @@ public class InboundWebsocketProcessorUtil {
     }
 
     /**
+     * Get the updated API for the websocket frame and set API information to InboundMessageContext.
+     *
+     * @param inboundMessageContext InboundMessageContext
+     * @param tenantDomain          String
+     */
+    public static void updateElectedAPI(String tenantDomain, InboundMessageContext inboundMessageContext) {
+        org.wso2.carbon.apimgt.keymgt.model.entity.API api = Utils.getAPI(tenantDomain, inboundMessageContext.getElectedAPI());
+        inboundMessageContext.setElectedAPI(api);
+    }
+
+
+    /**
      * Remove token query parameter from full request path in InboundMessageContext.
      *
      * @param parameters            Query parameters

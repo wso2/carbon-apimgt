@@ -747,6 +747,24 @@ public class Utils {
     }
 
     /**
+     * Returns the updated API from the tenant subscription store using its context and version.
+     *
+     * @param tenantDomain the tenant domain
+     * @param electedAPI the API to look up
+     * @return the matching API if found; otherwise, the provided API
+     */
+    public static org.wso2.carbon.apimgt.keymgt.model.entity.API getAPI(
+            String tenantDomain,
+            org.wso2.carbon.apimgt.keymgt.model.entity.API electedAPI) {
+        SubscriptionDataStore tenantSubscriptionStore =
+                SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
+        if (tenantSubscriptionStore != null) {
+            return tenantSubscriptionStore.getApiByContextAndVersion(electedAPI.getContext(), electedAPI.getVersion());
+        }
+        return electedAPI;
+    }
+
+    /**
      * Get the security scheme of the given API
      *
      * @param context      API context

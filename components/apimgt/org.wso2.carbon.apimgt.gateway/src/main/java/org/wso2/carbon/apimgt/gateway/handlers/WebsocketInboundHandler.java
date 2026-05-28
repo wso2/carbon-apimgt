@@ -189,6 +189,13 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
 
             InboundProcessorResponseDTO responseDTO =
                     webSocketProcessor.handleHandshake(req, ctx, inboundMessageContext);
+            if (APIConstants.BLOCKED.equalsIgnoreCase(inboundMessageContext.getElectedAPI().getStatus())) {
+                responseDTO = InboundWebsocketProcessorUtil.getFrameErrorDTO(
+                        HttpResponseStatus.SERVICE_UNAVAILABLE.code(),
+                        APISecurityConstants.API_BLOCKED_MESSAGE,
+                        false
+                );
+            }
             if (!responseDTO.isError()) {
                 responseDTO = WebsocketUtil.validateDenyPolicies(inboundMessageContext);
                 if (!responseDTO.isError()) {
@@ -260,6 +267,14 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
         } else if (msg instanceof WebSocketFrame) {
             InboundProcessorResponseDTO responseDTO =
                     webSocketProcessor.handleRequest((WebSocketFrame) msg, inboundMessageContext);
+            InboundWebsocketProcessorUtil.updateElectedAPI(inboundMessageContext.getTenantDomain(), inboundMessageContext);
+            if (APIConstants.BLOCKED.equalsIgnoreCase(inboundMessageContext.getElectedAPI().getStatus())) {
+                responseDTO = InboundWebsocketProcessorUtil.getFrameErrorDTO(
+                        WebSocketApiConstants.FrameErrorConstants.API_BLOCKED,
+                        WebSocketApiConstants.FrameErrorConstants.API_BLOCKED_MESSAGE,
+                        true
+                );
+            }
             if (responseDTO.isError()) {
                 // Release WebsocketFrame
                 ReferenceCountUtil.release(msg);
