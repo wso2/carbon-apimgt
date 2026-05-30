@@ -19,7 +19,7 @@
 package org.wso2.carbon.apimgt.gateway.service;
 
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
-import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTDataHolder;
+import org.wso2.carbon.apimgt.impl.jwt.RevokedJWTDataHolder;
 import org.wso2.carbon.apimgt.impl.token.RevokedTokenService;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;

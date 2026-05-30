@@ -78,6 +78,7 @@ import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.issuers.SystemScopesIssuer;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationServiceImpl;
+import org.wso2.carbon.apimgt.impl.jwt.RevokedJWTTokensRetriever;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.listeners.APIMTenantMgtListener;
@@ -232,6 +233,7 @@ public class APIManagerComponent {
                     null);
             APIMgtDBUtil.initialize();
             APIUtil.init();
+            new RevokedJWTTokensRetriever().startRevokedJWTTokensRetriever();
             String migrationEnabled = System.getProperty(APIConstants.MIGRATE);
             if (migrationEnabled == null) {
                 CommonConfigDeployer configDeployer = new CommonConfigDeployer();

@@ -2651,6 +2651,7 @@ public final class APIConstants {
         public static final String DECODING_ALGORITHM_BASE64URL = "base64url";
         public static final String APP_DOMAIN = "app_td";
         public static final String USER_DOMAIN = "user_td";
+        public static final String ENTITY_ID = "entity_id";
         public static final Set<String> RESERVED_CLAIMS =
                 Set.of("sub","iss","aud","exp","iat","jti","azp","nbf","scope","scp","aut","typ","alg");
     }
