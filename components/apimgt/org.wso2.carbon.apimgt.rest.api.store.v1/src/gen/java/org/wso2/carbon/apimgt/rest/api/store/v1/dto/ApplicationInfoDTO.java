@@ -21,8 +21,9 @@ import javax.validation.Valid;
 
 
 public class ApplicationInfoDTO   {
-  
+
     private String applicationId = null;
+    private String templateId = null;
     private String name = null;
     private String throttlingPolicy = null;
     private String description = null;
@@ -42,7 +43,7 @@ public class ApplicationInfoDTO   {
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "")
   @JsonProperty("applicationId")
   public String getApplicationId() {
@@ -53,13 +54,31 @@ public class ApplicationInfoDTO   {
   }
 
   /**
+   * Devportal Governance template UUID associated with this application.
+   **/
+  public ApplicationInfoDTO templateId(String templateId) {
+    this.templateId = templateId;
+    return this;
+  }
+
+
+  @ApiModelProperty(example = "123e4567-e89b-12d3-a456-426614174000", value = "Devportal Governance template UUID associated with this application.")
+  @JsonProperty("templateId")
+  public String getTemplateId() {
+    return templateId;
+  }
+  public void setTemplateId(String templateId) {
+    this.templateId = templateId;
+  }
+
+  /**
    **/
   public ApplicationInfoDTO name(String name) {
     this.name = name;
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "CalculatorApp", value = "")
   @JsonProperty("name")
   public String getName() {
@@ -76,7 +95,7 @@ public class ApplicationInfoDTO   {
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "Unlimited", value = "")
   @JsonProperty("throttlingPolicy")
   public String getThrottlingPolicy() {
@@ -93,7 +112,7 @@ public class ApplicationInfoDTO   {
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "Sample calculator application", value = "")
   @JsonProperty("description")
   public String getDescription() {
@@ -110,7 +129,7 @@ public class ApplicationInfoDTO   {
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "APPROVED", value = "")
   @JsonProperty("status")
   public String getStatus() {
@@ -127,7 +146,7 @@ public class ApplicationInfoDTO   {
     return this;
   }
 
-  
+
   @ApiModelProperty(value = "")
   @JsonProperty("groups")
   public List<String> getGroups() {
@@ -144,7 +163,7 @@ public class ApplicationInfoDTO   {
     return this;
   }
 
-  
+
   @ApiModelProperty(value = "")
   @JsonProperty("subscriptionCount")
   public Integer getSubscriptionCount() {
@@ -161,7 +180,7 @@ public class ApplicationInfoDTO   {
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "External Reference ID, Billing Tier", value = "")
       @Valid
   @JsonProperty("attributes")
@@ -179,7 +198,7 @@ public class ApplicationInfoDTO   {
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "admin", value = "")
   @JsonProperty("owner")
   public String getOwner() {
@@ -196,7 +215,7 @@ public class ApplicationInfoDTO   {
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "JWT", value = "")
   @JsonProperty("tokenType")
   public String getTokenType() {
@@ -213,7 +232,7 @@ public class ApplicationInfoDTO   {
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "1651555310208", value = "")
   @JsonProperty("createdTime")
   public String getCreatedTime() {
@@ -230,7 +249,7 @@ public class ApplicationInfoDTO   {
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "1651555310208", value = "")
   @JsonProperty("updatedTime")
   public String getUpdatedTime() {
@@ -251,6 +270,7 @@ public class ApplicationInfoDTO   {
     }
     ApplicationInfoDTO applicationInfo = (ApplicationInfoDTO) o;
     return Objects.equals(applicationId, applicationInfo.applicationId) &&
+        Objects.equals(templateId, applicationInfo.templateId) &&
         Objects.equals(name, applicationInfo.name) &&
         Objects.equals(throttlingPolicy, applicationInfo.throttlingPolicy) &&
         Objects.equals(description, applicationInfo.description) &&
@@ -266,15 +286,16 @@ public class ApplicationInfoDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(applicationId, name, throttlingPolicy, description, status, groups, subscriptionCount, attributes, owner, tokenType, createdTime, updatedTime);
+    return Objects.hash(applicationId, templateId, name, throttlingPolicy, description, status, groups, subscriptionCount, attributes, owner, tokenType, createdTime, updatedTime);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApplicationInfoDTO {\n");
-    
+
     sb.append("    applicationId: ").append(toIndentedString(applicationId)).append("\n");
+    sb.append("    templateId: ").append(toIndentedString(templateId)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    throttlingPolicy: ").append(toIndentedString(throttlingPolicy)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
@@ -301,4 +322,3 @@ public class ApplicationInfoDTO   {
     return o.toString().replace("\n", "\n    ");
   }
 }
-

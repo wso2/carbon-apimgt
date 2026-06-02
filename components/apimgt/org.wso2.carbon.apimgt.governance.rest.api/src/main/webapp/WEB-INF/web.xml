@@ -36,9 +36,10 @@
             <param-value>
                 org.wso2.carbon.apimgt.governance.rest.api.SwaggerYamlApi,
                 org.wso2.carbon.apimgt.governance.rest.api.RulesetsApi,
+                org.wso2.carbon.apimgt.governance.rest.api.TemplatesApi,
                 org.wso2.carbon.apimgt.governance.rest.api.PoliciesApi,
                 org.wso2.carbon.apimgt.governance.rest.api.ArtifactComplianceApi,
-                org.wso2.carbon.apimgt.governance.rest.api.PolicyAdherenceApi,
+                org.wso2.carbon.apimgt.governance.rest.api.PolicyAdherenceApi
             </param-value>
         </init-param>
         <init-param>

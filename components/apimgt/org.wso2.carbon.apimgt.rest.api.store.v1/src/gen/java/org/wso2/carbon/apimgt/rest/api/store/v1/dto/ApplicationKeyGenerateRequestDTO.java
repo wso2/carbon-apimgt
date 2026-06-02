@@ -108,9 +108,8 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "[\"password\",\"client_credentials\"]", required = true, value = "Grant types that should be supported by the application")
+  @ApiModelProperty(example = "[\"password\",\"client_credentials\"]", value = "Grant types that should be supported by the application")
   @JsonProperty("grantTypesToBeSupported")
-  @NotNull
   public List<String> getGrantTypesToBeSupported() {
     return grantTypesToBeSupported;
   }

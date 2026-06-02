@@ -34,6 +34,8 @@ tags:
     description: for managing rulesets.
   - name: Governance Policies
     description: for managing governance policies.
+  - name: Devportal Governance Templates
+    description: for managing Devportal Governance templates.
   - name: Artifact Compliance
     description: for accessing artifact compliance.
   - name: Policy Adherence
@@ -41,6 +43,320 @@ tags:
   - name: Deprecated
     description: resources that are deprecated.
 paths:
+  /templates:
+    get:
+      summary: Retrieves a list of Devportal Governance templates.
+      description: Returns all Devportal Governance templates associated with the requested organization.
+      operationId: getDevportalGovernanceTemplates
+      tags:
+        - Devportal Governance Templates
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+      responses:
+        "200":
+          description: OK. Successful response with a list of Devportal Governance templates.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DevportalGovernanceTemplateList'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - OAuth2Security:
+            - apim:gov_template_read
+    post:
+      summary: Create a new Devportal Governance template.
+      description: Creates a Devportal Governance template in the user's organization.
+      operationId: createDevportalGovernanceTemplate
+      tags:
+        - Devportal Governance Templates
+      requestBody:
+        required: true
+        description: JSON object containing the details of the new Devportal Governance template.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DevportalGovernanceTemplate'
+      responses:
+        "201":
+          description: OK. Devportal Governance template created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DevportalGovernanceTemplate'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - OAuth2Security:
+            - apim:gov_template_manage
+  /templates/default:
+    get:
+      summary: Retrieves the default Devportal Governance template.
+      description: Retrieves the fallback Devportal Governance template configured for the requested organization.
+      operationId: getDefaultDevportalGovernanceTemplate
+      tags:
+        - Devportal Governance Templates
+      responses:
+        "200":
+          description: OK. Default Devportal Governance template retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DevportalGovernanceTemplate'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - OAuth2Security:
+            - apim:gov_template_read
+  /templates/{templateId}:
+    get:
+      summary: Retrieves details of a specific Devportal Governance template.
+      description: Retrieves details of the Devportal Governance template identified by the templateId.
+      operationId: getDevportalGovernanceTemplateById
+      tags:
+        - Devportal Governance Templates
+      parameters:
+        - $ref: '#/components/parameters/templateId'
+      responses:
+        "200":
+          description: OK. Devportal Governance template details retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DevportalGovernanceTemplate'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - OAuth2Security:
+            - apim:gov_template_read
+
+    put:
+      summary: Updates a specific Devportal Governance template.
+      description: Updates the details and ruleset bindings of the Devportal Governance template identified by the templateId.
+      operationId: updateDevportalGovernanceTemplateById
+      tags:
+        - Devportal Governance Templates
+      parameters:
+        - $ref: '#/components/parameters/templateId'
+      requestBody:
+        required: true
+        description: JSON object containing the updated Devportal Governance template details.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DevportalGovernanceTemplate'
+      responses:
+        "200":
+          description: OK. Devportal Governance template updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DevportalGovernanceTemplate'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - OAuth2Security:
+            - apim:gov_template_manage
+
+    delete:
+      summary: Deletes a specific Devportal Governance template.
+      description: Deletes an existing Devportal Governance template identified by the templateId.
+      operationId: deleteDevportalGovernanceTemplate
+      tags:
+        - Devportal Governance Templates
+      parameters:
+        - $ref: '#/components/parameters/templateId'
+      responses:
+        '204':
+          description: OK. Devportal Governance template deleted successfully.
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - OAuth2Security:
+            - apim:gov_template_manage
+
+  /templates/{templateId}/validate-defaults:
+    post:
+      summary: Validates a template's hidden field defaults against its bound rulesets.
+      description: >
+        Dry-run check that returns any rule violations that would block publishing the template.
+        Only rules targeting hidden fields with admin-set defaults are evaluated;
+        violations about visible fields (filled by developers) are excluded.
+        This endpoint does not modify the template.
+      operationId: validateTemplateDefaults
+      tags:
+        - Devportal Governance Templates
+      parameters:
+        - $ref: '#/components/parameters/templateId'
+      responses:
+        "200":
+          description: >
+            OK. Validation completed. An empty violations list means the template is safe to publish.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateDefaultViolationList'
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - OAuth2Security:
+            - apim:gov_template_read
+
   /rulesets:
     get:
       summary: Retrieves a list of rulesets.
@@ -910,6 +1226,50 @@ paths:
 
 components:
   schemas:
+    TemplateDefaultViolationList:
+      title: TemplateDefaultViolationList
+      type: object
+      properties:
+        hasViolations:
+          type: boolean
+          description: True when at least one hidden default violates a bound ruleset rule.
+          example: true
+        violations:
+          type: array
+          items:
+            $ref: '#/components/schemas/TemplateDefaultViolation'
+
+    TemplateDefaultViolation:
+      title: TemplateDefaultViolation
+      type: object
+      required:
+        - ruleName
+        - message
+        - severity
+      properties:
+        ruleName:
+          type: string
+          description: Name of the rule that was violated.
+          example: description-min-length
+        rulesetId:
+          type: string
+          description: ID of the ruleset containing the violated rule.
+        rulesetName:
+          type: string
+          description: Name of the ruleset containing the violated rule.
+        violatedPath:
+          type: string
+          description: JSON path of the field whose default value caused the violation.
+          example: application.description
+        message:
+          type: string
+          description: Human-readable description of what the rule requires.
+          example: "description must be at least 50 characters"
+        severity:
+          type: string
+          description: Severity of the violation.
+          enum: [ERROR, WARN, INFO]
+
     Pagination:
       title: Pagination
       type: object
@@ -949,6 +1309,203 @@ components:
           type: string
           description: |
             A detail description about the error message.
+    DevportalGovernanceTemplateList:
+      type: object
+      description: A list of Devportal Governance templates.
+      properties:
+        count:
+          type: integer
+          description: Number of templates returned.
+          example: 2
+        list:
+          type: array
+          description: List of Devportal Governance templates.
+          items:
+            $ref: '#/components/schemas/DevportalGovernanceTemplate'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    DevportalGovernanceTemplate:
+      type: object
+      description: Detailed information about a Devportal Governance template.
+      properties:
+        id:
+          type: string
+          description: UUID of the template.
+          readOnly: true
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        name:
+          type: string
+          maxLength: 256
+          description: Name of the template.
+          example: "Partner App Template"
+        description:
+          type: string
+          maxLength: 1024
+          description: A brief description of the template.
+          example: "Template used for partner-facing Devportal applications."
+        tags:
+          type: array
+          description: Tags for categorising the template in the Devportal gallery.
+          items:
+            type: string
+          example: ["internal", "partner"]
+        icon:
+          type: string
+          description: Base64-encoded icon image for the template card (JPEG, PNG, SVG, or WebP; max 200 KB).
+          example: "data:image/png;base64,iVBOR..."
+        formConfig:
+          type: object
+          description: Nested UI form configuration used by the Devportal application, subscription, and key generation flows.
+          additionalProperties:
+            type: object
+          example:
+            application:
+              throttlingPolicy:
+                hidden: true
+                defaultValue: Unlimited
+              description:
+                hidden: false
+                defaultValue: ""
+              groups:
+                hidden: false
+                defaultValue: ""
+            subscription:
+              throttlingPolicy:
+                hidden: true
+                defaultValue: Gold
+            keyGeneration:
+              allowedKeyManagers:
+                defaultValue:
+                  - Resident Key Manager
+              grantTypes:
+                hidden: true
+                defaultValue:
+                  - client_credentials
+              callbackUrl:
+                hidden: true
+                defaultValue: ""
+            developerExperience:
+              summary: Partner applications use locked subscription and OAuth defaults.
+              limitations: |
+                Application throttling policy is fixed to Unlimited.
+                Subscription throttling policy is fixed to Gold.
+                OAuth grant types are fixed to Client Credentials.
+        formConfigHash:
+          type: string
+          description: SHA-256 hash of the serialized form configuration.
+          readOnly: true
+          example: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        status:
+          type: string
+          description: Template lifecycle status.
+          enum:
+            - DRAFT
+            - PUBLISHED
+          default: DRAFT
+          example: DRAFT
+        isDefault:
+          type: boolean
+          description: Whether this template is the organization fallback template.
+          default: false
+          example: false
+        isGlobal:
+          type: boolean
+          description: Whether this template is a super-tenant fallback visible to all organizations.
+          default: false
+          example: false
+        createdBy:
+          type: string
+          description: Identifier of the user who created the template.
+          readOnly: true
+          example: "admin@gmail.com"
+        createdTime:
+          type: string
+          description: Timestamp when the template was created.
+          readOnly: true
+          example: "2026-04-24T12:00:00Z"
+        updatedBy:
+          type: string
+          description: Identifier of the user who last updated the template.
+          readOnly: true
+          example: "admin@gmail.com"
+        updatedTime:
+          type: string
+          description: Timestamp when the template was last updated.
+          readOnly: true
+          example: "2026-04-24T12:15:00Z"
+        rulesetBindings:
+          type: array
+          description: Rulesets bound to the template.
+          items:
+            $ref: '#/components/schemas/DevportalGovernanceRulesetBinding'
+      required:
+        - name
+        - formConfig
+    DevportalGovernanceRulesetBinding:
+      type: object
+      description: Ruleset binding configured for a Devportal Governance template.
+      properties:
+        bindingId:
+          type: string
+          description: UUID of the ruleset binding.
+          readOnly: true
+          example: "1e42a46d-73e6-4035-9d0e-cfe92fb1a7c8"
+        rulesetId:
+          type: string
+          description: UUID of the ruleset bound to the template.
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        rulesetName:
+          type: string
+          description: Display name of the bound ruleset.
+          readOnly: true
+          example: "Partner Application Rules"
+        rulesetDescription:
+          type: string
+          description: Description of the bound ruleset.
+          readOnly: true
+          example: "Rules applied during application creation."
+        documentationLink:
+          type: string
+          description: Documentation link of the bound ruleset.
+          readOnly: true
+          example: "https://docs.example.com/governance/rules"
+        ruleType:
+          type: string
+          description: Rule type of the bound ruleset.
+          readOnly: true
+          example: APP_INFO
+        artifactType:
+          type: string
+          description: Artifact type of the bound ruleset.
+          readOnly: true
+          example: APPLICATION
+        bindingOrder:
+          type: integer
+          description: Evaluation order for bound rulesets.
+          default: 0
+          example: 0
+        keyManagerScopes:
+          type: array
+          description: Key managers that scope this ruleset binding.
+          items:
+            $ref: '#/components/schemas/DevportalGovernanceKeyManagerScope'
+      required:
+        - rulesetId
+    DevportalGovernanceKeyManagerScope:
+      type: object
+      description: Key Manager scope for a Devportal Governance template ruleset binding.
+      properties:
+        keyManagerUuid:
+          type: string
+          description: UUID of the Key Manager.
+          example: "6f9dcb8a-20f4-421d-9b45-6b89f3f6e8b4"
+        organization:
+          type: string
+          description: Organization associated with the Key Manager scope.
+          readOnly: true
+          example: "carbon.super"
+      required:
+        - keyManagerUuid
     RulesetList:
       type: object
       description: A list of rulesets.
@@ -1012,11 +1569,17 @@ components:
             - API_METADATA
             - API_DEFINITION
             - API_DOCUMENTATION
+            - APP_INFO
+            - APP_SUBSCRIPTION
+            - APP_OAUTH
           example: API_DEFINITION
           x-enum-varnames:
             - API_METADATA
             - API_DEFINITION
             - API_DOCUMENTATION
+            - APP_INFO
+            - APP_SUBSCRIPTION
+            - APP_OAUTH
         artifactType:
           type: string
           description: The type of artifact that the ruleset validates.
@@ -1024,6 +1587,7 @@ components:
             - REST_API
             - ASYNC_API
             - MCP
+            - APPLICATION
           example: REST_API
         documentationLink:
           type: string
@@ -1068,11 +1632,17 @@ components:
             - API_METADATA
             - API_DEFINITION
             - API_DOCUMENTATION
+            - APP_INFO
+            - APP_SUBSCRIPTION
+            - APP_OAUTH
           example: API_DEFINITION
           x-enum-varnames:
             - API_METADATA
             - API_DEFINITION
             - API_DOCUMENTATION
+            - APP_INFO
+            - APP_SUBSCRIPTION
+            - APP_OAUTH
         artifactType:
           type: string
           description: The type of artifact that the ruleset validates.
@@ -1080,6 +1650,7 @@ components:
             - REST_API
             - ASYNC_API
             - MCP
+            - APPLICATION
           example: REST_API
         documentationLink:
           type: string
@@ -1634,8 +2205,18 @@ components:
             apim:gov_rule_manage: Manage governance rulesets
             apim:gov_policy_read: Read governance policies
             apim:gov_policy_manage: Manage governance policies
+            apim:gov_template_read: Read Devportal Governance templates
+            apim:gov_template_manage: Manage Devportal Governance templates
             apim:gov_result_read: Read governance results
   parameters:
+    templateId:
+      name: templateId
+      in: path
+      description: |
+        **UUID** of the Devportal Governance template.
+      required: true
+      schema:
+        type: string
     artifactId:
       name: artifactId
       in: path

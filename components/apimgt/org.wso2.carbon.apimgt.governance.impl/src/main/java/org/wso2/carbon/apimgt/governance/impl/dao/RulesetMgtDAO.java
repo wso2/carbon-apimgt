@@ -125,6 +125,16 @@ public interface RulesetMgtDAO {
     List<String> getAssociatedPoliciesForRuleset(String rulesetId, String organization) throws APIMGovernanceException;
 
     /**
+     * Get the associated Devportal Governance templates for a Ruleset
+     *
+     * @param rulesetId    Ruleset ID
+     * @param organization Organization
+     * @return List of associated template IDs
+     */
+    List<String> getAssociatedTemplatesForRuleset(String rulesetId, String organization)
+            throws APIMGovernanceException;
+
+    /**
      * Get the rules of a Ruleset
      *
      * @param rulesetId    Ruleset ID

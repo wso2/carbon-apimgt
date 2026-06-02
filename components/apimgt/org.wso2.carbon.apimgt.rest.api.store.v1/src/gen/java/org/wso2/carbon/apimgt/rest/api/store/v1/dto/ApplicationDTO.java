@@ -25,8 +25,10 @@ import javax.validation.Valid;
 
 
 public class ApplicationDTO   {
-  
+
     private String applicationId = null;
+    private String templateId = null;
+    private Map<String, Object> governanceFormConfig = new HashMap<String, Object>();
     private String name = null;
     private String throttlingPolicy = null;
     private String description = null;
@@ -112,7 +114,7 @@ return null;
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "")
   @JsonProperty("applicationId")
   public String getApplicationId() {
@@ -123,13 +125,49 @@ return null;
   }
 
   /**
+   * Optional Devportal Governance template UUID used to initialize this application.
+   **/
+  public ApplicationDTO templateId(String templateId) {
+    this.templateId = templateId;
+    return this;
+  }
+
+
+  @ApiModelProperty(example = "123e4567-e89b-12d3-a456-426614174000", value = "Optional Devportal Governance template UUID used to initialize this application.")
+  @JsonProperty("templateId")
+  public String getTemplateId() {
+    return templateId;
+  }
+  public void setTemplateId(String templateId) {
+    this.templateId = templateId;
+  }
+
+  /**
+   * Captured Devportal Governance formConfig snapshot for this application.
+   **/
+  public ApplicationDTO governanceFormConfig(Map<String, Object> governanceFormConfig) {
+    this.governanceFormConfig = governanceFormConfig;
+    return this;
+  }
+
+
+  @ApiModelProperty(value = "Captured Devportal Governance formConfig snapshot for this application.")
+  @JsonProperty("governanceFormConfig")
+  public Map<String, Object> getGovernanceFormConfig() {
+    return governanceFormConfig;
+  }
+  public void setGovernanceFormConfig(Map<String, Object> governanceFormConfig) {
+    this.governanceFormConfig = governanceFormConfig;
+  }
+
+  /**
    **/
   public ApplicationDTO name(String name) {
     this.name = name;
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "CalculatorApp", required = true, value = "")
   @JsonProperty("name")
   @NotNull
@@ -141,17 +179,17 @@ return null;
   }
 
   /**
+   * Throttling tier for this application. Optional — if omitted (or empty) and a templateId is supplied, the value is resolved server-side from the template&#39;s formConfig.application.throttlingPolicy.defaultValue.
    **/
   public ApplicationDTO throttlingPolicy(String throttlingPolicy) {
     this.throttlingPolicy = throttlingPolicy;
     return this;
   }
 
-  
-  @ApiModelProperty(example = "Unlimited", required = true, value = "")
+
+  @ApiModelProperty(example = "Unlimited", value = "Throttling tier for this application. Optional — if omitted (or empty) and a templateId is supplied, the value is resolved server-side from the template's formConfig.application.throttlingPolicy.defaultValue. ")
   @JsonProperty("throttlingPolicy")
-  @NotNull
- @Size(min=1)  public String getThrottlingPolicy() {
+  public String getThrottlingPolicy() {
     return throttlingPolicy;
   }
   public void setThrottlingPolicy(String throttlingPolicy) {
@@ -165,7 +203,7 @@ return null;
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "Sample calculator application", value = "")
   @JsonProperty("description")
  @Size(max=512)  public String getDescription() {
@@ -176,14 +214,14 @@ return null;
   }
 
   /**
-   * Type of the access token generated for this application.  **OAUTH:** A UUID based access token **JWT:** A self-contained, signed JWT based access token which is issued by default. 
+   * Type of the access token generated for this application.  **OAUTH:** A UUID based access token **JWT:** A self-contained, signed JWT based access token which is issued by default.
    **/
   public ApplicationDTO tokenType(TokenTypeEnum tokenType) {
     this.tokenType = tokenType;
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "JWT", value = "Type of the access token generated for this application.  **OAUTH:** A UUID based access token **JWT:** A self-contained, signed JWT based access token which is issued by default. ")
   @JsonProperty("tokenType")
   public TokenTypeEnum getTokenType() {
@@ -200,7 +238,7 @@ return null;
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "APPROVED", value = "")
   @JsonProperty("status")
   public String getStatus() {
@@ -217,7 +255,7 @@ return null;
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "[]", value = "")
   @JsonProperty("groups")
   public List<String> getGroups() {
@@ -234,7 +272,7 @@ return null;
     return this;
   }
 
-  
+
   @ApiModelProperty(value = "")
   @JsonProperty("subscriptionCount")
   public Integer getSubscriptionCount() {
@@ -251,7 +289,7 @@ return null;
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "[]", value = "")
       @Valid
   @JsonProperty("keys")
@@ -269,7 +307,7 @@ return null;
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "{}", value = "")
   @JsonProperty("attributes")
   public Map<String, String> getAttributes() {
@@ -286,7 +324,7 @@ return null;
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "[]", value = "")
       @Valid
   @JsonProperty("subscriptionScopes")
@@ -298,14 +336,14 @@ return null;
   }
 
   /**
-   * Application created user 
+   * Application created user
    **/
   public ApplicationDTO owner(String owner) {
     this.owner = owner;
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "admin", value = "Application created user ")
   @JsonProperty("owner")
   public String getOwner() {
@@ -322,7 +360,7 @@ return null;
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "false", value = "")
   @JsonProperty("hashEnabled")
   public Boolean isHashEnabled() {
@@ -339,7 +377,7 @@ return null;
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "1651555310208", value = "")
   @JsonProperty("createdTime")
   public String getCreatedTime() {
@@ -356,7 +394,7 @@ return null;
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "1651555310208", value = "")
   @JsonProperty("updatedTime")
   public String getUpdatedTime() {
@@ -373,7 +411,7 @@ return null;
     return this;
   }
 
-  
+
   @ApiModelProperty(value = "")
   @JsonProperty("visibility")
   public VisibilityEnum getVisibility() {
@@ -394,6 +432,8 @@ return null;
     }
     ApplicationDTO application = (ApplicationDTO) o;
     return Objects.equals(applicationId, application.applicationId) &&
+        Objects.equals(templateId, application.templateId) &&
+        Objects.equals(governanceFormConfig, application.governanceFormConfig) &&
         Objects.equals(name, application.name) &&
         Objects.equals(throttlingPolicy, application.throttlingPolicy) &&
         Objects.equals(description, application.description) &&
@@ -413,15 +453,17 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(applicationId, name, throttlingPolicy, description, tokenType, status, groups, subscriptionCount, keys, attributes, subscriptionScopes, owner, hashEnabled, createdTime, updatedTime, visibility);
+    return Objects.hash(applicationId, templateId, governanceFormConfig, name, throttlingPolicy, description, tokenType, status, groups, subscriptionCount, keys, attributes, subscriptionScopes, owner, hashEnabled, createdTime, updatedTime, visibility);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApplicationDTO {\n");
-    
+
     sb.append("    applicationId: ").append(toIndentedString(applicationId)).append("\n");
+    sb.append("    templateId: ").append(toIndentedString(templateId)).append("\n");
+    sb.append("    governanceFormConfig: ").append(toIndentedString(governanceFormConfig)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    throttlingPolicy: ").append(toIndentedString(throttlingPolicy)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
@@ -452,4 +494,3 @@ return null;
     return o.toString().replace("\n", "\n    ");
   }
 }
-

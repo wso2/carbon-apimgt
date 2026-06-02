@@ -25,6 +25,7 @@ public class APIMGovernanceAPIConstants {
     public static final String ORGANIZATION = "organization";
     public static final String RULESET_PATH = "/rulesets";
     public static final String POLICY_PATH = "/policies";
+    public static final String TEMPLATE_PATH = "/templates";
     public static final String ARTIFACT_COMPLIANCE_PATH = "/artifact-compliance";
     public static final String POLICY_ADHERENCE_PATH = "/policy-adherence";
 
@@ -39,6 +40,9 @@ public class APIMGovernanceAPIConstants {
     public static final String POLICIES_GET_URL =
             POLICY_PATH + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM + "&query=" + QUERY_PARAM;
 
+    public static final String TEMPLATES_GET_URL =
+            TEMPLATE_PATH + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
+
     public static final String ARTIFACT_COMPLIANCE_GET_URL =
             ARTIFACT_COMPLIANCE_PATH + "/" + ARTIFACT_TYPE_PARAM + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
 
@@ -51,4 +55,3 @@ public class APIMGovernanceAPIConstants {
     public static final String DELEM_UNDERSCORE = "_";
 
 }
-

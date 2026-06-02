@@ -584,6 +584,34 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
     }
 
     /**
+     * Get the associated Devportal Governance templates for a Ruleset
+     *
+     * @param rulesetId    Ruleset ID
+     * @param organization Organization
+     * @return List of associated template IDs
+     */
+    @Override
+    public List<String> getAssociatedTemplatesForRuleset(String rulesetId, String organization)
+            throws APIMGovernanceException {
+        List<String> templateIds = new ArrayList<>();
+        String sqlQuery = SQLConstants.GET_TEMPLATES_FOR_RULESET;
+        try (Connection connection = APIMGovernanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
+            prepStmt.setString(1, rulesetId);
+            prepStmt.setString(2, organization);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    templateIds.add(rs.getString("TEMPLATE_ID"));
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_ASSOCIATED_TEMPLATES,
+                    e, rulesetId);
+        }
+        return templateIds;
+    }
+
+    /**
      * Get the rules of a Ruleset (without the content)
      *
      * @param rulesetId    Ruleset ID
@@ -615,4 +643,3 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
         }
     }
 }
-

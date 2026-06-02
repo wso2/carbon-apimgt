@@ -1,0 +1,218 @@
+# Copyright (c) 2026, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
+#
+# This software is the property of WSO2 LLC. and its suppliers, if any.
+# Dissemination of any information or reproduction of any material contained
+# herein in any form is strictly forbidden, unless permitted by WSO2 expressly.
+# You may not alter or remove any copyright or other notice from copies of this content.
+
+name: WSO2 OAuth Key Governance Baseline
+description: >-
+  Capability-aware baseline for Devportal OAuth key lifecycle: blocks unsafe grants,
+  enforces redirect-grant callback URL discipline, requires PKCE for public clients,
+  validates token-validation/JWKS configuration per Key Manager type, and caps token
+  validity. Targets the canonical sync-validation payload emitted by the
+  Devportal Governance enforcement layer (root keys: action, keyManager,
+  keyManagerContext, grantTypesToBeSupported, callbackUrl, additionalProperties).
+ruleCategory: SPECTRAL
+ruleType: APP_OAUTH
+artifactType: APPLICATION
+provider: WSO2
+rulesetContent:
+  rules:
+
+    # --- Grant-type policy --------------------------------------------------------------
+
+    'oauth-no-password-grant':
+      given:
+        - '$.grantTypesToBeSupported.*'
+      severity: error
+      then:
+        function: pattern
+        functionOptions:
+          notMatch: '^password$'
+      message: >-
+        The OAuth 'password' grant is deprecated by OAuth 2.1 and not allowed for new
+        OAuth client registrations. Use 'authorization_code' with PKCE instead.
+
+    'oauth-no-implicit-grant':
+      given:
+        - '$.grantTypesToBeSupported.*'
+      severity: error
+      then:
+        function: pattern
+        functionOptions:
+          notMatch: '^implicit$'
+      message: >-
+        The OAuth 'implicit' grant is deprecated by OAuth 2.1. Use 'authorization_code'
+        with PKCE for browser-based clients.
+
+    # --- Callback-URL discipline --------------------------------------------------------
+    # 'authorization_code' and 'implicit' MUST have a callback URL configured. Targets
+    # the request payload only (action == OAUTH_APP_CREATE / OAUTH_APP_UPDATE) so token
+    # generation requests aren't checked against the redirect-grant rule.
+
+    'oauth-callback-required-for-authorization-code':
+      given:
+        - '$[?(@.action == "OAUTH_APP_CREATE" || @.action == "OAUTH_APP_UPDATE")]'
+      severity: error
+      then:
+        function: schema
+        functionOptions:
+          schema:
+            type: object
+            if:
+              properties:
+                grantTypesToBeSupported:
+                  type: array
+                  contains:
+                    const: authorization_code
+              required: [grantTypesToBeSupported]
+            then:
+              properties:
+                callbackUrl:
+                  type: string
+                  minLength: 1
+              required: [callbackUrl]
+      message: >-
+        A callback (redirect) URL is required when the OAuth client supports the
+        'authorization_code' grant type.
+
+    # --- PKCE for public clients --------------------------------------------------------
+    # If bypassClientCredentials is true (i.e. publicClient template flag), PKCE must be
+    # mandatory and cannot be downgraded to 'plain'.
+
+    'oauth-public-client-requires-pkce':
+      given:
+        - '$.additionalProperties[?(@.bypassClientCredentials == "true" || @.bypassClientCredentials == true)]'
+      severity: error
+      then:
+        field: pkceMandatory
+        function: truthy
+      message: >-
+        Public OAuth clients (no client secret authentication) MUST enable PKCE
+        (additionalProperties.pkceMandatory = true).
+
+    'oauth-pkce-no-plain':
+      given:
+        - '$.additionalProperties'
+      severity: error
+      then:
+        field: pkceSupportPlain
+        function: falsy
+      message: >-
+        The 'plain' PKCE code challenge method is not allowed. Use S256 only
+        (additionalProperties.pkceSupportPlain must be false).
+
+    # --- Token-expiry caps --------------------------------------------------------------
+    # Enforced at OAUTH_APP_CREATE / OAUTH_APP_UPDATE so token-generation requests aren't
+    # double-checked. -1 means "indefinite" and is rejected for access tokens.
+
+    'oauth-application-access-token-expiry-cap':
+      given:
+        - >-
+          $[?(@.action == "OAUTH_APP_CREATE" || @.action == "OAUTH_APP_UPDATE")]
+          .additionalProperties.application_access_token_expiry_time
+      severity: warn
+      then:
+        function: schema
+        functionOptions:
+          schema:
+            type: [integer, string]
+            not:
+              enum: ['-1', -1]
+            pattern: '^[0-9]+$'
+            maximum: 3600
+      message: >-
+        Application access token expiry should not exceed 3600 seconds (1 hour) and
+        must not be unlimited (-1). Use refresh tokens for longer-lived sessions.
+
+    'oauth-user-access-token-expiry-cap':
+      given:
+        - >-
+          $[?(@.action == "OAUTH_APP_CREATE" || @.action == "OAUTH_APP_UPDATE")]
+          .additionalProperties.user_access_token_expiry_time
+      severity: warn
+      then:
+        function: schema
+        functionOptions:
+          schema:
+            type: [integer, string]
+            not:
+              enum: ['-1', -1]
+            pattern: '^[0-9]+$'
+            maximum: 3600
+      message: >-
+        User access token expiry should not exceed 3600 seconds (1 hour) and
+        must not be unlimited (-1).
+
+    # --- KM capability invariants -------------------------------------------------------
+    # These guard against Spectral payloads that have a populated keyManagerContext block
+    # — i.e. when the resolver successfully matched the KM. They are advisory at warn
+    # severity because misconfigured KMs are a deployment problem, not a developer error.
+
+    'oauth-key-manager-must-advertise-grant-types':
+      given:
+        - '$.keyManagerContext'
+      severity: warn
+      then:
+        field: availableGrantTypes
+        function: schema
+        functionOptions:
+          schema:
+            type: array
+            minItems: 1
+      message: >-
+        The selected Key Manager has not advertised any OAuth grant_types.
+        Configure the KM's grant_types list before allowing client registration —
+        rule authors can then write subset checks against keyManagerContext.availableGrantTypes.
+
+    'oauth-jwt-validation-requires-jwks-or-self-validation':
+      given:
+        - '$.keyManagerContext[?(@.validationType == "jwt")]'
+      severity: warn
+      then:
+        function: schema
+        functionOptions:
+          schema:
+            anyOf:
+              - properties:
+                  selfValidateJwt:
+                    const: true
+              - required: ['rawProperties']
+                properties:
+                  rawProperties:
+                    type: object
+                    required: ['jwks_endpoint']
+      message: >-
+        Key Managers using JWT token validation must declare either
+        self_validate_jwt = true or a non-empty jwks_endpoint in additionalProperties.
+
+    'oauth-bypass-client-credentials-disallowed-by-default':
+      given:
+        - '$.keyManagerContext'
+      severity: warn
+      then:
+        field: bypassClientCredentials
+        function: falsy
+      message: >-
+        bypassClientCredentials should be false on Key Managers used in production —
+        skipping client-credential validation weakens the OAuth security posture.
+
+    # --- Multi-secret rotation ----------------------------------------------------------
+    # When the KM advertises multiple-client-secrets support, rotation policies should
+    # cap the number of active secrets. Default cap of 5; admins can override.
+
+    'oauth-client-secret-count-cap':
+      given:
+        - '$.keyManagerContext[?(@.enableMultipleClientSecrets == true)]'
+      severity: warn
+      then:
+        field: clientSecretCount
+        function: schema
+        functionOptions:
+          schema:
+            type: integer
+            maximum: 5
+      message: >-
+        At most 5 active client secrets are recommended per OAuth client. Rotate and
+        revoke older secrets rather than accumulating them.

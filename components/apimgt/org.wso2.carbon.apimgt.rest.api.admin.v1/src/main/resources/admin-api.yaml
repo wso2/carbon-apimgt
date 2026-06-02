@@ -6763,6 +6763,16 @@ components:
           type: boolean
           description: Whether the ConsumptionDataExportService OSGi service is available
           example: false
+        applicationSharingEnabled:
+          type: boolean
+          description: Whether application sharing (multi-group) is enabled
+          example: false
+        applicationAttributes:
+          type: array
+          description: Custom application attributes defined in the deployment configuration
+          items:
+            type: object
+            additionalProperties: true
     ScopeList:
       title: Scope Role Mapping List
       type: object
@@ -8149,5 +8159,7 @@ components:
             apim:gov_result_read: Retrieve governance results
             apim:gov_rule_read: Retrieve governance rules
             apim:gov_rule_manage: Manage governance rules
+            apim:gov_template_read: Retrieve Devportal Governance templates
+            apim:gov_template_manage: Manage Devportal Governance templates
             apim:organization_manage: Manage Organizations
             apim:organization_read: Read Organizations

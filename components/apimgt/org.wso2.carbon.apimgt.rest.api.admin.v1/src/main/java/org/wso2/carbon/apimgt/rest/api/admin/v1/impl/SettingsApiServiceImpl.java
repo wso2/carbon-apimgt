@@ -18,8 +18,13 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIConstants.ApplicationAttributes;
+import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.SettingsApiService;
 
@@ -29,6 +34,10 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.SettingsMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.ws.rs.core.Response;
 
 public class SettingsApiServiceImpl implements SettingsApiService {
@@ -53,6 +62,27 @@ public class SettingsApiServiceImpl implements SettingsApiService {
             SettingsMappingUtil settingsMappingUtil = new SettingsMappingUtil();
             SettingsDTO settingsDTO = settingsMappingUtil.fromSettingsToDTO(isUserAvailable);
             settingsDTO.setTransactionCounterEnable(APIUtil.getTransactionCounterEnable());
+            try {
+                APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+                JSONArray attrArray = apiConsumer.getAppAttributesFromConfig(username);
+                List<Map<String, Object>> attrs = new ArrayList<>();
+                for (int i = 0; i < attrArray.size(); i++) {
+                    JSONObject obj = (JSONObject) attrArray.get(i);
+                    // Map capitalized config keys to lowercase to match the devportal API response shape
+                    Map<String, Object> attr = new HashMap<>();
+                    attr.put("attribute", obj.get(APIConstants.ApplicationAttributes.ATTRIBUTE));
+                    attr.put("description", obj.get(APIConstants.ApplicationAttributes.DESCRIPTION));
+                    attr.put("required", String.valueOf(obj.get(APIConstants.ApplicationAttributes.REQUIRED)));
+                    attr.put("hidden", String.valueOf(obj.get(APIConstants.ApplicationAttributes.HIDDEN)));
+                    attr.put("type", String.valueOf(obj.get(APIConstants.ApplicationAttributes.TYPE)));
+                    attrs.add(attr);
+                }
+                settingsDTO.setApplicationAttributes(attrs);
+            } catch (APIManagementException e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Failed to load application attributes for settings response", e);
+                }
+            }
             return Response.ok().entity(settingsDTO).build();
     }
 }

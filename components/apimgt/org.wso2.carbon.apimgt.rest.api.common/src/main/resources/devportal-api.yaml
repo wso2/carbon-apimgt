@@ -5931,21 +5931,32 @@ components:
       title: Application
       required:
         - name
-        - throttlingPolicy
       type: object
       properties:
         applicationId:
           type: string
           readOnly: true
           example: 01234567-0123-0123-0123-012345678901
+        templateId:
+          type: string
+          description: Optional Devportal Governance template UUID used to initialize this application.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        governanceFormConfig:
+          type: object
+          readOnly: true
+          additionalProperties: true
+          description: Captured Devportal Governance formConfig snapshot for this application.
         name:
           maxLength: 100
           minLength: 1
           type: string
           example: CalculatorApp
         throttlingPolicy:
-          minLength: 1
           type: string
+          description: |
+            Throttling tier for this application. Optional — if omitted (or empty)
+            and a templateId is supplied, the value is resolved server-side from
+            the template's formConfig.application.throttlingPolicy.defaultValue.
           example: Unlimited
         description:
           maxLength: 512
@@ -6022,6 +6033,10 @@ components:
         applicationId:
           type: string
           example: 01234567-0123-0123-0123-012345678901
+        templateId:
+          type: string
+          description: Devportal Governance template UUID associated with this application.
+          example: 123e4567-e89b-12d3-a456-426614174000
         name:
           type: string
           example: CalculatorApp
@@ -6312,7 +6327,6 @@ components:
       title: Subscription
       required:
         - applicationId
-        - throttlingPolicy
       type: object
       properties:
         subscriptionId:
@@ -6836,7 +6850,6 @@ components:
     ApplicationKeyGenerateRequest:
       title: Application key generation request object
       required:
-        - grantTypesToBeSupported
         - keyType
       type: object
       properties:
@@ -8768,3 +8781,4 @@ components:
             apim:sub_alert_manage: Retrieve, subscribe and configure Developer Portal alert types
             apim:app_import_export: Import and export applications related operations
             apim:admin: Manage all admin operations
+            apim:gov_template_read: Retrieve governance templates

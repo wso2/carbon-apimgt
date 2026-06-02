@@ -97,6 +97,9 @@ public class RulesetManager {
         } else if (isRulesetAssociatedWithPolicies(rulesetId, organization)) {
             throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_RULESET_ASSOCIATED_WITH_POLICIES,
                     ruleset.getId());
+        } else if (isRulesetAssociatedWithTemplates(rulesetId, organization)) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_RULESET_ASSOCIATED_WITH_TEMPLATES,
+                    ruleset.getId());
         }
         rulesetMgtDAO.deleteRuleset(rulesetId, organization);
         AuditLogger.log("Ruleset", "Ruleset %s with id %s deleted by user %s in organization %s",
@@ -114,6 +117,19 @@ public class RulesetManager {
             throws APIMGovernanceException {
         List<String> policyIds = rulesetMgtDAO.getAssociatedPoliciesForRuleset(rulesetId, organization);
         return !policyIds.isEmpty();
+    }
+
+    /**
+     * Check if a ruleset is associated with any Devportal Governance templates
+     *
+     * @param rulesetId    Ruleset ID
+     * @param organization Organization
+     * @return boolean True if the ruleset is associated with templates
+     */
+    private boolean isRulesetAssociatedWithTemplates(String rulesetId, String organization)
+            throws APIMGovernanceException {
+        List<String> templateIds = rulesetMgtDAO.getAssociatedTemplatesForRuleset(rulesetId, organization);
+        return !templateIds.isEmpty();
     }
 
     /**

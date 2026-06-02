@@ -42,6 +42,13 @@ public enum APIMGovExceptionCodes implements ErrorHandler {
                     "Please update the associated governance policies before " +
                     "attempting to delete the ruleset."),
 
+    ERROR_RULESET_ASSOCIATED_WITH_TEMPLATES(990121, "Ruleset is currently " +
+            "in use by some Devportal Governance templates", 409,
+            "The ruleset with ID: %s cannot be deleted because it " +
+                    "is associated with some Devportal Governance templates. " +
+                    "Please update or delete the associated templates before " +
+                    "attempting to delete the ruleset."),
+
     RULESET_NOT_FOUND(990102, "Ruleset not found",
             404, "Ruleset with ID: %s not found"),
     RULESET_CREATION_FAILED(990103, "Ruleset creation failed",
@@ -101,6 +108,11 @@ public enum APIMGovExceptionCodes implements ErrorHandler {
             400, "Content of ruleset '%s' is invalid"),
     INVALID_RULESET_CONTENT_DETAILED(990120, "Invalid ruleset content",
             400, "Content of ruleset `%s` is invalid:\n %s"),
+
+    ERROR_WHILE_GETTING_ASSOCIATED_TEMPLATES(990122, "Error while retrieving " +
+            "associated templates for the ruleset.", 500,
+            "Error while retrieving associated Devportal Governance templates " +
+                    "for the ruleset with ID: %s", true),
 
     // Policy related codes
     POLICY_ALREADY_EXISTS(990200, "Policy already exists.",
@@ -272,7 +284,61 @@ public enum APIMGovExceptionCodes implements ErrorHandler {
     ERROR_WHILE_CHECKING_API_VISIBILITY(990616, "Error while checking API visibility.",
             500, "Error while checking API visibility for API with ID: %s", true),
 
+    // Devportal Governance Template related codes
+    DEVPORTAL_TEMPLATE_ALREADY_EXISTS(990700, "Devportal Governance template already exists.",
+            409, "Devportal Governance template with name: '%s' in the organization: '%s' already exists."),
+
+    DEVPORTAL_TEMPLATE_NOT_FOUND(990701, "Devportal Governance template not found.",
+            404, "Devportal Governance template with ID: %s not found"),
+
+    ERROR_WHILE_CREATING_DEVPORTAL_TEMPLATE(990702, "Devportal Governance template creation failed.",
+            500, "Error while creating Devportal Governance template: %s in organization: %s", true),
+
+    ERROR_WHILE_RETRIEVING_DEVPORTAL_TEMPLATE(990703,
+            "Retrieving Devportal Governance template failed.",
+            500, "Error while retrieving Devportal Governance template with ID: %s", true),
+
+    ERROR_WHILE_RETRIEVING_DEVPORTAL_TEMPLATES(990704,
+            "Retrieving Devportal Governance templates failed.",
+            500, "Error while retrieving Devportal Governance templates for organization: %s", true),
+
+    ERROR_WHILE_UPDATING_DEVPORTAL_TEMPLATE(990705, "Devportal Governance template update failed.",
+            500, "Error while updating Devportal Governance template with ID: %s", true),
+
+    ERROR_WHILE_DELETING_DEVPORTAL_TEMPLATE(990706, "Devportal Governance template deletion failed.",
+            500, "Error while deleting Devportal Governance template with ID: %s", true),
+
+    ERROR_WHILE_CAPTURING_DEVPORTAL_GOVERNANCE_SNAPSHOT(990707,
+            "Devportal Governance application snapshot capture failed.",
+            500, "Error while capturing Devportal Governance snapshot for application: %s", true),
+
+    ERROR_WHILE_RETRIEVING_DEVPORTAL_GOVERNANCE_SNAPSHOT(990708,
+            "Retrieving Devportal Governance application snapshot failed.",
+            500, "Error while retrieving Devportal Governance snapshot for application: %s", true),
+
+    TEMPLATE_DEFAULT_VIOLATES_RULESET(990709,
+            "Template cannot be published: hidden field defaults violate bound rulesets.",
+            400, "Template default values violate bound ruleset rules: %s", false),
+
+    ERROR_WHILE_VALIDATING_TEMPLATE_DEFAULTS(990710,
+            "Error while validating template default values against rulesets.",
+            500, "Error while validating template defaults for template: %s", true),
+
+    // Application Governance Handler related codes
+    ERROR_WHILE_GETTING_APPLICATION_INFO(990620, "Error while retrieving application info.",
+            500, "Error while retrieving application info for application with ID: %s", true),
+
+    ERROR_WHILE_GETTING_APPLICATION_LIST(990621, "Error while retrieving application list.",
+            500, "Error while retrieving application list for organization: %s", true),
+
+    ERROR_WHILE_CHECKING_APPLICATION_AVAILABILITY(990622, "Error while checking application availability.",
+            500, "Error while checking availability of application with ID: %s", true),
+
+    ERROR_WHILE_CHECKING_APPLICATION_VISIBILITY(990623, "Error while checking application visibility.",
+            500, "Error while checking visibility of application with ID: %s for user: %s", true),
+
     ;
+
 
     private final long errorCode;
     private final String errorMessage;

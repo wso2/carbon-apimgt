@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.common.jms.JMSTransportHandler;
 import org.wso2.carbon.apimgt.governance.impl.APIMGovernanceConstants;
+import org.wso2.carbon.apimgt.governance.impl.DevportalGovernanceTemplateConfigSynchronizer;
 import org.wso2.carbon.apimgt.governance.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -65,6 +66,7 @@ public class APIMGovServerStartupShutdownListener implements ServerStartupObserv
             if (apimConfigService != null) {
                 APIMGovernanceUtil.loadDefaultRulesets(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
                 APIMGovernanceUtil.loadDefaultPolicies(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                DevportalGovernanceTemplateConfigSynchronizer.synchronizeAllTemplates();
                 jmsTransportHandlerForEventHub
                         .subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_NOTIFICATION,
                                 new APIMGovernanceMessageListener());

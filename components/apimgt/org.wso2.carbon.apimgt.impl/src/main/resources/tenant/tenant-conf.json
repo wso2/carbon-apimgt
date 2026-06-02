@@ -402,6 +402,14 @@
         "Roles": "admin,Internal/publisher,Internal/creator,Internal/observer"
       },
       {
+        "Name": "apim:gov_template_manage",
+        "Roles": "admin"
+      },
+      {
+        "Name": "apim:gov_template_read",
+        "Roles": "admin,Internal/publisher,Internal/creator,Internal/observer"
+      },
+      {
         "Name": "apim:mcp_server_create",
         "Roles": "admin,Internal/creator"
       },

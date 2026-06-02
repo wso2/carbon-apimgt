@@ -30,7 +30,11 @@ public enum APIMGovernableState {
     API_CREATE,
     API_UPDATE,
     API_DEPLOY,
-    API_PUBLISH;
+    API_PUBLISH,
+    APP_CREATE,
+    APP_UPDATE,
+    SUB_CREATE,
+    KEY_GENERATE;
 
     public static APIMGovernableState fromString(String stateString) {
         try {

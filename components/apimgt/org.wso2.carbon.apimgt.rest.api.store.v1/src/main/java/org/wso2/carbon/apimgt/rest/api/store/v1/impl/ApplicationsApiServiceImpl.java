@@ -53,6 +53,10 @@ import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
+import org.wso2.carbon.apimgt.governance.api.model.DevportalGovernanceApplicationSnapshot;
+import org.wso2.carbon.apimgt.governance.api.model.KeyManagerGovernanceContext;
+import org.wso2.carbon.apimgt.governance.impl.dao.DevportalGovernanceDAO;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -98,6 +102,8 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ApplicationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.models.ExportedApplication;
 import org.wso2.carbon.apimgt.rest.api.store.v1.utils.ExportUtils;
 import org.wso2.carbon.apimgt.rest.api.store.v1.utils.ImportUtils;
+import org.wso2.carbon.apimgt.rest.api.store.v1.utils.DevportalGovernanceValidationUtil;
+import org.wso2.carbon.apimgt.rest.api.store.v1.utils.TemplateDefaultsApplier;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
@@ -363,9 +369,19 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
+            // Hydrate hidden/default fields from the bound governance template before
+            // validation, so callers can omit fields the admin has locked or pre-filled.
+            TemplateDefaultsApplier.applyTo(body, username, organization, log);
+            DevportalGovernanceValidationUtil.validateApplicationCreate(body, organization, log);
             Application createdApplication = preProcessAndAddApplication(username, body, organization,
                     orgInfo.getOrganizationId());
+            DevportalGovernanceValidationUtil.captureApplicationSnapshot(createdApplication, body.getTemplateId(),
+                    organization, log);
             ApplicationDTO createdApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(createdApplication);
+            attachGovernanceSnapshot(createdApplication, createdApplicationDTO);
+            if (createdApplicationDTO.getTemplateId() == null) {
+                createdApplicationDTO.setTemplateId(body.getTemplateId());
+            }
 
             //to be set as the Location header
             URI location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/" +
@@ -387,6 +403,27 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             RestApiUtil.handleInternalServerError(e.getLocalizedMessage(), log);
         }
         return null;
+    }
+
+    private void attachGovernanceSnapshot(Application application, ApplicationDTO applicationDTO) {
+
+        if (application == null || applicationDTO == null) {
+            return;
+        }
+        try {
+            DevportalGovernanceApplicationSnapshot snapshot = DevportalGovernanceDAO.getInstance()
+                    .getApplicationSnapshot(application.getId());
+            if (snapshot == null) {
+                return;
+            }
+            applicationDTO.setTemplateId(snapshot.getSourceTemplateId());
+            applicationDTO.setGovernanceFormConfig(snapshot.getFormConfig());
+        } catch (APIMGovernanceException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Unable to attach Devportal Governance snapshot for application "
+                        + application.getUUID(), e);
+            }
+        }
     }
 
     /**
@@ -472,6 +509,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                         || (orgInfo.getOrganizationId() != null
                                 && orgInfo.getOrganizationId().equals(application.getSharedOrganization()))) {
                     ApplicationDTO applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
+                    attachGovernanceSnapshot(application, applicationDTO);
                     applicationDTO.setHashEnabled(OAuthServerConfiguration.getInstance().isClientSecretHashEnabled());
                     Set<Scope> scopes = apiConsumer
                             .getScopesForApplicationSubscription(username, application.getId(), organization);
@@ -502,6 +540,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     public Response applicationsApplicationIdPut(String applicationId, ApplicationDTO body, String ifMatch, MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application oldApplication = apiConsumer.getApplicationByUUID(applicationId);
 
@@ -527,6 +566,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 }
             }
             OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
+            DevportalGovernanceValidationUtil.validateApplicationUpdate(oldApplication, body, organization, log);
             Application updatedApplication = preProcessAndUpdateApplication(username, body, oldApplication,
                     applicationId, orgInfo);
             ApplicationDTO updatedApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(updatedApplication);
@@ -1189,6 +1229,11 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
+            if (body == null) {
+                RestApiUtil.handleBadRequest("Key generation request body is required", log);
+            }
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            TemplateDefaultsApplier.applyToKeyGen(applicationId, body, organization, log);
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             if (!(apiConsumer.isKeyManagerAllowedForUser(body.getKeyManager(), username))) {
                 throw new APIManagementException("Key Manager is permission restricted",
@@ -1202,6 +1247,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                         RestApiUtil.handleBadRequest(
                                 "Cannot generate keys for applications that are not yet approved.", log);
                     }
+                    DevportalGovernanceValidationUtil.validateKeyGeneration(application, body, organization, log);
                     String[] accessAllowDomainsArray = {"ALL"};
                     JSONObject jsonParamObj = new JSONObject();
                     jsonParamObj.put(ApplicationConstants.OAUTH_CLIENT_USERNAME, username);
@@ -1239,7 +1285,6 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     if (StringUtils.isNotEmpty(body.getKeyManager())) {
                         keyManagerName = body.getKeyManager();
                     }
-                    String organization = RestApiUtil.getValidatedOrganization(messageContext);
                     Map<String, Object> keyDetails = apiConsumer.requestApprovalForApplicationRegistration(
                             username, application, body.getKeyType().toString(), body.getCallbackUrl(),
                             accessAllowDomainsArray, body.getValidityTime(), tokenScopes,
@@ -1301,6 +1346,11 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getLightweightApplicationByUUID(applicationId);
+            // Devportal Governance gate — legacy keyType surface always targets Resident KM.
+            DevportalGovernanceValidationUtil.validateOAuthAppRemoval(application, null,
+                    APIConstants.KeyManager.DEFAULT_KEY_MANAGER,
+                    KeyManagerGovernanceContext.Action.OAUTH_APP_CLEANUP,
+                    application.getOrganization(), log);
             apiConsumer.cleanUpApplicationRegistrationByApplicationId(application.getId(), keyType);
             return Response.ok().build();
         } catch (APIManagementException e) {
@@ -1364,6 +1414,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
                     ApplicationKeyDTO appKey = getApplicationKeyByAppIDAndKeyType(applicationId, keyType);
                     if (appKey != null) {
+                        // Devportal Governance gate — legacy keyType surface always targets Resident KM.
+                        DevportalGovernanceValidationUtil.validateGenerateToken(application, null,
+                                APIConstants.KeyManager.DEFAULT_KEY_MANAGER, body,
+                                application.getOrganization(), log);
                         String jsonInput = null;
                         String grantType;
                         if (ApplicationTokenGenerateRequestDTO.GrantTypeEnum.TOKEN_EXCHANGE
@@ -1491,6 +1545,12 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             Application application = apiConsumer.getApplicationByUUID(applicationId);
             if (application != null) {
                 if (orgWideAppUpdateEnabled || RestAPIStoreUtils.isUserOwnerOfApplication(application)) {
+                    // Devportal Governance gate — legacy keyType surface always targets Resident KM.
+                    if (StringUtils.isBlank(body.getKeyManager())) {
+                        body.setKeyManager(APIConstants.KeyManager.DEFAULT_KEY_MANAGER);
+                    }
+                    DevportalGovernanceValidationUtil.validateUpdateOAuthApp(application, null, body,
+                            application.getOrganization(), log);
                     String grantTypes = StringUtils.join(body.getSupportedGrantTypes(), ',');
                     JsonObject jsonParams = new JsonObject();
                     jsonParams.addProperty(APIConstants.JSON_GRANT_TYPES, grantTypes);
@@ -1556,6 +1616,11 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 if (keyType != null && keyType.equals(apiKey.getType()) &&
                         APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(apiKey.getKeyManager())) {
                     APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+                    Application application = apiConsumer.getLightweightApplicationByUUID(applicationId);
+                    // Devportal Governance gate — legacy keyType surface always targets Resident KM.
+                    DevportalGovernanceValidationUtil.validateRegenerateSecret(application, null,
+                            APIConstants.KeyManager.DEFAULT_KEY_MANAGER,
+                            application.getOrganization(), log);
                     String clientId = apiKey.getConsumerKey();
                     String clientSecret =
                             apiConsumer.renewConsumerSecret(clientId, APIConstants.KeyManager.DEFAULT_KEY_MANAGER);
@@ -1703,6 +1768,9 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 jsonParamObj.put(APIConstants.SUBSCRIPTION_KEY_TYPE, body.getKeyType().toString());
                 jsonParamObj.put(APIConstants.JSON_CLIENT_SECRET, body.getConsumerSecret());
                 String organization = RestApiUtil.getValidatedOrganization(messageContext);
+                // Devportal Governance gate — runs before the KM-side mapping call so
+                // policy violations or capability mismatches don't reach the KM.
+                DevportalGovernanceValidationUtil.validateMapKeys(application, body, organization, log);
                 Map<String, Object> keyDetails = apiConsumer
                         .mapExistingOAuthClient(jsonParamObj.toJSONString(), username, clientId,
                                 application, keyType, tokenType, keyManagerName, organization);
@@ -1751,6 +1819,14 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getLightweightApplicationByUUID(applicationId);
+            // Devportal Governance gate — runs before the KM-side cleanup call. Resolved KM
+            // is derived from the existing key registration, falling back to Resident.
+            ApplicationKeyDTO existingKey = getApplicationKeyByAppIDAndKeyMapping(applicationId, keyMappingId);
+            String keyManagerName = existingKey == null ? APIConstants.KeyManager.DEFAULT_KEY_MANAGER
+                    : existingKey.getKeyManager();
+            DevportalGovernanceValidationUtil.validateOAuthAppRemoval(application, keyMappingId, keyManagerName,
+                    KeyManagerGovernanceContext.Action.OAUTH_APP_CLEANUP,
+                    application.getOrganization(), log);
             apiConsumer.cleanUpApplicationRegistrationByApplicationIdAndKeyMappingId(application.getId(), keyMappingId);
             return Response.ok().build();
         } catch (APIManagementException e) {
@@ -1774,6 +1850,13 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             if (!RestAPIStoreUtils.isUserOwnerOfApplication(application)) {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
+            // Devportal Governance gate — runs before the KM-side removal call.
+            ApplicationKeyDTO existingKey = getApplicationKeyByAppIDAndKeyMapping(applicationId, keyMappingId);
+            String keyManagerName = existingKey == null ? APIConstants.KeyManager.DEFAULT_KEY_MANAGER
+                    : existingKey.getKeyManager();
+            DevportalGovernanceValidationUtil.validateOAuthAppRemoval(application, keyMappingId, keyManagerName,
+                    KeyManagerGovernanceContext.Action.OAUTH_APP_DELETE,
+                    application.getOrganization(), log);
             boolean result = apiConsumer.removalKeys(application, keyMappingId, xWSO2Tenant);
             if (result) {
                 return Response.ok().build();
@@ -1805,6 +1888,9 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     && orgInfo.getOrganizationId().equals(application.getSharedOrganization()))) {
                 ApplicationKeyDTO appKey = getApplicationKeyByAppIDAndKeyMapping(applicationId, keyMappingId);
                 if (appKey != null) {
+                    // Devportal Governance gate — runs before the KM-side renewAccessToken call.
+                    DevportalGovernanceValidationUtil.validateGenerateToken(application, keyMappingId,
+                            appKey.getKeyManager(), body, application.getOrganization(), log);
                     String jsonInput = null;
                     String grantType;
                     if (ApplicationTokenGenerateRequestDTO.GrantTypeEnum.TOKEN_EXCHANGE
@@ -1885,6 +1971,9 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 ApplicationKeyDTO appKey = getApplicationKeyByAppIDAndKeyMapping(applicationId, keyMappingId);
                 if ((orgWideAppUpdateEnabled || RestAPIStoreUtils.isUserOwnerOfApplication(application))
                         && appKey != null) {
+                    // Devportal Governance gate — runs before the KM-side update call.
+                    DevportalGovernanceValidationUtil.validateUpdateOAuthApp(application, keyMappingId, body,
+                            application.getOrganization(), log);
                     String grantTypes = StringUtils.join(body.getSupportedGrantTypes(), ',');
                     JsonObject jsonParams = new JsonObject();
                     jsonParams.addProperty(APIConstants.JSON_GRANT_TYPES, grantTypes);
@@ -1942,6 +2031,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             ApplicationKeyDTO applicationKeyDTO = getApplicationKeyByAppIDAndKeyMapping(applicationId, keyMappingId);
             if (applicationKeyDTO != null) {
                 APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+                Application application = apiConsumer.getLightweightApplicationByUUID(applicationId);
+                // Devportal Governance gate — runs before the KM-side renewConsumerSecret call.
+                DevportalGovernanceValidationUtil.validateRegenerateSecret(application, keyMappingId,
+                        applicationKeyDTO.getKeyManager(), application.getOrganization(), log);
                 String clientId = applicationKeyDTO.getConsumerKey();
                 String clientSecret = apiConsumer.renewConsumerSecret(clientId, applicationKeyDTO.getKeyManager());
 

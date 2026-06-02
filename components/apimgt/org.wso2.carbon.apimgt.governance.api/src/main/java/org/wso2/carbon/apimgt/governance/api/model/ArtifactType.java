@@ -24,7 +24,8 @@ import java.util.Locale;
  * This class represents different types of artifacts available for Governing
  */
 public enum ArtifactType {
-    API; // Represent all types of APIs
+    API,
+    APPLICATION;
 
     public static ArtifactType fromString(String text) {
         try {
