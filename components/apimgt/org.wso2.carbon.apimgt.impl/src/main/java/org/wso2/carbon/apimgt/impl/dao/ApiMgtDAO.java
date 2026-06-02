@@ -27345,16 +27345,8 @@ public class ApiMgtDAO {
             statement.setString(1, policyMappingUUID);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
-                    OperationPolicy operationPolicy = new OperationPolicy();
-                    operationPolicy.setPolicyName(rs.getString("POLICY_NAME"));
-                    operationPolicy.setPolicyVersion(rs.getString("POLICY_VERSION"));
-                    operationPolicy.setPolicyId(rs.getString("POLICY_UUID"));
-                    operationPolicy.setOrder(rs.getInt("POLICY_ORDER"));
-                    operationPolicy.setDirection(rs.getString("DIRECTION"));
-                    Map<String, Object> parameters =
-                    APIMgtDBUtil.convertJSONStringToMap(rs.getString("PARAMETERS"));
-                    operationPolicy.setParameters(parameters != null ? parameters : new HashMap<>());
-                    gatewayPolicies.add(operationPolicy);
+                    OperationPolicy policy = populateOperationPolicyWithRS(rs);
+                    gatewayPolicies.add(policy);
                 }
             }
         } catch (SQLException e) {
