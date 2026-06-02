@@ -759,7 +759,9 @@ public class Utils {
         SubscriptionDataStore tenantSubscriptionStore =
                 SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
         if (tenantSubscriptionStore != null) {
-            return tenantSubscriptionStore.getApiByContextAndVersion(electedAPI.getContext(), electedAPI.getVersion());
+            org.wso2.carbon.apimgt.keymgt.model.entity.API updatedApi =
+                    tenantSubscriptionStore.getApiByContextAndVersion(electedAPI.getContext(), electedAPI.getVersion());
+            return updatedApi != null ? updatedApi : electedAPI;
         }
         return electedAPI;
     }

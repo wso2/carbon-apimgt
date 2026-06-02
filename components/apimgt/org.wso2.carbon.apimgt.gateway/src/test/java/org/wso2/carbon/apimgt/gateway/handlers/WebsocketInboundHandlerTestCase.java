@@ -133,6 +133,9 @@ public class WebsocketInboundHandlerTestCase {
         PowerMockito.when(serviceReferenceHolder.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
 
         PowerMockito.mockStatic(WebsocketUtil.class);
+        PowerMockito.spy(InboundWebsocketProcessorUtil.class);
+        PowerMockito.doNothing().when(InboundWebsocketProcessorUtil.class, "setLatestElectedAPI",
+                Mockito.anyString(), Mockito.any(InboundMessageContext.class));
     }
 
     @Test

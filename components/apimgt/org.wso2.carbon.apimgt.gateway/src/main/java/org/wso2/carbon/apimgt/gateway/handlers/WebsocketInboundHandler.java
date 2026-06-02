@@ -189,7 +189,8 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
 
             InboundProcessorResponseDTO responseDTO =
                     webSocketProcessor.handleHandshake(req, ctx, inboundMessageContext);
-            if (APIConstants.BLOCKED.equalsIgnoreCase(inboundMessageContext.getElectedAPI().getStatus())) {
+            if (inboundMessageContext.getElectedAPI() != null
+                    && APIConstants.BLOCKED.equalsIgnoreCase(inboundMessageContext.getElectedAPI().getStatus())) {
                 responseDTO = InboundWebsocketProcessorUtil.getFrameErrorDTO(
                         HttpResponseStatus.SERVICE_UNAVAILABLE.code(),
                         APISecurityConstants.API_BLOCKED_MESSAGE,
@@ -267,8 +268,9 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
         } else if (msg instanceof WebSocketFrame) {
             InboundProcessorResponseDTO responseDTO =
                     webSocketProcessor.handleRequest((WebSocketFrame) msg, inboundMessageContext);
-            InboundWebsocketProcessorUtil.updateElectedAPI(inboundMessageContext.getTenantDomain(), inboundMessageContext);
-            if (APIConstants.BLOCKED.equalsIgnoreCase(inboundMessageContext.getElectedAPI().getStatus())) {
+            InboundWebsocketProcessorUtil.setLatestElectedAPI(inboundMessageContext.getTenantDomain(), inboundMessageContext);
+            if (inboundMessageContext.getElectedAPI() != null
+                    && APIConstants.BLOCKED.equalsIgnoreCase(inboundMessageContext.getElectedAPI().getStatus())) {
                 responseDTO = InboundWebsocketProcessorUtil.getFrameErrorDTO(
                         WebSocketApiConstants.FrameErrorConstants.API_BLOCKED,
                         WebSocketApiConstants.FrameErrorConstants.API_BLOCKED_MESSAGE,

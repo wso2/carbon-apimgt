@@ -325,8 +325,9 @@ public class InboundWebsocketProcessorUtil {
      * @param inboundMessageContext InboundMessageContext
      * @param tenantDomain          String
      */
-    public static void updateElectedAPI(String tenantDomain, InboundMessageContext inboundMessageContext) {
-        org.wso2.carbon.apimgt.keymgt.model.entity.API api = Utils.getAPI(tenantDomain, inboundMessageContext.getElectedAPI());
+    public static void setLatestElectedAPI(String tenantDomain, InboundMessageContext inboundMessageContext) {
+        org.wso2.carbon.apimgt.keymgt.model.entity.API api = Utils.getAPI(tenantDomain,
+                inboundMessageContext.getElectedAPI());
         inboundMessageContext.setElectedAPI(api);
     }
 
