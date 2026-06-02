@@ -2678,7 +2678,8 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             if (RestApiConstants.MCP_SERVER_PUBLISHER_SCOPE.equals(scope)
                     || RestApiConstants.MCP_SERVER_IMPORT_EXPORT_SCOPE.equals(scope)
                     || RestApiConstants.MCP_SERVER_MANAGE_SCOPE.equals(scope)
-                    || RestApiConstants.ADMIN_SCOPE.equals(scope)) {
+                    || RestApiConstants.ADMIN_SCOPE.equals(scope)
+                    || RestApiConstants.MCP_SERVER_LIFECYCLE_MANAGE_SCOPE.equals(scope)) {
                 updatePermittedForPublishedDeprecated = true;
                 break;
             }

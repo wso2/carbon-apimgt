@@ -203,6 +203,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             APIProduct product = apiProvider.getAPIProductbyUUID(apiProductId, organization);
             APIProductIdentifier productIdentifier = product.getId();
+            validateAPIProductOperationsPerLC(product.getState());
             if (fileInputStream != null && inlineContent != null) {
                 RestApiUtil.handleBadRequest("Only one of 'file' and 'inlineContent' should be specified", log);
             }
@@ -281,6 +282,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             //this will fail if user does not have access to the API Product or the API Product does not exist
             APIProductIdentifier productIdentifier = APIMappingUtil
                     .getAPIProductIdentifierFromUUID(apiProductId, organization);
+            validateAPIProductOperationsPerLC(apiProvider.getAPIInfoByUUID(apiProductId).getStatus());
             documentation = apiProvider.getDocumentation(apiProductId, documentId, organization);
             if (documentation == null) {
                 RestApiUtil
@@ -375,6 +377,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             Documentation newDocumentation = DocumentationMappingUtil.fromDTOtoDocumentation(body);
             //this will fail if user does not have access to the API or the API does not exist
             APIProductIdentifier apiIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, organization);
+            validateAPIProductOperationsPerLC(apiProvider.getAPIInfoByUUID(apiProductId).getStatus());
             newDocumentation.setFilePath(oldDocument.getFilePath());
             newDocumentation.setId(oldDocument.getId());
             apiProvider.updateDocumentation(apiProductId, newDocumentation, organization);
@@ -458,6 +461,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             }
             //this will fail if user does not have access to the API Product or the API Product does not exist
             APIProductIdentifier productIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, organization);
+            validateAPIProductOperationsPerLC(apiProvider.getAPIInfoByUUID(apiProductId).getStatus());
             if (apiProvider.isDocumentationExist(apiProductId, documentName, organization)) {
                 String errorMessage = "Requested document '" + documentName + "' already exists";
                 RestApiUtil.handleResourceAlreadyExistsError(errorMessage, log);
@@ -538,6 +542,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             if (retrievedProduct == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
             }
+            validateAPIProductOperationsPerLC(retrievedProduct.getState());
             APIProduct updatedProduct = PublisherCommonUtils.updateApiProduct(retrievedProduct, body,
                     apiProvider, username, tenantDomain);
             APIProductDTO updatedProductDTO = getAPIProductByID(apiProductId, apiProvider);
@@ -634,6 +639,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
 
             //this will fail if user does not have access to the API or the API does not exist
             APIProduct apiProduct = apiProvider.getAPIProductbyUUID(apiProductId, tenantDomain);
+            validateAPIProductOperationsPerLC(apiProduct.getState());
             ResourceFile apiImage = new ResourceFile(inputStream, fileMediaType);
             apiProvider.setThumbnailToAPI(apiProductId, apiImage, tenantDomain);
             /*
@@ -852,6 +858,38 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     }
 
     /**
+     * Validate that a write operation is permitted based on the API Product's lifecycle state.
+     * Users with only granular scopes (e.g., apim:api_product_update) are blocked from modifying
+     * Published or Deprecated API Products unless they also hold a scope that grants lifecycle control.
+     *
+     * @param status Current lifecycle state of the API Product
+     * @throws APIManagementException if the operation is not permitted in the given state
+     */
+    private void validateAPIProductOperationsPerLC(String status) throws APIManagementException {
+        boolean updatePermittedForPublishedDeprecated = false;
+        String[] tokenScopes =
+                (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
+                        .get(RestApiConstants.USER_REST_API_SCOPES);
+
+        for (String scope : tokenScopes) {
+            if (RestApiConstants.PUBLISHER_SCOPE.equals(scope)
+                    || RestApiConstants.API_PRODUCT_IMPORT_EXPORT_SCOPE.equals(scope)
+                    || RestApiConstants.API_MANAGE_SCOPE.equals(scope)
+                    || RestApiConstants.ADMIN_SCOPE.equals(scope)
+                    || RestApiConstants.API_PRODUCT_LIFECYCLE_MANAGE_SCOPE.equals(scope)) {
+                updatePermittedForPublishedDeprecated = true;
+                break;
+            }
+        }
+        if (!updatePermittedForPublishedDeprecated && (
+                APIConstants.PUBLISHED.equals(status)
+                        || APIConstants.DEPRECATED.equals(status))) {
+            throw new APIManagementException(
+                    ExceptionCodes.from(ExceptionCodes.API_PRODUCT_UPDATE_FORBIDDEN_PER_LC, status));
+        }
+    }
+
+    /**
      * Check whether the given API Product is indeed an API Product and not an API
      * @param apiProductId the API Product ID to check
      * @throws APIManagementException if the artifact corresponding to the given id is not found or it's not an API
@@ -874,6 +912,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             validateAPIProduct(apiProductId);
+            validateAPIProductOperationsPerLC(apiProvider.getAPIInfoByUUID(apiProductId).getStatus());
             APIRevision apiRevision = new APIRevision();
             apiRevision.setApiUUID(apiProductId);
             apiRevision.setDescription(apIRevisionDTO.getDescription());
@@ -909,6 +948,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         validateAPIProduct(apiProductId);
+        validateAPIProductOperationsPerLC(apiProvider.getAPIInfoByUUID(apiProductId).getStatus());
         apiProvider.deleteAPIProductRevision(apiProductId, revisionId, organization);
         List<APIRevision> apiRevisions = apiProvider.getAPIRevisions(apiProductId);
         APIRevisionListDTO apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiRevisions);
