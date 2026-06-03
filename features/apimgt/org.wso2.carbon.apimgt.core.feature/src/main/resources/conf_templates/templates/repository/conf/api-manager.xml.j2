@@ -1650,6 +1650,27 @@
         </SolaceConfig>
     {% endif %}
 
+    {% if apim.external_websub_hub is defined %}
+    <WebSubHubConfig>
+        {% if apim.external_websub_hub.url is defined %}
+        <url>{{apim.external_websub_hub.url}}</url>
+        {% endif %}
+        {% if apim.external_websub_hub.type is defined %}
+        <type>{{apim.external_websub_hub.type}}</type>
+        {% endif %}
+        {% if apim.external_websub_hub.disable_topic_context_prefix is defined %}
+        <disable_topic_context_prefix>{{apim.external_websub_hub.disable_topic_context_prefix}}</disable_topic_context_prefix>
+        {% endif %}
+        {% if apim.external_websub_hub.properties is defined %}
+        <WebSubHubProperties>
+            {% for key,value in apim.external_websub_hub.properties.items() %}
+            <{{key}}>{{value}}</{{key}}>
+            {% endfor %}
+        </WebSubHubProperties>
+        {% endif %}
+    </WebSubHubConfig>
+    {% endif %}
+
     {% if apim.devportal.application_attributes is defined %}
     <ApplicationConfiguration>
         <ApplicationAttributes>
@@ -1950,6 +1971,7 @@
             <Sequence>_throttle_out_handler_.xml</Sequence>
             <Sequence>_token_fault_.xml</Sequence>
             <Sequence>webhooksFaultSequence.xml</Sequence>
+            <Sequence>externalWebSubHubCaller.xml</Sequence>
             <Sequence>_block_api_handler_.xml</Sequence>
             <Sequence>_backend_failure_handler_.xml</Sequence>
             <Sequence>_opa_policy_failure_handler_.xml</Sequence>
