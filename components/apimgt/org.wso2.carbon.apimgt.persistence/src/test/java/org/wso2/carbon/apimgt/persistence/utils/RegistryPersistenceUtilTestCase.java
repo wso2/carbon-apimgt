@@ -256,4 +256,226 @@ public class RegistryPersistenceUtilTestCase {
                 + RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR + apiVersion
                 + RegistryConstants.PATH_SEPARATOR + "api";
     }
+
+    // =====================================================================
+    // Tests for extractApiSourcePath
+    // =====================================================================
+
+    @Test
+    public void testExtractApiSourcePath_SimpleUser() throws APIPersistenceException {
+        String path = "/apimgt/applicationdata/provider/admin/MyAPI/1.0/api";
+        String result = RegistryPersistenceUtil.extractApiSourcePath(path);
+        Assert.assertEquals("/apimgt/applicationdata/provider/admin/MyAPI/1.0", result);
+    }
+
+    @Test
+    public void testExtractApiSourcePath_EmailDomainUser() throws APIPersistenceException {
+        String path = "/apimgt/applicationdata/provider/user-AT-gmail.com/MyAPI/1.0/api";
+        String result = RegistryPersistenceUtil.extractApiSourcePath(path);
+        Assert.assertEquals("/apimgt/applicationdata/provider/user-AT-gmail.com/MyAPI/1.0", result);
+    }
+
+    @Test
+    public void testExtractApiSourcePath_TenantEmailUser() throws APIPersistenceException {
+        String path = "/apimgt/applicationdata/provider/user-AT-gmail.com-AT-abc.com/MyAPI/1.0/api";
+        String result = RegistryPersistenceUtil.extractApiSourcePath(path);
+        Assert.assertEquals("/apimgt/applicationdata/provider/user-AT-gmail.com-AT-abc.com/MyAPI/1.0", result);
+    }
+
+    @Test
+    public void testExtractApiSourcePath_SecondaryUserstore() throws APIPersistenceException {
+        String path = "/apimgt/applicationdata/provider/WSO2.COM/user/MyAPI/1.0/api";
+        String result = RegistryPersistenceUtil.extractApiSourcePath(path);
+        Assert.assertEquals("/apimgt/applicationdata/provider/WSO2.COM/user/MyAPI/1.0", result);
+    }
+
+    @Test
+    public void testExtractApiSourcePath_SecondaryUserstoreEmailTenant() throws APIPersistenceException {
+        String path = "/apimgt/applicationdata/provider/WSO2.COM/user-AT-gmail.com-AT-abc.com/MyAPI/1.0/api";
+        String result = RegistryPersistenceUtil.extractApiSourcePath(path);
+        Assert.assertEquals("/apimgt/applicationdata/provider/WSO2.COM/user-AT-gmail.com-AT-abc.com/MyAPI/1.0",
+                result);
+    }
+
+    @Test
+    public void testExtractApiSourcePath_ApiNameContainsApi() throws APIPersistenceException {
+        String path = "/apimgt/applicationdata/provider/admin/api-test/1.0/api";
+        String result = RegistryPersistenceUtil.extractApiSourcePath(path);
+        Assert.assertEquals("/apimgt/applicationdata/provider/admin/api-test/1.0", result);
+    }
+
+    @Test(expected = APIPersistenceException.class)
+    public void testExtractApiSourcePath_NullPath() throws APIPersistenceException {
+        RegistryPersistenceUtil.extractApiSourcePath(null);
+    }
+
+    @Test(expected = APIPersistenceException.class)
+    public void testExtractApiSourcePath_NoApiSuffix() throws APIPersistenceException {
+        RegistryPersistenceUtil.extractApiSourcePath("/registry/resource/provider/admin/MyAPI/1.0");
+    }
+
+    // =====================================================================
+    // Tests for extractProvider (2-arg)
+    // =====================================================================
+
+    @Test
+    public void testExtractProvider_SimpleUser() throws Exception {
+        String path = "/apimgt/applicationdata/provider/admin/MyAPI/1.0/api";
+        String result = RegistryPersistenceUtil.extractProviderFromPath(path, "MyAPI", "1.0");
+        Assert.assertEquals("admin", result);
+    }
+
+    @Test
+    public void testExtractProvider_EmailDomainUser() throws Exception {
+        String path = "/apimgt/applicationdata/provider/user-AT-gmail.com/MyAPI/1.0/api";
+        String result = RegistryPersistenceUtil.extractProviderFromPath(path, "MyAPI", "1.0");
+        Assert.assertEquals("user-AT-gmail.com", result);
+    }
+
+    @Test
+    public void testExtractProvider_TenantEmailUser() throws Exception {
+        String path = "/apimgt/applicationdata/provider/user-AT-gmail.com-AT-abc.com/MyAPI/1.0/api";
+        String result = RegistryPersistenceUtil.extractProviderFromPath(path, "MyAPI", "1.0");
+        Assert.assertEquals("user-AT-gmail.com-AT-abc.com", result);
+    }
+
+    @Test
+    public void testExtractProvider_SecondaryUserstore() throws Exception {
+        String path = "/apimgt/applicationdata/provider/WSO2.COM/user/MyAPI/1.0/api";
+        String result = RegistryPersistenceUtil.extractProviderFromPath(path, "MyAPI", "1.0");
+        Assert.assertEquals("WSO2.COM/user", result);
+    }
+
+    @Test
+    public void testExtractProvider_SecondaryUserstoreEmailTenant() throws Exception {
+        String path = "/apimgt/applicationdata/provider/WSO2.COM/user-AT-gmail.com-AT-abc.com/MyAPI/1.0/api";
+        String result = RegistryPersistenceUtil.extractProviderFromPath(path, "MyAPI", "1.0");
+        Assert.assertEquals("WSO2.COM/user-AT-gmail.com-AT-abc.com", result);
+    }
+
+    // =====================================================================
+    // Edge cases: API name matches provider name or version
+    // =====================================================================
+
+    @Test
+    public void testExtractProvider_ApiNameSameAsSimpleProvider() throws Exception {
+        // Provider is "admin", API name is also "admin"
+        String path = "/apimgt/applicationdata/provider/admin/admin/1.0/api";
+        String result = RegistryPersistenceUtil.extractProviderFromPath(path, "admin", "1.0");
+        Assert.assertEquals("admin", result);
+    }
+
+    @Test
+    public void testExtractProvider_ApiNameSameAsSecondaryUserstoreUsername() throws Exception {
+        // Provider is "WSO2.COM/admin", API name is "admin"
+        String path = "/apimgt/applicationdata/provider/WSO2.COM/admin/admin/1.0/api";
+        String result = RegistryPersistenceUtil.extractProviderFromPath(path, "admin", "1.0");
+        Assert.assertEquals("WSO2.COM/admin", result);
+    }
+
+    @Test
+    public void testExtractProvider_ApiNameAndVersionSameAsProvider() throws Exception {
+        // Pathological case: provider "admin", API name "admin", version "admin"
+        String path = "/apimgt/applicationdata/provider/admin/admin/admin/api";
+        String result = RegistryPersistenceUtil.extractProviderFromPath(path, "admin", "admin");
+        Assert.assertEquals("admin", result);
+    }
+
+    @Test
+    public void testExtractProvider_ApiNameSameAsTenantProvider() throws Exception {
+        // Provider is "admin-AT-abc.com", API name is "admin-AT-abc.com" (unlikely but valid)
+        String path = "/apimgt/applicationdata/provider/admin-AT-abc.com/admin-AT-abc.com/1.0/api";
+        String result = RegistryPersistenceUtil.extractProviderFromPath(path, "admin-AT-abc.com", "1.0");
+        Assert.assertEquals("admin-AT-abc.com", result);
+    }
+
+    // =====================================================================
+    // Tests for extractProviderFromPath (4-arg, with revision path support)
+    // =====================================================================
+
+    @Test
+    public void testExtractProvider3Arg_CurrentPath() throws APIPersistenceException {
+        String path = "/apimgt/applicationdata/provider/admin/MyAPI/1.0/api";
+        String result = RegistryPersistenceUtil.extractProviderFromPath(path, "MyAPI", "1.0", registry);
+        Assert.assertEquals("admin", result);
+    }
+
+    @Test
+    public void testExtractProvider3Arg_RevisionPath() throws Exception {
+        String revisionPath = "/apimgt/applicationdata/apis/88e758b7-6924-4e9f-8882-431070b6492b/1/api";
+        String currentApiPath = "/apimgt/applicationdata/provider/admin/MyAPI/1.0/api";
+        Mockito.when(GovernanceUtils.getArtifactPath(registry,
+                "88e758b7-6924-4e9f-8882-431070b6492b")).thenReturn(currentApiPath);
+        String result = RegistryPersistenceUtil.extractProviderFromPath(revisionPath, "MyAPI", "1.0", registry);
+        Assert.assertEquals("admin", result);
+    }
+
+    @Test
+    public void testExtractProvider3Arg_RevisionPathWithEmailUser() throws Exception {
+        String revisionPath = "/apimgt/applicationdata/apis/88e758b7-6924-4e9f-8882-431070b6492b/1/api";
+        String currentApiPath = "/apimgt/applicationdata/provider/user-AT-gmail.com-AT-abc.com/MyAPI/1.0/api";
+        Mockito.when(GovernanceUtils.getArtifactPath(registry,
+                "88e758b7-6924-4e9f-8882-431070b6492b")).thenReturn(currentApiPath);
+        String result = RegistryPersistenceUtil.extractProviderFromPath(revisionPath, "MyAPI", "1.0", registry);
+        Assert.assertEquals("user-AT-gmail.com-AT-abc.com", result);
+    }
+
+    @Test
+    public void testExtractProvider4Arg_RevisionPathWithSecondaryUserstore() throws Exception {
+        String revisionPath = "/apimgt/applicationdata/apis/88e758b7-6924-4e9f-8882-431070b6492b/1/api";
+        String currentApiPath = "/apimgt/applicationdata/provider/WSO2.COM/admin/MyAPI/1.0/api";
+        Mockito.when(GovernanceUtils.getArtifactPath(registry,
+                 "88e758b7-6924-4e9f-8882-431070b6492b")).thenReturn(currentApiPath);
+        String result = RegistryPersistenceUtil.extractProviderFromPath(revisionPath, "MyAPI", "1.0", registry);
+        Assert.assertEquals("WSO2.COM/admin", result);
+    }
+
+    @Test
+    public void testExtractProvider4Arg_RevisionPathWithSecondaryUserstoreEmailTenant() throws Exception {
+        String revisionPath = "/apimgt/applicationdata/apis/88e758b7-6924-4e9f-8882-431070b6492b/2/api";
+        String currentApiPath = "/apimgt/applicationdata/provider/WSO2.COM/user-AT-gmail.com-AT-abc.com/MyAPI/1.0/api";
+        Mockito.when(GovernanceUtils.getArtifactPath(registry,
+                "88e758b7-6924-4e9f-8882-431070b6492b")).thenReturn(currentApiPath);
+        String result = RegistryPersistenceUtil.extractProviderFromPath(revisionPath, "MyAPI", "1.0", registry);
+        Assert.assertEquals("WSO2.COM/user-AT-gmail.com-AT-abc.com", result);
+    }
+
+    // =====================================================================
+    // Tests for getProviderFromArtifact — handles state B (@) and state A/C (-AT-)
+    // =====================================================================
+
+    @Test
+    public void testGetProviderFromArtifact_NormalProvider() throws GovernanceException {
+        GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifact();
+        // "admin" has no @ so should remain "admin"
+        String result = RegistryPersistenceUtil.getProviderFromArtifact(artifact);
+        Assert.assertEquals("admin", result);
+    }
+
+    @Test
+    public void testGetProviderFromArtifact_StateBRawAt() throws GovernanceException {
+        GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifact();
+        // Simulate state B: raw @ stored after pre-fix provider change
+        artifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER, "publisher@abc.com");
+        String result = RegistryPersistenceUtil.getProviderFromArtifact(artifact);
+        Assert.assertEquals("publisher-AT-abc.com", result);
+    }
+
+    @Test
+    public void testGetProviderFromArtifact_StateC_AlreadyEncoded() throws GovernanceException {
+        GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifact();
+        // Simulate state C: -AT- stored after post-fix provider change
+        artifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER, "publisher-AT-abc.com");
+        String result = RegistryPersistenceUtil.getProviderFromArtifact(artifact);
+        Assert.assertEquals("publisher-AT-abc.com", result);
+    }
+
+    @Test
+    public void testGetProviderFromArtifact_MultipleAtSigns() throws GovernanceException {
+        GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifact();
+        // Simulate tenant email user: user@gmail.com@abc.com
+        artifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER, "user@gmail.com@abc.com");
+        String result = RegistryPersistenceUtil.getProviderFromArtifact(artifact);
+        Assert.assertEquals("user-AT-gmail.com-AT-abc.com", result);
+    }
 }
