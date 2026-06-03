@@ -27604,7 +27604,7 @@ public class ApiMgtDAO {
 
     private void addGatewayPolicyMapping(Connection connection, List<OperationPolicy> gatewayPolicyList,
                                          String policyMappingUUID, String orgId)
-            throws SQLException, APIMgtResourceNotFoundException {
+            throws SQLException, APIMgtResourceNotFoundException, APIManagementException {
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(
                 SQLConstants.GatewayPolicyConstants.ADD_GATEWAY_POLICY_MAPPING)) {
@@ -27625,7 +27625,14 @@ public class ApiMgtDAO {
                     preparedStatement.setString(2, gatewayGlobalPolicy.getPolicyId());
                     preparedStatement.setInt(3, gatewayGlobalPolicy.getOrder());
                     preparedStatement.setString(4, gatewayGlobalPolicy.getDirection());
-                    preparedStatement.setString(5, paramJSON);
+
+                    try (InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8))) {
+                        preparedStatement.setBinaryStream(5, paramInputStream, paramJSON.length());
+                    } catch (IOException e) {
+                        log.error("Error creating or reading InputStream for Global policy");
+                        throw new APIManagementException("Error processing Global policy parameters for policy ID: " +
+                                gatewayGlobalPolicy.getPolicyId(), e);
+                    }
                     preparedStatement.addBatch();
                 }
             }
