@@ -27626,8 +27626,9 @@ public class ApiMgtDAO {
                     preparedStatement.setInt(3, gatewayGlobalPolicy.getOrder());
                     preparedStatement.setString(4, gatewayGlobalPolicy.getDirection());
 
-                    try (InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8))) {
-                        preparedStatement.setBinaryStream(5, paramInputStream, paramJSON.length());
+                    byte[] paramBytes = paramJSON.getBytes(StandardCharsets.UTF_8);
+                    try (InputStream paramInputStream = new ByteArrayInputStream(paramBytes)) {
+                        preparedStatement.setBinaryStream(5, paramInputStream, paramBytes.length);
                     } catch (IOException e) {
                         log.error("Error creating or reading InputStream for Global policy");
                         throw new APIManagementException("Error processing Global policy parameters for policy ID: " +
