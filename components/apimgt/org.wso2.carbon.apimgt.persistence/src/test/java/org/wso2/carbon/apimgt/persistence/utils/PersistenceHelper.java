@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2026, WSO2 LLC. (https://www.wso2.com)
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package org.wso2.carbon.apimgt.persistence.utils;
 
 import javax.xml.namespace.QName;
 
+import org.wso2.carbon.apimgt.persistence.APIConstants;
 import org.wso2.carbon.apimgt.persistence.GenericArtifactWrapper;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
@@ -114,12 +115,37 @@ public class PersistenceHelper {
         artifact.setId("88e758b7-6924-4e9f-8882-431070b6492b");
         artifact.setAttribute("overview_audience", "PUBLIC");
         artifact.setAttribute("overview_audiences", null);
-        
+
+        // Set artifact path to match the registry path format
+        String provider = RegistryPersistenceUtil.replaceEmailDomain(
+                artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));
+        ((GenericArtifactWrapper) artifact).setArtifactPath(APIConstants.API_ROOT_LOCATION + "/" + provider + "/"
+                + artifact.getAttribute(APIConstants.API_OVERVIEW_NAME) + "/"
+                + artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION) + "/api");
+
         return artifact;
     }
+
+    /**
+     * Creates a sample API artifact with the given provider. The artifact path is set to match
+     * the provider after email domain encoding. Use this to test different username formats
+     * (e.g., email domain users in super tenant).
+     */
+    public static GenericArtifact getSampleAPIArtifactWithProvider(String providerName)
+            throws GovernanceException {
+        GenericArtifact artifact = getSampleAPIArtifact();
+        artifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER,
+                RegistryPersistenceUtil.replaceEmailDomain(providerName));
+        String encodedProvider = RegistryPersistenceUtil.replaceEmailDomain(providerName);
+        ((GenericArtifactWrapper) artifact).setArtifactPath(APIConstants.API_ROOT_LOCATION + "/" + encodedProvider + "/"
+                + artifact.getAttribute(APIConstants.API_OVERVIEW_NAME) + "/"
+                + artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION) + "/api");
+        return artifact;
+    }
+
     public static GenericArtifact getSampleAPIArtifactForTenant() throws GovernanceException {
 
-        GenericArtifact artifact = new GenericArtifactImpl(new QName("", "PizzaShackAPI", ""),
+        GenericArtifact artifact = new GenericArtifactWrapper(new QName("", "PizzaShackAPI", ""),
                 "application/vnd.wso2-api+xml");
         artifact.setAttribute("overview_endpointSecured","false");
         artifact.setAttribute("overview_transports","http,https");
@@ -205,11 +231,19 @@ public class PersistenceHelper {
         artifact.setAttribute("overview_endpointUsername",null);
         artifact.setAttribute("overview_status", "PUBLISHED");
         artifact.setId("88e758b7-6924-4e9f-8882-431070b6492b");
+
+        // Set artifact path to match the registry path format
+        String tenantProvider = RegistryPersistenceUtil.replaceEmailDomain(
+                artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));
+        ((GenericArtifactWrapper) artifact).setArtifactPath(APIConstants.API_ROOT_LOCATION + "/" + tenantProvider + "/"
+                + artifact.getAttribute(APIConstants.API_OVERVIEW_NAME) + "/"
+                + artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION) + "/api");
+
         return artifact;
     }
-    
+
     public static GenericArtifact getSampleAPIProductArtifact() throws GovernanceException {
-        GenericArtifact artifact = new GenericArtifactImpl(new QName("", "APIProductTest", ""),
+        GenericArtifact artifact = new GenericArtifactWrapper(new QName("", "APIProductTest", ""),
                 "application/vnd.wso2-api+xml");
         artifact.setAttribute("overview_transports","http,https");
         artifact.setAttribute("monetizationProperties","{}");
@@ -249,6 +283,14 @@ public class PersistenceHelper {
         artifact.setAttribute("overview_enableSchemaValidation","false");
         artifact.setId("88e758b7-6924-4e9f-8882-431070b6492b");
         artifact.setAttribute("overview_audiences", null);
+
+        // Set artifact path to match the registry path format
+        String productProvider = RegistryPersistenceUtil.replaceEmailDomain(
+                artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));
+        ((GenericArtifactWrapper) artifact).setArtifactPath(APIConstants.API_ROOT_LOCATION + "/" + productProvider + "/"
+                + artifact.getAttribute(APIConstants.API_OVERVIEW_NAME) + "/"
+                + artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION) + "/api");
+
         return artifact;
     }
     
