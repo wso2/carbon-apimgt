@@ -237,10 +237,13 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
     private boolean isNoAuthMCPRequest(String method) throws McpException {
 
         switch (method) {
-            case APIConstants.MCP.METHOD_TOOL_CALL:
-                return false;
-            default:
+            case APIConstants.MCP.METHOD_INITIALIZE:
+            case APIConstants.MCP.METHOD_TOOL_LIST:
+            case APIConstants.MCP.METHOD_NOTIFICATION_INITIALIZED:
+            case APIConstants.MCP.METHOD_PING:
                 return true;
+            default:
+                return false;
         }
     }
 }
