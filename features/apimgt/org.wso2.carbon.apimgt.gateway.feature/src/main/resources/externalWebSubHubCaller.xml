@@ -4,16 +4,17 @@
         <property name="uri.var.external.websub.hub.endpoint" expression="get-property('external.websub.hub.endpoint')"/>
         <property name="GIVEN_HUB_SECRET" expression="//xformValues//hub.secret"/>
 
-        <!-- Prefix external hub topics with API context (sanitized: '/' -> '_') to avoid collisions across APIs.
-             Note: Synapse uses Jaxen (XPath 1.0), so we use translate() instead of replace(). -->
-        <property name="WEBSUB_TOPIC_PREFIX" expression="fn:translate(fn:substring-after(get-property('REST_API_CONTEXT'), '/'), '/', '_')" scope="default" type="STRING"/>
-
-        <!-- Build effective prefix with separator; empty if customer skips context prefixing. -->
-        <property name="TOPIC_PREFIX" expression="fn:concat(get-property('WEBSUB_TOPIC_PREFIX'), '_')" scope="default" type="STRING"/>
+        <!-- Build effective prefix with separator; skip computation entirely if context prefixing is disabled. -->
         <filter source="$ctx:disable.topic.context.prefix" regex="true">
             <then>
                 <property name="TOPIC_PREFIX" value="" scope="default" type="STRING"/>
             </then>
+            <else>
+                <!-- Prefix external hub topics with API context (sanitized: '/' -> '_') to avoid collisions across APIs.
+                     Note: Synapse uses Jaxen (XPath 1.0), so we use translate() instead of replace(). -->
+                <property name="WEBSUB_TOPIC_PREFIX" expression="fn:translate(fn:substring-after(get-property('REST_API_CONTEXT'), '/'), '/', '_')" scope="default" type="STRING"/>
+                <property name="TOPIC_PREFIX" expression="fn:concat(get-property('WEBSUB_TOPIC_PREFIX'), '_')" scope="default" type="STRING"/>
+            </else>
         </filter>
 
         <!-- Normalize SUBSCRIBER_TOPIC: strip leading '/' if present. Subscribers may send
