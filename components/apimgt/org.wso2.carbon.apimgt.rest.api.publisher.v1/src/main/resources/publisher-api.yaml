@@ -19817,7 +19817,7 @@ components:
             apim:tier_view: View throttling policies
             apim:tier_manage: View, update and delete throttling policies
             apim:api_list_view: View, Retrieve API list
-            apim:api_definition_view: View, Retrieve API definition
+            apim:api_definition_view: View API definition (swagger, wsdl, asyncapi, graphql) and SOAP-to-REST resource policies
             apim:subscription_approval_view: Approve subscription creation requests
             apim:subscription_approval_manage: Approve subscription update requests
             apim:llm_provider_read: Read LLM Providers
@@ -19832,10 +19832,10 @@ components:
             apim:mcp_server_publish: Publish MCP Server
             apim:mcp_server_manage: Manage all MCP Server related operations
             apim:mcp_server_import_export: Import and export MCP Server related operations
-            apim:api_metadata_view: View API listing and configuration (excludes documents, deployments, lifecycle, comments)
+            apim:api_metadata_view: View API listing, configuration, and definition resources (swagger, wsdl, graphql, certificates, mediation policies, monetization). Excludes lifecycle, revisions, deployments, documents, comments, subscriptions, shared scopes, and common operation policies.
             apim:api_create_only: Create new APIs
             apim:api_update: Update API configuration (metadata, endpoints, certificates, labels, themes, definition)
-            apim:api_definition_update: Update API definition (swagger, graphql, wsdl, asyncapi)
+            apim:api_definition_update: Update API definition (swagger, graphql, wsdl, asyncapi) and SOAP-to-REST resource policies
             apim:api_version_create: Create new API version
             apim:api_revision_create: Create API revision
             apim:api_revision_delete: Delete API revision
@@ -19843,7 +19843,7 @@ components:
             apim:api_deploy_view: View API deployment status and revisions
             apim:api_lifecycle_view: View API lifecycle state and transition history
             apim:api_lifecycle_manage: Change API lifecycle state
-            apim:api_product_metadata_view: View API Product listing and configuration (excludes documents, deployments, lifecycle)
+            apim:api_product_metadata_view: View API Product listing and configuration (excludes documents, deployments, lifecycle, comments)
             apim:api_product_create: Create API Product
             apim:api_product_update: Update API Product configuration (metadata, thumbnail)
             apim:api_product_delete: Delete API Product
@@ -19875,4 +19875,4 @@ components:
             apim:mcp_server_deploy_view: View MCP Server deployment status and revisions
             apim:mcp_server_lifecycle_view: View MCP Server lifecycle state and transition history
             apim:mcp_server_lifecycle_manage: Change MCP Server lifecycle state
-            apim:mcp_server_metadata_view: View MCP Server listing and configuration (excludes documents, deployments, lifecycle)
+            apim:mcp_server_metadata_view: View MCP Server listing and configuration (excludes documents, deployments, lifecycle, comments)
