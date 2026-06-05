@@ -60,7 +60,7 @@ OrganizationsApiService delegate = new OrganizationsApiServiceImpl();
     @ApiOperation(value = "Delete an Organization", notes = "Delete an organization by organization Id ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:organization_manage", description = "Manage Organizations"),
+            @AuthorizationScope(scope = "apim:organization_manage", description = "Create, update and delete organizations. View requires apim:organization_read"),
             @AuthorizationScope(scope = "apim:organization_delete", description = "Delete organizations")
         })
     }, tags={ "Organizations",  })
@@ -96,7 +96,7 @@ OrganizationsApiService delegate = new OrganizationsApiServiceImpl();
     @ApiOperation(value = "Update an Organization", notes = "Update an organization by organization Id ", response = OrganizationDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:organization_manage", description = "Manage Organizations"),
+            @AuthorizationScope(scope = "apim:organization_manage", description = "Create, update and delete organizations. View requires apim:organization_read"),
             @AuthorizationScope(scope = "apim:organization_update", description = "Update organizations")
         })
     }, tags={ "Organizations",  })
@@ -115,7 +115,7 @@ OrganizationsApiService delegate = new OrganizationsApiServiceImpl();
     @ApiOperation(value = "Add an Organizations", notes = "Add a new organization ", response = OrganizationDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:organization_manage", description = "Manage Organizations"),
+            @AuthorizationScope(scope = "apim:organization_manage", description = "Create, update and delete organizations. View requires apim:organization_read"),
             @AuthorizationScope(scope = "apim:organization_create", description = "Create organizations")
         })
     }, tags={ "Organizations" })

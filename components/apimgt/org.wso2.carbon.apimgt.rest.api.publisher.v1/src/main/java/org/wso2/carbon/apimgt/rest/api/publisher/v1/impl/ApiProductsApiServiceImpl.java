@@ -871,14 +871,16 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
                         .get(RestApiConstants.USER_REST_API_SCOPES);
 
-        for (String scope : tokenScopes) {
-            if (RestApiConstants.PUBLISHER_SCOPE.equals(scope)
-                    || RestApiConstants.API_PRODUCT_IMPORT_EXPORT_SCOPE.equals(scope)
-                    || RestApiConstants.API_MANAGE_SCOPE.equals(scope)
-                    || RestApiConstants.ADMIN_SCOPE.equals(scope)
-                    || RestApiConstants.API_PRODUCT_LIFECYCLE_MANAGE_SCOPE.equals(scope)) {
-                updatePermittedForPublishedDeprecated = true;
-                break;
+        if (tokenScopes != null) {
+            for (String scope : tokenScopes) {
+                if (RestApiConstants.PUBLISHER_SCOPE.equals(scope)
+                        || RestApiConstants.API_PRODUCT_IMPORT_EXPORT_SCOPE.equals(scope)
+                        || RestApiConstants.API_MANAGE_SCOPE.equals(scope)
+                        || RestApiConstants.ADMIN_SCOPE.equals(scope)
+                        || RestApiConstants.API_PRODUCT_LIFECYCLE_MANAGE_SCOPE.equals(scope)) {
+                    updatePermittedForPublishedDeprecated = true;
+                    break;
+                }
             }
         }
         if (!updatePermittedForPublishedDeprecated && (

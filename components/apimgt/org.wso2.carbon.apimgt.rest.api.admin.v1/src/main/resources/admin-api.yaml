@@ -8202,13 +8202,13 @@ components:
             apim:keymanagers_manage: Manage Key Managers
             apim:api_provider_change: Retrieve and manage apis
             apim:admin_api_view: View Apis
-            apim:llm_provider_manage: Manage LLM Providers
+            apim:llm_provider_manage: Create, update and delete LLM providers. View requires apim:llm_provider_view
             apim:gov_policy_read: Retrieve governance policies
             apim:gov_policy_manage: Manage governance policies
             apim:gov_result_read: Retrieve governance results
             apim:gov_rule_read: Retrieve governance rules
             apim:gov_rule_manage: Manage governance rules
-            apim:organization_manage: Manage Organizations
+            apim:organization_manage: Create, update and delete organizations. View requires apim:organization_read
             apim:organization_read: Read Organizations
             apim:environment_create: Create gateway environments
             apim:environment_update: Update gateway environments

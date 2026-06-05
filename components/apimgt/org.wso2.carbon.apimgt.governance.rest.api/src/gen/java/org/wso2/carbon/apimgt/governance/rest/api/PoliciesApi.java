@@ -103,7 +103,8 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get a specific governance policy", notes = "Retrieves details of a specific governance policy identified by the policyId.", response = APIMGovernancePolicyDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:gov_policy_read", description = "Read governance policies")
+            @AuthorizationScope(scope = "apim:gov_policy_read", description = "Read governance policies"),
+            @AuthorizationScope(scope = "apim:gov_policy_manage", description = "Manage governance policies")
         })
     }, tags={ "Governance Policies",  })
     @ApiResponses(value = { 

@@ -529,6 +529,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_policy_read
+            - apim:gov_policy_manage
     put:
       summary: Update a specific governance policy
       description: Updates the details of an existing governance policy identified by the policyId.

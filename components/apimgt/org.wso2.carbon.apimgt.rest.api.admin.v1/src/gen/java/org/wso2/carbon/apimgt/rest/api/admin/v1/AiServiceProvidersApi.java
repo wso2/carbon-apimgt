@@ -45,7 +45,7 @@ AiServiceProvidersApiService delegate = new AiServiceProvidersApiServiceImpl();
     @ApiOperation(value = "Add a AI Service provider", notes = "Add a new AI Service provider ", response = AIServiceProviderResponseDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:llm_provider_manage", description = "Manage LLM Providers"),
+            @AuthorizationScope(scope = "apim:llm_provider_manage", description = "Create, update and delete LLM providers. View requires apim:llm_provider_view"),
             @AuthorizationScope(scope = "apim:llm_provider_create", description = "Create AI and LLM service providers")
         })
     }, tags={ "AIServiceProviders",  })
@@ -63,7 +63,7 @@ AiServiceProvidersApiService delegate = new AiServiceProvidersApiServiceImpl();
     @ApiOperation(value = "Delete a AI Service Provider", notes = "Delete a AI Service Provider by aiServiceProviderId ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:llm_provider_manage", description = "Manage LLM Providers"),
+            @AuthorizationScope(scope = "apim:llm_provider_manage", description = "Create, update and delete LLM providers. View requires apim:llm_provider_view"),
             @AuthorizationScope(scope = "apim:llm_provider_delete", description = "Delete AI and LLM service providers")
         })
     }, tags={ "AIServiceProvider",  })
@@ -113,7 +113,7 @@ AiServiceProvidersApiService delegate = new AiServiceProvidersApiServiceImpl();
     @ApiOperation(value = "Update an AI Service provider", notes = "Update a AI Service provider by AIServiceProviderId ", response = AIServiceProviderResponseDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:llm_provider_manage", description = "Manage LLM Providers"),
+            @AuthorizationScope(scope = "apim:llm_provider_manage", description = "Create, update and delete LLM providers. View requires apim:llm_provider_view"),
             @AuthorizationScope(scope = "apim:llm_provider_update", description = "Update AI and LLM service providers")
         })
     }, tags={ "AIServiceProvider" })
