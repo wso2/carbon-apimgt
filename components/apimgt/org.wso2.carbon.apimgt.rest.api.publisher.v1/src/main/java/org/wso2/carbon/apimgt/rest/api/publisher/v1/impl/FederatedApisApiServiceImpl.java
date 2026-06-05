@@ -41,6 +41,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -110,15 +111,49 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
 
     /**
      * Background executor for discovery work.
-     * Single-thread keeps resource usage bounded; discovery is I/O-bound, not CPU-bound.
-     * Named thread aids log debugging.
+     * Fixed pool of 5 threads so multiple environments / tenants can discover concurrently.
+     * Discovery is network I/O-bound, so 5 threads cover most real-world multi-tenant deployments
+     * without significant resource overhead.
+     * Named thread prefix aids log debugging.
      */
     private static final ExecutorService DISCOVERY_EXECUTOR =
-            Executors.newSingleThreadExecutor(r -> {
+            Executors.newFixedThreadPool(5, r -> {
                 Thread t = new Thread(r, "federated-api-discovery-worker");
                 t.setDaemon(true);
                 return t;
             });
+
+    /**
+     * Active cleanup scheduler — runs every 5 minutes and removes tasks that have passed their
+     * TTL from both {@code TASK_STORE} and {@code ACTIVE_TASK_BY_ENV}.
+     *
+     * <p>Without this, a task would only be evicted when a <em>new</em> discovery is triggered
+     * for the same environment. Tasks for environments that are rarely touched would otherwise
+     * accumulate indefinitely in JVM heap memory.
+     */
+    static {
+        ScheduledExecutorService cleaner = Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread t = new Thread(r, "federated-api-discovery-cleaner");
+            t.setDaemon(true);
+            return t;
+        });
+        cleaner.scheduleAtFixedRate(() -> {
+            try {
+                TASK_STORE.forEach((taskId, task) -> {
+                    if (task.isExpired()) {
+                        TASK_STORE.remove(taskId);
+                        String envKey = task.organization + "|" + task.environment;
+                        // Only remove from active index if this exact task is occupying it
+                        ACTIVE_TASK_BY_ENV.remove(envKey, taskId);
+                    }
+                });
+            } catch (Exception e) {
+                // Use a local logger reference since this runs in a static context
+                LogFactory.getLog(FederatedApisApiServiceImpl.class)
+                        .error("Error during stale discovery task cleanup", e);
+            }
+        }, 5, 5, TimeUnit.MINUTES);
+    }
 
     // -----------------------------------------------------------------------
     // Endpoints
