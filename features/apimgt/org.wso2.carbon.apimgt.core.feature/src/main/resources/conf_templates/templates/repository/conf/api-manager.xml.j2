@@ -425,6 +425,11 @@
         <Enabled>{{apim.mcp.enable}}</Enabled>
     </MCP>
 
+    <FederatedAPIDiscovery>
+        <Enabled>{{apim.federated_api_discovery.enable}}</Enabled>
+        <EnableSchedulerDiscovery>{{apim.federated_api_discovery.enable_scheduler}}</EnableSchedulerDiscovery>
+    </FederatedAPIDiscovery>
+
     <!--
         Configurations relevant to enable rate limit feature.
         This enables to use resources considering subscription levels.

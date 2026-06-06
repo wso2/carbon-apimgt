@@ -18399,6 +18399,10 @@ components:
           type: boolean
           description: This indicates whether the MCP support is enabled or not.
           default: true
+        isFederatedAPIDiscoveryEnabled:
+          type: boolean
+          description: This indicates whether the Federated API Discovery is enabled or not.
+          default: true
         customProperties:
           type: array
           items:
