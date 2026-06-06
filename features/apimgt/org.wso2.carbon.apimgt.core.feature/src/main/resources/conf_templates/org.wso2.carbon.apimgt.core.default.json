@@ -286,6 +286,5 @@
   "apim.synapse_artifact_generator.thread_pool.queue_capacity": "50",
   "apim.certificate_manager.events_enabled": true,
   "apim.platform_gateway.versions": ["1.0.0"],
-  "apim.federated_api_discovery.enable": true,
   "apim.federated_api_discovery.enable_scheduler": false
 }

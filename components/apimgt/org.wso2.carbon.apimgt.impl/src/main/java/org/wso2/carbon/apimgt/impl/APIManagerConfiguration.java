@@ -182,7 +182,6 @@ public class APIManagerConfiguration {
     private String hashingAlgorithm = SHA_256;
     private boolean isTransactionCounterEnabled;
     private static boolean isMCPSupportEnabled = true;
-    private static boolean isFederatedAPIDiscoveryEnabled = true;
     private static boolean isFederatedAPIDiscoverySchedulerEnabled = false;
     private static String devportalMode = APIConstants.DEVPORTAL_MODE_HYBRID;
     private static volatile boolean isRuntimeReadOnly = false;
@@ -3205,18 +3204,10 @@ public class APIManagerConfiguration {
             log.debug("FederatedAPIDiscovery configuration element is null. Skipping configuration parsing.");
             return;
         }
-        OMElement enabledElement = omElement.getFirstChildWithName(new QName("Enabled"));
-        if (enabledElement != null && StringUtils.isNotEmpty(enabledElement.getText())) {
-            isFederatedAPIDiscoveryEnabled = Boolean.parseBoolean(enabledElement.getText().trim());
-        }
         OMElement schedulerEnabledElement = omElement.getFirstChildWithName(new QName("EnableSchedulerDiscovery"));
         if (schedulerEnabledElement != null && StringUtils.isNotEmpty(schedulerEnabledElement.getText())) {
             isFederatedAPIDiscoverySchedulerEnabled = Boolean.parseBoolean(schedulerEnabledElement.getText().trim());
         }
-    }
-
-    public boolean isFederatedAPIDiscoveryEnabled() {
-        return isFederatedAPIDiscoveryEnabled;
     }
 
     public boolean isFederatedAPIDiscoverySchedulerEnabled() {

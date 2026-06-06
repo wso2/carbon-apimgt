@@ -121,7 +121,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     }
                     APIManagerConfiguration apimConfig = ServiceReferenceHolder.getInstance()
                             .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-                    boolean schedulerEnabled = apimConfig != null && apimConfig.isFederatedAPIDiscoveryEnabled()
+                    boolean schedulerEnabled = apimConfig != null
                             && apimConfig.isFederatedAPIDiscoverySchedulerEnabled();
                     if (!schedulerEnabled) {
                         if (log.isDebugEnabled()) {
