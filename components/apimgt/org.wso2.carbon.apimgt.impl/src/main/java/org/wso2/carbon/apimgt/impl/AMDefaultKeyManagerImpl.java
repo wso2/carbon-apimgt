@@ -678,6 +678,10 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             return updatedClient.getClientSecret();
 
         } catch (KeyManagerClientException e) {
+            if (e.getStatusCode() == HttpStatus.SC_BAD_REQUEST) {
+                throw new APIManagementException("Regenerating consumer secret is not supported in the current mode",
+                        ExceptionCodes.OPERATION_NOT_SUPPORTED_FOR_MULTIPLE_CLIENT_SECRET_MODE);
+            }
             handleException("Error while generating new consumer secret", e);
         }
         return null;
@@ -783,6 +787,10 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 log.debug("Deleted consumer secret with secretId: " + secretId + " for clientId: " + clientId);
             }
         } catch (KeyManagerClientException e) {
+            if (e.getStatusCode() == HttpStatus.SC_NOT_FOUND) {
+                throw new APIManagementException("Consumer secret not found: " + secretId,
+                        ExceptionCodes.RESOURCE_NOT_FOUND);
+            }
             String errMsg = "Error while deleting consumer secret of clientId : " + clientId;
             throw new APIManagementException(errMsg, e, ExceptionCodes
                     .from(ExceptionCodes.CLIENT_SECRET_DELETION_FAILED, clientId));

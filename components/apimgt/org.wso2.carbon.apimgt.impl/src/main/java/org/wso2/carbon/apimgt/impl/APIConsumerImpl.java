@@ -5205,6 +5205,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             throws APIManagementException {
 
         APIKey apiKey = apiMgtDAO.getKeyMappingFromApplicationIdAndKeyMappingId(applicationId, keyMappingId);
+        if (apiKey == null) {
+            return null;
+        }
         String keyManagerId = apiKey.getKeyManager();
         String consumerKey = apiKey.getConsumerKey();
 

@@ -1647,6 +1647,11 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             throw new APIManagementException("The requested operation is not supported",
                     ExceptionCodes.OPERATION_NOT_SUPPORTED_FOR_SINGLE_CLIENT_SECRET_MODE);
         }
+        if (consumerSecretDeletionRequestDTO == null
+                || StringUtils.isBlank(consumerSecretDeletionRequestDTO.getSecretId())) {
+            RestApiUtil.handleBadRequest("secretId must be provided in the request body", log);
+            return null;
+        }
         if (log.isDebugEnabled()) {
             log.debug("Revoking consumer secret of application: " + applicationId
                     + " and key mapping: " + keyMappingId);
