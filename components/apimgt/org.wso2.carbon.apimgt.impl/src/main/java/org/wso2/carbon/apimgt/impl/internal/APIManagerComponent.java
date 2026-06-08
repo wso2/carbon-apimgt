@@ -215,7 +215,6 @@ public class APIManagerComponent {
             bundleContext.registerService(Notifier.class.getName(), new GatewayPolicyNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new LLMProviderNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new LabelNotifier(), null);
-            bundleContext.registerService(Notifier.class.getName(), new FederatedDiscoveryNotifier(), null);
             if (!configuration.getGatewayArtifactSynchronizerProperties().isTenantLoading()) {
                 bundleContext.registerService(Notifier.class.getName(), new TenantNotifier(), null);
             }

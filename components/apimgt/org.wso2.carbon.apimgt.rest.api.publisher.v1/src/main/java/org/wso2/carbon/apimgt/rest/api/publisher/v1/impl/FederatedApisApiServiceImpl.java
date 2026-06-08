@@ -26,10 +26,6 @@ import org.wso2.carbon.apimgt.api.FederatedAPIDiscoveryService;
 import org.wso2.carbon.apimgt.api.model.DiscoveredAPI;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.federatedDiscovery.FederatedDiscoveryTaskStore;
-import org.wso2.carbon.apimgt.impl.federatedDiscovery.FederatedDiscoveryTaskStore.DiscoveryTask;
-import org.wso2.carbon.apimgt.impl.notifier.events.FederatedDiscoverySyncEvent;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.FederatedApisApiService;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -84,16 +80,9 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
     // -----------------------------------------------------------------------
     // Task status constants
     // -----------------------------------------------------------------------
-    static final String STATUS_PENDING   = "PENDING";
-    static final String STATUS_COMPLETED = "COMPLETED";
-    static final String STATUS_FAILED    = "FAILED";
-
-    /**
-     * Unique identifier for this JVM node — used to avoid re-processing events that
-     * originated locally.  Falls back to a random UUID if the Carbon node-id property
-     * is not set (e.g. single-node dev mode).
-     */
-    static final String NODE_ID = System.getProperty("carbon.id", UUID.randomUUID().toString());
+    private static final String STATUS_PENDING   = "PENDING";
+    private static final String STATUS_COMPLETED = "COMPLETED";
+    private static final String STATUS_FAILED    = "FAILED";
 
     /**
      * TTL after which completed/failed tasks are evicted from the store (5 minutes).
@@ -101,7 +90,24 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
      */
     private static final long TASK_TTL_MILLIS = TimeUnit.MINUTES.toMillis(5);
 
-    // Shared state now resides in FederatedDiscoveryTaskStore.java in apimgt.impl to prevent circular bundle references
+    // -----------------------------------------------------------------------
+    // Shared, JVM-wide state
+    // Intentionally static so they survive across request threads.
+    // -----------------------------------------------------------------------
+
+    /**
+     * Primary task store: taskId → DiscoveryTask.
+     * Read by GET /status/{taskId}, written by POST /discover and the worker.
+     */
+    private static final ConcurrentHashMap<String, DiscoveryTask> TASK_STORE =
+            new ConcurrentHashMap<>();
+
+    /**
+     * Active-task index: "tenantOrg|envName" → taskId.
+     * Enables O(1) de-duplication. Evicted by the worker on completion/failure.
+     */
+    private static final ConcurrentHashMap<String, String> ACTIVE_TASK_BY_ENV =
+            new ConcurrentHashMap<>();
 
     /**
      * Background executor for discovery work.
@@ -117,7 +123,37 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
                 return t;
             });
 
-
+    /**
+     * Active cleanup scheduler — runs every 5 minutes and removes tasks that have passed their
+     * TTL from both {@code TASK_STORE} and {@code ACTIVE_TASK_BY_ENV}.
+     *
+     * <p>Without this, a task would only be evicted when a <em>new</em> discovery is triggered
+     * for the same environment. Tasks for environments that are rarely touched would otherwise
+     * accumulate indefinitely in JVM heap memory.
+     */
+    static {
+        ScheduledExecutorService cleaner = Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread t = new Thread(r, "federated-api-discovery-cleaner");
+            t.setDaemon(true);
+            return t;
+        });
+        cleaner.scheduleAtFixedRate(() -> {
+            try {
+                TASK_STORE.forEach((taskId, task) -> {
+                    if (task.isExpired()) {
+                        TASK_STORE.remove(taskId);
+                        String envKey = task.organization + "|" + task.environment;
+                        // Only remove from active index if this exact task is occupying it
+                        ACTIVE_TASK_BY_ENV.remove(envKey, taskId);
+                    }
+                });
+            } catch (Exception e) {
+                // Use a local logger reference since this runs in a static context
+                LogFactory.getLog(FederatedApisApiServiceImpl.class)
+                        .error("Error during stale discovery task cleanup", e);
+            }
+        }, 5, 5, TimeUnit.MINUTES);
+    }
 
     // -----------------------------------------------------------------------
     // Endpoints
@@ -141,9 +177,9 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
         evictStaleTask(envKey);
 
         // --- De-duplication check --------------------------------------------
-        String existingTaskId = FederatedDiscoveryTaskStore.ACTIVE_TASK_BY_ENV.get(envKey);
+        String existingTaskId = ACTIVE_TASK_BY_ENV.get(envKey);
         if (existingTaskId != null) {
-            DiscoveryTask existing = FederatedDiscoveryTaskStore.TASK_STORE.get(existingTaskId);
+            DiscoveryTask existing = TASK_STORE.get(existingTaskId);
             if (existing != null && STATUS_PENDING.equals(existing.status)) {
                 log.debug("Discovery already in progress for env [" + environment
                         + "] org [" + organization + "], returning existing taskId: " + existingTaskId);
@@ -165,11 +201,8 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
         String taskId = UUID.randomUUID().toString();
         DiscoveryTask task = new DiscoveryTask(taskId, environment, organization);
 
-        FederatedDiscoveryTaskStore.TASK_STORE.put(taskId, task);
-        FederatedDiscoveryTaskStore.ACTIVE_TASK_BY_ENV.put(envKey, taskId);
-
-        // --- Broadcast PENDING state to sibling CP nodes via JMS --------------
-        publishDiscoverySync(taskId, envKey, STATUS_PENDING, organization, null, null);
+        TASK_STORE.put(taskId, task);
+        ACTIVE_TASK_BY_ENV.put(envKey, taskId);
 
         // --- Submit to background worker --------------------------------------
         // Carbon context is thread-local; capture the tenant info before jumping threads.
@@ -195,7 +228,7 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
     public Response getDiscoveryTaskStatus(String taskId, MessageContext messageContext)
             throws APIManagementException {
 
-        DiscoveryTask task = FederatedDiscoveryTaskStore.TASK_STORE.get(taskId);
+        DiscoveryTask task = TASK_STORE.get(taskId);
         if (task == null) {
             return Response.status(Response.Status.NOT_FOUND)
                     .entity("{\"error\": \"Task not found or has expired: " + taskId + "\"}")
@@ -290,18 +323,12 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
             log.info("Discovery task [" + task.taskId + "] completed with "
                     + result.size() + " APIs.");
 
-            // Broadcast COMPLETED state (with full result) to sibling CP nodes
-            publishDiscoverySync(task.taskId, envKey, STATUS_COMPLETED, organization, result, null);
-
         } catch (Exception e) {
             task.markFailed(e.getMessage());
             log.error("Discovery task [" + task.taskId + "] failed: " + e.getMessage(), e);
-
-            // Broadcast FAILED state to sibling CP nodes
-            publishDiscoverySync(task.taskId, envKey, STATUS_FAILED, organization, null, e.getMessage());
         } finally {
             // Always release the active-task lock so the next discovery can proceed
-            FederatedDiscoveryTaskStore.ACTIVE_TASK_BY_ENV.remove(envKey, task.taskId);
+            ACTIVE_TASK_BY_ENV.remove(envKey, task.taskId);
             PrivilegedCarbonContext.endTenantFlow();
         }
     }
@@ -311,15 +338,15 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
     // -----------------------------------------------------------------------
 
     private void evictStaleTask(String envKey) {
-        String staleId = FederatedDiscoveryTaskStore.ACTIVE_TASK_BY_ENV.get(envKey);
+        String staleId = ACTIVE_TASK_BY_ENV.get(envKey);
         if (staleId == null) {
             return;
         }
-        DiscoveryTask stale = FederatedDiscoveryTaskStore.TASK_STORE.get(staleId);
+        DiscoveryTask stale = TASK_STORE.get(staleId);
         if (stale == null || stale.isExpired()) {
-            FederatedDiscoveryTaskStore.ACTIVE_TASK_BY_ENV.remove(envKey, staleId);
+            ACTIVE_TASK_BY_ENV.remove(envKey, staleId);
             if (stale != null) {
-                FederatedDiscoveryTaskStore.TASK_STORE.remove(staleId);
+                TASK_STORE.remove(staleId);
             }
         }
     }
@@ -389,43 +416,73 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
     }
 
     // -----------------------------------------------------------------------
-    // JMS event publishing
+    // Inner class: DiscoveryTask
     // -----------------------------------------------------------------------
 
     /**
-     * Publishes a {@link FederatedDiscoverySyncEvent} to the notification JMS topic.
-     * The event is received by {@code FederatedDiscoveryJMSMessageListener} on every sibling
-     * CP node, which calls the appropriate {@code applyRemoteTask*()} method below.
+     * Lightweight value object representing one async discovery job.
      *
-     * @param taskId       task UUID
-     * @param envKey       "organization|environmentName" composite key
-     * @param status       PENDING | COMPLETED | FAILED
-     * @param organization tenant organization
-     * @param result       API list (non-null for COMPLETED events only)
-     * @param errorMessage failure reason (non-null for FAILED events only)
+     * <p>Fields are {@code volatile} so that the worker thread's writes are immediately
+     * visible to the HTTP-polling thread without synchronization overhead.
      */
-    private static void publishDiscoverySync(String taskId, String envKey, String status,
-            String organization, List<Map<String, Object>> result, String errorMessage) {
-        try {
-            FederatedDiscoverySyncEvent event =
-                    new FederatedDiscoverySyncEvent(taskId, envKey, status, organization, NODE_ID);
-            if (result != null) {
-                event.setResult(result);
+    private static class DiscoveryTask {
+
+        final String taskId;
+        final String environment;
+        final String organization;
+        final long createdAt;
+
+        volatile String status;
+        volatile List<Map<String, Object>> result;
+        volatile String errorMessage;
+        volatile long completedAt;
+
+        DiscoveryTask(String taskId, String environment, String organization) {
+            this.taskId = taskId;
+            this.environment = environment;
+            this.organization = organization;
+            this.status = STATUS_PENDING;
+            this.createdAt = System.currentTimeMillis();
+        }
+
+        void markCompleted(List<Map<String, Object>> apiList) {
+            this.result = apiList;
+            this.status = STATUS_COMPLETED;
+            this.completedAt = System.currentTimeMillis();
+        }
+
+        void markFailed(String error) {
+            this.errorMessage = error;
+            this.status = STATUS_FAILED;
+            this.completedAt = System.currentTimeMillis();
+        }
+
+        boolean isExpired() {
+            return !STATUS_PENDING.equals(status)
+                    && (System.currentTimeMillis() - completedAt) > TASK_TTL_MILLIS;
+        }
+
+        /** Minimal response for the 202 Accepted body. */
+        Map<String, Object> toStatusMap() {
+            Map<String, Object> m = new HashMap<>();
+            m.put("taskId", taskId);
+            m.put("status", status);
+            return m;
+        }
+
+        /** Full response for the GET /status/{taskId} poll endpoint. */
+        Map<String, Object> toResponseMap() {
+            Map<String, Object> m = new HashMap<>();
+            m.put("taskId", taskId);
+            m.put("status", status);
+            m.put("environment", environment);
+            if (STATUS_COMPLETED.equals(status) && result != null) {
+                m.put("result", result);
             }
-            if (errorMessage != null) {
-                event.setErrorMessage(errorMessage);
+            if (STATUS_FAILED.equals(status) && errorMessage != null) {
+                m.put("error", errorMessage);
             }
-            APIUtil.sendNotification(event, APIConstants.NotifierType.FEDERATED_DISCOVERY.name());
-            if (log.isDebugEnabled()) {
-                log.debug("Published federated-discovery-sync event: taskId=" + taskId
-                        + " status=" + status);
-            }
-        } catch (Exception e) {
-            // Non-fatal: the local node already has the correct state; only siblings are affected
-            log.warn("Failed to publish federated-discovery-sync JMS event for task [" + taskId
-                    + "]: " + e.getMessage(), e);
+            return m;
         }
     }
-
-
 }

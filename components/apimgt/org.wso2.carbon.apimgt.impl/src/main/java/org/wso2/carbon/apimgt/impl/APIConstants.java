@@ -3259,8 +3259,7 @@ public final class APIConstants {
         LLM_PROVIDER,
         LABEL,
         TENANT,
-        API_KEY,
-        FEDERATED_DISCOVERY
+        API_KEY
     }
 
     // Supported Event Types
@@ -3313,8 +3312,7 @@ public final class APIConstants {
         API_KEY_ASSOCIATION_CREATE,
         API_KEY_ASSOCIATION_DELETE,
         API_KEY_REGENERATE,
-        API_KEY_DELETE,
-        FEDERATED_DISCOVERY_SYNC
+        API_KEY_DELETE
         
     }
 

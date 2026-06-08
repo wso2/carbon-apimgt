@@ -82,13 +82,6 @@ public class JMSListenerStartupShutdownListener implements ServerStartupObserver
                     jmsTransportHandlerForEventHub.subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_NOTIFICATION,
                             new CertificateManagerJMSMessageListener());
                 }
-                // Always subscribe for federated API discovery task-state synchronization across CP nodes
-                if (jmsTransportHandlerForEventHub != null) {
-                    jmsTransportHandlerForEventHub.subscribeForJmsEvents(
-                            APIConstants.TopicNames.TOPIC_NOTIFICATION,
-                            new FederatedDiscoveryJMSMessageListener());
-                    log.info("Subscribed FederatedDiscoveryJMSMessageListener to the notification topic.");
-                }
             }
         } else {
             log.info("Running on migration enabled mode: Stopped at JMSListenerStartupShutdownListener completed");

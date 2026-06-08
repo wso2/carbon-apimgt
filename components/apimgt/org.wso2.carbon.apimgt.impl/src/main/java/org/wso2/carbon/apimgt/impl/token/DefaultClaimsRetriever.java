@@ -63,22 +63,12 @@ public class DefaultClaimsRetriever implements ClaimsRetriever {
                 getAPIManagerConfiguration().getFirstProperty(APIConstants.JWT_CLAIM_CACHE_EXPIRY);
         if(!isClaimsCacheInitialized && apimClaimsCacheExpiry != null) {init();
             isClaimsCacheInitialized = true;
-            try {
-                Iterable<Cache<?, ?>> availableCaches = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCaches();
-                for (Cache cache : availableCaches) {
-                    if (cache.getName().equalsIgnoreCase(APIConstants.CLAIMS_APIM_CACHE)) {
-                        return cache;
-                    }
-                }
-                return Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
-                         createCacheBuilder(APIConstants.CLAIMS_APIM_CACHE)
-                        .setExpiry(CacheConfiguration.ExpiryType.MODIFIED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
-                                Long.parseLong(apimClaimsCacheExpiry)))
-                        .setExpiry(CacheConfiguration.ExpiryType.ACCESSED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
-                                Long.parseLong(apimClaimsCacheExpiry))).setStoreByValue(false).build();
-            } catch (javax.cache.CacheException e) {
-                return Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.CLAIMS_APIM_CACHE);
-            }
+           return Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
+                    createCacheBuilder(APIConstants.CLAIMS_APIM_CACHE)
+                   .setExpiry(CacheConfiguration.ExpiryType.MODIFIED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
+                           Long.parseLong(apimClaimsCacheExpiry)))
+                   .setExpiry(CacheConfiguration.ExpiryType.ACCESSED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
+                           Long.parseLong(apimClaimsCacheExpiry))).setStoreByValue(false).build();
         }else {
            return Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.CLAIMS_APIM_CACHE);
         }
