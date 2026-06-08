@@ -51,6 +51,7 @@ import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.restapi.publisher.ApisApiServiceImplUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -679,8 +680,18 @@ public class RestApiPublisherUtils {
             validationResponse = new APIDefinitionValidationResponse();
             validationResponse.setParser(new OAS3Parser());
 
+            Boolean appendMCPPathValue = apiDtoTypeWrapper.getAppendMCPPath();
+            boolean appendMCPPath;
+            if (appendMCPPathValue != null) {
+                appendMCPPath = appendMCPPathValue;
+            } else {
+                appendMCPPath = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                        .getAPIManagerConfiguration().isMCPPathAppendEnabled();
+                apiDtoTypeWrapper.setAppendMCPPath(appendMCPPath);
+            }
             MCPServerValidationResponseDTO result =
-                    PublisherCommonUtils.validateMCPServer(definitionUrl, securityInfo, false, organization);
+                    PublisherCommonUtils.validateMCPServer(definitionUrl, securityInfo, false, appendMCPPath,
+                            organization);
 
             boolean isValid = Boolean.TRUE.equals(result.isIsValid());
             validationResponse.setValid(isValid);

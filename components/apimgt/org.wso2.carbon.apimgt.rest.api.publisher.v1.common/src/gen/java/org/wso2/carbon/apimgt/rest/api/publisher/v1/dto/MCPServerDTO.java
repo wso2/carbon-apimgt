@@ -208,6 +208,7 @@ return null;
     private String gatewayVendor = null;
     private String gatewayType = "wso2/synapse";
     private Boolean initiatedFromGateway = false;
+    private Boolean appendMCPPath = null;
 
   /**
    * UUID of the MCP Server
@@ -1112,6 +1113,24 @@ return null;
     this.initiatedFromGateway = initiatedFromGateway;
   }
 
+  /**
+   * Whether to append /mcp to the backend endpoint URL when routing requests. When true, the gateway appends /mcp to the configured endpoint URL. When false (or absent), the endpoint URL is used as-is. This field is only relevant when the server-side feature flag (apim.mcp.mcp_path_append_enabled) is enabled. Once set at creation time this value is immutable; the field is read-only in the edit UI. 
+   **/
+  public MCPServerDTO appendMCPPath(Boolean appendMCPPath) {
+    this.appendMCPPath = appendMCPPath;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Whether to append /mcp to the backend endpoint URL when routing requests. When true, the gateway appends /mcp to the configured endpoint URL. When false (or absent), the endpoint URL is used as-is. This field is only relevant when the server-side feature flag (apim.mcp.mcp_path_append_enabled) is enabled. Once set at creation time this value is immutable; the field is read-only in the edit UI. ")
+  @JsonProperty("appendMCPPath")
+  public Boolean isAppendMCPPath() {
+    return appendMCPPath;
+  }
+  public void setAppendMCPPath(Boolean appendMCPPath) {
+    this.appendMCPPath = appendMCPPath;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -1172,12 +1191,13 @@ return null;
         Objects.equals(keyManagers, mcPServer.keyManagers) &&
         Objects.equals(gatewayVendor, mcPServer.gatewayVendor) &&
         Objects.equals(gatewayType, mcPServer.gatewayType) &&
-        Objects.equals(initiatedFromGateway, mcPServer.initiatedFromGateway);
+        Objects.equals(initiatedFromGateway, mcPServer.initiatedFromGateway) &&
+        Objects.equals(appendMCPPath, mcPServer.appendMCPPath);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, displayName, description, context, endpointConfig, version, provider, lifeCycleStatus, hasThumbnail, isDefaultVersion, isRevision, revisionedMCPServerId, revisionId, enableSchemaValidation, audiences, transport, tags, policies, organizationPolicies, throttlingPolicy, authorizationHeader, apiKeyHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, visibleOrganizations, mcpServerPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, protocolVersion, createdTime, lastUpdatedTimestamp, lastUpdatedTime, subtypeConfiguration, scopes, operations, categories, keyManagers, gatewayVendor, gatewayType, initiatedFromGateway);
+    return Objects.hash(id, name, displayName, description, context, endpointConfig, version, provider, lifeCycleStatus, hasThumbnail, isDefaultVersion, isRevision, revisionedMCPServerId, revisionId, enableSchemaValidation, audiences, transport, tags, policies, organizationPolicies, throttlingPolicy, authorizationHeader, apiKeyHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, visibleOrganizations, mcpServerPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, protocolVersion, createdTime, lastUpdatedTimestamp, lastUpdatedTime, subtypeConfiguration, scopes, operations, categories, keyManagers, gatewayVendor, gatewayType, initiatedFromGateway, appendMCPPath);
   }
 
   @Override
@@ -1236,6 +1256,7 @@ return null;
     sb.append("    gatewayVendor: ").append(toIndentedString(gatewayVendor)).append("\n");
     sb.append("    gatewayType: ").append(toIndentedString(gatewayType)).append("\n");
     sb.append("    initiatedFromGateway: ").append(toIndentedString(initiatedFromGateway)).append("\n");
+    sb.append("    appendMCPPath: ").append(toIndentedString(appendMCPPath)).append("\n");
     sb.append("}");
     return sb.toString();
   }

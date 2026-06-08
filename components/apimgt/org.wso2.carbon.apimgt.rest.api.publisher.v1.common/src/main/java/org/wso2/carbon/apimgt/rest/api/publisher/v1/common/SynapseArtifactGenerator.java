@@ -300,6 +300,10 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                         API api = APIMappingUtil.fromMCPServerDTOtoAPI(mcpServerDTO,
                                 mcpServerDTO.getProvider());
                         api.setUuid(mcpServerDTO.getId());
+                        if (Boolean.TRUE.equals(mcpServerDTO.isAppendMCPPath())) {
+                            api.getMetadata().put(APIConstants.MCP.MCP_PATH_APPENDED_METADATA_KEY,
+                                    Boolean.TRUE.toString());
+                        }
                         String openApiDefinition = ImportUtils.loadSwaggerFile(extractedFolderPath);
                         api.setSwaggerDefinition(openApiDefinition);
                         gatewayAPIDTO = TemplateBuilderUtil.retrieveGatewayAPIDto(api, environment,

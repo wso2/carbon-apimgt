@@ -23,6 +23,7 @@ public class MCPServerValidationRequestDTO   {
   
     private String url = null;
     private SecurityInfoDTO securityInfo = null;
+    private Boolean appendMCPPath = null;
 
   /**
    * The URL to be validated.
@@ -60,6 +61,24 @@ public class MCPServerValidationRequestDTO   {
     this.securityInfo = securityInfo;
   }
 
+  /**
+   * Whether to append /mcp when connecting to the server for validation. If omitted, the server falls back to the value of the apim.mcp.mcp_path_append_enabled config (false by default). 
+   **/
+  public MCPServerValidationRequestDTO appendMCPPath(Boolean appendMCPPath) {
+    this.appendMCPPath = appendMCPPath;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Whether to append /mcp when connecting to the server for validation. If omitted, the server falls back to the value of the apim.mcp.mcp_path_append_enabled config (false by default). ")
+  @JsonProperty("appendMCPPath")
+  public Boolean isAppendMCPPath() {
+    return appendMCPPath;
+  }
+  public void setAppendMCPPath(Boolean appendMCPPath) {
+    this.appendMCPPath = appendMCPPath;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -71,12 +90,13 @@ public class MCPServerValidationRequestDTO   {
     }
     MCPServerValidationRequestDTO mcPServerValidationRequest = (MCPServerValidationRequestDTO) o;
     return Objects.equals(url, mcPServerValidationRequest.url) &&
-        Objects.equals(securityInfo, mcPServerValidationRequest.securityInfo);
+        Objects.equals(securityInfo, mcPServerValidationRequest.securityInfo) &&
+        Objects.equals(appendMCPPath, mcPServerValidationRequest.appendMCPPath);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(url, securityInfo);
+    return Objects.hash(url, securityInfo, appendMCPPath);
   }
 
   @Override
@@ -86,6 +106,7 @@ public class MCPServerValidationRequestDTO   {
     
     sb.append("    url: ").append(toIndentedString(url)).append("\n");
     sb.append("    securityInfo: ").append(toIndentedString(securityInfo)).append("\n");
+    sb.append("    appendMCPPath: ").append(toIndentedString(appendMCPPath)).append("\n");
     sb.append("}");
     return sb.toString();
   }

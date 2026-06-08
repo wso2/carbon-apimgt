@@ -54,13 +54,16 @@ public class MCPInitializerAndToolFetcher {
     private final String authHeaderName;
     private final String authHeaderValue;
     private final boolean secure;
+    private final boolean appendMCPPath;
 
-    public MCPInitializerAndToolFetcher(String mcpServerURL, String header, String value, boolean isSecure) {
+    public MCPInitializerAndToolFetcher(String mcpServerURL, String header, String value, boolean isSecure,
+                                        boolean appendMCPPath) {
 
         this.mcpServerUrl = mcpServerURL;
         this.authHeaderName = header;
         this.authHeaderValue = value;
         this.secure = isSecure;
+        this.appendMCPPath = appendMCPPath;
     }
 
     /**
@@ -69,7 +72,7 @@ public class MCPInitializerAndToolFetcher {
      * @return non-null array of tools (empty if none)
      * @throws APIManagementException on URL, I/O, or protocol errors
      */
-    public JSONObject initializeAndFetchTools() throws APIManagementException {
+public JSONObject initializeAndFetchTools() throws APIManagementException {
 
         URL endpoint;
         try {
@@ -159,9 +162,11 @@ public class MCPInitializerAndToolFetcher {
     private JSONObject sendJsonRpcRequest(CloseableHttpClient httpClient, String targetUrl, JSONObject jsonBody,
                                           String sessionId) throws Exception {
 
-        targetUrl = targetUrl.endsWith("/") ?
-                targetUrl + APIConstants.MCP.MCP_RESOURCES_MCP_WITHOUT_TRAILING_SLASH :
-                targetUrl + APIConstants.MCP.MCP_RESOURCES_MCP;
+        if (appendMCPPath) {
+            targetUrl = targetUrl.endsWith("/") ?
+                    targetUrl + APIConstants.MCP.MCP_RESOURCES_MCP_WITHOUT_TRAILING_SLASH :
+                    targetUrl + APIConstants.MCP.MCP_RESOURCES_MCP;
+        }
         HttpPost request = new HttpPost(targetUrl);
         request.setHeader(APIConstants.MCP.HEADER_CONTENT_TYPE,
                 ContentType.APPLICATION_JSON.withCharset(StandardCharsets.UTF_8).toString());
