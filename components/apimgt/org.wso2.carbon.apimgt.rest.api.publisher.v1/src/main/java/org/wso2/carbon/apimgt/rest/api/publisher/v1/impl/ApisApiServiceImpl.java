@@ -1122,41 +1122,6 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     /**
-     * Validate that a write operation on a shared endpoint is permitted based on lifecycle state and entity type.
-     * Used by endpoints that handle APIs, API Products, and MCP Servers via ApiTypeWrapper. The lifecycle_manage
-     * scope is checked against the entity-specific scope: apim:api_lifecycle_manage for APIs,
-     * apim:api_product_lifecycle_manage for API Products, and apim:mcp_server_lifecycle_manage for MCP Servers.
-     *
-     * @param apiTypeWrapper wrapper for the entity being modified
-     * @throws APIManagementException if the operation is not permitted in the given state
-     */
-    private void validateAPIOperationsPerLC(ApiTypeWrapper apiTypeWrapper) throws APIManagementException {
-        String status = apiTypeWrapper.getStatus();
-        boolean updatePermittedForPublishedDeprecated = false;
-        String[] tokenScopes =
-                (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
-                        .get(RestApiConstants.USER_REST_API_SCOPES);
-
-        if (tokenScopes != null) {
-            for (String scope : tokenScopes) {
-                if (RestApiConstants.PUBLISHER_SCOPE.equals(scope)
-                        || RestApiConstants.API_IMPORT_EXPORT_SCOPE.equals(scope)
-                        || RestApiConstants.API_MANAGE_SCOPE.equals(scope)
-                        || RestApiConstants.ADMIN_SCOPE.equals(scope)
-                        || RestApiConstants.API_LIFECYCLE_MANAGE_SCOPE.equals(scope)) {
-                    updatePermittedForPublishedDeprecated = true;
-                    break;
-                }
-            }
-        }
-        if (!updatePermittedForPublishedDeprecated && (
-                APIConstants.PUBLISHED.equals(status)
-                        || APIConstants.DEPRECATED.equals(status))) {
-            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.API_UPDATE_FORBIDDEN_PER_LC, status));
-        }
-    }
-
-    /**
      * Get all types and fields of the GraphQL Schema of a given API
      *
      * @param apiId          apiId
@@ -1345,7 +1310,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     APIConstants.API_IDENTIFIER_TYPE);
             apiTypeWrapper.setOrganization(organization);
             //validate API update operation permitted based on the LC state
-            validateAPIOperationsPerLC(apiTypeWrapper);
+            validateAPIOperationsPerLC(apiTypeWrapper.getStatus());
 
             ClientCertificateDTO clientCertificateDTO = CertificateRestApiUtils.preValidateClientCertificate(alias,
                     keyType, apiTypeWrapper, organization);
@@ -1443,7 +1408,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     APIConstants.API_IDENTIFIER_TYPE);
             apiTypeWrapper.setOrganization(organization);
             //validate API update operation permitted based on the LC state
-            validateAPIOperationsPerLC(apiTypeWrapper);
+            validateAPIOperationsPerLC(apiTypeWrapper.getStatus());
 
             String userName = RestApiCommonUtil.getLoggedInUsername();
             int tenantId = APIUtil.getInternalOrganizationId(organization);
@@ -1586,7 +1551,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     APIConstants.API_IDENTIFIER_TYPE);
             apiTypeWrapper.setOrganization(organization);
             //validate API update operation permitted based on the LC state
-            validateAPIOperationsPerLC(apiTypeWrapper);
+            validateAPIOperationsPerLC(apiTypeWrapper.getStatus());
 
             String userName = RestApiCommonUtil.getLoggedInUsername();
             String base64EncodedCert = CertificateRestApiUtils.generateEncodedCertificate(certificateInputStream);
