@@ -29,6 +29,8 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.jwt.RevokedJWTDataHolder;
 import org.wso2.carbon.apimgt.impl.jwt.RevokedJWTTokensRetriever;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -129,12 +131,17 @@ public class CPTokenRevocationMessageListener implements MessageListener {
         } else if (APIConstants.API_KEY_AUTH_TYPE.equals(tokenType) || APIConstants.JWT.equals(tokenType)) {
             RevokedJWTDataHolder.getInstance().addRevokedJWTToMap(revokedToken, expiryTime);
             try {
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(
+                        MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
                 CacheProvider.getRESTAPITokenCache().remove(revokedToken);
                 if (log.isDebugEnabled()) {
                     log.debug("Removed revoked token from REST API token cache.");
                 }
             } catch (Exception e) {
                 log.warn("Error while removing revoked token from REST API token cache.", e);
+            } finally {
+                PrivilegedCarbonContext.endTenantFlow();
             }
         }
         }
