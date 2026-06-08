@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.gateway.jwt;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.impl.jwt.RevokedJWTDataHolder;
 
 import java.util.Iterator;
 import java.util.Map;
