@@ -58,6 +58,7 @@ import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.http.apache.ApacheHttpClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.regions.providers.DefaultAwsRegionProviderChain;
+import software.amazon.awssdk.retries.StandardRetryStrategy;
 import software.amazon.awssdk.services.lambda.LambdaClient;
 import software.amazon.awssdk.services.lambda.model.InvocationType;
 import software.amazon.awssdk.services.lambda.model.InvokeRequest;
@@ -133,13 +134,7 @@ public class AWSLambdaMediator extends AbstractMediator implements ManagedLifecy
             log.debug("AWS Lambda proxy response mapping enabled: " + proxyResponseMappingEnabled);
         }
 
-        // Validate resource timeout and set client configuration
-        if (resourceTimeout.toMillis() < 1000 || resourceTimeout.toMillis() > 900000) {
-            setResourceTimeout(APIConstants.AWS_DEFAULT_CONNECTION_TIMEOUT);
-        }
-        ClientOverrideConfiguration clientConfig = ClientOverrideConfiguration.builder()
-                .apiCallTimeout(resourceTimeout)
-                .build();
+        ClientOverrideConfiguration clientConfig = buildClientOverrideConfiguration(config);
 
         if (StringUtils.isEmpty(accessKey) && StringUtils.isEmpty(secretKey)) {
             if (log.isDebugEnabled()) {
@@ -306,6 +301,53 @@ public class AWSLambdaMediator extends AbstractMediator implements ManagedLifecy
         }
 
         return true;
+    }
+
+    /**
+     * Validates timeout settings and builds the client override configuration with optional retry policy from deployment.toml.
+     * Falls back to AWS SDK defaults if not configured or invalid.
+     * Note: This method has a side effect - it corrects resourceTimeout if out of range.
+     *
+     * @param config API Manager configuration
+     * @return configured ClientOverrideConfiguration
+     */
+    private ClientOverrideConfiguration buildClientOverrideConfiguration(APIManagerConfiguration config) {
+        // Validate resource timeout and set client configuration
+        if (resourceTimeout.toMillis() < 1000 || resourceTimeout.toMillis() > 900000) {
+            log.warn("AWS Lambda resource timeout out of range (1s-900s): " + resourceTimeout.toMillis()
+                    + "ms. Using default: " + APIConstants.AWS_DEFAULT_CONNECTION_TIMEOUT + "ms.");
+            setResourceTimeout(APIConstants.AWS_DEFAULT_CONNECTION_TIMEOUT);
+        }
+        ClientOverrideConfiguration.Builder clientConfigBuilder = ClientOverrideConfiguration.builder()
+                .apiCallTimeout(resourceTimeout);
+
+        // Read retry configuration from config
+        String retryMaxAttemptsConfig = config.getFirstProperty(APIConstants.AWS_LAMBDA_RETRY_MAX_ATTEMPTS);
+
+        if (StringUtils.isNotEmpty(retryMaxAttemptsConfig)) {
+            try {
+                int maxAttempts = Integer.parseInt(retryMaxAttemptsConfig);
+                if (maxAttempts >= 1) {
+                    StandardRetryStrategy retryStrategy = StandardRetryStrategy.builder()
+                            .maxAttempts(maxAttempts)
+                            .build();
+                    clientConfigBuilder.retryStrategy(retryStrategy);
+                    if (log.isDebugEnabled()) {
+                        log.debug("AWS Lambda retry strategy configured with max attempts: " + maxAttempts);
+                    }
+                } else {
+                    log.warn("AWS Lambda RetryMaxAttempts must be >= 1, received: " + maxAttempts
+                            + ". Falling back to AWS SDK default.");
+                }
+            } catch (NumberFormatException nfe) {
+                log.warn("Invalid AWS Lambda RetryMaxAttempts: " + retryMaxAttemptsConfig
+                        + ". Falling back to AWS SDK default.");
+            }
+        } else {
+            log.debug("AWS Lambda RetryMaxAttempts not configured. Using AWS SDK default.");
+        }
+
+        return clientConfigBuilder.build();
     }
 
     /**

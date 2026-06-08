@@ -472,8 +472,14 @@ public class PublisherCommonUtils {
     private static void handleExistingApiSubtype(API apiToUpdate, API originalAPI, APIProvider apiProvider)
             throws APIManagementException {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Handling existing API subtype for API: " + apiToUpdate.getId().getApiName());
+        }
+        populateExistingSchemaDefinitions(apiToUpdate, originalAPI.getUriTemplates());
+
         Set<URITemplate> uriTemplates = apiToUpdate.getUriTemplates();
         if (uriTemplates.isEmpty()) {
+            log.error("No URI templates defined for API: " + apiToUpdate.getId().getApiName());
             throw new APIManagementException("No URI templates defined for existing API subtype.");
         }
 
@@ -3248,13 +3254,37 @@ public class PublisherCommonUtils {
         for (org.wso2.carbon.apimgt.api.model.Scope scope : scopes) {
             String roles = scope.getRoles();
             if (roles != null) {
+                boolean scopeBindingNeedsUpdate = false;
+                List<String> correctedRoles = new ArrayList<>();
                 for (String aRole : roles.split(",")) {
-                    boolean isValidRole = APIUtil.isRoleNameExist(RestApiCommonUtil.getLoggedInUsername(), aRole);
-                    if (!isValidRole) {
-                        String errorMessage = "Role '" + aRole + "' Does not exist.";
-                        throw new APIManagementException(errorMessage,
-                                ExceptionCodes.from(ExceptionCodes.ROLE_OF_SCOPE_DOES_NOT_EXIST, aRole));
+                    String correctedRole = aRole;
+                    boolean prefixCorrected = false;
+                    if (aRole.contains("/")) {
+                        String[] roleParts = aRole.split("/", 2);
+                        String prefix = roleParts[0];
+                        if ("APPLICATION".equalsIgnoreCase(prefix) && !"Application".equals(prefix)) {
+                            correctedRole = "Application/" + roleParts[1];
+                            prefixCorrected = true;
+                        }
                     }
+
+                    boolean isValidRole = APIUtil.isRoleNameExist(RestApiCommonUtil.getLoggedInUsername(),
+                            correctedRole);
+                    if (!isValidRole) {
+                        String errorMessage = "Role '" + correctedRole + "' Does not exist.";
+                        throw new APIManagementException(errorMessage,
+                                ExceptionCodes.from(ExceptionCodes.ROLE_OF_SCOPE_DOES_NOT_EXIST, correctedRole));
+                    }
+
+                    if (prefixCorrected) {
+                        scopeBindingNeedsUpdate = true;
+                    }
+                    correctedRoles.add(correctedRole);
+                }
+
+                if (scopeBindingNeedsUpdate) {
+                    scope.setRoles(String.join(",", correctedRoles));
+                    apiProvider.updateSharedScope(scope, organization);
                 }
             }
         }

@@ -820,6 +820,18 @@ public class ImportUtils {
                     Backend importedBackend = importedBackends.get(0);
                     Backend backend = new Backend(oldBackend);
                     backend.setEndpointConfig(importedBackend.getEndpointConfig());
+                    String importedDefinition = importedBackend.getDefinition();
+                    if (StringUtils.isNotBlank(importedDefinition)) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Validating and updating backend definition for API: " + targetApi.getUuid());
+                        }
+                        retrieveValidatedSwaggerDefinition(importedDefinition);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Backend API definition validated successfully for backend: "
+                                    + targetApi.getUuid());
+                        }
+                        backend.setDefinition(importedDefinition);
+                    }
                     PublisherCommonUtils.updateMCPServerBackend(targetApi.getUuid(), oldBackend, backend,
                             organization, apiProvider);
                 }
@@ -2013,10 +2025,8 @@ public class ImportUtils {
         try {
             OperationPolicyDefinition synapseGatewayDefinition = null;
             OperationPolicyDefinition ccGatewayDefinition = null;
-            String[] fileLocations = pathToArchive.split("/");
 
-            // File names of all types should be the same
-            String fileName = fileLocations[fileLocations.length - 1];
+            String fileName = new File(pathToArchive).getName();
             policySpecification = getOperationPolicySpecificationFromFile(pathToArchive, fileName);
             if (policySpecification == null) {
                 throw new APIManagementException("Policy Specification Cannot be null",
