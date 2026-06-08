@@ -103,14 +103,8 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
             String maskedToken = message.get(RestApiConstants.MASKED_TOKEN).toString();
             URL basePath = new URL(message.get(APIConstants.BASE_PATH).toString());
 
-            // Reject revoked tokens — unexpected exceptions fail-open so bugs never block a valid request
-            try {
-                if (isRevoked(signedJWTInfo, jwtTokenIdentifier, maskedToken)) {
-                    return false;
-                }
-            } catch (Exception e) {
-                log.error("Unexpected error during revocation check, proceeding with token validation: "
-                        + maskedToken, e);
+            if (isRevoked(signedJWTInfo, jwtTokenIdentifier, maskedToken)) {
+                return false;
             }
 
             //Validate token

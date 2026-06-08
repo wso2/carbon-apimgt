@@ -62,7 +62,7 @@ public class CPTokenRevocationMessageListener implements MessageListener {
 
                     if (APIConstants.TopicNames.TOPIC_TOKEN_REVOCATION
                             .equalsIgnoreCase(jmsDestination.getTopicName())) {
-                        if (payloadData.get(APIConstants.REVOKED_TOKEN_KEY).asText() != null) {
+                        if (!payloadData.path(APIConstants.REVOKED_TOKEN_KEY).isMissingNode()) {
                             handleRevokedTokenMessage(payloadData.get(APIConstants.REVOKED_TOKEN_KEY).asText(),
                                     payloadData.get(APIConstants.REVOKED_TOKEN_EXPIRY_TIME).asLong(),
                                     payloadData.get(APIConstants.REVOKED_TOKEN_TYPE).asText());
@@ -90,60 +90,60 @@ public class CPTokenRevocationMessageListener implements MessageListener {
             }
 
             if (APIConstants.NotificationEvent.CONSUMER_APP_REVOCATION_EVENT.equals(tokenType)) {
-            HashMap<String, Object> revokedTokenMap = base64Decode(revokedToken);
-            if (revokedTokenMap.containsKey(APIConstants.NotificationEvent.CONSUMER_KEY) &&
-                    revokedTokenMap.get(APIConstants.NotificationEvent.CONSUMER_KEY) != null &&
-                    revokedTokenMap.containsKey(APIConstants.NotificationEvent.REVOCATION_TIME) &&
-                    revokedTokenMap.get(APIConstants.NotificationEvent.REVOCATION_TIME) != null) {
+                HashMap<String, Object> revokedTokenMap = base64Decode(revokedToken);
+                if (revokedTokenMap.containsKey(APIConstants.NotificationEvent.CONSUMER_KEY) &&
+                        revokedTokenMap.get(APIConstants.NotificationEvent.CONSUMER_KEY) != null &&
+                        revokedTokenMap.containsKey(APIConstants.NotificationEvent.REVOCATION_TIME) &&
+                        revokedTokenMap.get(APIConstants.NotificationEvent.REVOCATION_TIME) != null) {
+                    try {
+                        RevokedJWTDataHolder.getInstance().addRevokedConsumerKeyToMap(
+                                (String) revokedTokenMap.get(APIConstants.NotificationEvent.CONSUMER_KEY),
+                                convertRevokedTime(revokedTokenMap));
+                    } catch (NumberFormatException e) {
+                        log.warn("Event dropped due to unsupported value type for "
+                                + APIConstants.NotificationEvent.REVOCATION_TIME + " : "
+                                + revokedTokenMap.get(APIConstants.NotificationEvent.REVOCATION_TIME));
+                    }
+                }
+            } else if (APIConstants.NotificationEvent.SUBJECT_ENTITY_REVOCATION_EVENT.equals(tokenType)) {
+                HashMap<String, Object> revokedTokenMap = base64Decode(revokedToken);
+                if (revokedTokenMap.get(APIConstants.NotificationEvent.ENTITY_TYPE) != null &&
+                        revokedTokenMap.get(APIConstants.NotificationEvent.REVOCATION_TIME) != null &&
+                        revokedTokenMap.get(APIConstants.NotificationEvent.ENTITY_ID) != null) {
+                    String entityType = (String) revokedTokenMap.get(APIConstants.NotificationEvent.ENTITY_TYPE);
+                    long revocationTime = 0;
+                    try {
+                        revocationTime = convertRevokedTime(revokedTokenMap);
+                    } catch (NumberFormatException e) {
+                        log.warn("Event dropped due to unsupported value type for "
+                                + APIConstants.NotificationEvent.REVOCATION_TIME + " : "
+                                + revokedTokenMap.get(APIConstants.NotificationEvent.REVOCATION_TIME));
+                        return;
+                    }
+                    String entityId = (String) revokedTokenMap.get(APIConstants.NotificationEvent.ENTITY_ID);
+                    if (APIConstants.NotificationEvent.ENTITY_TYPE_USER_ID.equals(entityType)) {
+                        RevokedJWTDataHolder.getInstance().addRevokedSubjectEntityUserToMap(entityId, revocationTime);
+                    } else if (APIConstants.NotificationEvent.ENTITY_TYPE_CLIENT_ID.equals(entityType)) {
+                        RevokedJWTDataHolder.getInstance()
+                                .addRevokedSubjectEntityConsumerAppToMap(entityId, revocationTime);
+                    }
+                }
+            } else if (APIConstants.API_KEY_AUTH_TYPE.equals(tokenType) || APIConstants.JWT.equals(tokenType)) {
+                RevokedJWTDataHolder.getInstance().addRevokedJWTToMap(revokedToken, expiryTime);
                 try {
-                    RevokedJWTDataHolder.getInstance().addRevokedConsumerKeyToMap(
-                            (String) revokedTokenMap.get(APIConstants.NotificationEvent.CONSUMER_KEY),
-                            convertRevokedTime(revokedTokenMap));
-                } catch (NumberFormatException e) {
-                    log.warn("Event dropped due to unsupported value type for "
-                            + APIConstants.NotificationEvent.REVOCATION_TIME + " : "
-                            + revokedTokenMap.get(APIConstants.NotificationEvent.REVOCATION_TIME));
+                    PrivilegedCarbonContext.startTenantFlow();
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(
+                            MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+                    CacheProvider.getRESTAPITokenCache().remove(revokedToken);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Removed revoked token from REST API token cache.");
+                    }
+                } catch (Exception e) {
+                    log.warn("Error while removing revoked token from REST API token cache.", e);
+                } finally {
+                    PrivilegedCarbonContext.endTenantFlow();
                 }
             }
-        } else if (APIConstants.NotificationEvent.SUBJECT_ENTITY_REVOCATION_EVENT.equals(tokenType)) {
-            HashMap<String, Object> revokedTokenMap = base64Decode(revokedToken);
-            if (revokedTokenMap.get(APIConstants.NotificationEvent.ENTITY_TYPE) != null &&
-                    revokedTokenMap.get(APIConstants.NotificationEvent.REVOCATION_TIME) != null &&
-                    revokedTokenMap.get(APIConstants.NotificationEvent.ENTITY_ID) != null) {
-                String entityType = (String) revokedTokenMap.get(APIConstants.NotificationEvent.ENTITY_TYPE);
-                long revocationTime = 0;
-                try {
-                    revocationTime = convertRevokedTime(revokedTokenMap);
-                } catch (NumberFormatException e) {
-                    log.warn("Event dropped due to unsupported value type for "
-                            + APIConstants.NotificationEvent.REVOCATION_TIME + " : "
-                            + revokedTokenMap.get(APIConstants.NotificationEvent.REVOCATION_TIME));
-                    return;
-                }
-                String entityId = (String) revokedTokenMap.get(APIConstants.NotificationEvent.ENTITY_ID);
-                if (APIConstants.NotificationEvent.ENTITY_TYPE_USER_ID.equals(entityType)) {
-                    RevokedJWTDataHolder.getInstance().addRevokedSubjectEntityUserToMap(entityId, revocationTime);
-                } else if (APIConstants.NotificationEvent.ENTITY_TYPE_CLIENT_ID.equals(entityType)) {
-                    RevokedJWTDataHolder.getInstance()
-                            .addRevokedSubjectEntityConsumerAppToMap(entityId, revocationTime);
-                }
-            }
-        } else if (APIConstants.API_KEY_AUTH_TYPE.equals(tokenType) || APIConstants.JWT.equals(tokenType)) {
-            RevokedJWTDataHolder.getInstance().addRevokedJWTToMap(revokedToken, expiryTime);
-            try {
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(
-                        MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-                CacheProvider.getRESTAPITokenCache().remove(revokedToken);
-                if (log.isDebugEnabled()) {
-                    log.debug("Removed revoked token from REST API token cache.");
-                }
-            } catch (Exception e) {
-                log.warn("Error while removing revoked token from REST API token cache.", e);
-            } finally {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
         }
     }
 
@@ -162,6 +162,10 @@ public class CPTokenRevocationMessageListener implements MessageListener {
 
     private long convertRevokedTime(HashMap<String, Object> revokedTokenMap) throws NumberFormatException {
 
-        return Long.parseLong((String) revokedTokenMap.get(APIConstants.NotificationEvent.REVOCATION_TIME));
+        Object value = revokedTokenMap.get(APIConstants.NotificationEvent.REVOCATION_TIME);
+        if (value instanceof Number) {
+            return ((Number) value).longValue();
+        }
+        return Long.parseLong(String.valueOf(value));
     }
 }
