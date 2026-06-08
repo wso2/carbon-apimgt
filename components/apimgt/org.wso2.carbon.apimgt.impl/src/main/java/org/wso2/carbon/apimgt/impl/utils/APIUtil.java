@@ -4253,9 +4253,20 @@ public final class APIUtil {
                 getCache(APIConstants.API_CONTEXT_CACHE).getCacheManager();
         if (!isContextCacheInitialized) {
             isContextCacheInitialized = true;
-            return contextCacheManager.<String, Boolean>createCacheBuilder(APIConstants.API_CONTEXT_CACHE_MANAGER).
-                    setExpiry(CacheConfiguration.ExpiryType.MODIFIED, new CacheConfiguration.Duration(TimeUnit.DAYS,
-                            APIConstants.API_CONTEXT_CACHE_EXPIRY_TIME_IN_DAYS)).setStoreByValue(false).build();
+            try {
+                Iterable<Cache<?, ?>> availableCaches = contextCacheManager.getCaches();
+                for (Cache cache : availableCaches) {
+                    if (cache.getName().equalsIgnoreCase(APIConstants.API_CONTEXT_CACHE_MANAGER)) {
+                        return cache;
+                    }
+                }
+                return contextCacheManager.<String, Boolean>createCacheBuilder(APIConstants.API_CONTEXT_CACHE_MANAGER).
+                        setExpiry(CacheConfiguration.ExpiryType.MODIFIED, new CacheConfiguration.Duration(TimeUnit.DAYS,
+                                APIConstants.API_CONTEXT_CACHE_EXPIRY_TIME_IN_DAYS)).setStoreByValue(false).build();
+            } catch (javax.cache.CacheException e) {
+                log.warn("Cache " + APIConstants.API_CONTEXT_CACHE_MANAGER + " already exists. Returning existing cache.");
+                return contextCacheManager.getCache(APIConstants.API_CONTEXT_CACHE_MANAGER);
+            }
         } else {
             return Caching.getCacheManager(APIConstants.API_CONTEXT_CACHE_MANAGER).getCache(
                     APIConstants.API_CONTEXT_CACHE);
