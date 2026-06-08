@@ -822,13 +822,16 @@ public class ImportUtils {
                     backend.setEndpointConfig(importedBackend.getEndpointConfig());
                     String importedDefinition = importedBackend.getDefinition();
                     if (StringUtils.isNotBlank(importedDefinition)) {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Validating and updating backend definition for API: " + targetApi.getUuid());
-                        }
-                        retrieveValidatedSwaggerDefinition(importedDefinition);
-                        if (log.isDebugEnabled()) {
-                            log.debug("Backend API definition validated successfully for backend: "
-                                    + targetApi.getUuid());
+                        if (APIConstants.API_SUBTYPE_DIRECT_BACKEND.equals(subtype)) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Validating and updating backend definition for API: "
+                                        + targetApi.getUuid());
+                            }
+                            retrieveValidatedSwaggerDefinition(importedDefinition);
+                            if (log.isDebugEnabled()) {
+                                log.debug("Backend API definition validated successfully for backend: "
+                                        + targetApi.getUuid());
+                            }
                         }
                         backend.setDefinition(importedDefinition);
                     }
