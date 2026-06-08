@@ -1143,13 +1143,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         || RestApiConstants.API_IMPORT_EXPORT_SCOPE.equals(scope)
                         || RestApiConstants.API_MANAGE_SCOPE.equals(scope)
                         || RestApiConstants.ADMIN_SCOPE.equals(scope)
-                        || (apiTypeWrapper.isAPIProduct()
-                                && RestApiConstants.API_PRODUCT_LIFECYCLE_MANAGE_SCOPE.equals(scope))
-                        || (APIConstants.API_TYPE_MCP.equals(apiTypeWrapper.getType())
-                                && RestApiConstants.MCP_SERVER_LIFECYCLE_MANAGE_SCOPE.equals(scope))
-                        || (!apiTypeWrapper.isAPIProduct()
-                                && !APIConstants.API_TYPE_MCP.equals(apiTypeWrapper.getType())
-                                && RestApiConstants.API_LIFECYCLE_MANAGE_SCOPE.equals(scope))) {
+                        || RestApiConstants.API_LIFECYCLE_MANAGE_SCOPE.equals(scope)) {
                     updatePermittedForPublishedDeprecated = true;
                     break;
                 }
@@ -1158,15 +1152,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         if (!updatePermittedForPublishedDeprecated && (
                 APIConstants.PUBLISHED.equals(status)
                         || APIConstants.DEPRECATED.equals(status))) {
-            ExceptionCodes errorCode;
-            if (apiTypeWrapper.isAPIProduct()) {
-                errorCode = ExceptionCodes.API_PRODUCT_UPDATE_FORBIDDEN_PER_LC;
-            } else if (APIConstants.API_TYPE_MCP.equals(apiTypeWrapper.getType())) {
-                errorCode = ExceptionCodes.MCP_SERVER_UPDATE_FORBIDDEN_PER_LC;
-            } else {
-                errorCode = ExceptionCodes.API_UPDATE_FORBIDDEN_PER_LC;
-            }
-            throw new APIManagementException(ExceptionCodes.from(errorCode, status));
+            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.API_UPDATE_FORBIDDEN_PER_LC, status));
         }
     }
 
