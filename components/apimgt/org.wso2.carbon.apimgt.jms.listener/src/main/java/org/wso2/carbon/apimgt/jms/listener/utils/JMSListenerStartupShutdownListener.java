@@ -76,8 +76,10 @@ public class JMSListenerStartupShutdownListener implements ServerStartupObserver
                     jmsTransportHandlerForEventHub
                             .subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_NOTIFICATION, new CorrelationConfigJMSMessageListener());
                 }
-                jmsTransportHandlerForEventHub.subscribeForJmsEvents(
-                        APIConstants.TopicNames.TOPIC_TOKEN_REVOCATION, new CPTokenRevocationMessageListener());
+                if (jmsTransportHandlerForEventHub != null) {
+                    jmsTransportHandlerForEventHub.subscribeForJmsEvents(
+                            APIConstants.TopicNames.TOPIC_TOKEN_REVOCATION, new CPTokenRevocationMessageListener());
+                }
                 if (Boolean.parseBoolean(apimConfiguration.getFirstProperty(APIConstants.
                         ENABLE_CERTIFICATE_MANAGEMENT_EVENT_LISTENING))) {
                     log.info("Certificate management event listening is enabled. Subscribing to notification topic.");

@@ -116,6 +116,7 @@ public class CPTokenRevocationMessageListener implements MessageListener {
                     log.warn("Event dropped due to unsupported value type for "
                             + APIConstants.NotificationEvent.REVOCATION_TIME + " : "
                             + revokedTokenMap.get(APIConstants.NotificationEvent.REVOCATION_TIME));
+                    return;
                 }
                 String entityId = (String) revokedTokenMap.get(APIConstants.NotificationEvent.ENTITY_ID);
                 if (APIConstants.NotificationEvent.ENTITY_TYPE_USER_ID.equals(entityType)) {
