@@ -233,9 +233,9 @@ public class APIManagerComponent {
                     null);
             APIMgtDBUtil.initialize();
             APIUtil.init();
-            new RevokedJWTTokensRetriever().startRevokedJWTTokensRetriever();
             String migrationEnabled = System.getProperty(APIConstants.MIGRATE);
             if (migrationEnabled == null) {
+                new RevokedJWTTokensRetriever().startRevokedJWTTokensRetriever();
                 CommonConfigDeployer configDeployer = new CommonConfigDeployer();
                 bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), configDeployer, null);
                 TenantLoadMessageSender tenantLoadMessageSender = new TenantLoadMessageSender();
