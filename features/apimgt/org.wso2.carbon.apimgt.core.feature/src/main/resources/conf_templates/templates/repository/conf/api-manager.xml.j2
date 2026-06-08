@@ -2177,4 +2177,18 @@
       <Mediation>
         <EnableSecureXMLProcessing>{{apim.mediation.enable_secure_xml_processing}}</EnableSecureXMLProcessing>
       </Mediation>
+      {% if apim.network_security.access_control is defined %}
+            <NetworkSecurityAccessControl>
+              <Enabled>true</Enabled>
+              {% if apim.network_security.access_control.mode is defined %}
+              <Mode>{{apim.network_security.access_control.mode}}</Mode>
+              {% endif %}
+              <BlockPrivateNetworkAccess>{{apim.network_security.access_control.block_private_network_access | default("false")}}</BlockPrivateNetworkAccess>
+              {% if apim.network_security.access_control.hosts is defined %}
+              {% for host in apim.network_security.access_control.hosts %}
+              <Host>{{host}}</Host>
+              {% endfor %}
+              {% endif %}
+            </NetworkSecurityAccessControl>
+            {% endif %}
 </APIManager>
