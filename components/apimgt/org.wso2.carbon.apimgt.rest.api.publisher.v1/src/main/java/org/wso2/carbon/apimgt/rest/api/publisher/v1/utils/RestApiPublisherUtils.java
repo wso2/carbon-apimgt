@@ -680,18 +680,8 @@ public class RestApiPublisherUtils {
             validationResponse = new APIDefinitionValidationResponse();
             validationResponse.setParser(new OAS3Parser());
 
-            Boolean appendMCPPathValue = apiDtoTypeWrapper.getAppendMCPPath();
-            boolean appendMCPPath;
-            if (appendMCPPathValue != null) {
-                appendMCPPath = appendMCPPathValue;
-            } else {
-                appendMCPPath = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                        .getAPIManagerConfiguration().isMCPPathAppendEnabled();
-                apiDtoTypeWrapper.setAppendMCPPath(appendMCPPath);
-            }
             MCPServerValidationResponseDTO result =
-                    PublisherCommonUtils.validateMCPServer(definitionUrl, securityInfo, false, appendMCPPath,
-                            organization);
+                    PublisherCommonUtils.validateMCPServer(definitionUrl, securityInfo, false, organization);
 
             boolean isValid = Boolean.TRUE.equals(result.isIsValid());
             validationResponse.setValid(isValid);

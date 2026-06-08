@@ -2516,9 +2516,6 @@ public class APIMappingUtil {
         if (protocolVersion != null) {
             dto.setProtocolVersion(protocolVersion);
         }
-        String mcpPathAppendedValue = model.getMetadata() != null
-                ? model.getMetadata().get(APIConstants.MCP.MCP_PATH_APPENDED_METADATA_KEY) : null;
-        dto.setAppendMCPPath(Boolean.parseBoolean(mcpPathAppendedValue));
         return dto;
     }
 

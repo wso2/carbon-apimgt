@@ -577,16 +577,4 @@ public class APIDTOTypeWrapper {
             return mcpServerDto.getProtocolVersion();
         }
     }
-
-    public Boolean getAppendMCPPath() {
-
-        return isMCPServerDTO() ? mcpServerDto.isAppendMCPPath() : null;
-    }
-
-    public void setAppendMCPPath(Boolean appendMCPPath) {
-
-        if (isMCPServerDTO()) {
-            mcpServerDto.setAppendMCPPath(appendMCPPath);
-        }
-    }
 }

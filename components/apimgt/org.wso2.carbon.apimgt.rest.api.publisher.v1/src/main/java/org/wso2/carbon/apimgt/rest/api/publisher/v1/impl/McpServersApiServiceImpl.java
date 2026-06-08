@@ -2679,15 +2679,8 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             securityInfo.setValue(value);
         }
 
-        boolean appendMCPPath;
-        if (dto.isAppendMCPPath() != null) {
-            appendMCPPath = dto.isAppendMCPPath();
-        } else {
-            appendMCPPath = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                    .getAPIManagerConfiguration().isMCPPathAppendEnabled();
-        }
         MCPServerValidationResponseDTO result =
-                PublisherCommonUtils.validateMCPServer(serverUrl, securityInfo, true, appendMCPPath, organization);
+                PublisherCommonUtils.validateMCPServer(serverUrl, securityInfo, true, organization);
 
         return Response.ok(result).build();
     }

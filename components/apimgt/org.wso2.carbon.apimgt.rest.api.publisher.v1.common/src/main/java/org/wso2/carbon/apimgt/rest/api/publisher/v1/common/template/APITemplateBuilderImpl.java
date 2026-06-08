@@ -204,7 +204,8 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
                 } else if (APIConstants.API_TYPE_MCP.equals(api.getType())) {
                     String mcpPathAppendedValue = api.getMetadata()
                             .get(APIConstants.MCP.MCP_PATH_APPENDED_METADATA_KEY);
-                    context.put("mcpPathAppended", Boolean.parseBoolean(mcpPathAppendedValue));
+                    context.put("mcpPathAppended",
+                            (mcpPathAppendedValue == null) || Boolean.parseBoolean(mcpPathAppendedValue));
                 }
             } else {
                 t = velocityengine.getTemplate(getApiProductTemplatePath());

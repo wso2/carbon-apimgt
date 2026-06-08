@@ -3878,7 +3878,6 @@ public final class APIConstants {
         public static final String SSE_DATA_PREFIX = "data:";
 
         public static final String MCP_AUTH_CLAIM = "MCP_AUTHENTICATED";
-        public static final String MCP_PATH_APPEND_ENABLED = "MCPPathAppendEnabled";
         public static final String MCP_PATH_APPENDED_METADATA_KEY = "mcpPathAppended";
 
         /**

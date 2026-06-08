@@ -2997,9 +2997,10 @@ public class PublisherCommonUtils {
             api.getMetadata().put(APIConstants.MCP.PROTOCOL_VERSION_KEY,
                     (protocolVersion != null && !protocolVersion.isEmpty()) ? protocolVersion
                             : APIConstants.MCP.PROTOCOL_VERSION_2025_JUNE);
-            if (Boolean.TRUE.equals(apiDtoTypeWrapper.getAppendMCPPath())) {
+            String existing = api.getMetadata().get(APIConstants.MCP.MCP_PATH_APPENDED_METADATA_KEY);
+            if (existing == null) {
                 api.getMetadata().put(APIConstants.MCP.MCP_PATH_APPENDED_METADATA_KEY,
-                        Boolean.TRUE.toString());
+                        Boolean.FALSE.toString());
             }
         }
         return api;
@@ -5081,7 +5082,7 @@ public class PublisherCommonUtils {
      * @throws APIManagementException On unexpected internal errors
      */
     public static MCPServerValidationResponseDTO validateMCPServer(String serverUrl, SecurityInfoDTO securityInfo,
-                                                                   boolean returnTools, boolean appendMCPPath,
+                                                                   boolean returnTools,
                                                                    String organization)
             throws APIManagementException {
 
@@ -5103,8 +5104,7 @@ public class PublisherCommonUtils {
             final String authValue = securityInfo != null ? securityInfo.getValue() : null;
 
             MCPInitializerAndToolFetcher fetcher =
-                    new MCPInitializerAndToolFetcher(serverUrl, authHeader, authValue, secureRequested,
-                            appendMCPPath);
+                    new MCPInitializerAndToolFetcher(serverUrl, authHeader, authValue, secureRequested);
 
             org.json.JSONObject toolsJson = fetcher.initializeAndFetchTools();
             response.setContent(toolsJson != null ? toolsJson.toString() : null);

@@ -112,7 +112,6 @@ public class SettingsMappingUtil {
             settingsDTO.setAiAuthTokenProvided(config.getDesignAssistantConfigurationDto().isAuthTokenProvided() ||
                     config.getDesignAssistantConfigurationDto().isKeyProvided());
             settingsDTO.setIsMCPSupportEnabled(config.isMCPSupportEnabled());
-            settingsDTO.setMcpPathAppendEnabled(config.isMCPPathAppendEnabled());
             settingsDTO.setIsGatewayNotificationEnabled(APIUtil.isGatewayNotificationEnabled());
         }
         return settingsDTO;

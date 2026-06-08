@@ -12346,10 +12346,6 @@ components:
           example: false
           default: false
           readOnly: true
-        appendMCPPath:
-          type: boolean
-          description: |
-            Whether to append /mcp to the backend endpoint URL when routing requests.
       x-scopes:
         - apim:mcp_server_create
         - apim:mcp_server_import_export
@@ -14823,13 +14819,6 @@ components:
           example: https://example.com/mcp
         securityInfo:
           $ref: '#/components/schemas/SecurityInfo'
-        appendMCPPath:
-          type: boolean
-          description: |
-            Whether to append /mcp when connecting to the server for validation.
-            If omitted, the server falls back to the value of the
-            apim.mcp.mcp_path_append_enabled config (false by default).
-
     SecurityInfo:
       title: MCP Server Security Information
       type: object
@@ -15264,13 +15253,6 @@ components:
           type: boolean
           description: This indicates whether the MCP support is enabled or not.
           default: true
-        mcpPathAppendEnabled:
-          type: boolean
-          description: |
-            Whether the MCP path-append feature is enabled server-wide.
-            When true, the UI shows the appendMCPPath toggle for MCP APIs (pre-set to true).
-            When false (default), the toggle is hidden and /mcp is never appended.
-          default: false
         customProperties:
             type: array
             items:
