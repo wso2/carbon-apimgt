@@ -185,6 +185,8 @@ public class PublisherCommonUtilsTest {
 
         Mockito.when(apiDto.getEndpointConfig()).thenReturn(endpointConfig);
         Mockito.when(advertiseInfoDto.isAdvertised()).thenReturn(false);
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        PowerMockito.when(RestApiCommonUtil.getLoggedInUserTenantDomain()).thenReturn(ORGANIZATION);
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.when(APIUtil.validateEndpointURLs(endpoints)).thenReturn(true);
         Assert.assertTrue(PublisherCommonUtils.validateEndpoints(new APIDTOTypeWrapper(apiDto)));
@@ -216,6 +218,8 @@ public class PublisherCommonUtilsTest {
 
         Mockito.when(apiDto.getEndpointConfig()).thenReturn(endpointConfig);
         Mockito.when(advertiseInfoDto.isAdvertised()).thenReturn(false);
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        PowerMockito.when(RestApiCommonUtil.getLoggedInUserTenantDomain()).thenReturn(ORGANIZATION);
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.when(APIUtil.validateEndpointURLs(endpoints)).thenReturn(false);
         Assert.assertFalse(PublisherCommonUtils.validateEndpoints(new APIDTOTypeWrapper(apiDto)));
@@ -247,6 +251,8 @@ public class PublisherCommonUtilsTest {
 
         Mockito.when(apiDto.getEndpointConfig()).thenReturn(endpointConfig);
         Mockito.when(advertiseInfoDto.isAdvertised()).thenReturn(false);
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        PowerMockito.when(RestApiCommonUtil.getLoggedInUserTenantDomain()).thenReturn(ORGANIZATION);
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.when(APIUtil.validateEndpointURLs(endpoints)).thenReturn(false);
         Assert.assertFalse(PublisherCommonUtils.validateEndpoints(new APIDTOTypeWrapper(apiDto)));
@@ -329,6 +335,8 @@ public class PublisherCommonUtilsTest {
         Mockito.when(advertiseInfoDto.getApiExternalProductionEndpoint()).thenReturn(externalProductionEndpointString);
         Mockito.when(advertiseInfoDto.getApiExternalSandboxEndpoint()).thenReturn(externalSandboxEndpointString);
         Mockito.when(advertiseInfoDto.getOriginalDevPortalUrl()).thenReturn(originalDevPortalUrl);
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        PowerMockito.when(RestApiCommonUtil.getLoggedInUserTenantDomain()).thenReturn(ORGANIZATION);
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.when(APIUtil.validateEndpointURLs(endpoints)).thenReturn(false);
         Assert.assertFalse(PublisherCommonUtils.validateEndpoints(new APIDTOTypeWrapper(apiDto)));
@@ -379,6 +387,8 @@ public class PublisherCommonUtilsTest {
 
         Mockito.when(apiDto.getEndpointConfig()).thenReturn(endpointConfig);
         Mockito.when(apiDto.getAdvertiseInfo()).thenReturn(null);
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        PowerMockito.when(RestApiCommonUtil.getLoggedInUserTenantDomain()).thenReturn(ORGANIZATION);
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.when(APIUtil.validateEndpointURLs(endpoints)).thenReturn(true);
         Assert.assertTrue(PublisherCommonUtils.validateEndpoints(new APIDTOTypeWrapper(apiDto)));
@@ -418,6 +428,8 @@ public class PublisherCommonUtilsTest {
         Mockito.when(advertiseInfoDto.getApiExternalProductionEndpoint()).thenReturn(null);
         Mockito.when(advertiseInfoDto.getApiExternalSandboxEndpoint()).thenReturn(externalSandboxEndpointString);
         Mockito.when(advertiseInfoDto.getOriginalDevPortalUrl()).thenReturn(originalDevPortalUrl);
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        PowerMockito.when(RestApiCommonUtil.getLoggedInUserTenantDomain()).thenReturn(ORGANIZATION);
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.when(APIUtil.validateEndpointURLs(endpoints)).thenReturn(true);
         Assert.assertTrue(PublisherCommonUtils.validateEndpoints(new APIDTOTypeWrapper(apiDto)));

@@ -26,7 +26,9 @@ import org.wso2.carbon.apimgt.impl.kmclient.model.OpenIdConnectConfiguration;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.persistence.dto.AdminContentSearchResult;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.KeyManagersApiService;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerCertificatesDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerEndpointDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerWellKnownResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.RestApiAdminUtils;
@@ -35,10 +37,13 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.Response;
@@ -51,6 +56,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
     public Response keyManagersDiscoverPost(String url, String type, MessageContext messageContext)
             throws APIManagementException {
         if (StringUtils.isNotEmpty(url)) {
+            APIUtil.validateRemoteURL(url, RestApiCommonUtil.getLoggedInUserTenantDomain());
             Gson gson = new GsonBuilder().serializeNulls().create();
             OpenIDConnectDiscoveryClient openIDConnectDiscoveryClient =
                     Feign.builder().client(new ApacheFeignHttpClient(APIUtil.getHttpClient(url)))
@@ -140,6 +146,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
                 body.setAllowedOrganizations(allowedOrgs);
             }
         }
+        validateKeyManagerURLs(body);
         try {
             KeyManagerConfigurationDTO keyManagerConfigurationDTO =
                     KeyManagerMappingUtil.toKeyManagerConfigurationDTO(organization, body);
@@ -223,6 +230,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         String organization = RestApiUtil.getOrganization(messageContext);
         APIAdmin apiAdmin = new APIAdminImpl();
         try {
+            validateKeyManagerURLs(body);
             KeyManagerConfigurationDTO keyManagerConfigurationDTO =
                     KeyManagerMappingUtil.toKeyManagerConfigurationDTO(organization, body);
             KeyManagerPermissionConfigurationDTO keyManagerPermissionConfigurationDTO =
@@ -265,4 +273,100 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         }
     }
 
+    /**
+     * Validates all outbound URLs defined in the given Key Manager configuration against
+     * network security access control policies. Blank and non-URL values are silently skipped.
+     * If a URL fails validation with a client error (HTTP 400), a field-specific bad request
+     * is returned. Internal errors are propagated unchanged.
+     *
+     * @param body Key Manager configuration containing URLs to validate
+     * @throws APIManagementException if URL validation fails
+     */
+    private void validateKeyManagerURLs(KeyManagerDTO body) throws APIManagementException {
+        Map<String, String> urlFields = new LinkedHashMap<>();
+        urlFields.put("well-known endpoint", body.getWellKnownEndpoint());
+        urlFields.put("token endpoint", body.getTokenEndpoint());
+        urlFields.put("introspection endpoint", body.getIntrospectionEndpoint());
+        urlFields.put("client registration endpoint", body.getClientRegistrationEndpoint());
+        urlFields.put("revoke endpoint", body.getRevokeEndpoint());
+        urlFields.put("user info endpoint", body.getUserInfoEndpoint());
+        urlFields.put("authorize endpoint", body.getAuthorizeEndpoint());
+        urlFields.put("scope management endpoint", body.getScopeManagementEndpoint());
+
+        for (Map.Entry<String, String> entry : urlFields.entrySet()) {
+            try {
+                validateKeyManagerURL(entry.getValue(), entry.getKey());
+            } catch (APIManagementException e) {
+                if (e.getErrorHandler() != null && e.getErrorHandler().getHttpStatusCode() == 400) {
+                    log.warn(e.getMessage(), e);
+                    RestApiUtil.handleBadRequest(e.getMessage());
+                } else {
+                    throw e;
+                }
+            }
+        }
+        if (body.getEndpoints() != null) {
+            for (KeyManagerEndpointDTO endpoint : body.getEndpoints()) {
+                if (endpoint != null) {
+                    try {
+                        validateKeyManagerURL(endpoint.getValue(),
+                                "custom endpoint '" + endpoint.getName() + "'");
+                    } catch (APIManagementException e) {
+                        if (e.getErrorHandler() != null && e.getErrorHandler().getHttpStatusCode() == 400) {
+                            log.warn(e.getMessage(), e);
+                            RestApiUtil.handleBadRequest(e.getMessage());
+                        } else {
+                            throw e;
+                        }
+                    }
+                }
+            }
+        }
+        if (body.getCertificates() != null
+                && KeyManagerCertificatesDTO.TypeEnum.JWKS.equals(body.getCertificates().getType())) {
+            try {
+                validateKeyManagerURL(body.getCertificates().getValue(), "JWKS endpoint");
+            } catch (APIManagementException e) {
+                if (e.getErrorHandler() != null && e.getErrorHandler().getHttpStatusCode() == 400) {
+                    log.warn(e.getMessage(), e);
+                    RestApiUtil.handleBadRequest(e.getMessage());
+                } else {
+                    throw e;
+                }
+            }
+        }
+    }
+
+    /**
+     * Validates a single Key Manager endpoint URL against network security access control policies.
+     * Blank and non-URL values (e.g. "none") are silently skipped for backward compatibility.
+     * If validation fails with a client error (HTTP 400), the exception is re-thrown with a
+     * field-specific message. Other failures are propagated unchanged.
+     *
+     * @param url       URL to validate; blank and non-URL values are silently skipped
+     * @param fieldName descriptive name of the Key Manager URL field being validated
+     * @throws APIManagementException if the URL is blocked by a host validation policy
+     */
+    private void validateKeyManagerURL(String url, String fieldName)
+            throws APIManagementException {
+        if (StringUtils.isBlank(url)) {
+            return;
+        }
+        try {
+            new URL(url).getHost();
+        } catch (MalformedURLException e) {
+            return; // not a URL (e.g. "none"), skip validation
+        }
+        try {
+            APIUtil.validateRemoteURL(url, RestApiCommonUtil.getLoggedInUserTenantDomain());
+        } catch (APIManagementException e) {
+            if (e.getErrorHandler() != null && e.getErrorHandler().getHttpStatusCode() == 400) {
+                throw new APIManagementException(
+                        "Invalid Key Manager URL configuration. The " + fieldName
+                                + " URL is not trusted. Please contact the system administrator.",
+                        e.getErrorHandler());
+            }
+            throw e;
+        }
+    }
 }
