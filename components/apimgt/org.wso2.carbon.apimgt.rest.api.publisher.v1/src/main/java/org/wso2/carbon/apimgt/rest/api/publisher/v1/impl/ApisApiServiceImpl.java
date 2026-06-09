@@ -1101,13 +1101,16 @@ public class ApisApiServiceImpl implements ApisApiService {
                 (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
                         .get(RestApiConstants.USER_REST_API_SCOPES);
 
-        for (String scope : tokenScopes) {
-            if (RestApiConstants.PUBLISHER_SCOPE.equals(scope)
-                    || RestApiConstants.API_IMPORT_EXPORT_SCOPE.equals(scope)
-                    || RestApiConstants.API_MANAGE_SCOPE.equals(scope)
-                    || RestApiConstants.ADMIN_SCOPE.equals(scope)) {
-                updatePermittedForPublishedDeprecated = true;
-                break;
+        if (tokenScopes != null) {
+            for (String scope : tokenScopes) {
+                if (RestApiConstants.PUBLISHER_SCOPE.equals(scope)
+                        || RestApiConstants.API_IMPORT_EXPORT_SCOPE.equals(scope)
+                        || RestApiConstants.API_MANAGE_SCOPE.equals(scope)
+                        || RestApiConstants.ADMIN_SCOPE.equals(scope)
+                        || RestApiConstants.API_LIFECYCLE_MANAGE_SCOPE.equals(scope)) {
+                    updatePermittedForPublishedDeprecated = true;
+                    break;
+                }
             }
         }
         if (!updatePermittedForPublishedDeprecated && (
@@ -1404,6 +1407,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(apiId, organization,
                     APIConstants.API_IDENTIFIER_TYPE);
             apiTypeWrapper.setOrganization(organization);
+            //validate API update operation permitted based on the LC state
+            validateAPIOperationsPerLC(apiTypeWrapper.getStatus());
 
             String userName = RestApiCommonUtil.getLoggedInUsername();
             int tenantId = APIUtil.getInternalOrganizationId(organization);

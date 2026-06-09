@@ -92,7 +92,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
-            @AuthorizationScope(scope = "apim:document_manage", description = "Create, update and delete API documents")
+            @AuthorizationScope(scope = "apim:document_manage", description = "Create, update and delete API documents"),
+            @AuthorizationScope(scope = "apim:document_create", description = "Create API documents")
         })
     }, tags={ "MCP Server Documents",  })
     @ApiResponses(value = { 
@@ -111,7 +112,9 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
-            @AuthorizationScope(scope = "apim:document_manage", description = "Create, update and delete API documents")
+            @AuthorizationScope(scope = "apim:document_manage", description = "Create, update and delete API documents"),
+            @AuthorizationScope(scope = "apim:document_create", description = "Create API documents"),
+            @AuthorizationScope(scope = "apim:document_update", description = "Update API, Product, and MCP Server documents")
         })
     }, tags={ "MCP Server Documents",  })
     @ApiResponses(value = { 
@@ -131,7 +134,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
-            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server")
+            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
+            @AuthorizationScope(scope = "apim:mcp_server_update", description = "Update MCP Server configuration (metadata, thumbnails, backends)")
         })
     }, tags={ "MCP Server Labels Attach",  })
     @ApiResponses(value = { 
@@ -150,7 +154,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
-            @AuthorizationScope(scope = "apim:mcp_server_import_export", description = "Import and export MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_import_export", description = "Import and export MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:mcp_server_lifecycle_manage", description = "Change MCP Server lifecycle state")
         })
     }, tags={ "MCP Server Lifecycle",  })
     @ApiResponses(value = { 
@@ -171,7 +176,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     @ApiOperation(value = "Create a New MCP Server", notes = "This operation can be used to create a new MCP server using an existing API. ", response = MCPServerDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:mcp_server_create_only", description = "Create new MCP Servers")
         })
     }, tags={ "MCP Servers",  })
     @ApiResponses(value = { 
@@ -189,7 +195,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     @ApiOperation(value = "Create a MCP server using an OpenAPI definition. ", notes = "This operation can be used to create a MCP server using the OpenAPI definition. Provide either `url` or `file` to specify the definition.  Specify additionalProperties with **at least** API's name, version, context and endpointConfig. ", response = MCPServerDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:mcp_server_create_only", description = "Create new MCP Servers")
         })
     }, tags={ "MCP Servers",  })
     @ApiResponses(value = { 
@@ -207,7 +214,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     @ApiOperation(value = "Create an MCP server by proxying a third-party MCP Server ", notes = "This operation can be used to create a MCP server using a third party MCP Server.  Specify additionalProperties with **at least** API's name, version, context and endpointConfig. ", response = MCPServerDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:mcp_server_create_only", description = "Create new MCP Servers")
         })
     }, tags={ "MCP Servers",  })
     @ApiResponses(value = { 
@@ -227,7 +235,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
             @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_import_export", description = "Import and export MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_import_export", description = "Import and export MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:mcp_server_revision_create", description = "Create MCP Server revision")
         })
     }, tags={ "MCP Server Revisions",  })
     @ApiResponses(value = { 
@@ -246,7 +255,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     @ApiOperation(value = "Create a New MCP Server Version", notes = "This operation can be used to create a new version of an existing MCP server. The new version is specified as  `newVersion` query parameter. New MCP server will be in `CREATED` state. ", response = MCPServerDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:mcp_server_version_create", description = "Create new MCP Server version")
         })
     }, tags={ "MCP Servers",  })
     @ApiResponses(value = { 
@@ -308,7 +318,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
-            @AuthorizationScope(scope = "apim:document_manage", description = "Create, update and delete API documents")
+            @AuthorizationScope(scope = "apim:document_manage", description = "Create, update and delete API documents"),
+            @AuthorizationScope(scope = "apim:document_delete", description = "Delete API, Product, and MCP Server documents")
         })
     }, tags={ "MCP Server Documents",  })
     @ApiResponses(value = { 
@@ -326,7 +337,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     @ApiOperation(value = "Delete Pending Lifecycle State Change Tasks", notes = "This operation can be used to remove pending lifecycle state change requests that are in pending state ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:mcp_server_lifecycle_manage", description = "Change MCP Server lifecycle state")
         })
     }, tags={ "MCP Server Lifecycle",  })
     @ApiResponses(value = { 
@@ -346,7 +358,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
             @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_import_export", description = "Import and export MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_import_export", description = "Import and export MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:mcp_server_revision_delete", description = "Delete MCP Server revision")
         })
     }, tags={ "MCP Server Revisions",  })
     @ApiResponses(value = { 
@@ -365,7 +378,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
-            @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server")
+            @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
+            @AuthorizationScope(scope = "apim:mcp_server_deploy", description = "Deploy, undeploy, and restore MCP Server revisions")
         })
     }, tags={ "MCP Server Revisions",  })
     @ApiResponses(value = { 
@@ -384,7 +398,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
-            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server")
+            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
+            @AuthorizationScope(scope = "apim:mcp_server_deploy", description = "Deploy, undeploy, and restore MCP Server revisions")
         })
     }, tags={ "MCP Server Revisions",  })
     @ApiResponses(value = { 
@@ -403,7 +418,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
-            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server")
+            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
+            @AuthorizationScope(scope = "apim:mcp_server_update", description = "Update MCP Server configuration (metadata, thumbnails, backends)")
         })
     }, tags={ "MCP Server Labels Detach",  })
     @ApiResponses(value = { 
@@ -504,7 +520,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
             @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
             @AuthorizationScope(scope = "apim:mcp_server_import_export", description = "Import and export MCP Server related operations"),
-            @AuthorizationScope(scope = "apim:mcp_server_list_view", description = "View, Retrieve MCP Server list")
+            @AuthorizationScope(scope = "apim:mcp_server_list_view", description = "View, Retrieve MCP Server list"),
+            @AuthorizationScope(scope = "apim:mcp_server_metadata_view", description = "View MCP Server listing and configuration (excludes documents, deployments, lifecycle, comments)")
         })
     }, tags={ "MCP Servers",  })
     @ApiResponses(value = { 
@@ -545,7 +562,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
             @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
-            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server")
+            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
+            @AuthorizationScope(scope = "apim:mcp_server_metadata_view", description = "View MCP Server listing and configuration (excludes documents, deployments, lifecycle, comments)")
         })
     }, tags={ "MCP Server Labels",  })
     @ApiResponses(value = { 
@@ -563,7 +581,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
-            @AuthorizationScope(scope = "apim:mcp_server_import_export", description = "Import and export MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_import_export", description = "Import and export MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:mcp_server_metadata_view", description = "View MCP Server listing and configuration (excludes documents, deployments, lifecycle, comments)")
         })
     }, tags={ "MCP Servers",  })
     @ApiResponses(value = { 
@@ -585,7 +604,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
             @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_import_export", description = "Import and export MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_import_export", description = "Import and export MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:mcp_server_metadata_view", description = "View MCP Server listing and configuration (excludes documents, deployments, lifecycle, comments)")
         })
     }, tags={ "MCP Server Backends",  })
     @ApiResponses(value = { 
@@ -606,7 +626,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
             @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_import_export", description = "Import and export MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_import_export", description = "Import and export MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:mcp_server_metadata_view", description = "View MCP Server listing and configuration (excludes documents, deployments, lifecycle, comments)")
         })
     }, tags={ "MCP Server Backends",  })
     @ApiResponses(value = { 
@@ -625,7 +646,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
-            @AuthorizationScope(scope = "apim:document_manage", description = "Create, update and delete API documents")
+            @AuthorizationScope(scope = "apim:document_manage", description = "Create, update and delete API documents"),
+            @AuthorizationScope(scope = "apim:document_view", description = "View API, Product, and MCP Server documents")
         })
     }, tags={ "MCP Server Documents",  })
     @ApiResponses(value = { 
@@ -645,7 +667,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
-            @AuthorizationScope(scope = "apim:document_manage", description = "Create, update and delete API documents")
+            @AuthorizationScope(scope = "apim:document_manage", description = "Create, update and delete API documents"),
+            @AuthorizationScope(scope = "apim:document_view", description = "View API, Product, and MCP Server documents")
         })
     }, tags={ "MCP Server Documents",  })
     @ApiResponses(value = { 
@@ -666,7 +689,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
-            @AuthorizationScope(scope = "apim:document_manage", description = "Create, update and delete API documents")
+            @AuthorizationScope(scope = "apim:document_manage", description = "Create, update and delete API documents"),
+            @AuthorizationScope(scope = "apim:document_view", description = "View API, Product, and MCP Server documents")
         })
     }, tags={ "MCP Server Documents",  })
     @ApiResponses(value = { 
@@ -686,7 +710,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:mcp_server_lifecycle_view", description = "View MCP Server lifecycle state and transition history")
         })
     }, tags={ "MCP Server Lifecycle",  })
     @ApiResponses(value = { 
@@ -706,7 +731,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
             @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:mcp_server_lifecycle_view", description = "View MCP Server lifecycle state and transition history")
         })
     }, tags={ "MCP Server Lifecycle",  })
     @ApiResponses(value = { 
@@ -727,7 +753,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
             @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
-            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server")
+            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
+            @AuthorizationScope(scope = "apim:mcp_server_deploy_view", description = "View MCP Server deployment status and revisions")
         })
     }, tags={ "MCP Server Revisions",  })
     @ApiResponses(value = { 
@@ -746,7 +773,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
             @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
-            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server")
+            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
+            @AuthorizationScope(scope = "apim:mcp_server_deploy_view", description = "View MCP Server deployment status and revisions")
         })
     }, tags={ "MCP Server Revisions",  })
     @ApiResponses(value = { 
@@ -766,7 +794,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
             @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_import_export", description = "Import and export MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_import_export", description = "Import and export MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:mcp_server_deploy_view", description = "View MCP Server deployment status and revisions")
         })
     }, tags={ "MCP Server Revisions",  })
     @ApiResponses(value = { 
@@ -783,7 +812,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     @ApiOperation(value = "Get Details of the Subscription Throttling Policies of a MCP Server ", notes = "This operation can be used to retrieve details of the subscription throttling policy of a MCP server by  specifying the API Id.  `X-WSO2-Tenant` header can be used to retrive MCP server subscription throttling policies that belongs to a  different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used. ", response = ThrottlingPolicyDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:mcp_server_metadata_view", description = "View MCP Server listing and configuration (excludes documents, deployments, lifecycle, comments)")
         })
     }, tags={ "MCP Servers",  })
     @ApiResponses(value = { 
@@ -802,7 +832,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     @ApiOperation(value = "Get Thumbnail Image of a MCP Server", notes = "This operation can be used to download a thumbnail image of a MCP Server ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:mcp_server_metadata_view", description = "View MCP Server listing and configuration (excludes documents, deployments, lifecycle, comments)")
         })
     }, tags={ "MCP Servers",  })
     @ApiResponses(value = { 
@@ -863,7 +894,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
-            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server")
+            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
+            @AuthorizationScope(scope = "apim:mcp_server_deploy", description = "Deploy, undeploy, and restore MCP Server revisions")
         })
     }, tags={ "MCP Server Revisions",  })
     @ApiResponses(value = { 
@@ -882,7 +914,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
             @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_import_export", description = "Import and export MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_import_export", description = "Import and export MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:mcp_server_deploy", description = "Deploy, undeploy, and restore MCP Server revisions")
         })
     }, tags={ "MCP Server Revisions",  })
     @ApiResponses(value = { 
@@ -902,7 +935,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
-            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server")
+            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
+            @AuthorizationScope(scope = "apim:mcp_server_update", description = "Update MCP Server configuration (metadata, thumbnails, backends)")
         })
     }, tags={ "MCP Servers",  })
     @ApiResponses(value = { 
@@ -925,7 +959,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
             @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_import_export", description = "Import and export MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_import_export", description = "Import and export MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:mcp_server_update", description = "Update MCP Server configuration (metadata, thumbnails, backends)")
         })
     }, tags={ "MCP Server Backends",  })
     @ApiResponses(value = { 
@@ -946,7 +981,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
-            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server")
+            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
+            @AuthorizationScope(scope = "apim:mcp_server_deploy", description = "Deploy, undeploy, and restore MCP Server revisions")
         })
     }, tags={ "MCP Server Revisions",  })
     @ApiResponses(value = { 
@@ -964,7 +1000,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
-            @AuthorizationScope(scope = "apim:document_manage", description = "Create, update and delete API documents")
+            @AuthorizationScope(scope = "apim:document_manage", description = "Create, update and delete API documents"),
+            @AuthorizationScope(scope = "apim:document_update", description = "Update API, Product, and MCP Server documents")
         })
     }, tags={ "MCP Server Documents",  })
     @ApiResponses(value = { 
@@ -984,7 +1021,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
-            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server")
+            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
+            @AuthorizationScope(scope = "apim:mcp_server_update", description = "Update MCP Server configuration (metadata, thumbnails, backends)")
         })
     }, tags={ "MCP Servers",  })
     @ApiResponses(value = { 
@@ -1003,7 +1041,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     @ApiOperation(value = "Check Given API Context Name already Exists", notes = "Using this operation, you can check a given API context is already used. You need to provide the context name you want to check. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:mcp_server_create_only", description = "Create new MCP Servers")
         })
     }, tags={ "Validation",  })
     @ApiResponses(value = { 
@@ -1041,7 +1080,9 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     @ApiOperation(value = "Check Whether Given Endpoint URL is Valid", notes = "Using this operation, it is possible check whether the given MCP server URL is a valid url ", response = ApiEndpointValidationResponseDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:mcp_server_create_only", description = "Create new MCP Servers"),
+            @AuthorizationScope(scope = "apim:mcp_server_update", description = "Update MCP Server configuration (metadata, thumbnails, backends)")
         })
     }, tags={ "Validation",  })
     @ApiResponses(value = { 
@@ -1059,7 +1100,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     @ApiOperation(value = "Validate an OpenAPI Definition of a API", notes = "This operation can be used to validate an OpenAPI definition and retrieve a summary. Provide either `url` or `file` to specify the definition. ", response = OpenAPIDefinitionValidationResponseDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:mcp_server_create_only", description = "Create new MCP Servers")
         })
     }, tags={ "Validation",  })
     @ApiResponses(value = { 
@@ -1077,7 +1119,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     @ApiOperation(value = "Validate a third-party MCP Server", notes = "This operation can be used to validate a `url` of a third party mcp server ", response = MCPServerValidationResponseDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:mcp_server_create_only", description = "Create new MCP Servers")
         })
     }, tags={ "Validation" })
     @ApiResponses(value = { 

@@ -265,6 +265,27 @@
                             </resources>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>copy-dcr-api-def</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <overwrite>true</overwrite>
+                            <outputDirectory>src/main/resources/</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>
+                                        ${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.dcr/src/main/resources
+                                    </directory>
+                                    <includes>
+                                        <include>dcr.yaml</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
