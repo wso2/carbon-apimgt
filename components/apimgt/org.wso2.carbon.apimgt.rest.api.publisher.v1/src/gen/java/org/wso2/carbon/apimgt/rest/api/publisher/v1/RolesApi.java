@@ -52,7 +52,10 @@ RolesApiService delegate = new RolesApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_product_create", description = "Create API Product"),
             @AuthorizationScope(scope = "apim:api_product_update", description = "Update API Product configuration (metadata, thumbnail)"),
             @AuthorizationScope(scope = "apim:mcp_server_create_only", description = "Create new MCP Servers"),
-            @AuthorizationScope(scope = "apim:mcp_server_update", description = "Update MCP Server configuration (metadata, thumbnails, backends)")
+            @AuthorizationScope(scope = "apim:mcp_server_update", description = "Update MCP Server configuration (metadata, thumbnails, backends)"),
+            @AuthorizationScope(scope = "apim:shared_scope_manage", description = "Manage shared scopes"),
+            @AuthorizationScope(scope = "apim:shared_scope_create", description = "Create shared OAuth2 scopes"),
+            @AuthorizationScope(scope = "apim:shared_scope_update", description = "Update shared OAuth2 scope details")
         })
     }, tags={ "Roles" })
     @ApiResponses(value = { 

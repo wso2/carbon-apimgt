@@ -10585,6 +10585,9 @@ paths:
             - apim:api_product_update
             - apim:mcp_server_create_only
             - apim:mcp_server_update
+            - apim:shared_scope_manage
+            - apim:shared_scope_create
+            - apim:shared_scope_update
       x-code-samples:
         - lang: Curl
           source: 'curl -k -I -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
