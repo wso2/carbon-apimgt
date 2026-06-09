@@ -288,6 +288,8 @@ public class PublisherCommonUtilsTest {
         Mockito.when(advertiseInfoDto.getApiExternalProductionEndpoint()).thenReturn(externalProductionEndpointString);
         Mockito.when(advertiseInfoDto.getApiExternalSandboxEndpoint()).thenReturn(externalSandboxEndpointString);
         Mockito.when(advertiseInfoDto.getOriginalDevPortalUrl()).thenReturn(originalDevPortalUrl);
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        PowerMockito.when(RestApiCommonUtil.getLoggedInUserTenantDomain()).thenReturn(ORGANIZATION);
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.when(APIUtil.validateEndpointURLs(endpoints)).thenReturn(true);
         Assert.assertTrue(PublisherCommonUtils.validateEndpoints(new APIDTOTypeWrapper(apiDto)));
