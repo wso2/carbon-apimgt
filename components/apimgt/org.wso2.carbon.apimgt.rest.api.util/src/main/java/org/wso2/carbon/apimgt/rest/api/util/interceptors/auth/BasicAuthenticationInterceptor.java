@@ -295,7 +295,7 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
                         break;
                     }
                 }
-            } else if (!checkForProductRestAPIScopes(scope.getKey())) {
+            } else {
                 //No role for the requested resource scope. Add it to the validated user scope list. 
                 validatedUserScopes.add(scope);
                 if (log.isDebugEnabled()) {
