@@ -295,7 +295,7 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
                         break;
                     }
                 }
-            } else {
+            } else if (!checkForProductRestAPIScopes(scope.getKey())){
                 //No role for the requested resource scope. Add it to the validated user scope list. 
                 validatedUserScopes.add(scope);
                 if (log.isDebugEnabled()) {
@@ -331,8 +331,8 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
      * @return true if it is a product REST API scope
      */
     private boolean checkForProductRestAPIScopes(String scope) {
-        return scope.startsWith("apim:") || scope.startsWith("apim_analytics:") ||
-                scope.startsWith("service_catalog:");
+        return (scope.startsWith("apim:") && !scope.startsWith("apim:dcr:"))
+                || scope.startsWith("apim_analytics:") || scope.startsWith("service_catalog:");
     }
 
     /**
