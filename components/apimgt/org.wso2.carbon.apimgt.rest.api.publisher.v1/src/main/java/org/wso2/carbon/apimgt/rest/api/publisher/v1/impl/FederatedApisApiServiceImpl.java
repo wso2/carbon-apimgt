@@ -198,7 +198,7 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
         }
 
         // --- Create and register new task -------------------------------------
-        String taskId = UUID.randomUUID().toString();
+        String taskId = environment + "_" + UUID.randomUUID().toString();
         DiscoveryTask task = new DiscoveryTask(taskId, environment, organization);
 
         TASK_STORE.put(taskId, task);
@@ -230,9 +230,38 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
 
         DiscoveryTask task = TASK_STORE.get(taskId);
         if (task == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("{\"error\": \"Task not found or has expired: " + taskId + "\"}")
-                    .build();
+            int index = taskId.lastIndexOf('_');
+            if (index > 0) {
+                String environment = taskId.substring(0, index);
+                String organization = RestApiUtil.getValidatedOrganization(messageContext);
+                try {
+                    Environment env = resolveEnvironment(environment, organization);
+                    String envKey = organization + "|" + environment;
+
+                    DiscoveryTask newTask = new DiscoveryTask(taskId, environment, organization);
+                    TASK_STORE.put(taskId, newTask);
+                    ACTIVE_TASK_BY_ENV.put(envKey, taskId);
+
+                    int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+                    String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+
+                    DISCOVERY_EXECUTOR.submit(() ->
+                            runDiscovery(newTask, env, organization, tenantId, tenantDomain, envKey));
+
+                    log.info("Federated API discovery task [" + taskId + "] lazily created on this node for env ["
+                            + environment + "] org [" + organization + "]");
+                    return Response.ok(newTask.toResponseMap()).build();
+                } catch (Exception e) {
+                    log.error("Failed to lazily create discovery task for taskId: " + taskId, e);
+                    return Response.status(Response.Status.NOT_FOUND)
+                            .entity("{\"error\": \"Task not found or has expired: " + taskId + "\"}")
+                            .build();
+                }
+            } else {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("{\"error\": \"Task not found or has expired: " + taskId + "\"}")
+                        .build();
+            }
         }
         return Response.ok(task.toResponseMap()).build();
     }
