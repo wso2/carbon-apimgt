@@ -1368,6 +1368,7 @@
           "type": "string",
           "title": "Mode schema",
           "description": "'allow' — only hosts matching the Hosts list are permitted; others are blocked. 'deny' — hosts matching the Hosts list are blocked; others are permitted.",
+          "enum": ["allow", "deny"],
           "examples": ["allow", "deny"]
         },
         "Hosts": {

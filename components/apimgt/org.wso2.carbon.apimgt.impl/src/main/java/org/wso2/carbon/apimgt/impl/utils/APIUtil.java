@@ -12500,12 +12500,12 @@ public final class APIUtil {
 
         String host;
         try {
-            host = new URL(url).getHost();
+            host = new URI(url).getHost();
             if (StringUtils.isBlank(host)) {
                 throw new APIManagementException("Could not extract a valid host from the provided URL: " + url,
                         ExceptionCodes.MALFORMED_URL);
             }
-        } catch (MalformedURLException e) {
+        } catch (URISyntaxException e) {
             throw new APIManagementException("The provided URL is malformed: " + url,
                     ExceptionCodes.MALFORMED_URL);
         }

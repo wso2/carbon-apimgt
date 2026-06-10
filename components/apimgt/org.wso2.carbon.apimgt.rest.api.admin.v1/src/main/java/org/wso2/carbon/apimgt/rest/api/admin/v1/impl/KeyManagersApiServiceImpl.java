@@ -353,8 +353,8 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
             return;
         }
         try {
-            new URL(url).getHost();
-        } catch (MalformedURLException e) {
+            new URI(url).getHost();
+        } catch (URISyntaxException e) {
             return; // not a URL (e.g. "none"), skip validation
         }
         try {
