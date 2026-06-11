@@ -32,6 +32,7 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -160,7 +161,7 @@ import static org.wso2.carbon.apimgt.impl.token.ClaimsRetriever.DEFAULT_DIALECT_
         Caching.class, PaginationContext.class, MultitenantUtils.class, AbstractAPIManager.class, OASParserUtil.class,
         KeyManagerHolder.class, CertificateManagerImpl.class , PublisherAPI.class, Organization.class,
         APIPersistence.class, GatewayArtifactsMgtDAO.class, RegistryPersistenceUtil.class, MCPUtils.class})
-
+@PowerMockIgnore({"javax.security.*", "javax.naming.*"})
 public class APIProviderImplTest {
 
     private ApiMgtDAO apimgtDAO;
@@ -1681,8 +1682,8 @@ public class APIProviderImplTest {
     @Test
     public void testSearchPaginatedAPIsByFQDNWithCorrectInputs() throws APIManagementException, APIPersistenceException {
 
-        int API_COUNT = 10;
-        int TOTAL_API_COUNT = API_COUNT + 5;
+        int apiCount = 10;
+        int totalApiCount = apiCount + 5;
 
         String[] returnRoles = {
                 "Internal/subscriber",
@@ -1698,10 +1699,10 @@ public class APIProviderImplTest {
         Mockito.when(APIUtil.getUserProperties(Mockito.anyString())).thenReturn(returnProperties);
 
         PublisherAPISearchResult returnSearchAPIs = new PublisherAPISearchResult();
-        List<PublisherAPIInfo> list = createMockPublisherAPIInfoList(API_COUNT);
+        List<PublisherAPIInfo> list = createMockPublisherAPIInfoList(apiCount);
         returnSearchAPIs.setPublisherAPIInfoList(list);
-        returnSearchAPIs.setReturnedAPIsCount(API_COUNT);
-        returnSearchAPIs.setTotalAPIsCount(TOTAL_API_COUNT);
+        returnSearchAPIs.setReturnedAPIsCount(apiCount);
+        returnSearchAPIs.setTotalAPIsCount(totalApiCount);
 
         Mockito.when(apiPersistenceInstance.searchAPIsForPublisher(
                 Mockito.any(Organization.class),
@@ -1716,8 +1717,8 @@ public class APIProviderImplTest {
                 "carbon.super", 1 , 6);
 
         Assert.assertNotNull(response);
-        Assert.assertEquals(response.getApiCount(), TOTAL_API_COUNT);
-        Assert.assertEquals(response.getApis().size(), API_COUNT);
+        Assert.assertEquals(response.getApiCount(), totalApiCount);
+        Assert.assertEquals(response.getApis().size(), apiCount);
     }
 
     @Test
@@ -1864,8 +1865,8 @@ public class APIProviderImplTest {
     @Test
     public void testSearchPaginatedAPIsByCertificateWithSANs()
             throws APIManagementException, APIPersistenceException {
-        int API_COUNT = 5;
-        int TOTAL_API_COUNT = 8;
+        int apiCount = 5;
+        int totalApiCount = 8;
 
         String[] returnRoles = {"Internal/publisher", "admin"};
         Map<String, Object> returnProperties = new HashMap<>();
@@ -1877,9 +1878,9 @@ public class APIProviderImplTest {
         Mockito.when(APIUtil.getUserProperties(Mockito.anyString())).thenReturn(returnProperties);
 
         PublisherAPISearchResult returnSearchAPIs = new PublisherAPISearchResult();
-        returnSearchAPIs.setPublisherAPIInfoList(createMockPublisherAPIInfoList(API_COUNT));
-        returnSearchAPIs.setReturnedAPIsCount(API_COUNT);
-        returnSearchAPIs.setTotalAPIsCount(TOTAL_API_COUNT);
+        returnSearchAPIs.setPublisherAPIInfoList(createMockPublisherAPIInfoList(apiCount));
+        returnSearchAPIs.setReturnedAPIsCount(apiCount);
+        returnSearchAPIs.setTotalAPIsCount(totalApiCount);
 
         ArgumentCaptor<String> queryCaptor = ArgumentCaptor.forClass(String.class);
         Mockito.when(apiPersistenceInstance.searchAPIsForPublisher(
@@ -1897,8 +1898,8 @@ public class APIProviderImplTest {
         APISearchResult response = apiProvider.searchPaginatedAPIsByCertificate(certDTO, "carbon.super", 0, 10);
 
         Assert.assertNotNull(response);
-        Assert.assertEquals(TOTAL_API_COUNT, response.getApiCount());
-        Assert.assertEquals(API_COUNT, response.getApis().size());
+        Assert.assertEquals(totalApiCount, response.getApiCount());
+        Assert.assertEquals(apiCount, response.getApis().size());
 
         String capturedQuery = queryCaptor.getValue();
         Assert.assertTrue("Query must contain .example.com term from wildcard SAN",

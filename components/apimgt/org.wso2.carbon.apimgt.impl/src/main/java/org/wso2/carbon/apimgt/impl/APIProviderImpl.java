@@ -173,8 +173,8 @@ import org.wso2.carbon.apimgt.impl.token.ApiKeyGenerator;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.token.InternalAPIKeyGenerator;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
-import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
+import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIProductNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIStoreNameComparator;
@@ -6737,7 +6737,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (StringUtils.isNotEmpty(endpoint)) {
             try {
                 String fqdn = new URI(endpoint).getHost();
-                if (fqdn != null) {
+                if (fqdn != null && !fqdn.contains(":")) { // skip IPv6 literals — ':' breaks Solr query parsing
                     searchTerms.add(fqdn);
                 }
             } catch (URISyntaxException e) {

@@ -74,10 +74,13 @@ import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.Set;
-import javax.security.auth.x500.X500Principal;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import javax.naming.InvalidNameException;
+import javax.naming.ldap.LdapName;
+import javax.naming.ldap.Rdn;
+import javax.security.auth.x500.X500Principal;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
@@ -542,6 +545,9 @@ public class CertificateMgtUtils {
      */
     public static Set<String> getEndpointSearchTermsFromCertificate(String base64Cert) {
         Set<String> searchTerms = new LinkedHashSet<>();
+        if (StringUtils.isBlank(base64Cert)) {
+            return searchTerms;
+        }
         try {
             byte[] certBytes = Base64.decodeBase64(base64Cert.getBytes(StandardCharsets.UTF_8));
             CertificateFactory cf = CertificateFactory.getInstance(certificateType);
@@ -559,7 +565,7 @@ public class CertificateMgtUtils {
                     if (type == 2) { // DNS name
                         hasSANs = true;
                         searchTerms.add(value.startsWith("*.") ? value.substring(1) : value);
-                    } else if (type == 7) { // IP address
+                    } else if (type == 7 && !value.contains(":")) { // IPv4 only — IPv6 contains ':' which breaks Solr
                         hasSANs = true;
                         searchTerms.add(value);
                     }
@@ -582,15 +588,16 @@ public class CertificateMgtUtils {
         if (dn == null) {
             return null;
         }
-        for (String part : dn.split(",")) {
-            part = part.trim();
-            if (part.toLowerCase().startsWith("cn=")) {
-                String cn = part.substring(3);
-                if (cn.startsWith("\"") && cn.endsWith("\"")) {
-                    cn = cn.substring(1, cn.length() - 1);
+        try {
+            LdapName ldapName = new LdapName(dn);
+            for (Rdn rdn : ldapName.getRdns()) {
+                if ("CN".equalsIgnoreCase(rdn.getType())) {
+                    Object value = rdn.getValue();
+                    return value != null ? value.toString() : null;
                 }
-                return cn;
             }
+        } catch (InvalidNameException e) {
+            log.warn("Could not parse subject DN: " + dn, e);
         }
         return null;
     }
