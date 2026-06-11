@@ -78,6 +78,7 @@ import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.issuers.SystemScopesIssuer;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationServiceImpl;
+import org.wso2.carbon.apimgt.impl.jwt.RevokedJWTMapCleaner;
 import org.wso2.carbon.apimgt.impl.jwt.RevokedJWTTokensRetriever;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationServiceImpl;
@@ -236,6 +237,7 @@ public class APIManagerComponent {
             String migrationEnabled = System.getProperty(APIConstants.MIGRATE);
             if (migrationEnabled == null) {
                 new RevokedJWTTokensRetriever().startRevokedJWTTokensRetriever();
+                new RevokedJWTMapCleaner().startJWTRevokedMapCleaner();
                 CommonConfigDeployer configDeployer = new CommonConfigDeployer();
                 bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), configDeployer, null);
                 TenantLoadMessageSender tenantLoadMessageSender = new TenantLoadMessageSender();

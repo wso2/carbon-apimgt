@@ -63,7 +63,6 @@ import org.wso2.carbon.apimgt.gateway.RedisBaseDistributedCountManager;
 import org.wso2.carbon.apimgt.gateway.ZillizVectorDBProviderServiceImpl;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClientPool;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.WebSocketProcessor;
-import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTMapCleaner;
 import org.wso2.carbon.apimgt.gateway.listeners.GatewayStartupListener;
 import org.wso2.carbon.apimgt.gateway.listeners.ServerStartupListener;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -139,10 +138,7 @@ public class APIHandlerServiceComponent {
         registration =
                 context.getBundleContext().registerService(AbstractAPIMgtGatewayJWTGenerator.class.getName(),
                         new APIMgtGatewayUrlSafeJWTGeneratorImpl(), null);
-        // Start JWT revoked map cleaner.
-        RevokedJWTMapCleaner revokedJWTMapCleaner = new RevokedJWTMapCleaner();
-        revokedJWTMapCleaner.startJWTRevokedMapCleaner();
-        if (TelemetryUtil.telemetryEnabled()) {
+if (TelemetryUtil.telemetryEnabled()) {
             ServiceReferenceHolder.getInstance().setTelemetry(ServiceReferenceHolder.getInstance().getTelemetryService
                     ().buildTelemetryTracer(APIMgtGatewayConstants.SERVICE_NAME));
         } else if (Util.tracingEnabled()) {
