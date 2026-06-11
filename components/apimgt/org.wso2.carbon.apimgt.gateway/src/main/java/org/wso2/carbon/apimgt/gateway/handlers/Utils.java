@@ -523,6 +523,7 @@ public class Utils {
             } else {
                 try {
                     if (certificate != null) {
+                        log.debug("Processing client certificate from header");
                         // Fix: Protect literal '+' signs from being turned into spaces by the URLDecoder
                         String safeCertificate = certificate.replace("+", "%2B");
                         certificate = URLDecoder.decode(safeCertificate, "UTF-8");
