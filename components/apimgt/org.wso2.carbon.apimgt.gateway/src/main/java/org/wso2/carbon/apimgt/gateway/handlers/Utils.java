@@ -522,7 +522,11 @@ public class Utils {
                 bytes = certificate.getBytes();
             } else {
                 try {
-                    certificate = URLDecoder.decode(certificate, "UTF-8");
+                    if (certificate != null) {
+                        // Fix: Protect literal '+' signs from being turned into spaces by the URLDecoder
+                        String safeCertificate = certificate.replace("+", "%2B");
+                        certificate = URLDecoder.decode(safeCertificate, "UTF-8");
+                    }
                 } catch (UnsupportedEncodingException e) {
                     String msg = "Error while URL decoding certificate";
                     throw new APIManagementException(msg, e);
