@@ -2692,6 +2692,12 @@ public class PublisherCommonUtils {
         if (externalExtractor != null) {
             externalExtractor.accept(endpoints);
         }
+        extractURLsFromEndpointConfig(endpointConfigObj, APIConstants.ENDPOINT_PRODUCTION_FAILOVERS, endpoints);
+        extractURLsFromEndpointConfig(endpointConfigObj, APIConstants.ENDPOINT_SANDBOX_FAILOVERS, endpoints);
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        for (String endpoint : endpoints) {
+            APIUtil.validateRemoteURL(endpoint, tenantDomain);
+        }
         return APIUtil.validateEndpointURLs(endpoints);
     }
 
@@ -3248,13 +3254,37 @@ public class PublisherCommonUtils {
         for (org.wso2.carbon.apimgt.api.model.Scope scope : scopes) {
             String roles = scope.getRoles();
             if (roles != null) {
+                boolean scopeBindingNeedsUpdate = false;
+                List<String> correctedRoles = new ArrayList<>();
                 for (String aRole : roles.split(",")) {
-                    boolean isValidRole = APIUtil.isRoleNameExist(RestApiCommonUtil.getLoggedInUsername(), aRole);
-                    if (!isValidRole) {
-                        String errorMessage = "Role '" + aRole + "' Does not exist.";
-                        throw new APIManagementException(errorMessage,
-                                ExceptionCodes.from(ExceptionCodes.ROLE_OF_SCOPE_DOES_NOT_EXIST, aRole));
+                    String correctedRole = aRole;
+                    boolean prefixCorrected = false;
+                    if (aRole.contains("/")) {
+                        String[] roleParts = aRole.split("/", 2);
+                        String prefix = roleParts[0];
+                        if ("APPLICATION".equalsIgnoreCase(prefix) && !"Application".equals(prefix)) {
+                            correctedRole = "Application/" + roleParts[1];
+                            prefixCorrected = true;
+                        }
                     }
+
+                    boolean isValidRole = APIUtil.isRoleNameExist(RestApiCommonUtil.getLoggedInUsername(),
+                            correctedRole);
+                    if (!isValidRole) {
+                        String errorMessage = "Role '" + correctedRole + "' Does not exist.";
+                        throw new APIManagementException(errorMessage,
+                                ExceptionCodes.from(ExceptionCodes.ROLE_OF_SCOPE_DOES_NOT_EXIST, correctedRole));
+                    }
+
+                    if (prefixCorrected) {
+                        scopeBindingNeedsUpdate = true;
+                    }
+                    correctedRoles.add(correctedRole);
+                }
+
+                if (scopeBindingNeedsUpdate) {
+                    scope.setRoles(String.join(",", correctedRoles));
+                    apiProvider.updateSharedScope(scope, organization);
                 }
             }
         }
@@ -4487,6 +4517,7 @@ public class PublisherCommonUtils {
             throw new APIManagementException("Invalid/Malformed endpoint URL detected",
                     ExceptionCodes.API_ENDPOINT_URL_INVALID);
         }
+        APIUtil.validateRemoteURL(endpointURL, RestApiCommonUtil.getLoggedInUserTenantDomain());
 
         APIEndpointInfo apiEndpointUpdated = apiProvider.updateAPIEndpoint(apiId, apiEndpoint, organization);
         if (apiEndpointUpdated == null) {
@@ -4530,12 +4561,12 @@ public class PublisherCommonUtils {
                     "'PRODUCTION' or 'SANDBOX'", ExceptionCodes.ERROR_ADDING_API_ENDPOINT);
         }
         String endpointURL = ((LinkedHashMap) endpointURLObj).get("url").toString();
-
         // validate endpoint URL
         if (!APIUtil.validateEndpointURL(endpointURL)) {
             throw new APIManagementException("Invalid/Malformed endpoint URL detected",
                     ExceptionCodes.API_ENDPOINT_URL_INVALID);
         }
+        APIUtil.validateRemoteURL(endpointURL, RestApiCommonUtil.getLoggedInUserTenantDomain());
 
         // validate endpoint name
         if (StringUtils.isBlank(apiEndpoint.getName())) {
@@ -5067,6 +5098,7 @@ public class PublisherCommonUtils {
             final String authHeader = securityInfo != null ? securityInfo.getHeader() : null;
             final String authValue = securityInfo != null ? securityInfo.getValue() : null;
 
+            APIUtil.validateRemoteURL(serverUrl, RestApiCommonUtil.getLoggedInUserTenantDomain());
             MCPInitializerAndToolFetcher fetcher =
                     new MCPInitializerAndToolFetcher(serverUrl, authHeader, authValue, secureRequested);
 

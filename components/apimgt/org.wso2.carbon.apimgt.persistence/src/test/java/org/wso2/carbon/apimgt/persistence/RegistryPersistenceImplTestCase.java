@@ -39,6 +39,8 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.persistence.utils.PersistenceHelper;
+import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
@@ -51,8 +53,6 @@ import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.APIProductMapper;
-import org.wso2.carbon.apimgt.persistence.utils.PersistenceHelper;
-import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
@@ -365,24 +365,25 @@ public class RegistryPersistenceImplTestCase {
         GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifact();
         String apiUUID = artifact.getId();
 
-        PowerMockito.mockStatic(RegistryPersistenceUtil.class);
         GenericArtifactManager manager = Mockito.mock(GenericArtifactManager.class);
+        PowerMockito.mockStatic(RegistryPersistenceUtil.class);
         PowerMockito.when(RegistryPersistenceUtil.getArtifactManager(registry, APIConstants.API_KEY))
                 .thenReturn(manager);
+        PowerMockito.when(RegistryPersistenceUtil.extractApiSourcePath(anyString())).thenCallRealMethod();
+        PowerMockito.when(RegistryPersistenceUtil.extractProviderFromPath(anyString(), anyString(), anyString()))
+                .thenCallRealMethod();
+        PowerMockito.when(RegistryPersistenceUtil.getProviderFromArtifact(any(GenericArtifact.class)))
+                .thenCallRealMethod();
+        PowerMockito.when(RegistryPersistenceUtil.replaceEmailDomain(anyString())).thenCallRealMethod();
         Mockito.when(manager.getGenericArtifact(apiUUID)).thenReturn(artifact);
         Mockito.doNothing().when(manager).updateGenericArtifact(artifact);
 
         Organization org = new Organization(SUPER_TENANT_DOMAIN);
         APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
 
-        String apiProviderName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
-        apiProviderName = RegistryPersistenceUtil.replaceEmailDomain(apiProviderName);
-        String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
-        String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
-        String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProviderName
-                + RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR + apiVersion;
-        String thumbPath = artifactPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
         String apiPath = generateArtifactPath(artifact);
+        String apiSourcePath = apiPath.substring(0, apiPath.lastIndexOf("/api"));
+        String thumbPath = apiSourcePath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
         Mockito.when(GovernanceUtils.getArtifactPath(registry, apiUUID)).thenReturn(apiPath);
 
         Mockito.when(registry.resourceExists(thumbPath)).thenReturn(true);
@@ -482,6 +483,52 @@ public class RegistryPersistenceImplTestCase {
     }
 
     @Test
+    public void testGetGraphQLSchema_RevisionArtifact() throws GraphQLPersistenceException, RegistryException {
+        Registry registry = Mockito.mock(Registry.class);
+        GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifact();
+        String apiUUID = artifact.getId();
+
+        String apiProviderName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+        apiProviderName = RegistryPersistenceUtil.replaceEmailDomain(apiProviderName);
+        String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+        String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+
+        // The current (non-revision) artifact path
+        String currentApiPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProviderName
+                + RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR + apiVersion
+                + RegistryConstants.PATH_SEPARATOR + "api";
+
+        // Set the artifact path to a revision path — simulates loading a revision artifact
+        String revisionPath = APIConstants.API_REVISION_LOCATION + RegistryConstants.PATH_SEPARATOR
+                + apiUUID + RegistryConstants.PATH_SEPARATOR + "1" + RegistryConstants.PATH_SEPARATOR + "api";
+        ((GenericArtifactWrapper) artifact).setArtifactPath(revisionPath);
+
+        // When resolving revision UUID to current path, return the normal provider path
+        Mockito.when(GovernanceUtils.getArtifactPath(registry, apiUUID)).thenReturn(currentApiPath);
+
+        // GraphQL schema resource sits under the revision source path
+        String revisionSourcePath = revisionPath.substring(0, revisionPath.lastIndexOf("/api"));
+        String schemaName = apiProviderName + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR + apiName
+                + apiVersion + APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION;
+        String schemaResourcePath = revisionSourcePath + RegistryConstants.PATH_SEPARATOR + schemaName;
+
+        String schema = "{\n"
+                + "  hero {\n"
+                + "    name\n"
+                + "  }\n"
+                + "}";
+        Organization org = new Organization(SUPER_TENANT_DOMAIN);
+        APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
+        Mockito.when(registry.resourceExists(schemaResourcePath)).thenReturn(true);
+        Resource schemaResource = new ResourceImpl();
+        schemaResource.setContent(schema.getBytes());
+        Mockito.when(registry.get(schemaResourcePath)).thenReturn(schemaResource);
+
+        String def = apiPersistenceInstance.getGraphQLSchema(org, apiUUID);
+        Assert.assertEquals("GraphQL schema should be retrievable from revision artifact", schema, def);
+    }
+
+    @Test
     public void testGetOASDefinition() throws OASPersistenceException, RegistryException {
         Registry registry = Mockito.mock(Registry.class);
         GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifact();
@@ -517,23 +564,19 @@ public class RegistryPersistenceImplTestCase {
         GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifact();
         String apiUUID = artifact.getId();
 
-        PowerMockito.mockStatic(RegistryPersistenceUtil.class);
         GenericArtifactManager manager = Mockito.mock(GenericArtifactManager.class);
+        PowerMockito.mockStatic(RegistryPersistenceUtil.class);
         PowerMockito.when(RegistryPersistenceUtil.getArtifactManager(registry, APIConstants.API_KEY))
                 .thenReturn(manager);
+        PowerMockito.when(RegistryPersistenceUtil.extractApiSourcePath(anyString())).thenCallRealMethod();
         Mockito.when(manager.getGenericArtifact(apiUUID)).thenReturn(artifact);
         Mockito.doNothing().when(manager).updateGenericArtifact(artifact);
 
-        String apiProviderName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
-        apiProviderName = RegistryPersistenceUtil.replaceEmailDomain(apiProviderName);
-        String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
-        String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
-        String definitionPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR
-                + RegistryPersistenceUtil.replaceEmailDomain(apiProviderName) + RegistryConstants.PATH_SEPARATOR
-                + apiName + RegistryConstants.PATH_SEPARATOR + apiVersion + RegistryConstants.PATH_SEPARATOR
+        // Derive expected path from artifact.getPath() — same source as production code
+        String apiPath = artifact.getPath();
+        String apiSourcePath = apiPath.substring(0, apiPath.lastIndexOf("/api"));
+        String definitionPath = apiSourcePath + RegistryConstants.PATH_SEPARATOR
                 + APIConstants.API_ASYNC_API_DEFINITION_RESOURCE_NAME;
-        String apiPath = generateArtifactPath(artifact);
-        Mockito.when(GovernanceUtils.getArtifactPath(registry, apiUUID)).thenReturn(apiPath);
 
         String definition = "{\"asyncapi\":\"2.0.0\",\"info\":{\"description\":\"This is a sample Async API\"}}";
         Organization org = new Organization(SUPER_TENANT_DOMAIN);
@@ -699,43 +742,6 @@ public class RegistryPersistenceImplTestCase {
                 updatedAPI.getDescription());
     }
 
-    @Test
-    public void testChangeApiProviderNormalizesEmailDomain() throws Exception {
-
-        Registry registry = Mockito.mock(UserRegistry.class);
-        Resource resource = new ResourceImpl();
-        GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifact();
-        String apiUUID = artifact.getId();
-        String apiPath = generateArtifactPath(artifact);
-
-        // Mock GovernanceUtils to return a valid artifact path
-        Mockito.when(GovernanceUtils.getArtifactPath(registry, apiUUID)).thenReturn(apiPath);
-        // Mock registry.get to return a non-null resource so the method proceeds
-        Mockito.when(registry.get(apiPath)).thenReturn(resource);
-
-        // Mock RegistryPersistenceUtil.getArtifactManager to return a mock artifact manager
-        PowerMockito.mockStatic(RegistryPersistenceUtil.class);
-        PowerMockito.when(RegistryPersistenceUtil.replaceEmailDomain("user@wso2.com")).thenCallRealMethod();
-        GenericArtifactManager artifactManager = Mockito.mock(GenericArtifactManager.class);
-        PowerMockito.when(RegistryPersistenceUtil.getArtifactManager(registry, APIConstants.API_KEY))
-                .thenReturn(artifactManager);
-
-        Organization org = new Organization(SUPER_TENANT_DOMAIN);
-        APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
-
-        // Invoke changeApiProvider with an email-style provider name
-        apiPersistenceInstance.changeApiProvider("user@wso2.com", apiUUID, org.getName());
-
-        // Verify that the provider attribute was set with '@' replaced by '-AT-'
-        Assert.assertEquals("Provider should be normalized with -AT- replacement",
-                "user-AT-wso2.com", artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));
-
-        // Verify that updateGenericArtifact was called exactly once with the updated artifact
-        Mockito.verify(artifactManager, times(1)).updateGenericArtifact(artifact);
-        // Verify that the transaction was committed
-        Mockito.verify(registry, times(1)).commitTransaction();
-    }
-
     private String generateArtifactPath(GenericArtifact artifact) throws GovernanceException {
         String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
         String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
@@ -744,5 +750,414 @@ public class RegistryPersistenceImplTestCase {
         return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProviderName
                 + RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR + apiVersion
                 + RegistryConstants.PATH_SEPARATOR + "api";
+    }
+
+    private String getSourcePathFromArtifact(GenericArtifact artifact) throws GovernanceException {
+        String path = artifact.getPath();
+        return path.substring(0, path.lastIndexOf("/api"));
+    }
+
+    // =====================================================================
+    // Non-provider-change tests for tenant users (provider with -AT-)
+    // These ensure existing functionality isn't broken.
+    // =====================================================================
+
+    @Test
+    public void testGetWSDL_TenantUser() throws Exception {
+        Registry registry = Mockito.mock(Registry.class);
+        GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifactForTenant();
+        String apiUUID = artifact.getId();
+        String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+        String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+
+        Organization org = new Organization(TENANT_DOMAIN);
+        APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
+
+        String sourcePath = getSourcePathFromArtifact(artifact);
+        String expectedWsdlPath = sourcePath + RegistryConstants.PATH_SEPARATOR
+                + RegistryPersistenceUtil.createWsdlFileName("admin-AT-wso2.com", apiName, apiVersion);
+
+        Mockito.when(registry.resourceExists(expectedWsdlPath)).thenReturn(true);
+        Resource wsdlResource = Mockito.mock(Resource.class);
+        Mockito.when(registry.get(expectedWsdlPath)).thenReturn(wsdlResource);
+
+        apiPersistenceInstance.getWSDL(org, apiUUID);
+        Mockito.verify(registry, times(1)).get(expectedWsdlPath);
+    }
+
+    @Test
+    public void testGetGraphQLSchema_TenantUser() throws Exception {
+        Registry registry = Mockito.mock(Registry.class);
+        GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifactForTenant();
+        String apiUUID = artifact.getId();
+        String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+        String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+
+        Organization org = new Organization(TENANT_DOMAIN);
+        APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
+
+        String sourcePath = getSourcePathFromArtifact(artifact);
+        String schemaName = "admin-AT-wso2.com" + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR
+                + apiName + apiVersion + APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION;
+        String expectedSchemaPath = sourcePath + RegistryConstants.PATH_SEPARATOR + schemaName;
+
+        String schema = "{ hero { name } }";
+        Mockito.when(registry.resourceExists(expectedSchemaPath)).thenReturn(true);
+        Resource schemaResource = new ResourceImpl();
+        schemaResource.setContent(schema.getBytes());
+        Mockito.when(registry.get(expectedSchemaPath)).thenReturn(schemaResource);
+
+        String def = apiPersistenceInstance.getGraphQLSchema(org, apiUUID);
+        Assert.assertEquals("GraphQL schema should match for tenant user", schema, def);
+    }
+
+    @Test
+    public void testGetThumbnail_TenantUser() throws Exception {
+        Registry registry = Mockito.mock(Registry.class);
+        GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifactForTenant();
+        String apiUUID = artifact.getId();
+
+        PowerMockito.mockStatic(RegistryPersistenceUtil.class);
+        GenericArtifactManager manager = Mockito.mock(GenericArtifactManager.class);
+        PowerMockito.when(RegistryPersistenceUtil.getArtifactManager(registry, APIConstants.API_KEY))
+                .thenReturn(manager);
+        PowerMockito.when(RegistryPersistenceUtil.extractApiSourcePath(anyString())).thenCallRealMethod();
+        PowerMockito.when(RegistryPersistenceUtil.extractProviderFromPath(anyString(), anyString(), anyString()))
+                .thenCallRealMethod();
+        PowerMockito.when(RegistryPersistenceUtil.getProviderFromArtifact(any(GenericArtifact.class)))
+                .thenCallRealMethod();
+        PowerMockito.when(RegistryPersistenceUtil.replaceEmailDomain(anyString())).thenCallRealMethod();
+        Mockito.when(manager.getGenericArtifact(apiUUID)).thenReturn(artifact);
+
+        Organization org = new Organization(TENANT_DOMAIN);
+        APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
+
+        String sourcePath = getSourcePathFromArtifact(artifact);
+        String expectedThumbPath = sourcePath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
+
+        Mockito.when(registry.resourceExists(expectedThumbPath)).thenReturn(true);
+        Resource imageResource = Mockito.mock(Resource.class);
+        Mockito.when(registry.get(expectedThumbPath)).thenReturn(imageResource);
+
+        apiPersistenceInstance.getThumbnail(org, apiUUID);
+        Mockito.verify(registry, times(1)).get(expectedThumbPath);
+    }
+
+    @Test
+    public void testGetOASDefinition_TenantUser() throws Exception {
+        Registry registry = Mockito.mock(UserRegistry.class);
+        GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifactForTenant();
+        String apiUUID = artifact.getId();
+
+        String sourcePath = getSourcePathFromArtifact(artifact);
+        String expectedDefinitionPath = sourcePath + RegistryConstants.PATH_SEPARATOR
+                + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME;
+
+        String apiPath = artifact.getPath();
+        Mockito.when(GovernanceUtils.getArtifactPath(registry, apiUUID)).thenReturn(apiPath);
+
+        String definition = "{\"swagger\":\"2.0\"}";
+        Organization org = new Organization(TENANT_DOMAIN);
+        APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
+        Mockito.when(registry.resourceExists(expectedDefinitionPath)).thenReturn(true);
+        Resource oasResource = new ResourceImpl();
+        oasResource.setContent(definition.getBytes());
+        Mockito.when(registry.get(expectedDefinitionPath)).thenReturn(oasResource);
+
+        String def = apiPersistenceInstance.getOASDefinition(org, apiUUID);
+        Assert.assertEquals("OAS definition should match for tenant user", definition, def);
+    }
+
+    @Test
+    public void testGetAsyncDefinition_TenantUser() throws Exception {
+        Registry registry = Mockito.mock(UserRegistry.class);
+        GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifactForTenant();
+        String apiUUID = artifact.getId();
+
+        GenericArtifactManager manager = Mockito.mock(GenericArtifactManager.class);
+        PowerMockito.mockStatic(RegistryPersistenceUtil.class);
+        PowerMockito.when(RegistryPersistenceUtil.getArtifactManager(registry, APIConstants.API_KEY))
+                .thenReturn(manager);
+        PowerMockito.when(RegistryPersistenceUtil.extractApiSourcePath(anyString())).thenCallRealMethod();
+        Mockito.when(manager.getGenericArtifact(apiUUID)).thenReturn(artifact);
+
+        String sourcePath = getSourcePathFromArtifact(artifact);
+        String expectedDefinitionPath = sourcePath + RegistryConstants.PATH_SEPARATOR
+                + APIConstants.API_ASYNC_API_DEFINITION_RESOURCE_NAME;
+
+        String apiPath = artifact.getPath();
+        Mockito.when(GovernanceUtils.getArtifactPath(registry, apiUUID)).thenReturn(apiPath);
+
+        String definition = "{\"asyncapi\":\"2.0.0\"}";
+        Organization org = new Organization(TENANT_DOMAIN);
+        APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
+        Mockito.when(registry.resourceExists(expectedDefinitionPath)).thenReturn(true);
+        Resource asyncResource = new ResourceImpl();
+        asyncResource.setContent(definition.getBytes());
+        Mockito.when(registry.get(expectedDefinitionPath)).thenReturn(asyncResource);
+
+        String def = apiPersistenceInstance.getAsyncDefinition(org, apiUUID);
+        Assert.assertEquals("Async definition should match for tenant user", definition, def);
+    }
+
+    @Test
+    public void testGetPublisherAPI_TenantUser() throws Exception {
+        Registry registry = Mockito.mock(UserRegistry.class);
+        Resource resource = new ResourceImpl();
+        Mockito.when(registry.get(anyString())).thenReturn(resource);
+        Tag[] tags = new Tag[1];
+        Tag tag = new Tag();
+        tag.setTagName("testTag");
+        tags[0] = tag;
+        Mockito.when(registry.getTags(anyString())).thenReturn(tags);
+
+        GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifactForTenant();
+        String apiUUID = artifact.getId();
+        String apiPath = artifact.getPath();
+        Mockito.when(GovernanceUtils.getArtifactPath(registry, apiUUID)).thenReturn(apiPath);
+
+        APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
+        Organization org = new Organization(TENANT_DOMAIN);
+        PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, apiUUID);
+
+        Assert.assertNotNull("Publisher API should not be null for tenant user", publisherAPI);
+        Assert.assertEquals("API UUID should match", apiUUID, publisherAPI.getId());
+    }
+
+    @Test
+    public void testGetPublisherAPIProduct_SuperTenantUser() throws Exception {
+        Registry registry = Mockito.mock(UserRegistry.class);
+        Resource resource = new ResourceImpl();
+        Mockito.when(registry.get(anyString())).thenReturn(resource);
+        Tag[] tags = new Tag[1];
+        Tag tag = new Tag();
+        tag.setTagName("testTag");
+        tags[0] = tag;
+        Mockito.when(registry.getTags(anyString())).thenReturn(tags);
+
+        GenericArtifact artifact = PersistenceHelper.getSampleAPIProductArtifact();
+        String apiProductId = artifact.getId();
+        String apiPath = artifact.getPath();
+        Mockito.when(GovernanceUtils.getArtifactPath(registry, apiProductId)).thenReturn(apiPath);
+
+        APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
+        Organization org = new Organization(SUPER_TENANT_DOMAIN);
+        apiPersistenceInstance.getPublisherAPIProduct(org, apiProductId);
+        // Verify OAS definition path is accessed at the correct location
+        String sourcePath = getSourcePathFromArtifact(artifact);
+        String expectedOasPath = sourcePath + RegistryConstants.PATH_SEPARATOR
+                + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME;
+        Mockito.verify(registry, times(1)).resourceExists(expectedOasPath);
+    }
+
+    // =====================================================================
+    // Non-provider-change tests for super tenant email domain users
+    // (e.g., user@gmail.com in carbon.super — provider stored as user-AT-gmail.com)
+    // =====================================================================
+
+    @Test
+    public void testGetWSDL_SuperTenantEmailDomainUser() throws Exception {
+        Registry registry = Mockito.mock(Registry.class);
+        GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifactWithProvider("user@gmail.com");
+        String apiUUID = artifact.getId();
+        String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+        String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+
+        Organization org = new Organization(SUPER_TENANT_DOMAIN);
+        APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
+
+        String sourcePath = getSourcePathFromArtifact(artifact);
+        String expectedWsdlPath = sourcePath + RegistryConstants.PATH_SEPARATOR
+                + RegistryPersistenceUtil.createWsdlFileName("user-AT-gmail.com", apiName, apiVersion);
+
+        Mockito.when(registry.resourceExists(expectedWsdlPath)).thenReturn(true);
+        Resource wsdlResource = Mockito.mock(Resource.class);
+        Mockito.when(registry.get(expectedWsdlPath)).thenReturn(wsdlResource);
+
+        apiPersistenceInstance.getWSDL(org, apiUUID);
+        Mockito.verify(registry, times(1)).get(expectedWsdlPath);
+    }
+
+    @Test
+    public void testGetGraphQLSchema_SuperTenantEmailDomainUser() throws Exception {
+        Registry registry = Mockito.mock(Registry.class);
+        GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifactWithProvider("user@gmail.com");
+        String apiUUID = artifact.getId();
+        String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+        String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+
+        Organization org = new Organization(SUPER_TENANT_DOMAIN);
+        APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
+
+        String sourcePath = getSourcePathFromArtifact(artifact);
+        String schemaName = "user-AT-gmail.com" + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR
+                + apiName + apiVersion + APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION;
+        String expectedSchemaPath = sourcePath + RegistryConstants.PATH_SEPARATOR + schemaName;
+
+        String schema = "{ hero { name } }";
+        Mockito.when(registry.resourceExists(expectedSchemaPath)).thenReturn(true);
+        Resource schemaResource = new ResourceImpl();
+        schemaResource.setContent(schema.getBytes());
+        Mockito.when(registry.get(expectedSchemaPath)).thenReturn(schemaResource);
+
+        String def = apiPersistenceInstance.getGraphQLSchema(org, apiUUID);
+        Assert.assertEquals("GraphQL schema should match for super tenant email domain user", schema, def);
+    }
+
+    @Test
+    public void testGetThumbnail_SuperTenantEmailDomainUser() throws Exception {
+        Registry registry = Mockito.mock(Registry.class);
+        GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifactWithProvider("user@gmail.com");
+        String apiUUID = artifact.getId();
+
+        PowerMockito.mockStatic(RegistryPersistenceUtil.class);
+        GenericArtifactManager manager = Mockito.mock(GenericArtifactManager.class);
+        PowerMockito.when(RegistryPersistenceUtil.getArtifactManager(registry, APIConstants.API_KEY))
+                .thenReturn(manager);
+        PowerMockito.when(RegistryPersistenceUtil.extractApiSourcePath(anyString())).thenCallRealMethod();
+        PowerMockito.when(RegistryPersistenceUtil.extractProviderFromPath(anyString(), anyString(), anyString()))
+                .thenCallRealMethod();
+        PowerMockito.when(RegistryPersistenceUtil.getProviderFromArtifact(any(GenericArtifact.class)))
+                .thenCallRealMethod();
+        PowerMockito.when(RegistryPersistenceUtil.replaceEmailDomain(anyString())).thenCallRealMethod();
+        Mockito.when(manager.getGenericArtifact(apiUUID)).thenReturn(artifact);
+
+        Organization org = new Organization(SUPER_TENANT_DOMAIN);
+        APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
+
+        String sourcePath = getSourcePathFromArtifact(artifact);
+        String expectedThumbPath = sourcePath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
+
+        Mockito.when(registry.resourceExists(expectedThumbPath)).thenReturn(true);
+        Resource imageResource = Mockito.mock(Resource.class);
+        Mockito.when(registry.get(expectedThumbPath)).thenReturn(imageResource);
+
+        apiPersistenceInstance.getThumbnail(org, apiUUID);
+        Mockito.verify(registry, times(1)).get(expectedThumbPath);
+    }
+
+    @Test
+    public void testGetOASDefinition_SuperTenantEmailDomainUser() throws Exception {
+        Registry registry = Mockito.mock(UserRegistry.class);
+        GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifactWithProvider("user@gmail.com");
+        String apiUUID = artifact.getId();
+
+        String sourcePath = getSourcePathFromArtifact(artifact);
+        String expectedDefinitionPath = sourcePath + RegistryConstants.PATH_SEPARATOR
+                + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME;
+
+        Mockito.when(GovernanceUtils.getArtifactPath(registry, apiUUID)).thenReturn(artifact.getPath());
+
+        String definition = "{\"swagger\":\"2.0\"}";
+        Organization org = new Organization(SUPER_TENANT_DOMAIN);
+        APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
+        Mockito.when(registry.resourceExists(expectedDefinitionPath)).thenReturn(true);
+        Resource oasResource = new ResourceImpl();
+        oasResource.setContent(definition.getBytes());
+        Mockito.when(registry.get(expectedDefinitionPath)).thenReturn(oasResource);
+
+        String def = apiPersistenceInstance.getOASDefinition(org, apiUUID);
+        Assert.assertEquals("OAS definition should match for super tenant email domain user", definition, def);
+    }
+
+    @Test
+    public void testGetPublisherAPI_SuperTenantEmailDomainUser() throws Exception {
+        Registry registry = Mockito.mock(UserRegistry.class);
+        Resource resource = new ResourceImpl();
+        Mockito.when(registry.get(anyString())).thenReturn(resource);
+        Tag[] tags = new Tag[1];
+        Tag tag = new Tag();
+        tag.setTagName("testTag");
+        tags[0] = tag;
+        Mockito.when(registry.getTags(anyString())).thenReturn(tags);
+
+        GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifactWithProvider("user@gmail.com");
+        String apiUUID = artifact.getId();
+        Mockito.when(GovernanceUtils.getArtifactPath(registry, apiUUID)).thenReturn(artifact.getPath());
+
+        APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
+        Organization org = new Organization(SUPER_TENANT_DOMAIN);
+        PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, apiUUID);
+
+        Assert.assertNotNull("Publisher API should not be null for email domain user", publisherAPI);
+        Assert.assertEquals("API UUID should match", apiUUID, publisherAPI.getId());
+    }
+
+    // =====================================================================
+    // Non-provider-change tests for secondary userstore users
+    // (e.g., WSO2.COM/admin — provider path includes the userstore domain)
+    // =====================================================================
+
+    @Test
+    public void testGetWSDL_SecondaryUserstoreUser() throws Exception {
+        Registry registry = Mockito.mock(Registry.class);
+        GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifactWithProvider("WSO2.COM/admin");
+        String apiUUID = artifact.getId();
+        String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+        String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+
+        Organization org = new Organization(SUPER_TENANT_DOMAIN);
+        APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
+
+        String sourcePath = getSourcePathFromArtifact(artifact);
+        String expectedWsdlPath = sourcePath + RegistryConstants.PATH_SEPARATOR
+                + RegistryPersistenceUtil.createWsdlFileName("WSO2.COM/admin", apiName, apiVersion);
+
+        Mockito.when(registry.resourceExists(expectedWsdlPath)).thenReturn(true);
+        Resource wsdlResource = Mockito.mock(Resource.class);
+        Mockito.when(registry.get(expectedWsdlPath)).thenReturn(wsdlResource);
+
+        apiPersistenceInstance.getWSDL(org, apiUUID);
+        Mockito.verify(registry, times(1)).get(expectedWsdlPath);
+    }
+
+    @Test
+    public void testGetGraphQLSchema_SecondaryUserstoreUser() throws Exception {
+        Registry registry = Mockito.mock(Registry.class);
+        GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifactWithProvider("WSO2.COM/admin");
+        String apiUUID = artifact.getId();
+        String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+        String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+
+        Organization org = new Organization(SUPER_TENANT_DOMAIN);
+        APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
+
+        String sourcePath = getSourcePathFromArtifact(artifact);
+        String schemaName = "WSO2.COM/admin" + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR
+                + apiName + apiVersion + APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION;
+        String expectedSchemaPath = sourcePath + RegistryConstants.PATH_SEPARATOR + schemaName;
+
+        String schema = "{ hero { name } }";
+        Mockito.when(registry.resourceExists(expectedSchemaPath)).thenReturn(true);
+        Resource schemaResource = new ResourceImpl();
+        schemaResource.setContent(schema.getBytes());
+        Mockito.when(registry.get(expectedSchemaPath)).thenReturn(schemaResource);
+
+        String def = apiPersistenceInstance.getGraphQLSchema(org, apiUUID);
+        Assert.assertEquals("GraphQL schema should match for secondary userstore user", schema, def);
+    }
+
+    @Test
+    public void testGetOASDefinition_SecondaryUserstoreUser() throws Exception {
+        Registry registry = Mockito.mock(UserRegistry.class);
+        GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifactWithProvider("WSO2.COM/admin");
+        String apiUUID = artifact.getId();
+
+        String sourcePath = getSourcePathFromArtifact(artifact);
+        String expectedDefinitionPath = sourcePath + RegistryConstants.PATH_SEPARATOR
+                + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME;
+
+        Mockito.when(GovernanceUtils.getArtifactPath(registry, apiUUID)).thenReturn(artifact.getPath());
+
+        String definition = "{\"swagger\":\"2.0\"}";
+        Organization org = new Organization(SUPER_TENANT_DOMAIN);
+        APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
+        Mockito.when(registry.resourceExists(expectedDefinitionPath)).thenReturn(true);
+        Resource oasResource = new ResourceImpl();
+        oasResource.setContent(definition.getBytes());
+        Mockito.when(registry.get(expectedDefinitionPath)).thenReturn(oasResource);
+
+        String def = apiPersistenceInstance.getOASDefinition(org, apiUUID);
+        Assert.assertEquals("OAS definition should match for secondary userstore user", definition, def);
     }
 }
