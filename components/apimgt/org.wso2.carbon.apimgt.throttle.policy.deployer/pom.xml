@@ -23,6 +23,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <packaging>bundle</packaging>
+    <name>WSO2 Carbon - API Management Throttle Policy Deployer</name>
 
     <artifactId>org.wso2.carbon.apimgt.throttle.policy.deployer</artifactId>
 
