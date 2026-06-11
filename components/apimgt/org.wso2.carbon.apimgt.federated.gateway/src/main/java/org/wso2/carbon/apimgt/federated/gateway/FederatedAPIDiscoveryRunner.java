@@ -564,7 +564,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
     public java.util.Map<String, List<DiscoveredAPI>> discoverExternalAPIs(Environment environment, String organization)
             throws APIManagementException {
         FederatedAPIDiscovery discovery = getFederatedAPIDiscovery(environment, organization);
-        List<DiscoveredAPI> allAPIs = discovery.discoverAPI();
+        List<DiscoveredAPI> allAPIs = discovery.discoverMetadata();
         List<DiscoveredAPI> newAPIs = new ArrayList<>();
         List<DiscoveredAPI> updatedAPIs = new ArrayList<>();
         Map<String, List<DiscoveredAPI>> categorizedApis = new HashMap<>();
@@ -662,8 +662,8 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
         String adminUsername = APIUtil.getTenantAdminUserName(organization);
         FederatedGatewayUtil.startTenantFlow(organization, adminUsername);
         try {
-            // Fetch the full list of DiscoveredAPIs from the connector.
-            List<DiscoveredAPI> allDiscoveredAPIs = discovery.discoverAPI();
+            // Fetch the specific list of DiscoveredAPIs from the connector.
+            List<DiscoveredAPI> allDiscoveredAPIs = discovery.discoverAPI(apiIds);
             // Build a lookup map: key the APIs by multiple identifiers so the UI can match by any of them.
             // Exclude name-only indexing to avoid conflicts between different versions.
             Map<String, DiscoveredAPI> apiLookup = new HashMap<>();
@@ -792,7 +792,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
         String adminUsername = APIUtil.getTenantAdminUserName(organization);
         FederatedGatewayUtil.startTenantFlow(organization, adminUsername);
         try {
-            List<DiscoveredAPI> allDiscoveredAPIs = discovery.discoverAPI();
+            List<DiscoveredAPI> allDiscoveredAPIs = discovery.discoverAPI(apiIds);
             Map<String, DiscoveredAPI> apiLookup = new HashMap<>();
             for (DiscoveredAPI discovered : allDiscoveredAPIs) {
                 API api = discovered.getApi();
