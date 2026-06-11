@@ -524,7 +524,12 @@ public class Utils {
                 try {
                     if (certificate != null) {
                         log.debug("Processing client certificate from header");
-                        // Fix: Protect literal '+' signs from being turned into spaces by the URLDecoder
+
+                        /**
+                         * Pre-escapes literal plus '+' characters into percent-encoded '%2B' form.
+                         * This prevents Java's URLDecoder from converting base64 plus signs
+                         * into whitespace characters during the decoding stage.
+                         */
                         String safeCertificate = certificate.replace("+", "%2B");
                         certificate = URLDecoder.decode(safeCertificate, "UTF-8");
                     }
