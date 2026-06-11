@@ -530,6 +530,7 @@ public class Utils {
                     }
                 } catch (UnsupportedEncodingException e) {
                     String msg = "Error while URL decoding certificate";
+                    log.error(msg + ": " + e.getMessage());
                     throw new APIManagementException(msg, e);
                 }
                 certificate = APIUtil.getX509certificateContent(certificate);
