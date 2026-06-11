@@ -71,7 +71,11 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import javax.security.auth.x500.X500Principal;
 import java.util.List;
 import java.util.Optional;
 import javax.xml.XMLConstants;
@@ -525,6 +529,70 @@ public class CertificateMgtUtils {
             log.error("Error while getting the certificate information from the certificate", e);
         }
         return certificateInformationDTO;
+    }
+
+    /**
+     * Extracts endpoint search terms from a base64-encoded X.509 certificate.
+     * DNS SANs are returned as-is; wildcard SANs like *.example.com are returned as .example.com
+     * (stripping the leading asterisk) so they can be used as Solr substring search terms.
+     * IP address SANs are returned as-is. Falls back to the certificate CN if no SANs are present.
+     *
+     * @param base64Cert Base64-encoded certificate string
+     * @return Ordered set of search terms derived from the certificate SANs or CN
+     */
+    public static Set<String> getEndpointSearchTermsFromCertificate(String base64Cert) {
+        Set<String> searchTerms = new LinkedHashSet<>();
+        try {
+            byte[] certBytes = Base64.decodeBase64(base64Cert.getBytes(StandardCharsets.UTF_8));
+            CertificateFactory cf = CertificateFactory.getInstance(certificateType);
+            X509Certificate x509Cert = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(certBytes));
+
+            Collection<List<?>> subjectAltNames = x509Cert.getSubjectAlternativeNames();
+            boolean hasSANs = false;
+            if (subjectAltNames != null) {
+                for (List<?> san : subjectAltNames) {
+                    if (san.size() < 2 || !(san.get(1) instanceof String)) {
+                        continue;
+                    }
+                    int type = (Integer) san.get(0);
+                    String value = (String) san.get(1);
+                    if (type == 2) { // DNS name
+                        hasSANs = true;
+                        searchTerms.add(value.startsWith("*.") ? value.substring(1) : value);
+                    } else if (type == 7) { // IP address
+                        hasSANs = true;
+                        searchTerms.add(value);
+                    }
+                }
+            }
+            if (!hasSANs) {
+                String cn = extractCNFromSubjectDN(
+                        x509Cert.getSubjectX500Principal().getName(X500Principal.RFC2253));
+                if (cn != null && !cn.isEmpty()) {
+                    searchTerms.add(cn.startsWith("*.") ? cn.substring(1) : cn);
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Error parsing certificate SANs; falling back to endpoint-only search", e);
+        }
+        return searchTerms;
+    }
+
+    private static String extractCNFromSubjectDN(String dn) {
+        if (dn == null) {
+            return null;
+        }
+        for (String part : dn.split(",")) {
+            part = part.trim();
+            if (part.toLowerCase().startsWith("cn=")) {
+                String cn = part.substring(3);
+                if (cn.startsWith("\"") && cn.endsWith("\"")) {
+                    cn = cn.substring(1, cn.length() - 1);
+                }
+                return cn;
+            }
+        }
+        return null;
     }
 
     /**

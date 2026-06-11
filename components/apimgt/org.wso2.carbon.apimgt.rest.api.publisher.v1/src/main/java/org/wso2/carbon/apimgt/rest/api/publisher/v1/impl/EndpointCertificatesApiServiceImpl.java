@@ -226,15 +226,13 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
 
         APIMetadataListDTO apiMetadataListDTO;
         CertificateMetadataDTO certificateMetadataDTO;
-        String fqdn;
         APISearchResult searchResult;
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         certificateMetadataDTO = apiProvider.getCertificate(alias);
 
         if (certificateMetadataDTO != null) {
-            String endpoint = certificateMetadataDTO.getEndpoint();
-            searchResult = apiProvider.searchPaginatedAPIsByFQDN(endpoint, organization, offset, limit);
+            searchResult = apiProvider.searchPaginatedAPIsByCertificate(certificateMetadataDTO, organization, offset, limit);
         } else {
             searchResult = new APISearchResult();
         }

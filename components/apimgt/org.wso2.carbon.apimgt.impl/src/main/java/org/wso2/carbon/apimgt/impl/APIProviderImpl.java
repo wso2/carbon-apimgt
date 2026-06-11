@@ -173,6 +173,7 @@ import org.wso2.carbon.apimgt.impl.token.ApiKeyGenerator;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.token.InternalAPIKeyGenerator;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
+import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIProductNameComparator;
@@ -6717,6 +6718,76 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException("Error while searching for APIs with Solr query: " + query, e);
         }
 
+        return result;
+    }
+
+    @Override
+    public APISearchResult searchPaginatedAPIsByCertificate(CertificateMetadataDTO certificateMetadataDTO,
+            String tenantDomain, int offset, int limit) throws APIManagementException {
+        APISearchResult result = new APISearchResult();
+        Set<String> searchTerms = new LinkedHashSet<>();
+
+        String certContent = certificateMetadataDTO.getCertificate();
+        if (StringUtils.isNotEmpty(certContent)) {
+            searchTerms.addAll(CertificateMgtUtils.getEndpointSearchTermsFromCertificate(certContent));
+        }
+
+        // Always include the stored endpoint FQDN to cover certificates with no parseable SANs/CN.
+        String endpoint = certificateMetadataDTO.getEndpoint();
+        if (StringUtils.isNotEmpty(endpoint)) {
+            try {
+                String fqdn = new URI(endpoint).getHost();
+                if (fqdn != null) {
+                    searchTerms.add(fqdn);
+                }
+            } catch (URISyntaxException e) {
+                log.warn("Could not extract FQDN from stored endpoint: " + endpoint, e);
+            }
+        }
+
+        if (searchTerms.isEmpty()) {
+            return result;
+        }
+
+        // Build a space-separated OR query: same key repeated → OR in the Registry search layer.
+        // Values include explicit wildcards so the OR path does not strip them.
+        StringBuilder queryBuilder = new StringBuilder();
+        for (String term : searchTerms) {
+            if (queryBuilder.length() > 0) {
+                queryBuilder.append(' ');
+            }
+            queryBuilder.append(ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX).append("*").append(term).append("*");
+        }
+        String query = queryBuilder.toString();
+
+        Organization org = new Organization(tenantDomain);
+        String adminUser = APIUtil.getTenantAdminUserName(tenantDomain);
+        String[] roles = APIUtil.getFilteredUserRoles(adminUser);
+        Map<String, Object> properties = APIUtil.getUserProperties(adminUser);
+        UserContext userCtx = new UserContext(adminUser, org, properties, roles);
+
+        try {
+            PublisherAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForPublisher(org, query,
+                    offset, limit, userCtx);
+            if (log.isDebugEnabled()) {
+                log.debug("Running certificate SAN Solr query: " + query);
+            }
+            if (searchAPIs != null) {
+                List<PublisherAPIInfo> list = searchAPIs.getPublisherAPIInfoList();
+                List<API> apiList = new ArrayList<>(list.size());
+                for (PublisherAPIInfo publisherAPIInfo : list) {
+                    API mappedAPI = APIMapper.INSTANCE.toApi(publisherAPIInfo);
+                    populateApiInfo(mappedAPI);
+                    populateDefaultVersion(mappedAPI);
+                    populateGatewayVendor(mappedAPI);
+                    apiList.add(mappedAPI);
+                }
+                result.setApis(apiList);
+                result.setApiCount(searchAPIs.getTotalAPIsCount());
+            }
+        } catch (APIPersistenceException e) {
+            throw new APIManagementException("Error while searching APIs by certificate SANs with query: " + query, e);
+        }
         return result;
     }
 
