@@ -2174,6 +2174,7 @@ public final class APIConstants {
     public static final String REST_API_SCOPE = "Scope";
     public static final String REST_API_SCOPE_NAME = "Name";
     public static final String REST_API_SCOPE_ROLE = "Roles";
+    public static final String REST_API_SCOPE_SUPPORTED_MODELS = "SupportedModels";
     public static final String REST_API_SCOPES_CONFIG = "RESTAPIScopes";
     public static final String REST_API_ROLE_MAPPINGS_CONFIG = "RoleMappings";
     public static final String APIM_SUBSCRIBE_SCOPE = "apim:subscribe";

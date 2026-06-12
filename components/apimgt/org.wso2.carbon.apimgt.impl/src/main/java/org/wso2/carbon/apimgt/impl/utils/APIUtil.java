@@ -10469,16 +10469,21 @@ public final class APIUtil {
 
         // Iterating the existing (old) scope-role mappings
         for (JsonElement existingScopeRoleMapping : existingTenantConfScopesArray) {
-            String existingScopeName = existingScopeRoleMapping.getAsJsonObject().get(APIConstants.REST_API_SCOPE_NAME).
-                    getAsString();
+            JsonObject existingScopeObject = existingScopeRoleMapping.getAsJsonObject();
+            String existingScopeName = existingScopeObject.get(APIConstants.REST_API_SCOPE_NAME).getAsString();
             Boolean scopeRoleMappingExists = false;
-            // Iterating the modified (new) scope-role mappings and add the old scope mappings
-            // if those are not present in the list (merging)
-            for (JsonElement newScopeRoleMapping : newTenantConfScopesArray) {
-                String newScopeName = newScopeRoleMapping.getAsJsonObject().get(APIConstants.REST_API_SCOPE_NAME).
-                        getAsString();
+            // Iterating the merged (new) scope-role mappings to detect overlap
+            for (JsonElement newScopeRoleMapping : mergedTenantConfScopesArray) {
+                JsonObject newScopeObject = newScopeRoleMapping.getAsJsonObject();
+                String newScopeName = newScopeObject.get(APIConstants.REST_API_SCOPE_NAME).getAsString();
                 if (StringUtils.equals(existingScopeName, newScopeName)) {
-                    // If a particular mapping is already there, skip it
+                    // Preserve the SupportedModels field from the existing entry as it is not part
+                    // of the role-mapping update payload sent from the Scope Assignments page
+                    if (existingScopeObject.has(APIConstants.REST_API_SCOPE_SUPPORTED_MODELS)
+                            && !newScopeObject.has(APIConstants.REST_API_SCOPE_SUPPORTED_MODELS)) {
+                        newScopeObject.add(APIConstants.REST_API_SCOPE_SUPPORTED_MODELS,
+                                existingScopeObject.get(APIConstants.REST_API_SCOPE_SUPPORTED_MODELS));
+                    }
                     scopeRoleMappingExists = true;
                     break;
                 }
