@@ -22702,20 +22702,78 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Update the API provider of a given API
+     * Update the API provider of a given API.
      *
-     * @param apiUUID      API id of the API that needs to update the provider
+     * @deprecated Use {@link #updateApiProvider(String, String, String, String)} instead,
+     *             which accepts the old provider name and API name explicitly and has
+     *             no execution-order dependency.
+     *
+     * @param apiUUID      API UUID of the API that needs to update the provider
      * @param providerName New API provider
      * @throws APIManagementException if an error occurs when changing the API provider
      */
+    @Deprecated
     public void updateApiProvider(String apiUUID, String providerName)
             throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
-            try (PreparedStatement statement = connection.prepareStatement(SQLConstants.UPDATE_API_PROVIDER_SQL)) {
-                statement.setString(1, providerName);
-                statement.setString(2, apiUUID);
-                statement.executeUpdate();
+            try {
+                // Must execute BEFORE UPDATE_API_PROVIDER_SQL — subquery reads old provider from AM_API
+                try (PreparedStatement stmt =
+                             connection.prepareStatement(SQLConstants.UPDATE_DEFAULT_VERSION_PROVIDER_SQL)) {
+                    stmt.setString(1, providerName);
+                    stmt.setString(2, apiUUID);
+                    stmt.setString(3, apiUUID);
+                    stmt.executeUpdate();
+                }
+                try (PreparedStatement stmt =
+                             connection.prepareStatement(SQLConstants.UPDATE_API_PROVIDER_SQL)) {
+                    stmt.setString(1, providerName);
+                    stmt.setString(2, apiUUID);
+                    stmt.executeUpdate();
+                }
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
+            }
+        } catch (SQLException e) {
+            handleException("Error while updating the API provider of " + apiUUID, e);
+        }
+    }
+
+    /**
+     * Update the API provider of a given API.
+     * Preferred over {@link #updateApiProvider(String, String)} — accepts the old provider name
+     * and API name explicitly, avoiding a correlated subquery and any execution-order dependency.
+     * Both AM_API_DEFAULT_VERSION and AM_API are updated atomically in a single transaction.
+     *
+     * @param apiUUID         API UUID of the API that needs to update the provider
+     * @param providerName    New API provider
+     * @param oldProviderName Current (old) API provider — used to locate the AM_API_DEFAULT_VERSION row
+     * @param apiName         API name — used to locate the AM_API_DEFAULT_VERSION row
+     * @throws APIManagementException if an error occurs when changing the API provider
+     */
+    public void updateApiProvider(String apiUUID, String providerName,
+                                   String oldProviderName, String apiName)
+            throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                try (PreparedStatement stmt =
+                             connection.prepareStatement(
+                                     SQLConstants.UPDATE_DEFAULT_VERSION_PROVIDER_BY_NAME_SQL)) {
+                    stmt.setString(1, providerName);
+                    stmt.setString(2, apiName);
+                    stmt.setString(3, oldProviderName);
+                    stmt.executeUpdate();
+                }
+                try (PreparedStatement stmt =
+                             connection.prepareStatement(SQLConstants.UPDATE_API_PROVIDER_SQL)) {
+                    stmt.setString(1, providerName);
+                    stmt.setString(2, apiUUID);
+                    stmt.executeUpdate();
+                }
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
