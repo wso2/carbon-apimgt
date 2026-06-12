@@ -92,7 +92,9 @@ public class SystemScopesMappingUtil {
                 roleScopeDTO.setTag(mapping.getValue().get(1));
                 scopeDTOs.add(roleScopeDTO);
             } else {
-                log.warn("The scope " + mapping.getKey() + " does not exist in tenant.conf");
+                if (log.isDebugEnabled()) {
+                    log.debug("The scope " + mapping.getKey() + " does not exist in tenant.conf");
+                }
             }
         }
         return scopeDTOs;
