@@ -141,7 +141,7 @@ public class APIHandlerServiceComponent {
         registration =
                 context.getBundleContext().registerService(AbstractAPIMgtGatewayJWTGenerator.class.getName(),
                         new APIMgtGatewayUrlSafeJWTGeneratorImpl(), null);
-if (TelemetryUtil.telemetryEnabled()) {
+        if (TelemetryUtil.telemetryEnabled()) {
             ServiceReferenceHolder.getInstance().setTelemetry(ServiceReferenceHolder.getInstance().getTelemetryService
                     ().buildTelemetryTracer(APIMgtGatewayConstants.SERVICE_NAME));
         } else if (Util.tracingEnabled()) {
