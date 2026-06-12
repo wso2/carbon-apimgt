@@ -80,6 +80,8 @@ import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationServiceImpl;
 import org.wso2.carbon.apimgt.impl.jwt.RevokedJWTMapCleaner;
 import org.wso2.carbon.apimgt.impl.jwt.RevokedJWTTokensRetriever;
+import org.wso2.carbon.apimgt.impl.token.RevokedTokenDataImpl;
+import org.wso2.carbon.apimgt.impl.token.RevokedTokenService;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.listeners.APIMTenantMgtListener;
@@ -238,6 +240,7 @@ public class APIManagerComponent {
             if (migrationEnabled == null) {
                 new RevokedJWTTokensRetriever().startRevokedJWTTokensRetriever();
                 new RevokedJWTMapCleaner().startJWTRevokedMapCleaner();
+                bundleContext.registerService(RevokedTokenService.class, new RevokedTokenDataImpl(), null);
                 CommonConfigDeployer configDeployer = new CommonConfigDeployer();
                 bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), configDeployer, null);
                 TenantLoadMessageSender tenantLoadMessageSender = new TenantLoadMessageSender();
@@ -1180,5 +1183,19 @@ public class APIManagerComponent {
 
     protected void unsetConsumptionDataExportService(ConsumptionDataExportService consumptionDataExportService) {
         ServiceReferenceHolder.getInstance().setConsumptionDataExportService(null);
+    }
+
+    @Reference(
+            name = "revoked.token.service",
+            service = RevokedTokenService.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "removeRevokedTokenService")
+    protected void addRevokedTokenService(RevokedTokenService revokedTokenService) {
+        ServiceReferenceHolder.getInstance().addRevokedTokenService(revokedTokenService);
+    }
+
+    protected void removeRevokedTokenService(RevokedTokenService revokedTokenService) {
+        ServiceReferenceHolder.getInstance().removeRevokedTokenService(revokedTokenService);
     }
 }

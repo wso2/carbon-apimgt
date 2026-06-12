@@ -19,16 +19,13 @@
 package org.wso2.carbon.apimgt.gateway.service;
 
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
-import org.wso2.carbon.apimgt.impl.jwt.RevokedJWTDataHolder;
 import org.wso2.carbon.apimgt.impl.token.RevokedTokenService;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
-public class RevokedTokenDataImpl implements RevokedTokenService {
+public class GatewayRevokedTokenDataImpl implements RevokedTokenService {
 
     public void addRevokedJWTIntoMap(String revokedToken, Long expiryTime) {
-        RevokedJWTDataHolder.getInstance().addRevokedJWTToMap(revokedToken, expiryTime);
-        // Add revoked token to the Map
     }
 
     @Override

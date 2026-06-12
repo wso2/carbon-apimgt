@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.gateway.listeners;
+package org.wso2.carbon.apimgt.impl.listeners;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -25,8 +25,8 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.jwt.RevokedJWTDataHolder;
 import org.wso2.carbon.apimgt.impl.jwt.RevokedJWTTokensRetriever;
 
@@ -37,9 +37,9 @@ import javax.jms.TextMessage;
 import javax.jms.Topic;
 import java.util.HashMap;
 
-public class GatewayTokenRevocationMessageListener implements MessageListener {
+public class TokenRevocationMessageListener implements MessageListener {
 
-    private static final Log log = LogFactory.getLog(GatewayTokenRevocationMessageListener.class);
+    private static final Log log = LogFactory.getLog(TokenRevocationMessageListener.class);
 
     public void onMessage(Message message) {
 

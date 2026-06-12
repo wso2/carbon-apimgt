@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.jms.listener.JMSListenerShutDownService;
+import org.wso2.carbon.apimgt.impl.listeners.TokenRevocationMessageListener;
 import org.wso2.carbon.apimgt.jms.listener.internal.ServiceReferenceHolder;
 import org.wso2.carbon.core.ServerShutdownHandler;
 import org.wso2.carbon.core.ServerStartupObserver;
@@ -78,7 +79,7 @@ public class JMSListenerStartupShutdownListener implements ServerStartupObserver
                 }
                 if (jmsTransportHandlerForEventHub != null) {
                     jmsTransportHandlerForEventHub.subscribeForJmsEvents(
-                            APIConstants.TopicNames.TOPIC_TOKEN_REVOCATION, new CPTokenRevocationMessageListener());
+                            APIConstants.TopicNames.TOPIC_TOKEN_REVOCATION, new TokenRevocationMessageListener());
                 }
                 if (Boolean.parseBoolean(apimConfiguration.getFirstProperty(APIConstants.
                         ENABLE_CERTIFICATE_MANAGEMENT_EVENT_LISTENING))) {
