@@ -152,6 +152,7 @@ public class CertificateMgtUtils {
      * SUCCESS : If certificate added successfully.
      * INTERNAL_SERVER_ERROR : If any internal error occurred
      * ALIAS_EXISTS_IN_TRUST_STORE : If the alias exists in trust store.
+     * CERTIFICATE_EXISTS_IN_TRUST_STORE : If the certificate content already exists in trust store under another alias.
      * CERTIFICATE_EXPIRED : If the given certificate is expired.
      */
     public ResponseCode addCertificateToTrustStore(String base64Cert, String alias) {
@@ -171,6 +172,7 @@ public class CertificateMgtUtils {
      * SUCCESS : If certificate added successfully.
      * INTERNAL_SERVER_ERROR : If any internal error occurred
      * ALIAS_EXISTS_IN_TRUST_STORE : If the alias exists in trust store.
+     * CERTIFICATE_EXISTS_IN_TRUST_STORE : If the certificate content already exists in trust store under another alias.
      * CERTIFICATE_EXPIRED : If the given certificate is expired.
      */
     private ResponseCode addCertificateToTrustStore(TrustStoreDTO trustStoreDTO, String base64Cert, String alias) {

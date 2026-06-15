@@ -167,9 +167,14 @@ public class CertificateManagerImplTest {
         PowerMockito.stub(PowerMockito
                 .method(CertificateMgtUtils.class, "addCertificateToTrustStore", String.class, String.class))
                 .toReturn(ResponseCode.CERTIFICATE_EXISTS_IN_TRUST_STORE);
+        // certificateMgtDAO is a shared static mock; clear prior invocations so the rollback assertion
+        // below only counts the deleteCertificate call triggered by this test.
+        Mockito.clearInvocations(certificateMgtDAO);
         ResponseCode responseCode = certificateManager.addCertificateToParentNode(BASE64_ENCODED_CERT, ALIAS,
                 END_POINT, TENANT_ID);
         Assert.assertEquals(ResponseCode.CERTIFICATE_EXISTS_IN_TRUST_STORE, responseCode);
+        // Verify the DB entry is rolled back when the trust store reports duplicate certificate content.
+        Mockito.verify(certificateMgtDAO).deleteCertificate(ALIAS, END_POINT, TENANT_ID);
     }
 
     //@Test
