@@ -130,6 +130,7 @@ public class ThrottleStreamProcessor extends StreamProcessor implements Scheduli
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
                            StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater) {
 
+        ComplexEventChunk<StreamEvent> resetEventChunk = null;
         synchronized (this) {
             if (expireEventTime != -1) {
                 if (expireEventTime - timeInMilliSeconds > streamEventChunk.getLast().getTimestamp()) {
@@ -146,13 +147,25 @@ public class ThrottleStreamProcessor extends StreamProcessor implements Scheduli
                 scheduler.notifyAt(expireEventTime);
             }
             long currentTime = executionPlanContext.getTimestampGenerator().currentTime();
-            boolean sendEvents;
+            boolean sendResetEvent;
             if (currentTime >= expireEventTime) {
                 expireEventTime += timeInMilliSeconds;
                 scheduler.notifyAt(expireEventTime);
-                sendEvents = true;
+                sendResetEvent = true;
             } else {
-                sendEvents = false;
+                sendResetEvent = false;
+            }
+
+            if (sendResetEvent) {
+                StreamEvent firstExpiredEvent = expiredEventChunk.getFirst();
+                if (firstExpiredEvent != null) {
+                    StreamEvent resetEvent = streamEventCloner.copyStreamEvent(firstExpiredEvent);
+                    resetEvent.setType(StreamEvent.Type.RESET);
+                    resetEvent.setTimestamp(expireEventTime);
+                    resetEventChunk = new ComplexEventChunk<StreamEvent>(true);
+                    resetEventChunk.add(resetEvent);
+                }
+                expiredEventChunk.clear();
             }
 
             while (streamEventChunk.hasNext()) {
@@ -165,15 +178,15 @@ public class ThrottleStreamProcessor extends StreamProcessor implements Scheduli
                 StreamEvent clonedStreamEvent = streamEventCloner.copyStreamEvent(streamEvent);
                 clonedStreamEvent.setType(StreamEvent.Type.EXPIRED);
                 clonedStreamEvent.setTimestamp(expireEventTime);
-                expiredEventChunk.add(clonedStreamEvent);
-            }
-            if (sendEvents) {
-                expiredEventChunk.reset();
-                if (expiredEventChunk.getFirst() != null) {
-                    streamEventChunk.add(expiredEventChunk.getFirst());
+                if (null == expiredEventChunk.getFirst()) {
+                    expiredEventChunk.add(clonedStreamEvent);
                 }
-                expiredEventChunk.clear();
             }
+        }
+        if (resetEventChunk != null) {
+            resetEventChunk.setBatch(true);
+            nextProcessor.process(resetEventChunk);
+            resetEventChunk.setBatch(false);
         }
         if (streamEventChunk.getFirst() != null) {
             streamEventChunk.setBatch(true);
