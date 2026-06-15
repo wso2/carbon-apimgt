@@ -25,6 +25,7 @@
 
     <artifactId>org.wso2.carbon.apimgt.cache.invalidation</artifactId>
     <packaging>bundle</packaging>
+    <name>WSO2 Carbon - API Management Cache Invalidation</name>
     <dependencies>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>

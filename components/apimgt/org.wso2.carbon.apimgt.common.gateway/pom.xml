@@ -10,6 +10,7 @@
 
     <artifactId>org.wso2.carbon.apimgt.common.gateway</artifactId>
     <packaging>bundle</packaging>
+    <name>WSO2 Carbon - API Management Common Gateway</name>
 
     <dependencies>
         <dependency>

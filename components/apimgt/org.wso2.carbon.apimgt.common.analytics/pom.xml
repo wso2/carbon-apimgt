@@ -10,6 +10,7 @@
 
     <artifactId>org.wso2.carbon.apimgt.common.analytics</artifactId>
     <packaging>bundle</packaging>
+    <name>WSO2 Carbon - API Management Common Analytics</name>
 
     <dependencies>
         <dependency>
