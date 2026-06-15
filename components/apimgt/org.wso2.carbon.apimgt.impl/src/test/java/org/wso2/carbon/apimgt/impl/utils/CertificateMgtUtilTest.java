@@ -39,6 +39,7 @@ public class CertificateMgtUtilTest {
 
     private static CertificateMgtUtils certificateMgtUtils;
     private static final String ALIAS = "TEST_ALIAS";
+    private static final String ALIAS_WITH_DUPLICATE_CONTENT = "TEST_ALIAS_DUPLICATE_CONTENT";
     private static final URL CERT_PATH = CertificateMgtUtilTest.class.getClassLoader().getResource
             ("security/client-truststore.jks");
     private static final String ALIAS_NOT_EXIST = "TEST_ALIAS_NOT";
@@ -100,6 +101,7 @@ public class CertificateMgtUtilTest {
     @Test
     public void testAddCertificateToTrustStore() {
 
+        certificateMgtUtils.removeCertificateFromTrustStore(ALIAS);
         ResponseCode result = certificateMgtUtils.addCertificateToTrustStore(BASE64_ENCODED_CERT_STRING, ALIAS);
         Assert.assertEquals(result, ResponseCode.SUCCESS);
     }
@@ -109,6 +111,14 @@ public class CertificateMgtUtilTest {
 
         ResponseCode result = certificateMgtUtils.addCertificateToTrustStore(BASE64_ENCODED_CERT_STRING, ALIAS);
         Assert.assertEquals(result, ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE);
+    }
+
+    @Test
+    public void testAddExistingCertificateContentWithDifferentAlias() {
+
+        ResponseCode result = certificateMgtUtils
+                .addCertificateToTrustStore(BASE64_ENCODED_CERT_STRING, ALIAS_WITH_DUPLICATE_CONTENT);
+        Assert.assertEquals(result, ResponseCode.CERTIFICATE_EXISTS_IN_TRUST_STORE);
     }
 
     @Test
@@ -213,6 +223,7 @@ public class CertificateMgtUtilTest {
      */
     @Test
     public void testValidateCertificate() {
+        certificateMgtUtils.removeCertificateFromTrustStore(ALIAS);
         certificateMgtUtils.addCertificateToTrustStore(BASE64_ENCODED_CERT_STRING,
                 ALIAS + "_" + MultitenantConstants.SUPER_TENANT_ID);
         ResponseCode responseCode = certificateMgtUtils

@@ -76,8 +76,14 @@ public class PeerNodeCertificateManager {
                     break;
                 case ALIAS_EXISTS_IN_TRUST_STORE:
                     if (log.isDebugEnabled()) {
-                        log.debug("Certificate already exists in trust store. alias='" + alias + "', endpoint='" + 
+                        log.debug("Certificate already exists in trust store. alias='" + alias + "', endpoint='" +
                                 endpoint + "', tenantId=" + tenantId);
+                    }
+                    break;
+                case CERTIFICATE_EXISTS_IN_TRUST_STORE:
+                    if (log.isDebugEnabled()) {
+                        log.debug("Certificate content already exists in trust store. alias='" + alias +
+                                "', endpoint='" + endpoint + "', tenantId=" + tenantId);
                     }
                     break;
                 case CERTIFICATE_EXPIRED:

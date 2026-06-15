@@ -176,6 +176,7 @@ public class CertificateMgtUtils {
     private ResponseCode addCertificateToTrustStore(TrustStoreDTO trustStoreDTO, String base64Cert, String alias) {
 
         boolean isCertExists = false;
+        boolean isCertificateContentExists = false;
         boolean expired = false;
 
         try {
@@ -198,6 +199,8 @@ public class CertificateMgtUtils {
                             //Check whether the Alias exists in the trust store.
                             if (trustStore.containsAlias(alias)) {
                                 isCertExists = true;
+                            } else if (trustStore.getCertificateAlias(certificate) != null) {
+                                isCertificateContentExists = true;
                             } else {
                                 /*
                                  * If alias is not exists, check whether the certificate is expired or not. If expired
@@ -219,8 +222,10 @@ public class CertificateMgtUtils {
                         try (OutputStream fileOutputStream = new FileOutputStream(trustStoreFile)) {
                             trustStore.store(fileOutputStream, trustStoreDTO.getPassword());
                         }
-                        return expired ? ResponseCode.CERTIFICATE_EXPIRED :
-                                                        isCertExists ? ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE : ResponseCode.SUCCESS;
+                        return isCertExists ? ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE
+                                : isCertificateContentExists ? ResponseCode.CERTIFICATE_EXISTS_IN_TRUST_STORE
+                                : expired ? ResponseCode.CERTIFICATE_EXPIRED
+                                : ResponseCode.SUCCESS;
                     }
                 }
             }
@@ -429,6 +434,12 @@ public class CertificateMgtUtils {
             if (x509Certificate.getNotAfter().getTime() <= System.currentTimeMillis()) {
                 log.error("Could not update the certificate. The certificate expired.");
                 return ResponseCode.CERTIFICATE_EXPIRED;
+            }
+            String existingAlias = trustStore.getCertificateAlias(newCertificate);
+            if (StringUtils.isNotEmpty(existingAlias) && !alias.equalsIgnoreCase(existingAlias)) {
+                log.error("Could not update the certificate. Certificate content already exists in the trust store " +
+                        "with alias '" + existingAlias + "'.");
+                return ResponseCode.CERTIFICATE_EXISTS_IN_TRUST_STORE;
             }
             // If the certificate is not expired, delete the existing certificate and add the new cert.
             trustStore.deleteEntry(alias);

@@ -28,7 +28,7 @@ package org.wso2.carbon.apimgt.impl.certificatemgt;
  * 4. CERTIFICATE_NOT_FOUND : Failed to remove the certificate from trust store. Certificate not found.
  * 5. FAILED_TO_REMOVE_FROM_DB : Failed to remove the certificate from Database.
  * 6. CERTIFICATE_EXPIRED : Failed to add certificate to key store. Certificate expired.
- * 7. CERTIFICATE_FOR_ENDPOINT_EXISTS : Failed to add Certificate to database. Certificate for endpoint exists.
+ * 7. CERTIFICATE_EXISTS_IN_TRUST_STORE : Failed to add certificate. Certificate content already exists in trust store.
  */
 public enum ResponseCode {
 
@@ -37,7 +37,8 @@ public enum ResponseCode {
     ALIAS_EXISTS_IN_TRUST_STORE(3),
     CERTIFICATE_NOT_FOUND(4),
     FAILED_TO_REMOVE_FROM_DB(5),
-    CERTIFICATE_EXPIRED(6);
+    CERTIFICATE_EXPIRED(6),
+    CERTIFICATE_EXISTS_IN_TRUST_STORE(7);
 
     private final int responseCode;
 

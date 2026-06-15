@@ -204,6 +204,8 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
                         "server error", log);
             } else if (ResponseCode.CERTIFICATE_NOT_FOUND.getResponseCode() == responseCode) {
                 RestApiUtil.handleResourceNotFoundError("", log);
+            } else if (ResponseCode.CERTIFICATE_EXISTS_IN_TRUST_STORE.getResponseCode() == responseCode) {
+                RestApiUtil.handleResourceAlreadyExistsError("Certificate already exists in the trust store.", log);
             } else if (ResponseCode.CERTIFICATE_EXPIRED.getResponseCode() == responseCode) {
                 RestApiUtil.handleBadRequest("Error while updating the certificate. Certificate Expired.", log);
             }
@@ -319,6 +321,8 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
             } else if (ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE.getResponseCode() == responseCode) {
                 RestApiUtil.handleResourceAlreadyExistsError("The alias '" + alias +
                         "' already exists in the trust store.", log);
+            } else if (ResponseCode.CERTIFICATE_EXISTS_IN_TRUST_STORE.getResponseCode() == responseCode) {
+                RestApiUtil.handleResourceAlreadyExistsError("Certificate already exists in the trust store.", log);
             } else if (ResponseCode.CERTIFICATE_EXPIRED.getResponseCode() == responseCode) {
                 RestApiUtil.handleBadRequest("Error while adding the certificate. Certificate Expired.", log);
             }

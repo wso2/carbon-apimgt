@@ -158,6 +158,20 @@ public class CertificateManagerImplTest {
         Assert.assertEquals(ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE, responseCode);
     }
 
+    @Test
+    public void testAddToPublisherWithExistingCertificateContent()
+            throws CertificateAliasExistsException, CertificateManagementException {
+        Mockito.when(certificateMgtDAO.addCertificate(BASE64_ENCODED_CERT, ALIAS, END_POINT, TENANT_ID))
+                .thenReturn(true);
+        Mockito.when(certificateMgtDAO.deleteCertificate(ALIAS, END_POINT, TENANT_ID)).thenReturn(true);
+        PowerMockito.stub(PowerMockito
+                .method(CertificateMgtUtils.class, "addCertificateToTrustStore", String.class, String.class))
+                .toReturn(ResponseCode.CERTIFICATE_EXISTS_IN_TRUST_STORE);
+        ResponseCode responseCode = certificateManager.addCertificateToParentNode(BASE64_ENCODED_CERT, ALIAS,
+                END_POINT, TENANT_ID);
+        Assert.assertEquals(ResponseCode.CERTIFICATE_EXISTS_IN_TRUST_STORE, responseCode);
+    }
+
     //@Test
     public void testAddToPublisherWhenDBError() {
 
