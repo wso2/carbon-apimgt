@@ -59,9 +59,9 @@ import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
 import java.security.KeyStore;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.Map;
 import java.util.Set;
 
@@ -98,7 +98,7 @@ public class ServiceReferenceHolder {
     private FederatedAPIDiscoveryService federatedAPIDiscoveryService;
     private OpaqueAPIKeyNotifier opaqueApiKeyNotifier;
     private ConsumptionDataExportService consumptionDataExportService;
-    private final List<RevokedTokenService> revokedTokenServices = new ArrayList<>();
+    private final List<RevokedTokenService> revokedTokenServices = new CopyOnWriteArrayList<>();
 
     private Map<String, LLMProviderService> llmProviderServiceMap = new HashMap();
 
