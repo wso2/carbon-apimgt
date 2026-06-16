@@ -22747,7 +22747,7 @@ public class ApiMgtDAO {
     /**
      * Update the API provider of a given API.
      * Preferred over {@link #updateApiProvider(String, String)} — accepts the old provider name
-     * and API name explicitly, avoiding a correlated subquery and any execution-order dependency.
+     * and API name explicitly, avoiding scalar subqueries and any execution-order dependency.
      * Both AM_API_DEFAULT_VERSION and AM_API are updated atomically in a single transaction.
      *
      * @param apiUUID         API UUID of the API that needs to update the provider
