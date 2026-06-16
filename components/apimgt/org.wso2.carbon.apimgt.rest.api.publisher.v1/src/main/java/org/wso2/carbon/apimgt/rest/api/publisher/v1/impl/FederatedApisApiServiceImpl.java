@@ -407,6 +407,11 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
                     }
                     map.put("description", discoveredAPI.getApi().getDescription());
                     map.put("context", discoveredAPI.getApi().getContext());
+                    String apiType = discoveredAPI.getApi().getType();
+                    if (apiType == null) {
+                        apiType = "HTTP";
+                    }
+                    map.put("apiType", apiType);
                 }
                 map.put("gatewayName", environment.getName());
                 map.put("gatewayType", environment.getGatewayType());
