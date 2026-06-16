@@ -22718,10 +22718,12 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try {
-                // Must execute BEFORE UPDATE_API_PROVIDER_SQL — subquery reads old provider from AM_API
+                // Must execute BEFORE UPDATE_API_PROVIDER_SQL — subquery reads old provider from AM_API.
+                // replaceEmailDomainBack ensures the SET value is stored in @ format,
+                // consistent with how AM_API_DEFAULT_VERSION.API_PROVIDER is written on INSERT.
                 try (PreparedStatement stmt =
                              connection.prepareStatement(SQLConstants.UPDATE_DEFAULT_VERSION_PROVIDER_SQL)) {
-                    stmt.setString(1, providerName);
+                    stmt.setString(1, APIUtil.replaceEmailDomainBack(providerName));
                     stmt.setString(2, apiUUID);
                     stmt.setString(3, apiUUID);
                     stmt.executeUpdate();
@@ -22760,12 +22762,17 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try {
+                // replaceEmailDomainBack ensures both SET and WHERE values are in @ format,
+                // consistent with how AM_API_DEFAULT_VERSION.API_PROVIDER is written on INSERT
+                // and queried in GET_DEFAULT_VERSION_SQL.
+                // oldProviderName comes from APIIdentifier.getProviderName() which is in -AT- format;
+                // replaceEmailDomainBack converts it to @ format to match the stored row.
                 try (PreparedStatement stmt =
                              connection.prepareStatement(
                                      SQLConstants.UPDATE_DEFAULT_VERSION_PROVIDER_BY_NAME_SQL)) {
-                    stmt.setString(1, providerName);
+                    stmt.setString(1, APIUtil.replaceEmailDomainBack(providerName));
                     stmt.setString(2, apiName);
-                    stmt.setString(3, oldProviderName);
+                    stmt.setString(3, APIUtil.replaceEmailDomainBack(oldProviderName));
                     stmt.executeUpdate();
                 }
                 try (PreparedStatement stmt =
