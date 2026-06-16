@@ -33,8 +33,12 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.ConfigurationDto;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.Workflow;
@@ -45,9 +49,12 @@ import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
+import org.wso2.carbon.apimgt.impl.factory.PersistenceFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.workflow.DefaultWorkflowTaskService;
+import org.wso2.carbon.apimgt.persistence.APIPersistence;
+import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.identity.application.common.model.IdentityProvider;
 import org.wso2.carbon.identity.application.common.model.IdentityProviderProperty;
@@ -60,7 +67,8 @@ import java.util.List;
 import java.util.Map;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ServiceReferenceHolder.class, ApiMgtDAO.class, APIUtil.class, CarbonContext.class})
+@PrepareForTest({ServiceReferenceHolder.class, ApiMgtDAO.class, APIUtil.class, CarbonContext.class,
+        APIManagerFactory.class, PersistenceFactory.class})
 public class APIAdminImplTest {
 
     private static final String azureADKeyManagerType = "AzureAD";
@@ -641,5 +649,154 @@ public class APIAdminImplTest {
             }
         }
         Assert.assertTrue("Expected " + APIConstants.JWKS_URI + " property on JWKS update", jwksFound);
+    }
+
+    // ---------- Issue #5038: AM_API_DEFAULT_VERSION.API_PROVIDER not updated on provider change ----------
+
+    private void setupProviderChangeMocks(String apiId, String organisation, String username,
+                                          API mockApi) throws Exception {
+        CarbonContext carbonContext = Mockito.mock(CarbonContext.class);
+        PowerMockito.when(CarbonContext.getThreadLocalCarbonContext()).thenReturn(carbonContext);
+        Mockito.when(carbonContext.getUsername()).thenReturn(username);
+
+        APIProvider mockAPIProvider = Mockito.mock(APIProvider.class);
+        Mockito.when(mockAPIProvider.getAPIbyUUID(apiId, organisation)).thenReturn(mockApi);
+
+        APIManagerFactory mockManagerFactory = Mockito.mock(APIManagerFactory.class);
+        PowerMockito.mockStatic(APIManagerFactory.class);
+        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(mockManagerFactory);
+        Mockito.when(mockManagerFactory.getAPIProvider(username)).thenReturn(mockAPIProvider);
+
+        APIPersistence mockPersistence = Mockito.mock(APIPersistence.class);
+        PowerMockito.mockStatic(PersistenceFactory.class);
+        PowerMockito.when(PersistenceFactory.getAPIPersistenceInstance()).thenReturn(mockPersistence);
+        Mockito.doNothing().when(mockPersistence).changeApiProvider(
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
+
+        PowerMockito.doNothing().when(APIUtil.class, "logAuditMessage",
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
+    }
+
+    @Test
+    public void testUpdateApiProviderCallsDaoWithCorrectParams() throws Exception {
+        // Regression test for issue #5038: verifies the 4-param DAO overload is called with
+        // oldProviderName and apiName so AM_API_DEFAULT_VERSION.API_PROVIDER is updated atomically.
+        String apiId = "test-api-uuid-5038";
+        String newProvider = "newprovider";
+        String oldProvider = "admin";
+        String apiName = "TestDefaultVersionAPI";
+        String organisation = "carbon.super";
+
+        APIIdentifier apiIdentifier = new APIIdentifier(oldProvider, apiName, "1.0");
+        API mockApi = Mockito.mock(API.class);
+        Mockito.when(mockApi.getId()).thenReturn(apiIdentifier);
+        Mockito.when(mockApi.getContext()).thenReturn("/testapi");
+
+        setupProviderChangeMocks(apiId, organisation, "admin", mockApi);
+
+        new APIAdminImpl().updateApiProvider(apiId, newProvider, organisation);
+
+        // 4-param overload must be called with old provider name and API name
+        Mockito.verify(apiMgtDAO).updateApiProvider(apiId, newProvider, oldProvider, apiName);
+        // Deprecated 2-param overload must NOT be called
+        Mockito.verify(apiMgtDAO, Mockito.never())
+                .updateApiProvider(Mockito.eq(apiId), Mockito.eq(newProvider));
+    }
+
+    @Test
+    public void testUpdateApiProviderNonDefaultVersionApiCallsDao() throws Exception {
+        // An API with isDefaultVersion=false also routes through the 4-param overload.
+        // The DAO handles the zero-row update silently when no default-version row exists.
+        String apiId = "non-default-api-uuid-5038";
+        String newProvider = "newprovider";
+        String oldProvider = "admin";
+        String apiName = "NonDefaultAPI";
+        String organisation = "carbon.super";
+
+        APIIdentifier apiIdentifier = new APIIdentifier(oldProvider, apiName, "1.0");
+        API mockApi = Mockito.mock(API.class);
+        Mockito.when(mockApi.getId()).thenReturn(apiIdentifier);
+        Mockito.when(mockApi.getContext()).thenReturn("/nondapi");
+
+        setupProviderChangeMocks(apiId, organisation, "admin", mockApi);
+
+        new APIAdminImpl().updateApiProvider(apiId, newProvider, organisation);
+
+        Mockito.verify(apiMgtDAO).updateApiProvider(apiId, newProvider, oldProvider, apiName);
+    }
+
+    @Test
+    public void testUpdateApiProviderApiNotFoundThrowsException() throws Exception {
+        String apiId = "missing-api-uuid-5038";
+        String newProvider = "newprovider";
+        String organisation = "carbon.super";
+        String username = "admin";
+
+        CarbonContext carbonContext = Mockito.mock(CarbonContext.class);
+        PowerMockito.when(CarbonContext.getThreadLocalCarbonContext()).thenReturn(carbonContext);
+        Mockito.when(carbonContext.getUsername()).thenReturn(username);
+
+        APIProvider mockAPIProvider = Mockito.mock(APIProvider.class);
+        Mockito.when(mockAPIProvider.getAPIbyUUID(apiId, organisation)).thenReturn(null);
+
+        APIManagerFactory mockManagerFactory = Mockito.mock(APIManagerFactory.class);
+        PowerMockito.mockStatic(APIManagerFactory.class);
+        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(mockManagerFactory);
+        Mockito.when(mockManagerFactory.getAPIProvider(username)).thenReturn(mockAPIProvider);
+
+        APIPersistence mockPersistence = Mockito.mock(APIPersistence.class);
+        PowerMockito.mockStatic(PersistenceFactory.class);
+        PowerMockito.when(PersistenceFactory.getAPIPersistenceInstance()).thenReturn(mockPersistence);
+
+        try {
+            new APIAdminImpl().updateApiProvider(apiId, newProvider, organisation);
+            Assert.fail("Expected APIMgtResourceNotFoundException for missing API");
+        } catch (APIMgtResourceNotFoundException e) {
+            Assert.assertTrue(e.getMessage().contains("API not found for id: " + apiId));
+        }
+        // DAO must NOT be called when the API is not found
+        Mockito.verify(apiMgtDAO, Mockito.never()).updateApiProvider(
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
+    }
+
+    @Test
+    public void testUpdateApiProviderPersistenceExceptionPropagated() throws Exception {
+        // APIPersistenceException from changeApiProvider is wrapped as APIManagementException.
+        String apiId = "persist-fail-uuid-5038";
+        String newProvider = "newprovider";
+        String oldProvider = "admin";
+        String apiName = "PersistFailAPI";
+        String organisation = "carbon.super";
+        String username = "admin";
+
+        APIIdentifier apiIdentifier = new APIIdentifier(oldProvider, apiName, "1.0");
+        API mockApi = Mockito.mock(API.class);
+        Mockito.when(mockApi.getId()).thenReturn(apiIdentifier);
+        Mockito.when(mockApi.getContext()).thenReturn("/persistfail");
+
+        CarbonContext carbonContext = Mockito.mock(CarbonContext.class);
+        PowerMockito.when(CarbonContext.getThreadLocalCarbonContext()).thenReturn(carbonContext);
+        Mockito.when(carbonContext.getUsername()).thenReturn(username);
+
+        APIProvider mockAPIProvider = Mockito.mock(APIProvider.class);
+        Mockito.when(mockAPIProvider.getAPIbyUUID(apiId, organisation)).thenReturn(mockApi);
+
+        APIManagerFactory mockManagerFactory = Mockito.mock(APIManagerFactory.class);
+        PowerMockito.mockStatic(APIManagerFactory.class);
+        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(mockManagerFactory);
+        Mockito.when(mockManagerFactory.getAPIProvider(username)).thenReturn(mockAPIProvider);
+
+        APIPersistence mockPersistence = Mockito.mock(APIPersistence.class);
+        PowerMockito.mockStatic(PersistenceFactory.class);
+        PowerMockito.when(PersistenceFactory.getAPIPersistenceInstance()).thenReturn(mockPersistence);
+        Mockito.doThrow(APIPersistenceException.class).when(mockPersistence).changeApiProvider(
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
+
+        try {
+            new APIAdminImpl().updateApiProvider(apiId, newProvider, organisation);
+            Assert.fail("Expected APIManagementException when persistence throws");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("Error while changing the API provider"));
+        }
     }
 }
