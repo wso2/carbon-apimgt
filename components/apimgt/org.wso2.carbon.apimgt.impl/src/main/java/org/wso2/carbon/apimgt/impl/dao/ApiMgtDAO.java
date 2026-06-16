@@ -22773,7 +22773,12 @@ public class ApiMgtDAO {
                     stmt.setString(1, APIUtil.replaceEmailDomainBack(providerName));
                     stmt.setString(2, apiName);
                     stmt.setString(3, APIUtil.replaceEmailDomainBack(oldProviderName));
-                    stmt.executeUpdate();
+                    int defaultVersionRows = stmt.executeUpdate();
+                    if (defaultVersionRows == 0 && log.isDebugEnabled()) {
+                        log.debug("No AM_API_DEFAULT_VERSION row updated for API: " + apiName
+                                + " provider change from " + oldProviderName + " to " + providerName
+                                + " — API may not be marked as default version");
+                    }
                 }
                 try (PreparedStatement stmt =
                              connection.prepareStatement(SQLConstants.UPDATE_API_PROVIDER_SQL)) {
