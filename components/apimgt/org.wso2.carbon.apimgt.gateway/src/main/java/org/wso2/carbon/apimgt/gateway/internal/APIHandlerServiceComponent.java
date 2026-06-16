@@ -63,9 +63,9 @@ import org.wso2.carbon.apimgt.gateway.RedisBaseDistributedCountManager;
 import org.wso2.carbon.apimgt.gateway.ZillizVectorDBProviderServiceImpl;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClientPool;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.WebSocketProcessor;
-import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTMapCleaner;
 import org.wso2.carbon.apimgt.gateway.listeners.GatewayStartupListener;
 import org.wso2.carbon.apimgt.gateway.listeners.ServerStartupListener;
+import org.wso2.carbon.apimgt.gateway.service.GatewayRevokedTokenDataImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
@@ -75,6 +75,7 @@ import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever
 import org.wso2.carbon.apimgt.impl.jms.listener.JMSListenerShutDownService;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerDataService;
+import org.wso2.carbon.apimgt.impl.token.RevokedTokenService;
 import org.wso2.carbon.apimgt.tracing.TracingService;
 import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryService;
@@ -131,6 +132,7 @@ public class APIHandlerServiceComponent {
         TenantServiceCreator listener = new TenantServiceCreator();
         bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), listener, null);
         bundleContext.registerService(ServerStartupObserver.class.getName(), new ServerStartupListener(), null);
+        bundleContext.registerService(RevokedTokenService.class, new GatewayRevokedTokenDataImpl(), null);
         // Set APIM Gateway JWT Generator
 
         registration =
@@ -139,9 +141,6 @@ public class APIHandlerServiceComponent {
         registration =
                 context.getBundleContext().registerService(AbstractAPIMgtGatewayJWTGenerator.class.getName(),
                         new APIMgtGatewayUrlSafeJWTGeneratorImpl(), null);
-        // Start JWT revoked map cleaner.
-        RevokedJWTMapCleaner revokedJWTMapCleaner = new RevokedJWTMapCleaner();
-        revokedJWTMapCleaner.startJWTRevokedMapCleaner();
         if (TelemetryUtil.telemetryEnabled()) {
             ServiceReferenceHolder.getInstance().setTelemetry(ServiceReferenceHolder.getInstance().getTelemetryService
                     ().buildTelemetryTracer(APIMgtGatewayConstants.SERVICE_NAME));
