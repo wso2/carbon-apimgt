@@ -83,8 +83,12 @@ public class DeploymentsApiServiceImpl implements DeploymentsApiService {
             GatewayDeploymentInfoDTO info = new GatewayDeploymentInfoDTO();
             info.setDeploymentId(row.getDeploymentId());
             info.setArtifactId(row.getApiUuid());
-            info.setKind(GatewayDeploymentInfoDTO.KindEnum.RESTAPI);
-            info.setUpdatedAt(row.getDeployedTime() != null
+            info.setKind(APIConstants.GatewayNotification.PLATFORM_GATEWAY_RESTAPI_KIND);
+            // Every row returned by listDeploymentsByGatewayEnvUuid represents an artifact that is
+            // currently deployed on this gateway (undeploy removes the row). The gateway controller
+            // only fetches artifacts whose state is "deployed", so this field is required.
+            info.setState(APIConstants.GatewayNotification.PLATFORM_GATEWAY_RESTAPI_STATUS);
+            info.setDeployedAt(row.getDeployedTime() != null
                     ? row.getDeployedTime().toInstant().toString()
                     : null);
             list.add(info);
