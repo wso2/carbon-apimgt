@@ -522,7 +522,7 @@ public class Utils {
                 bytes = certificate.getBytes();
             } else {
                 try {
-                    certificate = URLDecoder.decode(certificate, "UTF-8");
+                    certificate = URLDecoder.decode(certificate.replace("+", "%2B"), "UTF-8");
                 } catch (UnsupportedEncodingException e) {
                     String msg = "Error while URL decoding certificate";
                     throw new APIManagementException(msg, e);
