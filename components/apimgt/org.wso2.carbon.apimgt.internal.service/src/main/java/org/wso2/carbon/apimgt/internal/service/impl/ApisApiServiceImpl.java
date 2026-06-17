@@ -559,6 +559,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         if (gateway == null) {
             return Response.status(Response.Status.UNAUTHORIZED).entity("Invalid api-key").build();
         }
+        if (StringUtils.isBlank(gateway.id)) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Gateway id not resolved").build();
+        }
         List<APIKeyInfo> keyInfoList =
                 ApiKeyMgtDAO.getInstance().getPlatformGatewayAPIKeysByGateway(gateway.id);
         List<PlatformGatewayAPIKeyDTO> dtos = new ArrayList<>(keyInfoList.size());
