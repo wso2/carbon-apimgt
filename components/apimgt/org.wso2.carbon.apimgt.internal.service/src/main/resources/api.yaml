@@ -1670,12 +1670,15 @@ components:
           description: Artifact identifier (API UUID on-prem).
         kind:
           type: string
-          description: Artifact type (e.g. RestAPI).
-          enum:
-            - RestAPI
-        updatedAt:
+          description: Artifact type (e.g. RestApi).
+        state:
           type: string
-          description: When the deployment was last updated (ISO-8601 date-time string).
+          description: >-
+            Desired deployment state of the artifact on the gateway. Every entry returned by
+            this endpoint is currently deployed; absence from the list means undeployed/orphaned.
+        deployedAt:
+          type: string
+          description: When the deployment was last (un)deployed (ISO-8601 date-time string).
     GatewayDeploymentsResponse:
       description: Response for GET /deployments (platform contract).
       type: object
