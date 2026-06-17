@@ -23,14 +23,16 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Config for API Platform Gateway metadata (e.g. versions advertised to the UI).
+ * Config for Platform Gateway connect-with-token ({@code [[apim.platform_gateway.connect]]})
+ * and version metadata ({@code apim.platform_gateway.versions}).
  * Separate from {@link GatewayNotificationConfiguration} for notification/heartbeat settings.
  */
 public class PlatformGatewayConnectConfig {
     private List<String> platformGatewayVersions = new ArrayList<>();
+    private List<ConnectGatewayConfig> connectGateways = new ArrayList<>();
 
     /**
-     * Global API Platform Gateway versions (e.g. ["0.11.0","1.0.0"]).
+     * Global API Platform Gateway versions (e.g. ["1.0.0"]).
      */
     public List<String> getPlatformGatewayVersions() {
         if (platformGatewayVersions == null) {
@@ -43,5 +45,19 @@ public class PlatformGatewayConnectConfig {
         this.platformGatewayVersions = platformGatewayVersions != null
                 ? new ArrayList<>(platformGatewayVersions)
                 : new ArrayList<>();
+    }
+
+    /**
+     * Connect configs (one per gateway) for connect-with-token. If empty, platform connect is disabled.
+     */
+    public List<ConnectGatewayConfig> getConnectGateways() {
+        if (connectGateways == null) {
+            connectGateways = new ArrayList<>();
+        }
+        return connectGateways;
+    }
+
+    public void setConnectGateways(List<ConnectGatewayConfig> connectGateways) {
+        this.connectGateways = connectGateways != null ? new ArrayList<>(connectGateways) : new ArrayList<>();
     }
 }
