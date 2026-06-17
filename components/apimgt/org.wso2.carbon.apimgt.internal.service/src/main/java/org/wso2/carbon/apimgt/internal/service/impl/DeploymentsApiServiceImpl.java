@@ -156,16 +156,14 @@ public class DeploymentsApiServiceImpl implements DeploymentsApiService {
 
         byte[] tarBytes;
         try {
-            tarBytes = DeploymentTarGzBuilder.buildTar(entries);
+            tarBytes = DeploymentTarGzBuilder.buildTarGz(entries);
         } catch (IOException e) {
-            log.error("Failed to build TAR for deployment batch", e);
+            log.error("Failed to build TAR.GZ for deployment batch", e);
             throw new APIManagementException("Failed to build deployment archive", e);
         }
 
-        // Payload is uncompressed TAR; GZIPOutInterceptor (if applied) adds Content-Encoding: gzip.
-        // Use application/x-tar so type matches uncompressed content; filename hints .tar.gz when gzip is applied.
         return Response.ok(tarBytes)
-                .type("application/x-tar")
+                .type("application/x-tar+gzip")
                 .header("Content-Disposition", "attachment; filename=\"deployments.tar.gz\"")
                 .build();
     }
