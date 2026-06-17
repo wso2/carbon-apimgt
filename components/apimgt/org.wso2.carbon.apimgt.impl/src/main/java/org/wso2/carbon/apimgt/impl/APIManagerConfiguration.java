@@ -3671,6 +3671,52 @@ public class APIManagerConfiguration {
             if (!platformGatewayVersions.isEmpty()) {
                 platformGatewayConnectConfig.setPlatformGatewayVersions(platformGatewayVersions);
             }
+            List<org.wso2.carbon.apimgt.impl.dto.ConnectGatewayConfig> connectGateways = new ArrayList<>();
+            OMElement connectGatewaysElem = pgConnectElem.getFirstChildWithName(
+                    new QName(APIConstants.GatewayNotification.CONNECT_GATEWAYS));
+            if (connectGatewaysElem != null) {
+                Iterator<?> connectIt = connectGatewaysElem.getChildrenWithName(
+                        new QName(APIConstants.GatewayNotification.CONNECT));
+                while (connectIt != null && connectIt.hasNext()) {
+                    OMElement connectElem = (OMElement) connectIt.next();
+                    if (connectElem == null) {
+                        continue;
+                    }
+                    org.wso2.carbon.apimgt.impl.dto.ConnectGatewayConfig entry =
+                            new org.wso2.carbon.apimgt.impl.dto.ConnectGatewayConfig();
+                    OMElement rt = connectElem.getFirstChildWithName(
+                            new QName(APIConstants.GatewayNotification.REGISTRATION_TOKEN));
+                    if (rt != null && rt.getText() != null && !rt.getText().trim().isEmpty()) {
+                        entry.setRegistrationToken(rt.getText().trim());
+                    }
+                    OMElement nameEl = connectElem.getFirstChildWithName(
+                            new QName(APIConstants.GatewayNotification.CONNECT_NAME));
+                    if (nameEl != null && nameEl.getText() != null) {
+                        entry.setName(nameEl.getText().trim());
+                    }
+                    OMElement displayEl = connectElem.getFirstChildWithName(
+                            new QName(APIConstants.GatewayNotification.CONNECT_DISPLAY_NAME));
+                    if (displayEl != null && displayEl.getText() != null) {
+                        entry.setDisplayName(displayEl.getText().trim());
+                    }
+                    OMElement descEl = connectElem.getFirstChildWithName(
+                            new QName(APIConstants.GatewayNotification.CONNECT_DESCRIPTION));
+                    if (descEl != null && descEl.getText() != null) {
+                        entry.setDescription(descEl.getText().trim());
+                    }
+                    OMElement urlEl = connectElem.getFirstChildWithName(
+                            new QName(APIConstants.GatewayNotification.CONNECT_URL));
+                    if (urlEl != null && urlEl.getText() != null && !urlEl.getText().trim().isEmpty()) {
+                        entry.setUrl(urlEl.getText().trim());
+                    }
+                    if (!entry.getRegistrationToken().isEmpty()) {
+                        connectGateways.add(entry);
+                    }
+                }
+            }
+            if (!connectGateways.isEmpty()) {
+                platformGatewayConnectConfig.setConnectGateways(connectGateways);
+            }
         }
     }
 
@@ -3679,7 +3725,8 @@ public class APIManagerConfiguration {
     }
 
     /**
-     * API Platform Gateway metadata config (e.g. supported versions for UI).
+     * Platform Gateway connect-with-token config ({@code [[apim.platform_gateway.connect]]}) and
+     * version metadata ({@code apim.platform_gateway.versions}).
      */
     public PlatformGatewayConnectConfig getPlatformGatewayConnectConfig() {
         return platformGatewayConnectConfig;
