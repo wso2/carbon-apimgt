@@ -42,6 +42,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.basicauth.BasicAuthAuthe
 import org.wso2.carbon.apimgt.gateway.handlers.security.oauth.OAuthAuthenticator;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
+import org.wso2.carbon.apimgt.gateway.utils.MCPUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
@@ -471,6 +472,26 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                 }
                 handleNoAuthentication(messageContext);
                 setAPIParametersToMessageContext(messageContext);
+
+                //remove authorization header if exists
+                try {
+                    org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
+                            getAxis2MessageContext();
+                    Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+                    String authHeader = APIUtil.getOAuthConfigurationFromAPIMConfig(APIConstants.AUTHORIZATION_HEADER);
+                    if (authHeader == null) {
+                        authHeader = HttpHeaders.AUTHORIZATION;
+                    }
+                    
+                    if (headers != null && headers.get(authHeader) != null) {
+                        headers.remove(authHeader);
+                    }
+                } catch (APIManagementException e) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Error while removing authorization header for MCP request", e);
+                    }
+                }
+
                 return ExtensionListenerUtil.postProcessRequest(messageContext, type);
             }
 
@@ -484,10 +505,8 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                 }
 
                 String authenticationScheme;
-                String mcpMethod = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD);
-                if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(apiType) &&
-                        ((APIConstants.MCP.METHOD_TOOL_LIST.equals(mcpMethod)) || isMCPGetRequest(messageContext))) {
-                    authenticationScheme = APIConstants.AUTH_NO_AUTHENTICATION;
+                if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(apiType)) {
+                    authenticationScheme = MCPUtils.getResourceAuthenticationSchemeForMCP(messageContext, getAPIKeyValidator());
                 } else {
                     authenticationScheme = getAPIKeyValidator().getResourceAuthenticationScheme(messageContext);
                 }

@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.exception.McpException;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.mcp.request.MCPRequestDeserializer;
 import org.wso2.carbon.apimgt.gateway.mcp.request.Params;
 import org.wso2.carbon.apimgt.gateway.mcp.request.McpRequest;
@@ -45,6 +46,7 @@ import org.wso2.carbon.apimgt.gateway.mcp.response.McpResponseDto;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.utils.MCPUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 
 import javax.xml.stream.XMLStreamException;
@@ -236,11 +238,22 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
 
     private boolean isNoAuthMCPRequest(String method) throws McpException {
 
+        // If enforceAuthForAllMethods is enabled, then all MCP methods will require authentication, hence returning false
+        APIManagerConfiguration apiManagerConfiguration = ServiceReferenceHolder.getInstance()
+                .getApiManagerConfigurationService().getAPIManagerConfiguration();
+        if (apiManagerConfiguration.isMCPEnforceAuthForAllMethods()) {
+            return false;
+        }
+
         switch (method) {
             case APIConstants.MCP.METHOD_INITIALIZE:
             case APIConstants.MCP.METHOD_TOOL_LIST:
             case APIConstants.MCP.METHOD_NOTIFICATION_INITIALIZED:
             case APIConstants.MCP.METHOD_PING:
+            case APIConstants.MCP.METHOD_PROMPTS_LIST:
+            case APIConstants.MCP.METHOD_RESOURCES_LIST:
+            case APIConstants.MCP.METHOD_RESOURCE_TEMPLATE_LIST:
+            case APIConstants.MCP.METHOD_SET_LOG_LEVEL:
                 return true;
             default:
                 return false;
