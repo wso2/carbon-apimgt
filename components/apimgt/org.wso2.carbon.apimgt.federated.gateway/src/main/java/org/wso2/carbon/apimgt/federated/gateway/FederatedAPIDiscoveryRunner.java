@@ -662,8 +662,33 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
         String adminUsername = APIUtil.getTenantAdminUserName(organization);
         FederatedGatewayUtil.startTenantFlow(organization, adminUsername);
         try {
+            List<String> realApiIds = new ArrayList<>();
+            Map<String, String> customDisplayNames = new HashMap<>();
+            Map<String, String> customDescriptions = new HashMap<>();
+
+            for (String apiId : apiIds) {
+                String realId = apiId;
+                if (apiId != null && apiId.trim().startsWith("{") && apiId.trim().endsWith("}")) {
+                    try {
+                        com.google.gson.JsonObject json = new com.google.gson.JsonParser().parse(apiId).getAsJsonObject();
+                        if (json.has("id")) {
+                            realId = json.get("id").getAsString();
+                        }
+                        if (json.has("displayName")) {
+                            customDisplayNames.put(realId, json.get("displayName").getAsString());
+                        }
+                        if (json.has("description")) {
+                            customDescriptions.put(realId, json.get("description").getAsString());
+                        }
+                    } catch (Exception e) {
+                        log.error("Error parsing JSON apiId: " + apiId, e);
+                    }
+                }
+                realApiIds.add(realId);
+            }
+
             // Fetch the specific list of DiscoveredAPIs from the connector.
-            List<DiscoveredAPI> allDiscoveredAPIs = discovery.discoverAPI(apiIds);
+            List<DiscoveredAPI> allDiscoveredAPIs = discovery.discoverAPI(realApiIds);
             // Build a lookup map: key the APIs by multiple identifiers so the UI can match by any of them.
             // Exclude name-only indexing to avoid conflicts between different versions.
             Map<String, DiscoveredAPI> apiLookup = new HashMap<>();
@@ -683,7 +708,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
             List<String> alreadyDiscoveredAPIsList = new ArrayList<>(alreadyDiscoveredAPIMap.keySet());
             
             ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
-            for (String apiId : apiIds) {
+            for (String apiId : realApiIds) {
                 try {
                     DiscoveredAPI discoveredAPI = apiLookup.get(apiId);
                     if (discoveredAPI == null) {
@@ -691,7 +716,22 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                         continue;
                     }
                     API api = discoveredAPI.getApi();
+
+                    if (customDisplayNames.containsKey(apiId)) {
+                        api.setDisplayName(customDisplayNames.get(apiId));
+                    }
+                    if (customDescriptions.containsKey(apiId)) {
+                        api.setDescription(customDescriptions.get(apiId));
+                    }
+
                     APIDTO apidto = fromAPItoDTO(api);
+                    if (customDisplayNames.containsKey(apiId)) {
+                        apidto.setDisplayName(customDisplayNames.get(apiId));
+                    }
+                    if (customDescriptions.containsKey(apiId)) {
+                        apidto.setDescription(customDescriptions.get(apiId));
+                    }
+
                     if (apidto.getPolicies() == null || apidto.getPolicies().isEmpty()) {
                         apidto.setPolicies(Collections.singletonList(DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS));
                     }
@@ -792,7 +832,32 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
         String adminUsername = APIUtil.getTenantAdminUserName(organization);
         FederatedGatewayUtil.startTenantFlow(organization, adminUsername);
         try {
-            List<DiscoveredAPI> allDiscoveredAPIs = discovery.discoverAPI(apiIds);
+            List<String> realApiIds = new ArrayList<>();
+            Map<String, String> customDisplayNames = new HashMap<>();
+            Map<String, String> customDescriptions = new HashMap<>();
+
+            for (String apiId : apiIds) {
+                String realId = apiId;
+                if (apiId != null && apiId.trim().startsWith("{") && apiId.trim().endsWith("}")) {
+                    try {
+                        com.google.gson.JsonObject json = new com.google.gson.JsonParser().parse(apiId).getAsJsonObject();
+                        if (json.has("id")) {
+                            realId = json.get("id").getAsString();
+                        }
+                        if (json.has("displayName")) {
+                            customDisplayNames.put(realId, json.get("displayName").getAsString());
+                        }
+                        if (json.has("description")) {
+                            customDescriptions.put(realId, json.get("description").getAsString());
+                        }
+                    } catch (Exception e) {
+                        log.error("Error parsing JSON apiId: " + apiId, e);
+                    }
+                }
+                realApiIds.add(realId);
+            }
+
+            List<DiscoveredAPI> allDiscoveredAPIs = discovery.discoverAPI(realApiIds);
             Map<String, DiscoveredAPI> apiLookup = new HashMap<>();
             for (DiscoveredAPI discovered : allDiscoveredAPIs) {
                 API api = discovered.getApi();
@@ -802,7 +867,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                 apiLookup.put(api.getId().getApiName() + ":" + api.getId().getVersion(), discovered);
             }
             ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
-            for (String apiId : apiIds) {
+            for (String apiId : realApiIds) {
                 try {
                     DiscoveredAPI discoveredAPI = apiLookup.get(apiId);
                     if (discoveredAPI == null) {
@@ -810,7 +875,22 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                         continue;
                     }
                     API api = discoveredAPI.getApi();
+
+                    if (customDisplayNames.containsKey(apiId)) {
+                        api.setDisplayName(customDisplayNames.get(apiId));
+                    }
+                    if (customDescriptions.containsKey(apiId)) {
+                        api.setDescription(customDescriptions.get(apiId));
+                    }
+
                     APIDTO apidto = fromAPItoDTO(api);
+                    if (customDisplayNames.containsKey(apiId)) {
+                        apidto.setDisplayName(customDisplayNames.get(apiId));
+                    }
+                    if (customDescriptions.containsKey(apiId)) {
+                        apidto.setDescription(customDescriptions.get(apiId));
+                    }
+
                     if (apidto.getPolicies() == null || apidto.getPolicies().isEmpty()) {
                         apidto.setPolicies(Collections.singletonList(DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS));
                     }
