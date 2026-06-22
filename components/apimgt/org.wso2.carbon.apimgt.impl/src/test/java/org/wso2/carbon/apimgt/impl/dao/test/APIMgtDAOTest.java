@@ -2095,4 +2095,159 @@ public class APIMgtDAOTest {
         gatewayPolicyDeployment.setGatewayLabel(gatewayLabel);
         return gatewayPolicyDeployment;
     }
+
+    // ---------- Issue #5038: AM_API_DEFAULT_VERSION.API_PROVIDER not updated on provider change ----------
+
+    @Test
+    public void testUpdateApiProviderUpdatesDefaultVersionTable() throws Exception {
+        // Uses existing sample API: SUMEDHA / API1 / V1.0.0 (loaded by h2-sample-data.sql)
+        String apiUUID = "7af95c9d-6177-4191-ab3e-d3f6c1cdc4c2";
+        String apiName = "API1";
+        String oldProvider = "SUMEDHA";
+        String newProvider = "PRABATH";
+        String organization = "org1";
+
+        // Insert an AM_API_DEFAULT_VERSION row marking API1 as default under SUMEDHA
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(
+                     "INSERT INTO AM_API_DEFAULT_VERSION (API_NAME, API_PROVIDER, DEFAULT_API_VERSION, "
+                     + "PUBLISHED_DEFAULT_API_VERSION, ORGANIZATION) VALUES (?, ?, ?, ?, ?)")) {
+            stmt.setString(1, apiName);
+            stmt.setString(2, oldProvider);
+            stmt.setString(3, "V1.0.0");
+            stmt.setString(4, "V1.0.0");
+            stmt.setString(5, organization);
+            stmt.executeUpdate();
+        }
+
+        try {
+            // Execute the provider change — both AM_API and AM_API_DEFAULT_VERSION should be updated
+            apiMgtDAO.updateApiProvider(apiUUID, newProvider, oldProvider, apiName);
+
+            try (Connection conn = APIMgtDBUtil.getConnection()) {
+                // Verify AM_API_DEFAULT_VERSION.API_PROVIDER was updated to the new provider
+                try (PreparedStatement stmt = conn.prepareStatement(
+                        "SELECT COUNT(*) FROM AM_API_DEFAULT_VERSION WHERE API_NAME = ? AND API_PROVIDER = ?")) {
+                    stmt.setString(1, apiName);
+                    stmt.setString(2, newProvider);
+                    try (ResultSet rs = stmt.executeQuery()) {
+                        rs.next();
+                        Assert.assertEquals(
+                                "AM_API_DEFAULT_VERSION should have exactly one row under the new provider",
+                                1, rs.getInt(1));
+                    }
+                }
+
+                // Verify the old provider row is gone (not left as stale data)
+                try (PreparedStatement stmt = conn.prepareStatement(
+                        "SELECT COUNT(*) FROM AM_API_DEFAULT_VERSION WHERE API_NAME = ? AND API_PROVIDER = ?")) {
+                    stmt.setString(1, apiName);
+                    stmt.setString(2, oldProvider);
+                    try (ResultSet rs = stmt.executeQuery()) {
+                        rs.next();
+                        Assert.assertEquals(
+                                "Stale AM_API_DEFAULT_VERSION row under old provider should not remain",
+                                0, rs.getInt(1));
+                    }
+                }
+
+                // Verify AM_API.API_PROVIDER was also updated in the same transaction
+                try (PreparedStatement stmt = conn.prepareStatement(
+                        "SELECT API_PROVIDER FROM AM_API WHERE API_UUID = ?")) {
+                    stmt.setString(1, apiUUID);
+                    try (ResultSet rs = stmt.executeQuery()) {
+                        Assert.assertTrue(rs.next());
+                        Assert.assertEquals("AM_API.API_PROVIDER should be updated to the new provider",
+                                newProvider, rs.getString("API_PROVIDER"));
+                    }
+                }
+            }
+        } finally {
+            // Restore sample data to original state
+            try (Connection conn = APIMgtDBUtil.getConnection()) {
+                try (PreparedStatement stmt = conn.prepareStatement(
+                        "DELETE FROM AM_API_DEFAULT_VERSION WHERE API_NAME = ?")) {
+                    stmt.setString(1, apiName);
+                    stmt.executeUpdate();
+                }
+                try (PreparedStatement stmt = conn.prepareStatement(
+                        "UPDATE AM_API SET API_PROVIDER = ? WHERE API_UUID = ?")) {
+                    stmt.setString(1, oldProvider);
+                    stmt.setString(2, apiUUID);
+                    stmt.executeUpdate();
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testUpdateApiProviderUpdatesDefaultVersionTableWithEmailDomainProvider() throws Exception {
+        // Tests the replaceEmailDomainBack fix using an existing email-domain provider from sample data
+        // testUser1@wso2.test / testAPI1 / 1.0.0 (UUID: 3f3e4aac-...)
+        String apiUUID = "3f3e4aac-4122-4eea-a31e-7c80ee0454a8";
+        String apiName = "testAPI1";
+        String oldProviderAtFormat = "testUser1@wso2.test";          // @ format (stored in AM_API_DEFAULT_VERSION)
+        String oldProviderDashAtFormat = "testUser1-AT-wso2.test";   // -AT- format (as it comes from APIIdentifier)
+        String newProvider = "admin@wso2.test";
+        String organization = "wso2.test";
+
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(
+                     "INSERT INTO AM_API_DEFAULT_VERSION (API_NAME, API_PROVIDER, DEFAULT_API_VERSION, "
+                     + "PUBLISHED_DEFAULT_API_VERSION, ORGANIZATION) VALUES (?, ?, ?, ?, ?)")) {
+            stmt.setString(1, apiName);
+            stmt.setString(2, oldProviderAtFormat);
+            stmt.setString(3, "1.0.0");
+            stmt.setString(4, "1.0.0");
+            stmt.setString(5, organization);
+            stmt.executeUpdate();
+        }
+
+        try {
+            // oldProvider passed in -AT- format (as from APIIdentifier.getProviderName())
+            // replaceEmailDomainBack inside updateApiProvider converts it to @ format before the SQL WHERE
+            apiMgtDAO.updateApiProvider(apiUUID, newProvider, oldProviderDashAtFormat, apiName);
+
+            try (Connection conn = APIMgtDBUtil.getConnection()) {
+                // Verify new provider row exists
+                try (PreparedStatement stmt = conn.prepareStatement(
+                        "SELECT COUNT(*) FROM AM_API_DEFAULT_VERSION WHERE API_NAME = ? AND API_PROVIDER = ?")) {
+                    stmt.setString(1, apiName);
+                    stmt.setString(2, newProvider);
+                    try (ResultSet rs = stmt.executeQuery()) {
+                        rs.next();
+                        Assert.assertEquals(
+                                "AM_API_DEFAULT_VERSION should be updated to new email-domain provider",
+                                1, rs.getInt(1));
+                    }
+                }
+                // Verify old @ format row is gone
+                try (PreparedStatement stmt = conn.prepareStatement(
+                        "SELECT COUNT(*) FROM AM_API_DEFAULT_VERSION WHERE API_NAME = ? AND API_PROVIDER = ?")) {
+                    stmt.setString(1, apiName);
+                    stmt.setString(2, oldProviderAtFormat);
+                    try (ResultSet rs = stmt.executeQuery()) {
+                        rs.next();
+                        Assert.assertEquals(
+                                "Stale row with old email-domain provider should not remain",
+                                0, rs.getInt(1));
+                    }
+                }
+            }
+        } finally {
+            try (Connection conn = APIMgtDBUtil.getConnection()) {
+                try (PreparedStatement stmt = conn.prepareStatement(
+                        "DELETE FROM AM_API_DEFAULT_VERSION WHERE API_NAME = ?")) {
+                    stmt.setString(1, apiName);
+                    stmt.executeUpdate();
+                }
+                try (PreparedStatement stmt = conn.prepareStatement(
+                        "UPDATE AM_API SET API_PROVIDER = ? WHERE API_UUID = ?")) {
+                    stmt.setString(1, oldProviderAtFormat);
+                    stmt.setString(2, apiUUID);
+                    stmt.executeUpdate();
+                }
+            }
+        }
+    }
 }
