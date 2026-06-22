@@ -472,8 +472,14 @@ public class PublisherCommonUtils {
     private static void handleExistingApiSubtype(API apiToUpdate, API originalAPI, APIProvider apiProvider)
             throws APIManagementException {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Handling existing API subtype for API: " + apiToUpdate.getId().getApiName());
+        }
+        populateExistingSchemaDefinitions(apiToUpdate, originalAPI.getUriTemplates());
+
         Set<URITemplate> uriTemplates = apiToUpdate.getUriTemplates();
         if (uriTemplates.isEmpty()) {
+            log.error("No URI templates defined for API: " + apiToUpdate.getId().getApiName());
             throw new APIManagementException("No URI templates defined for existing API subtype.");
         }
 

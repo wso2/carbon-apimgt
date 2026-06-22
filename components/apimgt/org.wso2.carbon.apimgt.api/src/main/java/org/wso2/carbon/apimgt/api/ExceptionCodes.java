@@ -135,6 +135,8 @@ public enum ExceptionCodes implements ErrorHandler {
             "Updating the API is restricted as as it is %s."),
     UNSUPPORTED_LIFECYCLE_ACTION(900381, "Unsupported state change action", 400, "Lifecycle state change action %s is not allowed"),
     LIFECYCLE_STATE_INFORMATION_NOT_FOUND(900382, "Lifecycle state information not found", 500,"Lifecycle state change information for %s with %s cannot be found"),
+    API_PRODUCT_UPDATE_FORBIDDEN_PER_LC(900383, "Insufficient permission to update the API Product", 403,
+            "Updating the API Product is restricted as it is %s."),
 
     // Generic codes
     JSON_PARSE_ERROR(900400, "Json parse error", 500, "JSON parse error"),

@@ -133,6 +133,9 @@ public class WebsocketInboundHandlerTestCase {
         PowerMockito.when(serviceReferenceHolder.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
 
         PowerMockito.mockStatic(WebsocketUtil.class);
+        PowerMockito.spy(InboundWebsocketProcessorUtil.class);
+        PowerMockito.doNothing().when(InboundWebsocketProcessorUtil.class, "setLatestElectedAPI",
+                Mockito.anyString(), Mockito.any(InboundMessageContext.class));
     }
 
     @Test
@@ -257,6 +260,62 @@ public class WebsocketInboundHandlerTestCase {
 
         websocketInboundHandler.exceptionCaught(channelHandlerContext, cause);
         Assert.assertEquals(apiProperties.get("api.ut.WS_SC"), 1009);
+    }
+
+    @Test
+    public void testWSHandshakeBlockedAPIRejectsConnection() throws Exception {
+        websocketAPI.setStatus(APIConstants.BLOCKED);
+        InboundMessageContext inboundMessageContext = new InboundMessageContext();
+        inboundMessageContext.setTenantDomain("carbon.super");
+        inboundMessageContext.setElectedAPI(websocketAPI);
+        inboundMessageContext.setToken("test-backend-jwt-token");
+        InboundMessageContextDataHolder.getInstance().addInboundMessageContextForConnection(
+                channelIdString, inboundMessageContext);
+
+        FullHttpRequest fullHttpRequest = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET,
+                "ws://localhost:8080/wscontext");
+        fullHttpRequest.headers().set(HttpHeaders.UPGRADE, "websocket");
+        InboundProcessorResponseDTO responseDTO = new InboundProcessorResponseDTO();
+
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        ConfigurationContext configurationContext = Mockito.mock(ConfigurationContext.class);
+        AxisConfiguration axisConfiguration = Mockito.mock(AxisConfiguration.class);
+        ChannelPipeline channelPipeline = Mockito.mock(ChannelPipeline.class);
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfiguration())
+                .thenReturn(Mockito.mock(APIManagerConfiguration.class));
+        Mockito.when(serviceReferenceHolder.getServerConfigurationContext()).thenReturn(configurationContext);
+        Mockito.when(configurationContext.getAxisConfiguration()).thenReturn(axisConfiguration);
+        Mockito.when(channelHandlerContext.channel().pipeline()).thenReturn(channelPipeline);
+        Mockito.when(inboundWebSocketProcessor.handleHandshake(fullHttpRequest, channelHandlerContext,
+                inboundMessageContext)).thenReturn(responseDTO);
+
+        websocketInboundHandler.channelRead(channelHandlerContext, fullHttpRequest);
+
+        Assert.assertFalse("New connection should be rejected when API is blocked",
+                InboundMessageContextDataHolder.getInstance().getInboundMessageContextMap()
+                        .containsKey(channelIdString));
+    }
+
+    @Test
+    public void testWSFrameBlockedAPIClosesConnection() throws Exception {
+        websocketAPI.setStatus(APIConstants.BLOCKED);
+        InboundMessageContext inboundMessageContext = createWebSocketApiMessageContext();
+        InboundMessageContextDataHolder.getInstance().addInboundMessageContextForConnection(
+                channelIdString, inboundMessageContext);
+
+        ByteBuf content = Mockito.mock(ByteBuf.class);
+        WebSocketFrame msg = Mockito.mock(WebSocketFrame.class);
+        Mockito.when(msg.content()).thenReturn(content);
+        InboundProcessorResponseDTO responseDTO = new InboundProcessorResponseDTO();
+        Mockito.when(inboundWebSocketProcessor.handleRequest(msg, inboundMessageContext)).thenReturn(responseDTO);
+
+        websocketInboundHandler.channelRead(channelHandlerContext, msg);
+
+        Assert.assertFalse("Existing connection should be terminated when API becomes blocked",
+                InboundMessageContextDataHolder.getInstance().getInboundMessageContextMap()
+                        .containsKey(channelIdString));
     }
 
     private InboundMessageContext createWebSocketApiMessageContext() {

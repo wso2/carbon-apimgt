@@ -19,10 +19,11 @@
     <parent>
         <artifactId>apimgt</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>9.33.130-SNAPSHOT</version>
+        <version>9.33.137-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <packaging>bundle</packaging>
+    <name>WSO2 Carbon - API Management Throttle Policy Deployer</name>
 
     <artifactId>org.wso2.carbon.apimgt.throttle.policy.deployer</artifactId>
 

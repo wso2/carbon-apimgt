@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.impl.LLMProviderRegistrationService;
 import org.wso2.carbon.apimgt.impl.correlation.CorrelationConfigManager;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.jwt.RevokedJWTTokensRetriever;
 import org.wso2.carbon.apimgt.impl.loader.KeyManagerConfigurationDataRetriever;
 import org.wso2.carbon.core.ServerStartupObserver;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -58,6 +59,7 @@ public class ServerStartupListener implements ServerStartupObserver {
                 if (JavaUtils.isTrueExplicitly(enableKeyManagerRetrieval)) {
                     startConfigureKeyManagerConfigurations();
                 }
+                new RevokedJWTTokensRetriever().startRevokedJWTTokensRetriever();
                 Map<String, TokenIssuerDto> tokenIssuerDtoMap =
                         apiManagerConfiguration.getJwtConfigurationDto().getTokenIssuerDtoMap();
                 tokenIssuerDtoMap.forEach((issuer, tokenIssuer) -> KeyManagerHolder.addGlobalJWTValidators(tokenIssuer));

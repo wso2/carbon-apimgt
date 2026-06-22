@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -214,6 +215,8 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
         } catch (URISyntaxException e) {
             RestApiUtil.handleInternalServerError("Error while generating the resource location URI for alias '" +
                     alias + "'", log);
+        } finally {
+            IOUtils.closeQuietly(certificateInputStream);
         }
         return null;
     }
@@ -327,6 +330,8 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
         } catch (URISyntaxException e) {
             RestApiUtil.handleInternalServerError("Error while generating the resource location URI for alias '" +
                     alias + "'", log);
+        } finally {
+            IOUtils.closeQuietly(certificateInputStream);
         }
         return null;
     }
