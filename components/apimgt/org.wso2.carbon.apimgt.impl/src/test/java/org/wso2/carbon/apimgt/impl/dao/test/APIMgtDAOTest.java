@@ -2100,14 +2100,15 @@ public class APIMgtDAOTest {
 
     @Test
     public void testUpdateApiProviderUpdatesDefaultVersionTable() throws Exception {
-        // Uses existing sample API: SUMEDHA / API1 / V1.0.0 (loaded by h2-sample-data.sql)
+        // Uses existing sample API: API1 / V1.0.0 (loaded by h2-sample-data.sql)
         String apiUUID = "7af95c9d-6177-4191-ab3e-d3f6c1cdc4c2";
         String apiName = "API1";
-        String oldProvider = "SUMEDHA";
-        String newProvider = "PRABATH";
+        String originalAmApiProvider = "SUMEDHA";   // actual value in AM_API sample data — for restore only
+        String oldProvider = "providerA";
+        String newProvider = "providerB";
         String organization = "org1";
 
-        // Insert an AM_API_DEFAULT_VERSION row marking API1 as default under SUMEDHA
+        // Insert an AM_API_DEFAULT_VERSION row marking API1 as default under providerA
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement stmt = conn.prepareStatement(
                      "INSERT INTO AM_API_DEFAULT_VERSION (API_NAME, API_PROVIDER, DEFAULT_API_VERSION, "
@@ -2172,7 +2173,7 @@ public class APIMgtDAOTest {
                 }
                 try (PreparedStatement stmt = conn.prepareStatement(
                         "UPDATE AM_API SET API_PROVIDER = ? WHERE API_UUID = ?")) {
-                    stmt.setString(1, oldProvider);
+                    stmt.setString(1, originalAmApiProvider);
                     stmt.setString(2, apiUUID);
                     stmt.executeUpdate();
                 }
@@ -2182,13 +2183,14 @@ public class APIMgtDAOTest {
 
     @Test
     public void testUpdateApiProviderUpdatesDefaultVersionTableWithEmailDomainProvider() throws Exception {
-        // Tests the replaceEmailDomainBack fix using an existing email-domain provider from sample data
-        // testUser1@wso2.test / testAPI1 / 1.0.0 (UUID: 3f3e4aac-...)
+        // Tests the replaceEmailDomainBack fix using email-domain provider format
+        // Uses existing sample API: testAPI1 / 1.0.0 (UUID: 3f3e4aac-...)
         String apiUUID = "3f3e4aac-4122-4eea-a31e-7c80ee0454a8";
         String apiName = "testAPI1";
-        String oldProviderAtFormat = "testUser1@wso2.test";          // @ format (stored in AM_API_DEFAULT_VERSION)
-        String oldProviderDashAtFormat = "testUser1-AT-wso2.test";   // -AT- format (as it comes from APIIdentifier)
-        String newProvider = "admin@wso2.test";
+        String originalAmApiProvider = "testUser1@wso2.test";        // actual value in AM_API sample data — for restore only
+        String oldProviderAtFormat = "providerA@test.com";            // @ format (stored in AM_API_DEFAULT_VERSION)
+        String oldProviderDashAtFormat = "providerA-AT-test.com";     // -AT- format (as it comes from APIIdentifier)
+        String newProvider = "providerB@test.com";
         String organization = "wso2.test";
 
         try (Connection conn = APIMgtDBUtil.getConnection();
@@ -2243,7 +2245,7 @@ public class APIMgtDAOTest {
                 }
                 try (PreparedStatement stmt = conn.prepareStatement(
                         "UPDATE AM_API SET API_PROVIDER = ? WHERE API_UUID = ?")) {
-                    stmt.setString(1, oldProviderAtFormat);
+                    stmt.setString(1, originalAmApiProvider);
                     stmt.setString(2, apiUUID);
                     stmt.executeUpdate();
                 }
@@ -2257,11 +2259,12 @@ public class APIMgtDAOTest {
         // AM_API_DEFAULT_VERSION has a row under oldProvider (A) but AM_API.API_PROVIDER is currentProvider (B).
         // After U2, provider is changed again (B -> newProvider C).
         // Verify: no exception is thrown, AM_API is updated, stale row under A is untouched.
-        String apiUUID = "7af95c9d-6177-4191-ab3e-d3f6c1cdc4c2"; // API1 / SUMEDHA
+        String apiUUID = "7af95c9d-6177-4191-ab3e-d3f6c1cdc4c2"; // API1
         String apiName = "API1";
+        String originalAmApiProvider = "SUMEDHA";   // actual value in AM_API sample data — for restore only
         String staleProvider = "STALE_PROVIDER";    // old stale row — simulates pre-fix data
         String currentProvider = "SUMEDHA";         // AM_API.API_PROVIDER before this change
-        String newProvider = "PRABATH";
+        String newProvider = "providerB";
         String organization = "org1";
 
         // Insert stale row under staleProvider (this is what pre-fix data looks like)
