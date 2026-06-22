@@ -34,6 +34,8 @@ import javax.validation.Valid;
 @Scope(name = "apim:mcp_server_create", description="", value ="")
 @Scope(name = "apim:mcp_server_import_export", description="", value ="")
 @Scope(name = "apim:mcp_server_manage", description="", value ="")
+@Scope(name = "apim:mcp_server_update", description="", value ="")
+@Scope(name = "apim:mcp_server_create_only", description="", value ="")
 
 public class MCPServerDTO   {
   
@@ -47,6 +49,7 @@ public class MCPServerDTO   {
     private String provider = null;
     @Scope(name = "apim:mcp_server_publish", description="", value ="")
     @Scope(name = "apim:mcp_server_manage", description="", value ="")
+    @Scope(name = "apim:mcp_server_lifecycle_manage", description="", value ="")
     private String lifeCycleStatus = null;
     private Boolean hasThumbnail = null;
     private Boolean isDefaultVersion = null;

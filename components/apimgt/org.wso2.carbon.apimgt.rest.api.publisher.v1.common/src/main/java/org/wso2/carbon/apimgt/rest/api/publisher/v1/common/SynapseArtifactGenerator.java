@@ -60,7 +60,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -181,12 +180,7 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
         RuntimeArtifactDto runtimeArtifactDto = new RuntimeArtifactDto();
         List<String> synapseArtifacts = new ArrayList<>();
         List<String> failedApis = new ArrayList<>();
-        Map<String, Environment> environments = APIUtil.getEnvironments();
-
-        // Capture the tenant context
-        String currentTenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         String currentUsername = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-        int currentTenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
 
         List<CompletableFuture<ProcessingResult>> futures = apiRuntimeArtifactDtoList.stream()
                 .map(runTimeArtifact -> CompletableFuture.supplyAsync(() -> {
@@ -194,10 +188,9 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                     PrivilegedCarbonContext.startTenantFlow();
                     try {
                         PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-                        carbonContext.setTenantDomain(currentTenantDomain);
+                        carbonContext.setTenantDomain(runTimeArtifact.getTenantDomain(), true);
                         carbonContext.setUsername(currentUsername);
-                        carbonContext.setTenantId(currentTenantId);
-                        return processSingleArtifact(runTimeArtifact, environments);
+                        return processSingleArtifact(runTimeArtifact);
                     } finally {
                         PrivilegedCarbonContext.endTenantFlow();
                     }
@@ -227,8 +220,7 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
         return runtimeArtifactDto;
     }
 
-    private ProcessingResult processSingleArtifact(APIRuntimeArtifactDto runTimeArtifact,
-                                                   Map<String, Environment> environments) {
+    private ProcessingResult processSingleArtifact(APIRuntimeArtifactDto runTimeArtifact) {
 
         ProcessingResult result = new ProcessingResult();
         result.apiId = runTimeArtifact.getApiId();
@@ -239,10 +231,20 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
             return result;
         }
         String label = runTimeArtifact.getLabel();
-        Environment environment = environments.get(label);
+        String artifactTenantDomain = runTimeArtifact.getTenantDomain();
+        Environment environment;
+        try {
+            environment = APIUtil.getEnvironments(artifactTenantDomain).get(label);
+        } catch (APIManagementException e) {
+            result.success = false;
+            result.errorMessage = "Failed to load environments for tenant: " + artifactTenantDomain;
+            log.error("Error while retrieving environments for tenant: " + artifactTenantDomain, e);
+            return result;
+        }
         if (environment == null) {
             result.success = false;
-            result.errorMessage = "Environment not found for label: " + label;
+            result.errorMessage = "Environment not found for label: " + label + " in tenant: " +
+                    artifactTenantDomain;
             return result;
         }
         String cacheKey = runTimeArtifact.getApiId() + ":" + runTimeArtifact.getRevision() + ":" + label;

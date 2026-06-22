@@ -45,7 +45,8 @@ EnvironmentsApiService delegate = new EnvironmentsApiServiceImpl();
     @ApiOperation(value = "Delete an Environment", notes = "Delete a Environment by Environment Id ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:environment_manage", description = "Manage gateway environments")
+            @AuthorizationScope(scope = "apim:environment_manage", description = "Manage gateway environments"),
+            @AuthorizationScope(scope = "apim:environment_delete", description = "Delete gateway environments")
         })
     }, tags={ "Environments",  })
     @ApiResponses(value = { 
@@ -81,7 +82,8 @@ EnvironmentsApiService delegate = new EnvironmentsApiServiceImpl();
     @ApiOperation(value = "Get a Gateway Environment Configuration", notes = "Retrieve a single Gateway Environment Configuration. We should provide the Id of the Environment as a path parameter. ", response = EnvironmentDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:environment_manage", description = "Manage gateway environments")
+            @AuthorizationScope(scope = "apim:environment_manage", description = "Manage gateway environments"),
+            @AuthorizationScope(scope = "apim:environment_read", description = "Retrieve gateway environments")
         })
     }, tags={ "Environments",  })
     @ApiResponses(value = { 
@@ -99,7 +101,8 @@ EnvironmentsApiService delegate = new EnvironmentsApiServiceImpl();
     @ApiOperation(value = "Update an Environment", notes = "Update a gateway Environment by environment Id ", response = EnvironmentDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:environment_manage", description = "Manage gateway environments")
+            @AuthorizationScope(scope = "apim:environment_manage", description = "Manage gateway environments"),
+            @AuthorizationScope(scope = "apim:environment_update", description = "Update gateway environments")
         })
     }, tags={ "Environments",  })
     @ApiResponses(value = { 
@@ -133,7 +136,8 @@ EnvironmentsApiService delegate = new EnvironmentsApiServiceImpl();
     @ApiOperation(value = "Add an Environment", notes = "Add a new gateway environment ", response = EnvironmentDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:environment_manage", description = "Manage gateway environments")
+            @AuthorizationScope(scope = "apim:environment_manage", description = "Manage gateway environments"),
+            @AuthorizationScope(scope = "apim:environment_create", description = "Create gateway environments")
         })
     }, tags={ "Environments" })
     @ApiResponses(value = { 

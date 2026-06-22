@@ -24,11 +24,13 @@ import org.apache.xerces.util.SecurityManager;
 import org.w3c.dom.Document;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.SizeLimitedInputStream;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.ZIPUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.exceptions.APIMgtWSDLException;
 import org.xml.sax.SAXException;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -57,16 +59,29 @@ abstract class AbstractWSDLProcessor implements WSDLProcessor {
      * @throws APIMgtWSDLException When error occurred while reading from URL
      */
     Document getSecuredParsedDocumentFromURL(URL url) throws APIMgtWSDLException {
-        InputStream inputStream = null;
+        return getSecuredParsedDocumentFromURL(url ,getDefaultMaxFileSize());
+    }
+
+    /**
+     * Returns an "XXE safe" built DOM XML object by reading the content from the provided URL, enforcing a maximum file
+     * size limit.
+     *
+     * @param url         URL to fetch the content
+     * @param maxFileSize Maximum allowed file size in bytes for the content read from the URL.
+     * @return an "XXE safe" built DOM XML object by reading the content from the provided URL
+     * @throws APIMgtWSDLException When error occurred while reading from URL or if the content exceeds the specified
+     *                             maximum file size
+     */
+    Document getSecuredParsedDocumentFromURL(URL url, long maxFileSize) throws APIMgtWSDLException {
         try {
             DocumentBuilderFactory factory = getSecuredDocumentBuilder();
             DocumentBuilder builder = factory.newDocumentBuilder();
-            inputStream = url.openStream();
-            return builder.parse(inputStream);
+            try (BufferedInputStream bufferedStream = new BufferedInputStream(url.openStream(), 4096);
+                    SizeLimitedInputStream limitedStream = new SizeLimitedInputStream(bufferedStream, maxFileSize)) {
+                return builder.parse(limitedStream);
+            }
         } catch (ParserConfigurationException | IOException | SAXException e) {
             throw new APIMgtWSDLException("Error while reading WSDL document", e);
-        } finally {
-            IOUtils.closeQuietly(inputStream);
         }
     }
 
@@ -190,5 +205,10 @@ abstract class AbstractWSDLProcessor implements WSDLProcessor {
 
     public Mode getMode() {
         return this.mode;
+    }
+
+    protected long getDefaultMaxFileSize() {
+        return Long.parseLong(
+                org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_WSDL_FILE_SIZE_LIMIT_DEFAULT_MB) * 1024 * 1024L;
     }
 }

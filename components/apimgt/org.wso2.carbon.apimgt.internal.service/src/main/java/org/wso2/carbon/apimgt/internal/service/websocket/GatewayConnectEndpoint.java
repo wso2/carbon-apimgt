@@ -24,9 +24,8 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.PlatformGatewayDeploymentEventService;
 import org.wso2.carbon.apimgt.api.model.PlatformGatewayDeploymentEventRecord;
+import org.wso2.carbon.apimgt.impl.dao.PlatformGatewayArtifactDAO;
 import org.wso2.carbon.apimgt.impl.dao.PlatformGatewayDAO;
-import org.wso2.carbon.apimgt.impl.dto.ConnectGatewayConfig;
-import org.wso2.carbon.apimgt.impl.dto.PlatformGatewayConnectConfig;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.internal.service.dto.GatewayDeploymentStatusAcknowledgmentDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.GatewayDeploymentStatusAcknowledgmentListDTO;
@@ -66,12 +65,9 @@ import javax.websocket.server.ServerEndpoint;
  * <p>
  * The gateway must send the registration token in the {@code api-key} HTTP header when opening
  * the WebSocket. The token is verified via {@link PlatformGatewayTokenUtil#verifyToken(String)}.
- * If not found in the database, the token is checked against
- * {@code [[apim.universal_gateway.connect]]} {@code registration_token} (deployment.toml); when
- * it matches, a new platform gateway is created and the connection is accepted (e.g. for migrating
- * an existing gateway to a new control plane). On success, the connection is associated with the
- * gateway and the gateway's active status is set to true; on close it is set to false. On
- * verification failure, the connection is closed with code 4401 (Unauthorized).
+ * On success, the connection is associated with the gateway and the gateway's active status is
+ * set to true; on close it is set to false. On verification failure, the connection is closed
+ * with code 4401 (Unauthorized).
  */
 @ServerEndpoint(
         value = "/ws/gateways/connect",
@@ -152,60 +148,8 @@ public class GatewayConnectEndpoint {
         }
 
         if (gateway == null) {
-            // Accept token from [[apim.universal_gateway.connect]] registration_token (create gateway on first connect)
-            log.info("Gateway WebSocket token not in DB; checking [[apim.universal_gateway.connect]] config");
-            ConnectGatewayConfig matchedEntry = null;
-            PlatformGatewayConnectConfig connectConfig = null;
-            try {
-                connectConfig = ServiceReferenceHolder.getInstance()
-                        .getAPIManagerConfigurationService().getAPIManagerConfiguration()
-                        .getPlatformGatewayConnectConfig();
-                if (connectConfig != null) {
-                    List<ConnectGatewayConfig> list = connectConfig.getConnectGateways();
-                    if (list == null || list.isEmpty()) {
-                        log.info("Connect config present but ConnectGateways list is empty; ensure api-manager.xml " +
-                                "contains PlatformGatewayConnectConfiguration/ConnectGateways from deployment.toml");
-                    } else {
-                        for (ConnectGatewayConfig entry : list) {
-                            if (entry != null && StringUtils.isNotBlank(entry.getRegistrationToken())
-                                    && apiKey.trim().equals(entry.getRegistrationToken().trim())) {
-                                matchedEntry = entry;
-                                break;
-                            }
-                        }
-                        if (matchedEntry == null) {
-                            log.info("No [[apim.universal_gateway.connect]] entry matched api-key; check " +
-                                    "registration_token in deployment.toml and that api-manager.xml was generated with it");
-                        }
-                    }
-                } else {
-                    log.info("Platform gateway connect config is null; ensure api-manager.xml has " +
-                            "PlatformGatewayConnectConfiguration (from deployment.toml apim.universal_gateway.connect)");
-                }
-            } catch (Exception e) {
-                log.warn("Could not get platform gateway connect config: " + e.getMessage(), e);
-            }
-            if (matchedEntry != null && connectConfig != null) {
-                String newGatewayId = UUID.randomUUID().toString();
-                if (PlatformGatewayServiceImpl.ensurePlatformGatewayFromConnectToken(
-                        connectConfig, newGatewayId, matchedEntry)) {
-                    try {
-                        gateway = PlatformGatewayTokenUtil.verifyToken(apiKey);
-                    } catch (APIManagementException | NoSuchAlgorithmException e) {
-                        log.warn("Re-verify after connect-with-token failed: " + e.getMessage());
-                        closeWithUnauthorized(session, "Invalid or expired API key");
-                        return;
-                    }
-                } else {
-                    log.warn("Connect-with-token gateway creation failed; ensure registration_token is " +
-                            "tokenId.plainToken format and url is set in [[apim.universal_gateway.connect]]");
-                }
-            }
-            if (gateway == null) {
-                log.info("Gateway WebSocket connection rejected: token did not match any gateway or config");
-                closeWithUnauthorized(session, "Invalid or expired API key");
-                return;
-            }
+            closeWithUnauthorized(session, "Invalid or expired API key");
+            return;
         }
 
         session.getUserProperties().put(GATEWAY_PROPERTY, gateway);
@@ -393,7 +337,8 @@ public class GatewayConnectEndpoint {
     }
 
     private static GatewayDeploymentStatusAcknowledgmentDTO buildDeploymentAcknowledgment(
-            PlatformGatewayDAO.PlatformGateway gateway, PlatformGatewayWebSocketModels.DeploymentAckMessage root) {
+            PlatformGatewayDAO.PlatformGateway gateway, PlatformGatewayWebSocketModels.DeploymentAckMessage root)
+            throws APIManagementException {
         PlatformGatewayWebSocketModels.DeploymentAckPayload payload = root != null ? root.getPayload() : null;
         if (payload == null) {
             log.warn("Ignoring deployment.ack without payload: gatewayId=" + gateway.id);
@@ -414,7 +359,30 @@ public class GatewayConnectEndpoint {
         acknowledgment.setGatewayId(gateway.id);
         acknowledgment.setApiId(artifactId);
         acknowledgment.setTenantDomain(gateway.organizationId);
-        acknowledgment.setRevisionId(payload.getDeploymentId());
+        String revisionUuid = StringUtils.trimToNull(payload.getRevisionUuid());
+        PlatformGatewayArtifactDAO artifactDao = PlatformGatewayArtifactDAO.getInstance();
+        if (revisionUuid == null && StringUtils.isNotBlank(payload.getDeploymentId())) {
+            revisionUuid = StringUtils.trimToNull(artifactDao.getArtifactRevisionIdByGatewayEnvAndDeploymentId(
+                    gateway.id, payload.getDeploymentId().trim()));
+        }
+        if (revisionUuid == null) {
+            try {
+                revisionUuid = StringUtils.trimToNull(artifactDao.getArtifactRevisionId(artifactId, gateway.id));
+            } catch (APIManagementException e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Failed to resolve revision from artifact cache (api+gateway) for deployment.ack: "
+                            + "gatewayId=" + gateway.id + ", error=" + e.getMessage());
+                }
+            }
+        }
+        if (revisionUuid == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Ignoring deployment.ack: could not resolve API revision UUID from artifact cache; "
+                        + "gatewayId=" + gateway.id + ", apiId=" + artifactId);
+            }
+            return null;
+        }
+        acknowledgment.setRevisionId(revisionUuid);
         acknowledgment.setAction(resolveAction(payload.getAction()));
         acknowledgment.setDeploymentStatus(resolveStatus(payload.getStatus()));
         acknowledgment.setTimeStamp(resolveTimestamp(payload));

@@ -119,6 +119,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.Objects;
 
 import static org.wso2.carbon.apimgt.impl.restapi.CommonUtils.constructEndpointConfigForService;
 import static org.wso2.carbon.apimgt.impl.restapi.CommonUtils.validateScopes;
@@ -656,8 +657,15 @@ public class ApisApiServiceImplUtils {
             try {
                 URL urlObj = new URL(url);
                 HttpClient httpClient = APIUtil.getHttpClient(urlObj.getPort(), urlObj.getProtocol());
+                String maxContentSizeStr = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                        .getAPIManagerConfiguration().getFirstProperty(
+                                org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_OAS_FILE_SIZE_LIMIT);
+                if (maxContentSizeStr == null || maxContentSizeStr.trim().isEmpty()) {
+                    maxContentSizeStr = org.wso2.carbon.apimgt.api.
+                            APIConstants.API_PUBLISHER_IMPORT_OAS_FILE_SIZE_LIMIT_DEFAULT_MB;
+                }
                 validationResponse = OASParserUtil.validateAPIDefinitionByURL(url, httpClient, returnContent,
-                        parserOptions);
+                        parserOptions, maxContentSizeStr);
             } catch (MalformedURLException e) {
                 throw new APIManagementException("Error while processing the API definition URL", e);
             }
@@ -1150,7 +1158,8 @@ public class ApisApiServiceImplUtils {
             //Checking the vhost is included in the available vhost list
             if (vhostItem.getHost().equals(vhost)) {
                 isVhostValidated = true;
-            } else if (vhostItem.getWsHost().equals(vhost)) {
+            } else if (Objects.equals(vhostItem.getWsHost(), vhost) 
+                    || Objects.equals(vhostItem.getWssHost(), vhost)) {
                 // This was added to preserve the functionality in case of Deploying a WebSocket API revision.
                 // For WebSocket APIs apiRevisionDeploymentDTO.getVhost() returns the wsHost
                 isVhostValidated = true;

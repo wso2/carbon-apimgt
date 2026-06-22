@@ -1227,7 +1227,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             throws ParseException, APIImportExportException, IOException {
 
         File importFolder = CommonUtil.createTempDirectory(null);
-        String uploadFileName = fileDetail.getContentDisposition().getFilename();
+        String uploadFileName = fileDetail == null ? null : fileDetail.getDataHandler().getName();
         if (StringUtils.isEmpty(uploadFileName)) {
             throw new APIImportExportException("Invalid file name. File name cannot be null or empty.");
         }

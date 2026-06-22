@@ -135,6 +135,8 @@ public enum ExceptionCodes implements ErrorHandler {
             "Updating the API is restricted as as it is %s."),
     UNSUPPORTED_LIFECYCLE_ACTION(900381, "Unsupported state change action", 400, "Lifecycle state change action %s is not allowed"),
     LIFECYCLE_STATE_INFORMATION_NOT_FOUND(900382, "Lifecycle state information not found", 500,"Lifecycle state change information for %s with %s cannot be found"),
+    API_PRODUCT_UPDATE_FORBIDDEN_PER_LC(900383, "Insufficient permission to update the API Product", 403,
+            "Updating the API Product is restricted as it is %s."),
 
     // Generic codes
     JSON_PARSE_ERROR(900400, "Json parse error", 500, "JSON parse error"),
@@ -187,10 +189,10 @@ public enum ExceptionCodes implements ErrorHandler {
             "Cannot delete the environment with UUID %s as active gateway policy deployment exist"),
     GATEWAY_ENVIRONMENT_API_REVISIONS_EXIST(900515, "API Revisions Deployed to Gateway Environment Exist", 409,
             "Cannot delete the environment with UUID %s as API revisions are deployed to it"),
-    UNIVERSAL_GATEWAY_NAME_ALREADY_EXISTS(900518, "Universal gateway name already exists", 409,
-            "A universal gateway with name '%s' already exists in the organization"),
-    UNIVERSAL_GATEWAY_NOT_FOUND(900519, "Universal gateway not found", 404,
-            "Universal gateway not found"),
+    PLATFORM_GATEWAY_NAME_ALREADY_EXISTS(900518, "API Platform gateway name already exists", 409,
+            "An API Platform gateway with name '%s' already exists in the organization"),
+    PLATFORM_GATEWAY_NOT_FOUND(900519, "API Platform gateway not found", 404,
+            "API Platform gateway not found"),
 
     // Workflow related codes
     WORKFLOW_EXCEPTION(900550, "Workflow error", 500,
@@ -841,6 +843,8 @@ public enum ExceptionCodes implements ErrorHandler {
 
     ROLE_OF_SCOPE_DOES_NOT_EXIST(903250, "Role does not exist", 404,
             "Role %s does not exist"),
+    FILE_TOO_LARGE(902030, "Content retrieval from URL failed", 400,
+            "Maximum content size exceeded while retrieving content from URL"),
 
     OPERATION_OR_RESOURCE_TYPE_OR_METHOD_NOT_DEFINED(902031,
             "Operation type/http method is not specified for the operation/resource", 400,

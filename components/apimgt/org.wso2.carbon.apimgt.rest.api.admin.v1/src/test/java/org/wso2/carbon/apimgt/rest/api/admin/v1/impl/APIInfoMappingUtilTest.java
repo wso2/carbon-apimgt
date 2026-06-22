@@ -18,11 +18,14 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApiResultDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PaginationDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SearchResultListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.APIInfoMappingUtil;
 
 public class APIInfoMappingUtilTest {
@@ -100,5 +103,62 @@ public class APIInfoMappingUtilTest {
         assert(apiResultDTO3tenant.getName().equals("FacebookAPI"));
         assert(apiResultDTO3tenant.getVersion().equals("1.0.0"));
         assert(apiResultDTO3tenant.getProvider().equals("admin@pizzashack.com"));
+    }
+
+    @Test
+    public void testSetPaginationParamsWithNextAndPrevious() {
+        SearchResultListDTO resultListDTO = new SearchResultListDTO();
+        APIInfoMappingUtil.setPaginationParams(resultListDTO, 10, 10, 30, "test");
+
+        PaginationDTO pagination = resultListDTO.getPagination();
+        Assert.assertNotNull(pagination);
+        Assert.assertEquals(10, pagination.getLimit().intValue());
+        Assert.assertEquals(10, pagination.getOffset().intValue());
+        Assert.assertEquals(30, pagination.getTotal().intValue());
+        Assert.assertEquals("/apis?limit=10&offset=20&query=test", pagination.getNext());
+        Assert.assertEquals("/apis?limit=10&offset=0&query=test", pagination.getPrevious());
+    }
+
+    @Test
+    public void testSetPaginationParamsWithOnlyNext() {
+        SearchResultListDTO resultListDTO = new SearchResultListDTO();
+        APIInfoMappingUtil.setPaginationParams(resultListDTO, 10, 0, 30, "test");
+
+        PaginationDTO pagination = resultListDTO.getPagination();
+        Assert.assertNotNull(pagination);
+        Assert.assertEquals("/apis?limit=10&offset=10&query=test", pagination.getNext());
+        Assert.assertEquals("", pagination.getPrevious());
+    }
+
+    @Test
+    public void testSetPaginationParamsWithOnlyPrevious() {
+        SearchResultListDTO resultListDTO = new SearchResultListDTO();
+        APIInfoMappingUtil.setPaginationParams(resultListDTO, 10, 20, 30, "test");
+
+        PaginationDTO pagination = resultListDTO.getPagination();
+        Assert.assertNotNull(pagination);
+        Assert.assertEquals("", pagination.getNext());
+        Assert.assertEquals("/apis?limit=10&offset=10&query=test", pagination.getPrevious());
+    }
+
+    @Test
+    public void testSetPaginationParamsWithNoPagination() {
+        SearchResultListDTO resultListDTO = new SearchResultListDTO();
+        APIInfoMappingUtil.setPaginationParams(resultListDTO, 10, 0, 5, "test");
+
+        PaginationDTO pagination = resultListDTO.getPagination();
+        Assert.assertNotNull(pagination);
+        Assert.assertEquals("", pagination.getNext());
+        Assert.assertEquals("", pagination.getPrevious());
+    }
+
+    @Test
+    public void testSetPaginationParamsQueryInUrl() {
+        SearchResultListDTO resultListDTO = new SearchResultListDTO();
+        APIInfoMappingUtil.setPaginationParams(resultListDTO, 10, 0, 30, "name:test");
+
+        PaginationDTO pagination = resultListDTO.getPagination();
+        Assert.assertNotNull(pagination);
+        Assert.assertEquals("/apis?limit=10&offset=10&query=name:test", pagination.getNext());
     }
 }
