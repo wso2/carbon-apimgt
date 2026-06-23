@@ -1026,6 +1026,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void sendUpdateEventToPreviousDefaultVersion(APIIdentifier apiIdentifier, String organization)
             throws APIManagementException {
         API api = apiMgtDAO.getLightWeightAPIInfoByAPIIdentifier(apiIdentifier, organization);
+        if (api == null) {
+            log.warn("Could not load previous default version API: " + apiIdentifier
+                    + ". Skipping Gateway update notification — the API may no longer exist "
+                    + "under the referenced provider.");
+            return;
+        }
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_UPDATE.name(), tenantId, organization, apiIdentifier.getApiName(),
                 api.getId().getId(), api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
