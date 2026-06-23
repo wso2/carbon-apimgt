@@ -3682,6 +3682,11 @@ public class APIManagerConfiguration {
                     if (urlEl != null && urlEl.getText() != null && !urlEl.getText().trim().isEmpty()) {
                         entry.setUrl(urlEl.getText().trim());
                     }
+                    OMElement orgEl = connectElem.getFirstChildWithName(
+                            new QName(APIConstants.GatewayNotification.CONNECT_ORGANIZATION));
+                    if (orgEl != null && orgEl.getText() != null && !orgEl.getText().trim().isEmpty()) {
+                        entry.setOrganization(orgEl.getText().trim());
+                    }
                     if (!entry.getRegistrationToken().isEmpty()) {
                         connectGateways.add(entry);
                     }
