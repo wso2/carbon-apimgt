@@ -147,7 +147,8 @@ public class GatewayManagementUtils {
             }
             if (log.isInfoEnabled()) {
                 log.info("Connect-with-token configured for " + connectGateways.size()
-                        + " gateway(s); they can register on first connect.");
+                        + " gateway(s); they can register on first connect "
+                        + "(organization defaults to carbon.super when not set in toml).");
             }
             PlatformGatewayServiceImpl.ensurePlatformGatewayFromConfigOnStartup(config);
         } catch (IllegalArgumentException e) {

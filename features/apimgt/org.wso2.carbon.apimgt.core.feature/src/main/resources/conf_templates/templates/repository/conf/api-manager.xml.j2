@@ -2152,6 +2152,9 @@
                     {% if c.url is defined and c.url %}
                     <Url>{{ c.url }}</Url>
                     {% endif %}
+                    {% if c.organization is defined and c.organization %}
+                    <Organization>{{ c.organization }}</Organization>
+                    {% endif %}
                 </Connect>
               {% endfor %}
               </ConnectGateways>
