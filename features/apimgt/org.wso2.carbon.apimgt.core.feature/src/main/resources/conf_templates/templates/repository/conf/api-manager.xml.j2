@@ -1510,6 +1510,9 @@
             <Url>{{apim.open_telemetry.remote_tracer.url}}</Url>
             <HostName>{{apim.open_telemetry.remote_tracer.hostname}}</HostName>
             <Port>{{apim.open_telemetry.remote_tracer.port}}</Port>
+            {% if apim.open_telemetry.remote_tracer.sampler_mode is defined %}
+            <SamplerMode>{{apim.open_telemetry.remote_tracer.sampler_mode}}</SamplerMode>
+            {% endif %}
             <Properties>
                 {% for property in apim.open_telemetry.remote_tracer.properties %}
                 <{{property.name}}>{{property.value}}</{{property.name}}>
