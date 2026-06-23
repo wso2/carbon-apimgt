@@ -18,12 +18,17 @@
 
 package org.wso2.carbon.apimgt.impl.dto;
 
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+
 import java.net.URI;
 
 /**
  * One connect-with-token config entry for a self-hosted Platform Gateway.
  * Used when multiple gateways are configured via {@code [[apim.platform_gateway.connect]]}.
  * {@code url} is required: the base URL where the gateway will be accessible (e.g. https://gw.example.com:8243).
+ * {@code organization} is optional: tenant/org domain for gateway ownership (same as Admin Portal create).
+ * When omitted, defaults to {@link MultitenantConstants#SUPER_TENANT_DOMAIN_NAME}. Set to
+ * {@code WSO2-ALL-TENANTS} explicitly for a shared gateway visible to all tenants.
  */
 public class ConnectGatewayConfig {
     private String registrationToken = "";
@@ -31,6 +36,7 @@ public class ConnectGatewayConfig {
     private String displayName = "";
     private String description = "";
     private String url;
+    private String organization = "";
 
     public String getRegistrationToken() {
         return registrationToken;
@@ -62,6 +68,27 @@ public class ConnectGatewayConfig {
 
     public void setDescription(String description) {
         this.description = description != null ? description : "";
+    }
+
+    /**
+     * Tenant organization for this gateway (e.g. {@code carbon.super}, {@code t.com}, or {@code WSO2-ALL-TENANTS}).
+     */
+    public String getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(String organization) {
+        this.organization = organization != null ? organization : "";
+    }
+
+    /**
+     * Resolved organization for persistence: configured value or super-tenant default.
+     */
+    public String resolveOrganization() {
+        if (organization != null && !organization.isBlank()) {
+            return organization.trim();
+        }
+        return MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
     }
 
     /**

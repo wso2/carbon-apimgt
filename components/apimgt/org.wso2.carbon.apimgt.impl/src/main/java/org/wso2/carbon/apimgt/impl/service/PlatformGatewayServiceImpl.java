@@ -73,12 +73,12 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
      * ({@link APIConstants.GatewayNotification#WSO2_ALL_TENANTS}), so globally-scoped platform gateways are not
      * omitted from list/name checks. When {@code organizationId} is already the global scope, only that list is used.
      */
-    private List<Environment> getEnvironmentsForOrganizationMergedWithGlobal(String organizationId)
+    private static List<Environment> getEnvironmentsForOrganizationMergedWithGlobal(String organizationId)
             throws APIManagementException {
         return getEnvironmentsForOrganizationMergedWithGlobal(new APIAdminImpl(), organizationId);
     }
 
-    private List<Environment> getEnvironmentsForOrganizationMergedWithGlobal(APIAdminImpl apiAdmin,
+    private static List<Environment> getEnvironmentsForOrganizationMergedWithGlobal(APIAdminImpl apiAdmin,
                                                                                String organizationId)
             throws APIManagementException {
         List<Environment> merged = new ArrayList<>(apiAdmin.getAllEnvironments(organizationId));
@@ -284,7 +284,8 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
             throw new APIManagementException("Platform gateway not found: " + gatewayId,
                     ExceptionCodes.PLATFORM_GATEWAY_NOT_FOUND);
         }
-        if (!organizationId.equals(existing.getOrganizationId())) {
+        if (!organizationId.equals(existing.getOrganizationId())
+                && !APIConstants.GatewayNotification.WSO2_ALL_TENANTS.equals(existing.getOrganizationId())) {
             throw new APIManagementException("Platform gateway not found in organization: " + gatewayId,
                     ExceptionCodes.PLATFORM_GATEWAY_NOT_FOUND);
         }
@@ -307,12 +308,14 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
 
     @Override
     public void deleteGateway(String organizationId, String gatewayId) throws APIManagementException {
-        Environment env = ApiMgtDAO.getInstance().getEnvironment(organizationId, gatewayId);
+        String storageOrgId = resolveStorageOrganizationId(organizationId, gatewayId);
+        Environment env = storageOrgId != null
+                ? ApiMgtDAO.getInstance().getEnvironment(storageOrgId, gatewayId) : null;
         if (env == null || !APIConstants.WSO2_API_PLATFORM_GATEWAY.equals(env.getGatewayType())) {
             throw new APIManagementException("Platform gateway not found: " + gatewayId,
                     ExceptionCodes.PLATFORM_GATEWAY_NOT_FOUND);
         }
-        if (ApiMgtDAO.getInstance().hasExistingAPIRevisions(gatewayId, organizationId)) {
+        if (ApiMgtDAO.getInstance().hasExistingAPIRevisions(gatewayId, storageOrgId)) {
             throw new APIManagementException(
                     "Cannot delete platform gateway: API revisions are currently deployed to it. "
                             + "Undeploy all APIs from this gateway first.",
@@ -324,14 +327,16 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
         if (dispatcher != null) {
             dispatcher.closeGatewayConnection(gatewayId);
         }
-        PlatformGatewayDAO.getInstance().deleteGatewayWithReferences(gatewayId, env.getName(), organizationId);
+        PlatformGatewayDAO.getInstance().deleteGatewayWithReferences(gatewayId, env.getName(), storageOrgId);
     }
 
     @Override
     public PlatformGateway updateGateway(String organizationId, String gatewayId, String displayName,
                                          String description, String propertiesJson)
             throws APIManagementException {
-        Environment env = ApiMgtDAO.getInstance().getEnvironment(organizationId, gatewayId);
+        String storageOrgId = resolveStorageOrganizationId(organizationId, gatewayId);
+        Environment env = storageOrgId != null
+                ? ApiMgtDAO.getInstance().getEnvironment(storageOrgId, gatewayId) : null;
         if (env == null || !APIConstants.WSO2_API_PLATFORM_GATEWAY.equals(env.getGatewayType())) {
             throw new APIManagementException("Platform gateway not found: " + gatewayId,
                     ExceptionCodes.PLATFORM_GATEWAY_NOT_FOUND);
@@ -349,14 +354,16 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
             additional.put("updatedAt", String.valueOf(System.currentTimeMillis()));
             env.setAdditionalProperties(additional);
         }
-        new APIAdminImpl().updateEnvironment(organizationId, env);
-        return envToApiModel(ApiMgtDAO.getInstance().getEnvironment(organizationId, gatewayId));
+        new APIAdminImpl().updateEnvironment(storageOrgId, env);
+        return envToApiModel(ApiMgtDAO.getInstance().getEnvironment(storageOrgId, gatewayId));
     }
 
     @Override
     public void updateGatewayActiveStatus(String gatewayId, String organizationId, boolean active)
             throws APIManagementException {
-        Environment env = ApiMgtDAO.getInstance().getEnvironment(organizationId, gatewayId);
+        String storageOrgId = resolveStorageOrganizationId(organizationId, gatewayId);
+        Environment env = storageOrgId != null
+                ? ApiMgtDAO.getInstance().getEnvironment(storageOrgId, gatewayId) : null;
         if (env == null || !APIConstants.WSO2_API_PLATFORM_GATEWAY.equals(env.getGatewayType())) {
             return;
         }
@@ -365,7 +372,33 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
         additional.put("isActive", String.valueOf(active));
         additional.put("updatedAt", String.valueOf(System.currentTimeMillis()));
         env.setAdditionalProperties(additional);
-        new APIAdminImpl().updateEnvironment(organizationId, env);
+        new APIAdminImpl().updateEnvironment(storageOrgId, env);
+    }
+
+    /**
+     * Resolves the organization under which a platform gateway environment is stored.
+     * Falls back to {@code WSO2-ALL-TENANTS} when the gateway was created as a shared connect gateway.
+     */
+    public static String resolveStorageOrganizationId(String requestOrganizationId, String gatewayId)
+            throws APIManagementException {
+        if (StringUtils.isBlank(gatewayId)) {
+            return null;
+        }
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+        if (StringUtils.isNotBlank(requestOrganizationId)) {
+            Environment env = apiMgtDAO.getEnvironment(requestOrganizationId, gatewayId);
+            if (env != null && APIConstants.WSO2_API_PLATFORM_GATEWAY.equals(env.getGatewayType())) {
+                return requestOrganizationId;
+            }
+        }
+        String allTenantsOrg = APIConstants.GatewayNotification.WSO2_ALL_TENANTS;
+        if (!allTenantsOrg.equals(requestOrganizationId)) {
+            Environment env = apiMgtDAO.getEnvironment(allTenantsOrg, gatewayId);
+            if (env != null && APIConstants.WSO2_API_PLATFORM_GATEWAY.equals(env.getGatewayType())) {
+                return allTenantsOrg;
+            }
+        }
+        return null;
     }
 
     /**
@@ -454,7 +487,7 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
         if (config == null || entry == null || StringUtils.isBlank(entry.getRegistrationToken())) {
             return false;
         }
-        String orgId = APIConstants.GatewayNotification.WSO2_ALL_TENANTS;
+        String orgId = entry.resolveOrganization();
         String registrationToken = entry.getRegistrationToken();
         String name = StringUtils.isNotBlank(entry.getName()) ? entry.getName() : gatewayId;
         String displayNameOverride = entry.getDisplayName();
@@ -465,7 +498,7 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
         }
         if (StringUtils.isNotBlank(entry.getName())) {
             try {
-                Environment existingByName = new APIAdminImpl().getAllEnvironments(orgId).stream()
+                Environment existingByName = getEnvironmentsForOrganizationMergedWithGlobal(orgId).stream()
                         .filter(e -> APIConstants.WSO2_API_PLATFORM_GATEWAY.equals(e.getGatewayType())
                                 && entry.getName().equals(e.getName()))
                         .findFirst()
@@ -512,20 +545,27 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
             String displayName = StringUtils.isNotBlank(displayNameOverride) ? displayNameOverride : name;
             String description = StringUtils.isNotBlank(descriptionOverride) ? descriptionOverride : "";
             String vhostForDao = StringUtils.isNotBlank(urlOverride) ? urlOverride : "default";
+            Timestamp now = Timestamp.from(Instant.now());
             if (existing == null) {
                 Environment env = StringUtils.isNotBlank(urlOverride)
                         ? toEnvironmentFromUrl(gatewayId, name, displayName, description, urlOverride)
                         : toEnvironment(gatewayId, name, displayName, description, "default");
+                Map<String, String> additional = new HashMap<>();
+                additional.put("organization", orgId);
+                additional.put("isActive", "false");
+                additional.put("createdAt", String.valueOf(now.getTime()));
+                additional.put("updatedAt", String.valueOf(now.getTime()));
+                env.setAdditionalProperties(additional);
                 apiAdmin.addEnvironment(orgId, env);
             }
-            Timestamp now = Timestamp.from(Instant.now());
             PlatformGatewayDAO.PlatformGateway gateway = new PlatformGatewayDAO.PlatformGateway(
                     gatewayId, orgId, name, displayName, description, vhostForDao,
                     null, false, now, now);
             dao.createGatewayWithTokenAndGatewayInstance(gateway, tokenId, tokenHash,
                     Collections.singletonList(name));
             if (log.isInfoEnabled()) {
-                log.info("Platform gateway connected with token: gateway_id=" + gatewayId + ", name=" + name);
+                log.info("Platform gateway connected with token: gateway_id=" + gatewayId + ", name=" + name
+                        + ", organization=" + orgId);
             }
             return true;
         } catch (NoSuchAlgorithmException | APIManagementException e) {
