@@ -137,6 +137,7 @@ public class PlatformGatewayApiKeyAuthInterceptor extends AbstractPhaseIntercept
                     } catch (Exception e) {
                         log.error("Could not resolve tenant id for org " + org + "; rejecting request", e);
                         PrivilegedCarbonContext.endTenantFlow();
+                        clearConnectWithTokenAuthState();
                         throw new AuthenticationException("Unauthenticated request");
                     }
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername("admin@" + org);
@@ -219,5 +220,10 @@ public class PlatformGatewayApiKeyAuthInterceptor extends AbstractPhaseIntercept
             }
         }
         return null;
+    }
+
+    private static void clearConnectWithTokenAuthState() {
+        CONNECT_WITH_TOKEN_AUTH.remove();
+        CONNECT_WITH_TOKEN_MATCHED_ENTRY.remove();
     }
 }

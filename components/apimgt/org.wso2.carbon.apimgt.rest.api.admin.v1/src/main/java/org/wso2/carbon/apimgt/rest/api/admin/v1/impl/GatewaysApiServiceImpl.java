@@ -445,7 +445,6 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
                     description != null ? gateway.getDescription() : null);
         }
         GatewayVisibilityPermissionConfigurationDTO permissions = null;
-        APIAdmin apiAdmin = new APIAdminImpl();
         Environment env = getStoredPlatformGatewayEnvironment(organization, gateway.getId());
         if (env != null) {
             permissions = env.getPermissions();
@@ -487,7 +486,6 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
 
         // Fetch permissions from environment
         GatewayVisibilityPermissionConfigurationDTO permissions = null;
-        APIAdmin apiAdmin = new APIAdminImpl();
         Environment env = getStoredPlatformGatewayEnvironment(organization, gateway.getId());
         if (env != null) {
             permissions = env.getPermissions();

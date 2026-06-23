@@ -34,9 +34,9 @@ import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.PlatformGatewayDAO;
-import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayDeploymentDispatcher;
 import org.wso2.carbon.apimgt.impl.dto.ConnectGatewayConfig;
 import org.wso2.carbon.apimgt.impl.dto.PlatformGatewayConnectConfig;
+import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayDeploymentDispatcher;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.PlatformGatewayTokenUtil;
 

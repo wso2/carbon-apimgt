@@ -19,25 +19,23 @@
 package org.wso2.carbon.apimgt.internal.service.impl;
 
 import com.google.gson.Gson;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.GatewayManagementDAO;
 import org.wso2.carbon.apimgt.impl.dto.ConnectGatewayConfig;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.service.PlatformGatewayServiceImpl;
 import org.wso2.carbon.apimgt.impl.utils.GatewayManagementUtils;
-import org.apache.cxf.jaxrs.ext.MessageContext;
-
 import org.wso2.carbon.apimgt.internal.service.NotifyGatewayApiService;
 import org.wso2.carbon.apimgt.internal.service.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.NotifyGatewayPayloadDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.NotifyGatewayStatusResponseDTO;
 import org.wso2.carbon.apimgt.internal.service.interceptors.PlatformGatewayApiKeyAuthInterceptor;
-import org.wso2.carbon.apimgt.api.ExceptionCodes;
-
-import org.apache.commons.lang3.StringUtils;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
