@@ -27,10 +27,12 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.GatewayManagementDAO;
+import org.wso2.carbon.apimgt.impl.dao.PlatformGatewayDAO;
 import org.wso2.carbon.apimgt.impl.dto.ConnectGatewayConfig;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.service.PlatformGatewayServiceImpl;
 import org.wso2.carbon.apimgt.impl.utils.GatewayManagementUtils;
+import org.wso2.carbon.apimgt.impl.utils.PlatformGatewayTokenUtil;
 import org.wso2.carbon.apimgt.internal.service.NotifyGatewayApiService;
 import org.wso2.carbon.apimgt.internal.service.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.NotifyGatewayPayloadDTO;
@@ -87,15 +89,27 @@ public class NotifyGatewayApiServiceImpl implements NotifyGatewayApiService {
                 && StringUtils.isNotBlank(gatewayId)) {
             ConnectGatewayConfig matchedEntry =
                     PlatformGatewayApiKeyAuthInterceptor.CONNECT_WITH_TOKEN_MATCHED_ENTRY.get();
-            if (matchedEntry != null) {
-                org.wso2.carbon.apimgt.impl.dto.PlatformGatewayConnectConfig connectConfig =
-                        ServiceReferenceHolder.getInstance()
-                                .getAPIManagerConfigurationService().getAPIManagerConfiguration()
-                                .getPlatformGatewayConnectConfig();
-                if (connectConfig != null) {
-                    PlatformGatewayServiceImpl.ensurePlatformGatewayFromConnectToken(
-                            connectConfig, gatewayId, matchedEntry);
-                }
+            if (matchedEntry == null) {
+                log.error("Connect-with-token REGISTER missing matched config entry for gateway: " + gatewayId);
+                throw new APIManagementException("Platform gateway bootstrap failed: connect config entry not found",
+                        ExceptionCodes.GATEWAY_NOTIFICATION_INTERNAL_SERVER_ERROR);
+            }
+            org.wso2.carbon.apimgt.impl.dto.PlatformGatewayConnectConfig connectConfig =
+                    ServiceReferenceHolder.getInstance()
+                            .getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                            .getPlatformGatewayConnectConfig();
+            if (connectConfig == null) {
+                log.error("Connect-with-token REGISTER missing platform gateway connect config for gateway: "
+                        + gatewayId);
+                throw new APIManagementException("Platform gateway bootstrap failed: connect config not loaded",
+                        ExceptionCodes.GATEWAY_NOTIFICATION_INTERNAL_SERVER_ERROR);
+            }
+            boolean bootstrapped = PlatformGatewayServiceImpl.ensurePlatformGatewayFromConnectToken(
+                    connectConfig, gatewayId, matchedEntry);
+            if (!bootstrapped && !isConnectTokenRegistered(matchedEntry)) {
+                log.error("Connect-with-token REGISTER failed to create platform gateway for gateway: " + gatewayId);
+                throw new APIManagementException("Platform gateway bootstrap failed",
+                        ExceptionCodes.GATEWAY_NOTIFICATION_INTERNAL_SERVER_ERROR);
             }
         }
 
@@ -135,6 +149,24 @@ public class NotifyGatewayApiServiceImpl implements NotifyGatewayApiService {
 
         responseDTO.setGatewayId(gatewayId);
         return Response.ok(responseDTO).build();
+    }
+
+    private boolean isConnectTokenRegistered(ConnectGatewayConfig matchedEntry) {
+        String registrationToken = matchedEntry.getRegistrationToken();
+        if (StringUtils.isBlank(registrationToken)) {
+            return false;
+        }
+        String separator = PlatformGatewayTokenUtil.COMBINED_TOKEN_SEPARATOR;
+        int sep = registrationToken.indexOf(separator);
+        if (sep <= 0 || sep >= registrationToken.length() - 1) {
+            return false;
+        }
+        try {
+            return PlatformGatewayDAO.getInstance().getActiveTokenById(registrationToken.substring(0, sep)) != null;
+        } catch (APIManagementException e) {
+            log.warn("Could not verify connect token registration state: " + e.getMessage(), e);
+            return false;
+        }
     }
 
     private Response handleHeartbeat(NotifyGatewayPayloadDTO dto, List<String> organizations)
