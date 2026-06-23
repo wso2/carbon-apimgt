@@ -178,6 +178,18 @@ public class SQLConstants {
 
     public static final String UPDATE_API_PROVIDER_SQL = "UPDATE AM_API SET API_PROVIDER = ? WHERE API_UUID = ?";
 
+    // Used by the deprecated updateApiProvider(String, String) — subquery reads old provider from AM_API.
+    // MUST execute before UPDATE_API_PROVIDER_SQL so the subquery still sees the old value in AM_API.
+    public static final String UPDATE_DEFAULT_VERSION_PROVIDER_SQL =
+            "UPDATE AM_API_DEFAULT_VERSION SET API_PROVIDER = ? " +
+            "WHERE API_NAME = (SELECT API_NAME FROM AM_API WHERE API_UUID = ?) " +
+            "AND API_PROVIDER = (SELECT API_PROVIDER FROM AM_API WHERE API_UUID = ?)";
+
+    // Used by updateApiProvider(String, String, String, String) — explicit params, no subquery,
+    // no execution-order dependency.
+    public static final String UPDATE_DEFAULT_VERSION_PROVIDER_BY_NAME_SQL =
+            "UPDATE AM_API_DEFAULT_VERSION SET API_PROVIDER = ? WHERE API_NAME = ? AND API_PROVIDER = ?";
+
     public static final String GET_MD5_VALUE_OF_SERVICE_BY_API_ID_SQL = "SELECT " +
             "   AM_SERVICE_CATALOG.MD5 AS SERVICE_MD5, " +
             "   AM_SERVICE_CATALOG.SERVICE_NAME, " +
