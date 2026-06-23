@@ -2164,11 +2164,13 @@ public class APIMgtDAOTest {
                 }
             }
         } finally {
-            // Restore sample data to original state
+            // Restore sample data to original state — delete only rows inserted by this test
             try (Connection conn = APIMgtDBUtil.getConnection()) {
                 try (PreparedStatement stmt = conn.prepareStatement(
-                        "DELETE FROM AM_API_DEFAULT_VERSION WHERE API_NAME = ?")) {
+                        "DELETE FROM AM_API_DEFAULT_VERSION WHERE API_NAME = ? AND API_PROVIDER IN (?, ?)")) {
                     stmt.setString(1, apiName);
+                    stmt.setString(2, oldProvider);
+                    stmt.setString(3, newProvider);
                     stmt.executeUpdate();
                 }
                 try (PreparedStatement stmt = conn.prepareStatement(
@@ -2239,8 +2241,10 @@ public class APIMgtDAOTest {
         } finally {
             try (Connection conn = APIMgtDBUtil.getConnection()) {
                 try (PreparedStatement stmt = conn.prepareStatement(
-                        "DELETE FROM AM_API_DEFAULT_VERSION WHERE API_NAME = ?")) {
+                        "DELETE FROM AM_API_DEFAULT_VERSION WHERE API_NAME = ? AND API_PROVIDER IN (?, ?)")) {
                     stmt.setString(1, apiName);
+                    stmt.setString(2, oldProviderAtFormat);
+                    stmt.setString(3, newProvider);
                     stmt.executeUpdate();
                 }
                 try (PreparedStatement stmt = conn.prepareStatement(
@@ -2308,8 +2312,9 @@ public class APIMgtDAOTest {
         } finally {
             try (Connection conn = APIMgtDBUtil.getConnection()) {
                 try (PreparedStatement stmt = conn.prepareStatement(
-                        "DELETE FROM AM_API_DEFAULT_VERSION WHERE API_NAME = ?")) {
+                        "DELETE FROM AM_API_DEFAULT_VERSION WHERE API_NAME = ? AND API_PROVIDER = ?")) {
                     stmt.setString(1, apiName);
+                    stmt.setString(2, staleProvider);
                     stmt.executeUpdate();
                 }
                 try (PreparedStatement stmt = conn.prepareStatement(
@@ -2369,8 +2374,10 @@ public class APIMgtDAOTest {
         } finally {
             try (Connection conn = APIMgtDBUtil.getConnection()) {
                 try (PreparedStatement stmt = conn.prepareStatement(
-                        "DELETE FROM AM_API_DEFAULT_VERSION WHERE API_NAME = ?")) {
+                        "DELETE FROM AM_API_DEFAULT_VERSION WHERE API_NAME = ? AND API_PROVIDER IN (?, ?)")) {
                     stmt.setString(1, apiName);
+                    stmt.setString(2, staleProviderA);
+                    stmt.setString(3, newProvider);
                     stmt.executeUpdate();
                 }
                 try (PreparedStatement stmt = conn.prepareStatement(

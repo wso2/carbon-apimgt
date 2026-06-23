@@ -754,9 +754,11 @@ public class APIAdminImplTest {
         } catch (APIMgtResourceNotFoundException e) {
             Assert.assertTrue(e.getMessage().contains("API not found for id: " + apiId));
         }
-        // DAO must NOT be called when the API is not found
+        // DAO must NOT be called when the API is not found — neither overload
         Mockito.verify(apiMgtDAO, Mockito.never()).updateApiProvider(
                 Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
+        Mockito.verify(apiMgtDAO, Mockito.never()).updateApiProvider(
+                Mockito.anyString(), Mockito.anyString());
     }
 
     @Test
