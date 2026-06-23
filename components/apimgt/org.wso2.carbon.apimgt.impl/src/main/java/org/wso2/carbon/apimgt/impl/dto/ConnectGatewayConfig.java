@@ -114,6 +114,15 @@ public class ConnectGatewayConfig {
             if (u.getHost() == null || u.getHost().isEmpty()) {
                 throw new IllegalArgumentException("missing host");
             }
+            if (u.getUserInfo() != null && !u.getUserInfo().isEmpty()) {
+                throw new IllegalArgumentException("user-info not allowed in base URL");
+            }
+            if (u.getQuery() != null && !u.getQuery().isEmpty()) {
+                throw new IllegalArgumentException("query not allowed in base URL");
+            }
+            if (u.getFragment() != null && !u.getFragment().isEmpty()) {
+                throw new IllegalArgumentException("fragment not allowed in base URL");
+            }
             String scheme = u.getScheme();
             if (scheme == null || (!"http".equalsIgnoreCase(scheme) && !"https".equalsIgnoreCase(scheme))) {
                 throw new IllegalArgumentException("scheme must be http or https");

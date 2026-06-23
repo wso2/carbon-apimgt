@@ -27,7 +27,6 @@ import org.wso2.carbon.apimgt.impl.dto.GatewayNotificationConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.PlatformGatewayConnectConfig;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.service.PlatformGatewayServiceImpl;
-import org.wso2.carbon.apimgt.impl.utils.PlatformGatewayTokenUtil;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -124,10 +123,15 @@ public class GatewayManagementUtils {
                 }
                 index++;
                 String token = entry.getRegistrationToken();
+                String prefix = "[[apim.platform_gateway.connect]] entry " + index + ": ";
                 if (org.apache.commons.lang3.StringUtils.isBlank(token)) {
+                    errors.add(prefix + "mandatory 'registration_token' is missing");
+                    if (org.apache.commons.lang3.StringUtils.isBlank(entry.getUrl())) {
+                        errors.add(prefix + "mandatory 'url' is missing (base URL where the gateway will be accessible, "
+                                + "e.g. https://host:8243)");
+                    }
                     continue;
                 }
-                String prefix = "[[apim.platform_gateway.connect]] entry " + index + ": ";
                 if (org.apache.commons.lang3.StringUtils.isBlank(entry.getUrl())) {
                     errors.add(prefix + "mandatory 'url' is missing (base URL where the gateway will be accessible, "
                             + "e.g. https://host:8243)");

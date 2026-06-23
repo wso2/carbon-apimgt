@@ -8811,13 +8811,13 @@ public final class APIUtil {
         Map<String, Environment> allEnvironments = new LinkedHashMap<>(getReadOnlyEnvironments());
         allEnvironments.putAll(envFromDB);
 
-        // Platform gateways created via connect-with-token are stored under WSO2-ALL-TENANTS.
+        // Shared platform gateways stored under WSO2-ALL-TENANTS are merged as fallbacks only.
         String allTenantsOrg = APIConstants.GatewayNotification.WSO2_ALL_TENANTS;
         if (organization != null && !organization.equals(allTenantsOrg)) {
             Map<String, Environment> allTenantEnvs = ApiMgtDAO.getInstance().getAllEnvironments(allTenantsOrg).stream()
                     .filter(env -> APIConstants.WSO2_API_PLATFORM_GATEWAY.equals(env.getGatewayType()))
                     .collect(Collectors.toMap(Environment::getName, env -> env, (a, b) -> a));
-            allEnvironments.putAll(allTenantEnvs);
+            allTenantEnvs.forEach(allEnvironments::putIfAbsent);
         }
         return allEnvironments;
     }
