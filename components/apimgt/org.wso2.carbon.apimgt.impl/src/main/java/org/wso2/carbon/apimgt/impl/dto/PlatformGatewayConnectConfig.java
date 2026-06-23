@@ -54,7 +54,7 @@ public class PlatformGatewayConnectConfig {
         if (connectGateways == null) {
             connectGateways = new ArrayList<>();
         }
-        return connectGateways;
+        return Collections.unmodifiableList(connectGateways);
     }
 
     public void setConnectGateways(List<ConnectGatewayConfig> connectGateways) {
