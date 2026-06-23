@@ -53,13 +53,14 @@ public class PlatformGatewayTenantFlowCleanupInterceptor extends AbstractPhaseIn
      * handleMessage (success path) and handleFault (exception path).
      */
     private void ensureTenantFlowCleanedUp(Message message) {
-        if (!Boolean.TRUE.equals(message.get(PlatformGatewayApiKeyAuthInterceptor.MESSAGE_PROPERTY_TENANT_FLOW_STARTED))) {
-            return;
-        }
         try {
-            PrivilegedCarbonContext.endTenantFlow();
+            if (Boolean.TRUE.equals(
+                    message.get(PlatformGatewayApiKeyAuthInterceptor.MESSAGE_PROPERTY_TENANT_FLOW_STARTED))) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         } finally {
             message.remove(PlatformGatewayApiKeyAuthInterceptor.MESSAGE_PROPERTY_TENANT_FLOW_STARTED);
+            message.remove(PlatformGatewayApiKeyAuthInterceptor.MESSAGE_PROPERTY_CONNECT_WITH_TOKEN);
             PlatformGatewayApiKeyAuthInterceptor.CONNECT_WITH_TOKEN_AUTH.remove();
             PlatformGatewayApiKeyAuthInterceptor.CONNECT_WITH_TOKEN_MATCHED_ENTRY.remove();
         }

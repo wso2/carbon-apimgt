@@ -187,16 +187,16 @@ public class GatewayConnectEndpoint {
             }
             if (matchedEntry != null && connectConfig != null) {
                 String newGatewayId = UUID.randomUUID().toString();
-                if (PlatformGatewayServiceImpl.ensurePlatformGatewayFromConnectToken(
-                        connectConfig, newGatewayId, matchedEntry)) {
-                    try {
-                        gateway = PlatformGatewayTokenUtil.verifyToken(apiKey);
-                    } catch (APIManagementException | NoSuchAlgorithmException e) {
-                        log.warn("Re-verify after connect-with-token failed: " + e.getMessage());
-                        closeWithUnauthorized(session, "Invalid or expired API key");
-                        return;
-                    }
-                } else {
+                PlatformGatewayServiceImpl.ensurePlatformGatewayFromConnectToken(
+                        connectConfig, newGatewayId, matchedEntry);
+                try {
+                    gateway = PlatformGatewayTokenUtil.verifyToken(apiKey);
+                } catch (APIManagementException | NoSuchAlgorithmException e) {
+                    log.warn("Re-verify after connect-with-token failed: " + e.getMessage());
+                    closeWithUnauthorized(session, "Invalid or expired API key");
+                    return;
+                }
+                if (gateway == null) {
                     log.warn("Connect-with-token gateway creation failed; ensure registration_token is "
                             + "tokenId.plainToken format and url is set in [[apim.platform_gateway.connect]]");
                 }

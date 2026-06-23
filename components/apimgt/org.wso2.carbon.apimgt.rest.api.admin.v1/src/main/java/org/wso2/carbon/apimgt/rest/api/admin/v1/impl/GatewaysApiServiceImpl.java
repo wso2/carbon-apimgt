@@ -590,7 +590,9 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
             UpdatePlatformGatewayRequestPermissionsDTO requestPermissions, String newDisplayName, String newDescription)
             throws APIManagementException {
         APIAdmin apiAdmin = new APIAdminImpl();
-        Environment existingEnvironment = getStoredPlatformGatewayEnvironment(organization, gateway.getId());
+        String storageOrg = PlatformGatewayServiceImpl.resolveStorageOrganizationId(organization, gateway.getId());
+        Environment existingEnvironment =
+                storageOrg != null ? apiAdmin.getEnvironment(storageOrg, gateway.getId()) : null;
         if (existingEnvironment == null) {
             log.warn("Environment not found for platform gateway ID: " + gateway.getId() + ", skipping environment update");
             return;
@@ -623,8 +625,7 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
             }
             existingEnvironment.setPermissions(visibility);
         }
-        String storageOrg = PlatformGatewayServiceImpl.resolveStorageOrganizationId(organization, gateway.getId());
-        apiAdmin.updateEnvironment(storageOrg != null ? storageOrg : organization, existingEnvironment);
+        apiAdmin.updateEnvironment(storageOrg, existingEnvironment);
     }
 
     private Environment getStoredPlatformGatewayEnvironment(String organization, String gatewayId)

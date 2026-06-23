@@ -546,6 +546,7 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
             String description = StringUtils.isNotBlank(descriptionOverride) ? descriptionOverride : "";
             String vhostForDao = StringUtils.isNotBlank(urlOverride) ? urlOverride : "default";
             Timestamp now = Timestamp.from(Instant.now());
+            boolean environmentCreated = false;
             if (existing == null) {
                 Environment env = StringUtils.isNotBlank(urlOverride)
                         ? toEnvironmentFromUrl(gatewayId, name, displayName, description, urlOverride)
@@ -557,12 +558,25 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
                 additional.put("updatedAt", String.valueOf(now.getTime()));
                 env.setAdditionalProperties(additional);
                 apiAdmin.addEnvironment(orgId, env);
+                environmentCreated = true;
             }
-            PlatformGatewayDAO.PlatformGateway gateway = new PlatformGatewayDAO.PlatformGateway(
-                    gatewayId, orgId, name, displayName, description, vhostForDao,
-                    null, false, now, now);
-            dao.createGatewayWithTokenAndGatewayInstance(gateway, tokenId, tokenHash,
-                    Collections.singletonList(name));
+            try {
+                PlatformGatewayDAO.PlatformGateway gateway = new PlatformGatewayDAO.PlatformGateway(
+                        gatewayId, orgId, name, displayName, description, vhostForDao,
+                        null, false, now, now);
+                dao.createGatewayWithTokenAndGatewayInstance(gateway, tokenId, tokenHash,
+                        Collections.singletonList(name));
+            } catch (APIManagementException e) {
+                if (environmentCreated) {
+                    try {
+                        apiAdmin.deleteEnvironment(orgId, gatewayId);
+                    } catch (Exception rollbackEx) {
+                        log.warn("Rollback failed for connect-with-token environment cleanup: " + gatewayId,
+                                rollbackEx);
+                    }
+                }
+                throw e;
+            }
             if (log.isInfoEnabled()) {
                 log.info("Platform gateway connected with token: gateway_id=" + gatewayId + ", name=" + name
                         + ", organization=" + orgId);
