@@ -3017,6 +3017,11 @@ public class PublisherCommonUtils {
             api.getMetadata().put(APIConstants.MCP.PROTOCOL_VERSION_KEY,
                     (protocolVersion != null && !protocolVersion.isEmpty()) ? protocolVersion
                             : APIConstants.MCP.PROTOCOL_VERSION_2025_JUNE);
+            String existing = api.getMetadata().get(APIConstants.MCP.MCP_PATH_APPENDED_METADATA_KEY);
+            if (existing == null) {
+                api.getMetadata().put(APIConstants.MCP.MCP_PATH_APPENDED_METADATA_KEY,
+                        Boolean.FALSE.toString());
+            }
         }
         return api;
     }
@@ -5097,7 +5102,8 @@ public class PublisherCommonUtils {
      * @throws APIManagementException On unexpected internal errors
      */
     public static MCPServerValidationResponseDTO validateMCPServer(String serverUrl, SecurityInfoDTO securityInfo,
-                                                                   boolean returnTools, String organization)
+                                                                   boolean returnTools,
+                                                                   String organization)
             throws APIManagementException {
 
         MCPServerValidationResponseDTO response =
