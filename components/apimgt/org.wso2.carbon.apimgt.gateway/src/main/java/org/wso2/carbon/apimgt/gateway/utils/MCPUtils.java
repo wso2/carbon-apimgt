@@ -25,6 +25,7 @@ import org.apache.axis2.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpStatus;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
@@ -529,7 +530,30 @@ public class MCPUtils {
         } catch (AxisFault e) {
             log.warn("Failed to set MCP error JSON payload", e);
         }
-        Utils.sendFault(messageContext, responseDto.getStatusCode());
+        Utils.sendFault(messageContext, toHttpStatusCode(responseDto.getStatusCode()));
+    }
+
+    /**
+     * Maps a JSON-RPC error code to a valid HTTP status code, leaving real HTTP codes unchanged.
+     *
+     * @param errorCode the status code from the {@link McpResponseDto}
+     * @return a valid HTTP status code
+     */
+    private static int toHttpStatusCode(int errorCode) {
+        if (errorCode >= 100 && errorCode <= 599) {
+            // Already a valid HTTP status code (e.g., 405, 500 set explicitly by McpMediator)
+            return errorCode;
+        }
+
+        // JSON-RPC server errors -> HTTP 500
+        if (errorCode == APIConstants.MCP.RpcConstants.INTERNAL_ERROR_CODE
+                || errorCode == APIConstants.MCP.RpcConstants.CONNECTION_CLOSED) {
+            return HttpStatus.SC_INTERNAL_SERVER_ERROR;
+        }
+
+        // JSON-RPC client errors (parse error, invalid request, method not found,
+        // invalid params) -> HTTP 400
+        return HttpStatus.SC_BAD_REQUEST;
     }
 
     /**
