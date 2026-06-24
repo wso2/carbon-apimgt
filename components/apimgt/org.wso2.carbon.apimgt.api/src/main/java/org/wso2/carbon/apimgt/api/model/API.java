@@ -491,11 +491,13 @@ public class API implements Serializable {
 
     //TODO: missing - total user count, up time statistics,tier
     @Deprecated
+    @com.fasterxml.jackson.annotation.JsonIgnore
     public String getUUID() {
         return uuid;
     }
     
     @Deprecated
+    @com.fasterxml.jackson.annotation.JsonIgnore
     public void setUUID(String uuid) {
         this.uuid = uuid;
     }

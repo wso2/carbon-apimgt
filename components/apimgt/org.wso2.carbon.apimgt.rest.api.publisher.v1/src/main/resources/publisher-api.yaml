@@ -115,6 +115,148 @@ security:
       - apim:api_view
 paths:
   ######################################################
+# The "Federated API Discovery" resource APIs
+  ######################################################
+  /federated-apis/discover:
+    post:
+      tags:
+        - Federated APIs
+      summary: Trigger async discovery of federated APIs
+      description: |
+        Submits a discovery task for the specified gateway environment and immediately returns a task ID.
+        If a discovery task for the same environment is already running, the existing task ID is returned (de-duplication).
+        Poll GET /federated-apis/status/{taskId} to retrieve the result.
+      parameters:
+        - name: environment
+          in: query
+          description: Name of the environment/gateway
+          required: true
+          schema:
+            type: string
+      responses:
+        202:
+          description: Accepted. Discovery task submitted (or already in progress).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  taskId:
+                    type: string
+                  status:
+                    type: string
+                    enum: [PENDING, COMPLETED, FAILED]
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+      operationId: discoverFederatedAPIs
+
+  /federated-apis/status/{taskId}:
+    get:
+      tags:
+        - Federated APIs
+      summary: Poll the status of a discovery task
+      description: Returns the current status (PENDING, COMPLETED, or FAILED) and the discovered API list when completed.
+      parameters:
+        - name: taskId
+          in: path
+          description: The task ID returned by POST /federated-apis/discover
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Task status and optional result payload.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  taskId:
+                    type: string
+                  status:
+                    type: string
+                    enum: [PENDING, COMPLETED, FAILED]
+                  result:
+                    type: array
+                    items:
+                      type: object
+                  error:
+                    type: string
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+      operationId: getDiscoveryTaskStatus
+
+  /federated-apis/import:
+    post:
+      tags:
+        - Federated APIs
+      summary: Import discovered APIs
+      description: Import explicitly selected new APIs
+      parameters:
+        - name: environment
+          in: query
+          description: Name of the environment/gateway
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: List of API IDs to import
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+      responses:
+        200:
+          description: OK
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+      operationId: importFederatedAPIs
+
+  /federated-apis/update:
+    post:
+      tags:
+        - Federated APIs
+      summary: Update existing federated APIs
+      description: Update explicitly selected APIs from a specified federated gateway
+      parameters:
+        - name: environment
+          in: query
+          description: Name of the environment/gateway
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: List of API IDs to update
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+      responses:
+        200:
+          description: OK
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+      operationId: updateFederatedAPIs
+      
+  ######################################################
   # The "API Collection" resource APIs
   ######################################################
   /apis:
@@ -18546,6 +18688,10 @@ components:
         isMCPSupportEnabled:
           type: boolean
           description: This indicates whether the MCP support is enabled or not.
+          default: true
+        isFederatedAPIDiscoveryEnabled:
+          type: boolean
+          description: This indicates whether the Federated API Discovery is enabled or not.
           default: true
         customProperties:
           type: array
