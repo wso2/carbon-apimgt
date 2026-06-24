@@ -1026,6 +1026,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void sendUpdateEventToPreviousDefaultVersion(APIIdentifier apiIdentifier, String organization)
             throws APIManagementException {
         API api = apiMgtDAO.getLightWeightAPIInfoByAPIIdentifier(apiIdentifier, organization);
+        if (api == null) {
+            log.warn("Could not load previous default version API: " + apiIdentifier
+                    + ". Skipping Gateway update notification — the API may no longer exist "
+                    + "under the referenced provider.");
+            return;
+        }
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_UPDATE.name(), tenantId, organization, apiIdentifier.getApiName(),
                 api.getId().getId(), api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
@@ -2171,7 +2177,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                                              List<OperationPolicy> existingPoliciesList,
                                                              String tenantDomain) throws APIManagementException {
         List<OperationPolicy> validatedPolicies = new ArrayList<>();
+        if (apiPoliciesList == null || apiPoliciesList.isEmpty()) {
+            return validatedPolicies;
+        }
         for (OperationPolicy policy : apiPoliciesList) {
+            if (policy == null) {
+                continue;
+            }
             String policyId = policy.getPolicyId();
             OperationPolicyData policyData = null;
             if (policyId != null) {
@@ -9212,9 +9224,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String policyMappingUUID = UUID.randomUUID().toString();
 
         // Validate and process the policies before adding them to DB
-        validateAndProcessPolicies(gatewayGlobalPoliciesList, null, null, orgId);
+        List<OperationPolicy> validatedPolicies = validateAndProcessPolicies(gatewayGlobalPoliciesList, null, null, orgId);
+        if (validatedPolicies == null || validatedPolicies.isEmpty()) {
+            throw new APIManagementException("Cannot apply gateway global policies. Policy list is empty after " +
+                    "validation.");
+        }
 
-        return apiMgtDAO.addGatewayGlobalPolicy(gatewayGlobalPoliciesList, description, name, orgId, policyMappingUUID);
+        return apiMgtDAO.addGatewayGlobalPolicy(validatedPolicies, description, name, orgId, policyMappingUUID);
     }
 
     /**
@@ -9352,14 +9368,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         // Validate and process the policies before deleting the existing policies
         // The secret policy attributes will be encrypted during this
-        validateAndProcessPolicies(gatewayGlobalPolicyList, null, policyList, orgId);
+        List<OperationPolicy> validatedPolicies = validateAndProcessPolicies(gatewayGlobalPolicyList, null, policyList,
+                orgId);
+        if (validatedPolicies == null || validatedPolicies.isEmpty()) {
+            throw new APIManagementException("Cannot update gateway global policies. Policy list is empty after " +
+                    "validation.");
+        }
 
         // Keep the existing deployments and update the policy mapping.
         Set<String> activeGatewayLabels = apiMgtDAO.getGatewayPolicyMappingDeploymentsByPolicyMappingId(policyMappingId,
                 orgId);
         apiMgtDAO.deleteGatewayPolicyMappingByPolicyId(policyMappingId, false);
 
-        String mappingID = apiMgtDAO.updateGatewayGlobalPolicy(gatewayGlobalPolicyList, description, name, orgId, policyMappingId);
+        String mappingID = apiMgtDAO.updateGatewayGlobalPolicy(validatedPolicies, description, name, orgId,
+                policyMappingId);
         // Redeploy the updated policy mappings to the gateways.
         if (activeGatewayLabels.size() > 0) {
             APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
