@@ -2446,8 +2446,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     if (org.apache.commons.lang3.StringUtils.isBlank(defFileContentType)) {
                         defFileContentType = synapsePolicyDefinitionFileDetail.getContentType().toString();
                     }
-                    if (!(APIConstants.J2_CONTENT_TYPE.equals(defFileContentType) ||
-                            APIConstants.XML_CONTENT_TYPE.equals(defFileContentType))) {
+                    if (!APIConstants.J2_CONTENT_TYPE.equals(defFileContentType)) {
                         throw new APIManagementException("Unsupported file type for Operation Policy");
                     }
                     String synapsePolicyDefinition =
