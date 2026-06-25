@@ -27,10 +27,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -38,6 +40,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.BlockConditionNotFoundException;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
+import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -158,7 +161,7 @@ import static org.wso2.carbon.apimgt.impl.token.ClaimsRetriever.DEFAULT_DIALECT_
         Caching.class, PaginationContext.class, MultitenantUtils.class, AbstractAPIManager.class, OASParserUtil.class,
         KeyManagerHolder.class, CertificateManagerImpl.class , PublisherAPI.class, Organization.class,
         APIPersistence.class, GatewayArtifactsMgtDAO.class, RegistryPersistenceUtil.class, MCPUtils.class})
-
+@PowerMockIgnore({"javax.security.*", "javax.naming.*"})
 public class APIProviderImplTest {
 
     private ApiMgtDAO apimgtDAO;
@@ -1679,8 +1682,8 @@ public class APIProviderImplTest {
     @Test
     public void testSearchPaginatedAPIsByFQDNWithCorrectInputs() throws APIManagementException, APIPersistenceException {
 
-        int API_COUNT = 10;
-        int TOTAL_API_COUNT = API_COUNT + 5;
+        int apiCount = 10;
+        int totalApiCount = apiCount + 5;
 
         String[] returnRoles = {
                 "Internal/subscriber",
@@ -1696,10 +1699,10 @@ public class APIProviderImplTest {
         Mockito.when(APIUtil.getUserProperties(Mockito.anyString())).thenReturn(returnProperties);
 
         PublisherAPISearchResult returnSearchAPIs = new PublisherAPISearchResult();
-        List<PublisherAPIInfo> list = createMockPublisherAPIInfoList(API_COUNT);
+        List<PublisherAPIInfo> list = createMockPublisherAPIInfoList(apiCount);
         returnSearchAPIs.setPublisherAPIInfoList(list);
-        returnSearchAPIs.setReturnedAPIsCount(API_COUNT);
-        returnSearchAPIs.setTotalAPIsCount(TOTAL_API_COUNT);
+        returnSearchAPIs.setReturnedAPIsCount(apiCount);
+        returnSearchAPIs.setTotalAPIsCount(totalApiCount);
 
         Mockito.when(apiPersistenceInstance.searchAPIsForPublisher(
                 Mockito.any(Organization.class),
@@ -1714,8 +1717,8 @@ public class APIProviderImplTest {
                 "carbon.super", 1 , 6);
 
         Assert.assertNotNull(response);
-        Assert.assertEquals(response.getApiCount(), TOTAL_API_COUNT);
-        Assert.assertEquals(response.getApis().size(), API_COUNT);
+        Assert.assertEquals(response.getApiCount(), totalApiCount);
+        Assert.assertEquals(response.getApis().size(), apiCount);
     }
 
     @Test
@@ -1820,6 +1823,161 @@ public class APIProviderImplTest {
 
         assertEquals(APIConstants.API_SECURITY_API_KEY, api.getApiSecurity());
         assertEquals(APIConstants.API_KEY_HEADER_DEFAULT, api.getApiKeyHeader());
+    }
+
+    // Certificate with wildcard SAN *.example.com and exact SANs api1.hello.com, api2.hello.com
+    private static final String CERT_WITH_DNS_SANS =
+            "MIIDdTCCAl2gAwIBAgIUQmUApCllap+dKaaXsTk7dR0gDsQwDQYJKoZIhvcNAQELBQAwLDEbMBkG" +
+            "A1UEAwwSc2ltcGxlLmV4YW1wbGUuY29tMQ0wCwYDVQQKDARUZXN0MB4XDTI2MDYwNTA1NTcxMloX" +
+            "DTM2MDYwMjA1NTcxMlowLDEbMBkGA1UEAwwSc2ltcGxlLmV4YW1wbGUuY29tMQ0wCwYDVQQKDARU" +
+            "ZXN0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA8ur/uoiIoZ8yW4D0FZOAwaPmH8sk" +
+            "MZje4vW3ILxkLtgD8PjjiA4XQihrYuxrMBBS5Jlna8EmEjnP4ygg1mZ2AfHFQCMwJ4RlInxKEfr3" +
+            "ElFLLpPtBzFYjrlUzA7ZRxWrX9upeDOrsTytIxAvpdPbWrUsFKcYL3tq1GB4hE6GICs9VCkBTF58" +
+            "9loYZ3bH6T6epijAP0vRrSMIMD1CZrrvFilV0W6IohY56CF84mQWn3JqZbj2/FqkpMJ/VO0bJ6fK" +
+            "sup6nn0GqY7DNG6MglrvS+pkturYAXA26f5uh34YEuRnAzAdVLFtogJYrUWgk4yVB+7b0H4FEGTF" +
+            "DKQlBvErJQIDAQABo4GOMIGLMB0GA1UdDgQWBBTAXsL6ojyS6e42f69OIXTOzKt0ijAfBgNVHSME" +
+            "GDAWgBTAXsL6ojyS6e42f69OIXTOzKt0ijAPBgNVHRMBAf8EBTADAQH/MDgGA1UdEQQxMC+CDSou" +
+            "ZXhhbXBsZS5jb22CDmFwaTEuaGVsbG8uY29tgg5hcGkyLmhlbGxvLmNvbTANBgkqhkiG9w0BAQsF" +
+            "AAOCAQEATjPCm++GvSkY5IoBeZqAN3pIpjtZqTGj+tAHy2X+veRpUda9PEajV1kKpfB34ZoOcHrS" +
+            "Gb5y5VYojaAZotOZp+2ilmLqujfT2Q8+XQ0EHjpEPzuDq9koUeSJPY0w8m/TToldd1MtdDWXk0V9" +
+            "vdV41Gi/+VyOajdOtzdGKbEciJsq5sd5gyFRBxjo5gSPqqJi+L09Ig3g+c6faUJ/JI5e2Fbv53cc" +
+            "rBTc2XgsY2eKQLbIcgiEu/LjXyZ1mUvFv7LyzXRnWj3+w+ek3EPiRggQcbBPOHuPGaNrTzkwLIll" +
+            "chF2eAlffVjpWA3NzL/Q5tRXTFitbBozfHGl7nzN8QxtKQ==";
+
+    // Certificate with no SANs, CN=backend.example.com
+    private static final String CERT_CN_ONLY =
+            "MIIDOzCCAiOgAwIBAgIUFB8gC/GSC04yMpVppR2GSbQuEd8wDQYJKoZIhvcNAQELBQAwLTEcMBoG" +
+            "A1UEAwwTYmFja2VuZC5leGFtcGxlLmNvbTENMAsGA1UECgwEVGVzdDAeFw0yNjA2MDUwNTU3MjBa" +
+            "Fw0zNjA2MDIwNTU3MjBaMC0xHDAaBgNVBAMME2JhY2tlbmQuZXhhbXBsZS5jb20xDTALBgNVBAoM" +
+            "BFRlc3QwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCjfoX3PHePUrDlEQ78szKEhw8l" +
+            "8PHk1JgNPm/u1CtNz+JT/8zrfBw/+xZWCeNZ2fxgVN1wnl0h4LJogmSsQwYQe7naURxhomwQ+6Y" +
+            "rOXpCUSUYVvAI0ZsKUzDWFmssvo7QQ3lGpCC/nvjGtUBoE9Gjwbv45SYbzCWmCl1yRs4RxUMd5UC" +
+            "WF9GmrhiWnfAYpu825NEiT/yVlQBuHu/KoL7054WewQjsAX86HdNFS0r35wXp/qdk5pqauD0Jnff" +
+            "f8PZf/asrBoMA3Lx0bIlHX2KfgAN+PyXzDksK/y2CqiDdA0h5x/+FBSuh9d0rlK/v3nfPzF7VYfr" +
+            "xbLfkuRSf+ZY1AgMBAAGjUzBRMB0GA1UdDgQWBBTDJjRTndFSqtc0ydL5tdDexBqe4zAfBgNVHSME" +
+            "GDAWgBTDJjRTndFSqtc0ydL5tdDexBqe4zAPBgNVHRMBAf8EBTADAQH/MA0GCSqGSIb3DQEBCwUA" +
+            "A4IBAQCJAX2GciKCBtq8turwKXPxFuzlwwq44aqXMzQ2SxbQ/Z9hoLlpyGgQXeCQsL1KT4XWAvqf" +
+            "DrDuN+HyX6lnLfjnx/pU5z62fOg54UbpX++8Qz0/buYbMzh/BlvqW8B1HQ2OhUVaj1FMTCF984Rs" +
+            "AQgu1iP2xtatHbdVzjt7KmLot9CQzxTIIo0z75MqcqM+0az8VW+e2TDAEtzfSay3rh5X+YBJipk5" +
+            "V2+DWlF7yc8U3QSF/1rRmbefnIdfzaAoFkH6G5u8TUjYE/Tt3cSQiylPlhUiIwPgG1XyaVu9i2YM" +
+            "gv+Kp/g3ROxKCpqMv98hRw6MhzITCI5WUsd4dSfv5atg";
+
+    @Test
+    public void testSearchPaginatedAPIsByCertificateWithSANs()
+            throws APIManagementException, APIPersistenceException {
+        int apiCount = 5;
+        int totalApiCount = 8;
+
+        String[] returnRoles = {"Internal/publisher", "admin"};
+        Map<String, Object> returnProperties = new HashMap<>();
+        returnProperties.put("isAdmin", true);
+        returnProperties.put("skipRoles", null);
+
+        Mockito.when(APIUtil.getTenantAdminUserName(Mockito.anyString())).thenReturn("admin");
+        Mockito.when(APIUtil.getFilteredUserRoles(Mockito.anyString())).thenReturn(returnRoles);
+        Mockito.when(APIUtil.getUserProperties(Mockito.anyString())).thenReturn(returnProperties);
+
+        PublisherAPISearchResult returnSearchAPIs = new PublisherAPISearchResult();
+        returnSearchAPIs.setPublisherAPIInfoList(createMockPublisherAPIInfoList(apiCount));
+        returnSearchAPIs.setReturnedAPIsCount(apiCount);
+        returnSearchAPIs.setTotalAPIsCount(totalApiCount);
+
+        ArgumentCaptor<String> queryCaptor = ArgumentCaptor.forClass(String.class);
+        Mockito.when(apiPersistenceInstance.searchAPIsForPublisher(
+                Mockito.any(Organization.class),
+                queryCaptor.capture(),
+                Mockito.anyInt(),
+                Mockito.anyInt(),
+                Mockito.any(UserContext.class))).thenReturn(returnSearchAPIs);
+
+        CertificateMetadataDTO certDTO = new CertificateMetadataDTO();
+        certDTO.setCertificate(CERT_WITH_DNS_SANS);
+        certDTO.setEndpoint("https://simple.example.com/api");
+
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO);
+        APISearchResult response = apiProvider.searchPaginatedAPIsByCertificate(certDTO, "carbon.super", 0, 10);
+
+        Assert.assertNotNull(response);
+        Assert.assertEquals(totalApiCount, response.getApiCount());
+        Assert.assertEquals(apiCount, response.getApis().size());
+
+        String capturedQuery = queryCaptor.getValue();
+        Assert.assertTrue("Query must contain .example.com term from wildcard SAN",
+                capturedQuery.contains(".example.com"));
+        Assert.assertTrue("Query must contain api1.hello.com term from exact SAN",
+                capturedQuery.contains("api1.hello.com"));
+        Assert.assertTrue("Query must contain api2.hello.com term from exact SAN",
+                capturedQuery.contains("api2.hello.com"));
+    }
+
+    @Test
+    public void testSearchPaginatedAPIsByCertificateWhenSolrReturnsNull()
+            throws APIManagementException, APIPersistenceException {
+        String[] returnRoles = {"admin"};
+        Map<String, Object> returnProperties = new HashMap<>();
+        returnProperties.put("isAdmin", true);
+        returnProperties.put("skipRoles", null);
+
+        Mockito.when(APIUtil.getTenantAdminUserName(Mockito.anyString())).thenReturn("admin");
+        Mockito.when(APIUtil.getFilteredUserRoles(Mockito.anyString())).thenReturn(returnRoles);
+        Mockito.when(APIUtil.getUserProperties(Mockito.anyString())).thenReturn(returnProperties);
+
+        Mockito.when(apiPersistenceInstance.searchAPIsForPublisher(
+                Mockito.any(Organization.class),
+                Mockito.anyString(),
+                Mockito.anyInt(),
+                Mockito.anyInt(),
+                Mockito.any(UserContext.class))).thenReturn(null);
+
+        CertificateMetadataDTO certDTO = new CertificateMetadataDTO();
+        certDTO.setCertificate(CERT_WITH_DNS_SANS);
+        certDTO.setEndpoint("https://simple.example.com/api");
+
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO);
+        APISearchResult response = apiProvider.searchPaginatedAPIsByCertificate(certDTO, "carbon.super", 0, 10);
+
+        Assert.assertNotNull(response);
+        Assert.assertEquals(0, response.getApiCount());
+        Assert.assertTrue(response.getApis().isEmpty());
+    }
+
+    @Test
+    public void testSearchPaginatedAPIsByCertificateUsesEndpointFallbackWhenNoCertContent()
+            throws APIManagementException, APIPersistenceException {
+        String[] returnRoles = {"admin"};
+        Map<String, Object> returnProperties = new HashMap<>();
+        returnProperties.put("isAdmin", true);
+        returnProperties.put("skipRoles", null);
+
+        Mockito.when(APIUtil.getTenantAdminUserName(Mockito.anyString())).thenReturn("admin");
+        Mockito.when(APIUtil.getFilteredUserRoles(Mockito.anyString())).thenReturn(returnRoles);
+        Mockito.when(APIUtil.getUserProperties(Mockito.anyString())).thenReturn(returnProperties);
+
+        PublisherAPISearchResult returnSearchAPIs = new PublisherAPISearchResult();
+        returnSearchAPIs.setPublisherAPIInfoList(createMockPublisherAPIInfoList(2));
+        returnSearchAPIs.setReturnedAPIsCount(2);
+        returnSearchAPIs.setTotalAPIsCount(2);
+
+        ArgumentCaptor<String> queryCaptor = ArgumentCaptor.forClass(String.class);
+        Mockito.when(apiPersistenceInstance.searchAPIsForPublisher(
+                Mockito.any(Organization.class),
+                queryCaptor.capture(),
+                Mockito.anyInt(),
+                Mockito.anyInt(),
+                Mockito.any(UserContext.class))).thenReturn(returnSearchAPIs);
+
+        CertificateMetadataDTO certDTO = new CertificateMetadataDTO();
+        certDTO.setCertificate(CERT_CN_ONLY); // cert with CN=backend.example.com, no SANs
+        certDTO.setEndpoint("https://backend.example.com/api");
+
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO);
+        APISearchResult response = apiProvider.searchPaginatedAPIsByCertificate(certDTO, "carbon.super", 0, 10);
+
+        Assert.assertNotNull(response);
+        Assert.assertEquals(2, response.getApiCount());
+        String capturedQuery = queryCaptor.getValue();
+        Assert.assertTrue("Query must contain backend.example.com from the stored endpoint / CN",
+                capturedQuery.contains("backend.example.com"));
     }
 
     private List<PublisherAPIInfo> createMockPublisherAPIInfoList(int num) {
