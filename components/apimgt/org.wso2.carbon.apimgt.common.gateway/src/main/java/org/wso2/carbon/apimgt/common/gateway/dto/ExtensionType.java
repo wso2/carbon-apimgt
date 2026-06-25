@@ -22,5 +22,6 @@ package org.wso2.carbon.apimgt.common.gateway.dto;
  */
 public enum ExtensionType {
     AUTHENTICATION,
-    THROTTLING
+    THROTTLING,
+    WEBSUB_TOPIC_RESOLVER
 }

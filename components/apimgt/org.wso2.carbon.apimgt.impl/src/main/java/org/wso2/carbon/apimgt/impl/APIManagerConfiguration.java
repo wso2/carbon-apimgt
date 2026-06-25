@@ -61,6 +61,7 @@ import org.wso2.carbon.apimgt.impl.dto.OrgAccessControl;
 import org.wso2.carbon.apimgt.impl.dto.RedisConfig;
 import org.wso2.carbon.apimgt.impl.dto.TenantSharingConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.SolaceConfig;
+import org.wso2.carbon.apimgt.impl.dto.WebSubHubConfig;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.TokenValidationDto;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
@@ -164,6 +165,7 @@ public class APIManagerConfiguration {
     private DistributedThrottleConfig distributedThrottleConfig = new DistributedThrottleConfig();
     private GatewayCleanupSkipList gatewayCleanupSkipList = new GatewayCleanupSkipList();
     private RedisConfig redisConfig = new RedisConfig();
+    private WebSubHubConfig webSubHubConfig = new WebSubHubConfig();
     private SolaceConfig solaceConfig = new SolaceConfig();
     private OrgAccessControl orgAccessControl = new OrgAccessControl();
     public OrgAccessControl getOrgAccessControl() {
@@ -565,6 +567,26 @@ public class APIManagerConfiguration {
                         }
                     }
                 }
+            } else if ("WebSubHubConfig".equals(localName)) {
+                OMElement url = element.getFirstChildWithName(new QName("url"));
+                OMElement type = element.getFirstChildWithName(new QName("type"));
+                OMElement disableTopicContextPrefix = element.getFirstChildWithName(
+                        new QName("disable_topic_context_prefix"));
+                OMElement hubProperties = element.getFirstChildWithName(new QName("WebSubHubProperties"));
+                webSubHubConfig.setUrl(url != null ? url.getText() : null);
+                webSubHubConfig.setType(type != null ? type.getText() : null);
+                if (disableTopicContextPrefix != null) {
+                    webSubHubConfig.setTopicContextPrefixDisabled(
+                            Boolean.parseBoolean(disableTopicContextPrefix.getText()));
+                }
+                if (hubProperties != null) {
+                    Iterator<OMElement> properties = hubProperties.getChildElements();
+                    while (properties.hasNext()) {
+                        OMElement propertyNode = properties.next();
+                        webSubHubConfig.addHubProperty(propertyNode.getLocalName(), propertyNode.getText());
+                    }
+                }
+                webSubHubConfig.setEnabled(true);
             } else if (APIConstants.DISTRIBUTED_THROTTLE_CONFIG.equals(localName)) {
                 OMElement enabledElement = element.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_ENABLED));
                 OMElement typeElement = element.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_TYPE));
@@ -2318,6 +2340,11 @@ public class APIManagerConfiguration {
     public RedisConfig getRedisConfig() {
 
         return redisConfig;
+    }
+
+    public WebSubHubConfig getWebSubHubConfig() {
+
+        return webSubHubConfig;
     }
 
     public DistributedThrottleConfig getDistributedThrottleConfig() {
