@@ -7,6 +7,7 @@ import org.wso2.carbon.apimgt.internal.service.dto.ErrorDTO;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import org.wso2.carbon.apimgt.internal.service.dto.PlatformGatewayAPIKeyDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.UnDeployedAPIRevisionDTO;
 import org.wso2.carbon.apimgt.internal.service.ApisApiService;
 import org.wso2.carbon.apimgt.internal.service.impl.ApisApiServiceImpl;
@@ -67,6 +68,19 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
     public Response apisApiIdGet(@ApiParam(value = "API UUID.",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "application/zip for API Platform gateway format; application/json for APIList." , defaultValue="application/json")@HeaderParam("Accept") String accept) throws APIManagementException{
         return delegate.apisApiIdGet(apiId, accept, securityContext);
+    }
+
+    @GET
+    @Path("/api-keys")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get all REST API keys for platform gateway bulk sync", notes = "Returns all active API-scoped keys for the APIs currently deployed on the authenticated platform gateway. Intended for on-connect backfill by the gateway controller. Authenticated via api-key header (platform gateway registration token). ", response = PlatformGatewayAPIKeyDTO.class, responseContainer = "List", tags={ "Platform Gateway",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "Array of active API keys.", response = PlatformGatewayAPIKeyDTO.class, responseContainer = "List"),
+        @ApiResponse(code = 401, message = "Invalid or missing api-key.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal server error.", response = ErrorDTO.class) })
+    public Response apisApiKeysGet( @NotNull  @ApiParam(value = "Platform gateway registration token." ,required=true)@HeaderParam("api-key") String apiKey) throws APIManagementException{
+        return delegate.apisApiKeysGet(apiKey, securityContext);
     }
 
     @GET
