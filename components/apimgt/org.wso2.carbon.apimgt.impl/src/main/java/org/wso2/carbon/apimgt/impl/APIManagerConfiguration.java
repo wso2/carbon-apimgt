@@ -182,7 +182,7 @@ public class APIManagerConfiguration {
     private String hashingAlgorithm = SHA_256;
     private boolean isTransactionCounterEnabled;
     private static boolean isMCPSupportEnabled = true;
-    private static boolean isMCPEnforceAuthForAllMethods = false;
+    private static boolean isMCPEnforceAuthForAllMethods = true;
     private static String devportalMode = APIConstants.DEVPORTAL_MODE_HYBRID;
     private static volatile boolean isRuntimeReadOnly = false;
 
