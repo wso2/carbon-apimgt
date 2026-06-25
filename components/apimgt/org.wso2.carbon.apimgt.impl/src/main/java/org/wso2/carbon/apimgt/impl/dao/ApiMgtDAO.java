@@ -17341,7 +17341,7 @@ public class ApiMgtDAO {
                                             String paramJSON = gson.toJson(policy.getParameters());
                                             insertOperationPolicyMappingStatement.setInt(1, rs.getInt(1));
                                             insertOperationPolicyMappingStatement
-                                                    .setString(2, clonedPoliciesMap.get(policy.getPolicyId()));
+                                                    .setString(2, clonedPoliciesMap.get(resolvePolicyIdentifier(policy)));
                                             insertOperationPolicyMappingStatement.setString(3, policy.getDirection());
 
                                             try (InputStream paramInputStream = new ByteArrayInputStream(
@@ -22049,7 +22049,8 @@ public class ApiMgtDAO {
                                 String paramJSON = gson.toJson(policy.getParameters());
 
                                 insertOperationPolicyMappingStatement.setInt(1, rs.getInt(1));
-                                insertOperationPolicyMappingStatement.setString(2, clonedPoliciesMap.get(policy.getPolicyId()));
+                                insertOperationPolicyMappingStatement.setString(2,
+                                        clonedPoliciesMap.get(resolvePolicyIdentifier(policy)));
                                 insertOperationPolicyMappingStatement.setString(3, policy.getDirection());
 
                                 try (InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8))) {
@@ -24895,13 +24896,24 @@ public class ApiMgtDAO {
      */
     private OperationPolicyData createPlaceholderPolicyDataForExternalPolicy(String commonPolicyId,
                                                                               String clonedPolicyId,
-                                                                              String organization) {
-        String name = commonPolicyId;
+                                                                              String organization)
+            throws APIManagementException {
+        String resolvedExternalPolicyId = commonPolicyId;
+        if (StringUtils.isBlank(resolvedExternalPolicyId)) {
+            throw new APIManagementException("External policy identifier cannot be empty when creating placeholder " +
+                    "policy data.");
+        }
+        String name = resolvedExternalPolicyId;
         String version = "1.0";
-        int colonIdx = commonPolicyId.indexOf("::");
-        if (colonIdx > 0) {
-            name = commonPolicyId.substring(0, colonIdx);
-            version = commonPolicyId.substring(colonIdx + 2);
+        int colonIdx = resolvedExternalPolicyId.indexOf("::");
+        if (colonIdx >= 0) {
+            name = resolvedExternalPolicyId.substring(0, colonIdx);
+            version = StringUtils.defaultIfBlank(resolvedExternalPolicyId.substring(colonIdx + 2), "1.0");
+        }
+        name = StringUtils.trimToEmpty(name);
+        if (StringUtils.isBlank(name) || "null".equalsIgnoreCase(name)) {
+            throw new APIManagementException("External policy name cannot be empty when creating placeholder " +
+                    "policy data.");
         }
         OperationPolicySpecification spec = new OperationPolicySpecification();
         spec.setName(name);
@@ -25989,7 +26001,7 @@ public class ApiMgtDAO {
                                     + apiUUID + " to URL mapping Id " + template.getId());
                         }
 
-                        operationPolicyMappingStatement.setString(1, updatedPoliciesMap.get(policy.getPolicyId()));
+                        operationPolicyMappingStatement.setString(1, updatedPoliciesMap.get(resolvePolicyIdentifier(policy)));
                         operationPolicyMappingStatement.setString(2, policy.getDirection());
 
                         try (InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8))) {
@@ -26011,6 +26023,9 @@ public class ApiMgtDAO {
                 // Handle operation-level Policy Hub policies (direction 'hub'; no direction in UI, flow inside policy)
                 if (template.getHubPolicies() != null) {
                     for (OperationPolicy policy : template.getHubPolicies()) {
+                        if (policy == null) {
+                            continue;
+                        }
                         handlePolicyCloning(policy, apiUUID, tenantDomain, connection, updatedPoliciesMap,
                                 usedClonedPolicies, toBeClonedPolicyDetails);
                         Gson gson = new Gson();
@@ -26019,7 +26034,7 @@ public class ApiMgtDAO {
                             log.debug("Adding operation hub policy " + policy.getPolicyName() + " for API "
                                     + apiUUID + " to URL mapping Id " + template.getId());
                         }
-                        operationPolicyMappingStatement.setString(1, updatedPoliciesMap.get(policy.getPolicyId()));
+                        operationPolicyMappingStatement.setString(1, updatedPoliciesMap.get(resolvePolicyIdentifier(policy)));
                         operationPolicyMappingStatement.setString(2, APIConstants.OPERATION_SEQUENCE_TYPE_HUB);
                         try (InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8))) {
                             operationPolicyMappingStatement.setBinaryStream(3, paramInputStream, paramJSON.length());
@@ -26051,7 +26066,7 @@ public class ApiMgtDAO {
 
                     apiLevelPolicyMappingStatement.setString(1, apiUUID);
                     apiLevelPolicyMappingStatement.setString(2, null);
-                    apiLevelPolicyMappingStatement.setString(3, updatedPoliciesMap.get(policy.getPolicyId()));
+                    apiLevelPolicyMappingStatement.setString(3, updatedPoliciesMap.get(resolvePolicyIdentifier(policy)));
                     apiLevelPolicyMappingStatement.setString(4, policy.getDirection());
 
                     try (InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8))) {
@@ -26071,6 +26086,9 @@ public class ApiMgtDAO {
             // Handle API-level Policy Hub policies (direction 'hub'; no direction in UI, flow inside policy)
             if (apiHubPolicies != null && !apiHubPolicies.isEmpty()) {
                 for (OperationPolicy policy : apiHubPolicies) {
+                    if (policy == null) {
+                        continue;
+                    }
                     handlePolicyCloning(policy, apiUUID, tenantDomain, connection, updatedPoliciesMap,
                             usedClonedPolicies, toBeClonedPolicyDetails);
                     Gson gson = new Gson();
@@ -26080,7 +26098,7 @@ public class ApiMgtDAO {
                     }
                     apiLevelPolicyMappingStatement.setString(1, apiUUID);
                     apiLevelPolicyMappingStatement.setString(2, null);
-                    apiLevelPolicyMappingStatement.setString(3, updatedPoliciesMap.get(policy.getPolicyId()));
+                    apiLevelPolicyMappingStatement.setString(3, updatedPoliciesMap.get(resolvePolicyIdentifier(policy)));
                     apiLevelPolicyMappingStatement.setString(4, APIConstants.OPERATION_SEQUENCE_TYPE_HUB);
                     try (InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8))) {
                         apiLevelPolicyMappingStatement.setBinaryStream(5, paramInputStream, paramJSON.length());
@@ -26324,7 +26342,7 @@ public class ApiMgtDAO {
 
                 statement.setString(1, apiUUID);
                 statement.setString(2, revisionUUID);
-                statement.setString(3, updatedPoliciesMap.get(policy.getPolicyId()));
+                statement.setString(3, updatedPoliciesMap.get(resolvePolicyIdentifier(policy)));
                 statement.setString(4, policy.getDirection());
 
                 try (InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8))) {
@@ -26353,12 +26371,13 @@ public class ApiMgtDAO {
                                      Map<String, String> updatedPoliciesMap, Set<String> usedClonedPolicies,
                                      List<ClonePolicyMetadataDTO> toBeClonedPolicyDetails) throws SQLException, APIManagementException {
 
-        if (!updatedPoliciesMap.keySet().contains(policy.getPolicyId())) {
+        String policyIdentifier = resolvePolicyIdentifier(policy);
+        if (!updatedPoliciesMap.keySet().contains(policyIdentifier)) {
             //Check whether API specific policies available
             OperationPolicyData existingPolicy =
-                    getAPISpecificOperationPolicyByPolicyID(connection, policy.getPolicyId(), apiUUID, tenantDomain,
+                    getAPISpecificOperationPolicyByPolicyID(connection, policyIdentifier, apiUUID, tenantDomain,
                             false);
-            String clonedPolicyId = policy.getPolicyId();
+            String clonedPolicyId = policyIdentifier;
             if (existingPolicy != null) {
                 if (existingPolicy.isClonedPolicy()) {
                     usedClonedPolicies.add(clonedPolicyId);
@@ -26367,12 +26386,12 @@ public class ApiMgtDAO {
                 // Even though the policy ID attached is not in the API specific policy list,
                 // it can be a common policy and we need to verify that it has not been previously cloned
                 // for the API before cloning again.
-                clonedPolicyId = getClonedPolicyIdForCommonPolicyId(connection, policy.getPolicyId(), apiUUID);
+                clonedPolicyId = getClonedPolicyIdForCommonPolicyId(connection, policyIdentifier, apiUUID);
                 if (clonedPolicyId == null) {
                     clonedPolicyId = UUID.randomUUID().toString();
                     ClonePolicyMetadataDTO toBeClonedSinglePolicyData = new ClonePolicyMetadataDTO();
                     toBeClonedSinglePolicyData.setClonedPolicyUUID(clonedPolicyId);
-                    toBeClonedSinglePolicyData.setCurrentPolicyUUID(policy.getPolicyId());
+                    toBeClonedSinglePolicyData.setCurrentPolicyUUID(policyIdentifier);
                     toBeClonedPolicyDetails.add(toBeClonedSinglePolicyData);
                 }
                 usedClonedPolicies.add(clonedPolicyId);
@@ -26382,8 +26401,27 @@ public class ApiMgtDAO {
             // Updated policies map will record the updated policy ID for the used policy ID.
             // If the policy has been cloned to the API specific policy list, we need to use the
             // updated policy Id.
-            updatedPoliciesMap.put(policy.getPolicyId(), clonedPolicyId);
+            updatedPoliciesMap.put(policyIdentifier, clonedPolicyId);
         }
+    }
+
+    private String resolvePolicyIdentifier(OperationPolicy policy) throws APIManagementException {
+        String policyIdentifier = policy.getPolicyId();
+        if (StringUtils.isBlank(policyIdentifier)) {
+            String policyName = StringUtils.trimToEmpty(policy.getPolicyName());
+            if (StringUtils.isBlank(policyName) || "null".equalsIgnoreCase(policyName)) {
+                throw new APIManagementException("Operation policy name cannot be empty when policyId is missing.");
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("Policy ID is blank for policy: " + policyName
+                        + ". Using name::version format.");
+            }
+            // Platform Gateway external/hub policies can come without a policyId.
+            // Use incoming version when available, and only then default the version.
+            String policyVersion = StringUtils.defaultIfBlank(policy.getPolicyVersion(), "1.0");
+            policyIdentifier = policyName + "::" + StringUtils.trim(policyVersion);
+        }
+        return policyIdentifier;
     }
 
     /**
@@ -26612,7 +26650,7 @@ public class ApiMgtDAO {
                         }
 
                         operationPolicyMappingStatement.setInt(1, urlMapping.getId());
-                        operationPolicyMappingStatement.setString(2, clonedPolicyMap.get(policy.getPolicyId()));
+                        operationPolicyMappingStatement.setString(2, clonedPolicyMap.get(resolvePolicyIdentifier(policy)));
                         operationPolicyMappingStatement.setString(3, policy.getDirection());
 
                         try (InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8))) {
@@ -26629,6 +26667,9 @@ public class ApiMgtDAO {
                 // Operation-level Policy Hub policies
                 if (urlMapping.getHubPolicies() != null) {
                     for (OperationPolicy policy : urlMapping.getHubPolicies()) {
+                        if (policy == null) {
+                            continue;
+                        }
                         handlePolicyCloningWhenRevisioning(policy, apiRevision.getApiUUID(),
                                 apiRevision.getRevisionUUID(), clonedPolicyMap, toBeClonedPolicyDetails);
                         Gson gson = new Gson();
@@ -26638,7 +26679,7 @@ public class ApiMgtDAO {
                                     + apiRevision.getRevisionUUID());
                         }
                         operationPolicyMappingStatement.setInt(1, urlMapping.getId());
-                        operationPolicyMappingStatement.setString(2, clonedPolicyMap.get(policy.getPolicyId()));
+                        operationPolicyMappingStatement.setString(2, clonedPolicyMap.get(resolvePolicyIdentifier(policy)));
                         operationPolicyMappingStatement.setString(3, APIConstants.OPERATION_SEQUENCE_TYPE_HUB);
                         try (InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8))) {
                             operationPolicyMappingStatement.setBinaryStream(4, paramInputStream, paramJSON.length());
@@ -26668,7 +26709,7 @@ public class ApiMgtDAO {
 
                 apiLevelPolicyMappingStatement.setString(1, apiRevision.getApiUUID());
                 apiLevelPolicyMappingStatement.setString(2, apiRevision.getRevisionUUID());
-                apiLevelPolicyMappingStatement.setString(3, clonedPolicyMap.get(policy.getPolicyId()));
+                apiLevelPolicyMappingStatement.setString(3, clonedPolicyMap.get(resolvePolicyIdentifier(policy)));
                 apiLevelPolicyMappingStatement.setString(4, policy.getDirection());
 
                 try (InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8))) {
@@ -26685,6 +26726,9 @@ public class ApiMgtDAO {
             // API-level Policy Hub policies
             List<OperationPolicy> apiHubPolicies = getAPIHubPolicyMapping(apiRevision.getApiUUID(), null, connection);
             for (OperationPolicy policy : apiHubPolicies) {
+                if (policy == null) {
+                    continue;
+                }
                 handlePolicyCloningWhenRevisioning(policy, apiRevision.getApiUUID(), apiRevision.getRevisionUUID(),
                         clonedPolicyMap, toBeClonedPolicyDetails);
                 Gson gson = new Gson();
@@ -26695,7 +26739,7 @@ public class ApiMgtDAO {
                 }
                 apiLevelPolicyMappingStatement.setString(1, apiRevision.getApiUUID());
                 apiLevelPolicyMappingStatement.setString(2, apiRevision.getRevisionUUID());
-                apiLevelPolicyMappingStatement.setString(3, clonedPolicyMap.get(policy.getPolicyId()));
+                apiLevelPolicyMappingStatement.setString(3, clonedPolicyMap.get(resolvePolicyIdentifier(policy)));
                 apiLevelPolicyMappingStatement.setString(4, APIConstants.OPERATION_SEQUENCE_TYPE_HUB);
                 try (InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8))) {
                     apiLevelPolicyMappingStatement.setBinaryStream(5, paramInputStream, paramJSON.length());
@@ -26730,22 +26774,25 @@ public class ApiMgtDAO {
      * @param toBeClonedPolicyDetails List of policies to be cloned
      */
     private void handlePolicyCloningWhenRevisioning(OperationPolicy policy, String apiUUID, String revisionUUID,
-                                                    Map<String, String> clonedPolicyMap, List<ClonePolicyMetadataDTO> toBeClonedPolicyDetails) {
+                                                    Map<String, String> clonedPolicyMap,
+                                                    List<ClonePolicyMetadataDTO> toBeClonedPolicyDetails)
+            throws APIManagementException {
 
-        if (!clonedPolicyMap.keySet().contains(policy.getPolicyId())) {
+        String policyIdentifier = resolvePolicyIdentifier(policy);
+        if (!clonedPolicyMap.keySet().contains(policyIdentifier)) {
             // Since we are creating a new revision, if the policy is not found in the policy map,
             // we have to clone the policy.
             String clonedPolicyId = UUID.randomUUID().toString();
             ClonePolicyMetadataDTO toBeClonedSinglePolicyData = new ClonePolicyMetadataDTO();
             toBeClonedSinglePolicyData.setClonedPolicyUUID(clonedPolicyId);
-            toBeClonedSinglePolicyData.setCurrentPolicyUUID(policy.getPolicyId());
+            toBeClonedSinglePolicyData.setCurrentPolicyUUID(policyIdentifier);
             toBeClonedSinglePolicyData.setApiUUID(apiUUID);
             toBeClonedSinglePolicyData.setRevisionUUID(revisionUUID);
             toBeClonedPolicyDetails.add(toBeClonedSinglePolicyData);
 
             // policy ID is stored in a map as same policy can be applied to multiple operations
             // and we only need to create the policy once.
-            clonedPolicyMap.put(policy.getPolicyId(), clonedPolicyId);
+            clonedPolicyMap.put(policyIdentifier, clonedPolicyId);
         }
     }
 
