@@ -905,13 +905,30 @@ public class PublisherCommonUtils {
             if (!isGraphql) {
                 Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(newDefinition);
 
-                //set operation policies from the original API Payload
+                // Set operation policies from the original API payload.
+                if (log.isDebugEnabled()) {
+                    log.debug("Setting operation policies and hub policies from original API payload for API update: "
+                            + apiToUpdate.getUuid());
+                }
                 Set<URITemplate> uriTemplatesFromPayload = apiToUpdate.getUriTemplates();
                 Map<String, List<OperationPolicy>> operationPoliciesPerURITemplate = new HashMap<>();
+                Map<String, List<OperationPolicy>> operationHubPoliciesPerURITemplate = new HashMap<>();
                 for (URITemplate uriTemplate : uriTemplatesFromPayload) {
                     if (!uriTemplate.getOperationPolicies().isEmpty()) {
                         String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
                         operationPoliciesPerURITemplate.put(key, uriTemplate.getOperationPolicies());
+                    }
+                    if (uriTemplate.getHubPolicies() != null && !uriTemplate.getHubPolicies().isEmpty()) {
+                        List<OperationPolicy> filteredHubPolicies = new ArrayList<>();
+                        for (OperationPolicy hubPolicy : uriTemplate.getHubPolicies()) {
+                            if (hubPolicy != null) {
+                                filteredHubPolicies.add(hubPolicy);
+                            }
+                        }
+                        if (!filteredHubPolicies.isEmpty()) {
+                            String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
+                            operationHubPoliciesPerURITemplate.put(key, filteredHubPolicies);
+                        }
                     }
                 }
 
@@ -919,6 +936,9 @@ public class PublisherCommonUtils {
                     String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
                     if (operationPoliciesPerURITemplate.containsKey(key)) {
                         uriTemplate.setOperationPolicies(operationPoliciesPerURITemplate.get(key));
+                    }
+                    if (operationHubPoliciesPerURITemplate.containsKey(key)) {
+                        uriTemplate.setHubPolicies(operationHubPoliciesPerURITemplate.get(key));
                     }
                 }
 
