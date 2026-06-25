@@ -2443,7 +2443,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 if (synapsePolicyDefinitionFileInputStream != null) {
                     String defFileName = synapsePolicyDefinitionFileDetail.getDataHandler().getName();
                     String defFileContentType = FilenameUtils.getExtension(defFileName);
-                    if (org.apache.commons.lang3.StringUtils.isBlank(defFileContentType)) {
+                    if (StringUtils.isBlank(defFileContentType)) {
                         defFileContentType = synapsePolicyDefinitionFileDetail.getContentType().toString();
                     }
                     if (!APIConstants.J2_CONTENT_TYPE.equals(defFileContentType)) {
