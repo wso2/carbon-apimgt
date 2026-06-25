@@ -46,6 +46,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.Authenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
+import org.wso2.carbon.apimgt.gateway.utils.MCPUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
@@ -288,7 +289,11 @@ public class OAuthAuthenticator implements Authenticator {
                 }
             }
 
-            authenticationScheme = getAPIKeyValidator().getResourceAuthenticationScheme(synCtx);
+            if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(apiType)) {
+                authenticationScheme = MCPUtils.getResourceAuthenticationSchemeForMCP(synCtx, getAPIKeyValidator());
+            } else {
+                authenticationScheme = getAPIKeyValidator().getResourceAuthenticationScheme(synCtx);
+            }
         } catch (APISecurityException ex) {
             return new AuthenticationResponse(false, isMandatory, true, ex.getErrorCode(), ex.getMessage());
         }
