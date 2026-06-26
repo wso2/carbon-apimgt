@@ -7952,9 +7952,12 @@ public final class APIUtil {
      */
     public static boolean compareRoleList(String[] userRoleList, String accessControlRole) {
         if (userRoleList != null) {
+            boolean caseSensitive = Boolean.parseBoolean(System.getProperty(APIConstants.CASE_SENSITIVE_CHECK_PATH));
             for (String userRole : userRoleList) {
-                if (userRole != null && userRole.equalsIgnoreCase(accessControlRole)) {
-                    return true;
+                if (userRole != null) {
+                    if (caseSensitive ? userRole.equals(accessControlRole) : userRole.equalsIgnoreCase(accessControlRole)) {
+                        return true;
+                    }
                 }
             }
         }
