@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.internal.service.websocket;
 
 import com.google.gson.JsonSyntaxException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -26,14 +27,14 @@ import org.wso2.carbon.apimgt.api.PlatformGatewayDeploymentEventService;
 import org.wso2.carbon.apimgt.api.model.PlatformGatewayDeploymentEventRecord;
 import org.wso2.carbon.apimgt.impl.dao.PlatformGatewayArtifactDAO;
 import org.wso2.carbon.apimgt.impl.dao.PlatformGatewayDAO;
+import org.wso2.carbon.apimgt.impl.dto.ConnectGatewayConfig;
+import org.wso2.carbon.apimgt.impl.dto.PlatformGatewayConnectConfig;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.service.PlatformGatewayServiceImpl;
+import org.wso2.carbon.apimgt.impl.utils.PlatformGatewayTokenUtil;
 import org.wso2.carbon.apimgt.internal.service.dto.GatewayDeploymentStatusAcknowledgmentDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.GatewayDeploymentStatusAcknowledgmentListDTO;
 import org.wso2.carbon.apimgt.internal.service.impl.NotifyApiDeploymentStatusApiServiceImpl;
-import org.wso2.carbon.apimgt.impl.service.PlatformGatewayServiceImpl;
-import org.wso2.carbon.apimgt.impl.utils.PlatformGatewayTokenUtil;
-
-import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -65,9 +66,12 @@ import javax.websocket.server.ServerEndpoint;
  * <p>
  * The gateway must send the registration token in the {@code api-key} HTTP header when opening
  * the WebSocket. The token is verified via {@link PlatformGatewayTokenUtil#verifyToken(String)}.
- * On success, the connection is associated with the gateway and the gateway's active status is
- * set to true; on close it is set to false. On verification failure, the connection is closed
- * with code 4401 (Unauthorized).
+ * If not found in the database, the token is checked against
+ * {@code [[apim.platform_gateway.connect]]} {@code registration_token} (deployment.toml); when
+ * it matches, a new platform gateway is created and the connection is accepted. On success, the
+ * connection is associated with the gateway and the gateway's active status is set to true; on
+ * close it is set to false. On verification failure, the connection is closed with code 4401
+ * (Unauthorized).
  */
 @ServerEndpoint(
         value = "/ws/gateways/connect",
@@ -148,8 +152,70 @@ public class GatewayConnectEndpoint {
         }
 
         if (gateway == null) {
-            closeWithUnauthorized(session, "Invalid or expired API key");
-            return;
+            log.info("Gateway WebSocket token not in DB; checking [[apim.platform_gateway.connect]] config");
+            ConnectGatewayConfig matchedEntry = null;
+            PlatformGatewayConnectConfig connectConfig = null;
+            try {
+                connectConfig = ServiceReferenceHolder.getInstance()
+                        .getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                        .getPlatformGatewayConnectConfig();
+                if (connectConfig != null) {
+                    List<ConnectGatewayConfig> list = connectConfig.getConnectGateways();
+                    if (list == null || list.isEmpty()) {
+                        int declared = connectConfig.getDeclaredConnectEntryCount();
+                        if (declared > 0) {
+                            log.error(declared + " [[apim.platform_gateway.connect]] entr"
+                                    + (declared == 1 ? "y" : "ies")
+                                    + " in api-manager.xml but none loaded at runtime; "
+                                    + "check registration_token and url, then restart APIM");
+                        } else {
+                            log.info("No [[apim.platform_gateway.connect]] entries loaded; ensure deployment.toml "
+                                    + "defines connect gateways and api-manager.xml was regenerated");
+                        }
+                    } else {
+                        for (ConnectGatewayConfig entry : list) {
+                            if (entry != null && StringUtils.isNotBlank(entry.getRegistrationToken())
+                                    && PlatformGatewayTokenUtil.constantTimeEquals(
+                                            entry.getRegistrationToken(), apiKey)) {
+                                matchedEntry = entry;
+                                break;
+                            }
+                        }
+                        if (matchedEntry == null) {
+                            log.info("No [[apim.platform_gateway.connect]] entry matched api-key; check "
+                                    + "registration_token in deployment.toml");
+                        }
+                    }
+                } else {
+                    log.info("Platform gateway connect config is null; ensure api-manager.xml has "
+                            + "PlatformGatewayConnectConfiguration (from deployment.toml "
+                            + "apim.platform_gateway.connect)");
+                }
+            } catch (Exception e) {
+                log.warn("Could not get platform gateway connect config: " + e.getMessage(), e);
+            }
+            if (matchedEntry != null && connectConfig != null) {
+                String tokenId = PlatformGatewayTokenUtil.parseTokenId(matchedEntry.getRegistrationToken());
+                String connectGatewayId = PlatformGatewayServiceImpl.resolveConnectGatewayId(tokenId);
+                PlatformGatewayServiceImpl.ensurePlatformGatewayFromConnectToken(
+                        connectConfig, connectGatewayId, matchedEntry);
+                try {
+                    gateway = PlatformGatewayTokenUtil.verifyToken(apiKey);
+                } catch (APIManagementException | NoSuchAlgorithmException e) {
+                    log.warn("Re-verify after connect-with-token failed: " + e.getMessage());
+                    closeWithUnauthorized(session, "Invalid or expired API key");
+                    return;
+                }
+                if (gateway == null) {
+                    log.warn("Connect-with-token gateway creation failed; ensure registration_token is "
+                            + "tokenId.plainToken format and url is set in [[apim.platform_gateway.connect]]");
+                }
+            }
+            if (gateway == null) {
+                log.info("Gateway WebSocket connection rejected: token did not match any gateway or config");
+                closeWithUnauthorized(session, "Invalid or expired API key");
+                return;
+            }
         }
 
         session.getUserProperties().put(GATEWAY_PROPERTY, gateway);

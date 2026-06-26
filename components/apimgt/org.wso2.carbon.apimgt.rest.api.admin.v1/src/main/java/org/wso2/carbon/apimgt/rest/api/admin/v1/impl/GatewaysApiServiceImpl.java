@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.service.PlatformGatewayServiceImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.GatewaysApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CreatePlatformGatewayRequestDTO;
@@ -444,8 +445,7 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
                     description != null ? gateway.getDescription() : null);
         }
         GatewayVisibilityPermissionConfigurationDTO permissions = null;
-        APIAdmin apiAdmin = new APIAdminImpl();
-        Environment env = apiAdmin.getEnvironment(organization, gateway.getId());
+        Environment env = getStoredPlatformGatewayEnvironment(organization, gateway.getId());
         if (env != null) {
             permissions = env.getPermissions();
         }
@@ -486,8 +486,7 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
 
         // Fetch permissions from environment
         GatewayVisibilityPermissionConfigurationDTO permissions = null;
-        APIAdmin apiAdmin = new APIAdminImpl();
-        Environment env = apiAdmin.getEnvironment(organization, gateway.getId());
+        Environment env = getStoredPlatformGatewayEnvironment(organization, gateway.getId());
         if (env != null) {
             permissions = env.getPermissions();
         }
@@ -591,7 +590,9 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
             UpdatePlatformGatewayRequestPermissionsDTO requestPermissions, String newDisplayName, String newDescription)
             throws APIManagementException {
         APIAdmin apiAdmin = new APIAdminImpl();
-        Environment existingEnvironment = apiAdmin.getEnvironment(organization, gateway.getId());
+        String storageOrg = PlatformGatewayServiceImpl.resolveStorageOrganizationId(organization, gateway.getId());
+        Environment existingEnvironment =
+                storageOrg != null ? apiAdmin.getEnvironment(storageOrg, gateway.getId()) : null;
         if (existingEnvironment == null) {
             log.warn("Environment not found for platform gateway ID: " + gateway.getId() + ", skipping environment update");
             return;
@@ -624,7 +625,16 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
             }
             existingEnvironment.setPermissions(visibility);
         }
-        apiAdmin.updateEnvironment(organization, existingEnvironment);
+        apiAdmin.updateEnvironment(storageOrg, existingEnvironment);
+    }
+
+    private Environment getStoredPlatformGatewayEnvironment(String organization, String gatewayId)
+            throws APIManagementException {
+        String storageOrg = PlatformGatewayServiceImpl.resolveStorageOrganizationId(organization, gatewayId);
+        if (storageOrg == null) {
+            return null;
+        }
+        return new APIAdminImpl().getEnvironment(storageOrg, gatewayId);
     }
 
     /** Serialize properties map to JSON string for DB storage; null if empty/null. */
