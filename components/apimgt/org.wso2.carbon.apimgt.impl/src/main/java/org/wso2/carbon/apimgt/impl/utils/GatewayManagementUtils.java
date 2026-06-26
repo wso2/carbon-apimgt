@@ -18,19 +18,21 @@
 
 package org.wso2.carbon.apimgt.impl.utils;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.GatewayManagementDAO;
+import org.wso2.carbon.apimgt.impl.dto.ConnectGatewayConfig;
 import org.wso2.carbon.apimgt.impl.dto.GatewayNotificationConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.PlatformGatewayConnectConfig;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.service.PlatformGatewayServiceImpl;
 
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -38,7 +40,7 @@ import java.util.List;
  * Provides centralized methods for gateway status calculation and data cleanup operations.
  */
 public class GatewayManagementUtils {
-    
+
     private static final Log log = LogFactory.getLog(GatewayManagementUtils.class);
 
     /**
@@ -78,13 +80,13 @@ public class GatewayManagementUtils {
             long currentTime = Instant.now().toEpochMilli();
             GatewayNotificationConfiguration configuration = ServiceReferenceHolder.getInstance()
                     .getAPIManagerConfigurationService().getAPIManagerConfiguration().getGatewayNotificationConfiguration();
-            long retentionThreshold = currentTime - 
+            long retentionThreshold = currentTime -
                     (configuration.getGatewayCleanupConfiguration().getDataRetentionPeriodSeconds() * 1000L);
             Timestamp retentionTimestamp = new Timestamp(retentionThreshold);
 
             GatewayManagementDAO gatewayManagementDAO = GatewayManagementDAO.getInstance();
             int deletedCount = gatewayManagementDAO.deleteOldGatewayRecords(retentionTimestamp);
-            
+
             if (deletedCount > 0) {
                 log.info("Gateway cleanup completed - Deleted: " + deletedCount);
             }
@@ -99,6 +101,45 @@ public class GatewayManagementUtils {
     }
 
     /**
+     * Validates {@code [[apim.platform_gateway.connect]]} entries.
+     *
+     * @return validation error messages; empty when valid
+     */
+    public static List<String> validateConnectGatewayEntries(List<ConnectGatewayConfig> connectGateways) {
+        if (connectGateways == null || connectGateways.isEmpty()) {
+            return Collections.emptyList();
+        }
+        String sep = PlatformGatewayTokenUtil.COMBINED_TOKEN_SEPARATOR;
+        List<String> errors = new ArrayList<>();
+        int index = 0;
+        for (ConnectGatewayConfig entry : connectGateways) {
+            if (entry == null) {
+                continue;
+            }
+            index++;
+            String token = entry.getRegistrationToken();
+            String prefix = "[[apim.platform_gateway.connect]] entry " + index + ": ";
+            if (StringUtils.isBlank(token)) {
+                errors.add(prefix + "mandatory 'registration_token' is missing");
+                if (StringUtils.isBlank(entry.getUrl())) {
+                    errors.add(prefix + "mandatory 'url' is missing (base URL where the gateway will be accessible, "
+                            + "e.g. https://host:8243)");
+                }
+                continue;
+            }
+            if (StringUtils.isBlank(entry.getUrl())) {
+                errors.add(prefix + "mandatory 'url' is missing (base URL where the gateway will be accessible, "
+                        + "e.g. https://host:8243)");
+            }
+            int idx = token.indexOf(sep);
+            if (idx <= 0 || idx >= token.length() - 1) {
+                errors.add(prefix + "invalid registration_token format (expected tokenId" + sep + "plainToken)");
+            }
+        }
+        return errors;
+    }
+
+    /**
      * Validates {@code [[apim.platform_gateway.connect]]} entries at startup when configured.
      * Gateway records are created lazily on first WebSocket connect, not at startup.
      */
@@ -110,37 +151,22 @@ public class GatewayManagementUtils {
             if (config == null) {
                 return;
             }
-            List<org.wso2.carbon.apimgt.impl.dto.ConnectGatewayConfig> connectGateways = config.getConnectGateways();
-            if (connectGateways == null || connectGateways.isEmpty()) {
+            List<ConnectGatewayConfig> connectGateways = config.getConnectGateways();
+            int declaredConnectEntryCount = config.getDeclaredConnectEntryCount();
+            if (declaredConnectEntryCount == 0
+                    && (connectGateways == null || connectGateways.isEmpty())) {
                 return;
             }
-            String sep = PlatformGatewayTokenUtil.COMBINED_TOKEN_SEPARATOR;
-            List<String> errors = new ArrayList<>();
-            int index = 0;
-            for (org.wso2.carbon.apimgt.impl.dto.ConnectGatewayConfig entry : connectGateways) {
-                if (entry == null) {
-                    continue;
-                }
-                index++;
-                String token = entry.getRegistrationToken();
-                String prefix = "[[apim.platform_gateway.connect]] entry " + index + ": ";
-                if (org.apache.commons.lang3.StringUtils.isBlank(token)) {
-                    errors.add(prefix + "mandatory 'registration_token' is missing");
-                    if (org.apache.commons.lang3.StringUtils.isBlank(entry.getUrl())) {
-                        errors.add(prefix + "mandatory 'url' is missing (base URL where the gateway will be accessible, "
-                                + "e.g. https://host:8243)");
-                    }
-                    continue;
-                }
-                if (org.apache.commons.lang3.StringUtils.isBlank(entry.getUrl())) {
-                    errors.add(prefix + "mandatory 'url' is missing (base URL where the gateway will be accessible, "
-                            + "e.g. https://host:8243)");
-                }
-                int idx = token.indexOf(sep);
-                if (idx <= 0 || idx >= token.length() - 1) {
-                    errors.add(prefix + "invalid registration_token format (expected tokenId" + sep + "plainToken)");
-                }
+            if (declaredConnectEntryCount > 0
+                    && (connectGateways == null || connectGateways.isEmpty())) {
+                throw new IllegalArgumentException(
+                        "Platform gateway connect config validation failed at server startup. "
+                                + declaredConnectEntryCount + " [[apim.platform_gateway.connect]] "
+                                + "entr" + (declaredConnectEntryCount == 1 ? "y" : "ies")
+                                + " in api-manager.xml but none were loaded; ensure each entry includes "
+                                + "registration_token and url.");
             }
+            List<String> errors = validateConnectGatewayEntries(connectGateways);
             if (!errors.isEmpty()) {
                 for (String err : errors) {
                     log.error(err);
@@ -154,7 +180,6 @@ public class GatewayManagementUtils {
                         + " gateway(s); they can register on first connect "
                         + "(organization defaults to carbon.super when not set in toml).");
             }
-            PlatformGatewayServiceImpl.ensurePlatformGatewayFromConfigOnStartup(config);
         } catch (IllegalArgumentException e) {
             throw e;
         } catch (Exception e) {
