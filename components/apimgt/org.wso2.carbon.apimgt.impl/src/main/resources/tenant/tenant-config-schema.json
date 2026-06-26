@@ -1355,6 +1355,45 @@
       "examples": [
         true, false
       ]
+    },
+    "NetworkSecurityAccessControl": {
+      "$id": "#/properties/NetworkSecurityAccessControl",
+      "type": "object",
+      "title": "NetworkSecurityAccessControl schema",
+      "description": "Tenant-level network security access control. Activated when this key is present.",
+      "default": {},
+      "properties": {
+        "Mode": {
+          "$id": "#/properties/NetworkSecurityAccessControl/properties/Mode",
+          "type": "string",
+          "title": "Mode schema",
+          "description": "'allow' — only hosts matching the Hosts list are permitted; others are blocked. 'deny' — hosts matching the Hosts list are blocked; others are permitted.",
+          "enum": ["allow", "deny"],
+          "examples": ["allow", "deny"]
+        },
+        "Hosts": {
+          "$id": "#/properties/NetworkSecurityAccessControl/properties/Hosts",
+          "type": "array",
+          "title": "Hosts schema",
+          "description": "Wildcard host patterns. In 'allow' mode these are permitted and bypass BlockPrivateNetworkAccess. In 'deny' mode these are blocked.",
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "examples": [
+            ["*.mycompany.com", "trustedpartner.io"]
+          ]
+        },
+        "BlockPrivateNetworkAccess": {
+          "$id": "#/properties/NetworkSecurityAccessControl/properties/BlockPrivateNetworkAccess",
+          "type": "boolean",
+          "title": "BlockPrivateNetworkAccess schema",
+          "description": "When true, blocks outbound requests resolving to private/reserved IP ranges. Hosts matched by the Hosts list are exempt.",
+          "default": false,
+          "examples": [true, false]
+        }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": true

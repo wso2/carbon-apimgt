@@ -336,6 +336,25 @@ public class ImportUtils {
             // Get the endpoint config object updated
             APIUtil.validateAPIEndpointConfig(importedApiDTO.getEndpointConfig(), importedApiDTO.getType().toString(),
                     importedApiDTO.getName());
+            if (importedApiDTO.getEndpointConfig() instanceof Map) {
+                org.json.JSONObject endpointConfigObj =
+                        new org.json.JSONObject((Map) importedApiDTO.getEndpointConfig());
+                if (!APIConstants.ENDPOINT_TYPE_DEFAULT.equalsIgnoreCase(
+                        endpointConfigObj.optString(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                    ArrayList<String> endpointURLs = new ArrayList<>();
+                    APIUtil.extractURLsFromEndpointConfig(endpointConfigObj,
+                            APIConstants.API_DATA_PRODUCTION_ENDPOINTS, endpointURLs);
+                    APIUtil.extractURLsFromEndpointConfig(endpointConfigObj,
+                            APIConstants.API_DATA_SANDBOX_ENDPOINTS, endpointURLs);
+                    APIUtil.extractURLsFromEndpointConfig(endpointConfigObj,
+                            APIConstants.ENDPOINT_PRODUCTION_FAILOVERS, endpointURLs);
+                    APIUtil.extractURLsFromEndpointConfig(endpointConfigObj,
+                            APIConstants.ENDPOINT_SANDBOX_FAILOVERS, endpointURLs);
+                    for (String endpointURL : endpointURLs) {
+                        APIUtil.validateRemoteURL(endpointURL, tenantDomain);
+                    }
+                }
+            }
 
             API targetApi = retrieveApiToOverwrite(importedApiDTO.getName(), importedApiDTO.getVersion(),
                     currentTenantDomain, apiProvider, Boolean.TRUE, organization);
@@ -818,6 +837,23 @@ public class ImportUtils {
                     }
                     Backend oldBackend = existingBackends.get(0);
                     Backend importedBackend = importedBackends.get(0);
+                    org.json.JSONObject importedConfig =
+                            new org.json.JSONObject(importedBackend.getEndpointConfig());
+                    if (!APIConstants.ENDPOINT_TYPE_DEFAULT.equalsIgnoreCase(
+                            importedConfig.optString(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                        ArrayList<String> endpointURLs = new ArrayList<>();
+                        APIUtil.extractURLsFromEndpointConfig(importedConfig,
+                                APIConstants.API_DATA_PRODUCTION_ENDPOINTS, endpointURLs);
+                        APIUtil.extractURLsFromEndpointConfig(importedConfig,
+                                APIConstants.API_DATA_SANDBOX_ENDPOINTS, endpointURLs);
+                        APIUtil.extractURLsFromEndpointConfig(importedConfig,
+                                APIConstants.ENDPOINT_PRODUCTION_FAILOVERS, endpointURLs);
+                        APIUtil.extractURLsFromEndpointConfig(importedConfig,
+                                APIConstants.ENDPOINT_SANDBOX_FAILOVERS, endpointURLs);
+                        for (String endpointURL : endpointURLs) {
+                            APIUtil.validateRemoteURL(endpointURL, tenantDomain);
+                        }
+                    }
                     Backend backend = new Backend(oldBackend);
                     backend.setEndpointConfig(importedBackend.getEndpointConfig());
                     String importedDefinition = importedBackend.getDefinition();
@@ -875,6 +911,22 @@ public class ImportUtils {
 
                     final JSONObject endpointObject =
                             (JSONObject) new JSONParser().parse(backend.getEndpointConfig());
+                    org.json.JSONObject endpointConfigObj = new org.json.JSONObject((Map) endpointObject);
+                    if (!APIConstants.ENDPOINT_TYPE_DEFAULT.equalsIgnoreCase(
+                            endpointConfigObj.optString(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                        ArrayList<String> endpointURLs = new ArrayList<>();
+                        APIUtil.extractURLsFromEndpointConfig(endpointConfigObj,
+                                APIConstants.API_DATA_PRODUCTION_ENDPOINTS, endpointURLs);
+                        APIUtil.extractURLsFromEndpointConfig(endpointConfigObj,
+                                APIConstants.API_DATA_SANDBOX_ENDPOINTS, endpointURLs);
+                        APIUtil.extractURLsFromEndpointConfig(endpointConfigObj,
+                                APIConstants.ENDPOINT_PRODUCTION_FAILOVERS, endpointURLs);
+                        APIUtil.extractURLsFromEndpointConfig(endpointConfigObj,
+                                APIConstants.ENDPOINT_SANDBOX_FAILOVERS, endpointURLs);
+                        for (String endpointURL : endpointURLs) {
+                            APIUtil.validateRemoteURL(endpointURL, tenantDomain);
+                        }
+                    }
                     final Map<String, Object> endpointConfigMap =
                             (Map<String, Object>) endpointObject;
 
