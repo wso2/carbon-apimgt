@@ -29,7 +29,8 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
  * a message property. This interceptor calls {@link PrivilegedCarbonContext#endTenantFlow()}
  * so the tenant flow started there is properly closed and the thread-local is cleared.
  * {@link #handleFault(Message)} runs on fault responses so cleanup also occurs when
- * an exception is thrown after the auth interceptor started the tenant flow.
+ * an exception is thrown after the auth interceptor started the tenant flow. Registered as a
+ * CXF out-interceptor ({@code jaxrs.outInterceptors}) so it runs after every request completes.
  */
 public class PlatformGatewayTenantFlowCleanupInterceptor extends AbstractPhaseInterceptor<Message> {
 

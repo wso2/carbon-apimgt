@@ -105,7 +105,9 @@ public class NotifyGatewayApiServiceImpl implements NotifyGatewayApiService {
                         ExceptionCodes.GATEWAY_NOTIFICATION_INTERNAL_SERVER_ERROR);
             }
             boolean bootstrapped = PlatformGatewayServiceImpl.ensurePlatformGatewayFromConnectToken(
-                    connectConfig, gatewayId, matchedEntry);
+                    connectConfig, PlatformGatewayServiceImpl.resolveConnectGatewayId(
+                            PlatformGatewayTokenUtil.parseTokenId(matchedEntry.getRegistrationToken())),
+                    matchedEntry);
             if (!bootstrapped && !isConnectTokenRegistered(matchedEntry)) {
                 log.error("Connect-with-token REGISTER failed to create platform gateway for gateway: " + gatewayId);
                 throw new APIManagementException("Platform gateway bootstrap failed",
@@ -152,17 +154,12 @@ public class NotifyGatewayApiServiceImpl implements NotifyGatewayApiService {
     }
 
     private boolean isConnectTokenRegistered(ConnectGatewayConfig matchedEntry) {
-        String registrationToken = matchedEntry.getRegistrationToken();
-        if (StringUtils.isBlank(registrationToken)) {
-            return false;
-        }
-        String separator = PlatformGatewayTokenUtil.COMBINED_TOKEN_SEPARATOR;
-        int sep = registrationToken.indexOf(separator);
-        if (sep <= 0 || sep >= registrationToken.length() - 1) {
+        String tokenId = PlatformGatewayTokenUtil.parseTokenId(matchedEntry.getRegistrationToken());
+        if (StringUtils.isBlank(tokenId)) {
             return false;
         }
         try {
-            return PlatformGatewayDAO.getInstance().getActiveTokenById(registrationToken.substring(0, sep)) != null;
+            return PlatformGatewayDAO.getInstance().getActiveTokenById(tokenId) != null;
         } catch (APIManagementException e) {
             log.warn("Could not verify connect token registration state: " + e.getMessage(), e);
             return false;

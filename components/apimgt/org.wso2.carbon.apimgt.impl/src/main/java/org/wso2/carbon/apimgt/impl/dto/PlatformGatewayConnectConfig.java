@@ -30,6 +30,8 @@ import java.util.List;
 public class PlatformGatewayConnectConfig {
     private List<String> platformGatewayVersions = new ArrayList<>();
     private List<ConnectGatewayConfig> connectGateways = new ArrayList<>();
+    /** Number of {@code <Connect>} elements under {@code ConnectGateways} in api-manager.xml. */
+    private int declaredConnectEntryCount;
 
     /**
      * Global API Platform Gateway versions (e.g. ["1.0.0"]).
@@ -59,5 +61,17 @@ public class PlatformGatewayConnectConfig {
 
     public void setConnectGateways(List<ConnectGatewayConfig> connectGateways) {
         this.connectGateways = connectGateways != null ? new ArrayList<>(connectGateways) : new ArrayList<>();
+    }
+
+    /**
+     * How many connect entries were declared in api-manager.xml (from deployment.toml).
+     * Used to fail startup when XML declares entries but none are loaded into memory.
+     */
+    public int getDeclaredConnectEntryCount() {
+        return declaredConnectEntryCount;
+    }
+
+    public void setDeclaredConnectEntryCount(int declaredConnectEntryCount) {
+        this.declaredConnectEntryCount = Math.max(0, declaredConnectEntryCount);
     }
 }

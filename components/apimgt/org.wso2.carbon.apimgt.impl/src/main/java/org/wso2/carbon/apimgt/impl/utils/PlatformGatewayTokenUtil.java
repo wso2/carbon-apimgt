@@ -54,6 +54,35 @@ public final class PlatformGatewayTokenUtil {
     }
 
     /**
+     * Parses the token row ID from a combined {@code tokenId.plainToken} registration token.
+     */
+    public static String parseTokenId(String combinedRegistrationToken) {
+        if (combinedRegistrationToken == null || !combinedRegistrationToken.contains(COMBINED_TOKEN_SEPARATOR)) {
+            return null;
+        }
+        int sep = combinedRegistrationToken.indexOf(COMBINED_TOKEN_SEPARATOR);
+        if (sep <= 0 || sep >= combinedRegistrationToken.length() - 1) {
+            return null;
+        }
+        return combinedRegistrationToken.substring(0, sep);
+    }
+
+    /**
+     * Constant-time comparison for connect registration tokens.
+     */
+    public static boolean constantTimeEquals(String expected, String actual) {
+        if (expected == null || actual == null) {
+            return false;
+        }
+        byte[] expectedBytes = expected.trim().getBytes(StandardCharsets.UTF_8);
+        byte[] actualBytes = actual.trim().getBytes(StandardCharsets.UTF_8);
+        if (expectedBytes.length != actualBytes.length) {
+            return false;
+        }
+        return MessageDigest.isEqual(expectedBytes, actualBytes);
+    }
+
+    /**
      * Generate a time-ordered token row ID (UUID v7, RFC 9562). JDK-only implementation; no external
      * dependency. Sortable by creation time.
      * TODO: When Java 26+ is adopted and the JDK provides native UUID v7 support (e.g. java.util.UUID),

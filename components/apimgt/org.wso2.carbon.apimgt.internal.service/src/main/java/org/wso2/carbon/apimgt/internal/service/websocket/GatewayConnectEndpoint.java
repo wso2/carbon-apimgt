@@ -162,12 +162,21 @@ public class GatewayConnectEndpoint {
                 if (connectConfig != null) {
                     List<ConnectGatewayConfig> list = connectConfig.getConnectGateways();
                     if (list == null || list.isEmpty()) {
-                        log.info("Connect config present but ConnectGateways list is empty; ensure api-manager.xml "
-                                + "contains PlatformGatewayConnectConfiguration/ConnectGateways from deployment.toml");
+                        int declared = connectConfig.getDeclaredConnectEntryCount();
+                        if (declared > 0) {
+                            log.error(declared + " [[apim.platform_gateway.connect]] entr"
+                                    + (declared == 1 ? "y" : "ies")
+                                    + " in api-manager.xml but none loaded at runtime; "
+                                    + "check registration_token and url, then restart APIM");
+                        } else {
+                            log.info("No [[apim.platform_gateway.connect]] entries loaded; ensure deployment.toml "
+                                    + "defines connect gateways and api-manager.xml was regenerated");
+                        }
                     } else {
                         for (ConnectGatewayConfig entry : list) {
                             if (entry != null && StringUtils.isNotBlank(entry.getRegistrationToken())
-                                    && apiKey.trim().equals(entry.getRegistrationToken().trim())) {
+                                    && PlatformGatewayTokenUtil.constantTimeEquals(
+                                            entry.getRegistrationToken(), apiKey)) {
                                 matchedEntry = entry;
                                 break;
                             }
@@ -186,9 +195,10 @@ public class GatewayConnectEndpoint {
                 log.warn("Could not get platform gateway connect config: " + e.getMessage(), e);
             }
             if (matchedEntry != null && connectConfig != null) {
-                String newGatewayId = UUID.randomUUID().toString();
+                String tokenId = PlatformGatewayTokenUtil.parseTokenId(matchedEntry.getRegistrationToken());
+                String connectGatewayId = PlatformGatewayServiceImpl.resolveConnectGatewayId(tokenId);
                 PlatformGatewayServiceImpl.ensurePlatformGatewayFromConnectToken(
-                        connectConfig, newGatewayId, matchedEntry);
+                        connectConfig, connectGatewayId, matchedEntry);
                 try {
                     gateway = PlatformGatewayTokenUtil.verifyToken(apiKey);
                 } catch (APIManagementException | NoSuchAlgorithmException e) {

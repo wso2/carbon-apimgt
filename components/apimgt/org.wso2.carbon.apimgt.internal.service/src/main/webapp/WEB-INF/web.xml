@@ -92,13 +92,13 @@
                 org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.BasicAuthenticationInterceptor,
                 org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.PermissionValidationInterceptor(permissions=/permission/admin/ permissions=/permission/protected/),
                 org.wso2.carbon.apimgt.rest.api.util.interceptors.PostAuthenticationInterceptor,
-                org.wso2.carbon.apimgt.rest.api.util.interceptors.OrganizationInterceptor,
-                org.wso2.carbon.apimgt.internal.service.interceptors.PlatformGatewayTenantFlowCleanupInterceptor
+                org.wso2.carbon.apimgt.rest.api.util.interceptors.OrganizationInterceptor
             </param-value>
         </init-param>
         <init-param>
             <param-name>jaxrs.outInterceptors</param-name>
             <param-value>
+                org.wso2.carbon.apimgt.internal.service.interceptors.PlatformGatewayTenantFlowCleanupInterceptor,
                 org.apache.cxf.transport.common.gzip.GZIPOutInterceptor
             </param-value>
         </init-param>
