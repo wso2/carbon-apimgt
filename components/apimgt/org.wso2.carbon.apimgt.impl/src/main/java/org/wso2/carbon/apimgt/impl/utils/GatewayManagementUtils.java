@@ -153,18 +153,24 @@ public class GatewayManagementUtils {
             }
             List<ConnectGatewayConfig> connectGateways = config.getConnectGateways();
             int declaredConnectEntryCount = config.getDeclaredConnectEntryCount();
-            if (declaredConnectEntryCount == 0
-                    && (connectGateways == null || connectGateways.isEmpty())) {
+            int loadedConnectEntryCount = 0;
+            if (connectGateways != null) {
+                for (ConnectGatewayConfig connectGateway : connectGateways) {
+                    if (connectGateway != null) {
+                        loadedConnectEntryCount++;
+                    }
+                }
+            }
+            if (declaredConnectEntryCount == 0 && loadedConnectEntryCount == 0) {
                 return;
             }
-            if (declaredConnectEntryCount > 0
-                    && (connectGateways == null || connectGateways.isEmpty())) {
+            if (declaredConnectEntryCount != loadedConnectEntryCount) {
                 throw new IllegalArgumentException(
                         "Platform gateway connect config validation failed at server startup. "
                                 + declaredConnectEntryCount + " [[apim.platform_gateway.connect]] "
-                                + "entr" + (declaredConnectEntryCount == 1 ? "y" : "ies")
-                                + " in api-manager.xml but none were loaded; ensure each entry includes "
-                                + "registration_token and url.");
+                                + "entr" + (declaredConnectEntryCount == 1 ? "y was" : "ies were")
+                                + " declared in deployment.toml but only " + loadedConnectEntryCount
+                                + " loaded; ensure each entry includes registration_token and url.");
             }
             List<String> errors = validateConnectGatewayEntries(connectGateways);
             if (!errors.isEmpty()) {
