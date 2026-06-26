@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayDeploymentDispatcher;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.PlatformGatewayTokenUtil;
 
+import java.nio.charset.StandardCharsets;
 import java.net.URI;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
@@ -51,6 +52,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -60,6 +62,8 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
 
     private static final Log log = LogFactory.getLog(PlatformGatewayServiceImpl.class);
     private static final PlatformGatewayServiceImpl INSTANCE = new PlatformGatewayServiceImpl();
+    private static final ConcurrentHashMap<String, Object> CONNECT_TOKEN_BOOTSTRAP_LOCKS = new ConcurrentHashMap<>();
+    private static final String CONNECT_GATEWAY_ID_NAMESPACE = "platform-gateway-connect:";
 
     public static PlatformGatewayServiceImpl getInstance() {
         return INSTANCE;
@@ -489,30 +493,12 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
         }
         String orgId = entry.resolveOrganization();
         String registrationToken = entry.getRegistrationToken();
-        String name = StringUtils.isNotBlank(entry.getName()) ? entry.getName() : gatewayId;
+        String name = StringUtils.isNotBlank(entry.getName()) ? entry.getName() : null;
         String displayNameOverride = entry.getDisplayName();
         String descriptionOverride = entry.getDescription();
         String urlOverride = entry.getUrl();
-        if (StringUtils.isBlank(gatewayId) || StringUtils.isBlank(registrationToken)) {
+        if (StringUtils.isBlank(registrationToken)) {
             return false;
-        }
-        if (StringUtils.isNotBlank(entry.getName())) {
-            try {
-                Environment existingByName = getEnvironmentsForOrganizationMergedWithGlobal(orgId).stream()
-                        .filter(e -> APIConstants.WSO2_API_PLATFORM_GATEWAY.equals(e.getGatewayType())
-                                && entry.getName().equals(e.getName()))
-                        .findFirst()
-                        .orElse(null);
-                if (existingByName != null && !gatewayId.equals(existingByName.getUuid())) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Connect with token: name '" + entry.getName()
-                                + "' already exists; using gateway_id as name");
-                    }
-                    name = gatewayId;
-                }
-            } catch (APIManagementException e) {
-                // ignore, proceed with requested name
-            }
         }
         if (!registrationToken.contains(PlatformGatewayTokenUtil.COMBINED_TOKEN_SEPARATOR)) {
             if (log.isDebugEnabled()) {
@@ -526,74 +512,110 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
         if (StringUtils.isBlank(tokenId) || StringUtils.isBlank(plainToken)) {
             return false;
         }
-        try {
-            PlatformGatewayDAO dao = PlatformGatewayDAO.getInstance();
-            if (dao.getActiveTokenById(tokenId) != null) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Connect with token: gateway already exists for token_id=" + tokenId);
+        String persistedGatewayId = resolveConnectGatewayId(tokenId);
+        if (StringUtils.isBlank(persistedGatewayId)) {
+            return false;
+        }
+        if (name == null) {
+            name = persistedGatewayId;
+        }
+        Object bootstrapLock = CONNECT_TOKEN_BOOTSTRAP_LOCKS.computeIfAbsent(tokenId, id -> new Object());
+        synchronized (bootstrapLock) {
+            try {
+                PlatformGatewayDAO dao = PlatformGatewayDAO.getInstance();
+                if (dao.getActiveTokenById(tokenId) != null) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Connect with token: gateway already exists for token_id=" + tokenId);
+                    }
+                    return true;
+                }
+                if (StringUtils.isNotBlank(entry.getName())) {
+                    try {
+                        Environment existingByName = getEnvironmentsForOrganizationMergedWithGlobal(orgId).stream()
+                                .filter(e -> APIConstants.WSO2_API_PLATFORM_GATEWAY.equals(e.getGatewayType())
+                                        && entry.getName().equals(e.getName()))
+                                .findFirst()
+                                .orElse(null);
+                        if (existingByName != null && !persistedGatewayId.equals(existingByName.getUuid())) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Connect with token: name '" + entry.getName()
+                                        + "' already exists; using gateway_id as name");
+                            }
+                            name = persistedGatewayId;
+                        }
+                    } catch (APIManagementException e) {
+                        // ignore, proceed with requested name
+                    }
+                }
+                String tokenHash = PlatformGatewayTokenUtil.hashToken(plainToken);
+                APIAdminImpl apiAdmin = new APIAdminImpl();
+                Environment existing = null;
+                try {
+                    existing = ApiMgtDAO.getInstance().getEnvironmentByUuid(persistedGatewayId);
+                } catch (APIManagementException e) {
+                    // ignore
+                }
+                String displayName = StringUtils.isNotBlank(displayNameOverride) ? displayNameOverride : name;
+                String description = StringUtils.isNotBlank(descriptionOverride) ? descriptionOverride : "";
+                String vhostForDao = StringUtils.isNotBlank(urlOverride) ? urlOverride : "default";
+                Timestamp now = Timestamp.from(Instant.now());
+                boolean environmentCreated = false;
+                if (existing == null) {
+                    Environment env = StringUtils.isNotBlank(urlOverride)
+                            ? toEnvironmentFromUrl(persistedGatewayId, name, displayName, description, urlOverride)
+                            : toEnvironment(persistedGatewayId, name, displayName, description, "default");
+                    Map<String, String> additional = new HashMap<>();
+                    additional.put("organization", orgId);
+                    additional.put("isActive", "false");
+                    additional.put("createdAt", String.valueOf(now.getTime()));
+                    additional.put("updatedAt", String.valueOf(now.getTime()));
+                    env.setAdditionalProperties(additional);
+                    apiAdmin.addEnvironment(orgId, env);
+                    environmentCreated = true;
+                }
+                try {
+                    PlatformGatewayDAO.PlatformGateway gateway = new PlatformGatewayDAO.PlatformGateway(
+                            persistedGatewayId, orgId, name, displayName, description, vhostForDao,
+                            null, false, now, now);
+                    dao.createGatewayWithTokenAndGatewayInstance(gateway, tokenId, tokenHash,
+                            Collections.singletonList(name));
+                } catch (APIManagementException e) {
+                    if (environmentCreated) {
+                        try {
+                            apiAdmin.deleteEnvironment(orgId, persistedGatewayId);
+                        } catch (Exception rollbackEx) {
+                            log.warn("Rollback failed for connect-with-token environment cleanup: "
+                                    + persistedGatewayId, rollbackEx);
+                        }
+                    }
+                    if (dao.getActiveTokenById(tokenId) != null) {
+                        return true;
+                    }
+                    throw e;
+                }
+                if (log.isInfoEnabled()) {
+                    log.info("Platform gateway connected with token: gateway_id=" + persistedGatewayId + ", name="
+                            + name + ", organization=" + orgId);
+                }
+                return true;
+            } catch (NoSuchAlgorithmException | APIManagementException e) {
+                if (log.isWarnEnabled()) {
+                    log.warn("Connect with token failed for gateway_id=" + persistedGatewayId + ": "
+                            + e.getMessage(), e);
                 }
                 return false;
             }
-            String tokenHash = PlatformGatewayTokenUtil.hashToken(plainToken);
-            APIAdminImpl apiAdmin = new APIAdminImpl();
-            Environment existing = null;
-            try {
-                existing = ApiMgtDAO.getInstance().getEnvironmentByUuid(gatewayId);
-            } catch (APIManagementException e) {
-                // ignore
-            }
-            String displayName = StringUtils.isNotBlank(displayNameOverride) ? displayNameOverride : name;
-            String description = StringUtils.isNotBlank(descriptionOverride) ? descriptionOverride : "";
-            String vhostForDao = StringUtils.isNotBlank(urlOverride) ? urlOverride : "default";
-            Timestamp now = Timestamp.from(Instant.now());
-            boolean environmentCreated = false;
-            if (existing == null) {
-                Environment env = StringUtils.isNotBlank(urlOverride)
-                        ? toEnvironmentFromUrl(gatewayId, name, displayName, description, urlOverride)
-                        : toEnvironment(gatewayId, name, displayName, description, "default");
-                Map<String, String> additional = new HashMap<>();
-                additional.put("organization", orgId);
-                additional.put("isActive", "false");
-                additional.put("createdAt", String.valueOf(now.getTime()));
-                additional.put("updatedAt", String.valueOf(now.getTime()));
-                env.setAdditionalProperties(additional);
-                apiAdmin.addEnvironment(orgId, env);
-                environmentCreated = true;
-            }
-            try {
-                PlatformGatewayDAO.PlatformGateway gateway = new PlatformGatewayDAO.PlatformGateway(
-                        gatewayId, orgId, name, displayName, description, vhostForDao,
-                        null, false, now, now);
-                dao.createGatewayWithTokenAndGatewayInstance(gateway, tokenId, tokenHash,
-                        Collections.singletonList(name));
-            } catch (APIManagementException e) {
-                if (environmentCreated) {
-                    try {
-                        apiAdmin.deleteEnvironment(orgId, gatewayId);
-                    } catch (Exception rollbackEx) {
-                        log.warn("Rollback failed for connect-with-token environment cleanup: " + gatewayId,
-                                rollbackEx);
-                    }
-                }
-                throw e;
-            }
-            if (log.isInfoEnabled()) {
-                log.info("Platform gateway connected with token: gateway_id=" + gatewayId + ", name=" + name
-                        + ", organization=" + orgId);
-            }
-            return true;
-        } catch (NoSuchAlgorithmException | APIManagementException e) {
-            if (log.isWarnEnabled()) {
-                log.warn("Connect with token failed for gateway_id=" + gatewayId + ": " + e.getMessage(), e);
-            }
-            return false;
         }
     }
 
     /**
-     * Startup hook for connect config. Gateway records are created on first connect, not at startup.
+     * Deterministic platform gateway environment UUID for a connect-with-token bootstrap token row ID.
      */
-    public static void ensurePlatformGatewayFromConfigOnStartup(PlatformGatewayConnectConfig config) {
-        // No startup creation; gateway is registered on first connect with registration_token.
+    public static String resolveConnectGatewayId(String tokenId) {
+        if (StringUtils.isBlank(tokenId)) {
+            return null;
+        }
+        return UUID.nameUUIDFromBytes(
+                (CONNECT_GATEWAY_ID_NAMESPACE + tokenId.trim()).getBytes(StandardCharsets.UTF_8)).toString();
     }
 }

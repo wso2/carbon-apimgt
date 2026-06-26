@@ -130,9 +130,6 @@ public class ConnectGatewayConfig {
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException(
                     "Invalid URL in apim.platform_gateway.connect: \"" + url + "\" - " + e.getMessage(), e);
-        } catch (Exception e) {
-            throw new IllegalArgumentException(
-                    "Invalid URL in apim.platform_gateway.connect: \"" + url + "\" - " + e.getMessage(), e);
         }
         this.url = trimmed;
     }

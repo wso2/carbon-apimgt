@@ -115,7 +115,7 @@ public class PlatformGatewayApiKeyAuthInterceptor extends AbstractPhaseIntercept
             if (connectConfig != null) {
                 for (ConnectGatewayConfig entry : connectConfig.getConnectGateways()) {
                     if (entry != null && StringUtils.isNotBlank(entry.getRegistrationToken())
-                            && apiKey.trim().equals(entry.getRegistrationToken().trim())) {
+                            && PlatformGatewayTokenUtil.constantTimeEquals(entry.getRegistrationToken(), apiKey)) {
                         matchedEntry = entry;
                         break;
                     }

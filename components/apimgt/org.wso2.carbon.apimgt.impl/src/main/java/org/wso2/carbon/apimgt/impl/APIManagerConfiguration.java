@@ -51,6 +51,7 @@ import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.common.gateway.configdto.HttpClientConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIMGovernanceConfigDTO;
+import org.wso2.carbon.apimgt.impl.dto.ConnectGatewayConfig;
 import org.wso2.carbon.apimgt.impl.dto.DistributedThrottleConfig;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
@@ -3671,19 +3672,20 @@ public class APIManagerConfiguration {
             if (!platformGatewayVersions.isEmpty()) {
                 platformGatewayConnectConfig.setPlatformGatewayVersions(platformGatewayVersions);
             }
-            List<org.wso2.carbon.apimgt.impl.dto.ConnectGatewayConfig> connectGateways = new ArrayList<>();
+            List<ConnectGatewayConfig> connectGateways = new ArrayList<>();
+            int declaredConnectEntryCount = 0;
             OMElement connectGatewaysElem = pgConnectElem.getFirstChildWithName(
                     new QName(APIConstants.GatewayNotification.CONNECT_GATEWAYS));
             if (connectGatewaysElem != null) {
                 Iterator<?> connectIt = connectGatewaysElem.getChildrenWithName(
                         new QName(APIConstants.GatewayNotification.CONNECT));
                 while (connectIt != null && connectIt.hasNext()) {
+                    declaredConnectEntryCount++;
                     OMElement connectElem = (OMElement) connectIt.next();
                     if (connectElem == null) {
                         continue;
                     }
-                    org.wso2.carbon.apimgt.impl.dto.ConnectGatewayConfig entry =
-                            new org.wso2.carbon.apimgt.impl.dto.ConnectGatewayConfig();
+                    ConnectGatewayConfig entry = new ConnectGatewayConfig();
                     OMElement rt = connectElem.getFirstChildWithName(
                             new QName(APIConstants.GatewayNotification.REGISTRATION_TOKEN));
                     if (rt != null && rt.getText() != null && !rt.getText().trim().isEmpty()) {
@@ -3714,11 +3716,10 @@ public class APIManagerConfiguration {
                     if (orgEl != null && orgEl.getText() != null && !orgEl.getText().trim().isEmpty()) {
                         entry.setOrganization(orgEl.getText().trim());
                     }
-                    if (!entry.getRegistrationToken().isEmpty()) {
-                        connectGateways.add(entry);
-                    }
+                    connectGateways.add(entry);
                 }
             }
+            platformGatewayConnectConfig.setDeclaredConnectEntryCount(declaredConnectEntryCount);
             if (!connectGateways.isEmpty()) {
                 platformGatewayConnectConfig.setConnectGateways(connectGateways);
             }
