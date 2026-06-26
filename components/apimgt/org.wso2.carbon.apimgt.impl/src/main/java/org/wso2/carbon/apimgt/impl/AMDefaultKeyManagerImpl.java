@@ -1222,7 +1222,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         ScopeDTO scopeDTO;
         try {
-            scopeDTO = scopeClient.getScopeByName(name);
+            scopeDTO = scopeClient.getScopeByName(base64UrlEncode(name));
             return fromDTOToScope(scopeDTO);
         } catch (KeyManagerClientException ex) {
             handleException("Cannot read scope : " + name, ex);
@@ -1356,8 +1356,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     @Override
     public void deleteScope(String scopeName) throws APIManagementException {
 
-        try {
-            Response response = scopeClient.deleteScope(scopeName);
+        try (Response response = scopeClient.deleteScope(base64UrlEncode(scopeName))) {
             if (response.status() != HttpStatus.SC_OK) {
                 String responseString = readHttpResponseAsString(response.body());
                 String errorMessage =
@@ -1387,7 +1386,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             if (StringUtils.isNotBlank(scope.getRoles()) && scope.getRoles().trim().split(",").length > 0) {
                 scopeDTO.setBindings(Arrays.asList(scope.getRoles().trim().split(",")));
             }
-            try (Response response = scopeClient.updateScope(scopeDTO, scope.getKey())) {
+            try (Response response = scopeClient.updateScope(scopeDTO, base64UrlEncode(scope.getKey()))) {
                 if (response.status() != HttpStatus.SC_OK) {
                     String responseString = readHttpResponseAsString(response.body());
                     String errorMessage =
@@ -1413,7 +1412,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     @Override
     public boolean isScopeExists(String scopeName) throws APIManagementException {
 
-        try (Response response = scopeClient.isScopeExist(scopeName)) {
+        try (Response response = scopeClient.isScopeExist(base64UrlEncode(scopeName))) {
             if (response.status() == HttpStatus.SC_OK) {
                 return true;
             } else if (response.status() != HttpStatus.SC_NOT_FOUND) {
@@ -1650,5 +1649,17 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         oAuthApplicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME, kmAdminUsername);
         String kmAdminTenantDomain = MultitenantUtils.getTenantDomain(kmAdminUsername);
         this.setTenantDomain(kmAdminTenantDomain);
+    }
+
+    public static String base64UrlEncode(String value) {
+        if (value == null || StringUtils.isBlank(value)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Scope name is null, empty, or blank");
+            }
+            return value;
+        }
+        return Base64.getUrlEncoder()
+                .withoutPadding()
+                .encodeToString(value.getBytes(StandardCharsets.UTF_8));
     }
 }
