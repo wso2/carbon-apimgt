@@ -1405,6 +1405,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void updateAPI(API api, int tenantId, String username) throws APIManagementException {
 
         MCPUtils.validateMCPResources(api.getUuid(), api.getOrganization(), api.getUriTemplates());
+        MCPUtils.validateMCPBackendOperations(api);
         apiMgtDAO.updateAPI(api, username);
         if (log.isDebugEnabled()) {
             log.debug("Successfully updated the API: " + api.getId() + " metadata in the database");
