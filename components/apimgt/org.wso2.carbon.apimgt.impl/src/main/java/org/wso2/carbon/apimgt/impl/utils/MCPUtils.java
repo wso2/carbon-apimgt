@@ -23,6 +23,8 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIOperationMapping;
+import org.wso2.carbon.apimgt.api.model.BackendOperation;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -95,26 +97,37 @@ public class MCPUtils {
         if (uriTemplates == null || uriTemplates.isEmpty()) {
             return;
         }
-        URITemplate firstTemplate = uriTemplates.iterator().next();
-        if (firstTemplate.getAPIOperationMapping() == null) {
+        String referencedApiId = null;
+        for (URITemplate uriTemplate : uriTemplates) {
+            if (uriTemplate.getAPIOperationMapping() != null) {
+                referencedApiId = uriTemplate.getAPIOperationMapping().getApiUuid();
+                break;
+            }
+        }
+        if (referencedApiId == null) {
             return;
         }
-        String referencedApiId = firstTemplate.getAPIOperationMapping().getApiUuid();
         Set<URITemplate> referencedUriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(referencedApiId);
         if (referencedUriTemplates == null || referencedUriTemplates.isEmpty()) {
             return;
         }
         for (URITemplate uriTemplate : uriTemplates) {
-            if (uriTemplate.getAPIOperationMapping() != null) {
-                String target = uriTemplate.getAPIOperationMapping().getBackendOperation().getTarget();
-                String verb = uriTemplate.getAPIOperationMapping().getBackendOperation().getVerb().toString();
-                if (ApiMgtDAO.findMatchingTemplate(referencedUriTemplates, target, verb) == null) {
-                    throw new APIManagementException(
-                            "No matching resource found in the referenced API '" + referencedApiId
-                                    + "' for backend operation: " + verb + " " + target,
-                            ExceptionCodes.from(ExceptionCodes.INVALID_MCP_BACKEND_OPERATION, verb, target,
-                                    referencedApiId));
-                }
+            APIOperationMapping operationMapping = uriTemplate.getAPIOperationMapping();
+            if (operationMapping == null) {
+                continue;
+            }
+            BackendOperation backendOperation = operationMapping.getBackendOperation();
+            if (backendOperation == null || backendOperation.getVerb() == null) {
+                continue;
+            }
+            String target = backendOperation.getTarget();
+            String verb = backendOperation.getVerb().toString();
+            if (ApiMgtDAO.findMatchingTemplate(referencedUriTemplates, target, verb) == null) {
+                throw new APIManagementException(
+                        "No matching resource found in the referenced API '" + referencedApiId
+                                + "' for backend operation: " + verb + " " + target,
+                        ExceptionCodes.from(ExceptionCodes.INVALID_MCP_BACKEND_OPERATION, verb, target,
+                                referencedApiId));
             }
         }
     }
