@@ -351,10 +351,12 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
         if (description != null) {
             env.setDescription(description);
         }
-        if (propertiesJson != null) {
+        if (displayName != null || description != null || propertiesJson != null) {
             Map<String, String> additional = env.getAdditionalProperties() != null
                     ? new HashMap<>(env.getAdditionalProperties()) : new HashMap<>();
-            additional.put("properties", propertiesJson);
+            if (propertiesJson != null) {
+                additional.put("properties", propertiesJson);
+            }
             additional.put("updatedAt", String.valueOf(System.currentTimeMillis()));
             env.setAdditionalProperties(additional);
         }

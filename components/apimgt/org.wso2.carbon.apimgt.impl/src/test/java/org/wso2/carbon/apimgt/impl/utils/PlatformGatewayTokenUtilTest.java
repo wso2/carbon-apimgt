@@ -30,7 +30,12 @@ public class PlatformGatewayTokenUtilTest {
 
     @Test
     public void testConstantTimeEqualsMatchesSameToken() {
-        Assert.assertTrue(PlatformGatewayTokenUtil.constantTimeEquals(" id.plain ", "id.plain"));
+        Assert.assertTrue(PlatformGatewayTokenUtil.constantTimeEquals("id.plain", "id.plain"));
+    }
+
+    @Test
+    public void testConstantTimeEqualsRejectsWhitespacePaddedToken() {
+        Assert.assertFalse(PlatformGatewayTokenUtil.constantTimeEquals(" id.plain ", "id.plain"));
     }
 
     @Test

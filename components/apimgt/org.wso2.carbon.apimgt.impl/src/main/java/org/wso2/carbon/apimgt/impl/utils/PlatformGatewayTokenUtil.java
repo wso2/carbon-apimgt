@@ -74,8 +74,8 @@ public final class PlatformGatewayTokenUtil {
         if (expected == null || actual == null) {
             return false;
         }
-        byte[] expectedBytes = expected.trim().getBytes(StandardCharsets.UTF_8);
-        byte[] actualBytes = actual.trim().getBytes(StandardCharsets.UTF_8);
+        byte[] expectedBytes = expected.getBytes(StandardCharsets.UTF_8);
+        byte[] actualBytes = actual.getBytes(StandardCharsets.UTF_8);
         if (expectedBytes.length != actualBytes.length) {
             return false;
         }
