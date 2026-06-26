@@ -178,6 +178,18 @@ public class SQLConstants {
 
     public static final String UPDATE_API_PROVIDER_SQL = "UPDATE AM_API SET API_PROVIDER = ? WHERE API_UUID = ?";
 
+    // Used by the deprecated updateApiProvider(String, String) — subquery reads old provider from AM_API.
+    // MUST execute before UPDATE_API_PROVIDER_SQL so the subquery still sees the old value in AM_API.
+    public static final String UPDATE_DEFAULT_VERSION_PROVIDER_SQL =
+            "UPDATE AM_API_DEFAULT_VERSION SET API_PROVIDER = ? " +
+            "WHERE API_NAME = (SELECT API_NAME FROM AM_API WHERE API_UUID = ?) " +
+            "AND API_PROVIDER = (SELECT API_PROVIDER FROM AM_API WHERE API_UUID = ?)";
+
+    // Used by updateApiProvider(String, String, String, String) — explicit params, no subquery,
+    // no execution-order dependency.
+    public static final String UPDATE_DEFAULT_VERSION_PROVIDER_BY_NAME_SQL =
+            "UPDATE AM_API_DEFAULT_VERSION SET API_PROVIDER = ? WHERE API_NAME = ? AND API_PROVIDER = ?";
+
     public static final String GET_MD5_VALUE_OF_SERVICE_BY_API_ID_SQL = "SELECT " +
             "   AM_SERVICE_CATALOG.MD5 AS SERVICE_MD5, " +
             "   AM_SERVICE_CATALOG.SERVICE_NAME, " +
@@ -4081,6 +4093,18 @@ public class SQLConstants {
             "DELETE FROM AM_API_KEY_APPLICATION_MAPPING WHERE APPLICATION_UUID = ? AND API_KEY_UUID = ? " +
                     "AND EXISTS (SELECT 1 FROM AM_APPLICATION A WHERE A.UUID = AM_API_KEY_APPLICATION_MAPPING" +
                     ".APPLICATION_UUID AND A.ORGANIZATION = ?)";
+    // Returns all active API-scoped keys for APIs currently deployed on a specific platform gateway.
+    // AM_GW_PLATFORM_API_ARTIFACTS scopes results to only the APIs this gateway serves.
+    // AM_API is not needed: KM.API_UUID gives the artifactUuid directly, and GATEWAY_ENV_UUID
+    // already constrains to a single gateway (and therefore a single organization).
+    public static final String GET_PLATFORM_GATEWAY_API_KEYS_BY_GATEWAY_SQL =
+            "SELECT K.API_KEY_UUID, K.NAME, K.API_KEY_HASH, K.AUTHZ_USER, K.STATUS, " +
+                    "K.TIME_CREATED, K.VALIDITY_PERIOD, KM.API_UUID " +
+                    "FROM AM_API_KEY K " +
+                    "JOIN AM_API_KEY_API_MAPPING KM ON K.API_KEY_UUID = KM.API_KEY_UUID " +
+                    "JOIN AM_GW_PLATFORM_API_ARTIFACTS GWA " +
+                    "    ON KM.API_UUID = GWA.API_ID AND GWA.GATEWAY_ENV_UUID = ? " +
+                    "WHERE K.STATUS = 'ACTIVE'";
     public static final String GET_API_KEY_ASSOCIATIONS_SQL =
             "SELECT K.API_KEY_UUID, K.NAME, A.API_NAME, K.TIME_CREATED, K.AUTHZ_USER, K.VALIDITY_PERIOD, K.LAST_USED, KM.API_UUID " +
                     "FROM AM_API_KEY K " +

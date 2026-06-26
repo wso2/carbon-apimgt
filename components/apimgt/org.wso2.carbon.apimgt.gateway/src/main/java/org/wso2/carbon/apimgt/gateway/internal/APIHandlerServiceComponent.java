@@ -63,9 +63,9 @@ import org.wso2.carbon.apimgt.gateway.RedisBaseDistributedCountManager;
 import org.wso2.carbon.apimgt.gateway.ZillizVectorDBProviderServiceImpl;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClientPool;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.WebSocketProcessor;
-import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTMapCleaner;
 import org.wso2.carbon.apimgt.gateway.listeners.GatewayStartupListener;
 import org.wso2.carbon.apimgt.gateway.listeners.ServerStartupListener;
+import org.wso2.carbon.apimgt.gateway.service.GatewayRevokedTokenDataImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
@@ -75,6 +75,7 @@ import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever
 import org.wso2.carbon.apimgt.impl.jms.listener.JMSListenerShutDownService;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerDataService;
+import org.wso2.carbon.apimgt.impl.token.RevokedTokenService;
 import org.wso2.carbon.apimgt.tracing.TracingService;
 import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryService;
@@ -96,6 +97,7 @@ import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.Protocol;
 
 @Component(
         name = "org.wso2.carbon.apimgt.handlers",
@@ -130,6 +132,7 @@ public class APIHandlerServiceComponent {
         TenantServiceCreator listener = new TenantServiceCreator();
         bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), listener, null);
         bundleContext.registerService(ServerStartupObserver.class.getName(), new ServerStartupListener(), null);
+        bundleContext.registerService(RevokedTokenService.class, new GatewayRevokedTokenDataImpl(), null);
         // Set APIM Gateway JWT Generator
 
         registration =
@@ -138,9 +141,6 @@ public class APIHandlerServiceComponent {
         registration =
                 context.getBundleContext().registerService(AbstractAPIMgtGatewayJWTGenerator.class.getName(),
                         new APIMgtGatewayUrlSafeJWTGeneratorImpl(), null);
-        // Start JWT revoked map cleaner.
-        RevokedJWTMapCleaner revokedJWTMapCleaner = new RevokedJWTMapCleaner();
-        revokedJWTMapCleaner.startJWTRevokedMapCleaner();
         if (TelemetryUtil.telemetryEnabled()) {
             ServiceReferenceHolder.getInstance().setTelemetry(ServiceReferenceHolder.getInstance().getTelemetryService
                     ().buildTelemetryTracer(APIMgtGatewayConstants.SERVICE_NAME));
@@ -655,27 +655,42 @@ public class APIHandlerServiceComponent {
 
     private JedisPool getJedisPool(RedisConfig redisConfig) {
 
+        int connectionTimeout = redisConfig.getConnectionTimeout() != 0
+                ? redisConfig.getConnectionTimeout() : Protocol.DEFAULT_TIMEOUT;
+        int socketTimeout = redisConfig.getSocketTimeout() != 0
+                ? redisConfig.getSocketTimeout() : Protocol.DEFAULT_TIMEOUT;
         JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
         jedisPoolConfig.setMaxTotal(redisConfig.getMaxTotal());
         jedisPoolConfig.setMaxIdle(redisConfig.getMaxIdle());
         jedisPoolConfig.setMinIdle(redisConfig.getMinIdle());
         jedisPoolConfig.setTestOnBorrow(redisConfig.isTestOnBorrow());
         jedisPoolConfig.setBlockWhenExhausted(redisConfig.isBlockWhenExhausted());
+        jedisPoolConfig.setMaxWaitMillis(redisConfig.getMaxWaitMillis());
         jedisPoolConfig.setMinEvictableIdleTimeMillis(redisConfig.getMinEvictableIdleTimeMillis());
         jedisPoolConfig.setTimeBetweenEvictionRunsMillis(redisConfig.getTimeBetweenEvictionRunsMillis());
         jedisPoolConfig.setNumTestsPerEvictionRun(redisConfig.getNumTestsPerEvictionRun());
         JedisPool jedisPool;
         if (StringUtils.isNotEmpty(redisConfig.getUser()) && redisConfig.getPassword() != null) {
             jedisPool = new JedisPool(jedisPoolConfig, redisConfig.getHost(), redisConfig.getPort(),
-                    redisConfig.getConnectionTimeout(), redisConfig.getUser(),
-                    String.valueOf(redisConfig.getPassword()), redisConfig.getDatabaseId(), redisConfig.isSslEnabled());
+                    connectionTimeout, socketTimeout,
+                    redisConfig.getUser(), String.valueOf(redisConfig.getPassword()),
+                    redisConfig.getDatabaseId(), null, redisConfig.isSslEnabled());
         } else if (redisConfig.getPassword() != null) {
             jedisPool = new JedisPool(jedisPoolConfig, redisConfig.getHost(), redisConfig.getPort(),
-                    redisConfig.getConnectionTimeout(), String.valueOf(redisConfig.getPassword()),
-                    redisConfig.getDatabaseId(), redisConfig.isSslEnabled());
+                    connectionTimeout, socketTimeout,
+                    String.valueOf(redisConfig.getPassword()), redisConfig.getDatabaseId(), null,
+                    redisConfig.isSslEnabled());
         } else {
             jedisPool = new JedisPool(jedisPoolConfig, redisConfig.getHost(), redisConfig.getPort(),
-                    redisConfig.getConnectionTimeout(), null, redisConfig.getDatabaseId(), redisConfig.isSslEnabled());
+                    connectionTimeout, socketTimeout,
+                    null, redisConfig.getDatabaseId(), null, redisConfig.isSslEnabled());
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Redis connection pool initialized with connection timeout: "
+                    + connectionTimeout + "ms, socket timeout: "
+                    + socketTimeout + "ms, max wait: "
+                    + jedisPoolConfig.getMaxWaitMillis() + "ms, block when exhausted: "
+                    + redisConfig.isBlockWhenExhausted());
         }
         return jedisPool;
     }

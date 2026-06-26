@@ -30,6 +30,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIConstants.UnifiedSearchConstants;
 import org.wso2.carbon.apimgt.api.APIComplianceException;
+import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
@@ -115,6 +116,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubtypeConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.core.util.CryptoException;
@@ -2420,8 +2423,29 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             } else {
                 RestApiUtil.handleBadRequest("Endpoint config is not in correct format", log);
             }
+            String definition = backendAPIDTO.getDefinition();
+            if (StringUtils.isNotBlank(definition)) {
+                APIDefinitionValidationResponse validationResponse =
+                        OASParserUtil.validateAPIDefinition(definition, Boolean.TRUE,
+                                ServiceReferenceHolder.getInstance()
+                                        .getAPIMDependencyConfigurationService()
+                                        .getAPIMDependencyConfigurations().getOasParserOptions());
+                if (!validationResponse.isValid()) {
+                    List<ErrorListItemDTO> errorListItemDTOs =
+                            APIMappingUtil.getErrorListItemsDTOsFromErrorHandlers(
+                                    validationResponse.getErrorItems());
+                    ErrorDTO errorDTO =
+                            APIMappingUtil.getErrorDTOFromErrorListItems(errorListItemDTOs);
+                    throw RestApiUtil.buildBadRequestException(errorDTO);
+                }
+                backend.setDefinition(definition);
+            }
             PublisherCommonUtils.updateMCPServerBackend(mcpServerId, oldBackend, backend, organization, apiProvider);
-            return Response.ok().entity(APIMappingUtil.fromBackendAPIToDTO(backend, organization, false)).build();
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully updated backend API: " + backendApiId + " for MCP server: " + mcpServerId);
+            }
+            return Response.ok().entity(APIMappingUtil.fromBackendAPIToDTO(
+                    backend, organization, false)).build();
         } catch (ParseException e) {
             RestApiUtil.handleBadRequest("Endpoint config is not in correct format", e, log);
         }
@@ -2674,13 +2698,16 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         String[] tokenScopes =
                 (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
                         .get(RestApiConstants.USER_REST_API_SCOPES);
-        for (String scope : tokenScopes) {
-            if (RestApiConstants.MCP_SERVER_PUBLISHER_SCOPE.equals(scope)
-                    || RestApiConstants.MCP_SERVER_IMPORT_EXPORT_SCOPE.equals(scope)
-                    || RestApiConstants.MCP_SERVER_MANAGE_SCOPE.equals(scope)
-                    || RestApiConstants.ADMIN_SCOPE.equals(scope)) {
-                updatePermittedForPublishedDeprecated = true;
-                break;
+        if (tokenScopes != null) {
+            for (String scope : tokenScopes) {
+                if (RestApiConstants.MCP_SERVER_PUBLISHER_SCOPE.equals(scope)
+                        || RestApiConstants.MCP_SERVER_IMPORT_EXPORT_SCOPE.equals(scope)
+                        || RestApiConstants.MCP_SERVER_MANAGE_SCOPE.equals(scope)
+                        || RestApiConstants.ADMIN_SCOPE.equals(scope)
+                        || RestApiConstants.MCP_SERVER_LIFECYCLE_MANAGE_SCOPE.equals(scope)) {
+                    updatePermittedForPublishedDeprecated = true;
+                    break;
+                }
             }
         }
         if (!updatePermittedForPublishedDeprecated

@@ -1259,7 +1259,7 @@ public class APIAdminImpl implements APIAdmin {
                     idpProperties.add(jwksProperty);
                 }
             } else if (APIConstants.KeyManager.CERTIFICATE_TYPE_PEM_FILE.equals(certificateType)) {
-                identityProvider.setCertificate(String.join(certificate, ""));
+                identityProvider.setCertificate(certificate);
             }
         }
 
@@ -2089,7 +2089,8 @@ public class APIAdminImpl implements APIAdmin {
 
         String oldProvider = api.getId() != null ? api.getId().getProviderName() : null;
         try {
-            ApiMgtDAO.getInstance().updateApiProvider(apiId, provider);
+            ApiMgtDAO.getInstance().updateApiProvider(apiId, provider,
+                    oldProvider, api.getId() != null ? api.getId().getApiName() : null);
             apiPersistenceInstance.changeApiProvider(provider, apiId, organisation);
         } catch (APIPersistenceException | APIManagementException e) {
             throw new APIManagementException("Error while changing the API provider", e);
@@ -2282,7 +2283,7 @@ public class APIAdminImpl implements APIAdmin {
                     idpProperties.add(jwksProperty);
                 }
             } else if (APIConstants.KeyManager.CERTIFICATE_TYPE_PEM_FILE.equals(certificateType)) {
-                identityProvider.setCertificate(String.join(certificate, ""));
+                identityProvider.setCertificate(certificate);
             }
         }
 

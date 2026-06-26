@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.gateway.dto;
+package org.wso2.carbon.apimgt.impl.dto;
 
 import com.google.gson.annotations.SerializedName;
 

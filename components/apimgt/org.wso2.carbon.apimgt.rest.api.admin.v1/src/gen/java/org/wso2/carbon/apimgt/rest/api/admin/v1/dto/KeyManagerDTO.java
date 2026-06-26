@@ -52,6 +52,7 @@ public class KeyManagerDTO   {
     private Boolean enableTokenHashing = false;
     private Boolean enableMapOAuthConsumerApps = false;
     private Boolean enableOAuthAppCreation = false;
+    private Boolean enableProvisionedAppValidation = true;
     private Boolean enableSelfValidationJWT = true;
     private List<ClaimMappingEntryDTO> claimMapping = new ArrayList<ClaimMappingEntryDTO>();
     private String consumerKeyClaim = null;
@@ -530,6 +531,23 @@ return null;
 
   /**
    **/
+  public KeyManagerDTO enableProvisionedAppValidation(Boolean enableProvisionedAppValidation) {
+    this.enableProvisionedAppValidation = enableProvisionedAppValidation;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "true", value = "")
+  @JsonProperty("enableProvisionedAppValidation")
+  public Boolean isEnableProvisionedAppValidation() {
+    return enableProvisionedAppValidation;
+  }
+  public void setEnableProvisionedAppValidation(Boolean enableProvisionedAppValidation) {
+    this.enableProvisionedAppValidation = enableProvisionedAppValidation;
+  }
+
+  /**
+   **/
   public KeyManagerDTO enableSelfValidationJWT(Boolean enableSelfValidationJWT) {
     this.enableSelfValidationJWT = enableSelfValidationJWT;
     return this;
@@ -755,6 +773,7 @@ return null;
         Objects.equals(enableTokenHashing, keyManager.enableTokenHashing) &&
         Objects.equals(enableMapOAuthConsumerApps, keyManager.enableMapOAuthConsumerApps) &&
         Objects.equals(enableOAuthAppCreation, keyManager.enableOAuthAppCreation) &&
+        Objects.equals(enableProvisionedAppValidation, keyManager.enableProvisionedAppValidation) &&
         Objects.equals(enableSelfValidationJWT, keyManager.enableSelfValidationJWT) &&
         Objects.equals(claimMapping, keyManager.claimMapping) &&
         Objects.equals(consumerKeyClaim, keyManager.consumerKeyClaim) &&
@@ -770,7 +789,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, displayName, type, description, wellKnownEndpoint, introspectionEndpoint, clientRegistrationEndpoint, tokenEndpoint, displayTokenEndpoint, revokeEndpoint, displayRevokeEndpoint, userInfoEndpoint, authorizeEndpoint, endpoints, certificates, issuer, alias, scopeManagementEndpoint, availableGrantTypes, enableTokenGeneration, enableTokenEncryption, enableTokenHashing, enableMapOAuthConsumerApps, enableOAuthAppCreation, enableSelfValidationJWT, claimMapping, consumerKeyClaim, scopesClaim, tokenValidation, enabled, global, additionalProperties, permissions, tokenType, allowedOrganizations);
+    return Objects.hash(id, name, displayName, type, description, wellKnownEndpoint, introspectionEndpoint, clientRegistrationEndpoint, tokenEndpoint, displayTokenEndpoint, revokeEndpoint, displayRevokeEndpoint, userInfoEndpoint, authorizeEndpoint, endpoints, certificates, issuer, alias, scopeManagementEndpoint, availableGrantTypes, enableTokenGeneration, enableTokenEncryption, enableTokenHashing, enableMapOAuthConsumerApps, enableOAuthAppCreation, enableProvisionedAppValidation, enableSelfValidationJWT, claimMapping, consumerKeyClaim, scopesClaim, tokenValidation, enabled, global, additionalProperties, permissions, tokenType, allowedOrganizations);
   }
 
   @Override
@@ -803,6 +822,7 @@ return null;
     sb.append("    enableTokenHashing: ").append(toIndentedString(enableTokenHashing)).append("\n");
     sb.append("    enableMapOAuthConsumerApps: ").append(toIndentedString(enableMapOAuthConsumerApps)).append("\n");
     sb.append("    enableOAuthAppCreation: ").append(toIndentedString(enableOAuthAppCreation)).append("\n");
+    sb.append("    enableProvisionedAppValidation: ").append(toIndentedString(enableProvisionedAppValidation)).append("\n");
     sb.append("    enableSelfValidationJWT: ").append(toIndentedString(enableSelfValidationJWT)).append("\n");
     sb.append("    claimMapping: ").append(toIndentedString(claimMapping)).append("\n");
     sb.append("    consumerKeyClaim: ").append(toIndentedString(consumerKeyClaim)).append("\n");

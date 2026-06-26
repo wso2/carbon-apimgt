@@ -472,8 +472,14 @@ public class PublisherCommonUtils {
     private static void handleExistingApiSubtype(API apiToUpdate, API originalAPI, APIProvider apiProvider)
             throws APIManagementException {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Handling existing API subtype for API: " + apiToUpdate.getId().getApiName());
+        }
+        populateExistingSchemaDefinitions(apiToUpdate, originalAPI.getUriTemplates());
+
         Set<URITemplate> uriTemplates = apiToUpdate.getUriTemplates();
         if (uriTemplates.isEmpty()) {
+            log.error("No URI templates defined for API: " + apiToUpdate.getId().getApiName());
             throw new APIManagementException("No URI templates defined for existing API subtype.");
         }
 
@@ -899,13 +905,30 @@ public class PublisherCommonUtils {
             if (!isGraphql) {
                 Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(newDefinition);
 
-                //set operation policies from the original API Payload
+                // Set operation policies from the original API payload.
+                if (log.isDebugEnabled()) {
+                    log.debug("Setting operation policies and hub policies from original API payload for API update: "
+                            + apiToUpdate.getUuid());
+                }
                 Set<URITemplate> uriTemplatesFromPayload = apiToUpdate.getUriTemplates();
                 Map<String, List<OperationPolicy>> operationPoliciesPerURITemplate = new HashMap<>();
+                Map<String, List<OperationPolicy>> operationHubPoliciesPerURITemplate = new HashMap<>();
                 for (URITemplate uriTemplate : uriTemplatesFromPayload) {
                     if (!uriTemplate.getOperationPolicies().isEmpty()) {
                         String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
                         operationPoliciesPerURITemplate.put(key, uriTemplate.getOperationPolicies());
+                    }
+                    if (uriTemplate.getHubPolicies() != null && !uriTemplate.getHubPolicies().isEmpty()) {
+                        List<OperationPolicy> filteredHubPolicies = new ArrayList<>();
+                        for (OperationPolicy hubPolicy : uriTemplate.getHubPolicies()) {
+                            if (hubPolicy != null) {
+                                filteredHubPolicies.add(hubPolicy);
+                            }
+                        }
+                        if (!filteredHubPolicies.isEmpty()) {
+                            String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
+                            operationHubPoliciesPerURITemplate.put(key, filteredHubPolicies);
+                        }
                     }
                 }
 
@@ -913,6 +936,9 @@ public class PublisherCommonUtils {
                     String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
                     if (operationPoliciesPerURITemplate.containsKey(key)) {
                         uriTemplate.setOperationPolicies(operationPoliciesPerURITemplate.get(key));
+                    }
+                    if (operationHubPoliciesPerURITemplate.containsKey(key)) {
+                        uriTemplate.setHubPolicies(operationHubPoliciesPerURITemplate.get(key));
                     }
                 }
 
@@ -3248,13 +3274,37 @@ public class PublisherCommonUtils {
         for (org.wso2.carbon.apimgt.api.model.Scope scope : scopes) {
             String roles = scope.getRoles();
             if (roles != null) {
+                boolean scopeBindingNeedsUpdate = false;
+                List<String> correctedRoles = new ArrayList<>();
                 for (String aRole : roles.split(",")) {
-                    boolean isValidRole = APIUtil.isRoleNameExist(RestApiCommonUtil.getLoggedInUsername(), aRole);
-                    if (!isValidRole) {
-                        String errorMessage = "Role '" + aRole + "' Does not exist.";
-                        throw new APIManagementException(errorMessage,
-                                ExceptionCodes.from(ExceptionCodes.ROLE_OF_SCOPE_DOES_NOT_EXIST, aRole));
+                    String correctedRole = aRole;
+                    boolean prefixCorrected = false;
+                    if (aRole.contains("/")) {
+                        String[] roleParts = aRole.split("/", 2);
+                        String prefix = roleParts[0];
+                        if ("APPLICATION".equalsIgnoreCase(prefix) && !"Application".equals(prefix)) {
+                            correctedRole = "Application/" + roleParts[1];
+                            prefixCorrected = true;
+                        }
                     }
+
+                    boolean isValidRole = APIUtil.isRoleNameExist(RestApiCommonUtil.getLoggedInUsername(),
+                            correctedRole);
+                    if (!isValidRole) {
+                        String errorMessage = "Role '" + correctedRole + "' Does not exist.";
+                        throw new APIManagementException(errorMessage,
+                                ExceptionCodes.from(ExceptionCodes.ROLE_OF_SCOPE_DOES_NOT_EXIST, correctedRole));
+                    }
+
+                    if (prefixCorrected) {
+                        scopeBindingNeedsUpdate = true;
+                    }
+                    correctedRoles.add(correctedRole);
+                }
+
+                if (scopeBindingNeedsUpdate) {
+                    scope.setRoles(String.join(",", correctedRoles));
+                    apiProvider.updateSharedScope(scope, organization);
                 }
             }
         }

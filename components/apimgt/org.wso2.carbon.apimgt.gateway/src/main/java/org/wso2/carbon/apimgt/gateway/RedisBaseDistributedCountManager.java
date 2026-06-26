@@ -21,12 +21,13 @@ package org.wso2.carbon.apimgt.gateway;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.commons.throttle.core.DistributedCounterManager;
+import org.wso2.carbon.apimgt.impl.dto.RedisConfig;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.Response;
 import redis.clients.jedis.Transaction;
-import org.wso2.carbon.apimgt.gateway.throttling.util.ThrottleUtils;
-import org.wso2.carbon.apimgt.impl.dto.RedisConfig;
+import redis.clients.jedis.exceptions.JedisException;
+import redis.clients.jedis.params.SetParams;
 
 /**
  * Redis Base Distributed Counter Manager for Throttler.
@@ -144,6 +145,9 @@ public class RedisBaseDistributedCountManager implements DistributedCounterManag
                 transaction.del(key);
                 transaction.exec();
             }
+        } catch (JedisException e) {
+            // Non-critical cleanup; key expires via TTL if skipped.
+            log.warn("Redis error in removeCounter for key: " + key + ". Key will expire via TTL.", e);
         } finally {
             if (log.isTraceEnabled()) {
                 log.trace("Time Taken to removeCounter key" + key + ":" +(System.currentTimeMillis() - startTime));
@@ -369,6 +373,9 @@ public class RedisBaseDistributedCountManager implements DistributedCounterManag
                 transaction.del(key);
                 transaction.exec();
             }
+        } catch (JedisException e) {
+            // Non-critical cleanup; key expires via TTL if skipped.
+            log.warn("Redis error in removeTimestamp for key: " + key + ". Key will expire via TTL.", e);
         } finally {
             if (log.isTraceEnabled()) {
                 log.trace("Time Taken to removeTimestamp key " + key + (System.currentTimeMillis() - startTime));
@@ -422,6 +429,10 @@ public class RedisBaseDistributedCountManager implements DistributedCounterManag
                 }
                 return ttl;
             }
+        } catch (JedisException e) {
+            // Return -2 (key-not-found sentinel) as a safe fallback.
+            log.warn("Redis error in getTtl for key: " + key + ". Returning -2.", e);
+            return -2;
         } finally {
             if (log.isTraceEnabled()) {
                 log.trace("Time Taken to perform Redis getTtl operation:" + (System.currentTimeMillis() - startTime));
@@ -448,6 +459,10 @@ public class RedisBaseDistributedCountManager implements DistributedCounterManag
                 log.trace("setLock with key" + key + "with value " + value);
                 return responseCode;
             }
+        } catch (JedisException e) {
+            // Return 0 (lock not acquired) as a safe fallback.
+            log.warn("Redis error in setLock for key: " + key + ". Returning 0.", e);
+            return 0;
         } finally {
             if (log.isTraceEnabled()) {
                 log.trace("Time Taken to setLock :" + (System.currentTimeMillis() - startTime));
@@ -460,33 +475,27 @@ public class RedisBaseDistributedCountManager implements DistributedCounterManag
         long startTime = 0;
         try {
             startTime = System.currentTimeMillis();
+            long ttlMillis = expiryTimeStamp - System.currentTimeMillis();
+            if (ttlMillis <= 0) {
+                // Lock lease already expired — refuse to borrow a pool connection for a useless lock.
+                return false;
+            }
             try (Jedis jedis = redisPool.getResource()) {
-                Transaction transaction = jedis.multi();
-                transaction.setnx(key, value);
-                Response<Long> pexpireAtResponse = transaction.pexpireAt(key, expiryTimeStamp);
-                transaction.exec();
-                long pexpireAtResponseCode = pexpireAtResponse.get();
-                if (pexpireAtResponseCode == 1) {
-                    if (log.isTraceEnabled()) {
-                        log.trace("expiry time of key:" + key + " was set successfully.");
+                // Atomic NX + expiry: only the client that creates the key gets "OK".
+                String result = jedis.set(key, value, SetParams.setParams().nx().px(ttlMillis));
+                boolean acquired = "OK".equals(result);
+                if (log.isTraceEnabled()) {
+                    if (acquired) {
+                        log.trace("Lock acquired for key:" + key);
+                    } else {
+                        log.trace("Lock not acquired for key:" + key + " (already held by another node)");
                     }
-                    return true;
-                } else if (pexpireAtResponseCode == 0) {
-                    if (log.isTraceEnabled()) {
-                        log.trace("expiry time was not set of key:" + key
-                                + " e.g. key doesn't exist, or operation skipped due to the provided arguments.");
-                    }
-                    return false;
-                } else {
-                    if (log.isTraceEnabled()) {
-                        log.trace("expiry time was not set of key:" + key);
-                    }
-                    return false;
                 }
+                return acquired;
             }
         } finally {
             if (log.isTraceEnabled()) {
-                log.trace("Time Taken to setLock :" + (System.currentTimeMillis() - startTime));
+                log.trace("Time Taken to setLockWithExpiry :" + (System.currentTimeMillis() - startTime));
             }
         }
     }
@@ -520,6 +529,9 @@ public class RedisBaseDistributedCountManager implements DistributedCounterManag
                 transaction.del(key);
                 transaction.exec();
             }
+        } catch (JedisException e) {
+            // Non-critical; lock expires naturally.
+            log.warn("Redis error in removeLock for key: " + key + ". Lock will expire naturally.", e);
         } finally {
             if (log.isTraceEnabled()) {
                 log.trace("Time Taken to remove lock :" + (System.currentTimeMillis() - startTime));
