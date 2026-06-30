@@ -130,6 +130,7 @@ import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.Mediation;
+import org.wso2.carbon.apimgt.api.model.OASParserOptions;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
@@ -6196,6 +6197,35 @@ public final class APIUtil {
         }
 
         return CommonAPIUtil.getHttpClient(protocol, configuration, getSSLContext());
+    }
+
+    /**
+     * Build the HTTP client used by the SSRF {@code $ref} crawl. Mirrors {@link #getHttpClient(int, String)}
+     * (platform truststore/TLS, proxy, pool, timeouts) but with HTTP redirect handling <b>disabled</b>, so the crawl
+     * re-validates every redirect {@code Location} before following it (a redirect-to-private bypass is otherwise
+     * possible). The argument order matches {@link OASParserOptions.HttpClientProvider#getClient(String, int)} so it
+     * can be supplied directly as {@code APIUtil::getCrawlHttpClient}.
+     *
+     * @param protocol service endpoint protocol http/https
+     * @param port     service endpoint port
+     * @return a redirect-disabled {@link HttpClient}
+     */
+    public static HttpClient getCrawlHttpClient(String protocol, int port) {
+
+        HttpClientConfigurationDTO configuration = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration().getHttpClientConfiguration();
+
+        if (log.isDebugEnabled()) {
+            log.debug("Creating redirect-disabled $ref crawl HTTP client with protocol: " + protocol
+                    + " port: " + port);
+        }
+
+        // Avoid unnecessary truststore work for plain HTTP
+        if (!APIConstants.HTTPS_PROTOCOL.equalsIgnoreCase(protocol)) {
+            return CommonAPIUtil.getHttpClient(protocol, configuration, SSLContexts.createDefault(), true);
+        }
+
+        return CommonAPIUtil.getHttpClient(protocol, configuration, getSSLContext(), true);
     }
 
     /**
@@ -12532,6 +12562,41 @@ public final class APIUtil {
             }
             applyAccessControlPolicy(host, tenantMode, tenantHosts, tenantBlockPrivate);
         }
+    }
+
+    public static OASParserOptions buildRefAwareOASParserOptions(OASParserOptions base, String tenantDomain)
+            throws APIManagementException {
+        OASParserOptions opts = new OASParserOptions(base);
+        populateRefResolutionPolicy(opts, tenantDomain);
+        return opts;
+    }
+
+    /**
+     * Wire the network-security hook onto the parser options. When the platform or tenant network-security policy
+     * is active, the OAS3 parser validates every external $ref URL (top-level, direct, and transitive/nested) through
+     * {@link #validateRemoteURL(String, String)} via the injected custom URL validator; when inactive, no validator
+     * is set and ref resolution behaves as before. The same {@code validateRemoteURL}/{@code applyAccessControlPolicy}
+     * engine is therefore authoritative for top-level URLs, direct refs, and nested refs alike.
+     */
+    public static void populateRefResolutionPolicy(OASParserOptions opts, String tenantDomain)
+            throws APIManagementException {
+        opts.setRefValidationTenantDomain(tenantDomain);
+
+        JSONObject tenantConfig = getTenantConfig(tenantDomain);
+        boolean tenantEnabled = tenantConfig != null && tenantConfig.get(
+                APIConstants.NetworkSecurityAccessControl.TENANT_CONFIG_KEY) != null;
+
+        if (!networkSecurityEnabled && !tenantEnabled) {
+            opts.setRefValidator(null);
+            opts.setHttpClientProvider(null);
+            return;
+        }
+        opts.setRefValidator(APIUtil::validateRemoteURL);
+        opts.setHttpClientProvider(APIUtil::getCrawlHttpClient);
+        // cap each fetched $ref at the configured OAS import size limit (default 10 MB)
+        opts.setRefFetchMaxFileSize(ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration()
+                .getFirstProperty(org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_OAS_FILE_SIZE_LIMIT));
     }
 
     /**

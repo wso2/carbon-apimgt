@@ -86,6 +86,22 @@ public class CommonAPIUtil {
      */
     public static HttpClient getHttpClient(String protocol, HttpClientConfigurationDTO clientConfiguration,
                                           SSLContext sslContext) {
+        return getHttpClient(protocol, clientConfiguration, sslContext, false);
+    }
+
+    /**
+     * Return a http client instance, optionally with HTTP redirect handling disabled.
+     *
+     * @param protocol - service endpoint protocol http/https
+     * @param clientConfiguration HTTP client configuration for connection pooling, proxy, timeouts
+     * @param sslContext SSL context to be used for HTTPS connections
+     * @param disableRedirects when {@code true}, the client does not follow 3xx redirects (the caller must handle
+     *                         the {@code Location} header itself); used by the SSRF $ref crawl so each redirect hop
+     *                         is re-validated before being followed
+     * @return {@link HttpClient} with all proxy, TLS, ConnectionPooling related configurations
+     */
+    public static HttpClient getHttpClient(String protocol, HttpClientConfigurationDTO clientConfiguration,
+                                          SSLContext sslContext, boolean disableRedirects) {
 
         if (log.isDebugEnabled()) {
             log.debug("Creating HTTP client with protocol: " + protocol);
@@ -126,6 +142,10 @@ public class CommonAPIUtil {
 
         HttpClientBuilder clientBuilder = HttpClients.custom().setConnectionManager(pool)
                 .setDefaultRequestConfig(params);
+
+        if (disableRedirects) {
+            clientBuilder.disableRedirectHandling();
+        }
 
         if (proxyEnabled) {
             HttpHost host = new HttpHost(proxyHost, proxyPort, protocol);
