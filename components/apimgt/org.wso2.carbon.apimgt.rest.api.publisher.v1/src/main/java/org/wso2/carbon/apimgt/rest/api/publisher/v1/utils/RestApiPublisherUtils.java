@@ -694,6 +694,9 @@ public class RestApiPublisherUtils {
             } else {
                 String msg = StringUtils.defaultIfBlank(result.getErrorMessage(),
                         "MCP server validation failed for URL: " + definitionUrl);
+                if (log.isDebugEnabled()) {
+                    log.debug("MCP server validation failed for server URL: " + definitionUrl);
+                }
                 throw RestApiUtil.buildBadRequestException(msg);
             }
         }

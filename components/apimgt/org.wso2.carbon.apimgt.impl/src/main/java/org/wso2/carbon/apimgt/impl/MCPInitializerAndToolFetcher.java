@@ -78,6 +78,10 @@ public class MCPInitializerAndToolFetcher {
             throw new APIManagementException("Invalid MCP server URL: " + mcpServerUrl, e);
         }
 
+        if (log.isDebugEnabled()) {
+            log.debug("Initializing MCP connection and fetching tools");
+        }
+
         try (CloseableHttpClient httpClient =
                      (CloseableHttpClient) APIUtil.getHttpClient(endpoint.getPort(), endpoint.getProtocol())) {
 

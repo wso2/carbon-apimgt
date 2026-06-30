@@ -1422,6 +1422,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         apiMgtDAO.deleteCurrentAPIMetadata(api.getUuid());
         if (!merged.isEmpty()) {
+            if (log.isDebugEnabled()) {
+                log.debug("Adding merged metadata for API UUID: " + api.getUuid() + ", metadata count: " + merged.size());
+            }  
             apiMgtDAO.addAPIMetadata(api.getUuid(), merged);
         }
     }
