@@ -4001,4 +4001,21 @@ public final class APIConstants {
         public static final String QUEUE_CAPACITY = THREAD_POOL_CONFIG + "QueueCapacity";
     }
 
+    // Constants related to network security access control
+    public static class NetworkSecurityAccessControl {
+
+        private static final String CONFIG_PREFIX = "NetworkSecurityAccessControl.";
+        public static final String ENABLED = CONFIG_PREFIX + "Enabled";
+        public static final String MODE = CONFIG_PREFIX + "Mode";
+        public static final String HOSTS = CONFIG_PREFIX + "Host";
+        public static final String BLOCK_PRIVATE_NETWORK_ACCESS = CONFIG_PREFIX + "BlockPrivateNetworkAccess";
+        public static final String MODE_ALLOW = "allow";
+        public static final String MODE_DENY = "deny";
+
+        // Tenant config JSON keys (under "NetworkSecurityAccessControl" in tenant-conf.json)
+        public static final String TENANT_CONFIG_KEY = "NetworkSecurityAccessControl";
+        public static final String TENANT_MODE = "Mode";
+        public static final String TENANT_HOSTS = "Hosts";
+        public static final String TENANT_BLOCK_PRIVATE_NETWORK_ACCESS = "BlockPrivateNetworkAccess";
+    }
 }

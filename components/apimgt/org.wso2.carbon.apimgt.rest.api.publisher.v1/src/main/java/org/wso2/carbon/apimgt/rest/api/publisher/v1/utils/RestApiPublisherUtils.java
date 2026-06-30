@@ -745,6 +745,16 @@ public class RestApiPublisherUtils {
             throws APIManagementException {
         //validate inputs
         handleInvalidParams(fileInputStream, fileDetail, url, apiDefinition, isServiceAPI);
+        if (url != null) {
+            try {
+                APIUtil.validateRemoteURL(url, RestApiCommonUtil.getLoggedInUserTenantDomain());
+            } catch (APIManagementException e) {
+                if (e.getErrorHandler() != null && e.getErrorHandler().getHttpStatusCode() == 400) {
+                    throw RestApiUtil.buildBadRequestException(e.getErrorHandler().getErrorDescription());
+                }
+                throw e;
+            }
+        }
         String fileName = null;
 
         OpenAPIDefinitionValidationResponseDTO responseDTO;
