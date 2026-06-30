@@ -162,19 +162,7 @@ public final class PlatformGatewayTokenUtil {
             if (tokenRow == null) {
                 return null;
             }
-            String computedHash = hashToken(plainToken);
-            byte[] computedBytes;
-            byte[] storedBytes;
-            try {
-                computedBytes = Hex.decodeHex(computedHash.toCharArray());
-                storedBytes = Hex.decodeHex(tokenRow.tokenHash.toCharArray());
-            } catch (DecoderException e) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Token verification failed: invalid hash encoding for token id=" + tokenId);
-                }
-                return null;
-            }
-            if (computedBytes.length != storedBytes.length || !MessageDigest.isEqual(computedBytes, storedBytes)) {
+            if (!matchesActiveTokenHash(tokenRow, plainToken)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Token verification failed: hash mismatch for token id=" + tokenId);
                 }
@@ -194,5 +182,25 @@ public final class PlatformGatewayTokenUtil {
             log.debug("Platform gateway token verified successfully for gateway: " + tokenRow.gatewayId);
         }
         return PlatformGatewayDAO.fromTokenWithGateway(tokenRow);
+    }
+
+    /**
+     * Constant-time comparison of a plain token against a stored active token row hash.
+     */
+    public static boolean matchesActiveTokenHash(PlatformGatewayDAO.TokenWithGateway tokenRow, String plainToken)
+            throws NoSuchAlgorithmException {
+        if (tokenRow == null || plainToken == null) {
+            return false;
+        }
+        String computedHash = hashToken(plainToken);
+        byte[] computedBytes;
+        byte[] storedBytes;
+        try {
+            computedBytes = Hex.decodeHex(computedHash.toCharArray());
+            storedBytes = Hex.decodeHex(tokenRow.tokenHash.toCharArray());
+        } catch (DecoderException e) {
+            return false;
+        }
+        return computedBytes.length == storedBytes.length && MessageDigest.isEqual(computedBytes, storedBytes);
     }
 }
