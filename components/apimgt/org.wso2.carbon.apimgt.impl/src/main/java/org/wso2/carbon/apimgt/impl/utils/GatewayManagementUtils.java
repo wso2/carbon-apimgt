@@ -119,6 +119,11 @@ public class GatewayManagementUtils {
             index++;
             String token = entry.getRegistrationToken();
             String prefix = "[[apim.platform_gateway.connect]] entry " + index + ": ";
+            String org = entry.resolveOrganization();
+            if (APIConstants.GatewayNotification.WSO2_ALL_TENANTS.equals(org)) {
+                errors.add(prefix + "organization must be a single tenant domain; "
+                        + "WSO2-ALL-TENANTS is not supported for platform gateways");
+            }
             if (StringUtils.isBlank(token)) {
                 errors.add(prefix + "mandatory 'registration_token' is missing");
                 if (StringUtils.isBlank(entry.getUrl())) {

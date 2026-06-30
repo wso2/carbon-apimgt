@@ -26,9 +26,9 @@ import java.net.URI;
  * One connect-with-token config entry for a self-hosted Platform Gateway.
  * Used when multiple gateways are configured via {@code [[apim.platform_gateway.connect]]}.
  * {@code url} is required: the base URL where the gateway will be accessible (e.g. https://gw.example.com:8243).
- * {@code organization} is optional: tenant/org domain for gateway ownership (same as Admin Portal create).
- * When omitted, defaults to {@link MultitenantConstants#SUPER_TENANT_DOMAIN_NAME}. Set to
- * {@code WSO2-ALL-TENANTS} explicitly for a shared gateway visible to all tenants.
+ * {@code organization} is optional: single-tenant org domain for gateway ownership (same as Admin Portal create).
+ * When omitted, defaults to {@link MultitenantConstants#SUPER_TENANT_DOMAIN_NAME}. Platform gateways are not
+ * shared across tenants.
  */
 public class ConnectGatewayConfig {
     private String registrationToken = "";
@@ -71,7 +71,7 @@ public class ConnectGatewayConfig {
     }
 
     /**
-     * Tenant organization for this gateway (e.g. {@code carbon.super}, {@code t.com}, or {@code WSO2-ALL-TENANTS}).
+     * Single-tenant organization for this gateway (e.g. {@code carbon.super} or {@code t.com}).
      */
     public String getOrganization() {
         return organization;

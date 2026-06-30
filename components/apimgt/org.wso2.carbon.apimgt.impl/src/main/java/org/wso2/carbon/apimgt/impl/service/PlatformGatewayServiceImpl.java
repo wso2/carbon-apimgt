@@ -45,7 +45,6 @@ import java.net.URI;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -72,32 +71,12 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
     private PlatformGatewayServiceImpl() {
     }
 
-    /**
-     * Gateway environments for an organization plus any stored under the global-tenant scope
-     * ({@link APIConstants.GatewayNotification#WSO2_ALL_TENANTS}), so globally-scoped platform gateways are not
-     * omitted from list/name checks. When {@code organizationId} is already the global scope, only that list is used.
-     */
-    private static List<Environment> getEnvironmentsForOrganizationMergedWithGlobal(String organizationId)
-            throws APIManagementException {
-        return getEnvironmentsForOrganizationMergedWithGlobal(new APIAdminImpl(), organizationId);
-    }
-
-    private static List<Environment> getEnvironmentsForOrganizationMergedWithGlobal(APIAdminImpl apiAdmin,
-                                                                               String organizationId)
-            throws APIManagementException {
-        List<Environment> merged = new ArrayList<>(apiAdmin.getAllEnvironments(organizationId));
-        if (!APIConstants.GatewayNotification.WSO2_ALL_TENANTS.equals(organizationId)) {
-            merged.addAll(apiAdmin.getAllEnvironments(APIConstants.GatewayNotification.WSO2_ALL_TENANTS));
-        }
-        return merged;
-    }
-
     @Override
     public PlatformGatewayRegistrationResult createGateway(String organizationId, String name, String displayName,
                                                      String description, String vhost, String propertiesJson)
             throws APIManagementException {
         APIAdminImpl apiAdmin = new APIAdminImpl();
-        boolean nameExists = getEnvironmentsForOrganizationMergedWithGlobal(apiAdmin, organizationId).stream()
+        boolean nameExists = apiAdmin.getAllEnvironments(organizationId).stream()
                 .anyMatch(e -> APIConstants.WSO2_API_PLATFORM_GATEWAY.equals(e.getGatewayType())
                         && name.equals(e.getName()));
         if (nameExists) {
@@ -237,7 +216,7 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
     @Override
     public PlatformGateway getGatewayByNameAndOrganization(String name, String organizationId)
             throws APIManagementException {
-        Environment env = getEnvironmentsForOrganizationMergedWithGlobal(organizationId).stream()
+        Environment env = new APIAdminImpl().getAllEnvironments(organizationId).stream()
                 .filter(e -> APIConstants.WSO2_API_PLATFORM_GATEWAY.equals(e.getGatewayType())
                         && name.equals(e.getName()))
                 .findFirst()
@@ -247,7 +226,7 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
 
     @Override
     public List<PlatformGateway> listGatewaysByOrganization(String organizationId) throws APIManagementException {
-        return getEnvironmentsForOrganizationMergedWithGlobal(organizationId).stream()
+        return new APIAdminImpl().getAllEnvironments(organizationId).stream()
                 .filter(e -> APIConstants.WSO2_API_PLATFORM_GATEWAY.equals(e.getGatewayType()))
                 .map(PlatformGatewayServiceImpl::envToApiModel)
                 .collect(Collectors.toList());
@@ -288,8 +267,7 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
             throw new APIManagementException("Platform gateway not found: " + gatewayId,
                     ExceptionCodes.PLATFORM_GATEWAY_NOT_FOUND);
         }
-        if (!organizationId.equals(existing.getOrganizationId())
-                && !APIConstants.GatewayNotification.WSO2_ALL_TENANTS.equals(existing.getOrganizationId())) {
+        if (!organizationId.equals(existing.getOrganizationId())) {
             throw new APIManagementException("Platform gateway not found in organization: " + gatewayId,
                     ExceptionCodes.PLATFORM_GATEWAY_NOT_FOUND);
         }
@@ -383,26 +361,16 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
 
     /**
      * Resolves the organization under which a platform gateway environment is stored.
-     * Falls back to {@code WSO2-ALL-TENANTS} when the gateway was created as a shared connect gateway.
+     * Platform gateways are single-tenant scoped; lookup is limited to {@code requestOrganizationId}.
      */
     public static String resolveStorageOrganizationId(String requestOrganizationId, String gatewayId)
             throws APIManagementException {
-        if (StringUtils.isBlank(gatewayId)) {
+        if (StringUtils.isBlank(gatewayId) || StringUtils.isBlank(requestOrganizationId)) {
             return null;
         }
-        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
-        if (StringUtils.isNotBlank(requestOrganizationId)) {
-            Environment env = apiMgtDAO.getEnvironment(requestOrganizationId, gatewayId);
-            if (env != null && APIConstants.WSO2_API_PLATFORM_GATEWAY.equals(env.getGatewayType())) {
-                return requestOrganizationId;
-            }
-        }
-        String allTenantsOrg = APIConstants.GatewayNotification.WSO2_ALL_TENANTS;
-        if (!allTenantsOrg.equals(requestOrganizationId)) {
-            Environment env = apiMgtDAO.getEnvironment(allTenantsOrg, gatewayId);
-            if (env != null && APIConstants.WSO2_API_PLATFORM_GATEWAY.equals(env.getGatewayType())) {
-                return allTenantsOrg;
-            }
+        Environment env = ApiMgtDAO.getInstance().getEnvironment(requestOrganizationId, gatewayId);
+        if (env != null && APIConstants.WSO2_API_PLATFORM_GATEWAY.equals(env.getGatewayType())) {
+            return requestOrganizationId;
         }
         return null;
     }
@@ -533,7 +501,8 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
                 }
                 if (StringUtils.isNotBlank(entry.getName())) {
                     try {
-                        Environment existingByName = getEnvironmentsForOrganizationMergedWithGlobal(orgId).stream()
+                        APIAdminImpl apiAdminForNameCheck = new APIAdminImpl();
+                        Environment existingByName = apiAdminForNameCheck.getAllEnvironments(orgId).stream()
                                 .filter(e -> APIConstants.WSO2_API_PLATFORM_GATEWAY.equals(e.getGatewayType())
                                         && entry.getName().equals(e.getName()))
                                 .findFirst()

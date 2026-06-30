@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl.utils;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.ConnectGatewayConfig;
 
 import java.util.Arrays;
@@ -60,6 +61,19 @@ public class GatewayManagementUtilsConnectConfigTest {
 
         Assert.assertEquals(1, errors.size());
         Assert.assertTrue(errors.get(0).contains("invalid registration_token format"));
+    }
+
+    @Test
+    public void testValidateConnectGatewayEntriesRejectsAllTenantsOrganization() {
+        ConnectGatewayConfig entry = new ConnectGatewayConfig();
+        entry.setRegistrationToken("token-id.plain-token-value");
+        entry.setUrl("https://gw.example.com:8243");
+        entry.setOrganization(APIConstants.GatewayNotification.WSO2_ALL_TENANTS);
+
+        List<String> errors = GatewayManagementUtils.validateConnectGatewayEntries(Collections.singletonList(entry));
+
+        Assert.assertEquals(1, errors.size());
+        Assert.assertTrue(errors.get(0).contains("WSO2-ALL-TENANTS is not supported"));
     }
 
     @Test

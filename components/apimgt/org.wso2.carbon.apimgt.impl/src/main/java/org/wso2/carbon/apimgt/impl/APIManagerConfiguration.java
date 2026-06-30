@@ -3688,8 +3688,11 @@ public class APIManagerConfiguration {
                     ConnectGatewayConfig entry = new ConnectGatewayConfig();
                     OMElement rt = connectElem.getFirstChildWithName(
                             new QName(APIConstants.GatewayNotification.REGISTRATION_TOKEN));
-                    if (rt != null && rt.getText() != null && !rt.getText().trim().isEmpty()) {
-                        entry.setRegistrationToken(rt.getText().trim());
+                    if (rt != null) {
+                        String resolvedToken = MiscellaneousUtil.resolve(rt, secretResolver);
+                        if (resolvedToken != null && !resolvedToken.trim().isEmpty()) {
+                            entry.setRegistrationToken(resolvedToken.trim());
+                        }
                     }
                     OMElement nameEl = connectElem.getFirstChildWithName(
                             new QName(APIConstants.GatewayNotification.CONNECT_NAME));

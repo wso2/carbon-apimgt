@@ -8810,31 +8810,7 @@ public final class APIUtil {
 
         Map<String, Environment> allEnvironments = new LinkedHashMap<>(getReadOnlyEnvironments());
         allEnvironments.putAll(envFromDB);
-
-        // Shared platform gateways stored under WSO2-ALL-TENANTS are merged as fallbacks only.
-        String allTenantsOrg = APIConstants.GatewayNotification.WSO2_ALL_TENANTS;
-        if (organization != null && !organization.equals(allTenantsOrg)) {
-            getSharedPlatformGatewayEnvironments().forEach(allEnvironments::putIfAbsent);
-        }
         return allEnvironments;
-    }
-
-    private static volatile Map<String, Environment> sharedPlatformGatewayEnvironmentCache = Collections.emptyMap();
-    private static volatile long sharedPlatformGatewayEnvironmentCacheAtMs;
-
-    private static Map<String, Environment> getSharedPlatformGatewayEnvironments() throws APIManagementException {
-        long now = System.currentTimeMillis();
-        if (now - sharedPlatformGatewayEnvironmentCacheAtMs < 60_000L
-                && !sharedPlatformGatewayEnvironmentCache.isEmpty()) {
-            return sharedPlatformGatewayEnvironmentCache;
-        }
-        String allTenantsOrg = APIConstants.GatewayNotification.WSO2_ALL_TENANTS;
-        Map<String, Environment> sharedEnvs = ApiMgtDAO.getInstance().getAllEnvironments(allTenantsOrg).stream()
-                .filter(env -> APIConstants.WSO2_API_PLATFORM_GATEWAY.equals(env.getGatewayType()))
-                .collect(Collectors.toMap(Environment::getName, env -> env, (a, b) -> a));
-        sharedPlatformGatewayEnvironmentCache = sharedEnvs;
-        sharedPlatformGatewayEnvironmentCacheAtMs = now;
-        return sharedEnvs;
     }
 
     /**
