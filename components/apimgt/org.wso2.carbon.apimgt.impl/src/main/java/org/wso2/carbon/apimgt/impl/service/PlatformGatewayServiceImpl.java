@@ -45,6 +45,8 @@ import java.net.URI;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -376,6 +378,90 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
     }
 
     /**
+     * Reconstructs the gateway base URL from a {@link VHost} populated by {@link #toEnvironmentFromUrl(String, String,
+     * String, String, String)}. Uses HTTP when a non-default HTTP port is set and HTTPS port is still the default.
+     */
+    public static String buildGatewayBaseUrlFromVHost(VHost v) {
+        if (v == null || StringUtils.isBlank(v.getHost())) {
+            return "";
+        }
+        int httpPort = v.getHttpPort();
+        int httpsPort = v.getHttpsPort();
+        if (httpPort > 0 && httpPort != VHost.DEFAULT_HTTP_PORT
+                && (httpsPort <= 0 || httpsPort == VHost.DEFAULT_HTTPS_PORT)) {
+            return v.getHttpUrl();
+        }
+        return v.getHttpsUrl();
+    }
+
+    /**
+     * Resolves the gateway base URL for API/admin responses from environment storage.
+     */
+    public static String resolveGatewayBaseUrl(Environment env) {
+        if (env == null) {
+            return "";
+        }
+        Map<String, String> additional = env.getAdditionalProperties();
+        if (additional != null) {
+            String stored = additional.get(APIConstants.GatewayNotification.GATEWAY_BASE_URL);
+            if (StringUtils.isNotBlank(stored)) {
+                return stored.trim();
+            }
+        }
+        if (env.getVhosts() != null && !env.getVhosts().isEmpty()) {
+            return buildGatewayBaseUrlFromVHost(env.getVhosts().get(0));
+        }
+        return "";
+    }
+
+    /**
+     * Gateway base URLs for Dev Portal try-out / endpoint listing on a platform gateway environment.
+     * Uses the configured connect/admin base URL so an {@code http://host:port} entry is not rewritten as
+     * {@code https://host:443} via default {@link VHost#getHttpsUrl()}.
+     */
+    public static Map<String, String> resolveInvocationUrlsForTransports(Environment env, String transports) {
+        if (StringUtils.isBlank(transports)) {
+            return resolveInvocationUrlsForTransports(env, Collections.emptyList());
+        }
+        return resolveInvocationUrlsForTransports(env,
+                Arrays.stream(transports.split(","))
+                        .map(String::trim)
+                        .filter(StringUtils::isNotEmpty)
+                        .collect(Collectors.toList()));
+    }
+
+    public static Map<String, String> resolveInvocationUrlsForTransports(Environment env,
+                                                                          Collection<String> transports) {
+        Map<String, String> urls = new java.util.LinkedHashMap<>();
+        if (env == null || !APIConstants.WSO2_API_PLATFORM_GATEWAY.equals(env.getGatewayType())) {
+            return urls;
+        }
+        String baseUrl = resolveGatewayBaseUrl(env);
+        if (StringUtils.isBlank(baseUrl)) {
+            return urls;
+        }
+        boolean includesHttp = transports != null && transports.stream()
+                .anyMatch(t -> APIConstants.HTTP_PROTOCOL.equalsIgnoreCase(StringUtils.trimToEmpty(t)));
+        boolean includesHttps = transports != null && transports.stream()
+                .anyMatch(t -> APIConstants.HTTPS_PROTOCOL.equalsIgnoreCase(StringUtils.trimToEmpty(t)));
+        if (baseUrl.startsWith(APIConstants.HTTP_PROTOCOL_URL_PREFIX)) {
+            // HTTP-configured gateway: only expose under HTTP. OAS try-out prepends https:// for the HTTPS key,
+            // so putting an http:// base URL there produces malformed URLs like https://http//host:port.
+            if (includesHttp || includesHttps) {
+                urls.put(APIConstants.HTTP_PROTOCOL, baseUrl);
+            }
+        } else if (baseUrl.startsWith(APIConstants.HTTPS_PROTOCOL_URL_PREFIX)) {
+            if (includesHttps) {
+                urls.put(APIConstants.HTTPS_PROTOCOL, baseUrl);
+            }
+            if (includesHttp) {
+                urls.put(APIConstants.HTTP_PROTOCOL, baseUrl);
+            }
+        }
+        return urls;
+    }
+
+    /**
      * Map Environment (AM_GATEWAY_ENVIRONMENT with GATEWAY_TYPE=Platform) to API model.
      * Reads isActive, properties, createdAt, updatedAt from additionalProperties.
      */
@@ -384,14 +470,7 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
             return null;
         }
         Map<String, String> add = env.getAdditionalProperties();
-        String vhost = "";
-        if (env.getVhosts() != null && !env.getVhosts().isEmpty()) {
-            org.wso2.carbon.apimgt.api.model.VHost v = env.getVhosts().get(0);
-            vhost = v.getHost() != null ? v.getHost() : "";
-            if (v.getHttpsPort() > 0) {
-                vhost = vhost + ":" + v.getHttpsPort();
-            }
-        }
+        String vhost = resolveGatewayBaseUrl(env);
         boolean isActive = add != null && "true".equalsIgnoreCase(add.get("isActive"));
         String properties = add != null ? add.get("properties") : null;
         Date createdAt = null;
@@ -540,6 +619,9 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
                     additional.put("isActive", "false");
                     additional.put("createdAt", String.valueOf(now.getTime()));
                     additional.put("updatedAt", String.valueOf(now.getTime()));
+                    if (StringUtils.isNotBlank(urlOverride)) {
+                        additional.put(APIConstants.GatewayNotification.GATEWAY_BASE_URL, urlOverride.trim());
+                    }
                     env.setAdditionalProperties(additional);
                     apiAdmin.addEnvironment(orgId, env);
                     environmentCreated = true;
