@@ -3300,7 +3300,7 @@ public class APIManagerConfiguration {
 
     public boolean isJWTClaimCacheEnabled() {
 
-        String jwtClaimCacheExpiryEnabledString = getFirstProperty(APIConstants.JWT_CLAIM_CACHE_EXPIRY);
+        String jwtClaimCacheExpiryEnabledString = getFirstProperty(APIConstants.ENABLED_JWT_CLAIM_CACHE);
         if (StringUtils.isNotEmpty(jwtClaimCacheExpiryEnabledString)){
             return Boolean.parseBoolean(jwtClaimCacheExpiryEnabledString);
         }
