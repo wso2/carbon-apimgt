@@ -165,6 +165,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -445,7 +446,7 @@ public class PublisherCommonUtils {
         }
         Backend backend = backends.get(0);
 
-        Set<URITemplate> updatedTemplates = new HashSet<>();
+        Set<URITemplate> updatedTemplates = new LinkedHashSet<>();
         if (APIConstants.API_SUBTYPE_DIRECT_BACKEND.equals(originalAPI.getSubtype())) {
             updatedTemplates = updateTemplatesFromDefinition(backend.getDefinition(), null,
                     backend.getId(), originalAPI.getSubtype(), apiToUpdate.getUriTemplates()

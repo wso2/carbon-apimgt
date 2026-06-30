@@ -2305,10 +2305,10 @@ public class OAS2Parser extends APIDefinition {
         mergePathParametersIntoOperations(backendDefinition);
         if (backendDefinition.getPaths() == null || backendDefinition.getPaths().isEmpty()) {
             log.warn("Backend API definition has no paths defined");
-            return new HashSet<>();
+            return new LinkedHashSet<>();
         }
         Set<String> tools = new LinkedHashSet<>();
-        Set<URITemplate> updatedTools = new HashSet<>();
+        Set<URITemplate> updatedTools = new LinkedHashSet<>();
         for (URITemplate template : uriTemplates) {
             BackendOperation backendOperation = null;
             if (APISpecParserConstants.API_SUBTYPE_DIRECT_BACKEND.equals(mcpSubtype)) {

@@ -1062,7 +1062,7 @@ public class APIMappingUtil {
      */
     public static Set<URITemplate> fromOperationListToURITemplateList(List<APIOperationsDTO> operations) {
 
-        Set<URITemplate> uriTemplateList = new HashSet<>();
+        Set<URITemplate> uriTemplateList = new LinkedHashSet<>();
         for (APIOperationsDTO operation : operations) {
             URITemplate template = fromOperationToURITemplate(operation);
             uriTemplateList.add(template);

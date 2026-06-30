@@ -6492,7 +6492,7 @@ public class ApiMgtDAO {
                     refUriTemplates = getURITemplatesOfAPI(refApiId);
                     if (refUriTemplates == null) {
                         log.error("Failed to retrieve URI templates for referenced API: " + refApiId);
-                        refUriTemplates = new HashSet<>();
+                        refUriTemplates = new LinkedHashSet<>();
                     }
                 }
             }
