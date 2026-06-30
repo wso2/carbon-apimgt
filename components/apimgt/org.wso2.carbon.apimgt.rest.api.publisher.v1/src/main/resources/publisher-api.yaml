@@ -15089,7 +15089,6 @@ components:
           example: false
           default: false
           readOnly: true
-
       x-scopes:
         - apim:mcp_server_create
         - apim:mcp_server_import_export
@@ -17937,7 +17936,6 @@ components:
           example: https://example.com/mcp
         securityInfo:
           $ref: '#/components/schemas/SecurityInfo'
-
     SecurityInfo:
       title: MCP Server Security Information
       type: object
