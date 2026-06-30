@@ -562,8 +562,14 @@ public class ServicesApiServiceImpl implements ServicesApiService {
             APIUtil.validateRemoteURL(url, RestApiCommonUtil.getLoggedInUserTenantDomain());
             return true;
         } catch (APIManagementException e) {
-            log.error("The provided service definition URL is not allowed by the access-control policy: "
-                    + url, e);
+            String host;
+            try {
+                host = new URL(url).getHost();
+            } catch (MalformedURLException ex) {
+                host = "<unparseable>";
+            }
+            log.error("The provided service definition URL is not allowed by the access-control policy (host: "
+                    + host + ")", e);
             validationResponse.setValid(false);
             if (e.getErrorHandler() != null) {
                 validationResponse.getErrorItems().add(e.getErrorHandler());

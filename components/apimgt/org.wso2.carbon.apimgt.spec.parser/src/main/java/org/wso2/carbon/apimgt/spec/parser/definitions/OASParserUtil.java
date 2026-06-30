@@ -2664,6 +2664,11 @@ public class OASParserUtil {
                 if (!f.isFile()) {
                     continue;
                 }
+                // skip oversized members before reading them in — a file over the fetch cap can't be an OAS spec we'd crawl
+                long maxBytes = options.getRefFetchMaxBytes() > 0 ? options.getRefFetchMaxBytes() : REF_CRAWL_MAX_BYTES;
+                if (Files.size(p) > maxBytes) {
+                    continue;
+                }
                 String content = new String(Files.readAllBytes(p), StandardCharsets.UTF_8);
                 // base = null: only absolute http(s) refs in each file are followed
                 crawlRefs(content, null, options, visited, clients);

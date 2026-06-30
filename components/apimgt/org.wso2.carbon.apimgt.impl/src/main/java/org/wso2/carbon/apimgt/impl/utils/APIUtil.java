@@ -12572,11 +12572,13 @@ public final class APIUtil {
     }
 
     /**
-     * Wire the network-security hook onto the parser options. When the platform or tenant network-security policy
-     * is active, the OAS3 parser validates every external $ref URL (top-level, direct, and transitive/nested) through
-     * {@link #validateRemoteURL(String, String)} via the injected custom URL validator; when inactive, no validator
-     * is set and ref resolution behaves as before. The same {@code validateRemoteURL}/{@code applyAccessControlPolicy}
-     * engine is therefore authoritative for top-level URLs, direct refs, and nested refs alike.
+     * Wire the network-security hooks onto the parser options. When the platform or tenant network-security policy
+     * is active, this sets the {@code RefValidator} (and a redirect-disabled HTTP client) so the pre-parse crawl in
+     * {@code OASParserUtil.validateRemoteRefsRecursively} validates every external $ref URL (top-level, direct, and
+     * transitive/nested) through {@link #validateRemoteURL(String, String)} before it is fetched; when inactive, no
+     * validator is set and ref resolution behaves as before. The crawl runs on the stock parser — there is no
+     * swagger-parser URL-validator hook. The same {@code validateRemoteURL}/{@code applyAccessControlPolicy} engine
+     * is therefore authoritative for top-level URLs, direct refs, and nested refs alike.
      */
     public static void populateRefResolutionPolicy(OASParserOptions opts, String tenantDomain)
             throws APIManagementException {
