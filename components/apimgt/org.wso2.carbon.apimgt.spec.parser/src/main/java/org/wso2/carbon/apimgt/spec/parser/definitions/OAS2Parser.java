@@ -2259,7 +2259,7 @@ public class OAS2Parser extends APIDefinition {
             return new HashSet<>();
         }
         Set<String> tools = new LinkedHashSet<>();
-        Set<URITemplate> generatedTools = new HashSet<>();
+        Set<URITemplate> generatedTools = new LinkedHashSet<>();
         for (URITemplate template : uriTemplates) {
             BackendOperation backendOperation = null;
             if (APISpecParserConstants.API_SUBTYPE_DIRECT_BACKEND.equals(mcpSubtype)) {
