@@ -1416,9 +1416,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     private void updateAPIMetadata(API api) throws APIManagementException {
+        Map<String, String> existingMetadata = apiMgtDAO.getCurrentAPIMetadata(api.getUuid());
+        Map<String, String> merged = existingMetadata != null ? existingMetadata : new HashMap<>();
+        if (api.getMetadata() != null) {
+            merged.putAll(api.getMetadata());
+        }
         apiMgtDAO.deleteCurrentAPIMetadata(api.getUuid());
-        if (api.getMetadata() != null && !api.getMetadata().isEmpty()) {
-            apiMgtDAO.addAPIMetadata(api.getUuid(), api.getMetadata());
+        if (!merged.isEmpty()) {
+            if (log.isDebugEnabled()) {
+                log.debug("Adding merged metadata for API UUID: " + api.getUuid() + ", metadata count: " + merged.size());
+            }  
+            apiMgtDAO.addAPIMetadata(api.getUuid(), merged);
         }
     }
 
