@@ -3,13 +3,14 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>9.33.135-SNAPSHOT</version>
+        <version>9.33.143-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>org.wso2.carbon.apimgt.common.analytics</artifactId>
     <packaging>bundle</packaging>
+    <name>WSO2 Carbon - API Management Common Analytics</name>
 
     <dependencies>
         <dependency>

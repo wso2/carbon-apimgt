@@ -461,6 +461,12 @@ public class SystemScopesIssuer implements ScopeValidator {
                 if (!roleList.isEmpty()) {
                     authorizedScopes.add(scope);
                 }
+            } else if (roles == null && checkForProductRestAPIScopes(scope)) {
+                // Scope is not registered in tenant-conf.json and uses a product REST API scope prefix.
+                // Block issuance to prevent unauthorized use of unregistered system scopes.
+                if (log.isDebugEnabled()) {
+                    log.debug("Blocking unregistered system scope '" + scope + "' from being issued.");
+                }
             } else {
                 authorizedScopes.add(scope);
             }
@@ -903,5 +909,17 @@ public class SystemScopesIssuer implements ScopeValidator {
      */
     protected int getTenantIdOfUser(String username) {
         return IdentityTenantUtil.getTenantIdOfUser(username);
+    }
+
+    /**
+     * This method is used to check whether a given scope is a product REST API scope or not.
+     * Product REST API scopes are identified by their prefixes.
+     *
+     * @param scope scope
+     * @return true if it is a product REST API scope
+     */
+    private boolean checkForProductRestAPIScopes(String scope) {
+        return scope.startsWith("apim:") || scope.startsWith("apim_analytics:") ||
+                scope.startsWith("service_catalog:");
     }
 }
