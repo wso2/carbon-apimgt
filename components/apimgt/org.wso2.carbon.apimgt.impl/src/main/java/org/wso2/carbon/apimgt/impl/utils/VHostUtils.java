@@ -62,7 +62,19 @@ public class VHostUtils {
      * ({@code gatewayBaseUrl} or reconstructed VHost) instead of default https port 443.
      */
     public static VHost getInvocationVhostFromEnvironment(Environment environment, String host) {
-        if (environment == null || !APIConstants.WSO2_API_PLATFORM_GATEWAY.equals(environment.getGatewayType())) {
+        if (environment == null) {
+            VHost defaultVhost = new VHost();
+            defaultVhost.setHost(host);
+            defaultVhost.setHttpContext("");
+            defaultVhost.setHttpsPort(APIConstants.HTTPS_PROTOCOL_PORT);
+            defaultVhost.setHttpPort(APIConstants.HTTP_PROTOCOL_PORT);
+            defaultVhost.setWsPort(APIConstants.WS_PROTOCOL_PORT);
+            defaultVhost.setWsHost(host);
+            defaultVhost.setWssPort(APIConstants.WSS_PROTOCOL_PORT);
+            defaultVhost.setWssHost(host);
+            return defaultVhost;
+        }
+        if (!APIConstants.WSO2_API_PLATFORM_GATEWAY.equals(environment.getGatewayType())) {
             return getVhostFromEnvironment(environment, host);
         }
         String baseUrl = PlatformGatewayServiceImpl.resolveGatewayBaseUrl(environment);
