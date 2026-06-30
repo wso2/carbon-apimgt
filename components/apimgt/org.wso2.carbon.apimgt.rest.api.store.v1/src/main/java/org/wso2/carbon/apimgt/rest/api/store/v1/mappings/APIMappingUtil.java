@@ -672,6 +672,9 @@ public class APIMappingUtil {
         apiEndpointURLsDTO.setEnvironmentType(environment.getType());
 
         APIURLsDTO apiurLsDTO = new APIURLsDTO();
+        boolean isWs = StringUtils.equalsIgnoreCase("WS", apidto.getType());
+        boolean isGQLSubscription = StringUtils.equalsIgnoreCase(APIConstants.GRAPHQL_API, apidto.getType())
+                && isGraphQLSubscriptionsAvailable(apidto);
         Map<String, String> platformInvocationUrls =
                 PlatformGatewayServiceImpl.resolveInvocationUrlsForTransports(environment, apidto.getTransport());
         if (!platformInvocationUrls.isEmpty()) {
@@ -680,6 +683,18 @@ public class APIMappingUtil {
             }
             if (platformInvocationUrls.containsKey(APIConstants.HTTPS_PROTOCOL)) {
                 apiurLsDTO.setHttps(platformInvocationUrls.get(APIConstants.HTTPS_PROTOCOL) + context);
+            }
+            if (isGQLSubscription) {
+                apiurLsDTO.setWs(vHost.getWsUrl() + context);
+                apiurLsDTO.setWss(vHost.getWssUrl() + context);
+            }
+            if (isWs) {
+                if (vHost.getWsHost() != null) {
+                    apiurLsDTO.setWs(vHost.getWsUrl() + context);
+                }
+                if (vHost.getWssHost() != null) {
+                    apiurLsDTO.setWss(vHost.getWssUrl() + context);
+                }
             }
             apiEndpointURLsDTO.setUrLs(apiurLsDTO);
             if (apidto.isIsDefaultVersion() != null && apidto.isIsDefaultVersion()) {
@@ -693,13 +708,22 @@ public class APIMappingUtil {
                     apiDefaultVersionURLsDTO.setHttps(
                             platformInvocationUrls.get(APIConstants.HTTPS_PROTOCOL) + defaultContext);
                 }
+                if (isGQLSubscription) {
+                    apiDefaultVersionURLsDTO.setWs(vHost.getWsUrl() + defaultContext);
+                    apiDefaultVersionURLsDTO.setWss(vHost.getWssUrl() + defaultContext);
+                }
+                if (isWs) {
+                    if (vHost.getWsHost() != null) {
+                        apiDefaultVersionURLsDTO.setWs(vHost.getWsUrl() + defaultContext);
+                    }
+                    if (vHost.getWssHost() != null) {
+                        apiDefaultVersionURLsDTO.setWss(vHost.getWssUrl() + defaultContext);
+                    }
+                }
                 apiEndpointURLsDTO.setDefaultVersionURLs(apiDefaultVersionURLsDTO);
             }
             return apiEndpointURLsDTO;
         }
-        boolean isWs = StringUtils.equalsIgnoreCase("WS", apidto.getType());
-        boolean isGQLSubscription = StringUtils.equalsIgnoreCase(APIConstants.GRAPHQL_API, apidto.getType())
-                && isGraphQLSubscriptionsAvailable(apidto);
         if (!isWs) {
             if (apidto.isInitiatedFromGateway()) {
                 APIURLsDTO extractedURLs;

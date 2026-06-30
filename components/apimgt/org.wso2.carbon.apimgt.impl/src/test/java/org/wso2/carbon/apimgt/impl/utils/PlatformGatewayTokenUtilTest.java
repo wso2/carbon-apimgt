@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl.utils;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.wso2.carbon.apimgt.impl.dao.PlatformGatewayDAO;
 
 public class PlatformGatewayTokenUtilTest {
 
@@ -39,7 +40,12 @@ public class PlatformGatewayTokenUtilTest {
     }
 
     @Test
-    public void testConstantTimeEqualsRejectsDifferentToken() {
-        Assert.assertFalse(PlatformGatewayTokenUtil.constantTimeEquals("id.one", "id.two"));
+    public void testMatchesActiveTokenHash() throws Exception {
+        String plainToken = "plain-token";
+        String hash = PlatformGatewayTokenUtil.hashToken(plainToken);
+        PlatformGatewayDAO.TokenWithGateway tokenRow =
+                new PlatformGatewayDAO.TokenWithGateway(hash, "gw-1", "carbon.super", "gw");
+        Assert.assertTrue(PlatformGatewayTokenUtil.matchesActiveTokenHash(tokenRow, plainToken));
+        Assert.assertFalse(PlatformGatewayTokenUtil.matchesActiveTokenHash(tokenRow, "other-token"));
     }
 }

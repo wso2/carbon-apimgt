@@ -572,7 +572,14 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
         synchronized (bootstrapLock) {
             try {
                 PlatformGatewayDAO dao = PlatformGatewayDAO.getInstance();
-                if (dao.getActiveTokenById(tokenId) != null) {
+                PlatformGatewayDAO.TokenWithGateway activeToken = dao.getActiveTokenById(tokenId);
+                if (activeToken != null) {
+                    if (!PlatformGatewayTokenUtil.matchesActiveTokenHash(activeToken, plainToken)) {
+                        if (log.isWarnEnabled()) {
+                            log.warn("Connect with token: configured token hash mismatch for token_id=" + tokenId);
+                        }
+                        return false;
+                    }
                     if (log.isDebugEnabled()) {
                         log.debug("Connect with token: gateway already exists for token_id=" + tokenId);
                     }
@@ -641,7 +648,9 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
                                     + persistedGatewayId, rollbackEx);
                         }
                     }
-                    if (dao.getActiveTokenById(tokenId) != null) {
+                    activeToken = dao.getActiveTokenById(tokenId);
+                    if (activeToken != null
+                            && PlatformGatewayTokenUtil.matchesActiveTokenHash(activeToken, plainToken)) {
                         return true;
                     }
                     throw e;
