@@ -3987,6 +3987,8 @@ public final class APIConstants {
         public static final String CONNECT_DESCRIPTION = "Description";
         public static final String CONNECT_URL = "Url";
         public static final String CONNECT_ORGANIZATION = "Organization";
+        /** Original gateway base URL (scheme/host/port/path) for platform gateway environments. */
+        public static final String GATEWAY_BASE_URL = "gatewayBaseUrl";
         public static final String VERSION = "Version";
         public static final String API_KEY_NOTIFICATION = "APIKeyNotification";
         public static final String QUEUE_SIZE = "QueueSize";

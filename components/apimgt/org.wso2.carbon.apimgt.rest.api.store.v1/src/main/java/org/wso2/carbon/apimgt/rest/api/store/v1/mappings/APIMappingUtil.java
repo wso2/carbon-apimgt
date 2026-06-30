@@ -50,6 +50,7 @@ import org.wso2.carbon.apimgt.impl.factory.GatewayHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
+import org.wso2.carbon.apimgt.impl.service.PlatformGatewayServiceImpl;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIBusinessInformationDTO;
@@ -636,7 +637,7 @@ public class APIMappingUtil {
         VHost vHost;
         String context = apidto.getContext();
         if (StringUtils.isEmpty(customGatewayUrl)) {
-            vHost = VHostUtils.getVhostFromEnvironment(environment, host);
+            vHost = VHostUtils.getInvocationVhostFromEnvironment(environment, host);
         } else {
             if (!StringUtils.contains(customGatewayUrl, "://")) {
                 customGatewayUrl = APIConstants.HTTPS_PROTOCOL_URL_PREFIX + customGatewayUrl;
@@ -670,6 +671,31 @@ public class APIMappingUtil {
         apiEndpointURLsDTO.setEnvironmentType(environment.getType());
 
         APIURLsDTO apiurLsDTO = new APIURLsDTO();
+        Map<String, String> platformInvocationUrls =
+                PlatformGatewayServiceImpl.resolveInvocationUrlsForTransports(environment, apidto.getTransport());
+        if (!platformInvocationUrls.isEmpty()) {
+            if (platformInvocationUrls.containsKey(APIConstants.HTTP_PROTOCOL)) {
+                apiurLsDTO.setHttp(platformInvocationUrls.get(APIConstants.HTTP_PROTOCOL) + context);
+            }
+            if (platformInvocationUrls.containsKey(APIConstants.HTTPS_PROTOCOL)) {
+                apiurLsDTO.setHttps(platformInvocationUrls.get(APIConstants.HTTPS_PROTOCOL) + context);
+            }
+            apiEndpointURLsDTO.setUrLs(apiurLsDTO);
+            if (apidto.isIsDefaultVersion() != null && apidto.isIsDefaultVersion()) {
+                APIDefaultVersionURLsDTO apiDefaultVersionURLsDTO = new APIDefaultVersionURLsDTO();
+                String defaultContext = context.replaceAll("/" + apidto.getVersion() + "$", "");
+                if (apiurLsDTO.getHttp() != null) {
+                    apiDefaultVersionURLsDTO.setHttp(
+                            platformInvocationUrls.get(APIConstants.HTTP_PROTOCOL) + defaultContext);
+                }
+                if (apiurLsDTO.getHttps() != null) {
+                    apiDefaultVersionURLsDTO.setHttps(
+                            platformInvocationUrls.get(APIConstants.HTTPS_PROTOCOL) + defaultContext);
+                }
+                apiEndpointURLsDTO.setDefaultVersionURLs(apiDefaultVersionURLsDTO);
+            }
+            return apiEndpointURLsDTO;
+        }
         boolean isWs = StringUtils.equalsIgnoreCase("WS", apidto.getType());
         boolean isGQLSubscription = StringUtils.equalsIgnoreCase(APIConstants.GRAPHQL_API, apidto.getType())
                 && isGraphQLSubscriptionsAvailable(apidto);

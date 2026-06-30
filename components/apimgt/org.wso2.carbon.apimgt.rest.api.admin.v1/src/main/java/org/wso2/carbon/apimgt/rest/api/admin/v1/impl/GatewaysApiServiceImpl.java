@@ -138,12 +138,16 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         }
     }
 
-    /** Build gateway URL from stored host (DB stores host only). */
-    private static String toGatewayUrl(String host) {
-        if (StringUtils.isBlank(host)) {
+    /** Build gateway URL from stored value (full URL or legacy host[:port]). */
+    private static String toGatewayUrl(String vhost) {
+        if (StringUtils.isBlank(vhost)) {
             return null;
         }
-        return "https://" + host.trim();
+        String trimmed = vhost.trim();
+        if (trimmed.contains("://")) {
+            return trimmed;
+        }
+        return "https://" + trimmed;
     }
 
     /** VHost in request DTOs is URI; convert to string for parsing. */

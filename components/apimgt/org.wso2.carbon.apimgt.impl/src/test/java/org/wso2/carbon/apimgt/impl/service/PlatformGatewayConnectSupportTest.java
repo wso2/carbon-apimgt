@@ -27,8 +27,12 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ApiMgtDAO.class})
@@ -65,6 +69,82 @@ public class PlatformGatewayConnectSupportTest {
         Mockito.when(apiMgtDAO.getEnvironment("carbon.super", "gw-1")).thenReturn(null);
 
         Assert.assertNull(PlatformGatewayServiceImpl.resolveStorageOrganizationId("carbon.super", "gw-1"));
+    }
+
+    @Test
+    public void testBuildGatewayBaseUrlFromHttpVHostWithPath() {
+        VHost vhost = new VHost();
+        vhost.setHost("gw");
+        vhost.setHttpPort(8280);
+        vhost.setHttpsPort(VHost.DEFAULT_HTTPS_PORT);
+        vhost.setHttpContext("/base");
+
+        Assert.assertEquals("http://gw:8280/base",
+                PlatformGatewayServiceImpl.buildGatewayBaseUrlFromVHost(vhost));
+    }
+
+    @Test
+    public void testBuildGatewayBaseUrlFromHttpsVHostWithPath() {
+        VHost vhost = new VHost();
+        vhost.setHost("gw");
+        vhost.setHttpsPort(8443);
+        vhost.setHttpPort(VHost.DEFAULT_HTTP_PORT);
+        vhost.setHttpContext("/base");
+
+        Assert.assertEquals("https://gw:8443/base",
+                PlatformGatewayServiceImpl.buildGatewayBaseUrlFromVHost(vhost));
+    }
+
+    @Test
+    public void testResolveGatewayBaseUrlPrefersStoredValue() {
+        Environment env = new Environment();
+        Map<String, String> additional = new HashMap<>();
+        additional.put(APIConstants.GatewayNotification.GATEWAY_BASE_URL, "http://gw:8280/base");
+        env.setAdditionalProperties(additional);
+
+        Assert.assertEquals("http://gw:8280/base", PlatformGatewayServiceImpl.resolveGatewayBaseUrl(env));
+    }
+
+    @Test
+    public void testResolveInvocationUrlsForHttpConfiguredGateway() {
+        Environment env = new Environment();
+        env.setGatewayType(APIConstants.WSO2_API_PLATFORM_GATEWAY);
+        Map<String, String> additional = new HashMap<>();
+        additional.put(APIConstants.GatewayNotification.GATEWAY_BASE_URL, "http://localhost:8443");
+        env.setAdditionalProperties(additional);
+
+        Map<String, String> urls = PlatformGatewayServiceImpl.resolveInvocationUrlsForTransports(env, "http,https");
+
+        Assert.assertEquals("http://localhost:8443", urls.get(APIConstants.HTTP_PROTOCOL));
+        Assert.assertFalse(urls.containsKey(APIConstants.HTTPS_PROTOCOL));
+    }
+
+    @Test
+    public void testResolveInvocationUrlsForHttpConfiguredGatewayHttpsTransportOnly() {
+        Environment env = new Environment();
+        env.setGatewayType(APIConstants.WSO2_API_PLATFORM_GATEWAY);
+        Map<String, String> additional = new HashMap<>();
+        additional.put(APIConstants.GatewayNotification.GATEWAY_BASE_URL, "http://localhost:8443");
+        env.setAdditionalProperties(additional);
+
+        Map<String, String> urls = PlatformGatewayServiceImpl.resolveInvocationUrlsForTransports(env, "https");
+
+        Assert.assertEquals("http://localhost:8443", urls.get(APIConstants.HTTP_PROTOCOL));
+        Assert.assertFalse(urls.containsKey(APIConstants.HTTPS_PROTOCOL));
+    }
+
+    @Test
+    public void testResolveInvocationUrlsForHttpsConfiguredGateway() {
+        Environment env = new Environment();
+        env.setGatewayType(APIConstants.WSO2_API_PLATFORM_GATEWAY);
+        Map<String, String> additional = new HashMap<>();
+        additional.put(APIConstants.GatewayNotification.GATEWAY_BASE_URL, "https://localhost:8443");
+        env.setAdditionalProperties(additional);
+
+        Map<String, String> urls = PlatformGatewayServiceImpl.resolveInvocationUrlsForTransports(env, "https");
+
+        Assert.assertEquals("https://localhost:8443", urls.get(APIConstants.HTTPS_PROTOCOL));
+        Assert.assertFalse(urls.containsKey(APIConstants.HTTP_PROTOCOL));
     }
 
     @Test

@@ -17,10 +17,13 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings;
 
+import org.apache.commons.lang3.StringUtils;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.GatewayVisibilityPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.PlatformGateway;
 import org.wso2.carbon.apimgt.api.model.VHost;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.PlatformGatewayConnectConfig;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AdditionalPropertyDTO;
@@ -102,23 +105,33 @@ public class EnvironmentMappingUtil {
         envDTO.setMode(EnvironmentDTO.ModeEnum.WRITE_ONLY);
         envDTO.setType("hybrid");
 
-        // Populate vhosts from platform gateway's vhost
+        // Populate vhosts from platform gateway base URL
         List<VHostDTO> vhosts = new ArrayList<>();
-        if (gateway.getVhost() != null && !gateway.getVhost().isEmpty()) {
-            VHostDTO vhostDTO = new VHostDTO();
-            vhostDTO.setHost(gateway.getVhost());
-            vhostDTO.setHttpPort(80);
-            vhostDTO.setHttpsPort(443);
-            vhostDTO.setWsPort(9099);
-            vhostDTO.setWssPort(8099);
-            vhosts.add(vhostDTO);
+        String baseUrl = gateway.getVhost();
+        if (StringUtils.isNotBlank(baseUrl)) {
+            try {
+                if (baseUrl.contains("://")) {
+                    VHost vhost = VHost.fromEndpointUrls(new String[]{baseUrl.trim()});
+                    vhosts.add(fromVHostToVHostDTO(vhost));
+                    envDTO.setVhost(java.net.URI.create(baseUrl.trim()));
+                } else {
+                    VHostDTO vhostDTO = new VHostDTO();
+                    vhostDTO.setHost(baseUrl.trim());
+                    vhostDTO.setHttpPort(VHost.DEFAULT_HTTP_PORT);
+                    vhostDTO.setHttpsPort(VHost.DEFAULT_HTTPS_PORT);
+                    vhostDTO.setWsPort(9099);
+                    vhostDTO.setWssPort(8099);
+                    vhosts.add(vhostDTO);
+                    envDTO.setVhost(java.net.URI.create(APIConstants.HTTPS_PROTOCOL_URL_PREFIX + baseUrl.trim()));
+                }
+            } catch (APIManagementException e) {
+                VHostDTO vhostDTO = new VHostDTO();
+                vhostDTO.setHost(baseUrl.trim());
+                vhosts.add(vhostDTO);
+            }
         }
         envDTO.setVhosts(vhosts);
         envDTO.setEndpointURIs(new ArrayList<>());
-        // Gateway URL for platform gateways (same shape as Platform Gateways API vhost)
-        if (gateway.getVhost() != null && !gateway.getVhost().isEmpty()) {
-            envDTO.setVhost(java.net.URI.create("https://" + gateway.getVhost().trim()));
-        }
 
         // Include platform gateway metadata in additionalProperties for UI consumption
         List<AdditionalPropertyDTO> additionalProps = new ArrayList<>();
