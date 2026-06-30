@@ -57,19 +57,14 @@ public class PlatformGatewayConnectSupportTest {
     }
 
     @Test
-    public void testResolveStorageOrganizationIdFallsBackToAllTenants() throws Exception {
+    public void testResolveStorageOrganizationIdReturnsNullWhenNotInRequestOrg() throws Exception {
         PowerMockito.mockStatic(ApiMgtDAO.class);
         ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
         PowerMockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
 
-        Environment sharedEnv = new Environment();
-        sharedEnv.setGatewayType(APIConstants.WSO2_API_PLATFORM_GATEWAY);
         Mockito.when(apiMgtDAO.getEnvironment("carbon.super", "gw-1")).thenReturn(null);
-        Mockito.when(apiMgtDAO.getEnvironment(APIConstants.GatewayNotification.WSO2_ALL_TENANTS, "gw-1"))
-                .thenReturn(sharedEnv);
 
-        String storageOrg = PlatformGatewayServiceImpl.resolveStorageOrganizationId("carbon.super", "gw-1");
-        Assert.assertEquals(APIConstants.GatewayNotification.WSO2_ALL_TENANTS, storageOrg);
+        Assert.assertNull(PlatformGatewayServiceImpl.resolveStorageOrganizationId("carbon.super", "gw-1"));
     }
 
     @Test
