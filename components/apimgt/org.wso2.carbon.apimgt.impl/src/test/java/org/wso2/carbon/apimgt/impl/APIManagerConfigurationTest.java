@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.testng.Assert;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Environment;
@@ -27,6 +28,9 @@ import org.wso2.carbon.apimgt.api.model.Environment;
 import javax.xml.stream.XMLStreamException;
 
 import java.util.Map;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class APIManagerConfigurationTest {
 
@@ -128,5 +132,34 @@ public class APIManagerConfigurationTest {
         Assert.assertFalse(environmentsList.isEmpty());
         Environment defaultEnv = environmentsList.get("Default");
         Assert.assertFalse(defaultEnv.getAdditionalProperties().isEmpty());
+    }
+
+    @Test
+    public void testIsEnableSecureXMLProcessingDefaultsToTrueWhenAbsent() {
+        APIManagerConfiguration config = Mockito.spy(new APIManagerConfiguration());
+        Mockito.doReturn(null).when(config).getFirstProperty(
+                APIConstants.MEDIATION_CONFIG + "." + APIConstants.ENABLE_SECURE_XML_PROCESSING);
+        assertTrue(config.isEnableSecureXMLProcessing());
+    }
+
+    @Test
+    public void testIsEnableSecureXMLProcessingDefaultsToTrueWhenBlank() {
+        APIManagerConfiguration config = Mockito.spy(new APIManagerConfiguration());
+        Mockito.doReturn("").when(config).getFirstProperty(Mockito.anyString());
+        assertTrue(config.isEnableSecureXMLProcessing());
+    }
+
+    @Test
+    public void testIsEnableSecureXMLProcessingFalseOnlyWhenExplicitlyFalse() {
+        APIManagerConfiguration config = Mockito.spy(new APIManagerConfiguration());
+        Mockito.doReturn("false").when(config).getFirstProperty(Mockito.anyString());
+        assertFalse(config.isEnableSecureXMLProcessing());
+    }
+
+    @Test
+    public void testIsEnableSecureXMLProcessingTrueWhenExplicitlyTrue() {
+        APIManagerConfiguration config = Mockito.spy(new APIManagerConfiguration());
+        Mockito.doReturn("true").when(config).getFirstProperty(Mockito.anyString());
+        assertTrue(config.isEnableSecureXMLProcessing());
     }
 }

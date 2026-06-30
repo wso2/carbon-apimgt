@@ -36,14 +36,15 @@ import org.wso2.carbon.apimgt.gateway.threatprotection.analyzer.APIMThreatAnalyz
 import org.wso2.carbon.apimgt.gateway.threatprotection.configuration.XMLConfig;
 import org.wso2.carbon.apimgt.gateway.threatprotection.utils.ThreatExceptionHandler;
 import org.wso2.carbon.apimgt.gateway.threatprotection.utils.ThreatProtectorConstants;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.xml.sax.SAXException;
 
 import javax.xml.XMLConstants;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
@@ -52,7 +53,6 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -285,40 +285,118 @@ public class XMLSchemaValidator extends AbstractMediator {
      */
     private boolean validateSchema(MessageContext messageContext, BufferedInputStream bufferedInputStream)
             throws APIMThreatAnalyzerException {
-        String xsdURL;
+        Object messageProperty = messageContext.getProperty(APIMgtGatewayConstants.XSD_URL);
+        if (messageProperty == null || String.valueOf(messageProperty).isEmpty()) {
+            return true;
+        }
+        String xsdURL = String.valueOf(messageProperty);
+        String tenantDomain = GatewayUtils.getTenantDomain();
+        RemoteUrlValidator policy = url -> APIUtil.validateRemoteURL(url, tenantDomain);
+        return validateXsdAndPayload(xsdURL, policy, bufferedInputStream);
+    }
+
+    /**
+     * The xsdURL gate, decoupled from the Synapse MessageContext so it is unit-testable with a mock
+     * {@link RemoteUrlValidator}: (A) validate the top-level xsdURL; (B) fetch it and every nested ref
+     * redirect-safely and compile the schema; (C) validate the payload with NO external resolution.
+     */
+    static boolean validateXsdAndPayload(String xsdURL, RemoteUrlValidator policy,
+                                         BufferedInputStream bufferedInputStream)
+            throws APIMThreatAnalyzerException {
         Schema schema;
-        SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        // total try: the gate only ever throws APIMThreatAnalyzerException (→ clean 400), never a 500
         try {
-            if (isSecureXMLProcessingEnabled) {
-                schemaFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-                schemaFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-                schemaFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+            // (A) gate the top-level xsdURL before any fetch
+            assertXsdUrlAllowed(xsdURL, policy);
+
+            SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            // (B) hardening is unconditional — not gated on EnableSecureXMLProcessing
+            schemaFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            // http/https only at the JAXP layer; the resolver enforces per-host policy on nested refs
+            schemaFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "http,https");
+            schemaFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "http,https");
+            schemaFactory.setResourceResolver(new AccessControlledXmlResolver(policy));
+
+            // compile from fetched bytes, not newSchema(URL) — a URL lets Xerces follow redirects to a disallowed host
+            RedirectSafeXsdFetcher.Result topLevel;
+            try {
+                topLevel = RedirectSafeXsdFetcher.fetch(xsdURL, policy);
+            } catch (XsdRefBlockedException e) {
+                throw new APIMThreatAnalyzerException(e.getMessage());
+            } catch (IOException e) {
+                throw new APIMThreatAnalyzerException("Error occurred while fetching the XSD : " + e);
             }
 
-            Object messageProperty = messageContext.getProperty(APIMgtGatewayConstants.XSD_URL);
-            if (messageProperty == null) {
-                return true;
-            } else {
-                if (String.valueOf(messageProperty).isEmpty()) {
-                    return true;
-                } else {
-                    xsdURL = String.valueOf(messageProperty);
-                    URL schemaFile = new URL(xsdURL);
-                    schema = schemaFactory.newSchema(schemaFile);
-                    Source xmlFile = new StreamSource(bufferedInputStream);
-                    Validator validator = schema.newValidator();
-                    if (isSecureXMLProcessingEnabled) {
-                        validator.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-                        validator.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-                        validator.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
-                    }
-                    validator.validate(xmlFile);
+            try {
+                schema = schemaFactory.newSchema(
+                        new StreamSource(new ByteArrayInputStream(topLevel.body), topLevel.finalUrl));
+            } catch (RuntimeException e) {
+                // a wrapped block still surfaces as "not trusted"; otherwise a clean bad-request
+                XsdRefBlockedException blocked = unwrapBlockedRef(e);
+                if (blocked != null) {
+                    throw new APIMThreatAnalyzerException(blocked.getMessage());
                 }
+                throw new APIMThreatAnalyzerException("Error occurred while building the XML schema : " + e);
             }
+
+            // (C) validate the payload with external resolution disabled
+            Validator validator = schema.newValidator();
+            validator.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            validator.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            validator.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+            validator.validate(new StreamSource(bufferedInputStream));
         } catch (SAXException | IOException e) {
+            XsdRefBlockedException blocked = unwrapBlockedRef(e);
+            if (blocked != null) {
+                throw new APIMThreatAnalyzerException(blocked.getMessage());
+            }
             throw new APIMThreatAnalyzerException("Error occurred while parsing XML payload : " + e);
+        } catch (RuntimeException e) {
+            // total fail-closed net: any other unchecked → clean 400; java.lang.Error is intentionally not caught
+            XsdRefBlockedException blocked = unwrapBlockedRef(e);
+            if (blocked != null) {
+                throw new APIMThreatAnalyzerException(blocked.getMessage());
+            }
+            throw new APIMThreatAnalyzerException("Error occurred while validating against the XSD : " + e);
         }
         return true;
+    }
+
+    /**
+     * Validates the top-level xsdURL against the network access-control policy. Only
+     * http/https are permitted. Throws {@link APIMThreatAnalyzerException} (mapped to a
+     * 400 by the mediate() handler) when the URL is blocked or uses another scheme.
+     *
+     * @param xsdURL the publisher-supplied schema URL.
+     * @param policy the network access-control gate.
+     */
+    static void assertXsdUrlAllowed(String xsdURL, RemoteUrlValidator policy)
+            throws APIMThreatAnalyzerException {
+        if (!AccessControlledXmlResolver.isHttpOrHttps(xsdURL)) {
+            throw new APIMThreatAnalyzerException(
+                    "The provided XSD URL is not trusted (only HTTP/HTTPS is allowed): " + xsdURL);
+        }
+        try {
+            policy.validate(xsdURL);
+        } catch (APIManagementException e) {
+            throw new APIMThreatAnalyzerException("The provided XSD URL is not trusted: " + xsdURL);
+        }
+    }
+
+    /**
+     * Walks the cause chain (including {@code t} itself) and returns the first
+     * {@link XsdRefBlockedException}, or {@code null} if none is present. Lets the
+     * mediator fail closed even when the XML parser wraps a resolver-thrown block in
+     * another exception type. Bounded to avoid pathological cause cycles.
+     */
+    static XsdRefBlockedException unwrapBlockedRef(Throwable t) {
+        Throwable cur = t;
+        for (int depth = 0; cur != null && depth < 50; depth++, cur = cur.getCause()) {
+            if (cur instanceof XsdRefBlockedException) {
+                return (XsdRefBlockedException) cur;
+            }
+        }
+        return null;
     }
 
     /**
