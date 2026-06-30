@@ -78,6 +78,7 @@ import org.wso2.carbon.apimgt.spec.parser.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
 import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -650,9 +651,18 @@ public class ApisApiServiceImplUtils {
                                                                             String apiDefinition, String fileName,
                                                                             boolean returnContent)
             throws APIManagementException {
+        return validateOpenAPIDefinition(url, inputStream, apiDefinition, fileName, returnContent,
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+    }
+
+    public static APIDefinitionValidationResponse validateOpenAPIDefinition(String url, InputStream inputStream,
+                                                                            String apiDefinition, String fileName,
+                                                                            boolean returnContent, String tenantDomain)
+            throws APIManagementException {
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
-        OASParserOptions parserOptions = ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
+        OASParserOptions baseOptions = ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
                 .getAPIMDependencyConfigurations().getOasParserOptions();
+        OASParserOptions parserOptions = APIUtil.buildRefAwareOASParserOptions(baseOptions, tenantDomain);
         if (url != null) {
             try {
                 URL urlObj = new URL(url);

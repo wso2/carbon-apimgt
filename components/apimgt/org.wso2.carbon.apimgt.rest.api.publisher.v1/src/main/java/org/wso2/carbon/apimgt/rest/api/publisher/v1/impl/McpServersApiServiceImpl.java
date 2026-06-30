@@ -53,6 +53,7 @@ import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Label;
+import org.wso2.carbon.apimgt.api.model.OASParserOptions;
 import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
@@ -2452,11 +2453,12 @@ public class McpServersApiServiceImpl implements McpServersApiService {
 
             String definition = backendAPIDTO.getDefinition();
             if (StringUtils.isNotBlank(definition)) {
+                OASParserOptions parserOptions = APIUtil.buildRefAwareOASParserOptions(
+                        ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
+                                .getAPIMDependencyConfigurations().getOasParserOptions(),
+                        RestApiCommonUtil.getLoggedInUserTenantDomain());
                 APIDefinitionValidationResponse validationResponse =
-                        OASParserUtil.validateAPIDefinition(definition, Boolean.TRUE,
-                                ServiceReferenceHolder.getInstance()
-                                        .getAPIMDependencyConfigurationService()
-                                        .getAPIMDependencyConfigurations().getOasParserOptions());
+                        OASParserUtil.validateAPIDefinition(definition, Boolean.TRUE, parserOptions);
                 if (!validationResponse.isValid()) {
                     List<ErrorListItemDTO> errorListItemDTOs =
                             APIMappingUtil.getErrorListItemsDTOsFromErrorHandlers(

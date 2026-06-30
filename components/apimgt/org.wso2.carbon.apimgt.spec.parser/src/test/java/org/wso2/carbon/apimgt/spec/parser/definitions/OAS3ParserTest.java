@@ -80,7 +80,6 @@ public class OAS3ParserTest extends OASTestBase {
         String oas3Resources = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath), "UTF-8");
         OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
 
-        // check remove vendor extensions
         String definition = testGenerateAPIDefinitionWithExtension(oas3Parser, oas3Resources);
         SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(definition, null, null);
         OpenAPI openAPI = parseAttemptForV3.getOpenAPI();
@@ -98,11 +97,9 @@ public class OAS3ParserTest extends OASTestBase {
             }
         }
 
-        // check updated scopes in security definition
         Operation itemGet = openAPI.getPaths().get("/items").getGet();
         Assert.assertTrue(itemGet.getSecurity().get(0).get("default").contains("newScope"));
 
-        // check available scopes in security definition
         SecurityScheme securityScheme = openAPI.getComponents().getSecuritySchemes().get("default");
         OAuthFlow implicityOauth = securityScheme.getFlows().getImplicit();
         Assert.assertTrue(implicityOauth.getScopes().containsKey("newScope"));
@@ -299,29 +296,22 @@ public class OAS3ParserTest extends OASTestBase {
         String response = parser.getOASDefinitionForPublisher(api, oasDefinition);
         Assert.assertEquals(oasDefinitionEdited, response);
     }
-    // Test case for an API with clientCredentials security scheme
     @Test
     public void testProcessOtherSchemeScopesWithClientCredentialsScheme() throws Exception {
         String OPENAPI_SECURITY_SCHEMA_KEY = "default";
         String OPENAPI_DEFAULT_AUTHORIZATION_URL = "https://test.com";
 
-        //Read the API definition file
         String relativePath = "definitions" + File.separator + "oas3" + File.separator
                 + "oas3_client_credential_security_scheme.yaml";
         String swaggerContent = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath),
                 "UTF-8");
         swaggerContent = oas3Parser.processOtherSchemeScopes(swaggerContent);
         OpenAPI openAPI = oas3Parser.getOpenAPI(swaggerContent);
-        //Take the default security schema, where only the token url is not null
         SecurityScheme defaultSecScheme = openAPI.getComponents().getSecuritySchemes()
                 .get(OPENAPI_SECURITY_SCHEMA_KEY);
-        //Check whether the default security schema is not null
         Assert.assertNotNull(defaultSecScheme);
-        //Check whether the default security flows are not null
         Assert.assertNotNull(defaultSecScheme.getFlows());
-        //Check whether the token url is available
         Assert.assertNotNull(defaultSecScheme.getFlows().getClientCredentials().getTokenUrl());
-        //Check whether the authorization url is null
         Assert.assertNull(defaultSecScheme.getFlows().getClientCredentials().getAuthorizationUrl());
 
     }
@@ -550,5 +540,21 @@ public class OAS3ParserTest extends OASTestBase {
         apiScopes.add(globalScope);
         apiScopes.add(petLocalScope);
         return apiScopes;
+    }
+
+    @Test
+    public void testBuildParseOptionsResolveAndStyle() {
+        // stock parser only: must not wire any library-side network access-control gate
+        OASParserOptions opts = new OASParserOptions();
+        opts.setRefValidationTenantDomain("carbon.super");
+        opts.setRefValidator((url, tenantDomain) -> { });
+        io.swagger.v3.parser.core.models.ParseOptions po = OAS3Parser.buildParseOptions(opts, true);
+        Assert.assertTrue(po.isResolve());
+
+        io.swagger.v3.parser.core.models.ParseOptions noResolve = OAS3Parser.buildParseOptions(opts, false);
+        Assert.assertFalse(noResolve.isResolve());
+
+        io.swagger.v3.parser.core.models.ParseOptions nullOpts = OAS3Parser.buildParseOptions(null, true);
+        Assert.assertTrue(nullOpts.isResolve());
     }
 }
