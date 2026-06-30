@@ -5090,6 +5090,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     host = deployment.getVhost();
                 }
             }
+            Map<String, String> platformInvocationUrls =
+                    PlatformGatewayServiceImpl.resolveInvocationUrlsForTransports(environment, api.getTransports());
+            if (!platformInvocationUrls.isEmpty()) {
+                return platformInvocationUrls;
+            }
             if (StringUtils.isEmpty(host)) {
                 // returns empty server urls
                 hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, "");
@@ -5097,11 +5102,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
 
             VHost vhost = VHostUtils.getInvocationVhostFromEnvironment(environment, host);
-            Map<String, String> platformInvocationUrls =
-                    PlatformGatewayServiceImpl.resolveInvocationUrlsForTransports(environment, api.getTransports());
-            if (!platformInvocationUrls.isEmpty()) {
-                return platformInvocationUrls;
-            }
             GatewayAgentConfiguration gatewayConfiguration = ServiceReferenceHolder.getInstance()
                     .getExternalGatewayConnectorConfiguration(environment.getGatewayType());
 

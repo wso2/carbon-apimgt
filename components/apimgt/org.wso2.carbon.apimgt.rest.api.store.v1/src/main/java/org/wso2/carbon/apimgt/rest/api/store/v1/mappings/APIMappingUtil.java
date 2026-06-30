@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.v1.mappings;
 
+import java.util.regex.Pattern;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -683,7 +684,7 @@ public class APIMappingUtil {
             apiEndpointURLsDTO.setUrLs(apiurLsDTO);
             if (apidto.isIsDefaultVersion() != null && apidto.isIsDefaultVersion()) {
                 APIDefaultVersionURLsDTO apiDefaultVersionURLsDTO = new APIDefaultVersionURLsDTO();
-                String defaultContext = context.replaceAll("/" + apidto.getVersion() + "$", "");
+                String defaultContext = context.replaceAll("/" + Pattern.quote(apidto.getVersion()) + "$", "");
                 if (apiurLsDTO.getHttp() != null) {
                     apiDefaultVersionURLsDTO.setHttp(
                             platformInvocationUrls.get(APIConstants.HTTP_PROTOCOL) + defaultContext);
@@ -751,7 +752,7 @@ public class APIMappingUtil {
 
         APIDefaultVersionURLsDTO apiDefaultVersionURLsDTO = new APIDefaultVersionURLsDTO();
         if (apidto.isIsDefaultVersion() != null && apidto.isIsDefaultVersion()) {
-            String defaultContext = context.replaceAll("/" + apidto.getVersion() + "$", "");
+            String defaultContext = context.replaceAll("/" + Pattern.quote(apidto.getVersion()) + "$", "");
             if (!isWs) {
                 if (apidto.getTransport().contains(APIConstants.HTTP_PROTOCOL)) {
                     apiDefaultVersionURLsDTO.setHttp(vHost.getHttpUrl() + defaultContext);
