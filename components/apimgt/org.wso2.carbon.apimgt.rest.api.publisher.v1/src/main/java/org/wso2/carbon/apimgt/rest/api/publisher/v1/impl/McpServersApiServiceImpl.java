@@ -141,7 +141,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -2793,9 +2792,9 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             String username = (String) securityConfig.get(APIConstants.ENDPOINT_SECURITY_USERNAME);
             String password = (String) securityConfig.get(APIConstants.ENDPOINT_SECURITY_PASSWORD);
             if (StringUtils.isNotBlank(username) && StringUtils.isNotBlank(password)) {
-                String encoded = Base64.getEncoder()
-                        .encodeToString((username + ":" + password)
-                                .getBytes(StandardCharsets.UTF_8));
+                String encoded = new String(org.apache.commons.codec.binary.Base64
+                        .encodeBase64((username + ":" + password)
+                                .getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
                 SecurityInfoDTO info = new SecurityInfoDTO();
                 info.setIsSecure(true);
                 info.setHeader("Authorization");
