@@ -31,6 +31,7 @@ public class OASParserOptionsTest {
         Assert.assertNull(o.getYamlCodePointLimit());
         Assert.assertNull(o.getRefValidationTenantDomain());
         Assert.assertNull(o.getRefValidator());
+        Assert.assertEquals(0L, o.getRefFetchMaxBytes());
     }
 
     @Test
@@ -40,6 +41,7 @@ public class OASParserOptionsTest {
         base.setYamlCodePointLimit("5");
         base.setRefValidationTenantDomain("carbon.super");
         base.setRefValidator((url, t) -> { });
+        base.setRefFetchMaxFileSize("10");
 
         OASParserOptions copy = new OASParserOptions(base);
         Assert.assertFalse(copy.isExplicitStyleAndExplode());
@@ -47,6 +49,32 @@ public class OASParserOptionsTest {
         Assert.assertEquals("carbon.super", copy.getRefValidationTenantDomain());
         Assert.assertNotNull(copy.getRefValidator());
         Assert.assertSame(base.getRefValidator(), copy.getRefValidator());
+        Assert.assertEquals(base.getRefFetchMaxBytes(), copy.getRefFetchMaxBytes());
+    }
+
+    @Test
+    public void testRefFetchMaxFileSizeParsing() {
+        OASParserOptions o = new OASParserOptions();
+
+        // valid MB value -> bytes
+        o.setRefFetchMaxFileSize("10");
+        Assert.assertEquals(10L * 1024 * 1024, o.getRefFetchMaxBytes());
+
+        // null / blank -> unset (0), crawl applies its own fallback
+        o.setRefFetchMaxFileSize(null);
+        Assert.assertEquals(0L, o.getRefFetchMaxBytes());
+        o.setRefFetchMaxFileSize("   ");
+        Assert.assertEquals(0L, o.getRefFetchMaxBytes());
+
+        // non-numeric -> unset (0)
+        o.setRefFetchMaxFileSize("not-a-number");
+        Assert.assertEquals(0L, o.getRefFetchMaxBytes());
+
+        // non-positive -> unset (0)
+        o.setRefFetchMaxFileSize("0");
+        Assert.assertEquals(0L, o.getRefFetchMaxBytes());
+        o.setRefFetchMaxFileSize("-5");
+        Assert.assertEquals(0L, o.getRefFetchMaxBytes());
     }
 
     @Test

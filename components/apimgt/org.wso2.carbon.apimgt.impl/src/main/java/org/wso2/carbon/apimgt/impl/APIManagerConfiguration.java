@@ -3244,7 +3244,7 @@ public class APIManagerConfiguration {
         String value = getFirstProperty(APIConstants.MEDIATION_CONFIG + "."
                 + APIConstants.ENABLE_SECURE_XML_PROCESSING);
         // fail safe: missing/blank → secure; only an explicit "false" disables
-        if (value == null || value.isEmpty()) {
+        if (StringUtils.isBlank(value)) {
             return true;
         }
         return Boolean.parseBoolean(value);

@@ -2503,18 +2503,21 @@ public class OASParserUtil {
         }
     }
 
-    // Timeouts + redirect bound aligned with swagger-parser's RemoteUrl; no depth/total-ref cap (visited-set terminates cycles).
+    // Timeouts + redirect bound aligned with swagger-parser's RemoteUrl; a total-ref cap bounds distinct-URL chains
+    // (the visited-set only terminates cycles).
     private static final int REF_CRAWL_CONNECT_TIMEOUT_MS = 30000;
     private static final int REF_CRAWL_READ_TIMEOUT_MS = 60000;
     private static final int REF_CRAWL_MAX_REDIRECTS = 5;
+    // Bounds a chain of distinct attacker-served $ref URLs (unbounded recursion/OOM otherwise); 1000 ≫ any real spec.
+    private static final int REF_CRAWL_MAX_TOTAL_REFS = 1000;
     // fallback size cap, used only when the configured OAS import limit isn't carried on the options (e.g. a unit test)
     private static final int REF_CRAWL_MAX_BYTES = 10 * 1024 * 1024;
 
     /**
      * Recursively validate (and, to discover nested refs, fetch) every remote {@code $ref} reachable from
      * {@code content}. No-op when policy is inactive (no RefValidator hook set). Fail-closed: the first blocked ref
-     * or any fetch/IO error on an allowed ref aborts the whole crawl. There is no depth or total-ref cap (matching
-     * swagger-parser); the visited-set terminates cycles.
+     * or any fetch/IO error on an allowed ref aborts the whole crawl. A total-ref cap
+     * ({@value #REF_CRAWL_MAX_TOTAL_REFS}) bounds chains of distinct URLs; the visited-set terminates cycles.
      *
      * @param content the raw OpenAPI/Swagger definition to scan
      * @param baseUri  the base URI of {@code content} for resolving relative refs, or {@code null}
@@ -2544,6 +2547,13 @@ public class OASParserUtil {
             }
             if (!visited.add(dedupKey(absUrl))) {
                 continue;
+            }
+            // bound a chain of distinct attacker-served URLs (each doc → one new ref) that would otherwise
+            // grow the recursion depth + visited-set without limit
+            if (visited.size() > REF_CRAWL_MAX_TOTAL_REFS) {
+                throw new APIManagementException(
+                        "Too many remote $refs to resolve (limit " + REF_CRAWL_MAX_TOTAL_REFS + ")",
+                        ExceptionCodes.UNTRUSTED_URL);
             }
             // validate BEFORE any fetch — throws UNTRUSTED_URL on block
             options.getRefValidator().validate(absUrl, options.getRefValidationTenantDomain());

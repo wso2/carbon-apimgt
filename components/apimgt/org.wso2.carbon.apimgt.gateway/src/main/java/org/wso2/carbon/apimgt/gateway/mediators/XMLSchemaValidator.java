@@ -138,12 +138,16 @@ public class XMLSchemaValidator extends AbstractMediator {
                     }
                 }
             } catch (APIMThreatAnalyzerException e) {
+                // Full detail (schema URL, blocked internal host, parser error) is logged server-side only; the
+                // consumer receives a neutral message so a blocked/misconfigured URL can't be probed via the response.
                 logger.error(APIMgtGatewayConstants.BAD_REQUEST, e);
-                isValid = GatewayUtils.handleThreat(messageContext, ThreatProtectorConstants.HTTP_SC_CODE, e.getMessage());
+                isValid = GatewayUtils.handleThreat(messageContext, ThreatProtectorConstants.HTTP_SC_CODE,
+                        APIMgtGatewayConstants.XSD_VALIDATION_FAILED_MSG);
 
             } catch (IOException | XMLStreamException e) {
                 logger.error(APIMgtGatewayConstants.BAD_REQUEST, e);
-                isValid = GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.HTTP_SC_CODE, e.getMessage());
+                isValid = GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.HTTP_SC_CODE,
+                        APIMgtGatewayConstants.XSD_VALIDATION_FAILED_MSG);
             } finally {
                 // return analyzer to the pool
                 if (apimThreatAnalyzer != null) {

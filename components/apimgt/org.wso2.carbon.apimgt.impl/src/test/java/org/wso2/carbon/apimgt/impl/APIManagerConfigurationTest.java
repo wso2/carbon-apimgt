@@ -150,6 +150,13 @@ public class APIManagerConfigurationTest {
     }
 
     @Test
+    public void testIsEnableSecureXMLProcessingDefaultsToTrueWhenWhitespace() {
+        APIManagerConfiguration config = Mockito.spy(new APIManagerConfiguration());
+        Mockito.doReturn(" ").when(config).getFirstProperty(Mockito.anyString());
+        assertTrue(config.isEnableSecureXMLProcessing());
+    }
+
+    @Test
     public void testIsEnableSecureXMLProcessingFalseOnlyWhenExplicitlyFalse() {
         APIManagerConfiguration config = Mockito.spy(new APIManagerConfiguration());
         Mockito.doReturn("false").when(config).getFirstProperty(Mockito.anyString());

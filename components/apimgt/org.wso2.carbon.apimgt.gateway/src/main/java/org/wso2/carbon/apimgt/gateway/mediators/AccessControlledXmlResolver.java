@@ -61,8 +61,8 @@ public class AccessControlledXmlResolver implements LSResourceResolver {
             throw new XsdRefFetchException(
                     "Error fetching XSD reference " + absoluteUrl + ": " + e.getMessage(), e);
         }
-        // systemId = the final post-redirect URL so further relative refs resolve correctly
-        return new BytesLSInput(result.body, result.finalUrl, publicId, baseURI);
+        // systemId AND baseURI = the final post-redirect URL so further relative refs resolve correctly
+        return new BytesLSInput(result.body, result.finalUrl, publicId, result.finalUrl);
     }
 
     /**
