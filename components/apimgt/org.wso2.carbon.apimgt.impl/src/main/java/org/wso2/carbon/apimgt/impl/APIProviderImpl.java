@@ -1405,6 +1405,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void updateAPI(API api, int tenantId, String username) throws APIManagementException {
 
         MCPUtils.validateMCPResources(api.getUuid(), api.getOrganization(), api.getUriTemplates());
+        MCPUtils.validateMCPBackendOperations(api);
         apiMgtDAO.updateAPI(api, username);
         if (log.isDebugEnabled()) {
             log.debug("Successfully updated the API: " + api.getId() + " metadata in the database");
@@ -1415,9 +1416,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     private void updateAPIMetadata(API api) throws APIManagementException {
+        Map<String, String> existingMetadata = apiMgtDAO.getCurrentAPIMetadata(api.getUuid());
+        Map<String, String> merged = existingMetadata != null ? existingMetadata : new HashMap<>();
+        if (api.getMetadata() != null) {
+            merged.putAll(api.getMetadata());
+        }
         apiMgtDAO.deleteCurrentAPIMetadata(api.getUuid());
-        if (api.getMetadata() != null && !api.getMetadata().isEmpty()) {
-            apiMgtDAO.addAPIMetadata(api.getUuid(), api.getMetadata());
+        if (!merged.isEmpty()) {
+            if (log.isDebugEnabled()) {
+                log.debug("Adding merged metadata for API UUID: " + api.getUuid() + ", metadata count: " + merged.size());
+            }  
+            apiMgtDAO.addAPIMetadata(api.getUuid(), merged);
         }
     }
 
@@ -1516,18 +1525,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 apiMgtDAO.removeApiOperationMapping(oldURITemplates);
             }
         }
-        List<API> mcpServersAssociatedWithApi = getMCPServersUsedByAPI(api.getUuid(), api.getOrganization());
-        if (mcpServersAssociatedWithApi == null || mcpServersAssociatedWithApi.isEmpty()) {
-            APIUtil.validateAndUpdateURITemplates(api, tenantId);
-            apiMgtDAO.updateURITemplates(api, tenantId);
-            if (log.isDebugEnabled()) {
-                log.debug("Successfully updated the URI templates of API: " + apiIdentifier + " in the database");
-            }
-        } else {
-            if (log.isDebugEnabled()) {
-                log.debug(
-                        "Skipping URI template update for API: " + apiIdentifier + " as it is associated with MCP server(s)");
-            }
+        APIUtil.validateAndUpdateURITemplates(api, tenantId);
+        apiMgtDAO.updateURITemplates(api, tenantId);
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully updated the URI templates of API: " + apiIdentifier + " in the database");
         }
         // Update the resource scopes of the API in KM.
         // Need to remove the old local scopes and register new local scopes and, update the resource scope mappings

@@ -666,6 +666,7 @@ public enum ExceptionCodes implements ErrorHandler {
     AI_SERVICE_INVALID_ACCESS_TOKEN(903101, "Invalid access token provided for AI service", 401, "Invalid access token provided for AI service"),
     AI_SERVICE_QUOTA_EXCEEDED(903102, "Quota exceeded for AI service", 429, "Quota exceeded for AI service"),
     AI_SERVICE_PROVIDER_NOT_FOUND(903103,"AI Service Provider Not found for %s in organization" ,404 ,"AI Service Provider Not found for %s in organization" ,false ),
+    AI_SERVICE_PROVIDER_INVALID_METADATA_IDENTIFIER(903104, "Invalid metadata identifier", 400, "%s"),
 
     DOCUMENT_NAME_ILLEGAL_CHARACTERS(902016, "Document name cannot contain illegal characters", 400, "Document name contains one or more illegal characters"),
 
@@ -923,6 +924,8 @@ public enum ExceptionCodes implements ErrorHandler {
             "Referenced API is not supported for MCP Server."),
     DUPLICATE_MCP_TOOLS(904013, "Duplicate MCP tools", 400,
             "One or more MCP tools are duplicated."),
+    INVALID_MCP_BACKEND_OPERATION(904014, "Invalid MCP backend operation", 400,
+            "The backend operation '%s %s' does not match any resource in the referenced API '%s'."),
 
     // gateway notification related codes
     GATEWAY_NOTIFICATION_BAD_REQUEST(902052, "Invalid request for gateway notification", 400,
