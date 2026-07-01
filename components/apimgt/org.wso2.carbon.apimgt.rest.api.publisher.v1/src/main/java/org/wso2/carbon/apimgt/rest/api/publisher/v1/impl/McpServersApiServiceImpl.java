@@ -2854,6 +2854,20 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                 }
             }
 
+        } else if (APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST.equalsIgnoreCase(type)) {
+            String username = (String) securityConfig.get(APIConstants.ENDPOINT_SECURITY_USERNAME);
+            String password = (String) securityConfig.get(APIConstants.ENDPOINT_SECURITY_PASSWORD);
+            if (StringUtils.isNotBlank(username) && StringUtils.isNotBlank(password)) {
+                String digestHeaderValue = fetchDigestAuthHeaderForBackend(dto.getUrl(), username, password,
+                        backendId);
+                if (digestHeaderValue != null) {
+                    SecurityInfoDTO info = new SecurityInfoDTO();
+                    info.setIsSecure(true);
+                    info.setHeader("Authorization");
+                    info.setValue(digestHeaderValue);
+                    return info;
+                }
+            }
         }
 
         return null;
@@ -2940,6 +2954,150 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             log.error("Failed to fetch OAuth token for backend " + backendId + ": " + e.getMessage());
         }
         return null;
+    }
+
+    /**
+     * Derives a Digest Authorization header for the backend by first sending an unauthenticated probe request
+     * to obtain the WWW-Authenticate challenge, then computing the digest response from it.
+     *
+     * @param serverUrl  URL of the backend to challenge
+     * @param username   Endpoint username
+     * @param password   Endpoint password
+     * @param backendId  Backend id (used for logging)
+     * @return Digest Authorization header value, or null if the challenge could not be obtained/parsed
+     */
+    private String fetchDigestAuthHeaderForBackend(String serverUrl, String username, String password,
+            String backendId) {
+
+        try {
+            URL url = new URL(serverUrl);
+            org.apache.http.client.HttpClient httpClient = APIUtil.getHttpClient(url.getPort(), url.getProtocol());
+
+            HttpPost probeRequest = new HttpPost(serverUrl);
+            org.apache.http.HttpResponse probeResponse = httpClient.execute(probeRequest);
+            org.apache.http.Header wwwAuthHeader =
+                    probeResponse.getFirstHeader(org.apache.http.HttpHeaders.WWW_AUTHENTICATE);
+            EntityUtils.consumeQuietly(probeResponse.getEntity());
+
+            if (wwwAuthHeader == null || !StringUtils.startsWithIgnoreCase(wwwAuthHeader.getValue(), "Digest")) {
+                log.warn("Backend " + backendId + " did not return a Digest challenge; skipping Digest auth.");
+                return null;
+            }
+
+            Map<String, String> challenge = parseDigestChallenge(wwwAuthHeader.getValue());
+            String realm = challenge.get(APIConstants.DigestAuthConstants.REALM);
+            String serverNonce = challenge.get(APIConstants.DigestAuthConstants.NONCE);
+            String qop = challenge.get(APIConstants.DigestAuthConstants.QOP);
+            String opaque = challenge.get(APIConstants.DigestAuthConstants.OPAQUE);
+            String algorithm = challenge.get(APIConstants.DigestAuthConstants.ALGORITHM);
+
+            if (StringUtils.isBlank(realm) || StringUtils.isBlank(serverNonce)) {
+                log.warn("Digest challenge from backend " + backendId + " is missing realm/nonce.");
+                return null;
+            }
+
+            String digestUri = StringUtils.isNotBlank(url.getPath()) ? url.getPath() : "/";
+            String clientNonce = generateDigestClientNonce();
+            String nonceCount = qop != null ? APIConstants.DigestAuthConstants.INIT_NONCE_COUNT : null;
+
+            String ha1 = calculateDigestHA1(username, realm, password, algorithm, serverNonce, clientNonce);
+            String ha2 = org.apache.commons.codec.digest.DigestUtils.md5Hex("POST:" + digestUri);
+            String digestResponse = calculateDigestResponse(ha1, ha2, serverNonce, qop, nonceCount, clientNonce);
+
+            return constructDigestAuthHeader(username, realm, serverNonce, digestUri, digestResponse, qop, opaque,
+                    nonceCount, clientNonce, algorithm);
+        } catch (IOException e) {
+            log.warn("Failed to obtain Digest challenge from backend " + backendId + ": " + e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Splits the value of a WWW-Authenticate: Digest header into its constituent parameters.
+     *
+     * @param wwwAuthHeaderValue Raw header value, e.g. {@code Digest realm="x", nonce="y", qop="auth"}
+     * @return Map of digest parameter name to unquoted value
+     */
+    private Map<String, String> parseDigestChallenge(String wwwAuthHeaderValue) {
+
+        Map<String, String> challenge = new HashMap<>();
+        String paramsPart = wwwAuthHeaderValue.replaceFirst("(?i)^Digest\\s*", "");
+        for (String keyValue : paramsPart.split(",\\s*")) {
+            int separatorIndex = keyValue.indexOf('=');
+            if (separatorIndex < 0) {
+                continue;
+            }
+            String key = keyValue.substring(0, separatorIndex).trim();
+            String value = keyValue.substring(separatorIndex + 1).trim();
+            if (value.startsWith("\"") && value.endsWith("\"") && value.length() >= 2) {
+                value = value.substring(1, value.length() - 1);
+            }
+            challenge.put(key, value);
+        }
+        return challenge;
+    }
+
+    /**
+     * Calculates the HA1 value used in Digest authentication.
+     */
+    private String calculateDigestHA1(String username, String realm, String password, String algorithm,
+            String serverNonce, String clientNonce) {
+
+        String ha1 = org.apache.commons.codec.digest.DigestUtils.md5Hex(username + ":" + realm + ":" + password);
+        if (APIConstants.DigestAuthConstants.MD5_SESS.equalsIgnoreCase(algorithm)) {
+            ha1 = org.apache.commons.codec.digest.DigestUtils.md5Hex(ha1 + ":" + serverNonce + ":" + clientNonce);
+        }
+        return ha1;
+    }
+
+    /**
+     * Calculates the final Digest response hash from HA1/HA2, following RFC 2617.
+     */
+    private String calculateDigestResponse(String ha1, String ha2, String serverNonce, String qop,
+            String nonceCount, String clientNonce) {
+
+        if (qop != null) {
+            return org.apache.commons.codec.digest.DigestUtils.md5Hex(
+                    ha1 + ":" + serverNonce + ":" + nonceCount + ":" + clientNonce + ":" + qop + ":" + ha2);
+        }
+        return org.apache.commons.codec.digest.DigestUtils.md5Hex(ha1 + ":" + serverNonce + ":" + ha2);
+    }
+
+    /**
+     * Randomly generates a client nonce for Digest authentication.
+     */
+    private String generateDigestClientNonce() {
+
+        byte[] randomBytes = new byte[16];
+        new java.security.SecureRandom().nextBytes(randomBytes);
+        return new String(org.apache.commons.codec.binary.Hex.encodeHex(randomBytes));
+    }
+
+    /**
+     * Constructs the Digest Authorization header value to be sent to the backend.
+     */
+    private String constructDigestAuthHeader(String username, String realm, String serverNonce, String digestUri,
+            String digestResponse, String qop, String opaque, String nonceCount, String clientNonce,
+            String algorithm) {
+
+        StringBuilder header = new StringBuilder("Digest ");
+        header.append("username=\"").append(username).append("\", ");
+        header.append("realm=\"").append(realm).append("\", ");
+        header.append("nonce=\"").append(serverNonce).append("\", ");
+        header.append("uri=\"").append(digestUri).append("\", ");
+        if (qop != null) {
+            header.append("qop=").append(qop).append(", ");
+            header.append("nc=").append(nonceCount).append(", ");
+            header.append("cnonce=\"").append(clientNonce).append("\", ");
+        }
+        if (algorithm != null) {
+            header.append("algorithm=").append(algorithm).append(", ");
+        }
+        header.append("response=\"").append(digestResponse).append("\"");
+        if (opaque != null) {
+            header.append(", opaque=\"").append(opaque).append("\"");
+        }
+        return header.toString();
     }
 
     /**
