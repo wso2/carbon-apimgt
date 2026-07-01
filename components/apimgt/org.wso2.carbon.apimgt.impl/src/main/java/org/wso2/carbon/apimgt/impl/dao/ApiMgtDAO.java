@@ -22628,6 +22628,8 @@ public class ApiMgtDAO {
                 removeGraphQLComplexityStatement.setInt(1, apiId);
                 removeGraphQLComplexityStatement.setString(2, apiRevision.getRevisionUUID());
                 removeGraphQLComplexityStatement.executeUpdate();
+                // Removing revision metadata entry from AM_API_REVISION_METADATA table
+                deleteAPIRevisionMetaData(connection, apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
 
                 // Removing related revision entries for operation policies
                 deleteAllAPISpecificOperationPoliciesByAPIUUID(connection, apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
