@@ -821,6 +821,10 @@ public class APIMappingUtil {
         if (protocolVersion != null && !protocolVersion.isEmpty()) {
             model.getMetadata().put(APIConstants.MCP.PROTOCOL_VERSION_KEY, protocolVersion);
         }
+        String mcpPathAppended = dto.getMcpPathAppended();
+        if (mcpPathAppended != null && !mcpPathAppended.isEmpty()) {
+            model.getMetadata().put(APIConstants.MCP.MCP_PATH_APPENDED_METADATA_KEY, mcpPathAppended);
+        }
         String displayName = dto.getDisplayName();
         if (displayName != null && !displayName.trim().isEmpty()) {
             model.setDisplayName(displayName);
@@ -2515,6 +2519,14 @@ public class APIMappingUtil {
                 ? model.getMetadata().get(APIConstants.MCP.PROTOCOL_VERSION_KEY) : null;
         if (protocolVersion != null) {
             dto.setProtocolVersion(protocolVersion);
+        }
+        // Carry the mcpPathAppended metadata through the artifact so gateway template resolution
+        // reflects the stored value. Otherwise the value is lost on export/import and the gateway
+        // falls back to its append default, doubling the /mcp path for proxy MCP servers.
+        String mcpPathAppended = model.getMetadata() != null
+                ? model.getMetadata().get(APIConstants.MCP.MCP_PATH_APPENDED_METADATA_KEY) : null;
+        if (mcpPathAppended != null) {
+            dto.setMcpPathAppended(mcpPathAppended);
         }
         return dto;
     }

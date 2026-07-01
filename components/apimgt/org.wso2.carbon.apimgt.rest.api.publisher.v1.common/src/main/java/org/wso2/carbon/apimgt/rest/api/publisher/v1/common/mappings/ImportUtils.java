@@ -194,6 +194,9 @@ public class ImportUtils {
                 JsonElement jsonObject = retrieveValidatedDTOObject(extractedFolderPath, preserveProvider,
                         userName, ImportExportConstants.TYPE_MCP_SERVER);
                 importedApiDTO = new Gson().fromJson(jsonObject, MCPServerDTO.class);
+                if (importedApiDTO != null && importedApiDTO.getMcpPathAppended() == null) {
+                    importedApiDTO.setMcpPathAppended(Boolean.TRUE.toString());
+                }
             }
         } catch (IOException e) {
             throw new APIManagementException(
