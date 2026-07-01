@@ -145,7 +145,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -2663,6 +2662,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         if (StringUtils.isBlank(serverUrl)) {
             RestApiUtil.handleBadRequest("MCP server URL cannot be empty.", log);
         }
+        dto.setUrl(serverUrl);
 
         final String organization = RestApiUtil.getValidatedOrganization(messageContext);
         SecurityInfoDTO securityInfo = dto.getSecurityInfo();
@@ -2710,7 +2710,10 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                 PublisherCommonUtils.validateMCPServer(serverUrl, securityInfo, true, organization);
 
         if (log.isDebugEnabled()) {
-            log.info("MCP server validation completed for serverUrl: " + serverUrl + ", organization: " + organization);
+            // Query string may carry a derived API key (QUERY_PARAMETER identifier type); never log it.
+            String urlForLogging = StringUtils.substringBefore(serverUrl, "?");
+            log.info("MCP server validation completed for serverUrl: " + urlForLogging + ", organization: "
+                    + organization);
         }
         return Response.ok(result).build();
     }
@@ -2756,9 +2759,12 @@ public class McpServersApiServiceImpl implements McpServersApiService {
 
     private static String extractBackendEndpointUrl(JSONObject endpointConfig, String endpointType) {
         String key = APIConstants.ENDPOINT_SECURITY_SANDBOX.equalsIgnoreCase(endpointType)
-                ? "sandbox_endpoints" : "production_endpoints";
-        JSONObject endpoints = (JSONObject) endpointConfig.get(key);
-        return endpoints != null ? (String) endpoints.get("url") : null;
+                ? APIConstants.ENDPOINT_SANDBOX_ENDPOINTS : APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS;
+        Object endpointsObj = endpointConfig.get(key);
+        if (!(endpointsObj instanceof JSONObject)) {
+            return null;
+        }
+        return (String) ((JSONObject) endpointsObj).get(APIConstants.ENDPOINT_URL);
     }
 
     private SecurityInfoDTO deriveSecurityInfoFromBackend(String backendId, JSONObject endpointConfig,
@@ -2875,13 +2881,9 @@ public class McpServersApiServiceImpl implements McpServersApiService {
 
     private static String appendQueryParam(String url, String paramName, String paramValue) {
 
-        try {
-            String encoded = URLEncoder.encode(paramName, "UTF-8")
-                    + "=" + URLEncoder.encode(paramValue, "UTF-8");
-            return url + (url.contains("?") ? "&" : "?") + encoded;
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException("UTF-8 encoding not supported", e);
-        }
+        String encoded = URLEncoder.encode(paramName, StandardCharsets.UTF_8)
+                + "=" + URLEncoder.encode(paramValue, StandardCharsets.UTF_8);
+        return url + (url.contains("?") ? "&" : "?") + encoded;
     }
 
     private String decryptEndpointCredential(String encryptedValue) throws CryptoException {
@@ -2939,7 +2941,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                 urlParameters.add(new BasicNameValuePair(APIConstants.TOKEN_GRANT_TYPE_KEY,
                         APIConstants.GRANT_TYPE_VALUE));
             }
-            request.setEntity(new UrlEncodedFormEntity(urlParameters));
+            request.setEntity(new UrlEncodedFormEntity(urlParameters, StandardCharsets.UTF_8));
 
             org.apache.http.HttpResponse httpResponse = httpClient.execute(request);
             if (httpResponse.getStatusLine().getStatusCode() == org.apache.http.HttpStatus.SC_OK) {
@@ -2949,6 +2951,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             } else {
                 log.error("OAuth token request for backend " + backendId + " returned HTTP "
                         + httpResponse.getStatusLine().getStatusCode());
+                EntityUtils.consumeQuietly(httpResponse.getEntity());
             }
         } catch (IOException e) {
             log.error("Failed to fetch OAuth token for backend " + backendId + ": " + e.getMessage());
@@ -3012,8 +3015,13 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         }
     }
 
+    private static final java.util.regex.Pattern DIGEST_PARAM_PATTERN =
+            java.util.regex.Pattern.compile("(\\w+)=(?:\"([^\"]*)\"|([^,\\s]+))");
+
     /**
      * Splits the value of a WWW-Authenticate: Digest header into its constituent parameters.
+     * Quote-aware, so commas inside quoted values (e.g. {@code qop="auth,auth-int"}) are not treated
+     * as parameter separators.
      *
      * @param wwwAuthHeaderValue Raw header value, e.g. {@code Digest realm="x", nonce="y", qop="auth"}
      * @return Map of digest parameter name to unquoted value
@@ -3022,16 +3030,10 @@ public class McpServersApiServiceImpl implements McpServersApiService {
 
         Map<String, String> challenge = new HashMap<>();
         String paramsPart = wwwAuthHeaderValue.replaceFirst("(?i)^Digest\\s*", "");
-        for (String keyValue : paramsPart.split(",\\s*")) {
-            int separatorIndex = keyValue.indexOf('=');
-            if (separatorIndex < 0) {
-                continue;
-            }
-            String key = keyValue.substring(0, separatorIndex).trim();
-            String value = keyValue.substring(separatorIndex + 1).trim();
-            if (value.startsWith("\"") && value.endsWith("\"") && value.length() >= 2) {
-                value = value.substring(1, value.length() - 1);
-            }
+        java.util.regex.Matcher matcher = DIGEST_PARAM_PATTERN.matcher(paramsPart);
+        while (matcher.find()) {
+            String key = matcher.group(1);
+            String value = matcher.group(2) != null ? matcher.group(2) : matcher.group(3);
             challenge.put(key, value);
         }
         return challenge;
