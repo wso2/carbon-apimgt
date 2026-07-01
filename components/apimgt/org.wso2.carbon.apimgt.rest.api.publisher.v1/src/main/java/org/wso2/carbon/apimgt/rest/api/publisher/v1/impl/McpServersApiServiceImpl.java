@@ -2682,6 +2682,9 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         MCPServerValidationResponseDTO result =
                 PublisherCommonUtils.validateMCPServer(serverUrl, securityInfo, true, organization);
 
+        if (log.isDebugEnabled()) {
+            log.info("MCP server validation completed for serverUrl: " + serverUrl + ", organization: " + organization);
+        }
         return Response.ok(result).build();
     }
 
