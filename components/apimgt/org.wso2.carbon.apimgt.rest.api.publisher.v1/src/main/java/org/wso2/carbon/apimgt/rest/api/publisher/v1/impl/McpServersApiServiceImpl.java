@@ -25,6 +25,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.phase.PhaseInterceptorChain;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -129,13 +135,18 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -2653,13 +2664,30 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         if (dto == null) {
             RestApiUtil.handleBadRequest("Request body cannot be empty.", log);
         }
-        final String serverUrl = StringUtils.trimToEmpty(dto.getUrl());
+        String serverUrl = StringUtils.trimToEmpty(dto.getUrl());
         if (StringUtils.isBlank(serverUrl)) {
             RestApiUtil.handleBadRequest("MCP server URL cannot be empty.", log);
         }
 
         final String organization = RestApiUtil.getValidatedOrganization(messageContext);
         SecurityInfoDTO securityInfo = dto.getSecurityInfo();
+
+        // If the caller did not supply security info but provided mcpServerId + endpointType,
+        // derive credentials from the stored endpoint security of the matching backend.
+        // For query-param API keys the method updates dto.getUrl() instead of returning a SecurityInfoDTO.
+        if (securityInfo == null) {
+            String mcpServerId = StringUtils.trimToNull(dto.getMcpServerId());
+            String endpointType = dto.getEndpointType() != null ? dto.getEndpointType().toString() : null;
+            if ((mcpServerId == null) != (endpointType == null)) {
+                RestApiUtil.handleBadRequest(
+                        "Both mcpServerId and endpointType must be provided together.", log);
+            }
+            if (mcpServerId != null && endpointType != null) {
+                securityInfo = deriveBackendSecurityInfo(mcpServerId, endpointType, organization, serverUrl, dto);
+                serverUrl = dto.getUrl();
+            }
+        }
+
         final boolean isSecure = securityInfo != null && Boolean.TRUE.equals(securityInfo.isIsSecure());
 
         if (isSecure && !StringUtils.startsWithIgnoreCase(serverUrl, "https://")) {
@@ -2690,6 +2718,233 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             log.info("MCP server validation completed for serverUrl: " + serverUrl + ", organization: " + organization);
         }
         return Response.ok(result).build();
+    }
+
+    private SecurityInfoDTO deriveBackendSecurityInfo(String mcpServerId, String endpointType,
+            String organization, String serverUrl, MCPServerValidationRequestDTO dto) throws APIManagementException {
+
+        if (!StringUtils.startsWithIgnoreCase(serverUrl, "https://")) {
+            return null;
+        }
+
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        List<Backend> backends = apiProvider.getMCPServerBackends(mcpServerId, organization);
+        if (backends == null || backends.isEmpty()) {
+            return null;
+        }
+
+        for (Backend backend : backends) {
+            if (StringUtils.isBlank(backend.getEndpointConfig())) {
+                continue;
+            }
+            JSONObject endpointConfig;
+            try {
+                endpointConfig = (JSONObject) new JSONParser().parse(backend.getEndpointConfig());
+            } catch (ParseException e) {
+                log.warn("Failed to parse endpointConfig for backend " + backend.getId() + ": " + e.getMessage());
+                continue;
+            }
+            String backendUrl = extractBackendEndpointUrl(endpointConfig, endpointType);
+            if (!serverUrl.equals(backendUrl)) {
+                continue;
+            }
+            SecurityInfoDTO info = deriveSecurityInfoFromBackend(backend.getId(), endpointConfig, endpointType, dto);
+            if (info != null) {
+                return info;
+            }
+            if (!serverUrl.equals(dto.getUrl())) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    private static String extractBackendEndpointUrl(JSONObject endpointConfig, String endpointType) {
+        String key = APIConstants.ENDPOINT_SECURITY_SANDBOX.equalsIgnoreCase(endpointType)
+                ? "sandbox_endpoints" : "production_endpoints";
+        JSONObject endpoints = (JSONObject) endpointConfig.get(key);
+        return endpoints != null ? (String) endpoints.get("url") : null;
+    }
+
+    private SecurityInfoDTO deriveSecurityInfoFromBackend(String backendId, JSONObject endpointConfig,
+            String endpointType, MCPServerValidationRequestDTO dto)
+            throws APIManagementException {
+
+        JSONObject securityRoot = (JSONObject) endpointConfig.get(APIConstants.ENDPOINT_SECURITY);
+        if (securityRoot == null) {
+            return null;
+        }
+
+        String envKey = APIConstants.ENDPOINT_SECURITY_SANDBOX.equalsIgnoreCase(endpointType)
+                ? APIConstants.ENDPOINT_SECURITY_SANDBOX
+                : APIConstants.ENDPOINT_SECURITY_PRODUCTION;
+        JSONObject securityConfig = (JSONObject) securityRoot.get(envKey);
+        if (securityConfig == null) {
+            return null;
+        }
+
+        Object enabledObj = securityConfig.get(APIConstants.ENDPOINT_SECURITY_ENABLED);
+        if (!(Boolean.TRUE.equals(enabledObj))) {
+            return null;
+        }
+
+        String type = (String) securityConfig.get(APIConstants.ENDPOINT_SECURITY_TYPE);
+        if (type == null) {
+            return null;
+        }
+
+        if (APIConstants.ENDPOINT_SECURITY_TYPE_BASIC.equalsIgnoreCase(type)) {
+            String username = (String) securityConfig.get(APIConstants.ENDPOINT_SECURITY_USERNAME);
+            String password = (String) securityConfig.get(APIConstants.ENDPOINT_SECURITY_PASSWORD);
+            if (StringUtils.isNotBlank(username) && StringUtils.isNotBlank(password)) {
+                String encoded = Base64.getEncoder()
+                        .encodeToString((username + ":" + password)
+                                .getBytes(StandardCharsets.UTF_8));
+                SecurityInfoDTO info = new SecurityInfoDTO();
+                info.setIsSecure(true);
+                info.setHeader("Authorization");
+                info.setValue("Basic " + encoded);
+                return info;
+            }
+
+        } else if (APIConstants.ENDPOINT_SECURITY_TYPE_API_KEY.equalsIgnoreCase(type)) {
+            String identifier = (String) securityConfig.get(APIConstants.ENDPOINT_SECURITY_API_KEY_IDENTIFIER);
+            String encryptedValue = (String) securityConfig.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE);
+            String identifierType = (String) securityConfig
+                    .get(APIConstants.ENDPOINT_SECURITY_API_KEY_IDENTIFIER_TYPE);
+
+            if (StringUtils.isNotBlank(identifier) && StringUtils.isNotBlank(encryptedValue)) {
+                try {
+                    String decrypted = decryptEndpointCredential(encryptedValue);
+                    if ("HEADER".equalsIgnoreCase(identifierType)) {
+                        SecurityInfoDTO info = new SecurityInfoDTO();
+                        info.setIsSecure(true);
+                        info.setHeader(identifier);
+                        info.setValue(decrypted);
+                        return info;
+                    } else if ("QUERY_PARAMETER".equalsIgnoreCase(identifierType)) {
+                        dto.setUrl(appendQueryParam(dto.getUrl(), identifier, decrypted));
+                        return null;
+                    } else {
+                        log.warn("Unsupported API key identifier type '" + identifierType + "' for backend "
+                                + backendId + ". Only HEADER and QUERY_PARAMETER are supported.");
+                    }
+                } catch (CryptoException e) {
+                    log.warn("Failed to decrypt API key for backend " + backendId + ": " + e.getMessage());
+                }
+            }
+
+        } else if (APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH.equalsIgnoreCase(type)) {
+            String tokenUrl = (String) securityConfig.get(APIConstants.OAuthConstants.TOKEN_API_URL);
+            String clientId = (String) securityConfig.get(APIConstants.ENDPOINT_SECURITY_CLIENT_ID);
+            String encryptedSecret = (String) securityConfig.get(APIConstants.ENDPOINT_SECURITY_CLIENT_SECRET);
+            String grantType = (String) securityConfig.get(APIConstants.OAuthConstants.GRANT_TYPE);
+
+            if (StringUtils.isNotBlank(tokenUrl) && StringUtils.isNotBlank(clientId)
+                    && StringUtils.isNotBlank(encryptedSecret)) {
+                try {
+                    String clientSecret = decryptEndpointCredential(encryptedSecret);
+                    String accessToken = fetchOAuthTokenForBackend(tokenUrl, clientId, clientSecret,
+                            grantType, securityConfig, backendId);
+                    if (accessToken != null) {
+                        SecurityInfoDTO info = new SecurityInfoDTO();
+                        info.setIsSecure(true);
+                        info.setHeader("Authorization");
+                        info.setValue("Bearer " + accessToken);
+                        return info;
+                    }
+                } catch (CryptoException e) {
+                    log.warn("Failed to decrypt OAuth client secret for backend " + backendId + ": "
+                            + e.getMessage());
+                }
+            }
+
+        }
+
+        return null;
+    }
+
+    private static String appendQueryParam(String url, String paramName, String paramValue) {
+
+        try {
+            String encoded = URLEncoder.encode(paramName, "UTF-8")
+                    + "=" + URLEncoder.encode(paramValue, "UTF-8");
+            return url + (url.contains("?") ? "&" : "?") + encoded;
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException("UTF-8 encoding not supported", e);
+        }
+    }
+
+    private String decryptEndpointCredential(String encryptedValue) throws CryptoException {
+
+        CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+        if (cryptoUtil.base64DecodeAndIsSelfContainedCipherText(encryptedValue)) {
+            return new String(cryptoUtil.base64DecodeAndDecrypt(encryptedValue),
+                    StandardCharsets.UTF_8);
+        }
+        log.warn("Endpoint credential does not appear to be encrypted (not a self-contained cipher text). "
+                + "Using the stored value as-is. Ensure endpoint security credentials are encrypted.");
+        return encryptedValue;
+    }
+
+    private String fetchOAuthTokenForBackend(String tokenUrl, String clientId, String clientSecret,
+            String grantType, JSONObject securityConfig, String backendId) {
+
+        try {
+            if (!StringUtils.startsWithIgnoreCase(tokenUrl, "https://")) {
+                log.warn("OAuth token URL must use HTTPS; skipping token fetch for backend " + backendId);
+                return null;
+            }
+            URL oauthURL = new URL(tokenUrl);
+            int serverPort = oauthURL.getPort();
+            String serverProtocol = oauthURL.getProtocol();
+
+            HttpPost request = new HttpPost(tokenUrl);
+            org.apache.http.client.HttpClient httpClient = APIUtil.getHttpClient(serverPort, serverProtocol);
+
+            byte[] credentials = org.apache.commons.codec.binary.Base64
+                    .encodeBase64((clientId + ":" + clientSecret).getBytes(StandardCharsets.UTF_8));
+            request.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
+                    APIConstants.AUTHORIZATION_BASIC + new String(credentials, StandardCharsets.UTF_8));
+            request.setHeader(APIConstants.CONTENT_TYPE_HEADER, APIConstants.CONTENT_TYPE_APPLICATION_FORM);
+
+            List<BasicNameValuePair> urlParameters = new ArrayList<>();
+            if (APIConstants.GRANT_TYPE_PASSWORD.equalsIgnoreCase(grantType)) {
+                String username = (String) securityConfig.get(APIConstants.ENDPOINT_SECURITY_USERNAME);
+                String encryptedPassword = (String) securityConfig.get(APIConstants.ENDPOINT_SECURITY_PASSWORD);
+                if (StringUtils.isBlank(username) || StringUtils.isBlank(encryptedPassword)) {
+                    log.warn("Missing username or password for OAuth password grant, backend " + backendId);
+                    return null;
+                }
+                try {
+                    String password = decryptEndpointCredential(encryptedPassword);
+                    urlParameters.add(new BasicNameValuePair(APIConstants.TOKEN_GRANT_TYPE_KEY,
+                            APIConstants.GRANT_TYPE_PASSWORD));
+                    urlParameters.add(new BasicNameValuePair(APIConstants.ENDPOINT_SECURITY_USERNAME, username));
+                    urlParameters.add(new BasicNameValuePair(APIConstants.ENDPOINT_SECURITY_PASSWORD, password));
+                } catch (CryptoException e) {
+                    log.warn("Failed to decrypt password for OAuth password grant, backend " + backendId);
+                    return null;
+                }
+            } else {
+                urlParameters.add(new BasicNameValuePair(APIConstants.TOKEN_GRANT_TYPE_KEY,
+                        APIConstants.GRANT_TYPE_VALUE));
+            }
+            request.setEntity(new UrlEncodedFormEntity(urlParameters));
+
+            org.apache.http.HttpResponse httpResponse = httpClient.execute(request);
+            if (httpResponse.getStatusLine().getStatusCode() == org.apache.http.HttpStatus.SC_OK) {
+                String payload = EntityUtils.toString(httpResponse.getEntity());
+                org.json.JSONObject tokenResponse = new org.json.JSONObject(payload);
+                return tokenResponse.getString(APIConstants.OAUTH_RESPONSE_ACCESSTOKEN);
+            } else {
+                log.error("OAuth token request for backend " + backendId + " returned HTTP "
+                        + httpResponse.getStatusLine().getStatusCode());
+            }
+        } catch (IOException e) {
+            log.error("Failed to fetch OAuth token for backend " + backendId + ": " + e.getMessage());
+        }
+        return null;
     }
 
     /**
