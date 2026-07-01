@@ -26,3 +26,4 @@
 **/test/**
 swagger.json
 pom.xml
+src/gen/java/org/wso2/carbon/apimgt/rest/api/impl/gateway/*

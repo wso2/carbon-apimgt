@@ -1,0 +1,133 @@
+package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import javax.validation.constraints.*;
+
+
+import io.swagger.annotations.*;
+import java.util.Objects;
+
+import javax.xml.bind.annotation.*;
+import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
+
+
+
+public class InlineResponse202DTO   {
+  
+    private String taskId = null;
+
+    @XmlType(name="StatusEnum")
+    @XmlEnum(String.class)
+    public enum StatusEnum {
+        PENDING("PENDING"),
+        COMPLETED("COMPLETED"),
+        FAILED("FAILED");
+        private String value;
+
+        StatusEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static StatusEnum fromValue(String v) {
+            for (StatusEnum b : StatusEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
+    private StatusEnum status = null;
+
+  /**
+   **/
+  public InlineResponse202DTO taskId(String taskId) {
+    this.taskId = taskId;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("taskId")
+  public String getTaskId() {
+    return taskId;
+  }
+  public void setTaskId(String taskId) {
+    this.taskId = taskId;
+  }
+
+  /**
+   **/
+  public InlineResponse202DTO status(StatusEnum status) {
+    this.status = status;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("status")
+  public StatusEnum getStatus() {
+    return status;
+  }
+  public void setStatus(StatusEnum status) {
+    this.status = status;
+  }
+
+
+  @Override
+  public boolean equals(java.lang.Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    InlineResponse202DTO inlineResponse202 = (InlineResponse202DTO) o;
+    return Objects.equals(taskId, inlineResponse202.taskId) &&
+        Objects.equals(status, inlineResponse202.status);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(taskId, status);
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    sb.append("class InlineResponse202DTO {\n");
+    
+    sb.append("    taskId: ").append(toIndentedString(taskId)).append("\n");
+    sb.append("    status: ").append(toIndentedString(status)).append("\n");
+    sb.append("}");
+    return sb.toString();
+  }
+
+  /**
+   * Convert the given object to string with each line indented by 4 spaces
+   * (except the first line).
+   */
+  private String toIndentedString(java.lang.Object o) {
+    if (o == null) {
+      return "null";
+    }
+    return o.toString().replace("\n", "\n    ");
+  }
+}
+
