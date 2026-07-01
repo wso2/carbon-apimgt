@@ -2612,7 +2612,9 @@ public class OASParserUtil {
         if (redirectTarget != null) {
             // re-validate the redirect target before following
             options.getRefValidator().validate(redirectTarget, options.getRefValidationTenantDomain());
-            visited.add(dedupKey(redirectTarget));
+            if (!visited.add(dedupKey(redirectTarget))) {
+                return new FetchedRef("", redirectTarget);
+            }
             return fetchRefForValidation(redirectTarget, options, visited, redirects + 1, clients);
         }
         return new FetchedRef(body, url);
