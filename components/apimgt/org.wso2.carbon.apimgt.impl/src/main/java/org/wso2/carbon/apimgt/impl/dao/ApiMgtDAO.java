@@ -7138,15 +7138,85 @@ public class ApiMgtDAO {
             apiId = getAPIID(api.getUuid(), connection);
             prepStmt.setInt(1, apiId);
             try {
+                /*
+                 * When the API is referenced by one or more MCP servers, AM_API_OPERATION_MAPPING rows hold a
+                 * foreign key (REF_URL_MAPPING_ID) to this API's AM_API_URL_MAPPING rows. updateURITemplates does a
+                 * delete-then-reinsert of the URL mappings, so the delete below would violate that FK. Mirror the
+                 * restoreAPIRevision flow: capture the MCP operation-mapping references keyed by the API resource
+                 * (httpMethod + urlPattern), remove them before the URL mappings are deleted, then re-link them to
+                 * the freshly inserted URL mappings once addURITemplates has run.
+                 */
+                Map<String, List<Integer>> mcpOperationMappingRefs = getAPIOperationMappingsReferencedByAPIID(apiId);
+                if (!mcpOperationMappingRefs.isEmpty()) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Removing MCP API operation mapping references for API ID: " + apiId +
+                                " before re-inserting URL mappings.");
+                    }
+                    removeAPIOperationMappingsReferencedByAPIID(connection, mcpOperationMappingRefs);
+                }
                 prepStmt.execute();
                 addURITemplates(apiId, api, tenantId, connection);
+                if (!mcpOperationMappingRefs.isEmpty()) {
+                    restoreAPIOperationMappingReferences(connection, apiId, api, mcpOperationMappingRefs);
+                }
                 connection.commit();
-            } catch (SQLException e) {
+            } catch (SQLException | APIManagementException e) {
                 connection.rollback();
                 handleException("Error while deleting URL template(s) for API : " + api.getId(), e);
             }
         } catch (SQLException e) {
             handleException("Error while deleting URL template(s) for API : " + api.getId(), e);
+        }
+    }
+
+    /**
+     * Re-links MCP server operation mappings to the API's newly inserted URL mappings after the API's URI templates
+     * have been deleted and re-inserted. The MCP tool rows (identified by URL_MAPPING_ID) are re-pointed at the new
+     * REF_URL_MAPPING_ID resolved from the matching {@code httpVerb + uriTemplate} resource.
+     *
+     * @param connection database connection (must be part of the same transaction as the URI template update)
+     * @param apiId      the internal API id, used to resolve the current URL_MAPPING_IDs from the DB
+     * @param api        the API whose URI templates were just re-inserted
+     * @param references map of URL identifiers (httpMethod + urlPattern) to the MCP-side URL_MAPPING_IDs
+     * @throws SQLException if a database error occurs while re-inserting the operation mappings
+     */
+    private void restoreAPIOperationMappingReferences(Connection connection, int apiId, API api,
+            Map<String, List<Integer>> references) throws SQLException {
+
+        try (PreparedStatement addApiOperationMappingPrepStmt =
+                     connection.prepareStatement(SQLConstants.ADD_AM_API_OPERATION_MAPPING_SQL);
+             PreparedStatement getCurrentAPIURLMappingsStatement =
+                     connection.prepareStatement(GET_CURRENT_API_URL_MAPPINGS_ID)) {
+            for (URITemplate uriTemplate : api.getUriTemplates()) {
+                String urlIdentifier = uriTemplate.getHTTPVerb() + uriTemplate.getUriTemplate();
+                List<Integer> mcpUrlMappingIds = references.get(urlIdentifier);
+                if (mcpUrlMappingIds != null) {
+                    /*
+                     * uriTemplate.getId() is not reliable here. addURITemplates writes the freshly inserted
+                     * URL_MAPPING_ID back onto the URITemplate only when migration is disabled
+                     * (migrationEnabled == null), so the in-memory id can be stale and may not point at the
+                     * current API URL mapping row. Resolve the authoritative current URL_MAPPING_ID from the DB
+                     * (the same approach as restoreAPIRevision's restoredUrlMappingID) before re-linking the MCP
+                     * operation mappings to it.
+                     */
+                    getCurrentAPIURLMappingsStatement.setInt(1, apiId);
+                    getCurrentAPIURLMappingsStatement.setString(2, uriTemplate.getHTTPVerb());
+                    getCurrentAPIURLMappingsStatement.setString(3, uriTemplate.getAuthType());
+                    getCurrentAPIURLMappingsStatement.setString(4, uriTemplate.getUriTemplate());
+                    getCurrentAPIURLMappingsStatement.setString(5, uriTemplate.getThrottlingTier());
+                    try (ResultSet rs = getCurrentAPIURLMappingsStatement.executeQuery()) {
+                        while (rs.next()) {
+                            int currentUrlMappingId = rs.getInt(1);
+                            for (Integer mcpUrlMappingId : mcpUrlMappingIds) {
+                                addApiOperationMappingPrepStmt.setInt(1, mcpUrlMappingId);
+                                addApiOperationMappingPrepStmt.setInt(2, currentUrlMappingId);
+                                addApiOperationMappingPrepStmt.addBatch();
+                            }
+                        }
+                    }
+                }
+            }
+            addApiOperationMappingPrepStmt.executeBatch();
         }
     }
 
