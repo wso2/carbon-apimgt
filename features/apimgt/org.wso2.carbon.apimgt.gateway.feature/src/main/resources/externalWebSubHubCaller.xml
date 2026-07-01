@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<sequence xmlns="http://ws.apache.org/ns/synapse" name="externalWebSubHubCaller">
+    <in>
+        <property name="uri.var.external.websub.hub.endpoint" expression="get-property('external.websub.hub.endpoint')"/>
+        <property name="GIVEN_HUB_SECRET" expression="//xformValues//hub.secret"/>
+
+        <!-- Build effective prefix with separator; skip computation entirely if context prefixing is disabled. -->
+        <filter source="$ctx:disable.topic.context.prefix" regex="true">
+            <then>
+                <property name="TOPIC_PREFIX" value="" scope="default" type="STRING"/>
+            </then>
+            <else>
+                <!-- Prefix external hub topics with API context (sanitized: '/' -> '_') to avoid collisions across APIs.
+                     Note: Synapse uses Jaxen (XPath 1.0), so we use translate() instead of replace(). -->
+                <property name="WEBSUB_TOPIC_PREFIX" expression="fn:translate(fn:substring-after(get-property('REST_API_CONTEXT'), '/'), '/', '_')" scope="default" type="STRING"/>
+                <property name="TOPIC_PREFIX" expression="fn:concat(get-property('WEBSUB_TOPIC_PREFIX'), '_')" scope="default" type="STRING"/>
+            </else>
+        </filter>
+
+        <!-- Normalize SUBSCRIBER_TOPIC: strip leading '/' if present. Subscribers may send
+             hub.topic with or without a leading slash; we treat both equivalently. -->
+        <filter source="fn:starts-with(get-property('SUBSCRIBER_TOPIC'), '/')" regex="true">
+            <then>
+                <property name="SUBSCRIBER_TOPIC_NORMALIZED" expression="fn:substring-after(get-property('SUBSCRIBER_TOPIC'), '/')" scope="default" type="STRING"/>
+            </then>
+            <else>
+                <property name="SUBSCRIBER_TOPIC_NORMALIZED" expression="get-property('SUBSCRIBER_TOPIC')" scope="default" type="STRING"/>
+            </else>
+        </filter>
+
+        <!-- Prepare the payload for the external WebSub Hub call -->
+        <switch source="$ctx:HUB_MODE">
+            <case regex="subscribe">
+                <filter source="fn:starts-with(get-property('SUBSCRIBER_TOPIC'), '/')" regex="true">
+                    <then>
+                        <property name="EXTERNAL_HUB_TOPIC"
+                                  expression="fn:concat('/', get-property('TOPIC_PREFIX'), get-property('SUBSCRIBER_TOPIC_NORMALIZED'))"
+                                  scope="default" type="STRING"/>
+                    </then>
+                    <else>
+                        <property name="EXTERNAL_HUB_TOPIC"
+                                  expression="fn:concat(get-property('TOPIC_PREFIX'), get-property('SUBSCRIBER_TOPIC_NORMALIZED'))"
+                                  scope="default" type="STRING"/>
+                    </else>
+                </filter>
+
+                <!-- Create Topic -->
+                <payloadFactory media-type="xml">
+                    <format>
+                        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
+                            <soapenv:Header></soapenv:Header>
+                            <soapenv:Body>
+                                <root>
+                                    <hub.topic>$1</hub.topic>
+                                    <hub.mode>register</hub.mode>
+                                </root>
+                            </soapenv:Body>
+                        </soapenv:Envelope>
+                    </format>
+                    <args>
+                        <arg expression="get-property('EXTERNAL_HUB_TOPIC')" />
+                    </args>
+                </payloadFactory>
+                <property name="messageType" value="application/x-www-form-urlencoded" scope="axis2"/>
+                <call>
+                    <endpoint>
+                        <http method="POST" uri-template="{uri.var.external.websub.hub.endpoint}"/>
+                    </endpoint>
+                </call>
+
+                <!-- Capture HTTP Status and response body -->
+                <property name="external.websub.hub.response.status.code" expression="$axis2:HTTP_SC" scope="default"/>
+                <property name="external.websub.hub.response.status.body" expression="json-eval($)" scope="default"/>
+                <!-- Unless the status code is as a string, comparison in the below filter doesn't work -->
+                <property name="external.websub.hub.response.status.code" expression="get-property('external.websub.hub.response.status.code')"/>
+
+                <!-- HTTP 409 means topic already exists. We can safely ignore that. -->
+                <filter xpath="$ctx:external.websub.hub.response.status.code != 409 and ($ctx:external.websub.hub.response.status.code &gt; 299 or 200 &gt; $ctx:external.websub.hub.response.status.code)">
+                    <then>
+                        <property name="is.external.websub.hub.error" value="true" scope="default" type="BOOLEAN" />
+                    </then>
+                </filter>
+
+                <!-- Subscription will be the next call, prepare the payload -->
+                <payloadFactory media-type="xml">
+                    <format>
+                        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
+                            <soapenv:Header></soapenv:Header>
+                            <soapenv:Body>
+                                <root>
+                                    <hub.topic>$1</hub.topic>
+                                    <hub.callback>$2</hub.callback>
+                                    <hub.mode>$3</hub.mode>
+                                    <hub.secret>$4</hub.secret>
+                                    <hub.lease_seconds>$5</hub.lease_seconds>
+                                </root>
+                            </soapenv:Body>
+                        </soapenv:Envelope>
+                    </format>
+                    <args>
+                        <arg expression="get-property('EXTERNAL_HUB_TOPIC')"/>
+                        <arg expression="get-property('SUBSCRIBER_CALLBACK')"/>
+                        <arg expression="get-property('SUBSCRIBER_MODE')" />
+                        <arg expression="get-property('GIVEN_HUB_SECRET')"/>
+                        <arg expression="get-property('SUBSCRIBER_LEASE_SECONDS')"/>
+                    </args>
+                </payloadFactory>
+                <property name="messageType" value="application/x-www-form-urlencoded" scope="axis2"/>
+            </case>
+            <case regex="unsubscribe">
+                <filter source="fn:starts-with(get-property('SUBSCRIBER_TOPIC'), '/')" regex="true">
+                    <then>
+                        <property name="EXTERNAL_HUB_TOPIC"
+                                  expression="fn:concat('/', get-property('TOPIC_PREFIX'), get-property('SUBSCRIBER_TOPIC_NORMALIZED'))"
+                                  scope="default" type="STRING"/>
+                    </then>
+                    <else>
+                        <property name="EXTERNAL_HUB_TOPIC"
+                                  expression="fn:concat(get-property('TOPIC_PREFIX'), get-property('SUBSCRIBER_TOPIC_NORMALIZED'))"
+                                  scope="default" type="STRING"/>
+                    </else>
+                </filter>
+
+                <payloadFactory media-type="xml">
+                    <format>
+                        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
+                            <soapenv:Header></soapenv:Header>
+                            <soapenv:Body>
+                                <root>
+                                    <hub.topic>$1</hub.topic>
+                                    <hub.callback>$2</hub.callback>
+                                    <hub.mode>$3</hub.mode>
+                                    <hub.secret>$4</hub.secret>
+                                    <hub.lease_seconds>$5</hub.lease_seconds>
+                                </root>
+                            </soapenv:Body>
+                        </soapenv:Envelope>
+                    </format>
+                    <args>
+                        <arg expression="get-property('EXTERNAL_HUB_TOPIC')"/>
+                        <arg expression="get-property('SUBSCRIBER_CALLBACK')"/>
+                        <arg expression="get-property('SUBSCRIBER_MODE')" />
+                        <arg expression="get-property('GIVEN_HUB_SECRET')"/>
+                        <arg expression="get-property('SUBSCRIBER_LEASE_SECONDS')"/>
+                    </args>
+                </payloadFactory>
+                <property name="messageType" value="application/x-www-form-urlencoded" scope="axis2"/>
+            </case>
+            <case regex="publish">
+                <property name="TOPIC" expression="$url:topic" scope="default"/>
+                <!-- Normalize TOPIC: strip leading '/' if present. -->
+                <filter source="fn:starts-with($ctx:TOPIC, '/')" regex="true">
+                    <then>
+                        <property name="TOPIC_NORMALIZED" expression="fn:substring-after($ctx:TOPIC, '/')" scope="default" type="STRING"/>
+                    </then>
+                    <else>
+                        <property name="TOPIC_NORMALIZED" expression="$ctx:TOPIC" scope="default" type="STRING"/>
+                    </else>
+                </filter>
+                <filter source="fn:starts-with($ctx:TOPIC, '/')" regex="true">
+                    <then>
+                        <property name="EXTERNAL_HUB_TOPIC"
+                                  expression="fn:concat('/', get-property('TOPIC_PREFIX'), get-property('TOPIC_NORMALIZED'))"
+                                  scope="default" type="STRING"/>
+                    </then>
+                    <else>
+                        <property name="EXTERNAL_HUB_TOPIC"
+                                  expression="fn:concat(get-property('TOPIC_PREFIX'), get-property('TOPIC_NORMALIZED'))"
+                                  scope="default" type="STRING"/>
+                    </else>
+                </filter>
+                <property name="QUERY_PARAMS"
+                    expression="fn:concat('hub.mode=', 'publish', '&amp;','hub.topic=', $ctx:EXTERNAL_HUB_TOPIC)" />
+                <property name="websubhub.publish.url"
+                    expression="fn:concat($ctx:uri.var.external.websub.hub.endpoint,'?', $ctx:QUERY_PARAMS)"
+                    scope="default" type="STRING"/>
+                <property name="uri.var.external.websub.hub.endpoint" expression="get-property('websubhub.publish.url')"/>
+                <payloadFactory media-type="json">
+                    <format>$1</format>
+                    <args>
+                        <arg evaluator="json" expression="$."/>
+                    </args>
+                </payloadFactory>
+                <property name="messageType" value="application/json" scope="axis2"/>
+            </case>
+            <default/>
+        </switch>
+
+        <filter xpath="not($ctx:is.external.websub.hub.error)">
+            <call>
+                <endpoint>
+                    <http method="POST" uri-template="{uri.var.external.websub.hub.endpoint}"/>
+                </endpoint>
+            </call>
+
+             <!-- Capture HTTP Status and response body -->
+            <property name="external.websub.hub.response.status.code" expression="$axis2:HTTP_SC" scope="default"/>
+            <property name="external.websub.hub.response.status.body" expression="json-eval($)" scope="default"/>
+            <property name="external.websub.hub.response.status.code" expression="get-property('external.websub.hub.response.status.code')"/>
+
+            <filter xpath="$ctx:external.websub.hub.response.status.code &gt; 299 or 200 &gt; $ctx:external.websub.hub.response.status.code ">
+                <then>
+                    <property name="is.external.websub.hub.error" value="true" scope="default" type="BOOLEAN" />
+                </then>
+            </filter>
+        </filter>
+    </in>
+</sequence>
