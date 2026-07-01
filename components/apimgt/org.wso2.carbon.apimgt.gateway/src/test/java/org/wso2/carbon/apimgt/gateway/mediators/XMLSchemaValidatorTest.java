@@ -28,6 +28,8 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.gateway.threatprotection.APIMThreatAnalyzerException;
 import org.wso2.carbon.apimgt.gateway.threatprotection.analyzer.APIMThreatAnalyzer;
 import org.wso2.carbon.apimgt.gateway.threatprotection.analyzer.XMLAnalyzer;
 import org.wso2.carbon.apimgt.gateway.threatprotection.configuration.XMLConfig;
@@ -35,7 +37,13 @@ import org.wso2.carbon.apimgt.gateway.threatprotection.utils.ThreatProtectorCons
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 
 /**
  * This is the test case for {@link XMLSchemaValidator}
@@ -125,9 +133,7 @@ public class XMLSchemaValidatorTest {
     @Test
     public void testConfigureSchemaPropertiesAllowsDtdAndExternalEntitiesWhenSecureProcessingDisabled() {
         log.info("Running the test case to verify DTD/external entities follow message properties when secure XML processing is disabled.");
-        // Secure XML processing is disabled
         Mockito.when(apiManagerConfiguration.isEnableSecureXMLProcessing()).thenReturn(false);
-        // Message context properties enable DTD and external entities
         Mockito.when(messageContext.getProperty(ThreatProtectorConstants.DTD_ENABLED)).thenReturn("true");
         Mockito.when(messageContext.getProperty(ThreatProtectorConstants.EXTERNAL_ENTITIES_ENABLED)).thenReturn("true");
         Mockito.when(messageContext.getProperty(ThreatProtectorConstants.MAX_ELEMENT_COUNT)).thenReturn("5");
@@ -142,10 +148,8 @@ public class XMLSchemaValidatorTest {
         xmlSchemaValidator.isSecureXMLProcessingEnabled = false;
         XMLConfig testConfig = xmlSchemaValidator.configureSchemaProperties(messageContext);
 
-        // Since secure XML processing is disabled, DTD and external entities should follow message properties.
         assertEquals(true, testConfig.isDtdEnabled());
         assertEquals(true, testConfig.isExternalEntitiesEnabled());
-        // Verify other properties are set correctly
         assertEquals(5, testConfig.getMaxElementCount());
         assertEquals(5, testConfig.getMaxAttributeLength());
         assertEquals(5, testConfig.getMaxDepth());
@@ -154,5 +158,47 @@ public class XMLSchemaValidatorTest {
         assertEquals(5, testConfig.getEntityExpansionLimit());
 
         log.info("Successfully completed testConfigureSchemaPropertiesAllowsDtdAndExternalEntitiesWhenSecureProcessingDisabled test case.");
+    }
+
+    @Test
+    public void testAssertXsdUrlAllowedPassesForPermittedUrl() throws Exception {
+        RemoteUrlValidator allowAll = url -> { };
+        XMLSchemaValidator.assertXsdUrlAllowed("http://schemas.example.com/a.xsd", allowAll);
+    }
+
+    @Test(expected = APIMThreatAnalyzerException.class)
+    public void testAssertXsdUrlAllowedBlocksDeniedHost() throws Exception {
+        RemoteUrlValidator denyAll = url -> { throw new APIManagementException("blocked"); };
+        XMLSchemaValidator.assertXsdUrlAllowed("http://169.254.169.254/latest/meta-data/", denyAll);
+    }
+
+    @Test(expected = APIMThreatAnalyzerException.class)
+    public void testAssertXsdUrlAllowedBlocksNonHttpScheme() throws Exception {
+        RemoteUrlValidator allowAll = url -> { };
+        XMLSchemaValidator.assertXsdUrlAllowed("file:///etc/passwd", allowAll);
+    }
+
+    @Test
+    public void testUnwrapBlockedRefFindsDirectAndWrapped() {
+        XsdRefBlockedException blocked = new XsdRefBlockedException("not trusted");
+        assertSame(blocked, XMLSchemaValidator.unwrapBlockedRef(blocked));
+        assertSame(blocked, XMLSchemaValidator.unwrapBlockedRef(new org.xml.sax.SAXException(blocked)));
+        assertSame(blocked, XMLSchemaValidator.unwrapBlockedRef(
+                new RuntimeException(new RuntimeException(blocked))));
+    }
+
+    @Test
+    public void testUnwrapBlockedRefReturnsNullWhenNoBlockPresent() {
+        assertNull(XMLSchemaValidator.unwrapBlockedRef(new RuntimeException("genuine parse error")));
+        assertNull(XMLSchemaValidator.unwrapBlockedRef(null));
+    }
+
+    @Test(expected = APIMThreatAnalyzerException.class)
+    public void testValidateXsdAndPayloadConvertsPolicyRuntimeExceptionToFailClosed() throws Exception {
+        // unchecked RuntimeException must fail closed
+        RemoteUrlValidator boom = url -> { throw new IllegalStateException("malformed tenant-conf"); };
+        BufferedInputStream payload = new BufferedInputStream(
+                new ByteArrayInputStream("<note>hi</note>".getBytes(StandardCharsets.UTF_8)));
+        XMLSchemaValidator.validateXsdAndPayload("http://schemas.example.com/a.xsd", boom, payload);
     }
 }

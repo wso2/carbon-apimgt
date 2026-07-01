@@ -62,6 +62,8 @@ import io.swagger.v3.parser.ObjectMapperFactory;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.converter.SwaggerConverter;
 import io.swagger.v3.parser.core.models.ParseOptions;
+import io.swagger.v3.parser.core.models.SwaggerParseResult;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -69,6 +71,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
@@ -100,20 +105,25 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Provide common functions related to OAS
@@ -999,15 +1009,28 @@ public class OASParserUtil {
         } catch (IOException e) {
             throw new APIManagementException("Error reading master swagger file" + e);
         }
+        validateArchiveRemoteRefs(archiveDirectory, oasParserOptions);
         String openAPIContent = "";
         SwaggerVersion version;
         version = getSwaggerVersion(content);
         String filePath = masterSwagger.getAbsolutePath();
         if (SwaggerVersion.OPEN_API.equals(version)) {
             OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
-            ParseOptions options = new ParseOptions();
-            options.setResolve(true);
-            OpenAPI openAPI = openAPIV3Parser.read(filePath, null, options);
+            ParseOptions options = OAS3Parser.buildParseOptions(oasParserOptions, true);
+            SwaggerParseResult result = openAPIV3Parser.readLocation(filePath, null, options);
+            if (result.getOpenAPI() == null || CollectionUtils.isNotEmpty(result.getMessages())) {
+                APIDefinitionValidationResponse invalid = new APIDefinitionValidationResponse();
+                invalid.setValid(false);
+                if (CollectionUtils.isNotEmpty(result.getMessages())) {
+                    for (String m : result.getMessages()) {
+                        addErrorToValidationResponse(invalid, m);
+                    }
+                } else {
+                    addErrorToValidationResponse(invalid, "Could not resolve the OpenAPI archive references");
+                }
+                return invalid;
+            }
+            OpenAPI openAPI = result.getOpenAPI();
             openAPIContent = convertOAStoJSON(openAPI);
         } else if (SwaggerVersion.SWAGGER.equals(version)) {
             SwaggerParser parser = new SwaggerParser();
@@ -1089,6 +1112,7 @@ public class OASParserUtil {
     @UsedByMigrationClient
     public static APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, boolean returnJsonContent,
             OASParserOptions oasParserOptions) throws APIManagementException {
+        validateRemoteRefsRecursively(apiDefinition, null, oasParserOptions);
         String apiDefinitionProcessed = apiDefinition;
         if (!apiDefinition.trim().startsWith("{")) {
             try {
@@ -1307,6 +1331,7 @@ public class OASParserUtil {
                         buffer.write(chunk, 0, n);
                     }
                     String responseStr = buffer.toString(StandardCharsets.UTF_8.name());
+                    validateRemoteRefsRecursively(responseStr, url, oasParserOptions);
                     String responseStrProcessed = responseStr;
                     if (!responseStr.trim().startsWith("{")) {
                         try {
@@ -2350,4 +2375,345 @@ public class OASParserUtil {
             throw new APIManagementException("Error while parsing YAML with configured codePointLimit", e);
         }
     }
+
+    /**
+     * Collect every {@code $ref} string that has a file/URL part (absolute or relative); ignore pure "#/..."
+     * in-document fragments. Never throws on malformed content (JSON parse with a YAML fallback; returns what it
+     * could parse / empty).
+     *
+     * @param content raw OpenAPI/Swagger definition (JSON or YAML)
+     * @return set of raw $ref strings with a file/URL part (may be empty, never null)
+     */
+    static Set<String> extractRefStrings(String content) {
+        Set<String> refs = new LinkedHashSet<>();
+        if (StringUtils.isBlank(content)) {
+            return refs;
+        }
+        JsonNode root;
+        try {
+            root = new ObjectMapper().readTree(content);
+        } catch (Exception jsonEx) {
+            try {
+                root = new ObjectMapper(new YAMLFactory()).readTree(content);
+            } catch (Exception yamlEx) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Could not parse content to extract $refs", yamlEx);
+                }
+                return refs;
+            }
+        }
+        collectRefStrings(root, refs);
+        return refs;
+    }
+
+    private static void collectRefStrings(JsonNode node, Set<String> refs) {
+        if (node == null) {
+            return;
+        }
+        if (node.isObject()) {
+            JsonNode ref = node.get("$ref");
+            if (ref != null && ref.isTextual()) {
+                String value = ref.textValue().trim();
+                if (!value.isEmpty() && !value.startsWith("#")) {
+                    refs.add(value);
+                }
+            }
+            Iterator<JsonNode> it = node.elements();
+            while (it.hasNext()) {
+                collectRefStrings(it.next(), refs);
+            }
+        } else if (node.isArray()) {
+            for (JsonNode child : node) {
+                collectRefStrings(child, refs);
+            }
+        }
+    }
+
+    /**
+     * Resolve a raw {@code $ref} to an absolute http(s) URL, or {@code null} if it is in-document, non-http, or an
+     * unfollowable relative ref. Absolute http(s) refs pass through (fragment stripped); relative refs resolve against
+     * {@code baseUri} only when that base is itself a remote http(s) URL.
+     *
+     * @param rawRef  raw $ref string (may include a "#/..." fragment)
+     * @param baseUri the base URI for relative resolution, or {@code null}
+     * @return absolute http(s) URL, or {@code null} when not a followable remote ref
+     */
+    static String resolveToHttpUrl(String rawRef, String baseUri) {
+        if (rawRef == null) {
+            return null;
+        }
+        String filePart = rawRef.split("#", 2)[0].trim();
+        if (filePart.isEmpty()) {
+            return null;
+        }
+        String lower = filePart.toLowerCase(Locale.ROOT);
+        if (lower.startsWith("http://") || lower.startsWith("https://")) {
+            return filePart;
+        }
+        if (baseUri == null) {
+            return null;
+        }
+        try {
+            URI base = URI.create(baseUri);
+            String baseScheme = base.getScheme();
+            if (baseScheme == null
+                    || !(baseScheme.equalsIgnoreCase("http") || baseScheme.equalsIgnoreCase("https"))) {
+                return null;
+            }
+            URI resolved = base.resolve(filePart);
+            String scheme = resolved.getScheme();
+            if (scheme != null && (scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https"))) {
+                return resolved.toString();
+            }
+            return null;
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Build the visited-set dedup key for an absolute URL. Only the scheme and authority (host[:port]) are
+     * case-folded; the path and query are kept verbatim because they are case-sensitive on the origin server
+     * (e.g. {@code /A} and {@code /a} can be distinct resources). Lowercasing the whole URL would let a
+     * case-distinct path collide and be skipped, leaving its nested $refs unscanned — an under-validation vector.
+     *
+     * @param absUrl an absolute http(s) URL
+     * @return a normalized key safe for dedup
+     */
+    static String dedupKey(String absUrl) {
+        try {
+            URI u = URI.create(absUrl);
+            String scheme = u.getScheme() == null ? "" : u.getScheme().toLowerCase(Locale.ROOT);
+            String authority = u.getRawAuthority() == null ? "" : u.getRawAuthority().toLowerCase(Locale.ROOT);
+            String rest = absUrl.substring(scheme.length());
+            String afterScheme = rest.startsWith("://") ? rest.substring(3) : rest;
+            // authority ends at the first '/', '?', or '#' — keep the query even on a path-less URL
+            int authorityEnd = afterScheme.length();
+            for (char delim : new char[] {'/', '?', '#'}) {
+                int i = afterScheme.indexOf(delim);
+                if (i >= 0 && i < authorityEnd) {
+                    authorityEnd = i;
+                }
+            }
+            String tail = afterScheme.substring(authorityEnd);
+            return scheme + "://" + authority + tail;
+        } catch (IllegalArgumentException e) {
+            // unparseable URL: fall back to the exact string (never under-dedup)
+            return absUrl;
+        }
+    }
+
+    // Timeouts + redirect bound aligned with swagger-parser's RemoteUrl; a total-ref cap bounds distinct-URL chains
+    // (the visited-set only terminates cycles).
+    private static final int REF_CRAWL_CONNECT_TIMEOUT_MS = 30000;
+    private static final int REF_CRAWL_READ_TIMEOUT_MS = 60000;
+    private static final int REF_CRAWL_MAX_REDIRECTS = 5;
+    // Bounds a chain of distinct attacker-served $ref URLs (unbounded recursion/OOM otherwise); 1000 ≫ any real spec.
+    private static final int REF_CRAWL_MAX_TOTAL_REFS = 1000;
+    // fallback size cap, used only when the configured OAS import limit isn't carried on the options (e.g. a unit test)
+    private static final int REF_CRAWL_MAX_BYTES = 10 * 1024 * 1024;
+
+    /**
+     * Recursively validate (and, to discover nested refs, fetch) every remote {@code $ref} reachable from
+     * {@code content}. No-op when policy is inactive (no RefValidator hook set). Fail-closed: the first blocked ref
+     * or any fetch/IO error on an allowed ref aborts the whole crawl. A total-ref cap
+     * ({@value #REF_CRAWL_MAX_TOTAL_REFS}) bounds chains of distinct URLs; the visited-set terminates cycles.
+     *
+     * @param content the raw OpenAPI/Swagger definition to scan
+     * @param baseUri  the base URI of {@code content} for resolving relative refs, or {@code null}
+     * @param options  parser options carrying the RefValidator + HttpClientProvider hooks
+     * @throws APIManagementException UNTRUSTED_URL (HTTP 400) on a blocked ref; generic on a fetch error
+     */
+    public static void validateRemoteRefsRecursively(String content, String baseUri, OASParserOptions options)
+            throws APIManagementException {
+        if (options == null || options.getRefValidator() == null) {
+            return;
+        }
+        Map<String, CloseableHttpClient> clients = new HashMap<>();
+        try {
+            crawlRefs(content, baseUri, options, new HashSet<>(), clients);
+        } finally {
+            closeCrawlClients(clients);
+        }
+    }
+
+    private static void crawlRefs(String content, String baseUri, OASParserOptions options,
+                                 Set<String> visited, Map<String, CloseableHttpClient> clients)
+            throws APIManagementException {
+        for (String rawRef : extractRefStrings(content)) {
+            String absUrl = resolveToHttpUrl(rawRef, baseUri);
+            if (absUrl == null) {
+                continue;
+            }
+            if (!visited.add(dedupKey(absUrl))) {
+                continue;
+            }
+            // bound a chain of distinct attacker-served URLs (each doc → one new ref) that would otherwise
+            // grow the recursion depth + visited-set without limit
+            if (visited.size() > REF_CRAWL_MAX_TOTAL_REFS) {
+                throw new APIManagementException(
+                        "Too many remote $refs to resolve (limit " + REF_CRAWL_MAX_TOTAL_REFS + ")",
+                        ExceptionCodes.UNTRUSTED_URL);
+            }
+            // validate BEFORE any fetch — throws UNTRUSTED_URL on block
+            options.getRefValidator().validate(absUrl, options.getRefValidationTenantDomain());
+
+            if (options.getHttpClientProvider() == null) {
+                // validate-only fallback (no client wired) — unit-test path; prod always wires both hooks
+                continue;
+            }
+            FetchedRef fetched = fetchRefForValidation(absUrl, options, visited, 0, clients);
+            // recurse with the post-redirect final URL as the base for relative refs
+            crawlRefs(fetched.body, fetched.finalUrl, options, visited, clients);
+        }
+    }
+
+    /** A fetched remote document plus the URL it was ultimately served from (after any followed redirects). */
+    private static final class FetchedRef {
+        private final String body;
+        private final String finalUrl;
+        private FetchedRef(String body, String finalUrl) {
+            this.body = body;
+            this.finalUrl = finalUrl;
+        }
+    }
+
+    /**
+     * Fetch a validated ref with redirects disabled; on 3xx, re-validate and follow the Location manually (bounded).
+     * Returns the body together with the final URL it was served from. Fail-closed on any error.
+     */
+    private static FetchedRef fetchRefForValidation(String url, OASParserOptions options, Set<String> visited,
+                                                    int redirects, Map<String, CloseableHttpClient> clients)
+            throws APIManagementException {
+        if (redirects > REF_CRAWL_MAX_REDIRECTS) {
+            throw new APIManagementException("Too many redirects resolving $ref: " + url, ExceptionCodes.UNTRUSTED_URL);
+        }
+        String redirectTarget = null;
+        String body = null;
+        try {
+            URL u = new URL(url);
+            CloseableHttpClient client = crawlClientFor(u.getProtocol(), u.getPort(), options, clients);
+            HttpGet get = new HttpGet(url);
+            get.setConfig(RequestConfig.custom()
+                    .setRedirectsEnabled(false)
+                    .setSocketTimeout(REF_CRAWL_READ_TIMEOUT_MS)
+                    .setConnectTimeout(REF_CRAWL_CONNECT_TIMEOUT_MS)
+                    .build());
+            try (CloseableHttpResponse response = client.execute(get)) {
+                int status = response.getStatusLine().getStatusCode();
+                if (status >= 300 && status < 400) {
+                    org.apache.http.Header location = response.getFirstHeader("Location");
+                    if (location == null) {
+                        throw new APIManagementException("Redirect without Location for $ref: " + url);
+                    }
+                    redirectTarget = resolveToHttpUrl(location.getValue(), url);
+                    if (redirectTarget == null) {
+                        throw new APIManagementException("Unsupported redirect target for $ref: " + url);
+                    }
+                } else if (status != 200) {
+                    throw new APIManagementException("Failed to fetch $ref (HTTP " + status + "): " + url);
+                } else {
+                    body = readBodyCapped(response, options.getRefFetchMaxBytes());
+                }
+            }
+        } catch (IOException e) {
+            throw new APIManagementException("Error fetching $ref for validation: " + url, e);
+        }
+        if (redirectTarget != null) {
+            // re-validate the redirect target before following
+            options.getRefValidator().validate(redirectTarget, options.getRefValidationTenantDomain());
+            if (!visited.add(dedupKey(redirectTarget))) {
+                return new FetchedRef("", redirectTarget);
+            }
+            return fetchRefForValidation(redirectTarget, options, visited, redirects + 1, clients);
+        }
+        return new FetchedRef(body, url);
+    }
+
+    private static String readBodyCapped(HttpResponse response, long maxBytes)
+            throws IOException, APIManagementException {
+        if (response.getEntity() == null) {
+            return "";
+        }
+        // >0 ? configured cap : fallback — never hand a 0-byte limit to SizeLimitedInputStream (would over-block)
+        long limit = maxBytes > 0 ? maxBytes : REF_CRAWL_MAX_BYTES;
+        try (InputStream rawStream = response.getEntity().getContent();
+                SizeLimitedInputStream in = new SizeLimitedInputStream(rawStream, limit);
+                ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            byte[] buf = new byte[8192];
+            int n;
+            while ((n = in.read(buf)) != -1) {
+                out.write(buf, 0, n);
+            }
+            return out.toString(StandardCharsets.UTF_8.name());
+        } catch (FileSizeLimitExceededException e) {
+            throw new APIManagementException("Remote $ref document exceeds the size limit", e);
+        }
+    }
+
+    /**
+     * Scan EVERY bundled file under an extracted archive and crawl its remote {@code $ref}s through a shared
+     * visited-set. The stock parser resolves a local {@code $ref} to <em>any</em> file path regardless of
+     * extension, so a remote {@code $ref} hidden in a non-{@code .json}/{@code .yaml} file must still be validated;
+     * {@code extractRefStrings} no-ops on content it cannot parse, so non-OAS files contribute nothing. No-op when
+     * policy is inactive. Fail-closed.
+     *
+     * @param extractRoot the directory the archive was extracted into (parent of the master swagger file)
+     * @param options     parser options carrying the RefValidator + HttpClientProvider hooks
+     * @throws APIManagementException UNTRUSTED_URL on a blocked ref; generic on a fetch/scan error
+     */
+    public static void validateArchiveRemoteRefs(File extractRoot, OASParserOptions options)
+            throws APIManagementException {
+        if (options == null || options.getRefValidator() == null || extractRoot == null
+                || !extractRoot.isDirectory()) {
+            return;
+        }
+        Set<String> visited = new HashSet<>();
+        Map<String, CloseableHttpClient> clients = new HashMap<>();
+        try (Stream<java.nio.file.Path> paths = Files.walk(extractRoot.toPath())) {
+            for (java.nio.file.Path p : (Iterable<java.nio.file.Path>) paths::iterator) {
+                File f = p.toFile();
+                if (!f.isFile()) {
+                    continue;
+                }
+                // skip oversized members before reading them in — a file over the fetch cap can't be an OAS spec we'd crawl
+                long maxBytes = options.getRefFetchMaxBytes() > 0 ? options.getRefFetchMaxBytes() : REF_CRAWL_MAX_BYTES;
+                if (Files.size(p) > maxBytes) {
+                    continue;
+                }
+                String content = new String(Files.readAllBytes(p), StandardCharsets.UTF_8);
+                // base = null: only absolute http(s) refs in each file are followed
+                crawlRefs(content, null, options, visited, clients);
+            }
+        } catch (IOException e) {
+            throw new APIManagementException("Error scanning archive for remote $refs", e);
+        } finally {
+            closeCrawlClients(clients);
+        }
+    }
+
+    /** Reuse one crawl HTTP client per protocol:port for the duration of a single crawl. */
+    private static CloseableHttpClient crawlClientFor(String protocol, int port, OASParserOptions options,
+                                                      Map<String, CloseableHttpClient> clients)
+            throws APIManagementException {
+        String key = protocol + ":" + port;
+        CloseableHttpClient client = clients.get(key);
+        if (client == null) {
+            client = (CloseableHttpClient) options.getHttpClientProvider().getClient(protocol, port);
+            clients.put(key, client);
+        }
+        return client;
+    }
+
+    /** Close every HTTP client (and its connection pool) created during a crawl. */
+    private static void closeCrawlClients(Map<String, CloseableHttpClient> clients) {
+        for (CloseableHttpClient client : clients.values()) {
+            try {
+                client.close();
+            } catch (IOException e) {
+                log.warn("Error closing remote-$ref crawl HTTP client", e);
+            }
+        }
+    }
+
 }

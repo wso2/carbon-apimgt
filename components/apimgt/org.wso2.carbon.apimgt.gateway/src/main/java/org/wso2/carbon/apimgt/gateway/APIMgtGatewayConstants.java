@@ -109,6 +109,8 @@ public class APIMgtGatewayConstants {
     public static final String XML_VALIDATION = "xmlValidation";
     public static final String SCHEMA_VALIDATION = "schemaValidation";
     public static final String XSD_URL = "xsdURL";
+    // Neutral message; the real reason (URL/host/parser error) is server-log-only to avoid an internal-host oracle.
+    public static final String XSD_VALIDATION_FAILED_MSG = "XSD schema validation failed";
     public static final String UTF8 = "UTF-8";
     public static final String INVALID_XML_FORMAT_MSG = "Invalid XML format in the request payload";
 

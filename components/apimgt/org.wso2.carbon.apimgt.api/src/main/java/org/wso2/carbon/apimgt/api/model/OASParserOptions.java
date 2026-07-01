@@ -28,8 +28,43 @@ public class OASParserOptions {
 
     private boolean explicitStyleAndExplode = true;
     private Integer yamlCodePointLimit = null;
+    private String refValidationTenantDomain = null;
+    private transient RefValidator refValidator = null;
+    private transient HttpClientProvider httpClientProvider = null;
+    private long refFetchMaxBytes = 0L;
+
+    /**
+     * Network access-control hook. Set by the impl layer to {@code APIUtil::validateRemoteURL} so the parser layer can
+     * run the platform/tenant network-security policy on each direct external $ref without a compile-time impl
+     * dependency.
+     */
+    public interface RefValidator {
+        void validate(String url, String tenantDomain) throws org.wso2.carbon.apimgt.api.APIManagementException;
+    }
+
+    /**
+     * Supplies an HTTP client for crawling remote $refs, decoupling spec.parser from impl. The impl layer provides
+     * {@code org.apache.http.client.HttpClient} instances (built from the platform truststore/TLS/proxy config); this
+     * interface keeps the api module from forcing an Apache HttpComponents compile-time requirement onto callers that
+     * never crawl. The crawl uses it to fetch allowed remote $refs and discover nested refs.
+     */
+    public interface HttpClientProvider {
+        org.apache.http.client.HttpClient getClient(String protocol, int port)
+                throws org.wso2.carbon.apimgt.api.APIManagementException;
+    }
 
     public OASParserOptions() {
+    }
+
+    public OASParserOptions(OASParserOptions other) {
+        if (other != null) {
+            this.explicitStyleAndExplode = other.explicitStyleAndExplode;
+            this.yamlCodePointLimit = other.yamlCodePointLimit;
+            this.refValidationTenantDomain = other.refValidationTenantDomain;
+            this.refValidator = other.refValidator;
+            this.httpClientProvider = other.httpClientProvider;
+            this.refFetchMaxBytes = other.refFetchMaxBytes;
+        }
     }
 
     public boolean isExplicitStyleAndExplode() {
@@ -82,6 +117,46 @@ public class OASParserOptions {
         // Consider 4 bytes per character
         double limit = fileSizeInMB * 1024 * 1024 * 4;
         this.yamlCodePointLimit = limit > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) limit;
+    }
+
+    public String getRefValidationTenantDomain() { return refValidationTenantDomain; }
+    public void setRefValidationTenantDomain(String v) { this.refValidationTenantDomain = v; }
+    public RefValidator getRefValidator() { return refValidator; }
+    public void setRefValidator(RefValidator v) { this.refValidator = v; }
+    public HttpClientProvider getHttpClientProvider() { return httpClientProvider; }
+    public void setHttpClientProvider(HttpClientProvider v) { this.httpClientProvider = v; }
+
+    public long getRefFetchMaxBytes() {
+        return refFetchMaxBytes;
+    }
+
+    /**
+     * Set the per-document size cap for the remote $ref crawl from the configured OAS import file-size limit (the same
+     * limit the top-level by-URL fetch uses). Parsing mirrors {@link #setYamlCodePointLimit(String)}: a
+     * null/blank/non-numeric/non-positive value leaves the cap unset (0), in which case the crawl applies its own
+     * fallback. The value is interpreted in megabytes.
+     *
+     * @param maxFileSizeMB maximum fetched-document size in megabytes as a String (e.g. "10")
+     */
+    public void setRefFetchMaxFileSize(String maxFileSizeMB) {
+        if (maxFileSizeMB == null || (maxFileSizeMB = maxFileSizeMB.trim()).isEmpty()) {
+            this.refFetchMaxBytes = 0L;
+            return;
+        }
+        double fileSizeInMB;
+        try {
+            fileSizeInMB = Double.parseDouble(maxFileSizeMB);
+        } catch (NumberFormatException e) {
+            log.error("Invalid remote $ref fetch size limit value: " + maxFileSizeMB + ". Using crawl default.");
+            this.refFetchMaxBytes = 0L;
+            return;
+        }
+        if (fileSizeInMB <= 0) {
+            this.refFetchMaxBytes = 0L;
+            return;
+        }
+        double bytes = fileSizeInMB * 1024 * 1024;
+        this.refFetchMaxBytes = bytes > Long.MAX_VALUE ? Long.MAX_VALUE : (long) bytes;
     }
 
 }

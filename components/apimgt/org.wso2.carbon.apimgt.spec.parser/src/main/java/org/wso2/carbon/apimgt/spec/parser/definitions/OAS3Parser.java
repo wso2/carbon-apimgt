@@ -962,8 +962,7 @@ public class OAS3Parser extends APIDefinition {
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
         String processedDefinition = OASParserUtil.preprocessYamlWithLimit(apiDefinition, parserOptions);
         OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
-        ParseOptions options = new ParseOptions();
-        options.setResolve(true);
+        ParseOptions options = buildParseOptions(parserOptions, true);
         SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(processedDefinition, null, options);
         if (CollectionUtils.isNotEmpty(parseAttemptForV3.getMessages())) {
             validationResponse.setValid(false);
@@ -2034,8 +2033,22 @@ public class OAS3Parser extends APIDefinition {
     }
 
     private ParseOptions convertOptionsToParseOptions(OASParserOptions options) {
+        // resolve=false: getOpenAPI does not fetch external refs
+        return buildParseOptions(options, false);
+    }
+
+    /**
+     * Single source of truth for swagger-parser ParseOptions. Outbound host validation for remote {@code $ref}s is
+     * enforced upstream of the parser by the recursive validation crawl ({@code OASParserUtil#validateRemoteRefsRecursively}),
+     * not by any library-side URL validator. This uses the stock parser only — no {@code setSafelyResolveURL} /
+     * {@code setCustomUrlValidator} (those required the forked/patched library, which has been dropped).
+     */
+    public static ParseOptions buildParseOptions(OASParserOptions options, boolean resolve) {
         ParseOptions parserOptions = new ParseOptions();
-        parserOptions.setExplicitStyleAndExplode(options.isExplicitStyleAndExplode());
+        parserOptions.setResolve(resolve);
+        if (options != null) {
+            parserOptions.setExplicitStyleAndExplode(options.isExplicitStyleAndExplode());
+        }
         return parserOptions;
     }
 

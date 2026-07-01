@@ -762,8 +762,15 @@ public class RestApiPublisherUtils {
         if (fileDetail != null) {
             fileName = fileDetail.getDataHandler().getName();
         }
-        validationResponse = ApisApiServiceImplUtils.validateOpenAPIDefinition(url, fileInputStream, apiDefinition,
-                fileName, returnContent);
+        try {
+            validationResponse = ApisApiServiceImplUtils.validateOpenAPIDefinition(url, fileInputStream, apiDefinition,
+                    fileName, returnContent, RestApiCommonUtil.getLoggedInUserTenantDomain());
+        } catch (APIManagementException e) {
+            if (e.getErrorHandler() != null && e.getErrorHandler().getHttpStatusCode() == 400) {
+                throw RestApiUtil.buildBadRequestException(e.getErrorHandler().getErrorDescription());
+            }
+            throw e;
+        }
         responseDTO = APIMappingUtil.getOpenAPIDefinitionValidationResponseFromModel(validationResponse,
                 returnContent);
 

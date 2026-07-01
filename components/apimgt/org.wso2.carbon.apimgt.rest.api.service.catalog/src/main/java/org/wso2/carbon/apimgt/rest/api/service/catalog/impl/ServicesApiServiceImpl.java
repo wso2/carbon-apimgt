@@ -474,6 +474,10 @@ public class ServicesApiServiceImpl implements ServicesApiService {
             validationResponse = AsyncApiParserUtil.validateAsyncAPISpecification(schemaToBeValidated,
                     true, AsyncApiParserImplUtil.getParserOptionsFromConfig());
         } else if (url != null) {
+            // Access-control gate: validate the definition URL before fetching (no-op if policy unconfigured)
+            if (!isRemoteURLTrusted(url, validationResponse)) {
+                return validationResponse;
+            }
             try {
                 URL urlObj = new URL(url);
                 HttpClient httpClient = APIUtil.getHttpClient(urlObj.getPort(), urlObj.getProtocol());
@@ -504,10 +508,15 @@ public class ServicesApiServiceImpl implements ServicesApiService {
     private APIDefinitionValidationResponse validateOpenAPIDefinition(String url, String definitionContent)
             throws APIManagementException {
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
-        OASParserOptions parserOptions = CommonUtil.getOasParserOptions();
+        OASParserOptions parserOptions = APIUtil.buildRefAwareOASParserOptions(CommonUtil.getOasParserOptions(),
+                RestApiCommonUtil.getLoggedInUserTenantDomain());
         if (definitionContent != null) {
             validationResponse = OASParserUtil.validateAPIDefinition(definitionContent, true, parserOptions);
         } else if (url != null) {
+            // Access-control gate: validate the definition URL before fetching (no-op if policy unconfigured)
+            if (!isRemoteURLTrusted(url, validationResponse)) {
+                return validationResponse;
+            }
             try {
                 URL urlObj = new URL(url);
                 HttpClient httpClient = APIUtil.getHttpClient(urlObj.getPort(), urlObj.getProtocol());
@@ -533,6 +542,42 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         errorDTO.setMoreInfo(info);
         errorDTO.setDescription(description);
         return errorDTO;
+    }
+
+    /**
+     * Outbound host validation for the import-by-URL path. Validates the user-supplied top-level
+     * definition URL against the network access-control policy via {@link APIUtil#validateRemoteURL}
+     * BEFORE the URL is fetched. This mirrors the publisher import-by-URL gating
+     * (RestApiPublisherUtils#validateOpenAPIDefinition). It is a no-op when the policy is
+     * unconfigured (validateRemoteURL returns without throwing). When the host is disallowed, the
+     * provided {@code validationResponse} is marked invalid and carries the access-control error item
+     * so the caller surfaces a 400-style validation failure (the same outcome as a bad definition).
+     *
+     * @param url                the user-supplied definition URL to gate
+     * @param validationResponse the response to mark invalid (in place) if the URL is disallowed
+     * @return {@code true} if the URL is allowed (fetch may proceed); {@code false} if it was blocked
+     */
+    private boolean isRemoteURLTrusted(String url, APIDefinitionValidationResponse validationResponse) {
+        try {
+            APIUtil.validateRemoteURL(url, RestApiCommonUtil.getLoggedInUserTenantDomain());
+            return true;
+        } catch (APIManagementException e) {
+            String host;
+            try {
+                host = new URL(url).getHost();
+            } catch (MalformedURLException ex) {
+                host = "<unparseable>";
+            }
+            log.error("The provided service definition URL is not allowed by the access-control policy (host: "
+                    + host + ")", e);
+            validationResponse.setValid(false);
+            if (e.getErrorHandler() != null) {
+                validationResponse.getErrorItems().add(e.getErrorHandler());
+            } else {
+                validationResponse.getErrorItems().add(ExceptionCodes.UNTRUSTED_URL);
+            }
+            return false;
+        }
     }
 
     private APIDefinitionValidationResponse validateAndRetrieveServiceDefinition(byte[] definitionFileByteArray,
