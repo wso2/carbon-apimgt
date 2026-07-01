@@ -57,6 +57,7 @@ public class APIConstants {
     public static final String API_PUBLISHER_IMPORT_MCP_FILE_SIZE_LIMIT = API_PUBLISHER_IMPORT_DEFINITION_FILE_SIZE_LIMIT + "MCP";
     public static final String API_PUBLISHER_IMPORT_MCP_FILE_SIZE_LIMIT_DEFAULT_MB = "10";
     public static final String ENDPOINT_SECURITY_TYPE_AWS = "aws";
+    public static final String ENDPOINT_SECURITY_TYPE_UMI = "umi";
     public static final String LLM_PROVIDER_SERVICE_AWS_BEDROCK_SERVICE_NAME = "bedrock";
 
     public enum SupportedHTTPVerbs {
