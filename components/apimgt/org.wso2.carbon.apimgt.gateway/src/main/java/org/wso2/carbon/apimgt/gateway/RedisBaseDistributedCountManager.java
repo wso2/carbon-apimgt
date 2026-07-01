@@ -29,9 +29,7 @@ import redis.clients.jedis.Transaction;
 import redis.clients.jedis.exceptions.JedisException;
 import redis.clients.jedis.params.SetParams;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Redis Base Distributed Counter Manager for Throttler.
@@ -553,8 +551,18 @@ public class RedisBaseDistributedCountManager implements DistributedCounterManag
                     return new long[]{0L, 0L};
                 }
                 try {
-                    long ts      = (vals.get(0) != null) ? Long.parseLong(vals.get(0)) : 0L;
-                    long counter = (vals.get(1) != null) ? Long.parseLong(vals.get(1)) : 0L;
+                    String tsValue      = vals.get(0);
+                    String counterValue = vals.get(1);
+                    if (tsValue == null || counterValue == null) {
+                        if (tsValue != null || counterValue != null) {
+                            log.warn("Incomplete window state in Redis for key: " + key
+                                    + " (ts=" + tsValue + ", counter=" + counterValue
+                                    + "). Treating as empty window.");
+                        }
+                        return new long[]{0L, 0L};
+                    }
+                    long ts      = Long.parseLong(tsValue);
+                    long counter = Long.parseLong(counterValue);
                     return new long[]{ts, counter};
                 } catch (RuntimeException e) {
                     // Catches NumberFormatException (corrupted field value) and
@@ -588,6 +596,12 @@ public class RedisBaseDistributedCountManager implements DistributedCounterManag
                         + ". Window TTL would be zero or negative.");
             }
             try (Jedis jedis = redisPool.getResource()) {
+                now = System.currentTimeMillis();
+                if (expiryTime <= now) {
+                    throw new JedisException("setWindow called with already-expired expiryTime="
+                            + expiryTime + " (now=" + now + ") for key: " + key
+                            + ". Window expired while waiting for Redis connection.");
+                }
                 Transaction tx = jedis.multi();
                 tx.hset(key, "ts", String.valueOf(ts));
                 tx.hset(key, "counter", String.valueOf(count));
@@ -622,6 +636,13 @@ public class RedisBaseDistributedCountManager implements DistributedCounterManag
                         + ". Refusing to push delta=" + delta + " to an expired window.");
             }
             try (Jedis jedis = redisPool.getResource()) {
+                now = System.currentTimeMillis();
+                if (expiryTime <= now) {
+                    throw new JedisException("incrWindowCounter called with already-expired expiryTime="
+                            + expiryTime + " (now=" + now + ") for key: " + key
+                            + ". Window expired while waiting for Redis connection."
+                            + " Refusing to push delta=" + delta + ".");
+                }
                 Transaction tx = jedis.multi();
                 Response<Long> counterResp = tx.hincrBy(key, "counter", delta);
                 // pexpireAt guards against the narrow race where the hash TTL fires between
