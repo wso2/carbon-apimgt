@@ -25033,6 +25033,18 @@ public class ApiMgtDAO {
             }
             return addAPISpecificOperationPolicy(connection, policyData, apiUUID, revisionUUID, revisionedPolicyId,
                     policyData.getClonedCommonPolicyId());
+        } else if (workingCopyPolicyId != null && workingCopyPolicyId.contains("::")) {
+            // External policy (e.g. from Policy Hub) referenced by a Platform Gateway API is not stored in the
+            // common store. Mirror the working-copy import behaviour (cloneCommonPolicyToAPI) and create a
+            // placeholder API-specific policy so the revision policy mapping stays valid instead
+            if (log.isDebugEnabled()) {
+                log.debug("Creating placeholder revision policy for external policy " + workingCopyPolicyId
+                        + " (API " + apiUUID + ", revision " + revisionUUID + ")");
+            }
+            OperationPolicyData placeholder = createPlaceholderPolicyDataForExternalPolicy(workingCopyPolicyId,
+                    revisionedPolicyId, organization);
+            return addAPISpecificOperationPolicy(connection, placeholder, apiUUID, revisionUUID, revisionedPolicyId,
+                    workingCopyPolicyId);
         } else {
             throw new APIManagementException("Cannot create a revision of policy with ID " + workingCopyPolicyId
                     + " as it does not exists.");
@@ -26477,10 +26489,11 @@ public class ApiMgtDAO {
 
     private String resolvePolicyIdentifier(OperationPolicy policy) throws APIManagementException {
         String policyIdentifier = policy.getPolicyId();
-        if (StringUtils.isBlank(policyIdentifier)) {
+        if (APIConstants.OPERATION_SEQUENCE_TYPE_HUB.equalsIgnoreCase(policy.getDirection())) {
             String policyName = StringUtils.trimToEmpty(policy.getPolicyName());
             if (StringUtils.isBlank(policyName) || "null".equalsIgnoreCase(policyName)) {
-                throw new APIManagementException("Operation policy name cannot be empty when policyId is missing.");
+                throw new APIManagementException("Operation policy name cannot be empty for hub-directed operation " +
+                        "policies.");
             }
             if (log.isDebugEnabled()) {
                 log.debug("Policy ID is blank for policy: " + policyName
