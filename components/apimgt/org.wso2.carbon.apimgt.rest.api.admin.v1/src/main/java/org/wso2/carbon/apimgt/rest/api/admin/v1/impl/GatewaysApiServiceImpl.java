@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.service.PlatformGatewayServiceImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.GatewaysApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CreatePlatformGatewayRequestDTO;
@@ -137,12 +138,16 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         }
     }
 
-    /** Build gateway URL from stored host (DB stores host only). */
-    private static String toGatewayUrl(String host) {
-        if (StringUtils.isBlank(host)) {
+    /** Build gateway URL from stored value (full URL or legacy host[:port]). */
+    private static String toGatewayUrl(String vhost) {
+        if (StringUtils.isBlank(vhost)) {
             return null;
         }
-        return "https://" + host.trim();
+        String trimmed = vhost.trim();
+        if (trimmed.contains("://")) {
+            return trimmed;
+        }
+        return "https://" + trimmed;
     }
 
     /** VHost in request DTOs is URI; convert to string for parsing. */
@@ -245,9 +250,17 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
     }
 
     /**
+     * Canonical host:port key for immutable vhost checks. GET returns a full gateway URL; PUT sends that URL back,
+     * while persistence may store host:port or a full URL in {@code GATEWAY_BASE_URL}.
+     */
+    private static String normalizeImmutableVhost(String gatewayUrl, Map<String, Object> properties) {
+        return resolveHostFromGatewayUrl(gatewayUrl, properties);
+    }
+
+    /**
      * Resolve host from vhost URL or, as fallback, from properties.gatewayController.baseUrl.
      */
-    private String resolveHostFromGatewayUrl(String gatewayUrl, Map<String, Object> properties) {
+    private static String resolveHostFromGatewayUrl(String gatewayUrl, Map<String, Object> properties) {
         if (StringUtils.isNotBlank(gatewayUrl)) {
             ParsedGatewayUrl parsed = parseGatewayUrl(gatewayUrl);
             if (parsed != null) {
@@ -424,11 +437,13 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         if (!Objects.equals(body.getName(), existing.getName())) {
             throw RestApiUtil.buildBadRequestException("name in body must match existing gateway (immutable)");
         }
-        String bodyHost = resolveHostFromGatewayUrl(vhostString(body.getVhost()), body.getProperties());
-        if (bodyHost == null || bodyHost.isEmpty()) {
+        String bodyVhostKey = normalizeImmutableVhost(vhostString(body.getVhost()), body.getProperties());
+        if (bodyVhostKey == null || bodyVhostKey.isEmpty()) {
             throw RestApiUtil.buildBadRequestException("vhost is required for PUT");
         }
-        if (!Objects.equals(bodyHost, existing.getVhost())) {
+        String existingVhostKey = normalizeImmutableVhost(existing.getVhost(),
+                deserializeProperties(existing.getProperties()));
+        if (!Objects.equals(bodyVhostKey, existingVhostKey)) {
             throw RestApiUtil.buildBadRequestException("vhost in body must match existing gateway (immutable)");
         }
         log.info("Updating platform gateway: " + gatewayId);
@@ -444,8 +459,7 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
                     description != null ? gateway.getDescription() : null);
         }
         GatewayVisibilityPermissionConfigurationDTO permissions = null;
-        APIAdmin apiAdmin = new APIAdminImpl();
-        Environment env = apiAdmin.getEnvironment(organization, gateway.getId());
+        Environment env = getStoredPlatformGatewayEnvironment(organization, gateway.getId());
         if (env != null) {
             permissions = env.getPermissions();
         }
@@ -486,8 +500,7 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
 
         // Fetch permissions from environment
         GatewayVisibilityPermissionConfigurationDTO permissions = null;
-        APIAdmin apiAdmin = new APIAdminImpl();
-        Environment env = apiAdmin.getEnvironment(organization, gateway.getId());
+        Environment env = getStoredPlatformGatewayEnvironment(organization, gateway.getId());
         if (env != null) {
             permissions = env.getPermissions();
         }
@@ -591,7 +604,9 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
             UpdatePlatformGatewayRequestPermissionsDTO requestPermissions, String newDisplayName, String newDescription)
             throws APIManagementException {
         APIAdmin apiAdmin = new APIAdminImpl();
-        Environment existingEnvironment = apiAdmin.getEnvironment(organization, gateway.getId());
+        String storageOrg = PlatformGatewayServiceImpl.resolveStorageOrganizationId(organization, gateway.getId());
+        Environment existingEnvironment =
+                storageOrg != null ? apiAdmin.getEnvironment(storageOrg, gateway.getId()) : null;
         if (existingEnvironment == null) {
             log.warn("Environment not found for platform gateway ID: " + gateway.getId() + ", skipping environment update");
             return;
@@ -624,7 +639,16 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
             }
             existingEnvironment.setPermissions(visibility);
         }
-        apiAdmin.updateEnvironment(organization, existingEnvironment);
+        apiAdmin.updateEnvironment(storageOrg, existingEnvironment);
+    }
+
+    private Environment getStoredPlatformGatewayEnvironment(String organization, String gatewayId)
+            throws APIManagementException {
+        String storageOrg = PlatformGatewayServiceImpl.resolveStorageOrganizationId(organization, gatewayId);
+        if (storageOrg == null) {
+            return null;
+        }
+        return new APIAdminImpl().getEnvironment(storageOrg, gatewayId);
     }
 
     /** Serialize properties map to JSON string for DB storage; null if empty/null. */

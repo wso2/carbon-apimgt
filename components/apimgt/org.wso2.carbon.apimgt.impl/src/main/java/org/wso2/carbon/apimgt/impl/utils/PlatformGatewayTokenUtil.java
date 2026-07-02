@@ -54,6 +54,35 @@ public final class PlatformGatewayTokenUtil {
     }
 
     /**
+     * Parses the token row ID from a combined {@code tokenId.plainToken} registration token.
+     */
+    public static String parseTokenId(String combinedRegistrationToken) {
+        if (combinedRegistrationToken == null || !combinedRegistrationToken.contains(COMBINED_TOKEN_SEPARATOR)) {
+            return null;
+        }
+        int sep = combinedRegistrationToken.indexOf(COMBINED_TOKEN_SEPARATOR);
+        if (sep <= 0 || sep >= combinedRegistrationToken.length() - 1) {
+            return null;
+        }
+        return combinedRegistrationToken.substring(0, sep);
+    }
+
+    /**
+     * Constant-time comparison for connect registration tokens.
+     */
+    public static boolean constantTimeEquals(String expected, String actual) {
+        if (expected == null || actual == null) {
+            return false;
+        }
+        byte[] expectedBytes = expected.getBytes(StandardCharsets.UTF_8);
+        byte[] actualBytes = actual.getBytes(StandardCharsets.UTF_8);
+        if (expectedBytes.length != actualBytes.length) {
+            return false;
+        }
+        return MessageDigest.isEqual(expectedBytes, actualBytes);
+    }
+
+    /**
      * Generate a time-ordered token row ID (UUID v7, RFC 9562). JDK-only implementation; no external
      * dependency. Sortable by creation time.
      * TODO: When Java 26+ is adopted and the JDK provides native UUID v7 support (e.g. java.util.UUID),
@@ -133,19 +162,7 @@ public final class PlatformGatewayTokenUtil {
             if (tokenRow == null) {
                 return null;
             }
-            String computedHash = hashToken(plainToken);
-            byte[] computedBytes;
-            byte[] storedBytes;
-            try {
-                computedBytes = Hex.decodeHex(computedHash.toCharArray());
-                storedBytes = Hex.decodeHex(tokenRow.tokenHash.toCharArray());
-            } catch (DecoderException e) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Token verification failed: invalid hash encoding for token id=" + tokenId);
-                }
-                return null;
-            }
-            if (computedBytes.length != storedBytes.length || !MessageDigest.isEqual(computedBytes, storedBytes)) {
+            if (!matchesActiveTokenHash(tokenRow, plainToken)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Token verification failed: hash mismatch for token id=" + tokenId);
                 }
@@ -165,5 +182,25 @@ public final class PlatformGatewayTokenUtil {
             log.debug("Platform gateway token verified successfully for gateway: " + tokenRow.gatewayId);
         }
         return PlatformGatewayDAO.fromTokenWithGateway(tokenRow);
+    }
+
+    /**
+     * Constant-time comparison of a plain token against a stored active token row hash.
+     */
+    public static boolean matchesActiveTokenHash(PlatformGatewayDAO.TokenWithGateway tokenRow, String plainToken)
+            throws NoSuchAlgorithmException {
+        if (tokenRow == null || plainToken == null) {
+            return false;
+        }
+        String computedHash = hashToken(plainToken);
+        byte[] computedBytes;
+        byte[] storedBytes;
+        try {
+            computedBytes = Hex.decodeHex(computedHash.toCharArray());
+            storedBytes = Hex.decodeHex(tokenRow.tokenHash.toCharArray());
+        } catch (DecoderException e) {
+            return false;
+        }
+        return computedBytes.length == storedBytes.length && MessageDigest.isEqual(computedBytes, storedBytes);
     }
 }
