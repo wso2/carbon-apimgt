@@ -281,6 +281,25 @@ public class MCPInitializerAndToolFetcher {
     }
 
     /**
+     * Build the schema definition for a tool: all tool fields except name and description
+     * (i.e. the input schema plus any metadata such as annotations, _meta and outputSchema).
+     *
+     * @param toolJson Tool definition returned by the MCP server
+     * @return JSON object containing all tool fields except name and description
+     */
+    public static org.json.JSONObject buildToolMetadata(org.json.JSONObject toolJson) {
+
+        org.json.JSONObject toolMetadata = new org.json.JSONObject();
+        for (String key : toolJson.keySet()) {
+            if (!APIConstants.MCP.TOOL_NAME_KEY.equals(key)
+                    && !APIConstants.MCP.TOOL_DESCRIPTION_KEY.equals(key)) {
+                toolMetadata.put(key, toolJson.get(key));
+            }
+        }
+        return toolMetadata;
+    }
+
+    /**
      * Extract the tools array from a tools/list response.
      *
      * @param toolsJson Raw JSON returned by tools/list
