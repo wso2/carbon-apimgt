@@ -2048,10 +2048,6 @@ public class ImportUtils {
             if (existingPolicy == null) {
                 synapseGatewayDefinition = APIUtil.getOperationPolicyDefinitionFromFile(pathToArchive, fileName,
                         APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
-                if (synapseGatewayDefinition == null) {
-                    synapseGatewayDefinition = APIUtil.getOperationPolicyDefinitionFromFile(pathToArchive, fileName,
-                                    APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML);
-                }
                 ccGatewayDefinition = APIUtil.getOperationPolicyDefinitionFromFile(pathToArchive, fileName,
                         APIConstants.CC_POLICY_DEFINITION_EXTENSION);
 
