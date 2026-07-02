@@ -1525,18 +1525,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 apiMgtDAO.removeApiOperationMapping(oldURITemplates);
             }
         }
-        List<API> mcpServersAssociatedWithApi = getMCPServersUsedByAPI(api.getUuid(), api.getOrganization());
-        if (mcpServersAssociatedWithApi == null || mcpServersAssociatedWithApi.isEmpty()) {
-            APIUtil.validateAndUpdateURITemplates(api, tenantId);
-            apiMgtDAO.updateURITemplates(api, tenantId);
-            if (log.isDebugEnabled()) {
-                log.debug("Successfully updated the URI templates of API: " + apiIdentifier + " in the database");
-            }
-        } else {
-            if (log.isDebugEnabled()) {
-                log.debug(
-                        "Skipping URI template update for API: " + apiIdentifier + " as it is associated with MCP server(s)");
-            }
+        APIUtil.validateAndUpdateURITemplates(api, tenantId);
+        apiMgtDAO.updateURITemplates(api, tenantId);
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully updated the URI templates of API: " + apiIdentifier + " in the database");
         }
         // Update the resource scopes of the API in KM.
         // Need to remove the old local scopes and register new local scopes and, update the resource scope mappings
