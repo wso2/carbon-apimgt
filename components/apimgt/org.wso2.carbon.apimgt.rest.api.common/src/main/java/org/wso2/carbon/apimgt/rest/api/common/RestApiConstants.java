@@ -66,6 +66,8 @@ public final class RestApiConstants {
     public static final String MCP_SERVER_IMPORT_EXPORT_SCOPE = "apim:mcp_server_import_export";
     public static final String MCP_SERVER_MANAGE_SCOPE = "apim:mcp_server_manage";
     public static final String MCP_SERVER_LIFECYCLE_MANAGE_SCOPE = "apim:mcp_server_lifecycle_manage";
+    public static final String MCP_SERVER_CREATE_SCOPE = "apim:mcp_server_create";
+    public static final String MCP_SERVER_CREATE_ONLY_SCOPE = "apim:mcp_server_create_only";
     public static final String API_PRODUCT_IMPORT_EXPORT_SCOPE = "apim:api_product_import_export";
     public static final String API_PRODUCT_LIFECYCLE_MANAGE_SCOPE = "apim:api_product_lifecycle_manage";
 

@@ -2670,12 +2670,16 @@ public class McpServersApiServiceImpl implements McpServersApiService {
 
         final String organization = RestApiUtil.getValidatedOrganization(messageContext);
         SecurityInfoDTO securityInfo = dto.getSecurityInfo();
+        String mcpServerId = StringUtils.trimToNull(dto.getMcpServerId());
+
+        if (securityInfo != null || mcpServerId == null) {
+            validateFetchScopePermitted();
+        }
 
         // If the caller did not supply security info but provided mcpServerId + endpointType,
         // derive credentials from the stored endpoint security of the matching backend.
         // For query-param API keys the method updates dto.getUrl() instead of returning a SecurityInfoDTO.
         if (securityInfo == null) {
-            String mcpServerId = StringUtils.trimToNull(dto.getMcpServerId());
             String endpointType = dto.getEndpointType() != null ? dto.getEndpointType().toString() : null;
             if ((mcpServerId == null) != (endpointType == null)) {
                 RestApiUtil.handleBadRequest(
@@ -3119,6 +3123,35 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             header.append(", opaque=\"").append(opaque).append("\"");
         }
         return header.toString();
+    }
+
+    /**
+     * Validates that the caller's token carries a creation-capable scope, for validate-mcp-server calls that
+     * are not scoped to an existing MCP server (i.e. no mcpServerId, or an explicit securityInfo). Tokens
+     * limited to publish/import-export/update scopes may only re-validate via mcpServerId.
+     *
+     * @throws APIManagementException if the caller does not have a creation-capable scope.
+     */
+    private void validateFetchScopePermitted() throws APIManagementException {
+
+        boolean permitted = false;
+        String[] tokenScopes =
+                (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
+                        .get(RestApiConstants.USER_REST_API_SCOPES);
+        if (tokenScopes != null) {
+            for (String scope : tokenScopes) {
+                if (RestApiConstants.MCP_SERVER_CREATE_SCOPE.equals(scope)
+                        || RestApiConstants.MCP_SERVER_CREATE_ONLY_SCOPE.equals(scope)
+                        || RestApiConstants.MCP_SERVER_MANAGE_SCOPE.equals(scope)) {
+                    permitted = true;
+                    break;
+                }
+            }
+        }
+        if (!permitted) {
+            RestApiUtil.handleAuthorizationFailure(
+                    "User is not authorized to validate an MCP server URL directly", log);
+        }
     }
 
     /**
