@@ -250,9 +250,17 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
     }
 
     /**
+     * Canonical host:port key for immutable vhost checks. GET returns a full gateway URL; PUT sends that URL back,
+     * while persistence may store host:port or a full URL in {@code GATEWAY_BASE_URL}.
+     */
+    private static String normalizeImmutableVhost(String gatewayUrl, Map<String, Object> properties) {
+        return resolveHostFromGatewayUrl(gatewayUrl, properties);
+    }
+
+    /**
      * Resolve host from vhost URL or, as fallback, from properties.gatewayController.baseUrl.
      */
-    private String resolveHostFromGatewayUrl(String gatewayUrl, Map<String, Object> properties) {
+    private static String resolveHostFromGatewayUrl(String gatewayUrl, Map<String, Object> properties) {
         if (StringUtils.isNotBlank(gatewayUrl)) {
             ParsedGatewayUrl parsed = parseGatewayUrl(gatewayUrl);
             if (parsed != null) {
@@ -429,11 +437,13 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         if (!Objects.equals(body.getName(), existing.getName())) {
             throw RestApiUtil.buildBadRequestException("name in body must match existing gateway (immutable)");
         }
-        String bodyHost = resolveHostFromGatewayUrl(vhostString(body.getVhost()), body.getProperties());
-        if (bodyHost == null || bodyHost.isEmpty()) {
+        String bodyVhostKey = normalizeImmutableVhost(vhostString(body.getVhost()), body.getProperties());
+        if (bodyVhostKey == null || bodyVhostKey.isEmpty()) {
             throw RestApiUtil.buildBadRequestException("vhost is required for PUT");
         }
-        if (!Objects.equals(bodyHost, existing.getVhost())) {
+        String existingVhostKey = normalizeImmutableVhost(existing.getVhost(),
+                deserializeProperties(existing.getProperties()));
+        if (!Objects.equals(bodyVhostKey, existingVhostKey)) {
             throw RestApiUtil.buildBadRequestException("vhost in body must match existing gateway (immutable)");
         }
         log.info("Updating platform gateway: " + gatewayId);
