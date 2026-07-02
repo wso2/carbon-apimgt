@@ -22,6 +22,7 @@ package org.wso2.carbon.apimgt.gateway.utils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.gateway.mcp.response.InitializeResult;
@@ -99,31 +100,58 @@ public class MCPPayloadGenerator {
         return data;
     }
 
-    //write a method to generate the tool list payload
+    /**
+     * Generates the tools/list response payload for the given operations. Each stored schema
+     * definition may be either the bare input schema or a wrapper object that additionally
+     * carries metadata such as annotations, _meta and outputSchema; both formats are emitted
+     * as valid tool definitions.
+     *
+     * @param id                 id of the request
+     * @param extendedOperations tool operations of the MCP server
+     * @param isThirdParty       whether the MCP server proxies a third-party MCP server
+     * @return the tools/list response payload as a String
+     */
     public static String generateToolListPayload(Object id, List<URLMapping> extendedOperations, boolean isThirdParty) {
-        McpResponse<ToolListResult> toolListResponse = new McpResponse<>(id);
-        ToolListResult toolListResult = new ToolListResult();
-        List<ToolListResult.ToolInfo> toolInfoList = new ArrayList<>();
+        McpResponse<JsonObject> toolListResponse = new McpResponse<>(id);
+        JsonArray toolsArray = new JsonArray();
 
         for (URLMapping extendedOperation : extendedOperations) {
-            ToolListResult.ToolInfo tool = new ToolListResult.ToolInfo();
-            tool.setName(extendedOperation.getUrlPattern());
-            tool.setDescription(extendedOperation.getDescription());
+            JsonObject toolObj = new JsonObject();
+            toolObj.addProperty(APIConstants.MCP.TOOL_NAME_KEY, extendedOperation.getUrlPattern());
+            if (extendedOperation.getDescription() != null) {
+                toolObj.addProperty(APIConstants.MCP.TOOL_DESCRIPTION_KEY, extendedOperation.getDescription());
+            }
             String schema = extendedOperation.getSchemaDefinition();
             if (schema != null) {
-                ToolListResult.JsonSchema schemaObject = gson.fromJson(schema, ToolListResult.JsonSchema.class);
-                if (!isThirdParty) {
-                    tool.setInputSchema(sanitizeInputSchema(schemaObject));
+                JsonObject schemaJson = gson.fromJson(schema, JsonObject.class);
+                if (schemaJson != null && schemaJson.has(APIConstants.MCP.TOOL_INPUT_SCHEMA_KEY)) {
+                    JsonObject inputSchemaJson = schemaJson.getAsJsonObject(APIConstants.MCP.TOOL_INPUT_SCHEMA_KEY);
+                    ToolListResult.JsonSchema inputSchema = gson.fromJson(inputSchemaJson, ToolListResult.JsonSchema.class);
+                    if (!isThirdParty) {
+                        inputSchema = sanitizeInputSchema(inputSchema);
+                    }
+                    toolObj.add(APIConstants.MCP.TOOL_INPUT_SCHEMA_KEY, gson.toJsonTree(inputSchema));
+                    for (Map.Entry<String, JsonElement> entry : schemaJson.entrySet()) {
+                        if (!APIConstants.MCP.TOOL_INPUT_SCHEMA_KEY.equals(entry.getKey())) {
+                            toolObj.add(entry.getKey(), entry.getValue());
+                        }
+                    }
                 } else {
-                    // For third-party tools, we do not sanitize the input schema
-                    tool.setInputSchema(schemaObject);
+                    ToolListResult.JsonSchema inputSchema = gson.fromJson(schema, ToolListResult.JsonSchema.class);
+                    if (!isThirdParty) {
+                        toolObj.add(APIConstants.MCP.TOOL_INPUT_SCHEMA_KEY,
+                                gson.toJsonTree(sanitizeInputSchema(inputSchema)));
+                    } else {
+                        toolObj.add(APIConstants.MCP.TOOL_INPUT_SCHEMA_KEY, gson.toJsonTree(inputSchema));
+                    }
                 }
-
             }
-            toolInfoList.add(tool);
+            toolsArray.add(toolObj);
         }
-        toolListResult.setTools(toolInfoList);
-        toolListResponse.setResult(toolListResult);
+
+        JsonObject result = new JsonObject();
+        result.add(APIConstants.MCP.TOOLS_KEY, toolsArray);
+        toolListResponse.setResult(result);
         return gson.toJson(toolListResponse);
     }
 
