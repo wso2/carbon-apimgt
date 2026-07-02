@@ -2723,13 +2723,27 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     }
 
     private SecurityInfoDTO deriveBackendSecurityInfo(String mcpServerId, String endpointType,
-            String organization, String serverUrl, MCPServerValidationRequestDTO dto) throws APIManagementException {
+                                                      String organization, String serverUrl, MCPServerValidationRequestDTO dto) throws APIManagementException {
 
         if (!StringUtils.startsWithIgnoreCase(serverUrl, "https://")) {
             return null;
         }
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+
+        try {
+            apiProvider.getAPIbyUUID(mcpServerId, organization, APIConstants.API_TYPE_MCP);
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "User is not authorized to access the MCP server: " + mcpServerId, e, log);
+            } else {
+                throw e;
+            }
+        }
+
         List<Backend> backends = apiProvider.getMCPServerBackends(mcpServerId, organization);
         if (backends == null || backends.isEmpty()) {
             return null;
@@ -2762,6 +2776,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     }
 
     private static String extractBackendEndpointUrl(JSONObject endpointConfig, String endpointType) {
+
         String key = APIConstants.ENDPOINT_SECURITY_SANDBOX.equalsIgnoreCase(endpointType)
                 ? APIConstants.ENDPOINT_SANDBOX_ENDPOINTS : APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS;
         Object endpointsObj = endpointConfig.get(key);
@@ -2772,7 +2787,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     }
 
     private SecurityInfoDTO deriveSecurityInfoFromBackend(String backendId, JSONObject endpointConfig,
-            String endpointType, MCPServerValidationRequestDTO dto)
+                                                          String endpointType, MCPServerValidationRequestDTO dto)
             throws APIManagementException {
 
         JSONObject securityRoot = (JSONObject) endpointConfig.get(APIConstants.ENDPOINT_SECURITY);
@@ -2903,7 +2918,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     }
 
     private String fetchOAuthTokenForBackend(String tokenUrl, String clientId, String clientSecret,
-            String grantType, JSONObject securityConfig, String backendId) {
+                                             String grantType, JSONObject securityConfig, String backendId) {
 
         try {
             if (!StringUtils.startsWithIgnoreCase(tokenUrl, "https://")) {
@@ -2967,14 +2982,14 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      * Derives a Digest Authorization header for the backend by first sending an unauthenticated probe request
      * to obtain the WWW-Authenticate challenge, then computing the digest response from it.
      *
-     * @param serverUrl  URL of the backend to challenge
-     * @param username   Endpoint username
-     * @param password   Endpoint password
-     * @param backendId  Backend id (used for logging)
+     * @param serverUrl URL of the backend to challenge
+     * @param username  Endpoint username
+     * @param password  Endpoint password
+     * @param backendId Backend id (used for logging)
      * @return Digest Authorization header value, or null if the challenge could not be obtained/parsed
      */
     private String fetchDigestAuthHeaderForBackend(String serverUrl, String username, String password,
-            String backendId) {
+                                                   String backendId) {
 
         try {
             URL url = new URL(serverUrl);
@@ -3047,7 +3062,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      * Calculates the HA1 value used in Digest authentication.
      */
     private String calculateDigestHA1(String username, String realm, String password, String algorithm,
-            String serverNonce, String clientNonce) {
+                                      String serverNonce, String clientNonce) {
 
         String ha1 = org.apache.commons.codec.digest.DigestUtils.md5Hex(username + ":" + realm + ":" + password);
         if (APIConstants.DigestAuthConstants.MD5_SESS.equalsIgnoreCase(algorithm)) {
@@ -3060,7 +3075,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      * Calculates the final Digest response hash from HA1/HA2, following RFC 2617.
      */
     private String calculateDigestResponse(String ha1, String ha2, String serverNonce, String qop,
-            String nonceCount, String clientNonce) {
+                                           String nonceCount, String clientNonce) {
 
         if (qop != null) {
             return org.apache.commons.codec.digest.DigestUtils.md5Hex(
@@ -3083,8 +3098,8 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      * Constructs the Digest Authorization header value to be sent to the backend.
      */
     private String constructDigestAuthHeader(String username, String realm, String serverNonce, String digestUri,
-            String digestResponse, String qop, String opaque, String nonceCount, String clientNonce,
-            String algorithm) {
+                                             String digestResponse, String qop, String opaque, String nonceCount, String clientNonce,
+                                             String algorithm) {
 
         StringBuilder header = new StringBuilder("Digest ");
         header.append("username=\"").append(username).append("\", ");
