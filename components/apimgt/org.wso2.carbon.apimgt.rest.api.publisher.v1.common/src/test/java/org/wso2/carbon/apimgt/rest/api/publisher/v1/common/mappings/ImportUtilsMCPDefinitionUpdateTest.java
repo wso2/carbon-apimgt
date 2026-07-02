@@ -50,7 +50,7 @@ import java.util.LinkedHashMap;
  * Covers:
  * - Backend definition is updated when provided in import artifact
  * - Backend definition is NOT updated when absent in import artifact
- * - Definition validation is invoked for imported definitions
+ * - Definition validation is invoked only for DIRECT_BACKEND imported definitions
  * - Both DIRECT_BACKEND and SERVER_PROXY subtypes
  */
 @RunWith(PowerMockRunner.class)
@@ -333,8 +333,8 @@ public class ImportUtilsMCPDefinitionUpdateTest {
         Assert.assertEquals("SERVER_PROXY backend definition should be updated",
                 NEW_DEFINITION, capturedBackend.getDefinition());
 
-        PowerMockito.verifyPrivate(ImportUtils.class)
-                .invoke("retrieveValidatedSwaggerDefinition", NEW_DEFINITION);
+        PowerMockito.verifyPrivate(ImportUtils.class, Mockito.never())
+                .invoke("retrieveValidatedSwaggerDefinition", ArgumentMatchers.anyString());
     }
 
     // -------------------------------------------------------------------------

@@ -12281,6 +12281,8 @@ components:
           example: APPROVED
         protocolVersion:
           type: string
+        mcpPathAppended:
+          type: string
         createdTime:
           type: string
         lastUpdatedTimestamp:
