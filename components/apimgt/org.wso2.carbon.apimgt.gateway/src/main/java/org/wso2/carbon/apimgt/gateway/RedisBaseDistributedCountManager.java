@@ -551,7 +551,7 @@ public class RedisBaseDistributedCountManager implements DistributedCounterManag
                     return new long[]{0L, 0L};
                 }
                 try {
-                    String tsValue      = vals.get(0);
+                    String tsValue = vals.get(0);
                     String counterValue = vals.get(1);
                     if (tsValue == null || counterValue == null) {
                         if (tsValue != null || counterValue != null) {
@@ -561,7 +561,7 @@ public class RedisBaseDistributedCountManager implements DistributedCounterManag
                         }
                         return new long[]{0L, 0L};
                     }
-                    long ts      = Long.parseLong(tsValue);
+                    long ts = Long.parseLong(tsValue);
                     long counter = Long.parseLong(counterValue);
                     return new long[]{ts, counter};
                 } catch (RuntimeException e) {
