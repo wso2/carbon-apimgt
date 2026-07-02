@@ -14821,6 +14821,18 @@ components:
           example: https://example.com/mcp
         securityInfo:
           $ref: '#/components/schemas/SecurityInfo'
+        mcpServerId:
+          type: string
+          description: UUID of the MCP Server whose stored endpoint security should be used when securityInfo is absent.
+          example: 2962f50e-1c05-4b5d-a9c7-12345abcdef0
+        endpointType:
+          type: string
+          enum:
+            - PRODUCTION
+            - SANDBOX
+          description: The endpoint environment whose stored security config should be used. Required when mcpServerId is provided.
+          example: PRODUCTION
+
     SecurityInfo:
       title: MCP Server Security Information
       type: object
