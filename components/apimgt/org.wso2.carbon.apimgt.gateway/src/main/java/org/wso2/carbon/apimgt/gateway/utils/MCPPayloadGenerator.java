@@ -125,24 +125,30 @@ public class MCPPayloadGenerator {
             if (schema != null) {
                 JsonObject schemaJson = gson.fromJson(schema, JsonObject.class);
                 if (schemaJson != null && schemaJson.has(APIConstants.MCP.TOOL_INPUT_SCHEMA_KEY)) {
-                    JsonObject inputSchemaJson = schemaJson.getAsJsonObject(APIConstants.MCP.TOOL_INPUT_SCHEMA_KEY);
-                    ToolListResult.JsonSchema inputSchema = gson.fromJson(inputSchemaJson, ToolListResult.JsonSchema.class);
                     if (!isThirdParty) {
-                        inputSchema = sanitizeInputSchema(inputSchema);
+                        ToolListResult.JsonSchema inputSchema = gson.fromJson(
+                                schemaJson.getAsJsonObject(APIConstants.MCP.TOOL_INPUT_SCHEMA_KEY),
+                                ToolListResult.JsonSchema.class);
+                        toolObj.add(APIConstants.MCP.TOOL_INPUT_SCHEMA_KEY,
+                                gson.toJsonTree(sanitizeInputSchema(inputSchema)));
+                    } else {
+                        // For third-party tools, pass the input schema through unchanged
+                        toolObj.add(APIConstants.MCP.TOOL_INPUT_SCHEMA_KEY,
+                                schemaJson.get(APIConstants.MCP.TOOL_INPUT_SCHEMA_KEY));
                     }
-                    toolObj.add(APIConstants.MCP.TOOL_INPUT_SCHEMA_KEY, gson.toJsonTree(inputSchema));
                     for (Map.Entry<String, JsonElement> entry : schemaJson.entrySet()) {
                         if (!APIConstants.MCP.TOOL_INPUT_SCHEMA_KEY.equals(entry.getKey())) {
                             toolObj.add(entry.getKey(), entry.getValue());
                         }
                     }
                 } else {
-                    ToolListResult.JsonSchema inputSchema = gson.fromJson(schema, ToolListResult.JsonSchema.class);
                     if (!isThirdParty) {
+                        ToolListResult.JsonSchema inputSchema = gson.fromJson(schema, ToolListResult.JsonSchema.class);
                         toolObj.add(APIConstants.MCP.TOOL_INPUT_SCHEMA_KEY,
                                 gson.toJsonTree(sanitizeInputSchema(inputSchema)));
                     } else {
-                        toolObj.add(APIConstants.MCP.TOOL_INPUT_SCHEMA_KEY, gson.toJsonTree(inputSchema));
+                        // For third-party tools, pass the input schema through unchanged
+                        toolObj.add(APIConstants.MCP.TOOL_INPUT_SCHEMA_KEY, schemaJson);
                     }
                 }
             }
