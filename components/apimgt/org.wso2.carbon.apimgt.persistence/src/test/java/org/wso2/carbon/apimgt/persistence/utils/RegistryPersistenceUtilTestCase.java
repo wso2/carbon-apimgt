@@ -55,15 +55,21 @@ import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifactImpl;
 import org.wso2.carbon.governance.api.util.GovernanceArtifactConfiguration;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
+import org.wso2.carbon.registry.core.ActionConstants;
 import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.ResourceImpl;
 import org.wso2.carbon.registry.core.Tag;
+import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
 import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.core.AuthorizationManager;
+import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -72,27 +78,30 @@ import junit.framework.Assert;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ MultitenantUtils.class, ServiceReferenceHolder.class, GenericArtifact.class,
-        PrivilegedCarbonContext.class, GovernanceUtils.class, ServerConfiguration.class })
+        PrivilegedCarbonContext.class, GovernanceUtils.class, ServerConfiguration.class,
+        RegistryPersistenceUtil.class, RegistryContext.class, RegistryUtils.class })
 public class RegistryPersistenceUtilTestCase {
-    
+
     private final int SUPER_TENANT_ID = -1234;
     private final String SUPER_TENANT_DOMAIN = "carbon.super";
     private final int TENANT_ID = 1;
     private final String TENANT_DOMAIN = "wso2.com";
     private Registry registry;
-    
+    private RealmService realmService;
+
     @Before
     public void setupClass() throws Exception {
         System.setProperty("carbon.home", "");
         ServiceReferenceHolder serviceRefHolder = Mockito.mock(ServiceReferenceHolder.class);
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceRefHolder);
-        RealmService realmService = Mockito.mock(RealmService.class);
+        realmService = Mockito.mock(RealmService.class);
         PowerMockito.when(serviceRefHolder.getRealmService()).thenReturn(realmService);
 
         TenantManager tenantManager = Mockito.mock(TenantManager.class);
         PowerMockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         PowerMockito.when(tenantManager.getTenantId(SUPER_TENANT_DOMAIN)).thenReturn(SUPER_TENANT_ID);
+        PowerMockito.when(tenantManager.getTenantId(TENANT_DOMAIN)).thenReturn(TENANT_ID);
         
         registry = Mockito.mock(Registry.class);
 
@@ -477,5 +486,114 @@ public class RegistryPersistenceUtilTestCase {
         artifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER, "user@gmail.com@abc.com");
         String result = RegistryPersistenceUtil.getProviderFromArtifact(artifact);
         Assert.assertEquals("user-AT-gmail.com-AT-abc.com", result);
+    }
+
+    // =====================================================================
+    // Tests for setResourcePermissions — RESTRICTED visibility with
+    // empty/blank visibleRoles entries
+    // =====================================================================
+
+    private static final String ARTIFACT_PATH = "/apimgt/applicationdata/provider/admin/MyAPI/1.0/api";
+    private static final String SUPER_TENANT_USER = "admin";
+    private static final String TENANT_USER = "user@wso2.com";
+
+    private void mockRegistryPathStatics() throws Exception {
+        PowerMockito.mockStatic(RegistryContext.class);
+        PowerMockito.when(RegistryContext.getBaseInstance()).thenReturn(null);
+        PowerMockito.mockStatic(RegistryUtils.class);
+        PowerMockito.when(RegistryUtils.getAbsolutePath(Mockito.any(), Mockito.anyString()))
+                .thenAnswer(invocation -> invocation.getArgument(1));
+    }
+
+    private RegistryAuthorizationManager mockSuperTenantAuthManager() throws Exception {
+        mockRegistryPathStatics();
+        PowerMockito.when(MultitenantUtils.getTenantDomain(SUPER_TENANT_USER)).thenReturn(SUPER_TENANT_DOMAIN);
+        UserRealm userRealm = Mockito.mock(UserRealm.class);
+        Mockito.when(realmService.getTenantUserRealm(SUPER_TENANT_ID)).thenReturn(userRealm);
+        RegistryAuthorizationManager authorizationManager = Mockito.mock(RegistryAuthorizationManager.class);
+        PowerMockito.whenNew(RegistryAuthorizationManager.class).withAnyArguments()
+                .thenReturn(authorizationManager);
+        return authorizationManager;
+    }
+
+    private AuthorizationManager mockTenantAuthManager() throws Exception {
+        mockRegistryPathStatics();
+        PowerMockito.when(MultitenantUtils.getTenantDomain(TENANT_USER)).thenReturn(TENANT_DOMAIN);
+        UserRealm userRealm = Mockito.mock(UserRealm.class);
+        Mockito.when(realmService.getTenantUserRealm(TENANT_ID)).thenReturn(userRealm);
+        RegistryAuthorizationManager registryAuthManager = Mockito.mock(RegistryAuthorizationManager.class);
+        PowerMockito.whenNew(RegistryAuthorizationManager.class).withAnyArguments()
+                .thenReturn(registryAuthManager);
+        Mockito.when(registryAuthManager.computePathOnMount(anyString())).thenReturn(ARTIFACT_PATH);
+        AuthorizationManager authManager = Mockito.mock(AuthorizationManager.class);
+        Mockito.when(userRealm.getAuthorizationManager()).thenReturn(authManager);
+        return authManager;
+    }
+
+    @Test
+    public void testSetResourcePermissionsSuperTenantLoneEmptyRole() throws Exception {
+        RegistryAuthorizationManager authorizationManager = mockSuperTenantAuthManager();
+
+        RegistryPersistenceUtil.setResourcePermissions(SUPER_TENANT_USER, APIConstants.API_RESTRICTED_VISIBILITY,
+                new String[] { "" }, ARTIFACT_PATH, null);
+
+        Mockito.verify(authorizationManager).authorizeRole(Mockito.eq(APIConstants.EVERYONE_ROLE), anyString(),
+                Mockito.eq(ActionConstants.GET));
+        Mockito.verify(authorizationManager, Mockito.never()).authorizeRole(Mockito.eq(""), anyString(),
+                anyString());
+        Mockito.verify(authorizationManager, Mockito.never()).denyRole(Mockito.eq(APIConstants.EVERYONE_ROLE),
+                anyString(), anyString());
+        Mockito.verify(authorizationManager).denyRole(Mockito.eq(APIConstants.ANONYMOUS_ROLE), anyString(),
+                Mockito.eq(ActionConstants.GET));
+    }
+
+    @Test
+    public void testSetResourcePermissionsSuperTenantBlankRolesSkipped() throws Exception {
+        RegistryAuthorizationManager authorizationManager = mockSuperTenantAuthManager();
+
+        RegistryPersistenceUtil.setResourcePermissions(SUPER_TENANT_USER, APIConstants.API_RESTRICTED_VISIBILITY,
+                new String[] { "", "  ", "internal/subscriber" }, ARTIFACT_PATH, null);
+
+        Mockito.verify(authorizationManager).authorizeRole(Mockito.eq("internal/subscriber"), anyString(),
+                Mockito.eq(ActionConstants.GET));
+        Mockito.verify(authorizationManager, Mockito.never()).authorizeRole(Mockito.eq(""), anyString(),
+                anyString());
+        // no everyone role in the list -> everyone must be denied
+        Mockito.verify(authorizationManager).denyRole(Mockito.eq(APIConstants.EVERYONE_ROLE), anyString(),
+                Mockito.eq(ActionConstants.GET));
+        Mockito.verify(authorizationManager).denyRole(Mockito.eq(APIConstants.ANONYMOUS_ROLE), anyString(),
+                Mockito.eq(ActionConstants.GET));
+    }
+
+    @Test
+    public void testSetResourcePermissionsTenantLoneEmptyRole() throws Exception {
+        AuthorizationManager authManager = mockTenantAuthManager();
+
+        RegistryPersistenceUtil.setResourcePermissions(TENANT_USER, APIConstants.API_RESTRICTED_VISIBILITY,
+                new String[] { "" }, ARTIFACT_PATH, null);
+
+        Mockito.verify(authManager).authorizeRole(Mockito.eq(APIConstants.EVERYONE_ROLE), anyString(),
+                Mockito.eq(ActionConstants.GET));
+        Mockito.verify(authManager, Mockito.never()).authorizeRole(Mockito.eq(""), anyString(), anyString());
+        Mockito.verify(authManager, Mockito.never()).denyRole(Mockito.eq(APIConstants.EVERYONE_ROLE), anyString(),
+                anyString());
+        Mockito.verify(authManager).denyRole(Mockito.eq(APIConstants.ANONYMOUS_ROLE), anyString(),
+                Mockito.eq(ActionConstants.GET));
+    }
+
+    @Test
+    public void testSetResourcePermissionsTenantBlankRolesSkipped() throws Exception {
+        AuthorizationManager authManager = mockTenantAuthManager();
+
+        RegistryPersistenceUtil.setResourcePermissions(TENANT_USER, APIConstants.API_RESTRICTED_VISIBILITY,
+                new String[] { "", "  ", "internal/subscriber" }, ARTIFACT_PATH, null);
+
+        Mockito.verify(authManager).authorizeRole(Mockito.eq("internal/subscriber"), anyString(),
+                Mockito.eq(ActionConstants.GET));
+        Mockito.verify(authManager, Mockito.never()).authorizeRole(Mockito.eq(""), anyString(), anyString());
+        Mockito.verify(authManager).denyRole(Mockito.eq(APIConstants.EVERYONE_ROLE), anyString(),
+                Mockito.eq(ActionConstants.GET));
+        Mockito.verify(authManager).denyRole(Mockito.eq(APIConstants.ANONYMOUS_ROLE), anyString(),
+                Mockito.eq(ActionConstants.GET));
     }
 }
