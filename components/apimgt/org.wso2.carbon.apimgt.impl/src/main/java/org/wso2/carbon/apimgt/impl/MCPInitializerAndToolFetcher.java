@@ -287,9 +287,9 @@ public class MCPInitializerAndToolFetcher {
      * @param toolJson Tool definition returned by the MCP server
      * @return JSON object containing all tool fields except name and description
      */
-    public static org.json.JSONObject buildToolMetadata(org.json.JSONObject toolJson) {
+    public static JSONObject buildToolMetadata(JSONObject toolJson) {
 
-        org.json.JSONObject toolMetadata = new org.json.JSONObject();
+        JSONObject toolMetadata = new JSONObject();
         for (String key : toolJson.keySet()) {
             if (!APIConstants.MCP.TOOL_NAME_KEY.equals(key)
                     && !APIConstants.MCP.TOOL_DESCRIPTION_KEY.equals(key)) {
