@@ -1651,10 +1651,10 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         this.setTenantDomain(kmAdminTenantDomain);
     }
 
-    public static String base64UrlEncode(String value) {
+    private static String base64UrlEncode(String value) {
         if (value == null || StringUtils.isBlank(value)) {
             if (log.isDebugEnabled()) {
-                log.debug("Scope name is null, empty, or blank");
+                log.debug("Value to encode is null, empty, or blank");
             }
             return value;
         }
