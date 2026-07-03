@@ -174,6 +174,7 @@ import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.token.InternalAPIKeyGenerator;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
+import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIProductNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIStoreNameComparator;
@@ -1026,6 +1027,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void sendUpdateEventToPreviousDefaultVersion(APIIdentifier apiIdentifier, String organization)
             throws APIManagementException {
         API api = apiMgtDAO.getLightWeightAPIInfoByAPIIdentifier(apiIdentifier, organization);
+        if (api == null) {
+            log.warn("Could not load previous default version API: " + apiIdentifier
+                    + ". Skipping Gateway update notification — the API may no longer exist "
+                    + "under the referenced provider.");
+            return;
+        }
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_UPDATE.name(), tenantId, organization, apiIdentifier.getApiName(),
                 api.getId().getId(), api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
@@ -1398,6 +1405,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void updateAPI(API api, int tenantId, String username) throws APIManagementException {
 
         MCPUtils.validateMCPResources(api.getUuid(), api.getOrganization(), api.getUriTemplates());
+        MCPUtils.validateMCPBackendOperations(api);
         apiMgtDAO.updateAPI(api, username);
         if (log.isDebugEnabled()) {
             log.debug("Successfully updated the API: " + api.getId() + " metadata in the database");
@@ -1408,9 +1416,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     private void updateAPIMetadata(API api) throws APIManagementException {
+        Map<String, String> existingMetadata = apiMgtDAO.getCurrentAPIMetadata(api.getUuid());
+        Map<String, String> merged = existingMetadata != null ? existingMetadata : new HashMap<>();
+        if (api.getMetadata() != null) {
+            merged.putAll(api.getMetadata());
+        }
         apiMgtDAO.deleteCurrentAPIMetadata(api.getUuid());
-        if (api.getMetadata() != null && !api.getMetadata().isEmpty()) {
-            apiMgtDAO.addAPIMetadata(api.getUuid(), api.getMetadata());
+        if (!merged.isEmpty()) {
+            if (log.isDebugEnabled()) {
+                log.debug("Adding merged metadata for API UUID: " + api.getUuid() + ", metadata count: " + merged.size());
+            }  
+            apiMgtDAO.addAPIMetadata(api.getUuid(), merged);
         }
     }
 
@@ -1509,18 +1525,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 apiMgtDAO.removeApiOperationMapping(oldURITemplates);
             }
         }
-        List<API> mcpServersAssociatedWithApi = getMCPServersUsedByAPI(api.getUuid(), api.getOrganization());
-        if (mcpServersAssociatedWithApi == null || mcpServersAssociatedWithApi.isEmpty()) {
-            APIUtil.validateAndUpdateURITemplates(api, tenantId);
-            apiMgtDAO.updateURITemplates(api, tenantId);
-            if (log.isDebugEnabled()) {
-                log.debug("Successfully updated the URI templates of API: " + apiIdentifier + " in the database");
-            }
-        } else {
-            if (log.isDebugEnabled()) {
-                log.debug(
-                        "Skipping URI template update for API: " + apiIdentifier + " as it is associated with MCP server(s)");
-            }
+        APIUtil.validateAndUpdateURITemplates(api, tenantId);
+        apiMgtDAO.updateURITemplates(api, tenantId);
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully updated the URI templates of API: " + apiIdentifier + " in the database");
         }
         // Update the resource scopes of the API in KM.
         // Need to remove the old local scopes and register new local scopes and, update the resource scope mappings
@@ -2171,7 +2179,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                                              List<OperationPolicy> existingPoliciesList,
                                                              String tenantDomain) throws APIManagementException {
         List<OperationPolicy> validatedPolicies = new ArrayList<>();
+        if (apiPoliciesList == null || apiPoliciesList.isEmpty()) {
+            return validatedPolicies;
+        }
         for (OperationPolicy policy : apiPoliciesList) {
+            if (policy == null) {
+                continue;
+            }
             String policyId = policy.getPolicyId();
             OperationPolicyData policyData = null;
             if (policyId != null) {
@@ -6720,6 +6734,76 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return result;
     }
 
+    @Override
+    public APISearchResult searchPaginatedAPIsByCertificate(CertificateMetadataDTO certificateMetadataDTO,
+            String tenantDomain, int offset, int limit) throws APIManagementException {
+        APISearchResult result = new APISearchResult();
+        Set<String> searchTerms = new LinkedHashSet<>();
+
+        String certContent = certificateMetadataDTO.getCertificate();
+        if (StringUtils.isNotEmpty(certContent)) {
+            searchTerms.addAll(CertificateMgtUtils.getEndpointSearchTermsFromCertificate(certContent));
+        }
+
+        // Always include the stored endpoint FQDN to cover certificates with no parseable SANs/CN.
+        String endpoint = certificateMetadataDTO.getEndpoint();
+        if (StringUtils.isNotEmpty(endpoint)) {
+            try {
+                String fqdn = new URI(endpoint).getHost();
+                if (fqdn != null && !fqdn.contains(":")) { // skip IPv6 literals — ':' breaks Solr query parsing
+                    searchTerms.add(fqdn);
+                }
+            } catch (URISyntaxException e) {
+                log.warn("Could not extract FQDN from stored endpoint: " + endpoint, e);
+            }
+        }
+
+        if (searchTerms.isEmpty()) {
+            return result;
+        }
+
+        // Build a space-separated OR query: same key repeated → OR in the Registry search layer.
+        // Values include explicit wildcards so the OR path does not strip them.
+        StringBuilder queryBuilder = new StringBuilder();
+        for (String term : searchTerms) {
+            if (queryBuilder.length() > 0) {
+                queryBuilder.append(' ');
+            }
+            queryBuilder.append(ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX).append("*").append(term).append("*");
+        }
+        String query = queryBuilder.toString();
+
+        Organization org = new Organization(tenantDomain);
+        String adminUser = APIUtil.getTenantAdminUserName(tenantDomain);
+        String[] roles = APIUtil.getFilteredUserRoles(adminUser);
+        Map<String, Object> properties = APIUtil.getUserProperties(adminUser);
+        UserContext userCtx = new UserContext(adminUser, org, properties, roles);
+
+        try {
+            PublisherAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForPublisher(org, query,
+                    offset, limit, userCtx);
+            if (log.isDebugEnabled()) {
+                log.debug("Running certificate SAN Solr query: " + query);
+            }
+            if (searchAPIs != null) {
+                List<PublisherAPIInfo> list = searchAPIs.getPublisherAPIInfoList();
+                List<API> apiList = new ArrayList<>(list.size());
+                for (PublisherAPIInfo publisherAPIInfo : list) {
+                    API mappedAPI = APIMapper.INSTANCE.toApi(publisherAPIInfo);
+                    populateApiInfo(mappedAPI);
+                    populateDefaultVersion(mappedAPI);
+                    populateGatewayVendor(mappedAPI);
+                    apiList.add(mappedAPI);
+                }
+                result.setApis(apiList);
+                result.setApiCount(searchAPIs.getTotalAPIsCount());
+            }
+        } catch (APIPersistenceException e) {
+            throw new APIManagementException("Error while searching APIs by certificate SANs with query: " + query, e);
+        }
+        return result;
+    }
+
     private void populateAPITier(APIProduct apiProduct) throws APIManagementException {
 
         if (apiProduct.isRevision()) {
@@ -9212,9 +9296,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String policyMappingUUID = UUID.randomUUID().toString();
 
         // Validate and process the policies before adding them to DB
-        validateAndProcessPolicies(gatewayGlobalPoliciesList, null, null, orgId);
+        List<OperationPolicy> validatedPolicies = validateAndProcessPolicies(gatewayGlobalPoliciesList, null, null, orgId);
+        if (validatedPolicies == null || validatedPolicies.isEmpty()) {
+            throw new APIManagementException("Cannot apply gateway global policies. Policy list is empty after " +
+                    "validation.");
+        }
 
-        return apiMgtDAO.addGatewayGlobalPolicy(gatewayGlobalPoliciesList, description, name, orgId, policyMappingUUID);
+        return apiMgtDAO.addGatewayGlobalPolicy(validatedPolicies, description, name, orgId, policyMappingUUID);
     }
 
     /**
@@ -9352,14 +9440,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         // Validate and process the policies before deleting the existing policies
         // The secret policy attributes will be encrypted during this
-        validateAndProcessPolicies(gatewayGlobalPolicyList, null, policyList, orgId);
+        List<OperationPolicy> validatedPolicies = validateAndProcessPolicies(gatewayGlobalPolicyList, null, policyList,
+                orgId);
+        if (validatedPolicies == null || validatedPolicies.isEmpty()) {
+            throw new APIManagementException("Cannot update gateway global policies. Policy list is empty after " +
+                    "validation.");
+        }
 
         // Keep the existing deployments and update the policy mapping.
         Set<String> activeGatewayLabels = apiMgtDAO.getGatewayPolicyMappingDeploymentsByPolicyMappingId(policyMappingId,
                 orgId);
         apiMgtDAO.deleteGatewayPolicyMappingByPolicyId(policyMappingId, false);
 
-        String mappingID = apiMgtDAO.updateGatewayGlobalPolicy(gatewayGlobalPolicyList, description, name, orgId, policyMappingId);
+        String mappingID = apiMgtDAO.updateGatewayGlobalPolicy(validatedPolicies, description, name, orgId,
+                policyMappingId);
         // Redeploy the updated policy mappings to the gateways.
         if (activeGatewayLabels.size() > 0) {
             APIGatewayManager gatewayManager = APIGatewayManager.getInstance();

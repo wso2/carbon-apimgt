@@ -24,6 +24,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import com.jayway.jsonpath.InvalidPathException;
+import com.jayway.jsonpath.JsonPath;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -756,6 +758,7 @@ public class APIAdminImpl implements APIAdmin {
     @Override
     public LLMProvider addLLMProvider(String organization, LLMProvider provider) throws APIManagementException {
 
+        validateLLMProviderMetadataIdentifiers(provider);
         provider.setId(UUID.randomUUID().toString());
         LLMProvider result = apiMgtDAO.addLLMProvider(organization, provider);
         new LLMProviderNotificationSender().notify(result.getId(), result.getName(), result.getApiVersion(),
@@ -783,12 +786,65 @@ public class APIAdminImpl implements APIAdmin {
     @Override
     public LLMProvider updateLLMProvider(String organization, LLMProvider provider) throws APIManagementException {
 
+        validateLLMProviderMetadataIdentifiers(provider);
         LLMProvider result = apiMgtDAO.updateLLMProvider(organization, provider);
         if (!result.isBuiltInSupport()) {
             new LLMProviderNotificationSender().notify(result.getId(), result.getName(), result.getApiVersion(),
                     provider.getConfigurations(), organization, APIConstants.EventType.LLM_PROVIDER_UPDATE.name());
         }
         return result;
+    }
+
+    private void validateLLMProviderMetadataIdentifiers(LLMProvider provider) throws APIManagementException {
+
+        String configurations = provider.getConfigurations();
+        if (StringUtils.isEmpty(configurations)) {
+            return;
+        }
+        JsonObject configJson = JsonParser.parseString(configurations).getAsJsonObject();
+        JsonArray metadata = configJson.getAsJsonArray("metadata");
+        if (metadata == null) {
+            return;
+        }
+        for (JsonElement element : metadata) {
+            JsonObject entry = element.getAsJsonObject();
+            String inputSource = entry.has("inputSource") ? entry.get("inputSource").getAsString() : null;
+            String identifier = entry.has("attributeIdentifier")
+                    ? entry.get("attributeIdentifier").getAsString() : null;
+            String attributeName = entry.has("attributeName")
+                    ? entry.get("attributeName").getAsString() : null;
+            if (StringUtils.isEmpty(identifier)) {
+                continue;
+            }
+            if (org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD
+                    .equalsIgnoreCase(inputSource)) {
+                try {
+                    JsonPath.compile(identifier);
+                } catch (InvalidPathException e) {
+                    throw new APIManagementException(
+                            "Invalid JSONPath expression '" + identifier + "' for attribute '"
+                                    + attributeName + "'. Payload metadata identifiers must be valid "
+                                    + "JSONPath expressions.",
+                            ExceptionCodes.from(ExceptionCodes.AI_SERVICE_PROVIDER_INVALID_METADATA_IDENTIFIER,
+                                    "Invalid JSONPath expression '" + identifier + "' for attribute '"
+                                            + attributeName + "'"));
+                }
+            } else if ("path".equalsIgnoreCase(inputSource)
+                    || org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants.INPUT_SOURCE_PATH
+                    .equalsIgnoreCase(inputSource)) {
+                try {
+                    java.util.regex.Pattern.compile(identifier);
+                } catch (java.util.regex.PatternSyntaxException e) {
+                    throw new APIManagementException(
+                            "Invalid regex pattern '" + identifier + "' for attribute '"
+                                    + attributeName + "'. Path metadata identifiers must be valid "
+                                    + "regular expressions.",
+                            ExceptionCodes.from(ExceptionCodes.AI_SERVICE_PROVIDER_INVALID_METADATA_IDENTIFIER,
+                                    "Invalid regex pattern '" + identifier + "' for attribute '"
+                                            + attributeName + "'"));
+                }
+            }
+        }
     }
 
     @Override
@@ -1259,7 +1315,7 @@ public class APIAdminImpl implements APIAdmin {
                     idpProperties.add(jwksProperty);
                 }
             } else if (APIConstants.KeyManager.CERTIFICATE_TYPE_PEM_FILE.equals(certificateType)) {
-                identityProvider.setCertificate(String.join(certificate, ""));
+                identityProvider.setCertificate(certificate);
             }
         }
 
@@ -2089,7 +2145,8 @@ public class APIAdminImpl implements APIAdmin {
 
         String oldProvider = api.getId() != null ? api.getId().getProviderName() : null;
         try {
-            ApiMgtDAO.getInstance().updateApiProvider(apiId, provider);
+            ApiMgtDAO.getInstance().updateApiProvider(apiId, provider,
+                    oldProvider, api.getId() != null ? api.getId().getApiName() : null);
             apiPersistenceInstance.changeApiProvider(provider, apiId, organisation);
         } catch (APIPersistenceException | APIManagementException e) {
             throw new APIManagementException("Error while changing the API provider", e);
@@ -2282,7 +2339,7 @@ public class APIAdminImpl implements APIAdmin {
                     idpProperties.add(jwksProperty);
                 }
             } else if (APIConstants.KeyManager.CERTIFICATE_TYPE_PEM_FILE.equals(certificateType)) {
-                identityProvider.setCertificate(String.join(certificate, ""));
+                identityProvider.setCertificate(certificate);
             }
         }
 

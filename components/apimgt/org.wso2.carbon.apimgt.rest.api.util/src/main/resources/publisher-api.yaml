@@ -12281,6 +12281,8 @@ components:
           example: APPROVED
         protocolVersion:
           type: string
+        mcpPathAppended:
+          type: string
         createdTime:
           type: string
         lastUpdatedTimestamp:
@@ -14819,7 +14821,6 @@ components:
           example: https://example.com/mcp
         securityInfo:
           $ref: '#/components/schemas/SecurityInfo'
-
     SecurityInfo:
       title: MCP Server Security Information
       type: object

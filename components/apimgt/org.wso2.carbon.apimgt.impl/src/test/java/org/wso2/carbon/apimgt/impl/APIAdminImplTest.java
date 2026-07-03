@@ -30,10 +30,16 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.reflect.Whitebox;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.api.model.LLMProvider;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.ConfigurationDto;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.Workflow;
@@ -44,10 +50,15 @@ import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
+import org.wso2.carbon.apimgt.impl.factory.PersistenceFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.workflow.DefaultWorkflowTaskService;
+import org.wso2.carbon.apimgt.persistence.APIPersistence;
+import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.identity.application.common.model.IdentityProvider;
+import org.wso2.carbon.identity.application.common.model.IdentityProviderProperty;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -57,7 +68,8 @@ import java.util.List;
 import java.util.Map;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ServiceReferenceHolder.class, ApiMgtDAO.class, APIUtil.class, CarbonContext.class})
+@PrepareForTest({ServiceReferenceHolder.class, ApiMgtDAO.class, APIUtil.class, CarbonContext.class,
+        APIManagerFactory.class, PersistenceFactory.class})
 public class APIAdminImplTest {
 
     private static final String azureADKeyManagerType = "AzureAD";
@@ -451,5 +463,539 @@ public class APIAdminImplTest {
     private void assertUpdateDisabledKeyManagerConfigurationModification(APIManagementException exception) {
         Assert.assertTrue(exception.getMessage().contains("Modification of the Key Manager configuration"));
         Assert.assertEquals(ExceptionCodes.KEY_MANAGER_UPDATE_VIOLATION, exception.getErrorHandler());
+    }
+
+    // ---------- Issue #4990: PEM cert was dropped on the IdP record (private createIdp / updatedIDP) ----------
+
+    private static final String SAMPLE_PEM =
+            "-----BEGIN CERTIFICATE-----\n" +
+                    "MIIDazCCAlOgAwIBAgIUJ+abcDEFghIJklMNopQRsTUVwxYwDQYJKoZIhvcNAQEL\n" +
+                    "BQAwRTELMAkGA1UEBhMCQVUxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoM\n" +
+                    "GEludGVybmV0IFdpZGdpdHMgUHR5IEx0ZDAeFw0yNjA1MDUwMDAwMDBaFw0yNzA1\n" +
+                    "MDUwMDAwMDBaMEUxCzAJBgNVBAYTAkFVMRMwEQYDVQQIDApTb21lLVN0YXRlMSEw\n" +
+                    "HwYDVQQKDBhJbnRlcm5ldCBXaWRnaXRzIFB0eSBMdGQwggEiMA0GCSqGSIb3DQEB\n" +
+                    "AQUAA4IBDwAwggEKAoIBAQDtESTcert==\n" +
+                    "-----END CERTIFICATE-----";
+
+    private static final String SAMPLE_JWKS_URL = "https://idp.example.com/oauth2/jwks";
+
+    private KeyManagerConfigurationDTO buildExchangedKM(String certType, String certValue) {
+        KeyManagerConfigurationDTO config = new KeyManagerConfigurationDTO();
+        config.setName("TestKM");
+        config.setDisplayName("Test KM");
+        config.setDescription("");
+        config.setOrganization("carbon.super");
+        config.setType("WSO2-IS");
+        config.setEnabled(true);
+        config.setTokenType("EXCHANGED");
+        config.setAlias("https://localhost:9443/oauth2/token");
+        config.setUuid("11111111-2222-3333-4444-555555555555");
+
+        Map<String, Object> additionalProps = new HashMap<>();
+        if (certType != null) {
+            additionalProps.put(APIConstants.KeyManager.CERTIFICATE_TYPE, certType);
+        }
+        if (certValue != null) {
+            additionalProps.put(APIConstants.KeyManager.CERTIFICATE_VALUE, certValue);
+        }
+        config.setAdditionalProperties(additionalProps);
+        return config;
+    }
+
+    /**
+     * #4990 (create path): a KM with PEM cert must populate the IdP's {@code certificate}
+     * field verbatim — pre-fix the inverted {@code String.join(certificate, "")} dropped it
+     * to an empty string.
+     */
+    @Test
+    public void testCreateIdpSetsCertificateForPemType() throws Exception {
+
+        APIAdminImpl apiAdmin = new APIAdminImpl();
+        KeyManagerConfigurationDTO km = buildExchangedKM("PEM", SAMPLE_PEM);
+
+        IdentityProvider idp = Whitebox.invokeMethod(apiAdmin, "createIdp", km);
+
+        Assert.assertNotNull("IdP should be created", idp);
+        Assert.assertEquals("PEM cert must be set verbatim on the IdP (issue #4990)",
+                SAMPLE_PEM, idp.getCertificate());
+        // PEM branch must NOT add a JWKS_URI property
+        IdentityProviderProperty[] props = idp.getIdpProperties();
+        if (props != null) {
+            for (IdentityProviderProperty p : props) {
+                Assert.assertNotEquals("PEM branch must not set JWKS_URI", "jwksUri", p.getName());
+            }
+        }
+    }
+
+    /**
+     * #4990 (update path): same expectation as create — the PEM cert must round-trip
+     * onto the IdP record.
+     */
+    @Test
+    public void testUpdatedIDPSetsCertificateForPemType() throws Exception {
+
+        APIAdminImpl apiAdmin = new APIAdminImpl();
+        IdentityProvider retrieved = new IdentityProvider();
+        retrieved.setIdentityProviderName("existing");
+        retrieved.setCertificate(""); // simulate the prior empty placeholder
+        KeyManagerConfigurationDTO km = buildExchangedKM("PEM", SAMPLE_PEM);
+
+        IdentityProvider idp = Whitebox.invokeMethod(apiAdmin, "updatedIDP", retrieved, km);
+
+        Assert.assertNotNull("IdP should be returned from update", idp);
+        Assert.assertEquals("PEM cert must be set verbatim on update (issue #4990)",
+                SAMPLE_PEM, idp.getCertificate());
+    }
+
+    /**
+     * #4990 regression guard: a PEM containing newlines, leading/trailing whitespace,
+     * and embedded blank lines must round-trip without truncation or modification.
+     * This is what the inverted {@code String.join} would silently mangle.
+     */
+    @Test
+    public void testCreateIdpPreservesPemWithNewlinesAndWhitespace() throws Exception {
+
+        APIAdminImpl apiAdmin = new APIAdminImpl();
+        String multilinePem = "  \n-----BEGIN CERTIFICATE-----\nLINE1\n\nLINE2\n   \n-----END CERTIFICATE-----\n";
+        KeyManagerConfigurationDTO km = buildExchangedKM("PEM", multilinePem);
+
+        IdentityProvider idp = Whitebox.invokeMethod(apiAdmin, "createIdp", km);
+
+        Assert.assertEquals("Multi-line PEM must round-trip verbatim",
+                multilinePem, idp.getCertificate());
+    }
+
+    /**
+     * JWKS branch: with {@code certificate_type=JWKS}, the cert value goes into the
+     * {@code jwksUri} IdP property and {@code IdentityProvider.certificate} must remain unset.
+     * Sanity check that the fix is scoped to the PEM arm only.
+     */
+    @Test
+    public void testCreateIdpJwksTypeDoesNotSetCertificate() throws Exception {
+
+        APIAdminImpl apiAdmin = new APIAdminImpl();
+        KeyManagerConfigurationDTO km = buildExchangedKM("JWKS", SAMPLE_JWKS_URL);
+
+        IdentityProvider idp = Whitebox.invokeMethod(apiAdmin, "createIdp", km);
+
+        Assert.assertNull("JWKS branch must not populate IdP.certificate", idp.getCertificate());
+        IdentityProviderProperty[] props = idp.getIdpProperties();
+        Assert.assertNotNull("JWKS branch should add a " + APIConstants.JWKS_URI + " property", props);
+        boolean jwksFound = false;
+        for (IdentityProviderProperty p : props) {
+            if (APIConstants.JWKS_URI.equals(p.getName())) {
+                Assert.assertEquals(SAMPLE_JWKS_URL, p.getValue());
+                jwksFound = true;
+            }
+        }
+        Assert.assertTrue("Expected " + APIConstants.JWKS_URI + " property on JWKS branch", jwksFound);
+    }
+
+    /**
+     * Edge case: an empty {@code certificate_value} must NOT cause
+     * {@code setCertificate} to be invoked — the existing {@code StringUtils.isNotEmpty}
+     * guard should short-circuit. The IdP's certificate field remains at its
+     * default (null).
+     */
+    @Test
+    public void testCreateIdpEmptyCertificateValueIsSkipped() throws Exception {
+
+        APIAdminImpl apiAdmin = new APIAdminImpl();
+        KeyManagerConfigurationDTO km = buildExchangedKM("PEM", "");
+
+        IdentityProvider idp = Whitebox.invokeMethod(apiAdmin, "createIdp", km);
+
+        Assert.assertNull("Empty PEM must not be set on the IdP", idp.getCertificate());
+    }
+
+    /**
+     * Edge case: a missing {@code certificate_type} (with a non-empty value) must also
+     * skip {@code setCertificate} — the outer guard checks both type and value.
+     */
+    @Test
+    public void testCreateIdpMissingCertificateTypeIsSkipped() throws Exception {
+
+        APIAdminImpl apiAdmin = new APIAdminImpl();
+        KeyManagerConfigurationDTO km = buildExchangedKM(null, SAMPLE_PEM);
+
+        IdentityProvider idp = Whitebox.invokeMethod(apiAdmin, "createIdp", km);
+
+        Assert.assertNull("PEM without " + APIConstants.KeyManager.CERTIFICATE_TYPE + " must not be set",
+                idp.getCertificate());
+    }
+
+    /**
+     * Update path JWKS sanity: confirm the update path also preserves the PEM-only
+     * scope of the fix — JWKS path stays unchanged.
+     */
+    @Test
+    public void testUpdatedIDPJwksTypeDoesNotSetCertificate() throws Exception {
+
+        APIAdminImpl apiAdmin = new APIAdminImpl();
+        IdentityProvider retrieved = new IdentityProvider();
+        retrieved.setIdentityProviderName("existing");
+        KeyManagerConfigurationDTO km = buildExchangedKM("JWKS", SAMPLE_JWKS_URL);
+
+        IdentityProvider idp = Whitebox.invokeMethod(apiAdmin, "updatedIDP", retrieved, km);
+
+        Assert.assertNull("JWKS update branch must not populate IdP.certificate",
+                idp.getCertificate());
+        IdentityProviderProperty[] props = idp.getIdpProperties();
+        Assert.assertNotNull(props);
+        boolean jwksFound = false;
+        for (IdentityProviderProperty p : props) {
+            if (APIConstants.JWKS_URI.equals(p.getName())) {
+                Assert.assertEquals(SAMPLE_JWKS_URL, p.getValue());
+                jwksFound = true;
+            }
+        }
+        Assert.assertTrue("Expected " + APIConstants.JWKS_URI + " property on JWKS update", jwksFound);
+    }
+
+    @Test
+    public void testAddLLMProviderWithInvalidJsonPathRejects() throws APIManagementException {
+
+        APIAdminImpl apiAdmin = new APIAdminImpl();
+        LLMProvider provider = new LLMProvider("TestProvider", "1.0.0");
+        provider.setConfigurations("{\"metadata\":[{\"attributeName\":\"promptTokenCount\","
+                + "\"inputSource\":\"payload\",\"attributeIdentifier\":\"[0-9]+\"}]}");
+
+        try {
+            apiAdmin.addLLMProvider("carbon.super", provider);
+            Assert.fail("Expected APIManagementException for invalid JSONPath");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("Invalid JSONPath expression"));
+            Assert.assertTrue(e.getMessage().contains("[0-9]+"));
+            Assert.assertTrue(e.getMessage().contains("promptTokenCount"));
+        }
+    }
+
+    @Test
+    public void testAddLLMProviderWithValidJsonPathAccepts() throws APIManagementException {
+
+        APIAdminImpl apiAdmin = new APIAdminImpl();
+        LLMProvider provider = new LLMProvider("TestProvider", "1.0.0");
+        provider.setConfigurations("{\"metadata\":[{\"attributeName\":\"promptTokenCount\","
+                + "\"inputSource\":\"payload\",\"attributeIdentifier\":\"$.usage.inputTokens\"}]}");
+
+        LLMProvider mockResult = new LLMProvider("TestProvider", "1.0.0");
+        mockResult.setId("test-id");
+        mockResult.setName("TestProvider");
+        mockResult.setApiVersion("1.0.0");
+        mockResult.setConfigurations(provider.getConfigurations());
+        Mockito.when(apiMgtDAO.addLLMProvider(Mockito.anyString(), Mockito.any(LLMProvider.class)))
+                .thenReturn(mockResult);
+
+        LLMProvider result = apiAdmin.addLLMProvider("carbon.super", provider);
+        Assert.assertNotNull(result);
+    }
+
+    @Test
+    public void testAddLLMProviderWithInvalidRegexRejects() throws APIManagementException {
+
+        APIAdminImpl apiAdmin = new APIAdminImpl();
+        LLMProvider provider = new LLMProvider("TestProvider", "1.0.0");
+        provider.setConfigurations("{\"metadata\":[{\"attributeName\":\"model\","
+                + "\"inputSource\":\"pathParams\",\"attributeIdentifier\":\"[invalid(regex\"}]}");
+
+        try {
+            apiAdmin.addLLMProvider("carbon.super", provider);
+            Assert.fail("Expected APIManagementException for invalid regex");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("Invalid regex pattern"));
+            Assert.assertTrue(e.getMessage().contains("[invalid(regex"));
+            Assert.assertTrue(e.getMessage().contains("model"));
+        }
+    }
+
+    @Test
+    public void testAddLLMProviderWithValidRegexAccepts() throws APIManagementException {
+
+        APIAdminImpl apiAdmin = new APIAdminImpl();
+        LLMProvider provider = new LLMProvider("TestProvider", "1.0.0");
+        provider.setConfigurations("{\"metadata\":[{\"attributeName\":\"model\","
+                + "\"inputSource\":\"pathParams\",\"attributeIdentifier\":\"model/([^/]+)\"}]}");
+
+        LLMProvider mockResult = new LLMProvider("TestProvider", "1.0.0");
+        mockResult.setId("test-id");
+        mockResult.setName("TestProvider");
+        mockResult.setApiVersion("1.0.0");
+        mockResult.setConfigurations(provider.getConfigurations());
+        Mockito.when(apiMgtDAO.addLLMProvider(Mockito.anyString(), Mockito.any(LLMProvider.class)))
+                .thenReturn(mockResult);
+
+        LLMProvider result = apiAdmin.addLLMProvider("carbon.super", provider);
+        Assert.assertNotNull(result);
+    }
+
+    @Test
+    public void testAddLLMProviderWithNullConfigurationAccepts() throws APIManagementException {
+
+        APIAdminImpl apiAdmin = new APIAdminImpl();
+        LLMProvider provider = new LLMProvider("TestProvider", "1.0.0");
+        provider.setConfigurations(null);
+
+        LLMProvider mockResult = new LLMProvider("TestProvider", "1.0.0");
+        mockResult.setId("test-id");
+        mockResult.setName("TestProvider");
+        mockResult.setApiVersion("1.0.0");
+        Mockito.when(apiMgtDAO.addLLMProvider(Mockito.anyString(), Mockito.any(LLMProvider.class)))
+                .thenReturn(mockResult);
+
+        LLMProvider result = apiAdmin.addLLMProvider("carbon.super", provider);
+        Assert.assertNotNull(result);
+    }
+
+    @Test
+    public void testAddLLMProviderWithNoMetadataInConfigAccepts() throws APIManagementException {
+
+        APIAdminImpl apiAdmin = new APIAdminImpl();
+        LLMProvider provider = new LLMProvider("TestProvider", "1.0.0");
+        provider.setConfigurations("{\"connectorType\":\"openAI\"}");
+
+        LLMProvider mockResult = new LLMProvider("TestProvider", "1.0.0");
+        mockResult.setId("test-id");
+        mockResult.setName("TestProvider");
+        mockResult.setApiVersion("1.0.0");
+        mockResult.setConfigurations(provider.getConfigurations());
+        Mockito.when(apiMgtDAO.addLLMProvider(Mockito.anyString(), Mockito.any(LLMProvider.class)))
+                .thenReturn(mockResult);
+
+        LLMProvider result = apiAdmin.addLLMProvider("carbon.super", provider);
+        Assert.assertNotNull(result);
+    }
+
+    @Test
+    public void testAddLLMProviderWithEmptyIdentifierSkipsValidation() throws APIManagementException {
+
+        APIAdminImpl apiAdmin = new APIAdminImpl();
+        LLMProvider provider = new LLMProvider("TestProvider", "1.0.0");
+        provider.setConfigurations("{\"metadata\":[{\"attributeName\":\"promptTokenCount\","
+                + "\"inputSource\":\"payload\",\"attributeIdentifier\":\"\"}]}");
+
+        LLMProvider mockResult = new LLMProvider("TestProvider", "1.0.0");
+        mockResult.setId("test-id");
+        mockResult.setName("TestProvider");
+        mockResult.setApiVersion("1.0.0");
+        mockResult.setConfigurations(provider.getConfigurations());
+        Mockito.when(apiMgtDAO.addLLMProvider(Mockito.anyString(), Mockito.any(LLMProvider.class)))
+                .thenReturn(mockResult);
+
+        LLMProvider result = apiAdmin.addLLMProvider("carbon.super", provider);
+        Assert.assertNotNull(result);
+    }
+
+    @Test
+    public void testUpdateLLMProviderWithInvalidJsonPathRejects() throws APIManagementException {
+
+        APIAdminImpl apiAdmin = new APIAdminImpl();
+        LLMProvider provider = new LLMProvider("TestProvider", "1.0.0");
+        provider.setId("existing-id");
+        provider.setConfigurations("{\"metadata\":[{\"attributeName\":\"completionTokenCount\","
+                + "\"inputSource\":\"payload\",\"attributeIdentifier\":\"[0-9]+\"}]}");
+
+        try {
+            apiAdmin.updateLLMProvider("carbon.super", provider);
+            Assert.fail("Expected APIManagementException for invalid JSONPath on update");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("Invalid JSONPath expression"));
+            Assert.assertTrue(e.getMessage().contains("completionTokenCount"));
+        }
+    }
+
+    @Test
+    public void testAddLLMProviderWithMixedValidPayloadAndPathIdentifiers() throws APIManagementException {
+
+        APIAdminImpl apiAdmin = new APIAdminImpl();
+        LLMProvider provider = new LLMProvider("TestProvider", "1.0.0");
+        provider.setConfigurations("{\"metadata\":["
+                + "{\"attributeName\":\"promptTokenCount\",\"inputSource\":\"payload\","
+                + "\"attributeIdentifier\":\"$.usage.inputTokens\"},"
+                + "{\"attributeName\":\"model\",\"inputSource\":\"pathParams\","
+                + "\"attributeIdentifier\":\"model/([^/]+)\"}"
+                + "]}");
+
+        LLMProvider mockResult = new LLMProvider("TestProvider", "1.0.0");
+        mockResult.setId("test-id");
+        mockResult.setName("TestProvider");
+        mockResult.setApiVersion("1.0.0");
+        mockResult.setConfigurations(provider.getConfigurations());
+        Mockito.when(apiMgtDAO.addLLMProvider(Mockito.anyString(), Mockito.any(LLMProvider.class)))
+                .thenReturn(mockResult);
+
+        LLMProvider result = apiAdmin.addLLMProvider("carbon.super", provider);
+        Assert.assertNotNull(result);
+    }
+
+    @Test
+    public void testAddLLMProviderWithMixedValidAndInvalidIdentifiersRejects() throws APIManagementException {
+
+        APIAdminImpl apiAdmin = new APIAdminImpl();
+        LLMProvider provider = new LLMProvider("TestProvider", "1.0.0");
+        provider.setConfigurations("{\"metadata\":["
+                + "{\"attributeName\":\"promptTokenCount\",\"inputSource\":\"payload\","
+                + "\"attributeIdentifier\":\"$.usage.inputTokens\"},"
+                + "{\"attributeName\":\"totalTokenCount\",\"inputSource\":\"payload\","
+                + "\"attributeIdentifier\":\"[0-9]+\"}"
+                + "]}");
+
+        try {
+            apiAdmin.addLLMProvider("carbon.super", provider);
+            Assert.fail("Expected APIManagementException when one identifier is invalid");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("Invalid JSONPath expression"));
+            Assert.assertTrue(e.getMessage().contains("totalTokenCount"));
+        }
+    }
+
+    // ---------- Issue #5038: AM_API_DEFAULT_VERSION.API_PROVIDER not updated on provider change ----------
+
+    private void setupProviderChangeMocks(String apiId, String organisation, String username,
+                                          API mockApi) throws Exception {
+        CarbonContext carbonContext = Mockito.mock(CarbonContext.class);
+        PowerMockito.when(CarbonContext.getThreadLocalCarbonContext()).thenReturn(carbonContext);
+        Mockito.when(carbonContext.getUsername()).thenReturn(username);
+
+        APIProvider mockAPIProvider = Mockito.mock(APIProvider.class);
+        Mockito.when(mockAPIProvider.getAPIbyUUID(apiId, organisation)).thenReturn(mockApi);
+
+        APIManagerFactory mockManagerFactory = Mockito.mock(APIManagerFactory.class);
+        PowerMockito.mockStatic(APIManagerFactory.class);
+        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(mockManagerFactory);
+        Mockito.when(mockManagerFactory.getAPIProvider(username)).thenReturn(mockAPIProvider);
+
+        APIPersistence mockPersistence = Mockito.mock(APIPersistence.class);
+        PowerMockito.mockStatic(PersistenceFactory.class);
+        PowerMockito.when(PersistenceFactory.getAPIPersistenceInstance()).thenReturn(mockPersistence);
+        Mockito.doNothing().when(mockPersistence).changeApiProvider(
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
+
+        PowerMockito.doNothing().when(APIUtil.class, "logAuditMessage",
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
+    }
+
+    @Test
+    public void testUpdateApiProviderCallsDaoWithCorrectParams() throws Exception {
+        // Regression test for issue #5038: verifies the 4-param DAO overload is called with
+        // oldProviderName and apiName so AM_API_DEFAULT_VERSION.API_PROVIDER is updated atomically.
+        String apiId = "test-api-uuid-5038";
+        String newProvider = "newprovider";
+        String oldProvider = "admin";
+        String apiName = "TestDefaultVersionAPI";
+        String organisation = "carbon.super";
+
+        APIIdentifier apiIdentifier = new APIIdentifier(oldProvider, apiName, "1.0");
+        API mockApi = Mockito.mock(API.class);
+        Mockito.when(mockApi.getId()).thenReturn(apiIdentifier);
+        Mockito.when(mockApi.getContext()).thenReturn("/testapi");
+
+        setupProviderChangeMocks(apiId, organisation, "admin", mockApi);
+
+        new APIAdminImpl().updateApiProvider(apiId, newProvider, organisation);
+
+        // 4-param overload must be called with old provider name and API name
+        Mockito.verify(apiMgtDAO).updateApiProvider(apiId, newProvider, oldProvider, apiName);
+        // Deprecated 2-param overload must NOT be called
+        Mockito.verify(apiMgtDAO, Mockito.never())
+                .updateApiProvider(Mockito.eq(apiId), Mockito.eq(newProvider));
+    }
+
+    @Test
+    public void testUpdateApiProviderNonDefaultVersionApiCallsDao() throws Exception {
+        // An API with isDefaultVersion=false also routes through the 4-param overload.
+        // The DAO handles the zero-row update silently when no default-version row exists.
+        String apiId = "non-default-api-uuid-5038";
+        String newProvider = "newprovider";
+        String oldProvider = "admin";
+        String apiName = "NonDefaultAPI";
+        String organisation = "carbon.super";
+
+        APIIdentifier apiIdentifier = new APIIdentifier(oldProvider, apiName, "1.0");
+        API mockApi = Mockito.mock(API.class);
+        Mockito.when(mockApi.getId()).thenReturn(apiIdentifier);
+        Mockito.when(mockApi.getContext()).thenReturn("/nondapi");
+
+        setupProviderChangeMocks(apiId, organisation, "admin", mockApi);
+
+        new APIAdminImpl().updateApiProvider(apiId, newProvider, organisation);
+
+        Mockito.verify(apiMgtDAO).updateApiProvider(apiId, newProvider, oldProvider, apiName);
+    }
+
+    @Test
+    public void testUpdateApiProviderApiNotFoundThrowsException() throws Exception {
+        String apiId = "missing-api-uuid-5038";
+        String newProvider = "newprovider";
+        String organisation = "carbon.super";
+        String username = "admin";
+
+        CarbonContext carbonContext = Mockito.mock(CarbonContext.class);
+        PowerMockito.when(CarbonContext.getThreadLocalCarbonContext()).thenReturn(carbonContext);
+        Mockito.when(carbonContext.getUsername()).thenReturn(username);
+
+        APIProvider mockAPIProvider = Mockito.mock(APIProvider.class);
+        Mockito.when(mockAPIProvider.getAPIbyUUID(apiId, organisation)).thenReturn(null);
+
+        APIManagerFactory mockManagerFactory = Mockito.mock(APIManagerFactory.class);
+        PowerMockito.mockStatic(APIManagerFactory.class);
+        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(mockManagerFactory);
+        Mockito.when(mockManagerFactory.getAPIProvider(username)).thenReturn(mockAPIProvider);
+
+        APIPersistence mockPersistence = Mockito.mock(APIPersistence.class);
+        PowerMockito.mockStatic(PersistenceFactory.class);
+        PowerMockito.when(PersistenceFactory.getAPIPersistenceInstance()).thenReturn(mockPersistence);
+
+        try {
+            new APIAdminImpl().updateApiProvider(apiId, newProvider, organisation);
+            Assert.fail("Expected APIMgtResourceNotFoundException for missing API");
+        } catch (APIMgtResourceNotFoundException e) {
+            Assert.assertTrue(e.getMessage().contains("API not found for id: " + apiId));
+        }
+        // DAO must NOT be called when the API is not found — neither overload
+        Mockito.verify(apiMgtDAO, Mockito.never()).updateApiProvider(
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
+        Mockito.verify(apiMgtDAO, Mockito.never()).updateApiProvider(
+                Mockito.anyString(), Mockito.anyString());
+    }
+
+    @Test
+    public void testUpdateApiProviderPersistenceExceptionPropagated() throws Exception {
+        // APIPersistenceException from changeApiProvider is wrapped as APIManagementException.
+        String apiId = "persist-fail-uuid-5038";
+        String newProvider = "newprovider";
+        String oldProvider = "admin";
+        String apiName = "PersistFailAPI";
+        String organisation = "carbon.super";
+        String username = "admin";
+
+        APIIdentifier apiIdentifier = new APIIdentifier(oldProvider, apiName, "1.0");
+        API mockApi = Mockito.mock(API.class);
+        Mockito.when(mockApi.getId()).thenReturn(apiIdentifier);
+        Mockito.when(mockApi.getContext()).thenReturn("/persistfail");
+
+        CarbonContext carbonContext = Mockito.mock(CarbonContext.class);
+        PowerMockito.when(CarbonContext.getThreadLocalCarbonContext()).thenReturn(carbonContext);
+        Mockito.when(carbonContext.getUsername()).thenReturn(username);
+
+        APIProvider mockAPIProvider = Mockito.mock(APIProvider.class);
+        Mockito.when(mockAPIProvider.getAPIbyUUID(apiId, organisation)).thenReturn(mockApi);
+
+        APIManagerFactory mockManagerFactory = Mockito.mock(APIManagerFactory.class);
+        PowerMockito.mockStatic(APIManagerFactory.class);
+        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(mockManagerFactory);
+        Mockito.when(mockManagerFactory.getAPIProvider(username)).thenReturn(mockAPIProvider);
+
+        APIPersistence mockPersistence = Mockito.mock(APIPersistence.class);
+        PowerMockito.mockStatic(PersistenceFactory.class);
+        PowerMockito.when(PersistenceFactory.getAPIPersistenceInstance()).thenReturn(mockPersistence);
+        Mockito.doThrow(APIPersistenceException.class).when(mockPersistence).changeApiProvider(
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
+
+        try {
+            new APIAdminImpl().updateApiProvider(apiId, newProvider, organisation);
+            Assert.fail("Expected APIManagementException when persistence throws");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("Error while changing the API provider"));
+        }
     }
 }

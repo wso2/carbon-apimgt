@@ -245,6 +245,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
             // Retrieve the application DTO object from the aggregated exported application
             ApplicationDTO applicationDTO = exportedApplication.getApplicationInfo();
+            validateApplicationGroups(applicationDTO.getGroups());
 
             if (!StringUtils.isBlank(appOwner)) {
                 ownerId = appOwner;
@@ -406,6 +407,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         if (tierName == null) {
             RestApiUtil.handleBadRequest("Throttling tier cannot be null", log);
         }
+        validateApplicationGroups(applicationDto.getGroups());
 
         Object applicationAttributesFromUser = applicationDto.getAttributes();
         Map<String, String> applicationAttributes = new ObjectMapper()
@@ -593,6 +595,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     private Application preProcessAndUpdateApplication(String username, ApplicationDTO applicationDto,
             Application oldApplication, String applicationId, OrganizationInfo sharedOrganizationInfo) throws APIManagementException {
         APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+        validateApplicationGroups(applicationDto.getGroups());
         Object applicationAttributesFromUser = applicationDto.getAttributes();
         Map<String, String> applicationAttributes = new ObjectMapper()
                 .convertValue(applicationAttributesFromUser, Map.class);
@@ -645,6 +648,18 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
         //retrieves the updated application and send as the response
         return apiConsumer.getApplicationByUUID(applicationId);
+    }
+
+    private void validateApplicationGroups(List<String> groups) throws APIManagementException {
+
+        if (groups == null) {
+            return;
+        }
+        for (String group : groups) {
+            if (group != null && !group.equals(StringUtils.strip(group))) {
+                RestApiUtil.handleBadRequest("Application groups must not contain leading or trailing whitespace.", log);
+            }
+        }
     }
 
     /**

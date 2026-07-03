@@ -135,6 +135,8 @@ public enum ExceptionCodes implements ErrorHandler {
             "Updating the API is restricted as as it is %s."),
     UNSUPPORTED_LIFECYCLE_ACTION(900381, "Unsupported state change action", 400, "Lifecycle state change action %s is not allowed"),
     LIFECYCLE_STATE_INFORMATION_NOT_FOUND(900382, "Lifecycle state information not found", 500,"Lifecycle state change information for %s with %s cannot be found"),
+    API_PRODUCT_UPDATE_FORBIDDEN_PER_LC(900383, "Insufficient permission to update the API Product", 403,
+            "Updating the API Product is restricted as it is %s."),
 
     // Generic codes
     JSON_PARSE_ERROR(900400, "Json parse error", 500, "JSON parse error"),
@@ -664,6 +666,7 @@ public enum ExceptionCodes implements ErrorHandler {
     AI_SERVICE_INVALID_ACCESS_TOKEN(903101, "Invalid access token provided for AI service", 401, "Invalid access token provided for AI service"),
     AI_SERVICE_QUOTA_EXCEEDED(903102, "Quota exceeded for AI service", 429, "Quota exceeded for AI service"),
     AI_SERVICE_PROVIDER_NOT_FOUND(903103,"AI Service Provider Not found for %s in organization" ,404 ,"AI Service Provider Not found for %s in organization" ,false ),
+    AI_SERVICE_PROVIDER_INVALID_METADATA_IDENTIFIER(903104, "Invalid metadata identifier", 400, "%s"),
 
     DOCUMENT_NAME_ILLEGAL_CHARACTERS(902016, "Document name cannot contain illegal characters", 400, "Document name contains one or more illegal characters"),
 
@@ -921,6 +924,8 @@ public enum ExceptionCodes implements ErrorHandler {
             "Referenced API is not supported for MCP Server."),
     DUPLICATE_MCP_TOOLS(904013, "Duplicate MCP tools", 400,
             "One or more MCP tools are duplicated."),
+    INVALID_MCP_BACKEND_OPERATION(904014, "Invalid MCP backend operation", 400,
+            "The backend operation '%s %s' does not match any resource in the referenced API '%s'."),
 
     // gateway notification related codes
     GATEWAY_NOTIFICATION_BAD_REQUEST(902052, "Invalid request for gateway notification", 400,

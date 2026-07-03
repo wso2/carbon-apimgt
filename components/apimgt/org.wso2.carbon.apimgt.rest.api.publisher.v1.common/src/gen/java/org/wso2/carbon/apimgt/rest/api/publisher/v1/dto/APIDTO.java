@@ -42,6 +42,8 @@ import javax.validation.Valid;
 @Scope(name = "apim:api_create", description="", value ="")
 @Scope(name = "apim:api_import_export", description="", value ="")
 @Scope(name = "apim:api_manage", description="", value ="")
+@Scope(name = "apim:api_update", description="", value ="")
+@Scope(name = "apim:api_create_only", description="", value ="")
 
 public class APIDTO   {
   
@@ -54,6 +56,7 @@ public class APIDTO   {
     private String provider = null;
     @Scope(name = "apim:api_publish", description="", value ="")
     @Scope(name = "apim:api_manage", description="", value ="")
+    @Scope(name = "apim:api_lifecycle_manage", description="", value ="")
     private String lifeCycleStatus = null;
     private WSDLInfoDTO wsdlInfo = null;
     private String wsdlUrl = null;

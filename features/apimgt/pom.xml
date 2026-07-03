@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>carbon-apimgt</artifactId>
-        <version>9.33.123-SNAPSHOT</version>
+        <version>9.33.146-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -56,6 +56,7 @@
         <module>org.wso2.carbon.apimgt.rest.api.service.catalog.feature</module>
         <module>org.wso2.carbon.apimgt.governance.feature</module>
         <module>org.wso2.carbon.apimgt.federated.gateway.feature</module>
+        <module>org.wso2.carbon.apimgt.multitenant.auth.feature</module>
     </modules>
     <build>
         <plugins>
