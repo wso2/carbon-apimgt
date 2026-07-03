@@ -2409,6 +2409,8 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             if (oldBackend == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, log);
             }
+            API existingApi = apiProvider.getAPIbyUUID(mcpServerId, organization);
+            String subtype = existingApi.getSubtype();
             Backend backend = new Backend(oldBackend);
             Object endpointConfigObj = backendAPIDTO.getEndpointConfig();
             if (endpointConfigObj == null) {
@@ -2425,18 +2427,20 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             }
             String definition = backendAPIDTO.getDefinition();
             if (StringUtils.isNotBlank(definition)) {
-                APIDefinitionValidationResponse validationResponse =
-                        OASParserUtil.validateAPIDefinition(definition, Boolean.TRUE,
-                                ServiceReferenceHolder.getInstance()
-                                        .getAPIMDependencyConfigurationService()
-                                        .getAPIMDependencyConfigurations().getOasParserOptions());
-                if (!validationResponse.isValid()) {
-                    List<ErrorListItemDTO> errorListItemDTOs =
-                            APIMappingUtil.getErrorListItemsDTOsFromErrorHandlers(
-                                    validationResponse.getErrorItems());
-                    ErrorDTO errorDTO =
-                            APIMappingUtil.getErrorDTOFromErrorListItems(errorListItemDTOs);
-                    throw RestApiUtil.buildBadRequestException(errorDTO);
+                if (APIConstants.API_SUBTYPE_DIRECT_BACKEND.equals(subtype)) {
+                    APIDefinitionValidationResponse validationResponse =
+                            OASParserUtil.validateAPIDefinition(definition, Boolean.TRUE,
+                                    ServiceReferenceHolder.getInstance()
+                                            .getAPIMDependencyConfigurationService()
+                                            .getAPIMDependencyConfigurations().getOasParserOptions());
+                    if (!validationResponse.isValid()) {
+                        List<ErrorListItemDTO> errorListItemDTOs =
+                                APIMappingUtil.getErrorListItemsDTOsFromErrorHandlers(
+                                        validationResponse.getErrorItems());
+                        ErrorDTO errorDTO =
+                                APIMappingUtil.getErrorDTOFromErrorListItems(errorListItemDTOs);
+                        throw RestApiUtil.buildBadRequestException(errorDTO);
+                    }
                 }
                 backend.setDefinition(definition);
             }
