@@ -735,10 +735,11 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     if (apidto.getPolicies() == null || apidto.getPolicies().isEmpty()) {
                         apidto.setPolicies(Collections.singletonList(DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS));
                     }
+                    apidto.setInitiatedFromGateway(true);
 
                     String apiKey = apidto.getName() + DELEM_COLON + apidto.getVersion();
                     String envScopedKey = apidto.getName() + APIConstants.KEY_SEPARATOR
-                            + environment.getName() + DELEM_COLON + apidto.getVersion();
+                             + environment.getName() + DELEM_COLON + apidto.getVersion();
 
                     boolean update = false;
                     boolean isNewVersion = false;
@@ -759,8 +760,8 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                                 })
                                 .filter(Objects::nonNull)
                                 .filter(parts -> (parts[0].equals(apidto.getName())
-                                        || parts[0].equals(envPathName))
-                                        && !parts[1].equals(apidto.getVersion()))
+                                         || parts[0].equals(envPathName))
+                                         && !parts[1].equals(apidto.getVersion()))
                                 .map(parts -> parts[0] + DELEM_COLON + parts[1])
                                 .findFirst();
                         isNewVersion = existingApiOpt.isPresent();
@@ -815,6 +816,9 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     }
                     log.info("Successfully imported new API: " + api.getId().getApiName()
                             + " from environment: " + environment.getName());
+
+                    // Delete the API from discovery cache to avoid duplicates in the UI
+                    ApiMgtDAO.getInstance().deleteFederatedDiscoveryCacheEntry(environment.getName(), organization, apiId);
                 } catch (Exception e) {
                     log.error("Error importing API with ID: " + apiId
                             + " from environment: " + environment.getName(), e);
@@ -894,6 +898,8 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     if (apidto.getPolicies() == null || apidto.getPolicies().isEmpty()) {
                         apidto.setPolicies(Collections.singletonList(DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS));
                     }
+                    apidto.setInitiatedFromGateway(true);
+
                     // Build deployment ZIP
                     JsonObject apiJson = (JsonObject) new Gson().toJsonTree(apidto);
                     apiJson = CommonUtil.addTypeAndVersionToFile(ImportExportConstants.TYPE_API,
@@ -912,6 +918,9 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                             environment.getUuid(), discoveredAPI.getReferenceArtifact());
                     log.info("Successfully updated API: " + api.getId().getApiName()
                             + " from environment: " + environment.getName());
+
+                    // Delete the API from discovery cache to avoid duplicates in the UI
+                    ApiMgtDAO.getInstance().deleteFederatedDiscoveryCacheEntry(environment.getName(), organization, apiId);
                 } catch (Exception e) {
                     log.error("Error updating API with ID: " + apiId
                             + " from environment: " + environment.getName(), e);

@@ -255,6 +255,41 @@ paths:
             - apim:api_create
             - apim:api_manage
       operationId: updateFederatedAPIs
+
+  /federated-apis/cached:
+    get:
+      tags:
+        - Federated APIs
+      summary: Retrieve cached federated APIs discovery results
+      description: Returns previously cached discovery results from the DB for the given environment, WITHOUT triggering a new gateway call. Includes lastDiscoveredAt timestamp.
+      parameters:
+        - name: environment
+          in: query
+          description: Name of the environment/gateway
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Cached API discovery results and last discovered timestamp.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  lastDiscoveredAt:
+                    type: string
+                  result:
+                    type: array
+                    items:
+                      type: object
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+      operationId: getCachedDiscoveryResults
       
   ######################################################
   # The "API Collection" resource APIs

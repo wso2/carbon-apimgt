@@ -16681,6 +16681,176 @@ public class ApiMgtDAO {
         }
     }
 
+    // -----------------------------------------------------------------------
+    // Federated Discovery Cache DAO methods
+    // -----------------------------------------------------------------------
+
+    /**
+     * Delete all cached discovery entries for a given environment and organization,
+     * then insert the new list of discovered APIs.
+     *
+     * @param envName      environment name
+     * @param organization organization
+     * @param apis         list of discovered API maps (each map has keys: id, apiName, version, description, context, apiType, gatewayType, status)
+     * @param discoveredAt timestamp of this discovery run
+     */
+    public void saveFederatedDiscoveryCache(String envName, String organization,
+                                            List<Map<String, Object>> apis, java.sql.Timestamp discoveredAt)
+            throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                // Delete existing cache for this env+org
+                try (PreparedStatement deleteStmt = connection.prepareStatement(
+                        SQLConstants.DELETE_FEDERATED_DISCOVERY_CACHE_BY_ENV_SQL)) {
+                    deleteStmt.setString(1, envName);
+                    deleteStmt.setString(2, organization);
+                    deleteStmt.executeUpdate();
+                }
+                // Insert new entries
+                try (PreparedStatement insertStmt = connection.prepareStatement(
+                        SQLConstants.ADD_FEDERATED_DISCOVERY_CACHE_ENTRY_SQL)) {
+                    for (Map<String, Object> api : apis) {
+                        insertStmt.setString(1, envName);
+                        insertStmt.setString(2, organization);
+                        insertStmt.setString(3, (String) api.get("id"));
+                        insertStmt.setString(4, (String) api.get("apiName"));
+                        insertStmt.setString(5, (String) api.get("version"));
+                        insertStmt.setString(6, (String) api.get("description"));
+                        insertStmt.setString(7, (String) api.get("context"));
+                        insertStmt.setString(8, (String) api.getOrDefault("apiType", "HTTP"));
+                        insertStmt.setString(9, (String) api.get("gatewayType"));
+                        String refArtifact = api.get("referenceArtifact") != null
+                                ? api.get("referenceArtifact").toString() : null;
+                        if (refArtifact != null) {
+                            insertStmt.setBinaryStream(10,
+                                    new java.io.ByteArrayInputStream(refArtifact.getBytes()));
+                        } else {
+                            insertStmt.setNull(10, java.sql.Types.BLOB);
+                        }
+                        insertStmt.setString(11, (String) api.get("status"));
+                        insertStmt.setTimestamp(12, discoveredAt);
+                        insertStmt.addBatch();
+                    }
+                    insertStmt.executeBatch();
+                }
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Error saving federated discovery cache for env: " + envName, e);
+            }
+        } catch (SQLException e) {
+            handleException("Error saving federated discovery cache for env: " + envName, e);
+        }
+    }
+
+    /**
+     * Get cached discovery results for a given environment and organization.
+     *
+     * @param envName      environment name
+     * @param organization organization
+     * @return list of discovered API maps
+     */
+    public List<Map<String, Object>> getFederatedDiscoveryCache(String envName, String organization)
+            throws APIManagementException {
+        List<Map<String, Object>> results = new ArrayList<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(
+                     SQLConstants.GET_FEDERATED_DISCOVERY_CACHE_BY_ENV_SQL)) {
+            stmt.setString(1, envName);
+            stmt.setString(2, organization);
+            try (java.sql.ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> api = new java.util.HashMap<>();
+                    api.put("id", rs.getString("EXTERNAL_API_ID"));
+                    api.put("apiName", rs.getString("API_NAME"));
+                    api.put("version", rs.getString("API_VERSION"));
+                    api.put("description", rs.getString("DESCRIPTION"));
+                    api.put("context", rs.getString("CONTEXT"));
+                    api.put("apiType", rs.getString("API_TYPE"));
+                    api.put("gatewayType", rs.getString("GATEWAY_TYPE"));
+                    api.put("gatewayName", envName);
+                    api.put("status", rs.getString("STATUS"));
+                    java.sql.Timestamp ts = rs.getTimestamp("DISCOVERED_AT");
+                    api.put("discoveredAt", ts != null ? ts.toInstant().toString() : null);
+                    results.add(api);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error fetching federated discovery cache for env: " + envName, e);
+        }
+        return results;
+    }
+
+    /**
+     * Delete all cached discovery entries for a given environment and organization.
+     */
+    public void deleteFederatedDiscoveryCache(String envName, String organization)
+            throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try (PreparedStatement stmt = connection.prepareStatement(
+                    SQLConstants.DELETE_FEDERATED_DISCOVERY_CACHE_BY_ENV_SQL)) {
+                stmt.setString(1, envName);
+                stmt.setString(2, organization);
+                stmt.executeUpdate();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Error deleting federated discovery cache for env: " + envName, e);
+            }
+        } catch (SQLException e) {
+            handleException("Error deleting federated discovery cache for env: " + envName, e);
+        }
+    }
+
+    /**
+     * Delete a specific cached discovery entry for a given environment, organization and external API ID.
+     */
+    public void deleteFederatedDiscoveryCacheEntry(String envName, String organization, String externalApiId)
+            throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try (PreparedStatement stmt = connection.prepareStatement(
+                    SQLConstants.DELETE_FEDERATED_DISCOVERY_CACHE_ENTRY_SQL)) {
+                stmt.setString(1, envName);
+                stmt.setString(2, organization);
+                stmt.setString(3, externalApiId);
+                stmt.executeUpdate();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Error deleting federated discovery cache entry for API ID: " + externalApiId, e);
+            }
+        } catch (SQLException e) {
+            handleException("Error deleting federated discovery cache entry for API ID: " + externalApiId, e);
+        }
+    }
+
+
+    /**
+     * Get the last discovery timestamp for a given environment and organization.
+     *
+     * @return Timestamp of last discovery, or null if never discovered
+     */
+    public java.sql.Timestamp getLastFederatedDiscoveryTime(String envName, String organization)
+            throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(
+                     SQLConstants.GET_LAST_FEDERATED_DISCOVERY_TIME_SQL)) {
+            stmt.setString(1, envName);
+            stmt.setString(2, organization);
+            try (java.sql.ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getTimestamp("LAST_DISCOVERED");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error fetching last discovery time for env: " + envName, e);
+        }
+        return null;
+    }
+
     private boolean isEmptyValuesInApplicationAttributesEnabled() {
         return Boolean.parseBoolean(ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
                 getAPIManagerConfiguration().getFirstProperty(APIConstants.ApplicationAttributes.

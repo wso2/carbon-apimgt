@@ -1,6 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.InlineResponse2001DTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.InlineResponse200DTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.InlineResponse202DTO;
 import java.util.List;
@@ -53,6 +54,23 @@ FederatedApisApiService delegate = new FederatedApisApiServiceImpl();
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response discoverFederatedAPIs( @NotNull @ApiParam(value = "Name of the environment/gateway",required=true)  @QueryParam("environment") String environment) throws APIManagementException{
         return delegate.discoverFederatedAPIs(environment, securityContext);
+    }
+
+    @GET
+    @Path("/cached")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Retrieve cached federated APIs discovery results", notes = "Returns previously cached discovery results from the DB for the given environment, WITHOUT triggering a new gateway call. Includes lastDiscoveredAt timestamp.", response = InlineResponse2001DTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+        })
+    }, tags={ "Federated APIs",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "Cached API discovery results and last discovered timestamp.", response = InlineResponse2001DTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+    public Response getCachedDiscoveryResults( @NotNull @ApiParam(value = "Name of the environment/gateway",required=true)  @QueryParam("environment") String environment) throws APIManagementException{
+        return delegate.getCachedDiscoveryResults(environment, securityContext);
     }
 
     @GET

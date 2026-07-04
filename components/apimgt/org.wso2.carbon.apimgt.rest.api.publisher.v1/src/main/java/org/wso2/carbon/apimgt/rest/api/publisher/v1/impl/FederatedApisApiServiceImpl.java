@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.api.FederatedAPIDiscoveryService;
 import org.wso2.carbon.apimgt.api.model.DiscoveredAPI;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.FederatedApisApiService;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -55,23 +56,19 @@ import java.util.concurrent.TimeUnit;
  *       {@code TASK_STORE} and {@code ACTIVE_TASK_BY_ENV}, submitted to the
  *       shared {@link #DISCOVERY_EXECUTOR} and HTTP 202 is returned with the new task ID.</li>
  *   <li>The background worker calls {@code discoverExternalAPIs}, converts the result,
- *       stores it in the task, and marks status COMPLETED (or FAILED on error).
- *       It also evicts itself from {@code ACTIVE_TASK_BY_ENV} so fresh discoveries can start.</li>
+ *       <b>persists it to the AM_FEDERATED_DISCOVERY_CACHE DB table</b>, and marks status COMPLETED
+ *       (or FAILED on error). It also evicts itself from {@code ACTIVE_TASK_BY_ENV}.</li>
  *   <li>GET /federated-apis/status/{taskId} → reads from {@code TASK_STORE} and returns the
- *       current status plus the API list if COMPLETED.</li>
+ *       current status. When COMPLETED, results are read from the DB cache.</li>
+ *   <li>GET /federated-apis/cached?environment=X → returns previously cached results from the DB
+ *       without triggering a new gateway call. Includes lastDiscoveredAt timestamp.</li>
  * </ol>
  *
- * <p><b>Cluster note:</b> The task store is JVM-local ({@link ConcurrentHashMap}).
- * In a multi-node cluster each node maintains its own store; the UI should POST to the same
- * node it polls (sticky sessions / same LB node), which is the default in WSO2 deployments.
- * To go cluster-wide, replace the two static maps with a Hazelcast IMap — the surrounding
- * logic is identical.
- *
- * <p><b>Thread-pool sizing:</b> A single-thread executor is used deliberately.
- * Discovery is network-bound (one external call per gateway) so parallelism beyond the
- * number of concurrent gateways brings no benefit and only risks resource exhaustion.
- * The de-duplication guard ensures a single admin's repeated clicks never queue more than
- * one pending task per environment.
+ * <p><b>Key change:</b> Discovery results are no longer held in JVM-local {@link ConcurrentHashMap}
+ * objects. They are persisted to the {@code AM_FEDERATED_DISCOVERY_CACHE} table so they survive
+ * page reloads, server restarts, and are available across cluster nodes.
+ * The in-memory maps ({@code TASK_STORE}, {@code ACTIVE_TASK_BY_ENV}) are only used for
+ * ephemeral, in-flight task tracking and de-duplication.
  */
 public class FederatedApisApiServiceImpl implements FederatedApisApiService {
 
@@ -91,13 +88,13 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
     private static final long TASK_TTL_MILLIS = TimeUnit.MINUTES.toMillis(5);
 
     // -----------------------------------------------------------------------
-    // Shared, JVM-wide state
-    // Intentionally static so they survive across request threads.
+    // Shared, JVM-wide state (ephemeral — only tracks in-flight tasks)
     // -----------------------------------------------------------------------
 
     /**
      * Primary task store: taskId → DiscoveryTask.
      * Read by GET /status/{taskId}, written by POST /discover and the worker.
+     * Results are NOT stored here — they go to the DB.
      */
     private static final ConcurrentHashMap<String, DiscoveryTask> TASK_STORE =
             new ConcurrentHashMap<>();
@@ -111,10 +108,6 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
 
     /**
      * Background executor for discovery work.
-     * Fixed pool of 5 threads so multiple environments / tenants can discover concurrently.
-     * Discovery is network I/O-bound, so 5 threads cover most real-world multi-tenant deployments
-     * without significant resource overhead.
-     * Named thread prefix aids log debugging.
      */
     private static final ExecutorService DISCOVERY_EXECUTOR =
             Executors.newFixedThreadPool(5, r -> {
@@ -124,12 +117,7 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
             });
 
     /**
-     * Active cleanup scheduler — runs every 5 minutes and removes tasks that have passed their
-     * TTL from both {@code TASK_STORE} and {@code ACTIVE_TASK_BY_ENV}.
-     *
-     * <p>Without this, a task would only be evicted when a <em>new</em> discovery is triggered
-     * for the same environment. Tasks for environments that are rarely touched would otherwise
-     * accumulate indefinitely in JVM heap memory.
+     * Active cleanup scheduler — runs every 5 minutes and removes expired tasks.
      */
     static {
         ScheduledExecutorService cleaner = Executors.newSingleThreadScheduledExecutor(r -> {
@@ -143,12 +131,10 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
                     if (task.isExpired()) {
                         TASK_STORE.remove(taskId);
                         String envKey = task.organization + "|" + task.environment;
-                        // Only remove from active index if this exact task is occupying it
                         ACTIVE_TASK_BY_ENV.remove(envKey, taskId);
                     }
                 });
             } catch (Exception e) {
-                // Use a local logger reference since this runs in a static context
                 LogFactory.getLog(FederatedApisApiServiceImpl.class)
                         .error("Error during stale discovery task cleanup", e);
             }
@@ -205,7 +191,6 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
         ACTIVE_TASK_BY_ENV.put(envKey, taskId);
 
         // --- Submit to background worker --------------------------------------
-        // Carbon context is thread-local; capture the tenant info before jumping threads.
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
 
@@ -222,7 +207,7 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
      * GET /federated-apis/status/{taskId}
      *
      * <p>Returns the current status of an async discovery task.
-     * When status is COMPLETED the full API list is included in the response.
+     * When status is COMPLETED, results are read from the DB cache.
      */
     @Override
     public Response getDiscoveryTaskStatus(String taskId, MessageContext messageContext)
@@ -250,7 +235,7 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
 
                     log.info("Federated API discovery task [" + taskId + "] lazily created on this node for env ["
                             + environment + "] org [" + organization + "]");
-                    return Response.ok(newTask.toResponseMap()).build();
+                    return Response.ok(newTask.toResponseMap(organization)).build();
                 } catch (Exception e) {
                     log.error("Failed to lazily create discovery task for taskId: " + taskId, e);
                     return Response.status(Response.Status.NOT_FOUND)
@@ -263,15 +248,12 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
                         .build();
             }
         }
-        return Response.ok(task.toResponseMap()).build();
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        return Response.ok(task.toResponseMap(organization)).build();
     }
 
     /**
      * POST /federated-apis/import
-     *
-     * <p>Synchronous: the user has already seen the discovery results and explicitly
-     * selected a subset of NEW APIs to import. The network round-trip is to WSO2's own
-     * database — fast and predictable.
      */
     @Override
     public Response importFederatedAPIs(String environment, List<String> requestBody,
@@ -294,8 +276,6 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
 
     /**
      * POST /federated-apis/update
-     *
-     * <p>Synchronous for the same reason as import.
      */
     @Override
     public Response updateFederatedAPIs(String environment, List<String> requestBody,
@@ -316,6 +296,37 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
         }
     }
 
+    /**
+     * GET /federated-apis/cached?environment=X
+     *
+     * <p>Returns previously cached discovery results from the DB for the given environment,
+     * WITHOUT triggering a new gateway call. Includes lastDiscoveredAt timestamp.
+     */
+    @Override
+    public Response getCachedDiscoveryResults(String environment, MessageContext messageContext)
+            throws APIManagementException {
+        try {
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            ApiMgtDAO dao = ApiMgtDAO.getInstance();
+
+            List<Map<String, Object>> cachedApis = dao.getFederatedDiscoveryCache(environment, organization);
+            java.sql.Timestamp lastDiscovered = dao.getLastFederatedDiscoveryTime(environment, organization);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("environment", environment);
+            response.put("result", cachedApis);
+            response.put("lastDiscoveredAt", lastDiscovered != null
+                    ? lastDiscovered.toInstant().toString() : null);
+            response.put("status", STATUS_COMPLETED);
+
+            return Response.ok(response).build();
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError(
+                    "Error fetching cached discovery results for environment: " + environment, e, log);
+            return null;
+        }
+    }
+
     // -----------------------------------------------------------------------
     // Background worker
     // -----------------------------------------------------------------------
@@ -323,11 +334,8 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
     /**
      * Executed on the {@link #DISCOVERY_EXECUTOR} thread.
      *
-     * <p>Establishes a Carbon tenant context (required by DAO/registry calls inside
-     * {@code discoverExternalAPIs}), performs the external network call, converts the
-     * result and stores it in the task. Always evicts the task from
-     * {@code ACTIVE_TASK_BY_ENV} — whether it succeeds or fails — so the admin
-     * can trigger a new discovery without being locked out.
+     * <p>Performs the external network call, converts the result, persists it to the
+     * {@code AM_FEDERATED_DISCOVERY_CACHE} DB table, and marks the task as completed.
      */
     private void runDiscovery(DiscoveryTask task, Environment env, String organization,
             int tenantId, String tenantDomain, String envKey) {
@@ -348,9 +356,14 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
             Map<String, List<DiscoveredAPI>> discovered = service.discoverExternalAPIs(env, organization);
             List<Map<String, Object>> result = convertToListOfMaps(discovered, env);
 
-            task.markCompleted(result);
+            // Persist results to the DB cache
+            java.sql.Timestamp now = new java.sql.Timestamp(System.currentTimeMillis());
+            ApiMgtDAO.getInstance().saveFederatedDiscoveryCache(
+                    env.getName(), organization, result, now);
+
+            task.markCompleted(result.size());
             log.info("Discovery task [" + task.taskId + "] completed with "
-                    + result.size() + " APIs.");
+                    + result.size() + " APIs. Results persisted to DB cache.");
 
         } catch (Exception e) {
             task.markFailed(e.getMessage());
@@ -417,6 +430,10 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
                 map.put("gatewayType", environment.getGatewayType());
                 map.put("discoveredAt", discoveredAt);
                 map.put("status", status);
+                // Include reference artifact for DB persistence
+                if (discoveredAPI.getReferenceArtifact() != null) {
+                    map.put("referenceArtifact", discoveredAPI.getReferenceArtifact());
+                }
                 result.add(map);
             }
         }
@@ -456,8 +473,8 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
     /**
      * Lightweight value object representing one async discovery job.
      *
-     * <p>Fields are {@code volatile} so that the worker thread's writes are immediately
-     * visible to the HTTP-polling thread without synchronization overhead.
+     * <p>Results are no longer stored in this object — they are persisted to the DB.
+     * This object only tracks task lifecycle (PENDING → COMPLETED/FAILED).
      */
     private static class DiscoveryTask {
 
@@ -467,7 +484,7 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
         final long createdAt;
 
         volatile String status;
-        volatile List<Map<String, Object>> result;
+        volatile int resultCount;
         volatile String errorMessage;
         volatile long completedAt;
 
@@ -479,8 +496,8 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
             this.createdAt = System.currentTimeMillis();
         }
 
-        void markCompleted(List<Map<String, Object>> apiList) {
-            this.result = apiList;
+        void markCompleted(int count) {
+            this.resultCount = count;
             this.status = STATUS_COMPLETED;
             this.completedAt = System.currentTimeMillis();
         }
@@ -505,13 +522,27 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
         }
 
         /** Full response for the GET /status/{taskId} poll endpoint. */
-        Map<String, Object> toResponseMap() {
+        Map<String, Object> toResponseMap(String organization) {
             Map<String, Object> m = new HashMap<>();
             m.put("taskId", taskId);
             m.put("status", status);
             m.put("environment", environment);
-            if (STATUS_COMPLETED.equals(status) && result != null) {
-                m.put("result", result);
+            if (STATUS_COMPLETED.equals(status)) {
+                // Read results from DB cache instead of in-memory
+                try {
+                    ApiMgtDAO dao = ApiMgtDAO.getInstance();
+                    List<Map<String, Object>> cachedApis =
+                            dao.getFederatedDiscoveryCache(environment, organization);
+                    m.put("result", cachedApis);
+                    java.sql.Timestamp lastDiscovered =
+                            dao.getLastFederatedDiscoveryTime(environment, organization);
+                    m.put("lastDiscoveredAt", lastDiscovered != null
+                            ? lastDiscovered.toInstant().toString() : null);
+                } catch (Exception e) {
+                    LogFactory.getLog(FederatedApisApiServiceImpl.class)
+                            .error("Error reading cached results for task: " + taskId, e);
+                    m.put("result", new ArrayList<>());
+                }
             }
             if (STATUS_FAILED.equals(status) && errorMessage != null) {
                 m.put("error", errorMessage);
