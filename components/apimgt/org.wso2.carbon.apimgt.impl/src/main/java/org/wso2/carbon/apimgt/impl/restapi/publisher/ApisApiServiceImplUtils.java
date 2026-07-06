@@ -312,8 +312,8 @@ public class ApisApiServiceImplUtils {
         if (log.isDebugEnabled()) {
             log.debug("Using user given stored credentials");
         }
-        if (secretKey.length() == APIConstants.AWS_ENCRYPTED_SECRET_KEY_LENGTH) {
-            CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+        CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+        if (cryptoUtil.base64DecodeAndIsSelfContainedCipherText(secretKey)) {
             secretKey = new String(cryptoUtil.base64DecodeAndDecrypt(secretKey),
                     StandardCharsets.UTF_8);
         }
