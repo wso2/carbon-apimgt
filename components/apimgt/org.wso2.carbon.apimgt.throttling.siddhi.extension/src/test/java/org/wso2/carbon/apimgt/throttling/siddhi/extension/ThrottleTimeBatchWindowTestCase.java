@@ -29,6 +29,11 @@ import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
 
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
+
 public class ThrottleTimeBatchWindowTestCase {
     private static final Log log = LogFactory.getLog(ThrottleTimeBatchWindowTestCase.class);
     private int inEventCount;
@@ -86,7 +91,7 @@ public class ThrottleTimeBatchWindowTestCase {
         inputHandler.send(new Object[]{"WSO2", 60.5f, 1});
         Thread.sleep(6000);
         Assert.assertEquals(4, inEventCount);
-        Assert.assertEquals(2, removeEventCount);
+        Assert.assertEquals(0, removeEventCount);
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
 
@@ -129,12 +134,133 @@ public class ThrottleTimeBatchWindowTestCase {
         inputHandler.send(new Object[]{"WSO2", 60.5f, 1});
         Thread.sleep(10000);
         Assert.assertEquals(2, inEventCount);
-        Assert.assertEquals(0.0d, lastRemoveEvent.getData()[1]);
+        Assert.assertNull(lastRemoveEvent);
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
 
     }
 
+
+    @Test
+    public void throttleTimeWindowBatchShouldResetAggregatesOnWindowExpiry() throws InterruptedException {
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String requestStream = "" +
+                "define stream RequestStream (throttleKey string, messageSize long);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from RequestStream#throttler:timeBatch(2 sec , 0) " +
+                "select throttleKey, count(throttleKey) as requestCount, sum(messageSize) as bandwidth, " +
+                "expiryTimeStamp group by throttleKey " +
+                "insert all events into outputStream ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(requestStream + query);
+        List<Event> currentEvents = new CopyOnWriteArrayList<>();
+        CountDownLatch firstWindowEventsArrived = new CountDownLatch(2);
+        CountDownLatch postExpiryEventArrived = new CountDownLatch(1);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                if (inEvents != null) {
+                    for (Event event : inEvents) {
+                        currentEvents.add(event);
+                        if (currentEvents.size() <= 2) {
+                            firstWindowEventsArrived.countDown();
+                        } else {
+                            postExpiryEventArrived.countDown();
+                        }
+                    }
+                }
+                eventArrived = true;
+            }
+        });
+
+        try {
+            InputHandler inputHandler = executionPlanRuntime.getInputHandler("RequestStream");
+            executionPlanRuntime.start();
+            inputHandler.send(new Object[]{"app1", 100L});
+            inputHandler.send(new Object[]{"app1", 200L});
+            Assert.assertTrue("Timed out waiting for first window events",
+                    firstWindowEventsArrived.await(5, TimeUnit.SECONDS));
+
+            long expiryTime = (Long) currentEvents.get(1).getData()[3];
+            long waitTime = expiryTime - System.currentTimeMillis() + 500;
+            if (waitTime > 0) {
+                Thread.sleep(waitTime);
+            }
+
+            inputHandler.send(new Object[]{"app1", 50L});
+            Assert.assertTrue("Timed out waiting for post-expiry event",
+                    postExpiryEventArrived.await(5, TimeUnit.SECONDS));
+
+            Event firstEventAfterReset = currentEvents.get(currentEvents.size() - 1);
+            Assert.assertEquals("app1", firstEventAfterReset.getData()[0]);
+            Assert.assertEquals(1L, firstEventAfterReset.getData()[1]);
+            Assert.assertEquals(50L, firstEventAfterReset.getData()[2]);
+            Assert.assertTrue(eventArrived);
+        } finally {
+            executionPlanRuntime.shutdown();
+        }
+    }
+
+    /**
+     * Verifies that getThreadLocalWindowExpiry() returns null when called outside of a
+     * ThrottleStreamProcessor dispatch — the ThreadLocal must never leak across event batches.
+     */
+    @Test
+    public void getThreadLocalWindowExpiryIsNullOutsideProcessing() {
+        Assert.assertNull(
+                "ThreadLocal window expiry must be null outside of ThrottleStreamProcessor.process()",
+                ThrottleStreamProcessor.getThreadLocalWindowExpiry());
+    }
+
+    /**
+     * Verifies that all events belonging to the same time-batch window share an identical
+     * expiryTimeStamp. The window boundary is fixed once the first event arrives, so every
+     * subsequent event in the same batch must carry the same expiry value.
+     */
+    @Test
+    public void windowExpiryTimestampIsConsistentForAllEventsInSameBatch() throws InterruptedException {
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String requestStream = "define stream RequestStream (throttleKey string, messageSize long);";
+        String query = "@info(name = 'query1') " +
+                "from RequestStream#throttler:timeBatch(2 sec , 0) " +
+                "select throttleKey, count(throttleKey) as requestCount, expiryTimeStamp " +
+                "group by throttleKey " +
+                "insert all events into outputStream;";
+
+        ExecutionPlanRuntime runtime = siddhiManager.createExecutionPlanRuntime(requestStream + query);
+        List<Long> expiryTimestamps = new CopyOnWriteArrayList<>();
+        CountDownLatch eventsArrived = new CountDownLatch(3);
+
+        runtime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                if (inEvents != null) {
+                    for (Event e : inEvents) {
+                        expiryTimestamps.add((Long) e.getData()[2]);
+                        eventsArrived.countDown();
+                    }
+                }
+            }
+        });
+
+        try {
+            InputHandler inputHandler = runtime.getInputHandler("RequestStream");
+            runtime.start();
+            inputHandler.send(new Object[]{"key1", 100L});
+            inputHandler.send(new Object[]{"key2", 200L});
+            inputHandler.send(new Object[]{"key3", 300L});
+            Assert.assertTrue("Timed out waiting for events", eventsArrived.await(6, TimeUnit.SECONDS));
+            Assert.assertEquals("All events in the same window must have the same expiryTimeStamp",
+                    1, expiryTimestamps.stream().distinct().count());
+        } finally {
+            runtime.shutdown();
+        }
+    }
 
     @Test
     public void throttleTimeWindowBatchTest3() throws InterruptedException {
