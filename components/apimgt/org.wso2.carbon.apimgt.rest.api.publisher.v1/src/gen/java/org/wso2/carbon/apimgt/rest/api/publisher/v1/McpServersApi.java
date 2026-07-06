@@ -1120,7 +1120,10 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
-            @AuthorizationScope(scope = "apim:mcp_server_create_only", description = "Create new MCP Servers")
+            @AuthorizationScope(scope = "apim:mcp_server_create_only", description = "Create new MCP Servers"),
+            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
+            @AuthorizationScope(scope = "apim:mcp_server_import_export", description = "Import and export MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:mcp_server_update", description = "Update MCP Server configuration (metadata, thumbnails, backends)")
         })
     }, tags={ "Validation" })
     @ApiResponses(value = { 
