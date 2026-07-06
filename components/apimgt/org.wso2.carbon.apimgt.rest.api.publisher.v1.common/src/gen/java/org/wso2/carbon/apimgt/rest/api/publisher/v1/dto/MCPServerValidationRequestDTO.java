@@ -23,6 +23,39 @@ public class MCPServerValidationRequestDTO   {
   
     private String url = null;
     private SecurityInfoDTO securityInfo = null;
+    private String mcpServerId = null;
+
+    @XmlType(name="EndpointTypeEnum")
+    @XmlEnum(String.class)
+    public enum EndpointTypeEnum {
+        PRODUCTION("PRODUCTION"),
+        SANDBOX("SANDBOX");
+        private String value;
+
+        EndpointTypeEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static EndpointTypeEnum fromValue(String v) {
+            for (EndpointTypeEnum b : EndpointTypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
+    private EndpointTypeEnum endpointType = null;
 
   /**
    * The URL to be validated.
@@ -60,6 +93,42 @@ public class MCPServerValidationRequestDTO   {
     this.securityInfo = securityInfo;
   }
 
+  /**
+   * UUID of the MCP Server whose stored endpoint security should be used when securityInfo is absent.
+   **/
+  public MCPServerValidationRequestDTO mcpServerId(String mcpServerId) {
+    this.mcpServerId = mcpServerId;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "2962f50e-1c05-4b5d-a9c7-12345abcdef0", value = "UUID of the MCP Server whose stored endpoint security should be used when securityInfo is absent.")
+  @JsonProperty("mcpServerId")
+  public String getMcpServerId() {
+    return mcpServerId;
+  }
+  public void setMcpServerId(String mcpServerId) {
+    this.mcpServerId = mcpServerId;
+  }
+
+  /**
+   * The endpoint environment whose stored security config should be used. Required when mcpServerId is provided.
+   **/
+  public MCPServerValidationRequestDTO endpointType(EndpointTypeEnum endpointType) {
+    this.endpointType = endpointType;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "PRODUCTION", value = "The endpoint environment whose stored security config should be used. Required when mcpServerId is provided.")
+  @JsonProperty("endpointType")
+  public EndpointTypeEnum getEndpointType() {
+    return endpointType;
+  }
+  public void setEndpointType(EndpointTypeEnum endpointType) {
+    this.endpointType = endpointType;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -71,12 +140,14 @@ public class MCPServerValidationRequestDTO   {
     }
     MCPServerValidationRequestDTO mcPServerValidationRequest = (MCPServerValidationRequestDTO) o;
     return Objects.equals(url, mcPServerValidationRequest.url) &&
-        Objects.equals(securityInfo, mcPServerValidationRequest.securityInfo);
+        Objects.equals(securityInfo, mcPServerValidationRequest.securityInfo) &&
+        Objects.equals(mcpServerId, mcPServerValidationRequest.mcpServerId) &&
+        Objects.equals(endpointType, mcPServerValidationRequest.endpointType);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(url, securityInfo);
+    return Objects.hash(url, securityInfo, mcpServerId, endpointType);
   }
 
   @Override
@@ -86,6 +157,8 @@ public class MCPServerValidationRequestDTO   {
     
     sb.append("    url: ").append(toIndentedString(url)).append("\n");
     sb.append("    securityInfo: ").append(toIndentedString(securityInfo)).append("\n");
+    sb.append("    mcpServerId: ").append(toIndentedString(mcpServerId)).append("\n");
+    sb.append("    endpointType: ").append(toIndentedString(endpointType)).append("\n");
     sb.append("}");
     return sb.toString();
   }
