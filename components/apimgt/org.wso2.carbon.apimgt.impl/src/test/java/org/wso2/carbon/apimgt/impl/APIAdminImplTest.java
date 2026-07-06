@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.ConfigurationDto;
@@ -649,6 +650,202 @@ public class APIAdminImplTest {
             }
         }
         Assert.assertTrue("Expected " + APIConstants.JWKS_URI + " property on JWKS update", jwksFound);
+    }
+
+    @Test
+    public void testAddLLMProviderWithInvalidJsonPathRejects() throws APIManagementException {
+
+        APIAdminImpl apiAdmin = new APIAdminImpl();
+        LLMProvider provider = new LLMProvider("TestProvider", "1.0.0");
+        provider.setConfigurations("{\"metadata\":[{\"attributeName\":\"promptTokenCount\","
+                + "\"inputSource\":\"payload\",\"attributeIdentifier\":\"[0-9]+\"}]}");
+
+        try {
+            apiAdmin.addLLMProvider("carbon.super", provider);
+            Assert.fail("Expected APIManagementException for invalid JSONPath");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("Invalid JSONPath expression"));
+            Assert.assertTrue(e.getMessage().contains("[0-9]+"));
+            Assert.assertTrue(e.getMessage().contains("promptTokenCount"));
+        }
+    }
+
+    @Test
+    public void testAddLLMProviderWithValidJsonPathAccepts() throws APIManagementException {
+
+        APIAdminImpl apiAdmin = new APIAdminImpl();
+        LLMProvider provider = new LLMProvider("TestProvider", "1.0.0");
+        provider.setConfigurations("{\"metadata\":[{\"attributeName\":\"promptTokenCount\","
+                + "\"inputSource\":\"payload\",\"attributeIdentifier\":\"$.usage.inputTokens\"}]}");
+
+        LLMProvider mockResult = new LLMProvider("TestProvider", "1.0.0");
+        mockResult.setId("test-id");
+        mockResult.setName("TestProvider");
+        mockResult.setApiVersion("1.0.0");
+        mockResult.setConfigurations(provider.getConfigurations());
+        Mockito.when(apiMgtDAO.addLLMProvider(Mockito.anyString(), Mockito.any(LLMProvider.class)))
+                .thenReturn(mockResult);
+
+        LLMProvider result = apiAdmin.addLLMProvider("carbon.super", provider);
+        Assert.assertNotNull(result);
+    }
+
+    @Test
+    public void testAddLLMProviderWithInvalidRegexRejects() throws APIManagementException {
+
+        APIAdminImpl apiAdmin = new APIAdminImpl();
+        LLMProvider provider = new LLMProvider("TestProvider", "1.0.0");
+        provider.setConfigurations("{\"metadata\":[{\"attributeName\":\"model\","
+                + "\"inputSource\":\"pathParams\",\"attributeIdentifier\":\"[invalid(regex\"}]}");
+
+        try {
+            apiAdmin.addLLMProvider("carbon.super", provider);
+            Assert.fail("Expected APIManagementException for invalid regex");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("Invalid regex pattern"));
+            Assert.assertTrue(e.getMessage().contains("[invalid(regex"));
+            Assert.assertTrue(e.getMessage().contains("model"));
+        }
+    }
+
+    @Test
+    public void testAddLLMProviderWithValidRegexAccepts() throws APIManagementException {
+
+        APIAdminImpl apiAdmin = new APIAdminImpl();
+        LLMProvider provider = new LLMProvider("TestProvider", "1.0.0");
+        provider.setConfigurations("{\"metadata\":[{\"attributeName\":\"model\","
+                + "\"inputSource\":\"pathParams\",\"attributeIdentifier\":\"model/([^/]+)\"}]}");
+
+        LLMProvider mockResult = new LLMProvider("TestProvider", "1.0.0");
+        mockResult.setId("test-id");
+        mockResult.setName("TestProvider");
+        mockResult.setApiVersion("1.0.0");
+        mockResult.setConfigurations(provider.getConfigurations());
+        Mockito.when(apiMgtDAO.addLLMProvider(Mockito.anyString(), Mockito.any(LLMProvider.class)))
+                .thenReturn(mockResult);
+
+        LLMProvider result = apiAdmin.addLLMProvider("carbon.super", provider);
+        Assert.assertNotNull(result);
+    }
+
+    @Test
+    public void testAddLLMProviderWithNullConfigurationAccepts() throws APIManagementException {
+
+        APIAdminImpl apiAdmin = new APIAdminImpl();
+        LLMProvider provider = new LLMProvider("TestProvider", "1.0.0");
+        provider.setConfigurations(null);
+
+        LLMProvider mockResult = new LLMProvider("TestProvider", "1.0.0");
+        mockResult.setId("test-id");
+        mockResult.setName("TestProvider");
+        mockResult.setApiVersion("1.0.0");
+        Mockito.when(apiMgtDAO.addLLMProvider(Mockito.anyString(), Mockito.any(LLMProvider.class)))
+                .thenReturn(mockResult);
+
+        LLMProvider result = apiAdmin.addLLMProvider("carbon.super", provider);
+        Assert.assertNotNull(result);
+    }
+
+    @Test
+    public void testAddLLMProviderWithNoMetadataInConfigAccepts() throws APIManagementException {
+
+        APIAdminImpl apiAdmin = new APIAdminImpl();
+        LLMProvider provider = new LLMProvider("TestProvider", "1.0.0");
+        provider.setConfigurations("{\"connectorType\":\"openAI\"}");
+
+        LLMProvider mockResult = new LLMProvider("TestProvider", "1.0.0");
+        mockResult.setId("test-id");
+        mockResult.setName("TestProvider");
+        mockResult.setApiVersion("1.0.0");
+        mockResult.setConfigurations(provider.getConfigurations());
+        Mockito.when(apiMgtDAO.addLLMProvider(Mockito.anyString(), Mockito.any(LLMProvider.class)))
+                .thenReturn(mockResult);
+
+        LLMProvider result = apiAdmin.addLLMProvider("carbon.super", provider);
+        Assert.assertNotNull(result);
+    }
+
+    @Test
+    public void testAddLLMProviderWithEmptyIdentifierSkipsValidation() throws APIManagementException {
+
+        APIAdminImpl apiAdmin = new APIAdminImpl();
+        LLMProvider provider = new LLMProvider("TestProvider", "1.0.0");
+        provider.setConfigurations("{\"metadata\":[{\"attributeName\":\"promptTokenCount\","
+                + "\"inputSource\":\"payload\",\"attributeIdentifier\":\"\"}]}");
+
+        LLMProvider mockResult = new LLMProvider("TestProvider", "1.0.0");
+        mockResult.setId("test-id");
+        mockResult.setName("TestProvider");
+        mockResult.setApiVersion("1.0.0");
+        mockResult.setConfigurations(provider.getConfigurations());
+        Mockito.when(apiMgtDAO.addLLMProvider(Mockito.anyString(), Mockito.any(LLMProvider.class)))
+                .thenReturn(mockResult);
+
+        LLMProvider result = apiAdmin.addLLMProvider("carbon.super", provider);
+        Assert.assertNotNull(result);
+    }
+
+    @Test
+    public void testUpdateLLMProviderWithInvalidJsonPathRejects() throws APIManagementException {
+
+        APIAdminImpl apiAdmin = new APIAdminImpl();
+        LLMProvider provider = new LLMProvider("TestProvider", "1.0.0");
+        provider.setId("existing-id");
+        provider.setConfigurations("{\"metadata\":[{\"attributeName\":\"completionTokenCount\","
+                + "\"inputSource\":\"payload\",\"attributeIdentifier\":\"[0-9]+\"}]}");
+
+        try {
+            apiAdmin.updateLLMProvider("carbon.super", provider);
+            Assert.fail("Expected APIManagementException for invalid JSONPath on update");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("Invalid JSONPath expression"));
+            Assert.assertTrue(e.getMessage().contains("completionTokenCount"));
+        }
+    }
+
+    @Test
+    public void testAddLLMProviderWithMixedValidPayloadAndPathIdentifiers() throws APIManagementException {
+
+        APIAdminImpl apiAdmin = new APIAdminImpl();
+        LLMProvider provider = new LLMProvider("TestProvider", "1.0.0");
+        provider.setConfigurations("{\"metadata\":["
+                + "{\"attributeName\":\"promptTokenCount\",\"inputSource\":\"payload\","
+                + "\"attributeIdentifier\":\"$.usage.inputTokens\"},"
+                + "{\"attributeName\":\"model\",\"inputSource\":\"pathParams\","
+                + "\"attributeIdentifier\":\"model/([^/]+)\"}"
+                + "]}");
+
+        LLMProvider mockResult = new LLMProvider("TestProvider", "1.0.0");
+        mockResult.setId("test-id");
+        mockResult.setName("TestProvider");
+        mockResult.setApiVersion("1.0.0");
+        mockResult.setConfigurations(provider.getConfigurations());
+        Mockito.when(apiMgtDAO.addLLMProvider(Mockito.anyString(), Mockito.any(LLMProvider.class)))
+                .thenReturn(mockResult);
+
+        LLMProvider result = apiAdmin.addLLMProvider("carbon.super", provider);
+        Assert.assertNotNull(result);
+    }
+
+    @Test
+    public void testAddLLMProviderWithMixedValidAndInvalidIdentifiersRejects() throws APIManagementException {
+
+        APIAdminImpl apiAdmin = new APIAdminImpl();
+        LLMProvider provider = new LLMProvider("TestProvider", "1.0.0");
+        provider.setConfigurations("{\"metadata\":["
+                + "{\"attributeName\":\"promptTokenCount\",\"inputSource\":\"payload\","
+                + "\"attributeIdentifier\":\"$.usage.inputTokens\"},"
+                + "{\"attributeName\":\"totalTokenCount\",\"inputSource\":\"payload\","
+                + "\"attributeIdentifier\":\"[0-9]+\"}"
+                + "]}");
+
+        try {
+            apiAdmin.addLLMProvider("carbon.super", provider);
+            Assert.fail("Expected APIManagementException when one identifier is invalid");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("Invalid JSONPath expression"));
+            Assert.assertTrue(e.getMessage().contains("totalTokenCount"));
+        }
     }
 
     // ---------- Issue #5038: AM_API_DEFAULT_VERSION.API_PROVIDER not updated on provider change ----------

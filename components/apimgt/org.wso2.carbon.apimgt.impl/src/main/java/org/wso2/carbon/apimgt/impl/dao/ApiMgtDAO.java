@@ -6492,7 +6492,7 @@ public class ApiMgtDAO {
                     refUriTemplates = getURITemplatesOfAPI(refApiId);
                     if (refUriTemplates == null) {
                         log.error("Failed to retrieve URI templates for referenced API: " + refApiId);
-                        refUriTemplates = new HashSet<>();
+                        refUriTemplates = new LinkedHashSet<>();
                     }
                 }
             }
@@ -16978,7 +16978,7 @@ public class ApiMgtDAO {
      */
     public Map<String, URITemplate> getURITemplatesForAPI(API api) throws APIManagementException {
 
-        Map<String, URITemplate> templatesMap = new HashMap<String, URITemplate>();
+        Map<String, URITemplate> templatesMap = new LinkedHashMap<String, URITemplate>();
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
@@ -17271,7 +17271,7 @@ public class ApiMgtDAO {
                         }
                     }
 
-                    Map<String, URITemplate> uriTemplateMap = new HashMap<>();
+                    Map<String, URITemplate> uriTemplateMap = new LinkedHashMap<>();
                     for (URITemplate urlMapping : urlMappingList) {
                         if (urlMapping.getScope() != null) {
                             URITemplate urlMappingNew = urlMapping;
@@ -20402,7 +20402,7 @@ public class ApiMgtDAO {
                     }
                 }
 
-                Map<String, URITemplate> uriTemplateMap = new HashMap<>();
+                Map<String, URITemplate> uriTemplateMap = new LinkedHashMap<>();
                 for (URITemplate urlMapping : urlMappingList) {
                     if (urlMapping.getScope() != null) {
                         URITemplate urlMappingNew = urlMapping;
@@ -21586,7 +21586,7 @@ public class ApiMgtDAO {
                     }
                 }
 
-                Map<String, URITemplate> uriTemplateMap = new HashMap<>();
+                Map<String, URITemplate> uriTemplateMap = new LinkedHashMap<>();
                 for (URITemplate urlMapping : urlMappingList) {
                     if (urlMapping.getScope() != null) {
                         URITemplate urlMappingNew = urlMapping;
@@ -22005,7 +22005,7 @@ public class ApiMgtDAO {
                     }
                 }
 
-                Map<String, URITemplate> uriTemplateMap = new HashMap<>();
+                Map<String, URITemplate> uriTemplateMap = new LinkedHashMap<>();
                 for (URITemplate urlMapping : urlMappingList) {
                     if (urlMapping.getScope() != null) {
                         URITemplate urlMappingNew = urlMapping;
@@ -22294,7 +22294,7 @@ public class ApiMgtDAO {
                 PreparedStatement getURLMappingsFromRevisionedAPIProduct = connection.prepareStatement(
                         GET_API_PRODUCT_REVISION_URL_MAPPINGS_BY_REVISION_UUID);
                 getURLMappingsFromRevisionedAPIProduct.setString(1, apiRevision.getRevisionUUID());
-                Map<String, URITemplate> urlMappingList = new HashMap<>();
+                Map<String, URITemplate> urlMappingList = new LinkedHashMap<>();
                 try (ResultSet rs = getURLMappingsFromRevisionedAPIProduct.executeQuery()) {
                     String key, httpMethod, urlPattern;
                     while (rs.next()) {
@@ -24633,8 +24633,8 @@ public class ApiMgtDAO {
             query = SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_FOR_API_REVISION_SQL;
         }
 
-        Map<String, URITemplate> uriTemplates = new HashMap<>();
-        Set<URITemplate> uriTemplateList = new HashSet<>();
+        Map<String, URITemplate> uriTemplates = new LinkedHashMap<>();
+        Set<URITemplate> uriTemplateList = new LinkedHashSet<>();
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             if (apiRevision == null) {
