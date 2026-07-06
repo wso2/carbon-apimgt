@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.throttling.siddhi.extension.internal.ServiceRefere
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.Protocol;
 import redis.clients.jedis.exceptions.JedisException;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -48,6 +49,7 @@ public class JedisKeyValueStoreClient implements KeyValueStoreClient {
     private static volatile char[] password;
     private static volatile int databaseId;
     private static volatile int connectionTimeout;
+    private static volatile int socketTimeout;
     private static volatile boolean sslEnabled;
     private static volatile JedisPoolConfig poolConfig = new JedisPoolConfig();
 
@@ -67,11 +69,15 @@ public class JedisKeyValueStoreClient implements KeyValueStoreClient {
                 user = distributedConfig.getUser();
                 password = distributedConfig.getPassword();
                 databaseId = distributedConfig.getDatabaseId();
-                connectionTimeout = distributedConfig.getConnectionTimeout();
+                connectionTimeout = distributedConfig.getConnectionTimeout() != 0
+                        ? distributedConfig.getConnectionTimeout() : Protocol.DEFAULT_TIMEOUT;
+                socketTimeout = distributedConfig.getSocketTimeout() != 0
+                        ? distributedConfig.getSocketTimeout() : Protocol.DEFAULT_TIMEOUT;
                 sslEnabled = distributedConfig.isSslEnabled();
                 poolConfig.setMaxTotal(distributedConfig.getMaxTotal());
                 poolConfig.setMaxIdle(distributedConfig.getMaxIdle());
                 poolConfig.setMinIdle(distributedConfig.getMinIdle());
+                poolConfig.setMaxWaitMillis(distributedConfig.getMaxWaitMillis());
                 poolConfig.setBlockWhenExhausted(distributedConfig.isBlockWhenExhausted());
                 poolConfig.setTestOnBorrow(distributedConfig.isTestOnBorrow());
                 poolConfig.setTestOnReturn(distributedConfig.isTestOnReturn());
@@ -88,7 +94,10 @@ public class JedisKeyValueStoreClient implements KeyValueStoreClient {
                     user = redisConfig.getUser();
                     password = redisConfig.getPassword();
                     databaseId = redisConfig.getDatabaseId();
-                    connectionTimeout = redisConfig.getConnectionTimeout();
+                    connectionTimeout = redisConfig.getConnectionTimeout() != 0
+                            ? redisConfig.getConnectionTimeout() : Protocol.DEFAULT_TIMEOUT;
+                    socketTimeout = redisConfig.getSocketTimeout() != 0
+                            ? redisConfig.getSocketTimeout() : Protocol.DEFAULT_TIMEOUT;
                     sslEnabled = redisConfig.isSslEnabled();
                     poolConfig.setMaxTotal(redisConfig.getMaxTotal());
                     poolConfig.setMaxIdle(redisConfig.getMaxIdle());
@@ -97,6 +106,7 @@ public class JedisKeyValueStoreClient implements KeyValueStoreClient {
                     poolConfig.setTestOnBorrow(redisConfig.isTestOnBorrow());
                     poolConfig.setTestOnReturn(redisConfig.isTestOnReturn());
                     poolConfig.setTestWhileIdle(redisConfig.isTestWhileIdle());
+                    poolConfig.setMaxWaitMillis(redisConfig.getMaxWaitMillis());
                 }
                 else {
                     log.warn("Unknown config type provided to createPoolConfig. Using default JedisPoolConfig values.");
@@ -115,14 +125,17 @@ public class JedisKeyValueStoreClient implements KeyValueStoreClient {
                     populateKeyValueStoreConfigs();
                     try {
                         if (StringUtils.isNotEmpty(user) && password != null) {
-                            jedisPool = new JedisPool(poolConfig, host, port, connectionTimeout, user,
-                                    String.valueOf(password), databaseId, sslEnabled);
+                            jedisPool = new JedisPool(poolConfig, host, port,
+                                    connectionTimeout, socketTimeout,
+                                    user, String.valueOf(password), databaseId, null, sslEnabled);
                         } else if (password != null) {
-                            jedisPool = new JedisPool(poolConfig, host, port, connectionTimeout,
-                                    String.valueOf(password), databaseId, sslEnabled);
+                            jedisPool = new JedisPool(poolConfig, host, port,
+                                    connectionTimeout, socketTimeout,
+                                    String.valueOf(password), databaseId, null, sslEnabled);
                         } else {
-                            jedisPool = new JedisPool(poolConfig, host, port, connectionTimeout, null,
-                                    databaseId, sslEnabled);
+                            jedisPool = new JedisPool(poolConfig, host, port,
+                                    connectionTimeout, socketTimeout,
+                                    null, databaseId, null, sslEnabled);
                         }
                         return jedisPool;
                     } catch (Exception e) {
@@ -141,17 +154,19 @@ public class JedisKeyValueStoreClient implements KeyValueStoreClient {
                 return pool.getResource();
             } catch (JedisException e) {
                 long currentTimeMillis = System.currentTimeMillis();
-                if (currentTimeMillis - lastErrorLogTimestamp.get() > ERROR_LOG_INTERVAL_MS) {
+                long prev = lastErrorLogTimestamp.get();
+                if (currentTimeMillis - prev > ERROR_LOG_INTERVAL_MS
+                        && lastErrorLogTimestamp.compareAndSet(prev, currentTimeMillis)) {
                     log.error("Failed to get Jedis resource from pool. Check whether the server is running and accessible.", e);
-                    lastErrorLogTimestamp.set(currentTimeMillis);
                 }
                 return null;
             }
         }
         long currentTimeMillis = System.currentTimeMillis();
-        if (currentTimeMillis - lastErrorLogTimestamp.get() > ERROR_LOG_INTERVAL_MS) {
+        long prev = lastErrorLogTimestamp.get();
+        if (currentTimeMillis - prev > ERROR_LOG_INTERVAL_MS
+                && lastErrorLogTimestamp.compareAndSet(prev, currentTimeMillis)) {
             log.error("JedisPool is not initialized. Cannot get Jedis resource.");
-            lastErrorLogTimestamp.set(currentTimeMillis);
         }
         return null;
     }
@@ -260,6 +275,44 @@ public class JedisKeyValueStoreClient implements KeyValueStoreClient {
             return jedis.decrBy(key, decrement);
         } catch (JedisException e) {
             throw new KeyValueStoreException("Error during KeyValue DECREMENT for key: " + key, e);
+        } finally {
+            closeJedis(jedis);
+        }
+    }
+
+    @Override
+    public void setWithExpiry(String key, String value, long ttlMillis) {
+        if (key == null) {
+            throw new KeyValueStoreException("Key cannot be null for PSETEX operation.");
+        }
+        Jedis jedis = null;
+        try {
+            jedis = getJedis();
+            if (jedis == null) {
+                throw new KeyValueStoreException("Failed to get connection from KeyValue pool for PSETEX operation.");
+            }
+            jedis.psetex(key, ttlMillis, value);
+        } catch (JedisException e) {
+            throw new KeyValueStoreException("Error during KeyValue PSETEX for key: " + key, e);
+        } finally {
+            closeJedis(jedis);
+        }
+    }
+
+    @Override
+    public void expireMillis(String key, long ttlMillis) {
+        if (key == null) {
+            throw new KeyValueStoreException("Key cannot be null for PEXPIRE operation.");
+        }
+        Jedis jedis = null;
+        try {
+            jedis = getJedis();
+            if (jedis == null) {
+                throw new KeyValueStoreException("Failed to get connection from KeyValue pool for PEXPIRE operation.");
+            }
+            jedis.pexpire(key, ttlMillis);
+        } catch (JedisException e) {
+            throw new KeyValueStoreException("Error during KeyValue PEXPIRE for key: " + key, e);
         } finally {
             closeJedis(jedis);
         }
