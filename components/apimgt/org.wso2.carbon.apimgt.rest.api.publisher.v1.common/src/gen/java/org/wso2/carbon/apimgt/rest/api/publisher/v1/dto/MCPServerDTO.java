@@ -197,6 +197,7 @@ return null;
     private APICorsConfigurationDTO corsConfiguration = null;
     private String workflowStatus = null;
     private String protocolVersion = null;
+    private String mcpPathAppended = null;
     private String createdTime = null;
     private String lastUpdatedTimestamp = null;
     @Scope(name = "apim:mcp_server_publish", description="", value ="")
@@ -922,6 +923,23 @@ return null;
 
   /**
    **/
+  public MCPServerDTO mcpPathAppended(String mcpPathAppended) {
+    this.mcpPathAppended = mcpPathAppended;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("mcpPathAppended")
+  public String getMcpPathAppended() {
+    return mcpPathAppended;
+  }
+  public void setMcpPathAppended(String mcpPathAppended) {
+    this.mcpPathAppended = mcpPathAppended;
+  }
+
+  /**
+   **/
   public MCPServerDTO createdTime(String createdTime) {
     this.createdTime = createdTime;
     return this;
@@ -1165,6 +1183,7 @@ return null;
         Objects.equals(corsConfiguration, mcPServer.corsConfiguration) &&
         Objects.equals(workflowStatus, mcPServer.workflowStatus) &&
         Objects.equals(protocolVersion, mcPServer.protocolVersion) &&
+        Objects.equals(mcpPathAppended, mcPServer.mcpPathAppended) &&
         Objects.equals(createdTime, mcPServer.createdTime) &&
         Objects.equals(lastUpdatedTimestamp, mcPServer.lastUpdatedTimestamp) &&
         Objects.equals(lastUpdatedTime, mcPServer.lastUpdatedTime) &&
@@ -1180,7 +1199,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, displayName, description, context, endpointConfig, version, provider, lifeCycleStatus, hasThumbnail, isDefaultVersion, isRevision, revisionedMCPServerId, revisionId, enableSchemaValidation, audiences, transport, tags, policies, organizationPolicies, throttlingPolicy, authorizationHeader, apiKeyHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, visibleOrganizations, mcpServerPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, protocolVersion, createdTime, lastUpdatedTimestamp, lastUpdatedTime, subtypeConfiguration, scopes, operations, categories, keyManagers, gatewayVendor, gatewayType, initiatedFromGateway);
+    return Objects.hash(id, name, displayName, description, context, endpointConfig, version, provider, lifeCycleStatus, hasThumbnail, isDefaultVersion, isRevision, revisionedMCPServerId, revisionId, enableSchemaValidation, audiences, transport, tags, policies, organizationPolicies, throttlingPolicy, authorizationHeader, apiKeyHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, visibleOrganizations, mcpServerPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, protocolVersion, mcpPathAppended, createdTime, lastUpdatedTimestamp, lastUpdatedTime, subtypeConfiguration, scopes, operations, categories, keyManagers, gatewayVendor, gatewayType, initiatedFromGateway);
   }
 
   @Override
@@ -1228,6 +1247,7 @@ return null;
     sb.append("    corsConfiguration: ").append(toIndentedString(corsConfiguration)).append("\n");
     sb.append("    workflowStatus: ").append(toIndentedString(workflowStatus)).append("\n");
     sb.append("    protocolVersion: ").append(toIndentedString(protocolVersion)).append("\n");
+    sb.append("    mcpPathAppended: ").append(toIndentedString(mcpPathAppended)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    lastUpdatedTimestamp: ").append(toIndentedString(lastUpdatedTimestamp)).append("\n");
     sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
