@@ -313,7 +313,15 @@ public class ApisApiServiceImplUtils {
             log.debug("Using user given stored credentials");
         }
         CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
-        if (cryptoUtil.base64DecodeAndIsSelfContainedCipherText(secretKey)) {
+        boolean isEncryptedSecretKey = false;
+        try {
+            isEncryptedSecretKey = cryptoUtil.base64DecodeAndIsSelfContainedCipherText(secretKey);
+        } catch (CryptoException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("AWS secret key is not a self-contained cipher text; using stored value as-is.", e);
+            }
+        }
+        if (isEncryptedSecretKey) {
             secretKey = new String(cryptoUtil.base64DecodeAndDecrypt(secretKey),
                     StandardCharsets.UTF_8);
         }
