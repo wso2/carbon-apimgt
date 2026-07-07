@@ -3195,8 +3195,16 @@ public class APIManagerConfiguration {
         OMElement mcpEnforceAuthForAllMethodsElement =
                 omElement.getFirstChildWithName(new QName(APIConstants.AI.MCP_ENFORCE_AUTH_FOR_ALL));
         if (mcpEnforceAuthForAllMethodsElement != null
-                && StringUtils.isNotEmpty(mcpEnforceAuthForAllMethodsElement.getText())) {
-            isMCPEnforceAuthForAllMethods = Boolean.parseBoolean(mcpEnforceAuthForAllMethodsElement.getText().trim());
+                && StringUtils.isNotBlank(mcpEnforceAuthForAllMethodsElement.getText())) {
+            String enforceAuthValue = mcpEnforceAuthForAllMethodsElement.getText().trim();
+            // Validate the value to ensure it's either "true" or "false"
+            if (Boolean.TRUE.toString().equalsIgnoreCase(enforceAuthValue)
+                    || Boolean.FALSE.toString().equalsIgnoreCase(enforceAuthValue)) {
+                isMCPEnforceAuthForAllMethods = Boolean.parseBoolean(enforceAuthValue);
+            } else {
+                log.warn("Invalid value for " + APIConstants.AI.MCP_ENFORCE_AUTH_FOR_ALL
+                        + ". Using default: " + isMCPEnforceAuthForAllMethods);
+            }
         }
     }
 
