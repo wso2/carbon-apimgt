@@ -46,6 +46,23 @@ public interface FederatedAPIDiscovery {
      */
     List<DiscoveredAPI> discoverAPI();
 
+    /**
+     * Performs a light crawl fetching only API metadata (names, versions, descriptions, contexts)
+     * without downloading the heavy Swagger/OpenAPI specs.
+     */
+    default List<DiscoveredAPI> discoverMetadata() {
+        // Fallback to discoverAPI if not implemented by connector
+        return discoverAPI();
+    }
+
+    /**
+     * Fetches the full details and Swagger definitions for specific API IDs only.
+     */
+    default List<DiscoveredAPI> discoverAPI(List<String> apiIds) {
+        // Fallback to discoverAPI if not implemented by connector
+        return discoverAPI();
+    }
+
     default boolean isAPIUpdated(String existingReferenceArtifact, String newReferenceArtifact) {
         return !java.util.Objects.equals(existingReferenceArtifact, newReferenceArtifact);
     }
