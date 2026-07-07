@@ -3212,7 +3212,7 @@ public class APIManagerConfiguration {
 
     /**
      * Returns whether the Gateway should enforce authentication for all MCP methods.
-     * Default is false to preserve backward compatibility with existing MCP servers.
+     * Default is true to ensure security
      *
      * @return true if authentication should be enforced for all methods, false otherwise.
      */
