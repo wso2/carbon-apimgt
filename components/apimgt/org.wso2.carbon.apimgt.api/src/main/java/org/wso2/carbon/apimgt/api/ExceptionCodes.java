@@ -44,6 +44,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "lifecycle state"),
     TIER_CANNOT_BE_NULL(900304, "The tier cannot be null.", 400, "The tier cannot be null"),
     TIER_NAME_INVALID(900305, "The tier name is invalid.", 400, "The tier name is invalid"),
+    SUBSCRIBER_NOT_FOUND(900306, "Subscriber not found", 404, "Subscriber with ID '%s' not found."),
     APPLICATION_NOT_FOUND(900307, "Application not found", 404, "Application not found"),
     API_NOT_FOUND(900308, "API Not Found", 404, "Requested API with id '%s' not found"),
     APPLICATION_INACTIVE(900309, "Application is not active", 400, "Application is not active"),

@@ -3980,14 +3980,12 @@ paths:
           in: query
           description: |
             Application Name
-          required: true
           schema:
             type: string
         - name: appOwner
           in: query
           description: |
             Owner of the Application
-          required: true
           schema:
             type: string
         - name: withKeys
@@ -4005,6 +4003,13 @@ paths:
             enum:
               - JSON
               - YAML
+        - name: all
+          in: query
+          description: |
+            Export all applications in the tenant/organization.
+          schema:
+            type: boolean
+        - $ref: '#/components/parameters/requestedTenant'
       responses:
         200:
           description: |

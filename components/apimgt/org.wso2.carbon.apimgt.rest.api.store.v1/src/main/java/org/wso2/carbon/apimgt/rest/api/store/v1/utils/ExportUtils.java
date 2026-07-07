@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.utils;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
@@ -90,6 +91,23 @@ public class ExportUtils {
      */
     public static File exportApplication(Application exportApplication, APIConsumer apiConsumer,
             ExportFormat exportFormat, Boolean withKeys) throws APIManagementException {
+        return exportApplication(exportApplication, apiConsumer, exportFormat, withKeys, false);
+    }
+
+    /**
+     * Export a given Application to a file system as zip archive.
+     * The export root location is given by {@link @path}/exported-application.
+     *
+     * @param exportApplication Application{@link Application} to be exported
+     * @param apiConsumer       API Consumer
+     * @param exportFormat      Format to export
+     * @param withKeys          Export the Application with keys or not
+     * @param exploded          Return an exploded (unarchived) export directory instead of a zip.
+     * @return Path to the exported directory with exported artifacts
+     * @throws APIManagementException If an error occurs while exporting an application to a file system
+     */
+    public static File exportApplication(Application exportApplication, APIConsumer apiConsumer,
+            ExportFormat exportFormat, Boolean withKeys, boolean exploded) throws APIManagementException {
         String archivePath = null;
         String exportApplicationBasePath;
         String appName = exportApplication.getName();
@@ -111,6 +129,9 @@ public class ExportUtils {
             CommonUtil
                     .writeDtoToFile(archivePath + File.separator + ImportExportConstants.TYPE_APPLICATION, exportFormat,
                             ImportExportConstants.TYPE_APPLICATION, applicationDtoToExport);
+            if (exploded) {
+                return new File(exportApplicationBasePath);
+            }
             CommonUtil.archiveDirectory(exportApplicationBasePath);
             FileUtils.deleteQuietly(new File(exportApplicationBasePath));
             return new File(exportApplicationBasePath + APIConstants.ZIP_FILE_EXTENSION);
@@ -208,5 +229,51 @@ public class ExportUtils {
         File tempDirectory = new File(currentDirectory + File.separator + appOwner + "_" + appName);
         createDirectory(tempDirectory.getPath());
         return tempDirectory;
+    }
+
+    /**
+     * Export multiple applications to a zip archive. Each application will be exported in the same way as the single
+     * application export and then archived together as a zip file.
+     *
+     * @param applications List of applications to be exported
+     * @param apiConsumer  API Consumer
+     * @param exportFormat Format to export
+     * @param withKeys     Export the Application with keys or not
+     * @return File containing the exported applications in a zip archive
+     * @throws APIManagementException If an error occurs while exporting applications.
+     */
+    public static File exportApplications(List<Application> applications, APIConsumer apiConsumer,
+            ExportFormat exportFormat, Boolean withKeys) throws APIManagementException {
+        try {
+            File tempDirectoryFolder = CommonUtil.createTempDirectoryFromName(
+                    RandomStringUtils.randomAlphanumeric(ImportExportConstants.TEMP_FILENAME_LENGTH)
+                            .concat("-exported-applications"));
+            for (Application application : applications) {
+                File exportedApp = exportApplication(application, apiConsumer, exportFormat, withKeys, true);
+                try {
+                    if (exportedApp.isDirectory() && exportedApp.listFiles() != null) {
+                        File[] files = exportedApp.listFiles();
+                        if (files != null) {
+                            for (File file : files) {
+                                if (file.isDirectory()) {
+                                    FileUtils.copyDirectoryToDirectory(file, tempDirectoryFolder);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                } catch (IOException e) {
+                    throw new APIImportExportException(
+                            "Error while copying the exported application to the directory.", e);
+                } finally {
+                    FileUtils.deleteQuietly(exportedApp);
+                }
+            }
+            CommonUtil.archiveDirectory(tempDirectoryFolder.toString());
+            FileUtils.deleteQuietly(tempDirectoryFolder);
+            return new File(tempDirectoryFolder + APIConstants.ZIP_FILE_EXTENSION);
+        } catch (APIImportExportException e) {
+            throw new APIManagementException("Error while exporting applications.", e);
+        }
     }
 }
