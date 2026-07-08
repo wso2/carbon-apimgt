@@ -3155,6 +3155,13 @@ public class APIManagerConfiguration {
                 log.debug("RoundRobin configurations are not defined in AI configuration.");
             }
         }
+        OMElement errorResponseFormatSequenceElement =
+                omElement.getFirstChildWithName(new QName(APIConstants.AI.AI_CUSTOM_ERROR_RESPONSE_SEQUENCE));
+        if (errorResponseFormatSequenceElement != null
+                && StringUtils.isNotEmpty(errorResponseFormatSequenceElement.getText())) {
+            aiapiConfigurationsDTO.setCustomErrorResponseSequence(
+                    errorResponseFormatSequenceElement.getText().trim());
+        }
     }
 
     public boolean isEnableAiConfiguration() {

@@ -437,7 +437,11 @@ public class GatewayUtils {
         }
         messageContext.setProperty(APIMgtGatewayConstants.THREAT_DESC, desc);
         messageContext.setProperty(SynapseConstants.ERROR_DETAIL, desc);
-        Mediator sequence = messageContext.getSequence(APIMgtGatewayConstants.THREAT_FAULT);
+        // Publish the error flow type so any error sequence can branch on it.
+        messageContext.setProperty(APIMgtGatewayConstants.API_ERROR_TYPE,
+                APIMgtGatewayConstants.API_ERROR_TYPE_THREAT);
+        Mediator sequence = getErrorResponseFormatterSequence(messageContext,
+                APIMgtGatewayConstants.THREAT_FAULT);
         // Invoke the custom error handler specified by the user
         if (sequence != null && !sequence.mediate(messageContext)) {
             // If needed user should be able to prevent the rest of the fault handling
@@ -1912,14 +1916,43 @@ public class GatewayUtils {
         return false;
     }
 
+    /**
+     * Resolves the error response formatter sequence for the current request.
+     * For AI APIs, if the {@code [apim.ai].custom_error_response_sequence} configuration is set
+     * and the configured sequence is deployed on the gateway,that sequence is used.
+     * Otherwise, the provided default handler sequence is used.
+     *
+     * @param messageContext the Synapse message context
+     * @param defaultHandlerSequence the default error handler sequence to use
+     * @return the resolved sequence mediator, or {@code null} if the resolved
+     *         sequence is not available
+     */
+    public static Mediator getErrorResponseFormatterSequence(org.apache.synapse.MessageContext messageContext,
+                                                             String defaultHandlerSequence) {
+
+        if (APIConstants.API_SUBTYPE_AI_API.equals(messageContext.getProperty(APIMgtGatewayConstants.SUB_TYPE))) {
+            // Get the custom error response sequence for AI APIs if configured
+            String customErrorResponseSequence = APIManagerConfiguration.getAiApiConfigurationsDTO()
+                    .getCustomErrorResponseSequence();
+            if (StringUtils.isNotEmpty(customErrorResponseSequence)
+                    && messageContext.getSequence(customErrorResponseSequence) != null) {
+                return messageContext.getSequence(customErrorResponseSequence);
+            }
+        }
+        return messageContext.getSequence(defaultHandlerSequence);
+    }
+
     public static void handleAuthFailure(org.apache.synapse.MessageContext messageContext, APISecurityException e,
             String authorizationHeader, String apiKeyHeader, String authenticatorsChallengeString, String apiType) {
         messageContext.setProperty(SynapseConstants.ERROR_CODE, e.getErrorCode());
         messageContext.setProperty(SynapseConstants.ERROR_MESSAGE,
                 APISecurityConstants.getAuthenticationFailureMessage(e.getErrorCode()));
         messageContext.setProperty(SynapseConstants.ERROR_EXCEPTION, e);
-
-        Mediator sequence = messageContext.getSequence(APISecurityConstants.API_AUTH_FAILURE_HANDLER);
+        // Publish the error flow type such that any error sequence can branch on it.
+        messageContext.setProperty(APIMgtGatewayConstants.API_ERROR_TYPE,
+                APIMgtGatewayConstants.API_ERROR_TYPE_AUTH);
+        Mediator sequence = getErrorResponseFormatterSequence(messageContext,
+                APISecurityConstants.API_AUTH_FAILURE_HANDLER);
 
         //Setting error description which will be available to the handler
         String errorDetail = APISecurityConstants.getFailureMessageDetailDescription(e.getErrorCode(), e.getMessage());
