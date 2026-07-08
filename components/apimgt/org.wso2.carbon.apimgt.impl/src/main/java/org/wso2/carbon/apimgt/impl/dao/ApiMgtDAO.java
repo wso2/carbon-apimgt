@@ -11742,40 +11742,33 @@ public class ApiMgtDAO {
     public boolean isApiNameWithDifferentCaseExist(String apiName, String tenantDomain, String organization)
             throws APIManagementException {
 
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-        ResultSet resultSet = null;
         String contextParam = "/t/";
-
         String query = SQLConstants.GET_API_NAME_DIFF_CASE_NOT_MATCHING_CONTEXT_SQL;
         if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             query = SQLConstants.GET_API_NAME_DIFF_CASE_MATCHING_CONTEXT_SQL;
             contextParam += tenantDomain + '/';
         }
 
-        try {
-            connection = APIMgtDBUtil.getConnection();
-
-            prepStmt = connection.prepareStatement(query);
+        // The SQL uses LOWER(API_NAME) = LOWER(?) to find rows whose name matches case-
+        // insensitively; the exact-case exclusion is done in Java via String.equals so the
+        // check works correctly on every supported DB collation (previously the SQL
+        // included NOT (API_NAME = ?), which is collation-dependent and became a no-op on
+        // case-insensitive column collations, letting case-variant names slip through).
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
             prepStmt.setString(1, apiName);
             prepStmt.setString(2, contextParam + '%');
-            prepStmt.setString(3, apiName);
-            prepStmt.setString(4, organization);
-            resultSet = prepStmt.executeQuery();
-
-            int apiCount = 0;
-            if (resultSet != null) {
+            prepStmt.setString(3, organization);
+            try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {
-                    apiCount = resultSet.getInt("API_COUNT");
+                    String storedName = resultSet.getString("API_NAME");
+                    if (storedName != null && !storedName.equals(apiName)) {
+                        return true;
+                    }
                 }
-            }
-            if (apiCount > 0) {
-                return true;
             }
         } catch (SQLException e) {
             handleException("Failed to check different letter case api name availability : " + apiName, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, resultSet);
         }
         return false;
     }
@@ -25033,6 +25026,18 @@ public class ApiMgtDAO {
             }
             return addAPISpecificOperationPolicy(connection, policyData, apiUUID, revisionUUID, revisionedPolicyId,
                     policyData.getClonedCommonPolicyId());
+        } else if (workingCopyPolicyId != null && workingCopyPolicyId.contains("::")) {
+            // External policy (e.g. from Policy Hub) referenced by a Platform Gateway API is not stored in the
+            // common store. Mirror the working-copy import behaviour (cloneCommonPolicyToAPI) and create a
+            // placeholder API-specific policy so the revision policy mapping stays valid instead
+            if (log.isDebugEnabled()) {
+                log.debug("Creating placeholder revision policy for external policy " + workingCopyPolicyId
+                        + " (API " + apiUUID + ", revision " + revisionUUID + ")");
+            }
+            OperationPolicyData placeholder = createPlaceholderPolicyDataForExternalPolicy(workingCopyPolicyId,
+                    revisionedPolicyId, organization);
+            return addAPISpecificOperationPolicy(connection, placeholder, apiUUID, revisionUUID, revisionedPolicyId,
+                    workingCopyPolicyId);
         } else {
             throw new APIManagementException("Cannot create a revision of policy with ID " + workingCopyPolicyId
                     + " as it does not exists.");
@@ -26477,10 +26482,11 @@ public class ApiMgtDAO {
 
     private String resolvePolicyIdentifier(OperationPolicy policy) throws APIManagementException {
         String policyIdentifier = policy.getPolicyId();
-        if (StringUtils.isBlank(policyIdentifier)) {
+        if (APIConstants.OPERATION_SEQUENCE_TYPE_HUB.equalsIgnoreCase(policy.getDirection())) {
             String policyName = StringUtils.trimToEmpty(policy.getPolicyName());
             if (StringUtils.isBlank(policyName) || "null".equalsIgnoreCase(policyName)) {
-                throw new APIManagementException("Operation policy name cannot be empty when policyId is missing.");
+                throw new APIManagementException("Operation policy name cannot be empty for hub-directed operation " +
+                        "policies.");
             }
             if (log.isDebugEnabled()) {
                 log.debug("Policy ID is blank for policy: " + policyName

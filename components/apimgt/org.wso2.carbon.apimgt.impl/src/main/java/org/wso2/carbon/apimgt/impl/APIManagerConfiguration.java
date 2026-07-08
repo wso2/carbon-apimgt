@@ -182,6 +182,7 @@ public class APIManagerConfiguration {
     private String hashingAlgorithm = SHA_256;
     private boolean isTransactionCounterEnabled;
     private static boolean isMCPSupportEnabled = true;
+    private static boolean isMCPEnforceAuthForAllMethods = true;
     private static String devportalMode = APIConstants.DEVPORTAL_MODE_HYBRID;
     private static volatile boolean isRuntimeReadOnly = false;
 
@@ -3190,6 +3191,21 @@ public class APIManagerConfiguration {
             isMCPSupportEnabled = Boolean.parseBoolean(mcpServerConfigElement.getText().trim());
             System.setProperty(APIConstants.ENABLE_MCP_SUPPORT, Boolean.toString(isMCPSupportEnabled));
         }
+
+        OMElement mcpEnforceAuthForAllMethodsElement =
+                omElement.getFirstChildWithName(new QName(APIConstants.AI.MCP_ENFORCE_AUTH_FOR_ALL));
+        if (mcpEnforceAuthForAllMethodsElement != null
+                && StringUtils.isNotBlank(mcpEnforceAuthForAllMethodsElement.getText())) {
+            String enforceAuthValue = mcpEnforceAuthForAllMethodsElement.getText().trim();
+            // Validate the value to ensure it's either "true" or "false"
+            if (Boolean.TRUE.toString().equalsIgnoreCase(enforceAuthValue)
+                    || Boolean.FALSE.toString().equalsIgnoreCase(enforceAuthValue)) {
+                isMCPEnforceAuthForAllMethods = Boolean.parseBoolean(enforceAuthValue);
+            } else {
+                log.warn("Invalid value for " + APIConstants.AI.MCP_ENFORCE_AUTH_FOR_ALL
+                        + ". Using default: " + isMCPEnforceAuthForAllMethods);
+            }
+        }
     }
 
     /**
@@ -3200,6 +3216,17 @@ public class APIManagerConfiguration {
     public boolean isMCPSupportEnabled() {
 
         return isMCPSupportEnabled;
+    }
+
+    /**
+     * Returns whether the Gateway should enforce authentication for all MCP methods.
+     * Default is true to ensure security
+     *
+     * @return true if authentication should be enforced for all methods, false otherwise.
+     */
+    public boolean isMCPEnforceAuthForAllMethods() {
+
+        return isMCPEnforceAuthForAllMethods;
     }
 
     /**

@@ -603,6 +603,7 @@ public final class APIConstants {
         public static final String AI_CONFIGURATION = "AiConfiguration";
         public static final String MCP = "MCP";
         public static final String MCP_SUPPORT_ENABLED = "Enabled";
+        public static final String MCP_ENFORCE_AUTH_FOR_ALL = "EnforceAuthForAllMCPMethods";
         public static final String AI_CONFIGURATION_FAILOVER_CONFIGURATIONS = "FailoverConfigurations";
         public static final String AI_CONFIGURATION_ROUND_ROBIN_CONFIGURATIONS = "RoundRobinConfigurations";
         public static final String AI_CONFIGURATION_FAILOVER_CONFIGURATIONS_FAILOVER_ENDPOINTS_LIMIT =
@@ -2970,7 +2971,6 @@ public final class APIConstants {
 
     // AWS Lambda: Constants for aws lambda
     public static final String AWS_SECRET_KEY = "AWS_SECRET_KEY";
-    public static final int AWS_ENCRYPTED_SECRET_KEY_LENGTH = 620;
     public static final int AWS_DEFAULT_CONNECTION_TIMEOUT = 50000;
     public static final String AMZN_ACCESS_KEY = "amznAccessKey";
     public static final String AMZN_SECRET_KEY = "amznSecretKey";
@@ -3813,6 +3813,7 @@ public final class APIConstants {
         public static final String METHOD_RESOURCES_LIST = "resources/list";
         public static final String METHOD_RESOURCE_TEMPLATE_LIST = "resources/templates/list";
         public static final String METHOD_PROMPTS_LIST = "prompts/list";
+        public static final String METHOD_SET_LOG_LEVEL = "logging/setLevel";
         public static final List<String> ALLOWED_METHODS = Arrays.asList(METHOD_INITIALIZE, METHOD_TOOL_LIST,
                 METHOD_TOOL_CALL, METHOD_PING, METHOD_NOTIFICATION_INITIALIZED, METHOD_RESOURCES_LIST, METHOD_PROMPTS_LIST,
                 METHOD_RESOURCE_TEMPLATE_LIST);

@@ -2054,8 +2054,8 @@ public class RegistryPersistenceUtil {
         String provider = null;
         try {
             String segment = RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR;
-            int startIndex = apiPath.lastIndexOf(segment) + segment.length();
-            int endIndex = apiPath.lastIndexOf(APIConstants.API_RESOURCE_NAME);
+            int startIndex = StringUtils.lastIndexOfIgnoreCase(apiPath, segment) + segment.length();
+            int endIndex = StringUtils.lastIndexOfIgnoreCase(apiPath, APIConstants.API_RESOURCE_NAME);
             String apiVersion = apiPath.substring(startIndex, endIndex);
             provider = extractProviderFromPath(apiPath, apiName, apiVersion);
         } catch (APIPersistenceException | StringIndexOutOfBoundsException e) {
@@ -2090,7 +2090,7 @@ public class RegistryPersistenceUtil {
         }
         String nameVersionApiSegment = RegistryConstants.PATH_SEPARATOR + apiName
                 + RegistryConstants.PATH_SEPARATOR + apiVersion + APIConstants.API_RESOURCE_NAME;
-        int endIndex = apiPath.lastIndexOf(nameVersionApiSegment);
+        int endIndex = StringUtils.lastIndexOfIgnoreCase(apiPath, nameVersionApiSegment);
         if (endIndex < 0) {
             throw new APIPersistenceException("Unable to extract provider from path: " + apiPath
                     + ". Expected segment '" + nameVersionApiSegment + "' not found.");
