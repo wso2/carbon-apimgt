@@ -107,6 +107,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.net.URL;
+import java.net.MalformedURLException;
 
 import static org.wso2.carbon.apimgt.spec.parser.definitions.APISpecParserConstants.APPLICATION_JSON_MEDIA_TYPE;
 import static org.wso2.carbon.apimgt.spec.parser.definitions.APISpecParserConstants.APPLICATION_XML_MEDIA_TYPE;
@@ -1594,14 +1596,21 @@ public class OAS2Parser extends APIDefinition {
                 } else {
                     schemes.add(Scheme.HTTP);
                 }
-                String host = externalProductionEndpoint.split("://")[1].split("/")[0];
-                if (externalProductionEndpoint.split("://")[1].split("/").length > 1) {
-                    swagger.setBasePath(externalProductionEndpoint.split("://")[1].split(host)[1]);
-                } else {
-                    swagger.setBasePath("");
+                try {
+                    URL parsedUrl = new URL(externalProductionEndpoint);
+                    String host = parsedUrl.getPort() != -1
+                            ? parsedUrl.getHost() + ":" + parsedUrl.getPort()
+                            : parsedUrl.getHost();
+                    String path = parsedUrl.getPath();
+                    if (path != null && !path.isEmpty()) {
+                        swagger.setBasePath(path);
+                    }
+                    swagger.setHost(host);
+                    swagger.setSchemes(schemes);
+                } catch (MalformedURLException e) {
+                    log.error("Error parsing external production endpoint URL: "
+                            + externalProductionEndpoint, e);
                 }
-                swagger.setHost(host);
-                swagger.setSchemes(schemes);
             }
         } else {
             String host = StringUtils.EMPTY;
