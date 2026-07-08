@@ -2106,7 +2106,7 @@
         <carbon.commons.version>4.13.3</carbon.commons.version>
 
         <carbon.registry.version>4.9.13</carbon.registry.version>
-        <carbon.mediation.version>4.8.19</carbon.mediation.version>
+        <carbon.mediation.version>4.8.20</carbon.mediation.version>
 
         <mongodb.driver.version>4.1.0</mongodb.driver.version>
 
