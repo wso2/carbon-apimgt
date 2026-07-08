@@ -39,11 +39,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Implementation of the Federated API Discovery REST endpoints.
@@ -81,65 +78,16 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
     private static final String STATUS_COMPLETED = "COMPLETED";
     private static final String STATUS_FAILED    = "FAILED";
 
-    /**
-     * TTL after which completed/failed tasks are evicted from the store (5 minutes).
-     * The UI should poll well within this window.
-     */
-    private static final long TASK_TTL_MILLIS = TimeUnit.MINUTES.toMillis(5);
-
     // -----------------------------------------------------------------------
-    // Shared, JVM-wide state (ephemeral — only tracks in-flight tasks)
+    // Background executor for discovery work
     // -----------------------------------------------------------------------
 
-    /**
-     * Primary task store: taskId → DiscoveryTask.
-     * Read by GET /status/{taskId}, written by POST /discover and the worker.
-     * Results are NOT stored here — they go to the DB.
-     */
-    private static final ConcurrentHashMap<String, DiscoveryTask> TASK_STORE =
-            new ConcurrentHashMap<>();
-
-    /**
-     * Active-task index: "tenantOrg|envName" → taskId.
-     * Enables O(1) de-duplication. Evicted by the worker on completion/failure.
-     */
-    private static final ConcurrentHashMap<String, String> ACTIVE_TASK_BY_ENV =
-            new ConcurrentHashMap<>();
-
-    /**
-     * Background executor for discovery work.
-     */
     private static final ExecutorService DISCOVERY_EXECUTOR =
             Executors.newFixedThreadPool(5, r -> {
                 Thread t = new Thread(r, "federated-api-discovery-worker");
                 t.setDaemon(true);
                 return t;
             });
-
-    /**
-     * Active cleanup scheduler — runs every 5 minutes and removes expired tasks.
-     */
-    static {
-        ScheduledExecutorService cleaner = Executors.newSingleThreadScheduledExecutor(r -> {
-            Thread t = new Thread(r, "federated-api-discovery-cleaner");
-            t.setDaemon(true);
-            return t;
-        });
-        cleaner.scheduleAtFixedRate(() -> {
-            try {
-                TASK_STORE.forEach((taskId, task) -> {
-                    if (task.isExpired()) {
-                        TASK_STORE.remove(taskId);
-                        String envKey = task.organization + "|" + task.environment;
-                        ACTIVE_TASK_BY_ENV.remove(envKey, taskId);
-                    }
-                });
-            } catch (Exception e) {
-                LogFactory.getLog(FederatedApisApiServiceImpl.class)
-                        .error("Error during stale discovery task cleanup", e);
-            }
-        }, 5, 5, TimeUnit.MINUTES);
-    }
 
     // -----------------------------------------------------------------------
     // Endpoints
@@ -159,17 +107,24 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         String envKey = organization + "|" + environment;
 
-        // --- Evict stale completed/failed entries so a fresh run can start ----
-        evictStaleTask(envKey);
+        // --- DB-backed De-duplication check ----------------------------------
+        ApiMgtDAO dao = ApiMgtDAO.getInstance();
+        Map<String, Object> activeTask = dao.getActiveDiscoveryTask(environment, organization);
+        if (activeTask != null) {
+            String dbTaskId = (String) activeTask.get("taskId");
+            String dbStatus = (String) activeTask.get("status");
+            java.sql.Timestamp updatedAt = (java.sql.Timestamp) activeTask.get("updatedAt");
 
-        // --- De-duplication check --------------------------------------------
-        String existingTaskId = ACTIVE_TASK_BY_ENV.get(envKey);
-        if (existingTaskId != null) {
-            DiscoveryTask existing = TASK_STORE.get(existingTaskId);
-            if (existing != null && STATUS_PENDING.equals(existing.status)) {
-                log.debug("Discovery already in progress for env [" + environment
-                        + "] org [" + organization + "], returning existing taskId: " + existingTaskId);
-                return Response.accepted(existing.toStatusMap()).build();
+            if (STATUS_PENDING.equals(dbStatus) && updatedAt != null) {
+                long elapsed = System.currentTimeMillis() - updatedAt.getTime();
+                if (elapsed < 300000) { // 5 minutes safety timeout
+                    log.info("Discovery already in progress in the DB cluster for env [" + environment
+                            + "] org [" + organization + "], returning existing taskId: " + dbTaskId);
+                    Map<String, Object> m = new HashMap<>();
+                    m.put("taskId", dbTaskId);
+                    m.put("status", STATUS_PENDING);
+                    return Response.accepted(m).build();
+                }
             }
         }
 
@@ -185,22 +140,26 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
 
         // --- Create and register new task -------------------------------------
         String taskId = environment + "_" + UUID.randomUUID().toString();
-        DiscoveryTask task = new DiscoveryTask(taskId, environment, organization);
 
-        TASK_STORE.put(taskId, task);
-        ACTIVE_TASK_BY_ENV.put(envKey, taskId);
+        // Persist task status as PENDING in DB
+        java.sql.Timestamp now = new java.sql.Timestamp(System.currentTimeMillis());
+        ApiMgtDAO.getInstance().updateDiscoveryTaskStatus(
+                environment, organization, taskId, STATUS_PENDING, null, now);
 
         // --- Submit to background worker --------------------------------------
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
 
         DISCOVERY_EXECUTOR.submit(() ->
-                runDiscovery(task, env, organization, tenantId, tenantDomain, envKey));
+                runDiscovery(taskId, env, organization, tenantId, tenantDomain));
 
         log.info("Federated API discovery task [" + taskId + "] submitted for env ["
                 + environment + "] org [" + organization + "]");
 
-        return Response.accepted(task.toStatusMap()).build();
+        Map<String, Object> responseMap = new HashMap<>();
+        responseMap.put("taskId", taskId);
+        responseMap.put("status", STATUS_PENDING);
+        return Response.accepted(responseMap).build();
     }
 
     /**
@@ -213,43 +172,45 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
     public Response getDiscoveryTaskStatus(String taskId, MessageContext messageContext)
             throws APIManagementException {
 
-        DiscoveryTask task = TASK_STORE.get(taskId);
-        if (task == null) {
-            int index = taskId.lastIndexOf('_');
-            if (index > 0) {
-                String environment = taskId.substring(0, index);
-                String organization = RestApiUtil.getValidatedOrganization(messageContext);
-                try {
-                    Environment env = resolveEnvironment(environment, organization);
-                    String envKey = organization + "|" + environment;
-
-                    DiscoveryTask newTask = new DiscoveryTask(taskId, environment, organization);
-                    TASK_STORE.put(taskId, newTask);
-                    ACTIVE_TASK_BY_ENV.put(envKey, taskId);
-
-                    int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-                    String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-
-                    DISCOVERY_EXECUTOR.submit(() ->
-                            runDiscovery(newTask, env, organization, tenantId, tenantDomain, envKey));
-
-                    log.info("Federated API discovery task [" + taskId + "] lazily created on this node for env ["
-                            + environment + "] org [" + organization + "]");
-                    return Response.ok(newTask.toResponseMap(organization)).build();
-                } catch (Exception e) {
-                    log.error("Failed to lazily create discovery task for taskId: " + taskId, e);
-                    return Response.status(Response.Status.NOT_FOUND)
-                            .entity("{\"error\": \"Task not found or has expired: " + taskId + "\"}")
-                            .build();
-                }
-            } else {
-                return Response.status(Response.Status.NOT_FOUND)
-                        .entity("{\"error\": \"Task not found or has expired: " + taskId + "\"}")
-                        .build();
-            }
-        }
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        return Response.ok(task.toResponseMap(organization)).build();
+
+        // Parse environment name from taskId
+        int lastUnderscore = taskId.lastIndexOf('_');
+        if (lastUnderscore <= 0) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("{\"error\": \"Invalid task ID format: " + taskId + "\"}")
+                    .build();
+        }
+        String environment = taskId.substring(0, lastUnderscore);
+
+        // Fetch task status from database
+        ApiMgtDAO dao = ApiMgtDAO.getInstance();
+        Map<String, String> statusMap = dao.getDiscoveryTaskStatus(environment, organization, taskId);
+
+        if (statusMap == null) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("{\"error\": \"Task not found, expired, or superseded: " + taskId + "\"}")
+                    .build();
+        }
+
+        String status = statusMap.get("status");
+        String error = statusMap.get("error");
+
+        Map<String, Object> m = new HashMap<>();
+        m.put("taskId", taskId);
+        m.put("status", status);
+        m.put("environment", environment);
+
+        if (STATUS_COMPLETED.equals(status)) {
+            List<Map<String, Object>> cachedApis = dao.getFederatedDiscoveryCache(environment, organization);
+            m.put("result", cachedApis);
+            java.sql.Timestamp lastDiscovered = dao.getLastFederatedDiscoveryTime(environment, organization);
+            m.put("lastDiscoveredAt", lastDiscovered != null ? lastDiscovered.toInstant().toString() : null);
+        } else if (STATUS_FAILED.equals(status) && error != null) {
+            m.put("error", error);
+        }
+
+        return Response.ok(m).build();
     }
 
     /**
@@ -337,8 +298,8 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
      * <p>Performs the external network call, converts the result, persists it to the
      * {@code AM_FEDERATED_DISCOVERY_CACHE} DB table, and marks the task as completed.
      */
-    private void runDiscovery(DiscoveryTask task, Environment env, String organization,
-            int tenantId, String tenantDomain, String envKey) {
+    private void runDiscovery(String taskId, Environment env, String organization,
+            int tenantId, String tenantDomain) {
         try {
             // Restore Carbon context on the worker thread
             PrivilegedCarbonContext.startTenantFlow();
@@ -350,7 +311,7 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
                 throw new IllegalStateException("FederatedAPIDiscoveryService OSGi service is not available.");
             }
 
-            log.debug("Discovery worker starting for task [" + task.taskId + "] env ["
+            log.debug("Discovery worker starting for task [" + taskId + "] env ["
                     + env.getName() + "]");
 
             Map<String, List<DiscoveredAPI>> discovered = service.discoverExternalAPIs(env, organization);
@@ -361,35 +322,24 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
             ApiMgtDAO.getInstance().saveFederatedDiscoveryCache(
                     env.getName(), organization, result, now);
 
-            task.markCompleted(result.size());
-            log.info("Discovery task [" + task.taskId + "] completed with "
+            // Update status to COMPLETED in DB
+            ApiMgtDAO.getInstance().updateDiscoveryTaskStatus(
+                    env.getName(), organization, taskId, STATUS_COMPLETED, null, now);
+
+            log.info("Discovery task [" + taskId + "] completed with "
                     + result.size() + " APIs. Results persisted to DB cache.");
 
         } catch (Exception e) {
-            task.markFailed(e.getMessage());
-            log.error("Discovery task [" + task.taskId + "] failed: " + e.getMessage(), e);
-        } finally {
-            // Always release the active-task lock so the next discovery can proceed
-            ACTIVE_TASK_BY_ENV.remove(envKey, task.taskId);
-            PrivilegedCarbonContext.endTenantFlow();
-        }
-    }
-
-    // -----------------------------------------------------------------------
-    // Helper: evict a stale (completed/failed and past TTL) task from maps
-    // -----------------------------------------------------------------------
-
-    private void evictStaleTask(String envKey) {
-        String staleId = ACTIVE_TASK_BY_ENV.get(envKey);
-        if (staleId == null) {
-            return;
-        }
-        DiscoveryTask stale = TASK_STORE.get(staleId);
-        if (stale == null || stale.isExpired()) {
-            ACTIVE_TASK_BY_ENV.remove(envKey, staleId);
-            if (stale != null) {
-                TASK_STORE.remove(staleId);
+            log.error("Discovery task [" + taskId + "] failed: " + e.getMessage(), e);
+            try {
+                java.sql.Timestamp now = new java.sql.Timestamp(System.currentTimeMillis());
+                ApiMgtDAO.getInstance().updateDiscoveryTaskStatus(
+                        env.getName(), organization, taskId, STATUS_FAILED, e.getMessage(), now);
+            } catch (Exception ex) {
+                log.error("Failed to update discovery task status to FAILED in DB for task: " + taskId, ex);
             }
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
@@ -466,88 +416,5 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
                 .getOSGiService(FederatedAPIDiscoveryService.class, null);
     }
 
-    // -----------------------------------------------------------------------
-    // Inner class: DiscoveryTask
-    // -----------------------------------------------------------------------
 
-    /**
-     * Lightweight value object representing one async discovery job.
-     *
-     * <p>Results are no longer stored in this object — they are persisted to the DB.
-     * This object only tracks task lifecycle (PENDING → COMPLETED/FAILED).
-     */
-    private static class DiscoveryTask {
-
-        final String taskId;
-        final String environment;
-        final String organization;
-        final long createdAt;
-
-        volatile String status;
-        volatile int resultCount;
-        volatile String errorMessage;
-        volatile long completedAt;
-
-        DiscoveryTask(String taskId, String environment, String organization) {
-            this.taskId = taskId;
-            this.environment = environment;
-            this.organization = organization;
-            this.status = STATUS_PENDING;
-            this.createdAt = System.currentTimeMillis();
-        }
-
-        void markCompleted(int count) {
-            this.resultCount = count;
-            this.status = STATUS_COMPLETED;
-            this.completedAt = System.currentTimeMillis();
-        }
-
-        void markFailed(String error) {
-            this.errorMessage = error;
-            this.status = STATUS_FAILED;
-            this.completedAt = System.currentTimeMillis();
-        }
-
-        boolean isExpired() {
-            return !STATUS_PENDING.equals(status)
-                    && (System.currentTimeMillis() - completedAt) > TASK_TTL_MILLIS;
-        }
-
-        /** Minimal response for the 202 Accepted body. */
-        Map<String, Object> toStatusMap() {
-            Map<String, Object> m = new HashMap<>();
-            m.put("taskId", taskId);
-            m.put("status", status);
-            return m;
-        }
-
-        /** Full response for the GET /status/{taskId} poll endpoint. */
-        Map<String, Object> toResponseMap(String organization) {
-            Map<String, Object> m = new HashMap<>();
-            m.put("taskId", taskId);
-            m.put("status", status);
-            m.put("environment", environment);
-            if (STATUS_COMPLETED.equals(status)) {
-                // Read results from DB cache instead of in-memory
-                try {
-                    ApiMgtDAO dao = ApiMgtDAO.getInstance();
-                    List<Map<String, Object>> cachedApis =
-                            dao.getFederatedDiscoveryCache(environment, organization);
-                    m.put("result", cachedApis);
-                    java.sql.Timestamp lastDiscovered =
-                            dao.getLastFederatedDiscoveryTime(environment, organization);
-                    m.put("lastDiscoveredAt", lastDiscovered != null
-                            ? lastDiscovered.toInstant().toString() : null);
-                } catch (Exception e) {
-                    LogFactory.getLog(FederatedApisApiServiceImpl.class)
-                            .error("Error reading cached results for task: " + taskId, e);
-                    m.put("result", new ArrayList<>());
-                }
-            }
-            if (STATUS_FAILED.equals(status) && errorMessage != null) {
-                m.put("error", errorMessage);
-            }
-            return m;
-        }
-    }
 }

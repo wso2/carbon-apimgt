@@ -16851,6 +16851,110 @@ public class ApiMgtDAO {
         return null;
     }
 
+    /**
+     * Update the status of a federated discovery task in the database cache table.
+     *
+     * @param envName      environment name
+     * @param organization organization
+     * @param taskId       task ID
+     * @param status       status (PENDING, COMPLETED, FAILED)
+     * @param error        error message (if failed)
+     * @param now          timestamp
+     */
+    public void updateDiscoveryTaskStatus(String envName, String organization, String taskId,
+                                          String status, String error, java.sql.Timestamp now)
+            throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try (PreparedStatement stmt = connection.prepareStatement(
+                    SQLConstants.ADD_FEDERATED_DISCOVERY_CACHE_ENTRY_SQL)) {
+                stmt.setString(1, envName);
+                stmt.setString(2, organization);
+                stmt.setString(3, "__TASK_STATUS__");
+                stmt.setString(4, taskId);
+                stmt.setString(5, null);
+                stmt.setString(6, error);
+                stmt.setString(7, null);
+                stmt.setString(8, "HTTP");
+                stmt.setString(9, null);
+                stmt.setNull(10, java.sql.Types.BLOB);
+                stmt.setString(11, status);
+                stmt.setTimestamp(12, now);
+                stmt.executeUpdate();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Error updating federated discovery task status in DB for env: " + envName, e);
+            }
+        } catch (SQLException e) {
+            handleException("Error updating federated discovery task status in DB for env: " + envName, e);
+        }
+    }
+
+    /**
+     * Get the status of a federated discovery task from the database.
+     *
+     * @param envName      environment name
+     * @param organization organization
+     * @param taskId       task ID
+     * @return Map containing status and error, or null if not found/superseded
+     */
+    public Map<String, String> getDiscoveryTaskStatus(String envName, String organization, String taskId)
+            throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(
+                     "SELECT API_NAME, STATUS, DESCRIPTION FROM AM_FEDERATED_DISCOVERY_CACHE " +
+                     "WHERE ENVIRONMENT_NAME = ? AND ORGANIZATION = ? AND EXTERNAL_API_ID = '__TASK_STATUS__'")) {
+            stmt.setString(1, envName);
+            stmt.setString(2, organization);
+            try (java.sql.ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    String dbTaskId = rs.getString("API_NAME");
+                    if (taskId.equals(dbTaskId)) {
+                        Map<String, String> statusMap = new HashMap<>();
+                        statusMap.put("status", rs.getString("STATUS"));
+                        statusMap.put("error", rs.getString("DESCRIPTION"));
+                        return statusMap;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error fetching discovery task status for task: " + taskId, e);
+        }
+        return null;
+    }
+
+    /**
+     * Retrieve the active discovery task details for a given environment and organization.
+     *
+     * @param envName      environment name
+     * @param organization organization
+     * @return Map containing taskId, status, error, and updatedAt, or null if no task exists
+     */
+    public Map<String, Object> getActiveDiscoveryTask(String envName, String organization)
+            throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(
+                     "SELECT API_NAME, STATUS, DESCRIPTION, DISCOVERED_AT FROM AM_FEDERATED_DISCOVERY_CACHE " +
+                     "WHERE ENVIRONMENT_NAME = ? AND ORGANIZATION = ? AND EXTERNAL_API_ID = '__TASK_STATUS__'")) {
+            stmt.setString(1, envName);
+            stmt.setString(2, organization);
+            try (java.sql.ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    Map<String, Object> taskMap = new HashMap<>();
+                    taskMap.put("taskId", rs.getString("API_NAME"));
+                    taskMap.put("status", rs.getString("STATUS"));
+                    taskMap.put("error", rs.getString("DESCRIPTION"));
+                    taskMap.put("updatedAt", rs.getTimestamp("DISCOVERED_AT"));
+                    return taskMap;
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error fetching active discovery task status for env: " + envName, e);
+        }
+        return null;
+    }
+
     private boolean isEmptyValuesInApplicationAttributesEnabled() {
         return Boolean.parseBoolean(ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
                 getAPIManagerConfiguration().getFirstProperty(APIConstants.ApplicationAttributes.
