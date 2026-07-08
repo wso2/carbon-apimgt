@@ -292,13 +292,14 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
 
     @Override
     public void deleteGateway(String organizationId, String gatewayId) throws APIManagementException {
-        String storageOrgId = resolveStorageOrganizationId(organizationId, gatewayId);
-        Environment env = storageOrgId != null
-                ? ApiMgtDAO.getInstance().getEnvironment(storageOrgId, gatewayId) : null;
-        if (env == null || !APIConstants.WSO2_API_PLATFORM_GATEWAY.equals(env.getGatewayType())) {
+        ResolvedPlatformGatewayEnvironment resolved =
+                resolvePlatformGatewayEnvironment(organizationId, gatewayId);
+        if (resolved == null) {
             throw new APIManagementException("Platform gateway not found: " + gatewayId,
                     ExceptionCodes.PLATFORM_GATEWAY_NOT_FOUND);
         }
+        Environment env = resolved.environment;
+        String storageOrgId = resolved.storageOrganizationId;
         if (ApiMgtDAO.getInstance().hasExistingAPIRevisions(gatewayId, storageOrgId)) {
             throw new APIManagementException(
                     "Cannot delete platform gateway: API revisions are currently deployed to it. "
@@ -318,13 +319,14 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
     public PlatformGateway updateGateway(String organizationId, String gatewayId, String displayName,
                                          String description, String propertiesJson)
             throws APIManagementException {
-        String storageOrgId = resolveStorageOrganizationId(organizationId, gatewayId);
-        Environment env = storageOrgId != null
-                ? ApiMgtDAO.getInstance().getEnvironment(storageOrgId, gatewayId) : null;
-        if (env == null || !APIConstants.WSO2_API_PLATFORM_GATEWAY.equals(env.getGatewayType())) {
+        ResolvedPlatformGatewayEnvironment resolved =
+                resolvePlatformGatewayEnvironment(organizationId, gatewayId);
+        if (resolved == null) {
             throw new APIManagementException("Platform gateway not found: " + gatewayId,
                     ExceptionCodes.PLATFORM_GATEWAY_NOT_FOUND);
         }
+        Environment env = resolved.environment;
+        String storageOrgId = resolved.storageOrganizationId;
         if (displayName != null) {
             env.setDisplayName(displayName);
         }
@@ -341,18 +343,19 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
             env.setAdditionalProperties(additional);
         }
         new APIAdminImpl().updateEnvironment(storageOrgId, env);
-        return envToApiModel(ApiMgtDAO.getInstance().getEnvironment(storageOrgId, gatewayId));
+        return envToApiModel(env);
     }
 
     @Override
     public void updateGatewayActiveStatus(String gatewayId, String organizationId, boolean active)
             throws APIManagementException {
-        String storageOrgId = resolveStorageOrganizationId(organizationId, gatewayId);
-        Environment env = storageOrgId != null
-                ? ApiMgtDAO.getInstance().getEnvironment(storageOrgId, gatewayId) : null;
-        if (env == null || !APIConstants.WSO2_API_PLATFORM_GATEWAY.equals(env.getGatewayType())) {
+        ResolvedPlatformGatewayEnvironment resolved =
+                resolvePlatformGatewayEnvironment(organizationId, gatewayId);
+        if (resolved == null) {
             return;
         }
+        Environment env = resolved.environment;
+        String storageOrgId = resolved.storageOrganizationId;
         Map<String, String> additional = env.getAdditionalProperties() != null
                 ? new HashMap<>(env.getAdditionalProperties()) : new HashMap<>();
         additional.put("isActive", String.valueOf(active));
@@ -362,19 +365,42 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
     }
 
     /**
-     * Resolves the organization under which a platform gateway environment is stored.
-     * Platform gateways are single-tenant scoped; lookup is limited to {@code requestOrganizationId}.
+     * Resolved platform gateway environment and the organization key under which it is stored.
      */
-    public static String resolveStorageOrganizationId(String requestOrganizationId, String gatewayId)
-            throws APIManagementException {
+    public static final class ResolvedPlatformGatewayEnvironment {
+        public final String storageOrganizationId;
+        public final Environment environment;
+
+        ResolvedPlatformGatewayEnvironment(String storageOrganizationId, Environment environment) {
+            this.storageOrganizationId = storageOrganizationId;
+            this.environment = environment;
+        }
+    }
+
+    /**
+     * Resolves a platform gateway environment with a single DB read under {@code requestOrganizationId}.
+     */
+    public static ResolvedPlatformGatewayEnvironment resolvePlatformGatewayEnvironment(
+            String requestOrganizationId, String gatewayId) throws APIManagementException {
         if (StringUtils.isBlank(gatewayId) || StringUtils.isBlank(requestOrganizationId)) {
             return null;
         }
         Environment env = ApiMgtDAO.getInstance().getEnvironment(requestOrganizationId, gatewayId);
         if (env != null && APIConstants.WSO2_API_PLATFORM_GATEWAY.equals(env.getGatewayType())) {
-            return requestOrganizationId;
+            return new ResolvedPlatformGatewayEnvironment(requestOrganizationId, env);
         }
         return null;
+    }
+
+    /**
+     * Resolves the organization under which a platform gateway environment is stored.
+     * Platform gateways are single-tenant scoped; lookup is limited to {@code requestOrganizationId}.
+     */
+    public static String resolveStorageOrganizationId(String requestOrganizationId, String gatewayId)
+            throws APIManagementException {
+        ResolvedPlatformGatewayEnvironment resolved =
+                resolvePlatformGatewayEnvironment(requestOrganizationId, gatewayId);
+        return resolved != null ? resolved.storageOrganizationId : null;
     }
 
     /**
@@ -536,7 +562,7 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
     }
 
     public static boolean ensurePlatformGatewayFromConnectToken(PlatformGatewayConnectConfig config,
-                                                                String gatewayId, ConnectGatewayConfig entry) {
+                                                                ConnectGatewayConfig entry) {
         if (config == null || entry == null || StringUtils.isBlank(entry.getRegistrationToken())) {
             return false;
         }
@@ -580,9 +606,39 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
                         }
                         return false;
                     }
-                    if (log.isDebugEnabled()) {
-                        log.debug("Connect with token: gateway already exists for token_id=" + tokenId);
+                    Environment bootstrappedEnv = null;
+                    try {
+                        bootstrappedEnv = ApiMgtDAO.getInstance().getEnvironmentByUuid(persistedGatewayId);
+                    } catch (APIManagementException e) {
+                        // ignore
                     }
+                    if (bootstrappedEnv != null) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Connect with token: gateway already exists for token_id=" + tokenId);
+                        }
+                        return true;
+                    }
+                    if (log.isWarnEnabled()) {
+                        log.warn("Connect with token: active token row exists but environment missing for gateway_id="
+                                + persistedGatewayId + "; recreating environment");
+                    }
+                    String displayName = StringUtils.isNotBlank(displayNameOverride) ? displayNameOverride : name;
+                    String description = StringUtils.isNotBlank(descriptionOverride) ? descriptionOverride : "";
+                    Timestamp now = Timestamp.from(Instant.now());
+                    APIAdminImpl apiAdmin = new APIAdminImpl();
+                    Environment env = StringUtils.isNotBlank(urlOverride)
+                            ? toEnvironmentFromUrl(persistedGatewayId, name, displayName, description, urlOverride)
+                            : toEnvironment(persistedGatewayId, name, displayName, description, "default");
+                    Map<String, String> additional = new HashMap<>();
+                    additional.put("organization", orgId);
+                    additional.put("isActive", "false");
+                    additional.put("createdAt", String.valueOf(now.getTime()));
+                    additional.put("updatedAt", String.valueOf(now.getTime()));
+                    if (StringUtils.isNotBlank(urlOverride)) {
+                        additional.put(APIConstants.GatewayNotification.GATEWAY_BASE_URL, urlOverride.trim());
+                    }
+                    env.setAdditionalProperties(additional);
+                    apiAdmin.addEnvironment(orgId, env);
                     return true;
                 }
                 if (StringUtils.isNotBlank(entry.getName())) {
@@ -649,9 +705,15 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
                         }
                     }
                     activeToken = dao.getActiveTokenById(tokenId);
-                    if (activeToken != null
-                            && PlatformGatewayTokenUtil.matchesActiveTokenHash(activeToken, plainToken)) {
-                        return true;
+                    try {
+                        if (activeToken != null
+                                && PlatformGatewayTokenUtil.matchesActiveTokenHash(activeToken, plainToken)) {
+                            return true;
+                        }
+                    } catch (NoSuchAlgorithmException hashEx) {
+                        log.warn("Connect-with-token race recovery: hash verification failed for token_id="
+                                + tokenId, hashEx);
+                        return false;
                     }
                     throw e;
                 }

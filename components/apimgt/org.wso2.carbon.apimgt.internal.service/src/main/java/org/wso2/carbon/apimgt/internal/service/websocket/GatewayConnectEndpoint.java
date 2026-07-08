@@ -174,11 +174,18 @@ public class GatewayConnectEndpoint {
                         }
                     } else {
                         for (ConnectGatewayConfig entry : list) {
-                            if (entry != null && StringUtils.isNotBlank(entry.getRegistrationToken())
-                                    && PlatformGatewayTokenUtil.constantTimeEquals(
-                                            entry.getRegistrationToken(), apiKey)) {
-                                matchedEntry = entry;
-                                break;
+                            if (entry == null || StringUtils.isBlank(entry.getRegistrationToken())) {
+                                continue;
+                            }
+                            try {
+                                if (PlatformGatewayTokenUtil.matchesConnectConfigRegistrationToken(
+                                        entry.getRegistrationToken(), apiKey)) {
+                                    matchedEntry = entry;
+                                    break;
+                                }
+                            } catch (APIManagementException | NoSuchAlgorithmException e) {
+                                log.warn("Connect-with-token config match failed for entry name="
+                                        + entry.getName() + ": " + e.getMessage());
                             }
                         }
                         if (matchedEntry == null) {
@@ -195,10 +202,13 @@ public class GatewayConnectEndpoint {
                 log.warn("Could not get platform gateway connect config: " + e.getMessage(), e);
             }
             if (matchedEntry != null && connectConfig != null) {
-                String tokenId = PlatformGatewayTokenUtil.parseTokenId(matchedEntry.getRegistrationToken());
-                String connectGatewayId = PlatformGatewayServiceImpl.resolveConnectGatewayId(tokenId);
-                PlatformGatewayServiceImpl.ensurePlatformGatewayFromConnectToken(
-                        connectConfig, connectGatewayId, matchedEntry);
+                boolean created = PlatformGatewayServiceImpl.ensurePlatformGatewayFromConnectToken(
+                        connectConfig, matchedEntry);
+                if (!created) {
+                    log.warn("Connect-with-token bootstrap failed; closing connection");
+                    closeWithUnauthorized(session, "Invalid or expired API key");
+                    return;
+                }
                 try {
                     gateway = PlatformGatewayTokenUtil.verifyToken(apiKey);
                 } catch (APIManagementException | NoSuchAlgorithmException e) {

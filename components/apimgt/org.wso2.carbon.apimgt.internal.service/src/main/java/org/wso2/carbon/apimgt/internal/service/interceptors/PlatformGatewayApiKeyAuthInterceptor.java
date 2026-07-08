@@ -84,6 +84,9 @@ public class PlatformGatewayApiKeyAuthInterceptor extends AbstractPhaseIntercept
         if (!isPlatformGatewayAllowedPath(message)) {
             return;
         }
+        // Clear stale connect-auth state from a prior request on this pooled thread (e.g. if a fault
+        // skipped the cleanup interceptor before outFaultInterceptors was registered).
+        clearConnectWithTokenAuthState();
         @SuppressWarnings("unchecked")
         Map<String, List<String>> headers = (Map<String, List<String>>) message.get(Message.PROTOCOL_HEADERS);
         if (headers == null) {
@@ -114,10 +117,18 @@ public class PlatformGatewayApiKeyAuthInterceptor extends AbstractPhaseIntercept
             ConnectGatewayConfig matchedEntry = null;
             if (connectConfig != null) {
                 for (ConnectGatewayConfig entry : connectConfig.getConnectGateways()) {
-                    if (entry != null && StringUtils.isNotBlank(entry.getRegistrationToken())
-                            && PlatformGatewayTokenUtil.constantTimeEquals(entry.getRegistrationToken(), apiKey)) {
-                        matchedEntry = entry;
-                        break;
+                    if (entry == null || StringUtils.isBlank(entry.getRegistrationToken())) {
+                        continue;
+                    }
+                    try {
+                        if (PlatformGatewayTokenUtil.matchesConnectConfigRegistrationToken(
+                                entry.getRegistrationToken(), apiKey)) {
+                            matchedEntry = entry;
+                            break;
+                        }
+                    } catch (Exception e) {
+                        log.warn("Connect-with-token config match failed for entry name="
+                                + entry.getName(), e);
                     }
                 }
             }
@@ -128,23 +139,7 @@ public class PlatformGatewayApiKeyAuthInterceptor extends AbstractPhaseIntercept
                 String org = matchedEntry.resolveOrganization();
                 message.put(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME, RestApiConstants.PLATFORM_GATEWAY_API_KEY);
                 message.put(RestApiConstants.ORGANIZATION, org);
-                PrivilegedCarbonContext.startTenantFlow();
-                try {
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(org);
-                    try {
-                        int tenantId = APIUtil.getTenantIdFromTenantDomain(org);
-                        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
-                    } catch (Exception e) {
-                        log.error("Could not resolve tenant id for org " + org + "; rejecting request", e);
-                        PrivilegedCarbonContext.endTenantFlow();
-                        clearConnectWithTokenAuthState();
-                        throw new AuthenticationException("Unauthenticated request");
-                    }
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername("admin@" + org);
-                    message.put(MESSAGE_PROPERTY_TENANT_FLOW_STARTED, Boolean.TRUE);
-                } finally {
-                    // endTenantFlow in cleanup interceptor
-                }
+                startPlatformGatewayTenantFlow(message, org);
                 if (log.isDebugEnabled()) {
                     log.debug("Request allowed via connect-with-token config; gateway will be created on REGISTER");
                 }
@@ -162,29 +157,38 @@ public class PlatformGatewayApiKeyAuthInterceptor extends AbstractPhaseIntercept
         message.put(RestApiConstants.ORGANIZATION, org);
 
         // Set CarbonContext so getLoggedInUserProvider() and Registry/tenant lookups use this org (avoids "organizationnull").
-        PrivilegedCarbonContext.startTenantFlow();
-        try {
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(org);
-            try {
-                int tenantId = APIUtil.getTenantIdFromTenantDomain(org);
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
-            } catch (Exception e) {
-                log.error("Could not resolve tenant id for org " + org + "; rejecting request", e);
-                PrivilegedCarbonContext.endTenantFlow();
-                throw new AuthenticationException("Unauthenticated request");
-            }
-            // Username format expected by getAPIProvider: e.g. admin@carbon.super so tenant is derived correctly.
-            String systemUser = "admin@" + org;
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(systemUser);
+        startPlatformGatewayTenantFlow(message, org);
 
-            message.put(MESSAGE_PROPERTY_TENANT_FLOW_STARTED, Boolean.TRUE);
-
-            if (log.isDebugEnabled()) {
-                log.debug("Request authenticated via platform gateway api-key for gateway: " + gateway.id);
-            }
-        } finally {
-            // endTenantFlow() is called in PlatformGatewayTenantFlowCleanupInterceptor (POST_INVOKE) so tenant remains set for resource invocation
+        if (log.isDebugEnabled()) {
+            log.debug("Request authenticated via platform gateway api-key for gateway: " + gateway.id);
         }
+    }
+
+    /**
+     * Starts tenant flow for platform-gateway internal API calls using the tenant's configured admin
+     * username from the user realm (not a hardcoded {@code admin@<org>}).
+     */
+    private void startPlatformGatewayTenantFlow(Message message, String org) {
+        String tenantAdminUsername;
+        try {
+            tenantAdminUsername = APIUtil.getTenantAdminUserName(org);
+        } catch (Exception e) {
+            log.error("Could not resolve tenant admin username for org " + org + "; rejecting request", e);
+            clearConnectWithTokenAuthState();
+            throw new AuthenticationException("Unauthenticated request");
+        }
+        PrivilegedCarbonContext.startTenantFlow();
+        message.put(MESSAGE_PROPERTY_TENANT_FLOW_STARTED, Boolean.TRUE);
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(org);
+        try {
+            int tenantId = APIUtil.getTenantIdFromTenantDomain(org);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
+        } catch (Exception e) {
+            log.error("Could not resolve tenant id for org " + org + "; rejecting request", e);
+            clearConnectWithTokenAuthState();
+            throw new AuthenticationException("Unauthenticated request");
+        }
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(tenantAdminUsername);
     }
 
     /**

@@ -20,8 +20,15 @@ package org.wso2.carbon.apimgt.impl.utils;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.impl.dao.PlatformGatewayDAO;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({PlatformGatewayDAO.class})
 public class PlatformGatewayTokenUtilTest {
 
     @Test
@@ -40,6 +47,11 @@ public class PlatformGatewayTokenUtilTest {
     }
 
     @Test
+    public void testConstantTimeEqualsRejectsDifferentLengthWithoutEarlyReturn() {
+        Assert.assertFalse(PlatformGatewayTokenUtil.constantTimeEquals("short", "much-longer-value"));
+    }
+
+    @Test
     public void testMatchesActiveTokenHash() throws Exception {
         String plainToken = "plain-token";
         String hash = PlatformGatewayTokenUtil.hashToken(plainToken);
@@ -47,5 +59,47 @@ public class PlatformGatewayTokenUtilTest {
                 new PlatformGatewayDAO.TokenWithGateway(hash, "gw-1", "carbon.super", "gw");
         Assert.assertTrue(PlatformGatewayTokenUtil.matchesActiveTokenHash(tokenRow, plainToken));
         Assert.assertFalse(PlatformGatewayTokenUtil.matchesActiveTokenHash(tokenRow, "other-token"));
+    }
+
+    @Test
+    public void testMatchesConnectConfigRegistrationTokenAllowsPreBootstrap() throws Exception {
+        PowerMockito.mockStatic(PlatformGatewayDAO.class);
+        PlatformGatewayDAO dao = Mockito.mock(PlatformGatewayDAO.class);
+        PowerMockito.when(PlatformGatewayDAO.getInstance()).thenReturn(dao);
+        Mockito.when(dao.getActiveTokenById("token-id")).thenReturn(null);
+
+        String apiKey = "token-id.plain-token";
+        Assert.assertTrue(PlatformGatewayTokenUtil.matchesConnectConfigRegistrationToken(apiKey, apiKey));
+    }
+
+    @Test
+    public void testMatchesConnectConfigRegistrationTokenRejectsStaleTomlAfterRotation() throws Exception {
+        PowerMockito.mockStatic(PlatformGatewayDAO.class);
+        PlatformGatewayDAO dao = Mockito.mock(PlatformGatewayDAO.class);
+        PowerMockito.when(PlatformGatewayDAO.getInstance()).thenReturn(dao);
+
+        String stalePlain = "old-plain-token";
+        String newPlain = "new-plain-token";
+        String tokenId = "token-id";
+        String staleApiKey = tokenId + "." + stalePlain;
+        String newHash = PlatformGatewayTokenUtil.hashToken(newPlain);
+        PlatformGatewayDAO.TokenWithGateway activeRow =
+                new PlatformGatewayDAO.TokenWithGateway(newHash, "gw-1", "carbon.super", "gw");
+        Mockito.when(dao.getActiveTokenById(tokenId)).thenReturn(activeRow);
+
+        Assert.assertFalse(PlatformGatewayTokenUtil.matchesConnectConfigRegistrationToken(staleApiKey, staleApiKey));
+        Assert.assertTrue(PlatformGatewayTokenUtil.matchesConnectConfigRegistrationToken(
+                tokenId + "." + newPlain, tokenId + "." + newPlain));
+    }
+
+    @Test
+    public void testMatchesConnectConfigRegistrationTokenRejectsMismatchedConfig() throws Exception {
+        PowerMockito.mockStatic(PlatformGatewayDAO.class);
+        PlatformGatewayDAO dao = Mockito.mock(PlatformGatewayDAO.class);
+        PowerMockito.when(PlatformGatewayDAO.getInstance()).thenReturn(dao);
+        Mockito.when(dao.getActiveTokenById("token-id")).thenReturn(null);
+
+        Assert.assertFalse(PlatformGatewayTokenUtil.matchesConnectConfigRegistrationToken(
+                "token-id.plain-a", "token-id.plain-b"));
     }
 }

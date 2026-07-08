@@ -29,6 +29,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.Arrays;
 import java.util.Base64;
 
 /**
@@ -68,7 +69,38 @@ public final class PlatformGatewayTokenUtil {
     }
 
     /**
+     * True when {@code apiKey} matches a connect-config {@code registration_token} and TOML fallback is allowed.
+     * Pre-bootstrap (no active DB row) is allowed; once a row exists the stored hash must match.
+     * <p>
+     * Performs one {@link PlatformGatewayDAO#getActiveTokenById(String)} lookup per call when the TOML
+     * token string matches {@code apiKey}. That read is required so stale TOML credentials are rejected
+     * after Admin token rotation; it runs on every internal API request authenticated via connect config.
+     */
+    public static boolean matchesConnectConfigRegistrationToken(String configRegistrationToken, String apiKey)
+            throws APIManagementException, NoSuchAlgorithmException {
+        if (!constantTimeEquals(configRegistrationToken, apiKey)) {
+            return false;
+        }
+        String tokenId = parseTokenId(apiKey);
+        if (tokenId == null) {
+            return false;
+        }
+        int sep = apiKey.indexOf(COMBINED_TOKEN_SEPARATOR);
+        String plainToken = apiKey.substring(sep + 1);
+        if (plainToken.isEmpty()) {
+            return false;
+        }
+        PlatformGatewayDAO.TokenWithGateway active =
+                PlatformGatewayDAO.getInstance().getActiveTokenById(tokenId);
+        if (active == null) {
+            return true;
+        }
+        return matchesActiveTokenHash(active, plainToken);
+    }
+
+    /**
      * Constant-time comparison for connect registration tokens.
+     * Uses bitwise {@code &} (not {@code &&}) so {@link MessageDigest#isEqual(byte[], byte[])} always runs.
      */
     public static boolean constantTimeEquals(String expected, String actual) {
         if (expected == null || actual == null) {
@@ -76,10 +108,11 @@ public final class PlatformGatewayTokenUtil {
         }
         byte[] expectedBytes = expected.getBytes(StandardCharsets.UTF_8);
         byte[] actualBytes = actual.getBytes(StandardCharsets.UTF_8);
-        if (expectedBytes.length != actualBytes.length) {
-            return false;
-        }
-        return MessageDigest.isEqual(expectedBytes, actualBytes);
+        int maxLen = Math.max(expectedBytes.length, actualBytes.length);
+        byte[] paddedExpected = Arrays.copyOf(expectedBytes, maxLen);
+        byte[] paddedActual = Arrays.copyOf(actualBytes, maxLen);
+        return (expectedBytes.length == actualBytes.length)
+                & MessageDigest.isEqual(paddedExpected, paddedActual);
     }
 
     /**

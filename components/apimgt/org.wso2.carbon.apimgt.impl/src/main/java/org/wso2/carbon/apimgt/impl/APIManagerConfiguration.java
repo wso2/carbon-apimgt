@@ -268,6 +268,23 @@ public class APIManagerConfiguration {
     private GatewayNotificationConfiguration gatewayNotificationConfiguration = new GatewayNotificationConfiguration();
     private PlatformGatewayConnectConfig platformGatewayConnectConfig = new PlatformGatewayConnectConfig();
 
+    private static final Map<String, String> PUBLISHER_IMPORT_FILE_SIZE_LIMIT_DEFAULTS;
+
+    static {
+        Map<String, String> defaults = new HashMap<>();
+        defaults.put(org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_OAS_FILE_SIZE_LIMIT,
+                org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_OAS_FILE_SIZE_LIMIT_DEFAULT_MB);
+        defaults.put(org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_ASYNC_FILE_SIZE_LIMIT,
+                org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_ASYNC_FILE_SIZE_LIMIT_DEFAULT_MB);
+        defaults.put(org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_WSDL_FILE_SIZE_LIMIT,
+                org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_WSDL_FILE_SIZE_LIMIT_DEFAULT_MB);
+        defaults.put(org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_GRAPHQL_FILE_SIZE_LIMIT,
+                org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_GRAPHQL_FILE_SIZE_LIMIT_DEFAULT_MB);
+        defaults.put(org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_MCP_FILE_SIZE_LIMIT,
+                org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_MCP_FILE_SIZE_LIMIT_DEFAULT_MB);
+        PUBLISHER_IMPORT_FILE_SIZE_LIMIT_DEFAULTS = Collections.unmodifiableMap(defaults);
+    }
+
     /**
      * Returns the configuration of the Identity Provider.
      *
@@ -687,33 +704,9 @@ public class APIManagerConfiguration {
             } else if (elementHasText(element)) {
                 String key = getKey(nameStack);
                 String value = MiscellaneousUtil.resolve(element, secretResolver);
-                if (org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_OAS_FILE_SIZE_LIMIT.equals(key)) {
-                    String maxFileSize = StringUtils.isNumeric(value) ?
-                            value :
-                            org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_OAS_FILE_SIZE_LIMIT_DEFAULT_MB;
-                    addToConfiguration(key, APIUtil.replaceSystemProperty(maxFileSize));
-                } else if (org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_ASYNC_FILE_SIZE_LIMIT.equals(
-                        key)) {
-                    String maxFileSize = StringUtils.isNumeric(value) ?
-                            value :
-                            org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_ASYNC_FILE_SIZE_LIMIT_DEFAULT_MB;
-                    addToConfiguration(key, APIUtil.replaceSystemProperty(maxFileSize));
-                } else if (org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_WSDL_FILE_SIZE_LIMIT.equals(
-                        key)) {
-                    String maxFileSize = StringUtils.isNumeric(value) ?
-                            value :
-                            org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_WSDL_FILE_SIZE_LIMIT_DEFAULT_MB;
-                    addToConfiguration(key, APIUtil.replaceSystemProperty(maxFileSize));
-                } else if (org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_GRAPHQL_FILE_SIZE_LIMIT.equals(key)) {
-                    String maxFileSize = StringUtils.isNumeric(value) ?
-                            value :
-                            org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_GRAPHQL_FILE_SIZE_LIMIT_DEFAULT_MB;
-                    addToConfiguration(key, APIUtil.replaceSystemProperty(maxFileSize));
-                } else if (org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_MCP_FILE_SIZE_LIMIT.equals(
-                        key)) {
-                    String maxFileSize = StringUtils.isNumeric(value) ?
-                            value :
-                            org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_MCP_FILE_SIZE_LIMIT_DEFAULT_MB;
+                String defaultFileSizeLimit = PUBLISHER_IMPORT_FILE_SIZE_LIMIT_DEFAULTS.get(key);
+                if (defaultFileSizeLimit != null) {
+                    String maxFileSize = StringUtils.isNumeric(value) ? value : defaultFileSizeLimit;
                     addToConfiguration(key, APIUtil.replaceSystemProperty(maxFileSize));
                 } else {
                     addToConfiguration(key, APIUtil.replaceSystemProperty(value));

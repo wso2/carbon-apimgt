@@ -86,4 +86,17 @@ public class GatewayManagementUtilsConnectConfigTest {
 
         Assert.assertTrue(errors.isEmpty());
     }
+
+    @Test
+    public void testValidateConnectGatewayEntriesRejectsInvalidName() {
+        ConnectGatewayConfig entry = new ConnectGatewayConfig();
+        entry.setRegistrationToken("token-id.plain-token-value");
+        entry.setUrl("https://gw.example.com:8243");
+        entry.setName("Invalid_Gateway_Name");
+
+        List<String> errors = GatewayManagementUtils.validateConnectGatewayEntries(Collections.singletonList(entry));
+
+        Assert.assertEquals(1, errors.size());
+        Assert.assertTrue(errors.get(0).contains("invalid name"));
+    }
 }

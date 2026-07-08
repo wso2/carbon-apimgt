@@ -234,8 +234,10 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
             return;
         }
 
-        // Update fields that weren't set during initial creation
-        Map<String, String> environmentAdditionalProperties = new HashMap<>();
+        // Update fields that weren't set during initial creation; preserve existing metadata.
+        Map<String, String> environmentAdditionalProperties = existingEnvironment.getAdditionalProperties() != null
+                ? new HashMap<>(existingEnvironment.getAdditionalProperties())
+                : new HashMap<>();
         environmentAdditionalProperties.put("platformGatewayId", platformGatewayId);
         existingEnvironment.setAdditionalProperties(environmentAdditionalProperties);
 

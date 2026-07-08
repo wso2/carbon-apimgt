@@ -105,9 +105,7 @@ public class NotifyGatewayApiServiceImpl implements NotifyGatewayApiService {
                         ExceptionCodes.GATEWAY_NOTIFICATION_INTERNAL_SERVER_ERROR);
             }
             boolean bootstrapped = PlatformGatewayServiceImpl.ensurePlatformGatewayFromConnectToken(
-                    connectConfig, PlatformGatewayServiceImpl.resolveConnectGatewayId(
-                            PlatformGatewayTokenUtil.parseTokenId(matchedEntry.getRegistrationToken())),
-                    matchedEntry);
+                    connectConfig, matchedEntry);
             if (!bootstrapped && !isConnectTokenRegistered(matchedEntry)) {
                 log.error("Connect-with-token REGISTER failed to create platform gateway for gateway: " + gatewayId);
                 throw new APIManagementException("Platform gateway bootstrap failed",

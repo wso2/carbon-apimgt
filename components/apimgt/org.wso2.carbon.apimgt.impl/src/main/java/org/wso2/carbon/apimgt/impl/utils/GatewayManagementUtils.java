@@ -34,6 +34,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Utility class for gateway management operations.
@@ -139,6 +140,11 @@ public class GatewayManagementUtils {
             int idx = token.indexOf(sep);
             if (idx <= 0 || idx >= token.length() - 1) {
                 errors.add(prefix + "invalid registration_token format (expected tokenId" + sep + "plainToken)");
+            }
+            String gatewayName = entry.getName();
+            if (StringUtils.isNotBlank(gatewayName) && !CONNECT_GATEWAY_NAME_PATTERN.matcher(gatewayName).matches()) {
+                errors.add(prefix + "invalid name '" + gatewayName
+                        + "' (use lowercase letters, numbers, and hyphens only)");
             }
         }
         return errors;

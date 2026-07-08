@@ -102,6 +102,12 @@
                 org.apache.cxf.transport.common.gzip.GZIPOutInterceptor
             </param-value>
         </init-param>
+        <init-param>
+            <param-name>jaxrs.outFaultInterceptors</param-name>
+            <param-value>
+                org.wso2.carbon.apimgt.internal.service.interceptors.PlatformGatewayTenantFlowCleanupInterceptor
+            </param-value>
+        </init-param>
     </servlet>
     <servlet-mapping>
         <servlet-name>CXFServlet</servlet-name>
