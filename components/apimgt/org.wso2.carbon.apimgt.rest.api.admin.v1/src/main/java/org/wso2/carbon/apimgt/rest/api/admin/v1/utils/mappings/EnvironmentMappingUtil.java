@@ -127,6 +127,10 @@ public class EnvironmentMappingUtil {
             } catch (APIManagementException e) {
                 VHostDTO vhostDTO = new VHostDTO();
                 vhostDTO.setHost(baseUrl.trim());
+                vhostDTO.setHttpPort(VHost.DEFAULT_HTTP_PORT);
+                vhostDTO.setHttpsPort(VHost.DEFAULT_HTTPS_PORT);
+                vhostDTO.setWsPort(9099);
+                vhostDTO.setWssPort(8099);
                 vhosts.add(vhostDTO);
             }
         }

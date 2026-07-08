@@ -700,8 +700,10 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
                         try {
                             apiAdmin.deleteEnvironment(orgId, persistedGatewayId);
                         } catch (Exception rollbackEx) {
-                            log.warn("Rollback failed for connect-with-token environment cleanup: "
-                                    + persistedGatewayId, rollbackEx);
+                            log.error("Rollback failed for connect-with-token environment cleanup: gateway_id="
+                                    + persistedGatewayId + ". Environment row is now orphaned (no matching "
+                                    + "gateway/token) and will block future connect attempts for this gateway "
+                                    + "until manually removed.", rollbackEx);
                         }
                     }
                     activeToken = dao.getActiveTokenById(tokenId);

@@ -44,6 +44,8 @@ public class GatewayManagementUtils {
 
     private static final Log log = LogFactory.getLog(GatewayManagementUtils.class);
 
+    private static final Pattern CONNECT_GATEWAY_NAME_PATTERN = Pattern.compile("^[a-z0-9-]+$");
+
     /**
      * Validates the gateway status based on its last updated timestamp.
      * Returns "ACTIVE" if the gateway is live (not expired), "EXPIRED" otherwise.

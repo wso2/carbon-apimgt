@@ -2140,7 +2140,9 @@
               <ConnectGateways>
               {% for c in apim.platform_gateway.connect %}
                 <Connect>
+                    {% if c.registration_token is defined and c.registration_token %}
                     <RegistrationToken>{{ c.registration_token }}</RegistrationToken>
+                    {% endif %}
                     {% if c.name is defined and c.name %}
                     <Name>{{ c.name }}</Name>
                     {% endif %}

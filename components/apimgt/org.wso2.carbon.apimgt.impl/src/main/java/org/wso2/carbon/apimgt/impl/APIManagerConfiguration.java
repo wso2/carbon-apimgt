@@ -3705,7 +3705,13 @@ public class APIManagerConfiguration {
                     OMElement urlEl = connectElem.getFirstChildWithName(
                             new QName(APIConstants.GatewayNotification.CONNECT_URL));
                     if (urlEl != null && urlEl.getText() != null && !urlEl.getText().trim().isEmpty()) {
-                        entry.setUrl(urlEl.getText().trim());
+                        try {
+                            entry.setUrl(urlEl.getText().trim());
+                        } catch (IllegalArgumentException e) {
+                            log.error("Skipping [[apim.platform_gateway.connect]] entry " + declaredConnectEntryCount
+                                    + " (name=" + entry.getName() + "): invalid url - " + e.getMessage());
+                            continue;
+                        }
                     }
                     OMElement orgEl = connectElem.getFirstChildWithName(
                             new QName(APIConstants.GatewayNotification.CONNECT_ORGANIZATION));

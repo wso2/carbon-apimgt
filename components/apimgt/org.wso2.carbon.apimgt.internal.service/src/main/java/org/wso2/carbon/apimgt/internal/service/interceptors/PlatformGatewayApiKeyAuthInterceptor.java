@@ -115,7 +115,7 @@ public class PlatformGatewayApiKeyAuthInterceptor extends AbstractPhaseIntercept
                 }
             }
             ConnectGatewayConfig matchedEntry = null;
-            if (connectConfig != null) {
+            if (connectConfig != null && connectConfig.getConnectGateways() != null) {
                 for (ConnectGatewayConfig entry : connectConfig.getConnectGateways()) {
                     if (entry == null || StringUtils.isBlank(entry.getRegistrationToken())) {
                         continue;
