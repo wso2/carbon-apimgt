@@ -102,13 +102,13 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.net.URL;
-import java.net.MalformedURLException;
 
 import static org.wso2.carbon.apimgt.spec.parser.definitions.APISpecParserConstants.APPLICATION_JSON_MEDIA_TYPE;
 import static org.wso2.carbon.apimgt.spec.parser.definitions.APISpecParserConstants.APPLICATION_XML_MEDIA_TYPE;
@@ -1591,18 +1591,18 @@ public class OAS2Parser extends APIDefinition {
         if (api != null && api.isAdvertiseOnly()) {
             String externalProductionEndpoint = api.getApiExternalProductionEndpoint();
             if (externalProductionEndpoint != null) {
-                if (externalProductionEndpoint.split("://")[0].contains("https")) {
-                    schemes.add(Scheme.HTTPS);
-                } else {
-                    schemes.add(Scheme.HTTP);
-                }
                 try {
                     URL parsedUrl = new URL(externalProductionEndpoint);
+                    if ("https".equalsIgnoreCase(parsedUrl.getProtocol())) {
+                        schemes.add(Scheme.HTTPS);
+                    } else {
+                        schemes.add(Scheme.HTTP);
+                    }
                     String host = parsedUrl.getPort() != -1
                             ? parsedUrl.getHost() + ":" + parsedUrl.getPort()
                             : parsedUrl.getHost();
                     String path = parsedUrl.getPath();
-                    if (path != null && !path.isEmpty()) {
+                    if (path != null && !path.isEmpty() && !"/".equals(path)) {
                         swagger.setBasePath(path);
                     }
                     swagger.setHost(host);
