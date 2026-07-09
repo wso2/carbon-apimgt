@@ -94,6 +94,7 @@ import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.GatewayArtifactsMgtDBUtil;
+import org.wso2.carbon.apimgt.impl.utils.GatewayManagementUtils;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.CarbonContext;
@@ -235,6 +236,7 @@ public class APIManagerComponent {
                     null);
             APIMgtDBUtil.initialize();
             APIUtil.init();
+            GatewayManagementUtils.performPlatformGatewayConnectFromConfigIfConfigured();
             String migrationEnabled = System.getProperty(APIConstants.MIGRATE);
             if (migrationEnabled == null) {
                 new RevokedJWTMapCleaner().startJWTRevokedMapCleaner();

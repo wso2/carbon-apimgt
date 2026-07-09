@@ -115,6 +115,7 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayAPIKeyEvents;
 import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayAPIKeyEventService;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.service.PlatformGatewayServiceImpl;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIKeyAssociationEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIKeyEvent;
@@ -5089,13 +5090,18 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     host = deployment.getVhost();
                 }
             }
+            Map<String, String> platformInvocationUrls =
+                    PlatformGatewayServiceImpl.resolveInvocationUrlsForTransports(environment, api.getTransports());
+            if (!platformInvocationUrls.isEmpty()) {
+                return platformInvocationUrls;
+            }
             if (StringUtils.isEmpty(host)) {
                 // returns empty server urls
                 hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, "");
                 return hostsWithSchemes;
             }
 
-            VHost vhost = VHostUtils.getVhostFromEnvironment(environment, host);
+            VHost vhost = VHostUtils.getInvocationVhostFromEnvironment(environment, host);
             GatewayAgentConfiguration gatewayConfiguration = ServiceReferenceHolder.getInstance()
                     .getExternalGatewayConnectorConfiguration(environment.getGatewayType());
 
