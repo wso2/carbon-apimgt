@@ -96,7 +96,16 @@ public class ClaimBasedResourceAccessValidationMediator extends AbstractMediator
     private boolean isClaimValueAbsent(Object claimValueSentInToken) {
 
         if (claimValueSentInToken instanceof Collection) {
-            return ((Collection<?>) claimValueSentInToken).isEmpty();
+            Collection<?> claimValues = (Collection<?>) claimValueSentInToken;
+            if (claimValues.isEmpty()) {
+                return true;
+            }
+            for (Object claimValue : claimValues) {
+                if (claimValue != null && StringUtils.isNotBlank(claimValue.toString())) {
+                    return false;
+                }
+            }
+            return true;
         }
         return claimValueSentInToken == null || StringUtils.isBlank(claimValueSentInToken.toString());
     }
