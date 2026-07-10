@@ -489,6 +489,120 @@ public class RegistryPersistenceUtilTestCase {
     }
 
     // =====================================================================
+    // Tests for path/name case-mismatch tolerance in extractProviderFromPath
+    // The registry resource path segment and the artifact <overview><name>
+    // attribute may differ in case in environments migrated from pre-3.x
+    // product versions. The lenient match must accept the case mismatch
+    // without throwing, and must preserve the provider's original case in
+    // the returned substring.
+    // =====================================================================
+
+    @Test
+    public void testExtractProviderFromPath_PathCamelCaseNameLowercase() throws Exception {
+        // Registry path has CamelCase name segment; the artifact's <name>
+        // attribute was normalised to lowercase by pre-3.x migration tooling.
+        // Pre-fix this threw APIPersistenceException.
+        String path = "/apimgt/applicationdata/provider/wam_mhxu8g/CSContractRepositoryStaging/v1/api";
+        String result = RegistryPersistenceUtil.extractProviderFromPath(path, "cscontractrepositorystaging", "v1");
+        Assert.assertEquals("wam_mhxu8g", result);
+    }
+
+    @Test
+    public void testExtractProviderFromPath_PathLowercaseNameUppercase() throws Exception {
+        // Reverse case-mismatch: path segment lowercase, artifact <name> uppercase.
+        String path = "/apimgt/applicationdata/provider/admin/myapi/1.0/api";
+        String result = RegistryPersistenceUtil.extractProviderFromPath(path, "MyAPI", "1.0");
+        Assert.assertEquals("admin", result);
+    }
+
+    @Test
+    public void testExtractProviderFromPath_MixedCaseMismatch() throws Exception {
+        // Different mixed-case shapes between path and input name.
+        String path = "/apimgt/applicationdata/provider/admin/API_GetPO/v1/api";
+        String result = RegistryPersistenceUtil.extractProviderFromPath(path, "API_getPO", "v1");
+        Assert.assertEquals("admin", result);
+    }
+
+    @Test
+    public void testExtractProviderFromPath_ProviderCasePreservedOnCaseMismatch() throws Exception {
+        // Provider segment has mixed case and API name is case-mismatched.
+        // Fix must return the provider substring in its original stored case
+        // (not the lowercased search key).
+        String path = "/apimgt/applicationdata/provider/Azure_Janhavi.Patil/ABC/v1/api";
+        String result = RegistryPersistenceUtil.extractProviderFromPath(path, "abc", "v1");
+        Assert.assertEquals("Azure_Janhavi.Patil", result);
+    }
+
+    @Test
+    public void testExtractProviderFromPath_SecondaryUserstoreCasePreservedOnCaseMismatch() throws Exception {
+        // Secondary userstore prefix "WSO2.COM/" with case-mismatched name.
+        String path = "/apimgt/applicationdata/provider/WSO2.COM/user/TestNoSeip/v1/api";
+        String result = RegistryPersistenceUtil.extractProviderFromPath(path, "testnoseip", "v1");
+        Assert.assertEquals("WSO2.COM/user", result);
+    }
+
+    @Test
+    public void testExtractProviderFromPath_VersionCaseMismatch() throws Exception {
+        // Version segment case differs between path and input. extractProviderFromPath
+        // is a path-verification operation on an already-resolved artifact; identity
+        // is decided by other layers (gateway routing, /newversion, DB constraint),
+        // so version case-mismatch tolerance in this specific function is safe.
+        String path = "/apimgt/applicationdata/provider/admin/MyAPI/V1/api";
+        String result = RegistryPersistenceUtil.extractProviderFromPath(path, "MyAPI", "v1");
+        Assert.assertEquals("admin", result);
+    }
+
+    @Test(expected = APIPersistenceException.class)
+    public void testExtractProviderFromPath_NameFundamentallyDifferentStillThrows() throws Exception {
+        // Legitimate not-found case: input name has no case-insensitive match in
+        // the path. Fix must still throw APIPersistenceException here — the
+        // lenient match only tolerates CASE differences, not entirely different names.
+        String path = "/apimgt/applicationdata/provider/admin/MyAPI/1.0/api";
+        RegistryPersistenceUtil.extractProviderFromPath(path, "SomethingElse", "1.0");
+    }
+
+    @Test(expected = APIPersistenceException.class)
+    public void testExtractProviderFromPath_VersionFundamentallyDifferentStillThrows() throws Exception {
+        // Legitimate not-found: name matches (any case), but version is different.
+        // Should still throw.
+        String path = "/apimgt/applicationdata/provider/admin/MyAPI/1.0/api";
+        RegistryPersistenceUtil.extractProviderFromPath(path, "myapi", "9.9");
+    }
+
+    // =====================================================================
+    // Tests for the deprecated 2-arg extractProvider(path, name). Method
+    // returns null on failure via caught exceptions rather than throwing.
+    // Coverage for the same case-mismatch behaviour — the deprecated helper
+    // delegates to the fixed extractProviderFromPath and must also work on
+    // legacy case-mismatched data.
+    // =====================================================================
+
+    @Test
+    public void testExtractProviderDeprecated_CaseMismatchNameLowercase() throws Exception {
+        String path = "/apimgt/applicationdata/provider/wam_mhxu8g/CSContractRepositoryStaging/v1/api";
+        @SuppressWarnings("deprecation")
+        String result = RegistryPersistenceUtil.extractProvider(path, "cscontractrepositorystaging");
+        Assert.assertEquals("wam_mhxu8g", result);
+    }
+
+    @Test
+    public void testExtractProviderDeprecated_CaseMismatchNameUppercase() throws Exception {
+        String path = "/apimgt/applicationdata/provider/admin/myapi/1.0/api";
+        @SuppressWarnings("deprecation")
+        String result = RegistryPersistenceUtil.extractProvider(path, "MyAPI");
+        Assert.assertEquals("admin", result);
+    }
+
+    @Test
+    public void testExtractProviderDeprecated_NameFundamentallyDifferentReturnsNull() {
+        // Deprecated method catches exceptions and returns null on failure.
+        String path = "/apimgt/applicationdata/provider/admin/MyAPI/1.0/api";
+        @SuppressWarnings("deprecation")
+        String result = RegistryPersistenceUtil.extractProvider(path, "CompletelyDifferentName");
+        Assert.assertNull(result);
+    }
+
+    // =====================================================================
     // Tests for setResourcePermissions — RESTRICTED visibility with
     // empty/blank visibleRoles entries
     // =====================================================================

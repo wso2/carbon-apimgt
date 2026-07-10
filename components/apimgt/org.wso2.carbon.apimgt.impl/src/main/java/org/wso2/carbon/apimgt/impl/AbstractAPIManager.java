@@ -664,6 +664,15 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiMgtDAO.isApiNameWithDifferentCaseExist(apiName, tenantName, organization);
     }
 
+    public boolean isApiNameExistExactCase(String apiName, String organization) throws APIManagementException {
+
+        String tenantName = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            tenantName = tenantDomain;
+        }
+        return apiMgtDAO.isApiNameExistExactCase(apiName, tenantName, organization);
+    }
+
     public void addSubscriber(String username, String groupingId) throws APIManagementException {
         addSubscriber(username, groupingId, null);
     }
