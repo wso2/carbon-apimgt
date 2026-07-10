@@ -23010,6 +23010,7 @@ public class ApiMgtDAO {
     public Set<SubscribedAPI> getPaginatedSubscribedAPIsByApplication(Application application, Integer offset,
                                                                       Integer limit, String organization)
             throws APIManagementException {
+                
         Set<SubscribedAPI> subscribedAPIs = new LinkedHashSet<>();
 
         try (Connection connection = APIMgtDBUtil.getConnection();
