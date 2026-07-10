@@ -23020,35 +23020,33 @@ public class ApiMgtDAO {
             try (ResultSet result = ps.executeQuery()) {
                 int index = 0;
                 while (result.next()) {
-                    if (index >= offset && index < (limit + offset)) {
-                        String apiType = result.getString("TYPE");
-
-                        if (APIConstants.API_PRODUCT.equalsIgnoreCase(apiType)) {
-                            APIProductIdentifier identifier = new APIProductIdentifier(
-                                    APIUtil.replaceEmailDomain(result.getString("API_PROVIDER")),
-                                    result.getString("API_NAME"), result.getString("API_VERSION"));
-                            identifier.setUuid(result.getString("API_UUID"));
-                            SubscribedAPI subscribedAPI = new SubscribedAPI(application.getSubscriber(), identifier);
-                            subscribedAPI.setApplication(application);
-                            initSubscribedAPI(subscribedAPI, result);
-                            subscribedAPIs.add(subscribedAPI);
-                        } else {
-                            APIIdentifier identifier = new APIIdentifier(APIUtil.replaceEmailDomain(result.getString
-                                    ("API_PROVIDER")), result.getString("API_NAME"),
-                                    result.getString("API_VERSION"));
-                            identifier.setUuid(result.getString("API_UUID"));
-                            SubscribedAPI subscribedAPI = new SubscribedAPI(application.getSubscriber(), identifier);
-                            subscribedAPI.setApplication(application);
-                            initSubscribedAPI(subscribedAPI, result);
-                            subscribedAPIs.add(subscribedAPI);
-                        }
-
-                        if (index == limit + offset - 1) {
-                            break;
-                        }
+                    if (index++ < offset) {
+                        continue;
                     }
-                    index++;
+                    if (subscribedAPIs.size() >= limit) {
+                        break;
+                    }
+                    String apiType = result.getString("TYPE");
 
+                    if (APIConstants.API_PRODUCT.equalsIgnoreCase(apiType)) {
+                        APIProductIdentifier identifier = new APIProductIdentifier(
+                                APIUtil.replaceEmailDomain(result.getString("API_PROVIDER")),
+                                result.getString("API_NAME"), result.getString("API_VERSION"));
+                        identifier.setUuid(result.getString("API_UUID"));
+                        SubscribedAPI subscribedAPI = new SubscribedAPI(application.getSubscriber(), identifier);
+                        subscribedAPI.setApplication(application);
+                        initSubscribedAPI(subscribedAPI, result);
+                        subscribedAPIs.add(subscribedAPI);
+                    } else {
+                        APIIdentifier identifier = new APIIdentifier(APIUtil.replaceEmailDomain(result.getString
+                                ("API_PROVIDER")), result.getString("API_NAME"),
+                                result.getString("API_VERSION"));
+                        identifier.setUuid(result.getString("API_UUID"));
+                        SubscribedAPI subscribedAPI = new SubscribedAPI(application.getSubscriber(), identifier);
+                        subscribedAPI.setApplication(application);
+                        initSubscribedAPI(subscribedAPI, result);
+                        subscribedAPIs.add(subscribedAPI);
+                    }
                 }
             }
 
