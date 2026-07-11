@@ -523,8 +523,8 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
         try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(apiProjectZip))) {
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
-                if (entry.getName().contains(APIMGovernanceConstants.API_FILE_NAME) ||
-                        entry.getName().contains(APIMGovernanceConstants.MCP_FILE_NAME)) {
+                if (entry.getName().contains("/" + APIMGovernanceConstants.API_FILE_NAME) ||
+                        entry.getName().contains("/" + APIMGovernanceConstants.MCP_FILE_NAME)) {
                     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                     byte[] buffer = new byte[1024];
                     int length;
@@ -598,7 +598,7 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
                         && ExtendedArtifactType.REST_API.equals(extendedArtifactType))
                         || (entry.getName().contains(asyncAPIPath) &&
                         ExtendedArtifactType.ASYNC_API.equals(extendedArtifactType))
-                        || (entry.getName().contains(APIMGovernanceConstants.MCP_FILE_NAME) &&
+                        || (entry.getName().contains("/" + APIMGovernanceConstants.MCP_FILE_NAME) &&
                         ExtendedArtifactType.MCP.equals(extendedArtifactType))) {
                     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                     byte[] buffer = new byte[1024];
@@ -626,7 +626,7 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
     public static String extractDocData(byte[] apiProjectZip) throws APIMGovernanceException {
         ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
 
-        String rootFolder = APIMGovernanceConstants.DOCS_FOLDER + File.separator;
+        String rootFolder = APIMGovernanceConstants.DOCS_FOLDER + "/";
         String docMetadataFile = APIMGovernanceConstants.DOC_META_DATA_FILE_NAME;
         List<Object> docsList = new ArrayList<>();
         int count = 0;
