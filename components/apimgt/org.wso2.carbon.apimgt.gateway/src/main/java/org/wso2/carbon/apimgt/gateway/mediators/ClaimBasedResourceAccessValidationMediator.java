@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -55,14 +56,14 @@ public class ClaimBasedResourceAccessValidationMediator extends AbstractMediator
     @Override
     public boolean mediate(MessageContext messageContext) {
 
-        String claimValueSentInToken;
-        Map<String, String> jwtTokenClaims = (Map<String, String>) messageContext
+        Object claimValueSentInToken;
+        Map<String, Object> jwtTokenClaims = (Map<String, Object>) messageContext
                 .getProperty(APIMgtGatewayConstants.JWT_CLAIMS);
 
         claimValueSentInToken = jwtTokenClaims.get(accessVerificationClaim);
 
         try {
-            if (StringUtils.isBlank(claimValueSentInToken)) {
+            if (isClaimValueAbsent(claimValueSentInToken)) {
                 log.error("The configured resource access validation claim is " + "not present in the token.");
                 throw new APISecurityException(APISecurityConstants.API_AUTH_ACCESS_TOKEN_CLAIMS_INVALID,
                                                APISecurityConstants.API_AUTH_ACCESS_TOKEN_CLAIMS_INVALID_MESSAGE,
@@ -71,40 +72,79 @@ public class ClaimBasedResourceAccessValidationMediator extends AbstractMediator
             } else {
                 if (StringUtils.isNotBlank(accessVerificationClaimValueRegex)) {
                     log.debug("A regex is provided, hence, validating the claim values using the provided regex.");
-                    Pattern pattern = Pattern.compile(accessVerificationClaimValueRegex);
-                    Matcher configuredClaimValueMatcher = pattern.matcher(accessVerificationClaimValue);
-                    Matcher tokenSentClaimValueMatcher = pattern.matcher(claimValueSentInToken);
-
-                    if ((configuredClaimValueMatcher.matches() && tokenSentClaimValueMatcher.matches())
-                            || shouldAllowValidation) {
-                        log.debug("Claim values match or the flow is configured to allow when claims doesn't match. "
-                                          + "Hence the flow is allowed.");
-                        return true;
-                    } else {
-                        log.debug("Claim values don't match. Hence the flow is not allowed.");
-                        throw new APISecurityException(APISecurityConstants.API_AUTH_ACCESS_TOKEN_CLAIMS_MISMATCH,
-                                                       APISecurityConstants.API_AUTH_ACCESS_TOKEN_CLAIMS_MISMATCH_MESSAGE,
-                                                       APISecurityConstants.API_AUTH_ACCESS_TOKEN_CLAIMS_MISMATCH_DESCRIPTION);
-                    }
                 } else {
                     log.debug("A regex is not provided, validating the claim values based on equality.");
-                    if ((StringUtils.equals(accessVerificationClaimValue, claimValueSentInToken))
-                            || shouldAllowValidation) {
-                        log.debug("Claim values match or the flow is configured to allow when claims doesn't match. "
-                                          + "Hence the flow is allowed.");
-                        return true;
-                    } else {
-                        log.debug("Claim values don't match. Hence the flow is not allowed.");
-                        throw new APISecurityException(APISecurityConstants.API_AUTH_ACCESS_TOKEN_CLAIMS_MISMATCH,
-                                                       APISecurityConstants.API_AUTH_ACCESS_TOKEN_CLAIMS_MISMATCH_MESSAGE,
-                                                       APISecurityConstants.API_AUTH_ACCESS_TOKEN_CLAIMS_MISMATCH_DESCRIPTION);
-                    }
+                }
+
+                if (isClaimValueMatching(claimValueSentInToken) || shouldAllowValidation) {
+                    log.debug("Claim values match or the flow is configured to allow when claims doesn't match. "
+                            + "Hence the flow is allowed.");
+                    return true;
+                } else {
+                    log.debug("Claim values don't match. Hence the flow is not allowed.");
+                    throw new APISecurityException(APISecurityConstants.API_AUTH_ACCESS_TOKEN_CLAIMS_MISMATCH,
+                            APISecurityConstants.API_AUTH_ACCESS_TOKEN_CLAIMS_MISMATCH_MESSAGE,
+                            APISecurityConstants.API_AUTH_ACCESS_TOKEN_CLAIMS_MISMATCH_DESCRIPTION);
                 }
             }
         } catch (APISecurityException e) {
             handleAuthFailure(e.getErrorCode(), messageContext, e.getMessage(), e.getDescription());
             return false;
         }
+    }
+
+    private boolean isClaimValueAbsent(Object claimValueSentInToken) {
+
+        if (claimValueSentInToken instanceof Collection) {
+            Collection<?> claimValues = (Collection<?>) claimValueSentInToken;
+            if (claimValues.isEmpty()) {
+                return true;
+            }
+            for (Object claimValue : claimValues) {
+                if (claimValue != null && StringUtils.isNotBlank(claimValue.toString())) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return claimValueSentInToken == null || StringUtils.isBlank(claimValueSentInToken.toString());
+    }
+
+    /**
+     * Checks whether the claim value retrieved from the JWT token matches the configured
+     * access verification claim value (or regex). JWT claims are not guaranteed to be single-valued
+     * strings (see RFC 7519) - a claim can also be a JSON array. In that case, the claim is
+     * considered matching if any of its values matches.
+     *
+     * @param claimValueSentInToken the raw claim value retrieved from the JWT claims map. This can be a
+     *                              {@link String} for single-valued claims or a {@link Collection} for
+     *                              multi-valued (array) claims.
+     * @return true if the claim value (or one of its values, if it is a Collection) matches
+     */
+    private boolean isClaimValueMatching(Object claimValueSentInToken) {
+
+        // handle multivalued claim lists by matching each element at a time
+        if (claimValueSentInToken instanceof Collection) {
+            for (Object claimValue : (Collection<?>) claimValueSentInToken) {
+                if (claimValue != null && isSingleClaimValueMatching(claimValue.toString())) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        // handle single valued claims
+        return isSingleClaimValueMatching(claimValueSentInToken.toString());
+    }
+
+    private boolean isSingleClaimValueMatching(String claimValueSentInToken) {
+
+        if (StringUtils.isNotBlank(accessVerificationClaimValueRegex)) {
+            Pattern pattern = Pattern.compile(accessVerificationClaimValueRegex);
+            Matcher configuredClaimValueMatcher = pattern.matcher(accessVerificationClaimValue);
+            Matcher tokenSentClaimValueMatcher = pattern.matcher(claimValueSentInToken);
+            return configuredClaimValueMatcher.matches() && tokenSentClaimValueMatcher.matches();
+        }
+        return StringUtils.equals(accessVerificationClaimValue, claimValueSentInToken);
     }
 
     /**
