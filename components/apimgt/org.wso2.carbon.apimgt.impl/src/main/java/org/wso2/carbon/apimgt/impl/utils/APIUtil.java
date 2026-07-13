@@ -12545,7 +12545,8 @@ public final class APIUtil {
      * @param tenantDomain the tenant domain whose config should be merged in
      * @return a new {@link OASParserOptions} instance; never null
      */
-    public static OASParserOptions buildRefResolutionOptions(OASParserOptions base, String tenantDomain) {
+    public static OASParserOptions buildRefResolutionOptions(OASParserOptions base, String tenantDomain)
+            throws APIManagementException {
         OASParserOptions options = new OASParserOptions(base);
         List<String> allowList = new ArrayList<>();
         List<String> blockList = new ArrayList<>();
@@ -12556,6 +12557,7 @@ public final class APIUtil {
         // Platform policy (static fields populated in init()).
         if (networkSecurityEnabled) {
             policyConfigured = true;
+            validateNetworkSecurityMode(networkSecurityMode);
             if (networkSecurityHosts != null) {
                 if (APIConstants.NetworkSecurityAccessControl.MODE_ALLOW.equalsIgnoreCase(networkSecurityMode)) {
                     allowList.addAll(networkSecurityHosts);
@@ -12565,32 +12567,35 @@ public final class APIUtil {
             }
         }
 
-        // Tenant policy.
+        // Tenant policy. Only the config read is guarded; a misconfigured tenant policy must surface, not be swallowed.
+        JSONObject tenantConfig;
         try {
-            JSONObject tenantConfig = getTenantConfig(tenantDomain);
-            if (tenantConfig != null) {
-                Object nsac = tenantConfig.get(APIConstants.NetworkSecurityAccessControl.TENANT_CONFIG_KEY);
-                if (nsac instanceof JSONObject) {
-                    policyConfigured = true;
-                    JSONObject policy = (JSONObject) nsac;
-                    String tMode = (String) policy.get(APIConstants.NetworkSecurityAccessControl.TENANT_MODE);
-                    Object tHostsObj = policy.get(APIConstants.NetworkSecurityAccessControl.TENANT_HOSTS);
-                    List<String> tHosts = new ArrayList<>();
-                    if (tHostsObj instanceof JSONArray) {
-                        for (Object h : (JSONArray) tHostsObj) {
-                            tHosts.add(h.toString());
-                        }
-                    }
-                    if (APIConstants.NetworkSecurityAccessControl.MODE_ALLOW.equalsIgnoreCase(tMode)) {
-                        allowList.addAll(tHosts);
-                    } else if (APIConstants.NetworkSecurityAccessControl.MODE_DENY.equalsIgnoreCase(tMode)) {
-                        blockList.addAll(tHosts);
-                    }
-                }
-            }
+            tenantConfig = getTenantConfig(tenantDomain);
         } catch (APIManagementException e) {
             log.warn("Could not read tenant network access-control policy for $ref resolution; "
                     + "proceeding with platform policy only.", e);
+            tenantConfig = null;
+        }
+        if (tenantConfig != null) {
+            Object nsac = tenantConfig.get(APIConstants.NetworkSecurityAccessControl.TENANT_CONFIG_KEY);
+            if (nsac instanceof JSONObject) {
+                policyConfigured = true;
+                JSONObject policy = (JSONObject) nsac;
+                String tMode = (String) policy.get(APIConstants.NetworkSecurityAccessControl.TENANT_MODE);
+                Object tHostsObj = policy.get(APIConstants.NetworkSecurityAccessControl.TENANT_HOSTS);
+                List<String> tHosts = new ArrayList<>();
+                if (tHostsObj instanceof JSONArray) {
+                    for (Object h : (JSONArray) tHostsObj) {
+                        tHosts.add(h.toString());
+                    }
+                }
+                validateNetworkSecurityMode(tMode);
+                if (APIConstants.NetworkSecurityAccessControl.MODE_ALLOW.equalsIgnoreCase(tMode)) {
+                    allowList.addAll(tHosts);
+                } else if (APIConstants.NetworkSecurityAccessControl.MODE_DENY.equalsIgnoreCase(tMode)) {
+                    blockList.addAll(tHosts);
+                }
+            }
         }
 
         if (!allowList.isEmpty()) {
@@ -12601,6 +12606,30 @@ public final class APIUtil {
         }
         options.setNetworkAccessControlEnabled(policyConfigured);
         return options;
+    }
+
+    /**
+     * Validates the configured network access-control mode for an enabled policy. A blank mode is permitted (it means
+     * private-network blocking only, with no host allow/deny list). Any non-blank value other than
+     * {@code allow}/{@code deny} is a misconfiguration and is rejected, mirroring {@code applyAccessControlPolicy}.
+     *
+     * @param mode the configured mode, or {@code null}/blank for the private-network-only policy
+     * @throws APIManagementException with {@code NETWORK_SECURITY_ACCESS_CONTROL_MISCONFIGURED} if the mode is invalid
+     */
+    private static void validateNetworkSecurityMode(String mode) throws APIManagementException {
+        // Blank mode is valid (private-network-only) and handled by applyAccessControlPolicy; not a misconfiguration.
+        if (StringUtils.isBlank(mode)) {
+            return;
+        }
+        if (!APIConstants.NetworkSecurityAccessControl.MODE_ALLOW.equalsIgnoreCase(mode)
+                && !APIConstants.NetworkSecurityAccessControl.MODE_DENY.equalsIgnoreCase(mode)) {
+            APIManagementException ex = new APIManagementException(
+                    ExceptionCodes.NETWORK_SECURITY_ACCESS_CONTROL_MISCONFIGURED.getErrorMessage(),
+                    ExceptionCodes.NETWORK_SECURITY_ACCESS_CONTROL_MISCONFIGURED);
+            log.error("Network security access control misconfiguration: mode='" + mode + "' is not a valid value "
+                    + "(expected 'allow' or 'deny').", ex);
+            throw ex;
+        }
     }
 
     /**

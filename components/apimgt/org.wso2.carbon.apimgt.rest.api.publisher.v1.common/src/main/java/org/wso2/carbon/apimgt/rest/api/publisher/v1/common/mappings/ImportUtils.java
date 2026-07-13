@@ -665,7 +665,7 @@ public class ImportUtils {
                 throw new APIManagementException("Error while importing API: " + e.getMessage(),
                         ExceptionCodes.from(ExceptionCodes.API_CONTEXT_MALFORMED_EXCEPTION, e.getMessage()));
             }
-            throw new APIManagementException(errorMessage + StringUtils.SPACE + e.getMessage(), e);
+            throw new APIManagementException(errorMessage + StringUtils.SPACE + e.getMessage(), e, e.getErrorHandler());
         }
     }
 
@@ -1072,7 +1072,7 @@ public class ImportUtils {
                 throw new APIManagementException("Error while importing API: " + e.getMessage(),
                         ExceptionCodes.from(ExceptionCodes.API_CONTEXT_MALFORMED_EXCEPTION, e.getMessage()));
             }
-            throw new APIManagementException(errorMessage + StringUtils.SPACE + e.getMessage(), e);
+            throw new APIManagementException(errorMessage + StringUtils.SPACE + e.getMessage(), e, e.getErrorHandler());
         }
     }
 

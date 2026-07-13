@@ -247,7 +247,8 @@ public class WSDL11ProcessorAccessControlIntegrationTest {
         boolean ok = p.initPath(dir.getAbsolutePath());
         assertFalse(ok);
         assertTrue(p.hasError());
-        assertEquals(900405, p.getError().getErrorCode());   // UNTRUSTED_URL surfaced via reportBlockedReferencesIfAny
+        // UNTRUSTED_URL_IN_DEFINITION surfaced via reportBlockedReferencesIfAny
+        assertEquals(ExceptionCodes.UNTRUSTED_URL_IN_DEFINITION.getErrorCode(), p.getError().getErrorCode());
     }
 
     // initPath: remote xsd:import IS fetched when no policy configured (no-op) -> wiring resolves remote schemas
@@ -282,7 +283,7 @@ public class WSDL11ProcessorAccessControlIntegrationTest {
         WSDL11ProcessorImpl p = new WSDL11ProcessorImpl();
         p.init(wsdl);
         assertTrue(p.hasError());
-        assertEquals(900405, p.getError().getErrorCode());
+        assertEquals(ExceptionCodes.UNTRUSTED_URL_IN_DEFINITION.getErrorCode(), p.getError().getErrorCode());
     }
 
     // A bare Thread does not inherit the @Before tenant flow (non-inheritable ThreadLocal); resolveTenantDomain's
@@ -324,7 +325,8 @@ public class WSDL11ProcessorAccessControlIntegrationTest {
         boolean ok = p.initPath(dir.getAbsolutePath());
         assertFalse(ok);
         assertTrue(p.hasError());
-        assertEquals(900405, p.getError().getErrorCode());   // UNTRUSTED_URL surfaced from the first import
+        // UNTRUSTED_URL_IN_DEFINITION surfaced from the first import
+        assertEquals(ExceptionCodes.UNTRUSTED_URL_IN_DEFINITION.getErrorCode(), p.getError().getErrorCode());
         // the WSDL still parsed: the blocked FIRST import did not abort the whole parse, so the SECOND,
         // unrelated sibling import was not corrupted by it.
         assertNotNull(p.getWSDLDefinition());
@@ -338,7 +340,7 @@ public class WSDL11ProcessorAccessControlIntegrationTest {
             WSDL11ProcessorImpl p = new WSDL11ProcessorImpl();
             p.init(new URL("http://127.0.0.1:" + port(wsdlHost) + "/service.wsdl"));
             assertTrue(p.hasError());
-            assertEquals(900405, p.getError().getErrorCode());
+            assertEquals(ExceptionCodes.UNTRUSTED_URL_IN_DEFINITION.getErrorCode(), p.getError().getErrorCode());
         } finally {
             wsdlHost.stop(0);
         }
@@ -423,7 +425,7 @@ public class WSDL11ProcessorAccessControlIntegrationTest {
         boolean ok = p.initPath(dir.getAbsolutePath());
         assertFalse(ok);
         assertTrue(p.hasError());
-        assertEquals(900405, p.getError().getErrorCode());
+        assertEquals(ExceptionCodes.UNTRUSTED_URL_IN_DEFINITION.getErrorCode(), p.getError().getErrorCode());
     }
 
     // A schema reference that resolves INSIDE the archive but is absent on disk is a GENUINE failure, not a
@@ -450,7 +452,7 @@ public class WSDL11ProcessorAccessControlIntegrationTest {
         boolean ok = p.initPath(dir.getAbsolutePath());
         assertFalse(ok);
         assertTrue(p.hasError());
-        assertEquals(900405, p.getError().getErrorCode());
+        assertEquals(ExceptionCodes.UNTRUSTED_URL_IN_DEFINITION.getErrorCode(), p.getError().getErrorCode());
         // getWSDLDefinition() is protected but this test is in-package: proves at least one WSDL parsed.
         assertNotNull(p.getWSDLDefinition());
     }
@@ -463,7 +465,7 @@ public class WSDL11ProcessorAccessControlIntegrationTest {
         WSDL11ProcessorImpl p = new WSDL11ProcessorImpl();
         p.init(new File(dir, "service.wsdl").toURI().toURL());
         assertTrue(p.hasError());
-        assertEquals(900405, p.getError().getErrorCode());
+        assertEquals(ExceptionCodes.UNTRUSTED_URL_IN_DEFINITION.getErrorCode(), p.getError().getErrorCode());
     }
 
     // init(URL) on a file: WSDL whose xsd:import is an ABSOLUTE local path ("/etc/hostname") must be
@@ -475,6 +477,6 @@ public class WSDL11ProcessorAccessControlIntegrationTest {
         WSDL11ProcessorImpl p = new WSDL11ProcessorImpl();
         p.init(new File(dir, "service.wsdl").toURI().toURL());
         assertTrue(p.hasError());
-        assertEquals(900405, p.getError().getErrorCode());
+        assertEquals(ExceptionCodes.UNTRUSTED_URL_IN_DEFINITION.getErrorCode(), p.getError().getErrorCode());
     }
 }
