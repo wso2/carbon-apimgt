@@ -146,6 +146,8 @@ public enum ExceptionCodes implements ErrorHandler {
     MALFORMED_URL(900403, "Malformed URL", 400, "Malformed URL"),
     UNTRUSTED_URL(900405, "URL is not trusted", 400,
             "The provided URL is not trusted. Please contact the system administrator."),
+    UNTRUSTED_URL_IN_DEFINITION(900407, "URL is not trusted", 400,
+            "The provided definition contains a URL that is not trusted. Please contact the system administrator."),
     NETWORK_SECURITY_ACCESS_CONTROL_MISCONFIGURED(900406,
             "Internal server error. Please contact the system administrator.", 500,
             "Internal server error. Please contact the system administrator."),
