@@ -130,6 +130,7 @@ import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.Mediation;
+import org.wso2.carbon.apimgt.api.model.OASParserOptions;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
@@ -12532,6 +12533,74 @@ public final class APIUtil {
             }
             applyAccessControlPolicy(host, tenantMode, tenantHosts, tenantBlockPrivate);
         }
+    }
+
+    /**
+     * Builds a per-request {@link OASParserOptions} carrying the remote-$ref allow/block lists derived from the
+     * platform and tenant network access-control policy. Never mutates {@code base} (may be a shared singleton).
+     * allow-mode hosts → allow-list; deny-mode hosts → block-list; platform and tenant lists are unioned.
+     * Private-network blocking is handled by the resolver itself and needs no list entry here.
+     *
+     * @param base         base options to copy non-access-control settings from (may be null)
+     * @param tenantDomain the tenant domain whose config should be merged in
+     * @return a new {@link OASParserOptions} instance; never null
+     */
+    public static OASParserOptions buildRefResolutionOptions(OASParserOptions base, String tenantDomain) {
+        OASParserOptions options = new OASParserOptions(base);
+        List<String> allowList = new ArrayList<>();
+        List<String> blockList = new ArrayList<>();
+        // Whether any network access-control policy is configured. With no policy (neither platform nor tenant),
+        // safe resolution stays off so the parser keeps resolving remote refs as before (backwards compatibility).
+        boolean policyConfigured = false;
+
+        // Platform policy (static fields populated in init()).
+        if (networkSecurityEnabled) {
+            policyConfigured = true;
+            if (networkSecurityHosts != null) {
+                if (APIConstants.NetworkSecurityAccessControl.MODE_ALLOW.equalsIgnoreCase(networkSecurityMode)) {
+                    allowList.addAll(networkSecurityHosts);
+                } else if (APIConstants.NetworkSecurityAccessControl.MODE_DENY.equalsIgnoreCase(networkSecurityMode)) {
+                    blockList.addAll(networkSecurityHosts);
+                }
+            }
+        }
+
+        // Tenant policy.
+        try {
+            JSONObject tenantConfig = getTenantConfig(tenantDomain);
+            if (tenantConfig != null) {
+                Object nsac = tenantConfig.get(APIConstants.NetworkSecurityAccessControl.TENANT_CONFIG_KEY);
+                if (nsac instanceof JSONObject) {
+                    policyConfigured = true;
+                    JSONObject policy = (JSONObject) nsac;
+                    String tMode = (String) policy.get(APIConstants.NetworkSecurityAccessControl.TENANT_MODE);
+                    Object tHostsObj = policy.get(APIConstants.NetworkSecurityAccessControl.TENANT_HOSTS);
+                    List<String> tHosts = new ArrayList<>();
+                    if (tHostsObj instanceof JSONArray) {
+                        for (Object h : (JSONArray) tHostsObj) {
+                            tHosts.add(h.toString());
+                        }
+                    }
+                    if (APIConstants.NetworkSecurityAccessControl.MODE_ALLOW.equalsIgnoreCase(tMode)) {
+                        allowList.addAll(tHosts);
+                    } else if (APIConstants.NetworkSecurityAccessControl.MODE_DENY.equalsIgnoreCase(tMode)) {
+                        blockList.addAll(tHosts);
+                    }
+                }
+            }
+        } catch (APIManagementException e) {
+            log.warn("Could not read tenant network access-control policy for $ref resolution; "
+                    + "proceeding with platform policy only.", e);
+        }
+
+        if (!allowList.isEmpty()) {
+            options.setRemoteRefAllowList(allowList);
+        }
+        if (!blockList.isEmpty()) {
+            options.setRemoteRefBlockList(blockList);
+        }
+        options.setNetworkAccessControlEnabled(policyConfigured);
+        return options;
     }
 
     /**

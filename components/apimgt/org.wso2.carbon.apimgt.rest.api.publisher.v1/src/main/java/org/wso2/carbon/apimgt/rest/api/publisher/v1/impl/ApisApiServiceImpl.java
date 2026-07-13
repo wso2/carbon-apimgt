@@ -3045,7 +3045,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     private String updateSwagger(String apiId, String apiDefinition, String organization)
             throws APIManagementException, FaultGatewaysException {
-        OASParserOptions oasParserOptions = CommonUtil.getOasParserOptions();
+        OASParserOptions oasParserOptions = APIUtil.buildRefResolutionOptions(
+                CommonUtil.getOasParserOptions(), organization);
         APIDefinitionValidationResponse response = OASParserUtil.validateAPIDefinition(apiDefinition, true,
                 oasParserOptions);
         if (!response.isValid()) {
@@ -3283,7 +3284,11 @@ public class ApisApiServiceImpl implements ApisApiService {
                     inlineApiDefinition,
                     returnContent, false);
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
+            if (e.getErrorHandler() != null && e.getErrorHandler().getHttpStatusCode() == 400) {
+                RestApiUtil.handleBadRequest(e.getErrorHandler().getErrorDescription(), log);
+            } else {
+                RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
+            }
         }
 
         OpenAPIDefinitionValidationResponseDTO validationResponseDTO = (OpenAPIDefinitionValidationResponseDTO) validationResponseMap
@@ -5110,8 +5115,12 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleBadRequest("Unsupported protocol specified in the Service Definition. Protocol " +
                         "should be either sse or websub or ws", log);
             }
-            RestApiUtil.handleInternalServerError("Error while retrieving the service key of the service " +
-                    "associated with API with id " + apiId, log);
+            if (e.getErrorHandler() != null && e.getErrorHandler().getHttpStatusCode() == 400) {
+                RestApiUtil.handleBadRequest(e.getErrorHandler().getErrorDescription(), log);
+            } else {
+                RestApiUtil.handleInternalServerError("Error while retrieving the service key of the service " +
+                        "associated with API with id " + apiId, log);
+            }
         } catch (FaultGatewaysException e) {
             String errorMessage = "Error while updating API : " + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
