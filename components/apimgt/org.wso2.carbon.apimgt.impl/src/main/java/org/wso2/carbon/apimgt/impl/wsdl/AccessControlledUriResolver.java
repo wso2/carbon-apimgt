@@ -42,6 +42,10 @@ import java.util.List;
  * <p>
  * Note: returning {@code null} or throwing from a Woden resolver does NOT stop the fetch — Woden falls
  * back to the raw URI. Only redirecting to a different URI prevents the outbound request.
+ * <p>
+ * Known limitation: only the initially-referenced host is validated. If an allow-listed host responds with
+ * an HTTP redirect, Woden follows it using the JDK's default behavior without re-validating the redirect
+ * target — an accepted residual, consistent with the WSDL 1.1 remote-import fetcher ({@link RemoteSchemaFetcher}).
  */
 public class AccessControlledUriResolver implements URIResolver {
 

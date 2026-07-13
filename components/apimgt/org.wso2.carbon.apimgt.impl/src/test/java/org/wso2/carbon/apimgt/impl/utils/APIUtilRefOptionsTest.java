@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.impl.utils;
 
+import org.json.simple.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,7 +24,10 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.OASParserOptions;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.util.Arrays;
 
@@ -120,5 +124,47 @@ public class APIUtilRefOptionsTest {
 
         Assert.assertEquals(base.getYamlCodePointLimit(), out.getYamlCodePointLimit());
         Assert.assertNotEquals(Integer.valueOf(Integer.MAX_VALUE), out.getYamlCodePointLimit());
+    }
+
+    @Test
+    public void testInvalidModePlatformThrowsMisconfigured() throws Exception {
+        // An enabled platform policy whose mode is neither 'allow' nor 'deny' must fail fast rather than silently
+        // producing empty lists, matching the behaviour of the runtime access-control check.
+        PowerMockito.spy(APIUtil.class);
+        PowerMockito.doReturn(null).when(APIUtil.class, "getTenantConfig", TENANT);
+        Whitebox.setInternalState(APIUtil.class, "networkSecurityEnabled", true);
+        Whitebox.setInternalState(APIUtil.class, "networkSecurityMode", "block");
+        Whitebox.setInternalState(APIUtil.class, "networkSecurityHosts", Arrays.asList("*.wso2.com"));
+        Whitebox.setInternalState(APIUtil.class, "networkSecurityBlockPrivateAccess", true);
+
+        try {
+            APIUtil.buildRefResolutionOptions(new OASParserOptions(), TENANT);
+            Assert.fail("An invalid platform mode must raise a misconfiguration error");
+        } catch (APIManagementException e) {
+            Assert.assertEquals(ExceptionCodes.NETWORK_SECURITY_ACCESS_CONTROL_MISCONFIGURED, e.getErrorHandler());
+        }
+    }
+
+    @Test
+    public void testInvalidModeTenantThrowsMisconfigured() throws Exception {
+        // An enabled tenant policy with an invalid mode must also propagate a misconfiguration error instead of being
+        // swallowed by the tenant-config read guard.
+        PowerMockito.spy(APIUtil.class);
+        JSONObject policy = new JSONObject();
+        policy.put(APIConstants.NetworkSecurityAccessControl.TENANT_MODE, "block");
+        JSONObject tenantConfig = new JSONObject();
+        tenantConfig.put(APIConstants.NetworkSecurityAccessControl.TENANT_CONFIG_KEY, policy);
+        PowerMockito.doReturn(tenantConfig).when(APIUtil.class, "getTenantConfig", TENANT);
+        Whitebox.setInternalState(APIUtil.class, "networkSecurityEnabled", false);
+        Whitebox.setInternalState(APIUtil.class, "networkSecurityMode", (String) null);
+        Whitebox.setInternalState(APIUtil.class, "networkSecurityHosts", (java.util.List) null);
+        Whitebox.setInternalState(APIUtil.class, "networkSecurityBlockPrivateAccess", false);
+
+        try {
+            APIUtil.buildRefResolutionOptions(new OASParserOptions(), TENANT);
+            Assert.fail("An invalid tenant mode must raise a misconfiguration error");
+        } catch (APIManagementException e) {
+            Assert.assertEquals(ExceptionCodes.NETWORK_SECURITY_ACCESS_CONTROL_MISCONFIGURED, e.getErrorHandler());
+        }
     }
 }

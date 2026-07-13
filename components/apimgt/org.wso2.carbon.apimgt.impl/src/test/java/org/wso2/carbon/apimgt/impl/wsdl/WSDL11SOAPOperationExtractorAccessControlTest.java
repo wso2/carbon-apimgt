@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2026, WSO2 LLC. (http://www.wso2.com) All Rights Reserved.
+ *
+ * WSO2 LLC. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.carbon.apimgt.impl.wsdl;
 
 import org.junit.Test;
@@ -41,12 +59,12 @@ public class WSDL11SOAPOperationExtractorAccessControlTest {
 
         try {
             getBasedXSDofWSDL.invoke(extractor, "http://169.254.169.254/latest/meta-data/");
-            fail("a blocked namespace URL must propagate UNTRUSTED_URL, not fetch");
+            fail("a blocked namespace URL must propagate UNTRUSTED_URL_IN_DEFINITION, not fetch");
         } catch (InvocationTargetException ite) {
             assertTrue(ite.getCause() instanceof APIManagementException);
             APIManagementException cause = (APIManagementException) ite.getCause();
-            assertEquals("must carry UNTRUSTED_URL (900405)",
-                    ExceptionCodes.UNTRUSTED_URL.getErrorCode(), cause.getErrorHandler().getErrorCode());
+            assertEquals("must carry UNTRUSTED_URL_IN_DEFINITION (900407)",
+                    ExceptionCodes.UNTRUSTED_URL_IN_DEFINITION.getErrorCode(), cause.getErrorHandler().getErrorCode());
         }
 
         PowerMockito.verifyStatic(APIUtil.class);

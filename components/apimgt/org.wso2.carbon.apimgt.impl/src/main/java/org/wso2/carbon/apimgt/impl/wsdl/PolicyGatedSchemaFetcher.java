@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
 
 /**
  * Policy-gated {@link RemoteSchemaFetcher} used to retrieve remote XML schema/WSDL documents (e.g. the
@@ -43,14 +44,22 @@ import java.net.URL;
  * {@code API_PUBLISHER_IMPORT_WSDL_FILE_SIZE_LIMIT} configuration limit used by
  * {@link WSDL11ProcessorImpl#init(URL)} for direct WSDL fetches, so a remote schema fetched through this
  * class cannot be used to exhaust memory/disk.
+ * <p>
+ * The connection is opened with finite connect and read timeouts so a slow or unresponsive host cannot
+ * block the fetching thread indefinitely.
  */
 public class PolicyGatedSchemaFetcher implements RemoteSchemaFetcher {
 
     private static final Logger log = LoggerFactory.getLogger(PolicyGatedSchemaFetcher.class);
 
+    private static final int CONNECT_TIMEOUT_MILLIS = 10000;
+    private static final int READ_TIMEOUT_MILLIS = 30000;
+
     private final String tenantDomain;
     private final RemoteUrlValidator validator;
     private final long maxFileSize;
+    private final int connectTimeoutMillis;
+    private final int readTimeoutMillis;
 
     public PolicyGatedSchemaFetcher(String tenantDomain) {
         this(tenantDomain, APIUtil::validateRemoteURL);
@@ -61,15 +70,25 @@ public class PolicyGatedSchemaFetcher implements RemoteSchemaFetcher {
     }
 
     PolicyGatedSchemaFetcher(String tenantDomain, RemoteUrlValidator validator, long maxFileSize) {
+        this(tenantDomain, validator, maxFileSize, CONNECT_TIMEOUT_MILLIS, READ_TIMEOUT_MILLIS);
+    }
+
+    PolicyGatedSchemaFetcher(String tenantDomain, RemoteUrlValidator validator, long maxFileSize,
+            int connectTimeoutMillis, int readTimeoutMillis) {
         this.tenantDomain = tenantDomain;
         this.validator = validator;
         this.maxFileSize = maxFileSize;
+        this.connectTimeoutMillis = connectTimeoutMillis;
+        this.readTimeoutMillis = readTimeoutMillis;
     }
 
     @Override
     public InputStream fetch(String url) throws APIManagementException, IOException {
         validator.validate(url, tenantDomain);
-        return new SizeLimitedInputStream(new URL(url).openStream(), maxFileSize);
+        URLConnection connection = new URL(url).openConnection();
+        connection.setConnectTimeout(connectTimeoutMillis);
+        connection.setReadTimeout(readTimeoutMillis);
+        return new SizeLimitedInputStream(connection.getInputStream(), maxFileSize);
     }
 
     /**

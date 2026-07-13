@@ -68,8 +68,8 @@ public class WSDL20ProcessorImplResolverTest {
 
         // blocked import redirected to a local stub (no outbound fetch) AND reported to the user
         assertTrue("a blocked nested import must be reported as an error", processor.hasError());
-        assertEquals("must report UNTRUSTED_URL (900405)",
-                ExceptionCodes.UNTRUSTED_URL.getErrorCode(), processor.getError().getErrorCode());
+        assertEquals("must report UNTRUSTED_URL_IN_DEFINITION (900407)",
+                ExceptionCodes.UNTRUSTED_URL_IN_DEFINITION.getErrorCode(), processor.getError().getErrorCode());
 
         // the policy gate was consulted for the nested import URL
         PowerMockito.verifyStatic(APIUtil.class);
