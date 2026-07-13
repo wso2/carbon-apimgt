@@ -3088,6 +3088,12 @@ public class APIManagerConfiguration {
             if (marketplaceAssistantChatResource != null) {
                 marketplaceAssistantConfigurationDto.setChatResource(marketplaceAssistantChatResource.getText());
             }
+            OMElement marketplaceAssistantImplClass =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.MARKETPLACE_ASSISTANT_IMPL_CLASS));
+            if (marketplaceAssistantImplClass != null
+                    && StringUtils.isNotBlank(marketplaceAssistantImplClass.getText())) {
+                marketplaceAssistantConfigurationDto.setImplementationClass(marketplaceAssistantImplClass.getText());
+            }
         }
     }
 
@@ -3323,6 +3329,11 @@ public class APIManagerConfiguration {
             if (apiChatExecuteResource != null) {
                 apiChatConfigurationDto.setExecuteResource(apiChatExecuteResource.getText());
             }
+            OMElement apiChatImplClass =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.API_CHAT_IMPL_CLASS));
+            if (apiChatImplClass != null && StringUtils.isNotBlank(apiChatImplClass.getText())) {
+                apiChatConfigurationDto.setImplementationClass(apiChatImplClass.getText());
+            }
         }
     }
 
@@ -3383,6 +3394,12 @@ public class APIManagerConfiguration {
                     resources.getFirstChildWithName(new QName(APIConstants.AI.DESIGN_ASSISTANT_GEN_API_PAYLOAD_RESOURCE));
             if (designAssistantGenApiPayloadResource != null) {
                 designAssistantConfigurationDto.setGenApiPayloadResource(designAssistantGenApiPayloadResource.getText());
+            }
+            OMElement designAssistantImplClass =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.DESIGN_ASSISTANT_IMPL_CLASS));
+            if (designAssistantImplClass != null
+                    && StringUtils.isNotBlank(designAssistantImplClass.getText())) {
+                designAssistantConfigurationDto.setImplementationClass(designAssistantImplClass.getText());
             }
         }
     }

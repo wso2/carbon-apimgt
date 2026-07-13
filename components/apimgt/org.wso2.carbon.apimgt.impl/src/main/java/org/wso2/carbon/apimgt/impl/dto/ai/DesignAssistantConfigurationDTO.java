@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.impl.dto.ai;
 
+import static org.wso2.carbon.apimgt.impl.APIConstants.AI.DESIGN_ASSISTANT_DEFAULT_IMPL;
+
 /**
  * This class represent the Design Assistant configuration DTO.
  */
@@ -35,6 +37,7 @@ public class DesignAssistantConfigurationDTO {
     private boolean isEnabled;
     private boolean isAuthTokenProvided;
     private boolean isKeyProvided;
+    private String implementationClass = DESIGN_ASSISTANT_DEFAULT_IMPL;
 
     public String getAccessToken() {
         return accessToken;
@@ -130,5 +133,11 @@ public class DesignAssistantConfigurationDTO {
 
     public void setKeyProvided(boolean keyProvided) {
         this.isKeyProvided = keyProvided;
+    }
+    public String getImplementationClass() {
+        return implementationClass;
+    }
+    public void setImplementationClass(String implementationClass) {
+        this.implementationClass = implementationClass;
     }
 }
