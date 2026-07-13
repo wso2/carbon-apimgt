@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.APIMgtGoogleAnalyticsUtils;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
@@ -92,6 +93,7 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
             tracer = ServiceReferenceHolder.getInstance().getTelemetryTracer();
             span = TelemetryUtil.startSpan(APIMgtGatewayConstants.GOOGLE_ANALYTICS_HANDLER, responseLatencySpan,
                     tracer);
+            GatewayUtils.setCommonHTTPAttributes(span, msgCtx);
         } else if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =
                     (TracingSpan) msgCtx.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);

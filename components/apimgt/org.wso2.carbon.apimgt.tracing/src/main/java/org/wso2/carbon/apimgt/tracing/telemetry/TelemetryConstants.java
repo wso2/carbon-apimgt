@@ -64,6 +64,9 @@ public class TelemetryConstants {
      */
     static final String OTLP_CONFIG_URL = "OpenTelemetry.RemoteTracer.Url";
     static final String OPENTELEMETRY_PROPERTIES_PREFIX = "OpenTelemetry.RemoteTracer.Properties.";
+    static final String OTLP_CONFIG_PROTOCOL = "OpenTelemetry.RemoteTracer.Protocol";
+    static final String HTTP_PROTOCOL = "http";
+    static final String GRPC_PROTOCOL = "grpc";
 
     /**
      * Sampler Constants.

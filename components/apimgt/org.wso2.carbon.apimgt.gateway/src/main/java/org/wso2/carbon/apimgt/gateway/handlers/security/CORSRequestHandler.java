@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.LogsHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -140,6 +141,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             TelemetryTracer tracer = ServiceReferenceHolder.getInstance().getTelemetryTracer();
             corsRequestHandlerSpan =
                     TelemetryUtil.startSpan(APIMgtGatewayConstants.CORS_REQUEST_HANDLER, responseLatencySpan, tracer);
+            GatewayUtils.setCommonHTTPAttributes(corsRequestHandlerSpan, messageContext);
         } else if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =
                     (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);

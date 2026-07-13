@@ -651,6 +651,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
             TelemetryTracer tracer = ServiceReferenceHolder.getInstance().getTelemetryTracer();
             throttleLatencySpan = TelemetryUtil.startSpan(APIMgtGatewayConstants.THROTTLE_LATENCY,
                         responseLatencySpan, tracer);
+            GatewayUtils.setCommonHTTPAttributes(throttleLatencySpan, messageContext);
         } else if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =
                     (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
@@ -713,6 +714,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 TelemetryTracer tracer = ServiceReferenceHolder.getInstance().getTelemetryTracer();
                 throttleLatencySpan = TelemetryUtil.startSpan(APIMgtGatewayConstants.THROTTLE_LATENCY,
                         responseLatencySpan, tracer);
+                GatewayUtils.setCommonHTTPAttributes(throttleLatencySpan, messageContext);
             } else if (Util.tracingEnabled()) {
                 TracingSpan responseLatencySpan =
                         (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);

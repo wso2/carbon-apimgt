@@ -188,6 +188,9 @@ public class APIMgtGatewayConstants {
     public static final String SPAN_HTTP_RESPONSE_STATUS_CODE = "span.http.response.status.code";
     public static final String SPAN_HTTP_RESPONSE_STATUS_CODE_DESCRIPTION =
             "span.http.response.status.code.description";
+    public static final String HTTP_METHOD_ATTRIBUTE = "http.method";
+    public static final String HTTP_URL_ATTRIBUTE = "http.url";
+    public static final String HTTP_STATUS_CODE_ATTRIBUTE = "http.status_code";
 
     public static final String INTERNAL_KEY = "Internal-Key";
 
