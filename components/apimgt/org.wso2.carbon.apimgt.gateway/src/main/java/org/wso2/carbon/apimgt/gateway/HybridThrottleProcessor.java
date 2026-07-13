@@ -54,12 +54,14 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
     private ThrottleDataHolder dataHolder;
     private String gatewayId;
     private static final String SYNC_MODE_MSG_PART_DELIMITER = "___";
+    private final long minGatewayCount;
 
     public HybridThrottleProcessor() {
         redisPool = ServiceReferenceHolder.getInstance().getRedisPool();
         RedisConfig redisConfig = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration().getRedisConfig();
         gatewayId = redisConfig.getGatewayId();
+        minGatewayCount = redisConfig.getMinGatewayCount();
 
         ScheduledExecutorService syncModeInitChannelSubscriptionExecutor = Executors.newScheduledThreadPool(1);
         syncModeInitChannelSubscriptionExecutor.scheduleAtFixedRate(new SyncModeInitChannelSubscription(), 0, 1,
@@ -167,7 +169,7 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
                                         }
                                     }
                                 } catch (Exception e) {
-                                    log.error("Could not acquire/release Redis lock for forced sync of callerContext: " 
+                                    log.error("Could not acquire Redis lock for forced sync of callerContext: " 
                                             + callerContext.getId() + ". Sync skipped, will retry on next message.", e);
                                 } finally {
                                     if (lockAcquired) {
@@ -207,7 +209,7 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
                 log.error("Could not establish connection by retrieving a resource from the redis pool. So error "
                         + "occurred while subscribing to channel: " + WSO2_SYNC_MODE_INIT_CHANNEL, e);
                 log.info("Next retry to subscribe to channel " + WSO2_SYNC_MODE_INIT_CHANNEL + " in "
-                        + redisConnectionRetryInterval + " seconds");
+                        + redisConnectionRetryInterval + " ms");
                 try {
                     // sleep for given duration before retrying to subscribe, if the redis channel
                     // subscription failed
@@ -236,10 +238,19 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
                 for (Map.Entry<String, String> entry : channelCountMap.entrySet()) {
                     String channel = entry.getKey();
                     long gatewayCount = Long.parseLong(entry.getValue());
-                    ServiceReferenceHolder.getInstance().setGatewayCount(gatewayCount);
-                    if (log.isTraceEnabled()) {
-                        log.trace("ChannelSubscriptionCounterTask : channel = " + channel + ". Set Gateway count to "
-                                + gatewayCount);
+                    if (gatewayCount > 0) {
+                        ServiceReferenceHolder.getInstance().setGatewayCount(gatewayCount);
+                        if (log.isTraceEnabled()) {
+                            log.trace("ChannelSubscriptionCounterTask : channel = " + channel + ". Set Gateway count to "
+                                    + gatewayCount);
+                        }
+                    } else {
+                        if (log.isDebugEnabled()) {
+                            log.debug("ChannelSubscriptionCounterTask : channel = " + channel
+                                    + ". Skipping gateway count update as pubsubNumSub returned 0."
+                                    + " Subscriptions may not yet be established. Keeping existing count: "
+                                    + ServiceReferenceHolder.getInstance().getGatewayCount());
+                        }
                     }
                 }
             } catch (Exception e) {
@@ -328,7 +339,7 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
                             }
                         }
                     } catch (Exception e) {
-                        log.error("Could not acquire/release Redis lock in canAccessBasedOnUnitTime for key: "
+                        log.error("Could not acquire Redis lock in canAccessBasedOnUnitTime for key: "
                                 + callerContext.getId() + ". Continuing without sync.", e);
                     } finally {
                         if (lockAcquired) {
@@ -410,7 +421,7 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
                             // where incrementing should have happened (https://github.com/wso2/api-manager/issues/1982#issuecomment-1624920455)
                         }
                     } catch (Exception e) {
-                        log.error("Could not acquire/release Redis lock in canAccessIfUnitTimeNotOver for key: "
+                        log.error("Could not acquire Redis lock in canAccessIfUnitTimeNotOver for key: "
                                 + callerContext.getId() + ". Falling back to local counter increment.", e);
                         callerContext.incrementLocalCounter();
                     } finally {
@@ -572,7 +583,7 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
             // if throttle param processing was async and if the request was not allowed, then need to undo the
             // local counter increments that were speculatively applied
             if (!localCounterResettingDone && canAccess == false) {
-                callerContext.setLocalCounter(callerContext.getLocalCounter() - 1);
+                callerContext.decrementLocalCounter();
             }
         }
         if (log.isDebugEnabled()) {
@@ -643,7 +654,7 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
                         callerContext.incrementLocalCounter();
                     }
                 } catch (Exception e) {
-                    log.error("Could not acquire/release Redis lock in canAccessIfUnitTimeOver for key: "
+                    log.error("Could not acquire Redis lock in canAccessIfUnitTimeOver for key: "
                             + callerContext.getId() + ". Falling back to local counter increment.", e);
                     callerContext.incrementLocalCounter();
                 } finally {
@@ -857,7 +868,8 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
                     // Only reset local counter AFTER successful sync to Redis
                     callerContext.resetLocalCounter();
                     if (log.isDebugEnabled()) {
-                        log.debug("Successfully synced counter params for callerContext: " + callerContext.getId() + ". Local counter reset after sync.");
+                        log.debug("Successfully synced counter params for callerContext: " + callerContext.getId()
+                                + ". Snapshot=" + localCounter + " distributedCounter=" + distributedCounter);
                     }
                     
                     if (log.isTraceEnabled()) {
@@ -985,8 +997,8 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
                     }
                 }
                 if (log.isTraceEnabled()) {
-                    log.trace("When running syncing throttle window params :" + SharedParamManager.getSharedTimestamp(
-                            callerId) + ", sharedNextWindow = " + sharedNextWindow + ", localFirstAccessTime = "
+                    log.trace("When running syncing throttle window params : sharedTimestamp = " + sharedTimestamp
+                            + ", sharedNextWindow = " + sharedNextWindow + ", localFirstAccessTime = "
                             + localFirstAccessTime);
                 }
             } catch (Exception e) {
@@ -1007,10 +1019,13 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
         long maxRequests = configuration.getMaximumRequestPerUnitTime();
         long gatewayCount = ServiceReferenceHolder.getInstance().getGatewayCount();
 
-        RedisConfig redisConfig = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getRedisConfig();
-        if (gatewayCount < redisConfig.getMinGatewayCount()) {
-            gatewayCount = redisConfig.getMinGatewayCount();
+        if (gatewayCount <= 0) {
+            gatewayCount = (minGatewayCount > 0) ? minGatewayCount : 1;
+            if (log.isTraceEnabled()) {
+                log.trace("Set gateway count to " + gatewayCount + " as the calculated gateway count is less than 1");
+            }
+        } else if (gatewayCount < minGatewayCount) {
+            gatewayCount = minGatewayCount;
             if (log.isTraceEnabled()) {
                 log.trace("Set gateway count to " + gatewayCount + " as the calculated gateway count is less than the"
                         + " min_gateway_count configuration");
