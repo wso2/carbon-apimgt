@@ -34,7 +34,7 @@ public class ApiChatConfigurationDTO {
     private boolean isEnabled;
     private boolean isAuthTokenProvided;
     private boolean isKeyProvided;
-    private String implementationClass = APIConstants.AI.API_CHAT_DEFAULT_CLASS;
+    private String implementationClass = APIConstants.AI.API_CHAT_DEFAULT_IMPL;
 
     public String getAccessToken() {
         return accessToken;

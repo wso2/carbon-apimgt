@@ -63,7 +63,7 @@ public class APIChatServiceFactory {
     }
 
     private static APIChatService initialize() throws APIManagementException {
-        String implClass = APIConstants.AI.API_CHAT_DEFAULT_CLASS;
+        String implClass = APIConstants.AI.API_CHAT_DEFAULT_IMPL;
         APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration();
         if (configuration != null) {

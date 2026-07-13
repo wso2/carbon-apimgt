@@ -42,6 +42,7 @@ import java.io.IOException;
 public class DesignAssistantApiServiceImpl implements DesignAssistantApiService {
 
     private static final Log log = LogFactory.getLog(DesignAssistantApiServiceImpl.class);
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Override
     public Response designAssistantApiPayloadGen(DesignAssistantGenAPIPayloadDTO designAssistantGenAPIPayloadDTO,
@@ -100,7 +101,7 @@ public class DesignAssistantApiServiceImpl implements DesignAssistantApiService 
                 return null;
             }
             ObjectMapper objectMapper = new ObjectMapper();
-            DesignAssistantChatResponseDTO responseDTO = objectMapper.readValue(response,
+            DesignAssistantChatResponseDTO responseDTO = OBJECT_MAPPER.readValue(response,
                     DesignAssistantChatResponseDTO.class);
             return Response.ok(responseDTO).build();
         } catch (APIManagementException | IOException e) {

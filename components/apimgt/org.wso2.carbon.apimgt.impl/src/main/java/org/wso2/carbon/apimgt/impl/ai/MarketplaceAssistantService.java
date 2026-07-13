@@ -27,8 +27,9 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
  * invoking the service over whatever transport/auth mechanism it requires, and returning the response body. This
  * decouples the Developer Portal REST layer from any specific AI service contract, allowing deployments to plug in
  * their own AI service by configuring a custom implementation class under
- * {@code <MarketplaceAssistant><ImplementationClass></ImplementationClass></MarketplaceAssistant>} in
- * {@code api-manager.xml}. When no implementation is configured, {@link DefaultMarketplaceAssistantService} is used,
+ * {@code <MarketplaceAssistant><MarketPlaceAssistanceImplementation>
+ * </MarketPlaceAssistanceImplementation></MarketplaceAssistant>} in {@code api-manager.xml}.
+ * When no implementation is configured, {@link DefaultMarketplaceAssistantService} is used,
  * preserving the out-of-the-box behaviour.
  * <p>
  * Implementations must be thread-safe and provide a public no-argument constructor, as a single instance is created

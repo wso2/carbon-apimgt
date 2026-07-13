@@ -607,7 +607,7 @@ public final class APIConstants {
         public static final String DESIGN_ASSISTANT_IMPL_CLASS = "DesignAssistanceImplementation";
         public static final String DESIGN_ASSISTANT_DEFAULT_IMPL =
                 "org.wso2.carbon.apimgt.impl.ai.DefaultDesignAssistantService";
-        public static final String API_CHAT_DEFAULT_CLASS = "org.wso2.carbon.apimgt.impl.ai.DefaultAPIChatService";
+        public static final String API_CHAT_DEFAULT_IMPL = "org.wso2.carbon.apimgt.impl.ai.DefaultAPIChatService";
         public static final String AI_CONFIGURATION = "AiConfiguration";
         public static final String MCP = "MCP";
         public static final String MCP_SUPPORT_ENABLED = "Enabled";

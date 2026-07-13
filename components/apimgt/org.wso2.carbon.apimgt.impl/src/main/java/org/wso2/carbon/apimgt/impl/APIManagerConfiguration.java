@@ -3092,7 +3092,7 @@ public class APIManagerConfiguration {
                     omElement.getFirstChildWithName(new QName(APIConstants.AI.MARKETPLACE_ASSISTANT_IMPL_CLASS));
             if (marketplaceAssistantImplClass != null
                     && StringUtils.isNotBlank(marketplaceAssistantImplClass.getText())) {
-                marketplaceAssistantConfigurationDto.setImplementationClass(marketplaceAssistantImplClass.getText());
+                marketplaceAssistantConfigurationDto.setImplementationClass(marketplaceAssistantImplClass.getText().trim());
             }
         }
     }
@@ -3332,7 +3332,7 @@ public class APIManagerConfiguration {
             OMElement apiChatImplClass =
                     omElement.getFirstChildWithName(new QName(APIConstants.AI.API_CHAT_IMPL_CLASS));
             if (apiChatImplClass != null && StringUtils.isNotBlank(apiChatImplClass.getText())) {
-                apiChatConfigurationDto.setImplementationClass(apiChatImplClass.getText());
+                apiChatConfigurationDto.setImplementationClass(apiChatImplClass.getText().trim());
             }
         }
     }
@@ -3399,7 +3399,7 @@ public class APIManagerConfiguration {
                     omElement.getFirstChildWithName(new QName(APIConstants.AI.DESIGN_ASSISTANT_IMPL_CLASS));
             if (designAssistantImplClass != null
                     && StringUtils.isNotBlank(designAssistantImplClass.getText())) {
-                designAssistantConfigurationDto.setImplementationClass(designAssistantImplClass.getText());
+                designAssistantConfigurationDto.setImplementationClass(designAssistantImplClass.getText().trim());
             }
         }
     }
