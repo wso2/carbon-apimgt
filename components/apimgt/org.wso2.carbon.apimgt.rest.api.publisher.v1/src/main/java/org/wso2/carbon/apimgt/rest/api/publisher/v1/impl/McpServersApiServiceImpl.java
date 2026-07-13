@@ -2466,9 +2466,10 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                 if (APIConstants.API_SUBTYPE_DIRECT_BACKEND.equals(subtype)) {
                     APIDefinitionValidationResponse validationResponse =
                             OASParserUtil.validateAPIDefinition(definition, Boolean.TRUE,
-                                    ServiceReferenceHolder.getInstance()
+                                    APIUtil.buildRefResolutionOptions(ServiceReferenceHolder.getInstance()
                                             .getAPIMDependencyConfigurationService()
-                                            .getAPIMDependencyConfigurations().getOasParserOptions());
+                                            .getAPIMDependencyConfigurations().getOasParserOptions(),
+                                            RestApiCommonUtil.getLoggedInUserTenantDomain()));
                     if (!validationResponse.isValid()) {
                         List<ErrorListItemDTO> errorListItemDTOs =
                                 APIMappingUtil.getErrorListItemsDTOsFromErrorHandlers(
@@ -2665,7 +2666,11 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                     inlineAPIDefinition,
                     returnContent, false);
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
+            if (e.getErrorHandler() != null && e.getErrorHandler().getHttpStatusCode() == 400) {
+                RestApiUtil.handleBadRequest(e.getErrorHandler().getErrorDescription(), log);
+            } else {
+                RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
+            }
         }
 
         OpenAPIDefinitionValidationResponseDTO validationResponseDTO =
