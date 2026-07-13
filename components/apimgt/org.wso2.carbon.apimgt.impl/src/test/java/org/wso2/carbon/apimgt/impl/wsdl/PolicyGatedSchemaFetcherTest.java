@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2026, WSO2 LLC. (http://www.wso2.com) All Rights Reserved.
+ *
+ * WSO2 LLC. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.carbon.apimgt.impl.wsdl;
 
 import com.sun.net.httpserver.HttpExchange;
@@ -15,6 +33,7 @@ import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public class PolicyGatedSchemaFetcherTest {
@@ -52,6 +71,33 @@ public class PolicyGatedSchemaFetcherTest {
                 fail("expected size-limit failure");
             } catch (Exception expected) {
                 // SizeLimitedInputStream aborts past the cap
+            }
+        } finally {
+            s.stop(0);
+        }
+    }
+
+    // slow host: a finite read timeout aborts the fetch quickly instead of blocking indefinitely
+    @Test
+    public void readTimeoutAbortsSlowFetch() throws Exception {
+        HttpServer s = server(ctx -> {
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            respond(ctx, 200, "SLOW");
+        });
+        try {
+            long start = System.nanoTime();
+            try {
+                new PolicyGatedSchemaFetcher("carbon.super", (u, t) -> { /* allow all */ }, 1_000_000L, 1000, 200)
+                        .fetch(base(s) + "/slow.xsd");
+                fail("expected read timeout");
+            } catch (IOException expected) {
+                long elapsedMillis = (System.nanoTime() - start) / 1_000_000L;
+                assertTrue("fetch should abort well before the server responds, took " + elapsedMillis + "ms",
+                        elapsedMillis < 1500);
             }
         } finally {
             s.stop(0);
