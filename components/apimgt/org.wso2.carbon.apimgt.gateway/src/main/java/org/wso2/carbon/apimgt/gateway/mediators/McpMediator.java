@@ -407,6 +407,13 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
             // for JSON-RPC compliance, set HTTP_SC to 200 for all MCP responses
             axis2MessageContext.setProperty(APIMgtGatewayConstants.HTTP_SC, 200);
             axis2MessageContext.removeProperty(APIConstants.NO_ENTITY_BODY);
+
+            //drop request headers from response
+            Map headers = (Map) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+            if (headers != null) {
+                headers.clear();
+                axis2MessageContext.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
+            }
         } catch (Exception e) {
             throw new McpException(APIConstants.MCP.RpcConstants.INTERNAL_ERROR_CODE, APIConstants.MCP.RpcConstants.
                     INTERNAL_ERROR_MESSAGE, e);

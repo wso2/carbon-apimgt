@@ -55,15 +55,21 @@ import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifactImpl;
 import org.wso2.carbon.governance.api.util.GovernanceArtifactConfiguration;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
+import org.wso2.carbon.registry.core.ActionConstants;
 import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.ResourceImpl;
 import org.wso2.carbon.registry.core.Tag;
+import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
 import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.core.AuthorizationManager;
+import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -72,27 +78,30 @@ import junit.framework.Assert;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ MultitenantUtils.class, ServiceReferenceHolder.class, GenericArtifact.class,
-        PrivilegedCarbonContext.class, GovernanceUtils.class, ServerConfiguration.class })
+        PrivilegedCarbonContext.class, GovernanceUtils.class, ServerConfiguration.class,
+        RegistryPersistenceUtil.class, RegistryContext.class, RegistryUtils.class })
 public class RegistryPersistenceUtilTestCase {
-    
+
     private final int SUPER_TENANT_ID = -1234;
     private final String SUPER_TENANT_DOMAIN = "carbon.super";
     private final int TENANT_ID = 1;
     private final String TENANT_DOMAIN = "wso2.com";
     private Registry registry;
-    
+    private RealmService realmService;
+
     @Before
     public void setupClass() throws Exception {
         System.setProperty("carbon.home", "");
         ServiceReferenceHolder serviceRefHolder = Mockito.mock(ServiceReferenceHolder.class);
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceRefHolder);
-        RealmService realmService = Mockito.mock(RealmService.class);
+        realmService = Mockito.mock(RealmService.class);
         PowerMockito.when(serviceRefHolder.getRealmService()).thenReturn(realmService);
 
         TenantManager tenantManager = Mockito.mock(TenantManager.class);
         PowerMockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         PowerMockito.when(tenantManager.getTenantId(SUPER_TENANT_DOMAIN)).thenReturn(SUPER_TENANT_ID);
+        PowerMockito.when(tenantManager.getTenantId(TENANT_DOMAIN)).thenReturn(TENANT_ID);
         
         registry = Mockito.mock(Registry.class);
 
@@ -477,5 +486,228 @@ public class RegistryPersistenceUtilTestCase {
         artifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER, "user@gmail.com@abc.com");
         String result = RegistryPersistenceUtil.getProviderFromArtifact(artifact);
         Assert.assertEquals("user-AT-gmail.com-AT-abc.com", result);
+    }
+
+    // =====================================================================
+    // Tests for path/name case-mismatch tolerance in extractProviderFromPath
+    // The registry resource path segment and the artifact <overview><name>
+    // attribute may differ in case in environments migrated from pre-3.x
+    // product versions. The lenient match must accept the case mismatch
+    // without throwing, and must preserve the provider's original case in
+    // the returned substring.
+    // =====================================================================
+
+    @Test
+    public void testExtractProviderFromPath_PathCamelCaseNameLowercase() throws Exception {
+        // Registry path has CamelCase name segment; the artifact's <name>
+        // attribute was normalised to lowercase by pre-3.x migration tooling.
+        // Pre-fix this threw APIPersistenceException.
+        String path = "/apimgt/applicationdata/provider/wam_mhxu8g/CSContractRepositoryStaging/v1/api";
+        String result = RegistryPersistenceUtil.extractProviderFromPath(path, "cscontractrepositorystaging", "v1");
+        Assert.assertEquals("wam_mhxu8g", result);
+    }
+
+    @Test
+    public void testExtractProviderFromPath_PathLowercaseNameUppercase() throws Exception {
+        // Reverse case-mismatch: path segment lowercase, artifact <name> uppercase.
+        String path = "/apimgt/applicationdata/provider/admin/myapi/1.0/api";
+        String result = RegistryPersistenceUtil.extractProviderFromPath(path, "MyAPI", "1.0");
+        Assert.assertEquals("admin", result);
+    }
+
+    @Test
+    public void testExtractProviderFromPath_MixedCaseMismatch() throws Exception {
+        // Different mixed-case shapes between path and input name.
+        String path = "/apimgt/applicationdata/provider/admin/API_GetPO/v1/api";
+        String result = RegistryPersistenceUtil.extractProviderFromPath(path, "API_getPO", "v1");
+        Assert.assertEquals("admin", result);
+    }
+
+    @Test
+    public void testExtractProviderFromPath_ProviderCasePreservedOnCaseMismatch() throws Exception {
+        // Provider segment has mixed case and API name is case-mismatched.
+        // Fix must return the provider substring in its original stored case
+        // (not the lowercased search key).
+        String path = "/apimgt/applicationdata/provider/Azure_Janhavi.Patil/ABC/v1/api";
+        String result = RegistryPersistenceUtil.extractProviderFromPath(path, "abc", "v1");
+        Assert.assertEquals("Azure_Janhavi.Patil", result);
+    }
+
+    @Test
+    public void testExtractProviderFromPath_SecondaryUserstoreCasePreservedOnCaseMismatch() throws Exception {
+        // Secondary userstore prefix "WSO2.COM/" with case-mismatched name.
+        String path = "/apimgt/applicationdata/provider/WSO2.COM/user/TestNoSeip/v1/api";
+        String result = RegistryPersistenceUtil.extractProviderFromPath(path, "testnoseip", "v1");
+        Assert.assertEquals("WSO2.COM/user", result);
+    }
+
+    @Test
+    public void testExtractProviderFromPath_VersionCaseMismatch() throws Exception {
+        // Version segment case differs between path and input. extractProviderFromPath
+        // is a path-verification operation on an already-resolved artifact; identity
+        // is decided by other layers (gateway routing, /newversion, DB constraint),
+        // so version case-mismatch tolerance in this specific function is safe.
+        String path = "/apimgt/applicationdata/provider/admin/MyAPI/V1/api";
+        String result = RegistryPersistenceUtil.extractProviderFromPath(path, "MyAPI", "v1");
+        Assert.assertEquals("admin", result);
+    }
+
+    @Test(expected = APIPersistenceException.class)
+    public void testExtractProviderFromPath_NameFundamentallyDifferentStillThrows() throws Exception {
+        // Legitimate not-found case: input name has no case-insensitive match in
+        // the path. Fix must still throw APIPersistenceException here — the
+        // lenient match only tolerates CASE differences, not entirely different names.
+        String path = "/apimgt/applicationdata/provider/admin/MyAPI/1.0/api";
+        RegistryPersistenceUtil.extractProviderFromPath(path, "SomethingElse", "1.0");
+    }
+
+    @Test(expected = APIPersistenceException.class)
+    public void testExtractProviderFromPath_VersionFundamentallyDifferentStillThrows() throws Exception {
+        // Legitimate not-found: name matches (any case), but version is different.
+        // Should still throw.
+        String path = "/apimgt/applicationdata/provider/admin/MyAPI/1.0/api";
+        RegistryPersistenceUtil.extractProviderFromPath(path, "myapi", "9.9");
+    }
+
+    // =====================================================================
+    // Tests for the deprecated 2-arg extractProvider(path, name). Method
+    // returns null on failure via caught exceptions rather than throwing.
+    // Coverage for the same case-mismatch behaviour — the deprecated helper
+    // delegates to the fixed extractProviderFromPath and must also work on
+    // legacy case-mismatched data.
+    // =====================================================================
+
+    @Test
+    public void testExtractProviderDeprecated_CaseMismatchNameLowercase() throws Exception {
+        String path = "/apimgt/applicationdata/provider/wam_mhxu8g/CSContractRepositoryStaging/v1/api";
+        @SuppressWarnings("deprecation")
+        String result = RegistryPersistenceUtil.extractProvider(path, "cscontractrepositorystaging");
+        Assert.assertEquals("wam_mhxu8g", result);
+    }
+
+    @Test
+    public void testExtractProviderDeprecated_CaseMismatchNameUppercase() throws Exception {
+        String path = "/apimgt/applicationdata/provider/admin/myapi/1.0/api";
+        @SuppressWarnings("deprecation")
+        String result = RegistryPersistenceUtil.extractProvider(path, "MyAPI");
+        Assert.assertEquals("admin", result);
+    }
+
+    @Test
+    public void testExtractProviderDeprecated_NameFundamentallyDifferentReturnsNull() {
+        // Deprecated method catches exceptions and returns null on failure.
+        String path = "/apimgt/applicationdata/provider/admin/MyAPI/1.0/api";
+        @SuppressWarnings("deprecation")
+        String result = RegistryPersistenceUtil.extractProvider(path, "CompletelyDifferentName");
+        Assert.assertNull(result);
+    }
+
+    // =====================================================================
+    // Tests for setResourcePermissions — RESTRICTED visibility with
+    // empty/blank visibleRoles entries
+    // =====================================================================
+
+    private static final String ARTIFACT_PATH = "/apimgt/applicationdata/provider/admin/MyAPI/1.0/api";
+    private static final String SUPER_TENANT_USER = "admin";
+    private static final String TENANT_USER = "user@wso2.com";
+
+    private void mockRegistryPathStatics() throws Exception {
+        PowerMockito.mockStatic(RegistryContext.class);
+        PowerMockito.when(RegistryContext.getBaseInstance()).thenReturn(null);
+        PowerMockito.mockStatic(RegistryUtils.class);
+        PowerMockito.when(RegistryUtils.getAbsolutePath(Mockito.any(), Mockito.anyString()))
+                .thenAnswer(invocation -> invocation.getArgument(1));
+    }
+
+    private RegistryAuthorizationManager mockSuperTenantAuthManager() throws Exception {
+        mockRegistryPathStatics();
+        PowerMockito.when(MultitenantUtils.getTenantDomain(SUPER_TENANT_USER)).thenReturn(SUPER_TENANT_DOMAIN);
+        UserRealm userRealm = Mockito.mock(UserRealm.class);
+        Mockito.when(realmService.getTenantUserRealm(SUPER_TENANT_ID)).thenReturn(userRealm);
+        RegistryAuthorizationManager authorizationManager = Mockito.mock(RegistryAuthorizationManager.class);
+        PowerMockito.whenNew(RegistryAuthorizationManager.class).withAnyArguments()
+                .thenReturn(authorizationManager);
+        return authorizationManager;
+    }
+
+    private AuthorizationManager mockTenantAuthManager() throws Exception {
+        mockRegistryPathStatics();
+        PowerMockito.when(MultitenantUtils.getTenantDomain(TENANT_USER)).thenReturn(TENANT_DOMAIN);
+        UserRealm userRealm = Mockito.mock(UserRealm.class);
+        Mockito.when(realmService.getTenantUserRealm(TENANT_ID)).thenReturn(userRealm);
+        RegistryAuthorizationManager registryAuthManager = Mockito.mock(RegistryAuthorizationManager.class);
+        PowerMockito.whenNew(RegistryAuthorizationManager.class).withAnyArguments()
+                .thenReturn(registryAuthManager);
+        Mockito.when(registryAuthManager.computePathOnMount(anyString())).thenReturn(ARTIFACT_PATH);
+        AuthorizationManager authManager = Mockito.mock(AuthorizationManager.class);
+        Mockito.when(userRealm.getAuthorizationManager()).thenReturn(authManager);
+        return authManager;
+    }
+
+    @Test
+    public void testSetResourcePermissionsSuperTenantLoneEmptyRole() throws Exception {
+        RegistryAuthorizationManager authorizationManager = mockSuperTenantAuthManager();
+
+        RegistryPersistenceUtil.setResourcePermissions(SUPER_TENANT_USER, APIConstants.API_RESTRICTED_VISIBILITY,
+                new String[] { "" }, ARTIFACT_PATH, null);
+
+        Mockito.verify(authorizationManager).authorizeRole(Mockito.eq(APIConstants.EVERYONE_ROLE), anyString(),
+                Mockito.eq(ActionConstants.GET));
+        Mockito.verify(authorizationManager, Mockito.never()).authorizeRole(Mockito.eq(""), anyString(),
+                anyString());
+        Mockito.verify(authorizationManager, Mockito.never()).denyRole(Mockito.eq(APIConstants.EVERYONE_ROLE),
+                anyString(), anyString());
+        Mockito.verify(authorizationManager).denyRole(Mockito.eq(APIConstants.ANONYMOUS_ROLE), anyString(),
+                Mockito.eq(ActionConstants.GET));
+    }
+
+    @Test
+    public void testSetResourcePermissionsSuperTenantBlankRolesSkipped() throws Exception {
+        RegistryAuthorizationManager authorizationManager = mockSuperTenantAuthManager();
+
+        RegistryPersistenceUtil.setResourcePermissions(SUPER_TENANT_USER, APIConstants.API_RESTRICTED_VISIBILITY,
+                new String[] { "", "  ", "internal/subscriber" }, ARTIFACT_PATH, null);
+
+        Mockito.verify(authorizationManager).authorizeRole(Mockito.eq("internal/subscriber"), anyString(),
+                Mockito.eq(ActionConstants.GET));
+        Mockito.verify(authorizationManager, Mockito.never()).authorizeRole(Mockito.eq(""), anyString(),
+                anyString());
+        // no everyone role in the list -> everyone must be denied
+        Mockito.verify(authorizationManager).denyRole(Mockito.eq(APIConstants.EVERYONE_ROLE), anyString(),
+                Mockito.eq(ActionConstants.GET));
+        Mockito.verify(authorizationManager).denyRole(Mockito.eq(APIConstants.ANONYMOUS_ROLE), anyString(),
+                Mockito.eq(ActionConstants.GET));
+    }
+
+    @Test
+    public void testSetResourcePermissionsTenantLoneEmptyRole() throws Exception {
+        AuthorizationManager authManager = mockTenantAuthManager();
+
+        RegistryPersistenceUtil.setResourcePermissions(TENANT_USER, APIConstants.API_RESTRICTED_VISIBILITY,
+                new String[] { "" }, ARTIFACT_PATH, null);
+
+        Mockito.verify(authManager).authorizeRole(Mockito.eq(APIConstants.EVERYONE_ROLE), anyString(),
+                Mockito.eq(ActionConstants.GET));
+        Mockito.verify(authManager, Mockito.never()).authorizeRole(Mockito.eq(""), anyString(), anyString());
+        Mockito.verify(authManager, Mockito.never()).denyRole(Mockito.eq(APIConstants.EVERYONE_ROLE), anyString(),
+                anyString());
+        Mockito.verify(authManager).denyRole(Mockito.eq(APIConstants.ANONYMOUS_ROLE), anyString(),
+                Mockito.eq(ActionConstants.GET));
+    }
+
+    @Test
+    public void testSetResourcePermissionsTenantBlankRolesSkipped() throws Exception {
+        AuthorizationManager authManager = mockTenantAuthManager();
+
+        RegistryPersistenceUtil.setResourcePermissions(TENANT_USER, APIConstants.API_RESTRICTED_VISIBILITY,
+                new String[] { "", "  ", "internal/subscriber" }, ARTIFACT_PATH, null);
+
+        Mockito.verify(authManager).authorizeRole(Mockito.eq("internal/subscriber"), anyString(),
+                Mockito.eq(ActionConstants.GET));
+        Mockito.verify(authManager, Mockito.never()).authorizeRole(Mockito.eq(""), anyString(), anyString());
+        Mockito.verify(authManager).denyRole(Mockito.eq(APIConstants.EVERYONE_ROLE), anyString(),
+                Mockito.eq(ActionConstants.GET));
+        Mockito.verify(authManager).denyRole(Mockito.eq(APIConstants.ANONYMOUS_ROLE), anyString(),
+                Mockito.eq(ActionConstants.GET));
     }
 }

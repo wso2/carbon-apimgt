@@ -20,13 +20,16 @@ package org.wso2.carbon.apimgt.gateway;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.commons.throttle.core.DistributedCounterException;
 import org.apache.synapse.commons.throttle.core.DistributedCounterManager;
 import org.wso2.carbon.apimgt.impl.dto.RedisConfig;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.Response;
 import redis.clients.jedis.Transaction;
+import redis.clients.jedis.exceptions.JedisConnectionException;
 import redis.clients.jedis.exceptions.JedisException;
+import redis.clients.jedis.exceptions.JedisExhaustedPoolException;
 import redis.clients.jedis.params.SetParams;
 
 import java.util.List;
@@ -495,6 +498,9 @@ public class RedisBaseDistributedCountManager implements DistributedCounterManag
                 }
                 return acquired;
             }
+        } catch (JedisException e) {
+            throw new DistributedCounterException(
+                    "Redis error acquiring lock for key: " + key, e, toKind(e));
         } finally {
             if (log.isTraceEnabled()) {
                 log.trace("Time Taken to setLockWithExpiry :" + (System.currentTimeMillis() - startTime));
@@ -573,8 +579,8 @@ public class RedisBaseDistributedCountManager implements DistributedCounterManag
                 }
             }
         } catch (JedisException e) {
-            log.error("Redis error in getWindowState for key: " + key, e);
-            throw e;
+            throw new DistributedCounterException(
+                    "Redis error in getWindowState for key: " + key, e, toKind(e));
         } finally {
             if (log.isTraceEnabled()) {
                 log.trace("Time Taken to getWindowState :" + (System.currentTimeMillis() - startTime));
@@ -586,35 +592,21 @@ public class RedisBaseDistributedCountManager implements DistributedCounterManag
     public void setWindow(String key, long count, long ts, long expiryTime) {
         long startTime = System.currentTimeMillis();
         try {
-            // Reject already-expired windows upfront: pexpireAt with a past timestamp
-            // would immediately delete the hash, wasting a Redis round-trip and silently
-            // returning success to the caller.
-            long now = startTime;
-            if (expiryTime <= now) {
-                throw new JedisException("setWindow called with already-expired expiryTime="
-                        + expiryTime + " (now=" + now + ") for key: " + key
-                        + ". Window TTL would be zero or negative.");
-            }
             try (Jedis jedis = redisPool.getResource()) {
-                now = System.currentTimeMillis();
-                if (expiryTime <= now) {
-                    throw new JedisException("setWindow called with already-expired expiryTime="
-                            + expiryTime + " (now=" + now + ") for key: " + key
-                            + ". Window expired while waiting for Redis connection.");
-                }
                 Transaction tx = jedis.multi();
                 tx.hset(key, "ts", String.valueOf(ts));
                 tx.hset(key, "counter", String.valueOf(count));
                 tx.pexpireAt(key, expiryTime);
                 List<Object> results = tx.exec();
                 if (results == null || results.size() < 3) {
-                    throw new JedisException("Transaction failed for setWindow on key: "
-                            + key + " results=" + results);
+                    throw new DistributedCounterException(
+                            "Transaction failed for setWindow on key: " + key
+                            + " results=" + results, null, DistributedCounterException.Kind.TRANSACTION_ABORT);
                 }
             }
         } catch (JedisException e) {
-            log.error("Redis error in setWindow for key: " + key, e);
-            throw e;
+            throw new DistributedCounterException(
+                    "Redis error in setWindow for key: " + key, e, toKind(e));
         } finally {
             if (log.isTraceEnabled()) {
                 log.trace("Time Taken to setWindow :" + (System.currentTimeMillis() - startTime));
@@ -626,23 +618,7 @@ public class RedisBaseDistributedCountManager implements DistributedCounterManag
     public long incrWindowCounter(String key, long delta, long expiryTime) {
         long startTime = System.currentTimeMillis();
         try {
-            // Reject already-expired TTLs upfront: pexpireAt with a past timestamp would
-            // immediately delete the hash (including the just-incremented counter), causing
-            // the caller to skip its local commit and re-push the same delta next tick.
-            long now = startTime;
-            if (expiryTime <= now) {
-                throw new JedisException("incrWindowCounter called with already-expired expiryTime="
-                        + expiryTime + " (now=" + now + ") for key: " + key
-                        + ". Refusing to push delta=" + delta + " to an expired window.");
-            }
             try (Jedis jedis = redisPool.getResource()) {
-                now = System.currentTimeMillis();
-                if (expiryTime <= now) {
-                    throw new JedisException("incrWindowCounter called with already-expired expiryTime="
-                            + expiryTime + " (now=" + now + ") for key: " + key
-                            + ". Window expired while waiting for Redis connection."
-                            + " Refusing to push delta=" + delta + ".");
-                }
                 Transaction tx = jedis.multi();
                 Response<Long> counterResp = tx.hincrBy(key, "counter", delta);
                 // pexpireAt guards against the narrow race where the hash TTL fires between
@@ -651,23 +627,35 @@ public class RedisBaseDistributedCountManager implements DistributedCounterManag
                 tx.pexpireAt(key, expiryTime);
                 List<Object> results = tx.exec();
                 if (results == null || results.size() < 2) {
-                    throw new JedisException("Transaction failed for incrWindowCounter on key: "
-                            + key + " results=" + results);
+                    throw new DistributedCounterException(
+                            "Transaction failed for incrWindowCounter on key: " + key
+                            + " results=" + results, null, DistributedCounterException.Kind.TRANSACTION_ABORT);
                 }
                 Long newCounter = counterResp.get();
                 if (newCounter == null) {
-                    throw new JedisException("Counter increment returned null for key: " + key);
+                    throw new DistributedCounterException(
+                            "Counter increment returned null for key: " + key, null,
+                            DistributedCounterException.Kind.SERVER_ERROR);
                 }
                 return newCounter;
             }
         } catch (JedisException e) {
-            log.error("Redis error in incrWindowCounter for key: " + key, e);
-            throw e;
+            throw new DistributedCounterException(
+                    "Redis error in incrWindowCounter for key: " + key, e, toKind(e));
         } finally {
             if (log.isTraceEnabled()) {
                 log.trace("Time Taken to incrWindowCounter :" + (System.currentTimeMillis() - startTime));
             }
         }
     }
-}
 
+    private static DistributedCounterException.Kind toKind(JedisException e) {
+        if (e instanceof JedisExhaustedPoolException) {
+            return DistributedCounterException.Kind.POOL_EXHAUSTED;
+        }
+        if (e instanceof JedisConnectionException) {
+            return DistributedCounterException.Kind.CONNECTION_FAILURE;
+        }
+        return DistributedCounterException.Kind.SERVER_ERROR;
+    }
+}
