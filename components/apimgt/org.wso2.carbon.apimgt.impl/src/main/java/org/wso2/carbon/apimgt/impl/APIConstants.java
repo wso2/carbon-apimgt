@@ -589,7 +589,7 @@ public final class APIConstants {
         public static final String API_CHAT_ACTION_PREPARE = "PREPARE";
         public static final String API_CHAT_ACTION_EXECUTE = "EXECUTE";
         public static final String API_CHAT_REQUEST_ID = "apiChatRequestId";
-        public static final String API_CHAT_IMPL_CLASS = "ApiChatImplementation";
+        public static final String API_CHAT_IMPL_CLASS = "ApiChatAssistantImplementation";
 
         public static final String MARKETPLACE_ASSISTANT = "MarketplaceAssistant";
         public static final String MARKETPLACE_ASSISTANT_ENABLED = "Enabled";
@@ -601,13 +601,13 @@ public final class APIConstants {
         public static final String MARKETPLACE_ASSISTANT_PUBLISH_API_RESOURCE = "ApiPublishResource";
         public static final String MARKETPLACE_ASSISTANT_DELETE_API_RESOURCE = "ApiDeleteResource";
         public static final String MARKETPLACE_ASSISTANT_API_COUNT_RESOURCE = "ApiCountResource";
-        public static final String MARKETPLACE_ASSISTANT_IMPL_CLASS = "MarketPlaceAssistanceImplementation";
+        public static final String MARKETPLACE_ASSISTANT_IMPL_CLASS = "MarketPlaceAssistantImplementation";
         public static final String MARKETPLACE_ASSISTANT_DEFAULT_IMPL =
                 "org.wso2.carbon.apimgt.impl.ai.DefaultMarketplaceAssistantService";
-        public static final String DESIGN_ASSISTANT_IMPL_CLASS = "DesignAssistanceImplementation";
+        public static final String DESIGN_ASSISTANT_IMPL_CLASS = "DesignAssistantImplementation";
         public static final String DESIGN_ASSISTANT_DEFAULT_IMPL =
                 "org.wso2.carbon.apimgt.impl.ai.DefaultDesignAssistantService";
-        public static final String API_CHAT_DEFAULT_IMPL = "org.wso2.carbon.apimgt.impl.ai.DefaultAPIChatService";
+        public static final String API_CHAT_DEFAULT_IMPL = "org.wso2.carbon.apimgt.impl.ai.DefaultAPIChatAssistantService";
         public static final String AI_CONFIGURATION = "AiConfiguration";
         public static final String MCP = "MCP";
         public static final String MCP_SUPPORT_ENABLED = "Enabled";
