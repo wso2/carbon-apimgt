@@ -27383,16 +27383,8 @@ public class ApiMgtDAO {
             statement.setString(1, policyMappingUUID);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
-                    OperationPolicy operationPolicy = new OperationPolicy();
-                    operationPolicy.setPolicyName(rs.getString("POLICY_NAME"));
-                    operationPolicy.setPolicyVersion(rs.getString("POLICY_VERSION"));
-                    operationPolicy.setPolicyId(rs.getString("POLICY_UUID"));
-                    operationPolicy.setOrder(rs.getInt("POLICY_ORDER"));
-                    operationPolicy.setDirection(rs.getString("DIRECTION"));
-                    Map<String, Object> parameters =
-                    APIMgtDBUtil.convertJSONStringToMap(rs.getString("PARAMETERS"));
-                    operationPolicy.setParameters(parameters != null ? parameters : new HashMap<>());
-                    gatewayPolicies.add(operationPolicy);
+                    OperationPolicy policy = populateOperationPolicyWithRS(rs);
+                    gatewayPolicies.add(policy);
                 }
             }
         } catch (SQLException e) {
@@ -27733,7 +27725,7 @@ public class ApiMgtDAO {
 
     private void addGatewayPolicyMapping(Connection connection, List<OperationPolicy> gatewayPolicyList,
                                          String policyMappingUUID, String orgId)
-            throws SQLException, APIMgtResourceNotFoundException {
+            throws SQLException, APIMgtResourceNotFoundException, APIManagementException {
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(
                 SQLConstants.GatewayPolicyConstants.ADD_GATEWAY_POLICY_MAPPING)) {
@@ -27754,7 +27746,15 @@ public class ApiMgtDAO {
                     preparedStatement.setString(2, gatewayGlobalPolicy.getPolicyId());
                     preparedStatement.setInt(3, gatewayGlobalPolicy.getOrder());
                     preparedStatement.setString(4, gatewayGlobalPolicy.getDirection());
-                    preparedStatement.setString(5, paramJSON);
+
+                    byte[] paramBytes = paramJSON.getBytes(StandardCharsets.UTF_8);
+                    try (InputStream paramInputStream = new ByteArrayInputStream(paramBytes)) {
+                        preparedStatement.setBinaryStream(5, paramInputStream, paramBytes.length);
+                    } catch (IOException e) {
+                        log.error("Error creating or reading InputStream for Global policy");
+                        throw new APIManagementException("Error processing Global policy parameters for policy ID: " +
+                                gatewayGlobalPolicy.getPolicyId(), e);
+                    }
                     preparedStatement.addBatch();
                 }
             }
