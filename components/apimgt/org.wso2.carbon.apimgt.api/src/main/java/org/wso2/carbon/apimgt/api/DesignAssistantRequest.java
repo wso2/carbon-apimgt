@@ -16,57 +16,38 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.impl.ai;
+package org.wso2.carbon.apimgt.api;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Carries the context of a Marketplace Assistant request to a {@link MarketplaceAssistantService} implementation.
+ * Carries the context of an API Design Assistant request to a {@link DesignAssistant} implementation.
  * <p>
  * Passing a context object rather than positional parameters keeps the SPI stable: an implementation reads only the
- * fields it needs (ignoring, for example, {@link #getUsername()} if its AI service does not require it), and new
- * fields can be added over time without breaking existing implementations. Any information not modelled as a typed
- * field can be supplied through {@link #getAdditionalProperties()}.
+ * fields it needs, and new fields can be added over time without breaking existing implementations. Any information
+ * not modelled as a typed field can be supplied through {@link #getAdditionalProperties()}.
  */
-public class MarketplaceAssistantRequest {
+public class DesignAssistantRequest {
 
-    private String query;
-    private String history;
-    private String organization;
-    private String username;
+    private String sessionId;
+    private String text;
     private final Map<String, Object> additionalProperties = new HashMap<>();
 
-    public String getQuery() {
-        return query;
+    public String getSessionId() {
+        return sessionId;
     }
 
-    public void setQuery(String query) {
-        this.query = query;
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
     }
 
-    public String getHistory() {
-        return history;
+    public String getText() {
+        return text;
     }
 
-    public void setHistory(String history) {
-        this.history = history;
-    }
-
-    public String getOrganization() {
-        return organization;
-    }
-
-    public void setOrganization(String organization) {
-        this.organization = organization;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
+    public void setText(String text) {
+        this.text = text;
     }
 
     public Map<String, Object> getAdditionalProperties() {

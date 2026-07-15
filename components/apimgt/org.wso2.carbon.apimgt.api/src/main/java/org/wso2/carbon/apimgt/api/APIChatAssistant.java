@@ -16,9 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.impl.ai;
-
-import org.wso2.carbon.apimgt.api.APIManagementException;
+package org.wso2.carbon.apimgt.api;
 
 /**
  * Extension point for the API Chat backend integration.
@@ -28,12 +26,12 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
  * returning the response body. This decouples the API Chat logic from any specific AI service contract, allowing
  * deployments to plug in their own AI service by configuring a custom implementation class under
  * {@code <APIChat><ApiChatImplementation></ApiChatImplementation></APIChat>} in {@code api-manager.xml}. When no
- * implementation is configured, {@link DefaultAPIChatService} is used, preserving the out-of-the-box behaviour.
+ * implementation is configured, {@code DefaultAPIChatService} is used, preserving the out-of-the-box behaviour.
  * <p>
  * Implementations must be thread-safe and provide a public no-argument constructor, as a single instance is created
- * and cached by {@link APIChatServiceFactory}.
+ * and cached by {@code APIChatServiceFactory}.
  */
-public interface APIChatService {
+public interface APIChatAssistant {
 
     /**
      * Executes the API Chat "prepare" stage against the underlying AI service.
@@ -43,7 +41,7 @@ public interface APIChatService {
      * @return the raw JSON response body returned by the AI service, expected to map onto {@code ApiChatResponseDTO}
      * @throws APIManagementException if an error occurs while invoking the AI service
      */
-    String prepare(APIChatRequest request) throws APIManagementException;
+    APIChatResponse prepare(APIChatRequest request) throws APIManagementException;
 
     /**
      * Executes the API Chat "execute" stage against the underlying AI service.
@@ -52,5 +50,5 @@ public interface APIChatService {
      * @return the raw JSON response body returned by the AI service, expected to map onto {@code ApiChatResponseDTO}
      * @throws APIManagementException if an error occurs while invoking the AI service
      */
-    String execute(APIChatRequest request) throws APIManagementException;
+    APIChatResponse execute(APIChatRequest request) throws APIManagementException;
 }

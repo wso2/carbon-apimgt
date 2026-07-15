@@ -16,38 +16,39 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.impl.ai;
+package org.wso2.carbon.apimgt.api;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Carries the context of an API Design Assistant request to a {@link DesignAssistantService} implementation.
+ * Carries the result of a {@link MarketplaceAssistant} invocation.
  * <p>
- * Passing a context object rather than positional parameters keeps the SPI stable: an implementation reads only the
- * fields it needs, and new fields can be added over time without breaking existing implementations. Any information
- * not modelled as a typed field can be supplied through {@link #getAdditionalProperties()}.
+ * {@code executeResponse} holds the raw JSON body returned by the chat/execute call, and {@code count} the raw JSON
+ * body returned by the API-count call. Consumers map the relevant field onto the REST response DTO. Returning a
+ * response object (rather than a bare string) keeps the SPI stable - additional fields can be added over time, and
+ * anything not modelled as a typed field can be supplied through {@link #getAdditionalProperties()}.
  */
-public class DesignAssistantRequest {
+public class MarketplaceAssistantResponse {
 
-    private String sessionId;
-    private String text;
+    private String executeResponse;
+    private String count;
     private final Map<String, Object> additionalProperties = new HashMap<>();
 
-    public String getSessionId() {
-        return sessionId;
+    public String getExecuteResponse() {
+        return executeResponse;
     }
 
-    public void setSessionId(String sessionId) {
-        this.sessionId = sessionId;
+    public void setExecuteResponse(String executeResponse) {
+        this.executeResponse = executeResponse;
     }
 
-    public String getText() {
-        return text;
+    public String getCount() {
+        return count;
     }
 
-    public void setText(String text) {
-        this.text = text;
+    public void setCount(String count) {
+        this.count = count;
     }
 
     public Map<String, Object> getAdditionalProperties() {

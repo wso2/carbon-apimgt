@@ -15,10 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-package org.wso2.carbon.apimgt.impl.ai;
-
-import org.wso2.carbon.apimgt.api.APIManagementException;
+package org.wso2.carbon.apimgt.api;
 
 /**
  * Extension point for the Marketplace Assistant backend integration.
@@ -27,15 +24,14 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
  * invoking the service over whatever transport/auth mechanism it requires, and returning the response body. This
  * decouples the Developer Portal REST layer from any specific AI service contract, allowing deployments to plug in
  * their own AI service by configuring a custom implementation class under
- * {@code <MarketplaceAssistant><MarketPlaceAssistanceImplementation>
- * </MarketPlaceAssistanceImplementation></MarketplaceAssistant>} in {@code api-manager.xml}.
- * When no implementation is configured, {@link DefaultMarketplaceAssistantService} is used,
- * preserving the out-of-the-box behaviour.
+ * {@code <MarketplaceAssistant><MarketPlaceAssistanceImplementation></MarketPlaceAssistanceImplementation></MarketplaceAssistant>}
+ * in {@code api-manager.xml}. When no implementation is configured, {@code DefaultMarketplaceAssistantService} is
+ * used, preserving the out-of-the-box behaviour.
  * <p>
  * Implementations must be thread-safe and provide a public no-argument constructor, as a single instance is created
- * and cached by {@link MarketplaceAssistantServiceFactory}.
+ * and cached by {@code MarketplaceAssistantServiceFactory}.
  */
-public interface MarketplaceAssistantService {
+public interface MarketplaceAssistant {
 
     /**
      * Executes a Marketplace Assistant chat query against the underlying AI service.
@@ -46,7 +42,7 @@ public interface MarketplaceAssistantService {
      *         in which case the REST layer produces an empty response
      * @throws APIManagementException if an error occurs while invoking the AI service
      */
-    String execute(MarketplaceAssistantRequest request) throws APIManagementException;
+    MarketplaceAssistantResponse execute(MarketplaceAssistantRequest request) throws APIManagementException;
 
     /**
      * Retrieves the number of APIs available to the Marketplace Assistant.
@@ -57,5 +53,5 @@ public interface MarketplaceAssistantService {
      *         applicable/configured, in which case the REST layer produces an empty response
      * @throws APIManagementException if an error occurs while invoking the AI service
      */
-    String getApiCount(MarketplaceAssistantRequest request) throws APIManagementException;
+    MarketplaceAssistantResponse getApiCount(MarketplaceAssistantRequest request) throws APIManagementException;
 }

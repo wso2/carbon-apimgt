@@ -16,52 +16,41 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.impl.ai;
+package org.wso2.carbon.apimgt.api;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Carries the context of an API Chat request to an {@link APIChatService} implementation.
+ * Carries the context of a Marketplace Assistant request to a {@link MarketplaceAssistant} implementation.
  * <p>
  * Passing a context object rather than positional parameters keeps the SPI stable: an implementation reads only the
- * fields it needs (ignoring, for example, {@link #getApiChatRequestId()} if its AI service does not track requests
- * that way), and new fields can be added over time without breaking existing implementations. Any information not
- * modelled as a typed field can be supplied through {@link #getAdditionalProperties()}.
+ * fields it needs (ignoring, for example, {@link #getUsername()} if its AI service does not require it), and new
+ * fields can be added over time without breaking existing implementations. Any information not modelled as a typed
+ * field can be supplied through {@link #getAdditionalProperties()}.
  */
-public class APIChatRequest {
+public class MarketplaceAssistantRequest {
 
-    private String action;
-    private String apiId;
-    private String apiChatRequestId;
+    private String query;
+    private String history;
     private String organization;
     private String username;
-    private String openAPIDefinition;
-    private String requestPayload;
     private final Map<String, Object> additionalProperties = new HashMap<>();
 
-    public String getAction() {
-        return action;
+    public String getQuery() {
+        return query;
     }
 
-    public void setAction(String action) {
-        this.action = action;
+    public void setQuery(String query) {
+        this.query = query;
     }
 
-    public String getApiId() {
-        return apiId;
+    public String getHistory() {
+        return history;
     }
 
-    public void setApiId(String apiId) {
-        this.apiId = apiId;
-    }
-
-    public String getApiChatRequestId() {
-        return apiChatRequestId;
-    }
-
-    public void setApiChatRequestId(String apiChatRequestId) {
-        this.apiChatRequestId = apiChatRequestId;
+    public void setHistory(String history) {
+        this.history = history;
     }
 
     public String getOrganization() {
@@ -78,22 +67,6 @@ public class APIChatRequest {
 
     public void setUsername(String username) {
         this.username = username;
-    }
-
-    public String getOpenAPIDefinition() {
-        return openAPIDefinition;
-    }
-
-    public void setOpenAPIDefinition(String openAPIDefinition) {
-        this.openAPIDefinition = openAPIDefinition;
-    }
-
-    public String getRequestPayload() {
-        return requestPayload;
-    }
-
-    public void setRequestPayload(String requestPayload) {
-        this.requestPayload = requestPayload;
     }
 
     public Map<String, Object> getAdditionalProperties() {

@@ -23,8 +23,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.ai.MarketplaceAssistantRequest;
-import org.wso2.carbon.apimgt.impl.ai.MarketplaceAssistantService;
+import org.wso2.carbon.apimgt.api.MarketplaceAssistant;
+import org.wso2.carbon.apimgt.api.MarketplaceAssistantRequest;
+import org.wso2.carbon.apimgt.api.MarketplaceAssistantResponse;
 import org.wso2.carbon.apimgt.impl.ai.MarketplaceAssistantServiceFactory;
 import org.wso2.carbon.apimgt.rest.api.store.v1.*;
 
@@ -66,14 +67,14 @@ public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantA
             request.setOrganization(organization);
             request.setUsername(username);
 
-            MarketplaceAssistantService marketplaceAssistantService =
+            MarketplaceAssistant marketplaceAssistantService =
                     MarketplaceAssistantServiceFactory.getMarketplaceAssistantService();
-            String response = marketplaceAssistantService.execute(request);
-            if (response == null) {
+            MarketplaceAssistantResponse response = marketplaceAssistantService.execute(request);
+            if (response == null || response.getExecuteResponse() == null) {
                 return null;
             }
             ObjectMapper objectMapper = new ObjectMapper();
-            MarketplaceAssistantResponseDTO executeResponseDTO = objectMapper.readValue(response,
+            MarketplaceAssistantResponseDTO executeResponseDTO = objectMapper.readValue(response.getExecuteResponse(),
                     MarketplaceAssistantResponseDTO.class);
             return Response.status(Response.Status.CREATED).entity(executeResponseDTO).build();
         } catch (APIManagementException | IOException e) {
@@ -97,14 +98,14 @@ public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantA
             MarketplaceAssistantRequest request = new MarketplaceAssistantRequest();
             request.setOrganization(organization);
 
-            MarketplaceAssistantService marketplaceAssistantService =
+            MarketplaceAssistant marketplaceAssistantService =
                     MarketplaceAssistantServiceFactory.getMarketplaceAssistantService();
-            String response = marketplaceAssistantService.getApiCount(request);
-            if (response == null) {
+            MarketplaceAssistantResponse response = marketplaceAssistantService.getApiCount(request);
+            if (response == null || response.getCount() == null) {
                 return null;
             }
             ObjectMapper objectMapper = new ObjectMapper();
-            MarketplaceAssistantApiCountResponseDTO executeResponseDTO = objectMapper.readValue(response,
+            MarketplaceAssistantApiCountResponseDTO executeResponseDTO = objectMapper.readValue(response.getCount(),
                     MarketplaceAssistantApiCountResponseDTO.class);
             return Response.status(Response.Status.OK).entity(executeResponseDTO).build();
         } catch (APIManagementException | IOException e) {

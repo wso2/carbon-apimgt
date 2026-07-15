@@ -26,6 +26,9 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.MarketplaceAssistant;
+import org.wso2.carbon.apimgt.api.MarketplaceAssistantRequest;
+import org.wso2.carbon.apimgt.api.MarketplaceAssistantResponse;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.ai.MarketplaceAssistantConfigurationDTO;
@@ -35,16 +38,16 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import java.io.IOException;
 
 /**
- * Default {@link MarketplaceAssistantService} implementation that integrates with the WSO2 (Choreo) deployed AI
- * service. This preserves the out-of-the-box Marketplace Assistant behaviour and is used whenever no custom
- * implementation class is configured.
+ * Default {@link MarketplaceAssistant} implementation that integrates with the WSO2 (Choreo) deployed AI service.
+ * This preserves the out-of-the-box Marketplace Assistant behaviour and is used whenever no custom implementation
+ * class is configured.
  */
-public class DefaultMarketplaceAssistantService implements MarketplaceAssistantService {
+public class DefaultMarketplaceAssistantService implements MarketplaceAssistant {
 
     private static final Log log = LogFactory.getLog(DefaultMarketplaceAssistantService.class);
 
     @Override
-    public String execute(MarketplaceAssistantRequest request) throws APIManagementException {
+    public MarketplaceAssistantResponse execute(MarketplaceAssistantRequest request) throws APIManagementException {
         MarketplaceAssistantConfigurationDTO configDto = getConfiguration();
         if (configDto == null || !(configDto.isKeyProvided() || configDto.isAuthTokenProvided())) {
             return null;
@@ -59,38 +62,45 @@ public class DefaultMarketplaceAssistantService implements MarketplaceAssistantS
         payload.put(APIConstants.USERROLES, userRoles.toLowerCase());
         payload.put(APIConstants.APIM_VERSION, APIUtil.getAPIMVersion());
 
+        String aiResponse;
         if (configDto.isKeyProvided()) {
-            return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(),
+            aiResponse = APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(),
                     configDto.getKey(), configDto.getChatResource(), payload.toString(), null);
         } else {
-            return APIUtil.invokeAIService(configDto.getEndpoint(), null,
+            aiResponse = APIUtil.invokeAIService(configDto.getEndpoint(), null,
                     configDto.getAccessToken(), configDto.getChatResource(), payload.toString(), null);
         }
+
+        MarketplaceAssistantResponse response = new MarketplaceAssistantResponse();
+        response.setExecuteResponse(aiResponse);
+        return response;
     }
 
     @Override
-    public String getApiCount(MarketplaceAssistantRequest request) throws APIManagementException {
+    public MarketplaceAssistantResponse getApiCount(MarketplaceAssistantRequest request) throws APIManagementException {
         MarketplaceAssistantConfigurationDTO configDto = getConfiguration();
         if (configDto == null || !(configDto.isKeyProvided() || configDto.isAuthTokenProvided())) {
             return null;
         }
 
-        CloseableHttpResponse response = null;
+        CloseableHttpResponse httpResponse = null;
         try {
             if (configDto.isKeyProvided()) {
-                response = APIUtil.getMarketplaceChatApiCount(configDto.getEndpoint(),
+                httpResponse = APIUtil.getMarketplaceChatApiCount(configDto.getEndpoint(),
                         configDto.getTokenEndpoint(), configDto.getKey(), configDto.getApiCountResource());
             } else {
-                response = APIUtil.getMarketplaceChatApiCount(configDto.getEndpoint(),
+                httpResponse = APIUtil.getMarketplaceChatApiCount(configDto.getEndpoint(),
                         null, configDto.getAccessToken(), configDto.getApiCountResource());
             }
-            int statusCode = response.getStatusLine().getStatusCode();
+            int statusCode = httpResponse.getStatusLine().getStatusCode();
             if (statusCode == HttpStatus.SC_OK) {
                 if (log.isDebugEnabled()) {
                     log.debug("Successfully completed the Marketplace Assistant api count call with status code: "
                             + statusCode);
                 }
-                return EntityUtils.toString(response.getEntity());
+                MarketplaceAssistantResponse response = new MarketplaceAssistantResponse();
+                response.setCount(EntityUtils.toString(httpResponse.getEntity()));
+                return response;
             } else {
                 throw new APIManagementException("Error encountered while executing the Marketplace Assistant "
                         + "service to accommodate the specified testing requirement. Received status code: "
@@ -100,9 +110,9 @@ public class DefaultMarketplaceAssistantService implements MarketplaceAssistantS
             throw new APIManagementException("Error encountered while connecting to the Marketplace Assistant "
                     + "service", e);
         } finally {
-            if (response != null) {
+            if (httpResponse != null) {
                 try {
-                    response.close();
+                    httpResponse.close();
                 } catch (IOException e) {
                     log.error("Error while closing the CloseableHttpResponse", e);
                 }

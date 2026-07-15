@@ -16,9 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.impl.ai;
-
-import org.wso2.carbon.apimgt.api.APIManagementException;
+package org.wso2.carbon.apimgt.api;
 
 /**
  * Extension point for the API Design Assistant backend integration.
@@ -28,14 +26,13 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
  * decouples the Publisher REST layer from any specific AI service contract, allowing deployments to plug in their
  * own AI service by configuring a custom implementation class under
  * {@code <DesignAssistant><DesignAssistanceImplementation></DesignAssistanceImplementation></DesignAssistant>} in
- * {@code api-manager.xml}. When no implementation is configured, {@link DefaultDesignAssistantService} is used,
+ * {@code api-manager.xml}. When no implementation is configured, {@code DefaultDesignAssistantService} is used,
  * preserving the out-of-the-box behaviour.
  * <p>
  * Implementations must be thread-safe and provide a public no-argument constructor, as a single instance is created
- * and cached by {@link DesignAssistanceServiceFactory}.
+ * and cached by {@code DesignAssistanceServiceFactory}.
  */
-public interface DesignAssistantService {
-
+public interface DesignAssistant {
     /**
      * Generates an API payload for the given design session.
      *
@@ -44,7 +41,7 @@ public interface DesignAssistantService {
      *         applicable/configured, in which case the REST layer produces an empty response
      * @throws APIManagementException if an error occurs while invoking the AI service
      */
-    String generatePayload(DesignAssistantRequest request) throws APIManagementException;
+    DesignAssistantResponse generatePayload(DesignAssistantRequest request) throws APIManagementException;
 
     /**
      * Executes a Design Assistant chat query against the underlying AI service.
@@ -55,5 +52,5 @@ public interface DesignAssistantService {
      *         in which case the REST layer produces an empty response
      * @throws APIManagementException if an error occurs while invoking the AI service
      */
-    String chat(DesignAssistantRequest request) throws APIManagementException;
+    DesignAssistantResponse chat(DesignAssistantRequest request) throws APIManagementException;
 }

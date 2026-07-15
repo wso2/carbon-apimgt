@@ -22,9 +22,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.ai.DesignAssistanceServiceFactory;
-import org.wso2.carbon.apimgt.impl.ai.DesignAssistantRequest;
-import org.wso2.carbon.apimgt.impl.ai.DesignAssistantService;
+import org.wso2.carbon.apimgt.api.DesignAssistant;
+import org.wso2.carbon.apimgt.api.DesignAssistantRequest;
+import org.wso2.carbon.apimgt.api.DesignAssistantResponse;
+import org.wso2.carbon.apimgt.impl.ai.DesignAssistantServiceFactory;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.DesignAssistantApiService;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
@@ -58,13 +59,13 @@ public class DesignAssistantApiServiceImpl implements DesignAssistantApiService 
             DesignAssistantRequest request = new DesignAssistantRequest();
             request.setSessionId(sessionId);
 
-            DesignAssistantService designAssistantService = DesignAssistanceServiceFactory.getDesignAssistantService();
-            String response = designAssistantService.generatePayload(request);
-            if (response == null) {
+            DesignAssistant designAssistantService = DesignAssistantServiceFactory.getDesignAssistantService();
+            DesignAssistantResponse response = designAssistantService.generatePayload(request);
+            if (response == null || response.getPayload() == null) {
                 return null;
             }
             DesignAssistantAPIPayloadResponseDTO responseDTO = new DesignAssistantAPIPayloadResponseDTO();
-            responseDTO.setGeneratedPayload(response);
+            responseDTO.setGeneratedPayload(response.getPayload());
             return Response.ok(responseDTO).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAIServiceNotAccessible(e)) {
@@ -95,13 +96,12 @@ public class DesignAssistantApiServiceImpl implements DesignAssistantApiService 
             request.setSessionId(sessionId);
             request.setText(designAssistantChatQueryDTO.getText());
 
-            DesignAssistantService designAssistantService = DesignAssistanceServiceFactory.getDesignAssistantService();
-            String response = designAssistantService.chat(request);
-            if (response == null) {
+            DesignAssistant designAssistantService = DesignAssistantServiceFactory.getDesignAssistantService();
+            DesignAssistantResponse response = designAssistantService.chat(request);
+            if (response == null || response.getChatResponse() == null) {
                 return null;
             }
-            ObjectMapper objectMapper = new ObjectMapper();
-            DesignAssistantChatResponseDTO responseDTO = OBJECT_MAPPER.readValue(response,
+            DesignAssistantChatResponseDTO responseDTO = OBJECT_MAPPER.readValue(response.getChatResponse(),
                     DesignAssistantChatResponseDTO.class);
             return Response.ok(responseDTO).build();
         } catch (APIManagementException | IOException e) {
