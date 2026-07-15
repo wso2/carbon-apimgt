@@ -136,7 +136,6 @@ public class GatewayUtils {
     private static final String HTTP_SC_DESC = "HTTP_SC_DESC";
     private static final Gson gson = new Gson();
     private static String apiUUID;
-    private static final String apiType = String.valueOf(APIConstants.ApiTypes.API);
     private static final Pattern validHostHeaderPattern =
             Pattern.compile("^[A-Za-z0-9][A-Za-z0-9.-]*(:\\d{1,5})?$");
 
