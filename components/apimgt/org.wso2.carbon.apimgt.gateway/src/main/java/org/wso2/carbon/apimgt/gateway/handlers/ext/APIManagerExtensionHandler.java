@@ -29,6 +29,7 @@ import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
@@ -112,6 +113,7 @@ public class APIManagerExtensionHandler extends AbstractHandler {
             TelemetryTracer tracer = ServiceReferenceHolder.getInstance().getTelemetryTracer();
             requestMediationSpan = TelemetryUtil.startSpan(APIMgtGatewayConstants.REQUEST_MEDIATION,
                     responseLatencySpan, tracer);
+            GatewayUtils.setCommonHTTPAttributes(requestMediationSpan, messageContext);
         } else if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =
                     (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
@@ -167,6 +169,7 @@ public class APIManagerExtensionHandler extends AbstractHandler {
             TelemetryTracer tracer = ServiceReferenceHolder.getInstance().getTelemetryTracer();
             responseMediationSpan =
                     TelemetryUtil.startSpan(APIMgtGatewayConstants.RESPONSE_MEDIATION, responseLatencySpan, tracer);
+            GatewayUtils.setCommonHTTPAttributes(responseMediationSpan, messageContext);
         } else if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =
                     (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);

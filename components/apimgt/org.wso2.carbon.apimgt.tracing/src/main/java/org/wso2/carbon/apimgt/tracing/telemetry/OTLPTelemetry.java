@@ -22,11 +22,14 @@ import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
 import io.opentelemetry.context.propagation.ContextPropagators;
+import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporter;
+import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporterBuilder;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporterBuilder;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
+import io.opentelemetry.sdk.trace.export.SpanExporter;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -53,7 +56,9 @@ public class OTLPTelemetry implements APIMOpenTelemetry {
         String headerKey = null;
         String headerValue = null;
 
-
+        String otlpProtocol = configuration.getFirstProperty(TelemetryConstants.OTLP_CONFIG_PROTOCOL) != null ?
+                configuration.getFirstProperty(TelemetryConstants.OTLP_CONFIG_PROTOCOL) :
+                TelemetryConstants.GRPC_PROTOCOL;
         String headerProperty = getHeaderKeyProperty();
         String endPointURL = configuration.getFirstProperty(TelemetryConstants.OTLP_CONFIG_URL) != null ?
                 configuration.getFirstProperty(TelemetryConstants.OTLP_CONFIG_URL) : null;
@@ -64,29 +69,21 @@ public class OTLPTelemetry implements APIMOpenTelemetry {
                     configuration.getFirstProperty(headerProperty) : null;
         }
 
-        if (StringUtils.isNotEmpty(endPointURL)) {
-            OtlpGrpcSpanExporterBuilder otlpGrpcSpanExporterBuilder = null;
-            if (headerKey != null && headerValue != null) {
-                otlpGrpcSpanExporterBuilder = OtlpGrpcSpanExporter.builder()
-                        .setEndpoint(endPointURL)
-                        .setCompression("gzip")
-                        .addHeader(headerKey, headerValue);
-            } else {
-                otlpGrpcSpanExporterBuilder = OtlpGrpcSpanExporter.builder()
-                        .setEndpoint(endPointURL)
-                        .setCompression("gzip");
-                if (log.isDebugEnabled()) {
-                    log.debug("OTLP exporter: " + otlpGrpcSpanExporterBuilder + " is configured at " + endPointURL +
-                            " without headers.");
-                }
-            }
+        boolean useHttp;
+        if (TelemetryConstants.HTTP_PROTOCOL.equalsIgnoreCase(otlpProtocol)) {
+            useHttp = true;
+        } else if (TelemetryConstants.GRPC_PROTOCOL.equalsIgnoreCase(otlpProtocol)) {
+            useHttp = false;
+        } else {
+            log.warn("OTLP protocol '" + otlpProtocol + "' is invalid. Defaulting to gRPC.");
+            useHttp = false;
+        }
 
-            if (log.isDebugEnabled()) {
-                log.debug("OTLP exporter: " + otlpGrpcSpanExporterBuilder + " is configured at " + endPointURL);
-            }
+        if (StringUtils.isNotEmpty(endPointURL)) {
+            SpanExporter spanExporter = buildSpanExporter(useHttp, endPointURL, headerKey, headerValue);
 
             sdkTracerProvider = SdkTracerProvider.builder()
-                    .addSpanProcessor(BatchSpanProcessor.builder(otlpGrpcSpanExporterBuilder.build()).build())
+                    .addSpanProcessor(BatchSpanProcessor.builder(spanExporter).build())
                     .setResource(TelemetryUtil.getTracerProviderResource(serviceName))
                     .setSampler(getConfiguredSampler())
                     .build();
@@ -129,6 +126,41 @@ public class OTLPTelemetry implements APIMOpenTelemetry {
         if (sdkTracerProvider != null) {
             sdkTracerProvider.close();
         }
+    }
+
+    /**
+     * Builds the OTLP span exporter for the configured protocol (HTTP or gRPC).
+     *
+     * @param useHttp     whether to use the OTLP/HTTP exporter instead of OTLP/gRPC.
+     * @param endPointURL the OTLP endpoint URL.
+     * @param headerKey   optional authentication header name (may be {@code null}).
+     * @param headerValue optional authentication header value (may be {@code null}).
+     * @return the configured {@link SpanExporter}.
+     */
+    private SpanExporter buildSpanExporter(boolean useHttp, String endPointURL, String headerKey, String headerValue) {
+
+        boolean hasHeader = headerKey != null && headerValue != null;
+        SpanExporter spanExporter;
+        if (useHttp) {
+            OtlpHttpSpanExporterBuilder builder =
+                    OtlpHttpSpanExporter.builder().setEndpoint(endPointURL).setCompression("gzip");
+            if (hasHeader) {
+                builder.addHeader(headerKey, headerValue);
+            }
+            spanExporter = builder.build();
+        } else {
+            OtlpGrpcSpanExporterBuilder builder =
+                    OtlpGrpcSpanExporter.builder().setEndpoint(endPointURL).setCompression("gzip");
+            if (hasHeader) {
+                builder.addHeader(headerKey, headerValue);
+            }
+            spanExporter = builder.build();
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("OTLP " + (useHttp ? "HTTP" : "gRPC") + " exporter is configured at " + endPointURL +
+                    (hasHeader ? " with header: " + headerKey : " without headers."));
+        }
+        return spanExporter;
     }
 
     /**

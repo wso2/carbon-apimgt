@@ -173,6 +173,7 @@ public class APIThrottleHandler extends AbstractHandler {
             TelemetryTracer tracer = ServiceReferenceHolder.getInstance().getTelemetryTracer();
             throttlingLatencySpan = TelemetryUtil.startSpan(APIMgtGatewayConstants.THROTTLE_LATENCY,
                     responseLatencySpan, tracer);
+            GatewayUtils.setCommonHTTPAttributes(throttlingLatencySpan, messageContext);
         } else if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =
                     (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);

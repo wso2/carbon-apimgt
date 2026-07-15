@@ -35,6 +35,7 @@ import org.apache.synapse.rest.AbstractHandler;
 import org.jetbrains.annotations.NotNull;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
@@ -70,6 +71,7 @@ public class APIMgtLatencyStatsHandler extends AbstractHandler {
             TelemetryTracer tracer = ServiceReferenceHolder.getInstance().getTelemetryTracer();
             TelemetrySpan span = TelemetryUtil.startSpan(APIMgtGatewayConstants.RESOURCE_SPAN, responseLatencySpan,
                     tracer);
+            GatewayUtils.setCommonHTTPAttributes(span, messageContext);
             messageContext.setProperty(APIMgtGatewayConstants.RESOURCE_SPAN, span);
         } else if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =
