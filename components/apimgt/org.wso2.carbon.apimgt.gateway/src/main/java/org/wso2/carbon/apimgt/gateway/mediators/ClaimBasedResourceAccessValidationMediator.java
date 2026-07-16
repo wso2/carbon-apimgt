@@ -27,6 +27,7 @@ import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 
@@ -161,7 +162,11 @@ public class ClaimBasedResourceAccessValidationMediator extends AbstractMediator
         messageContext.setProperty(SynapseConstants.ERROR_CODE, errorCode);
         messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, errorMessage);
         messageContext.setProperty(SynapseConstants.ERROR_DETAIL, errorDescription);
-        Mediator sequence = messageContext.getSequence(APISecurityConstants.BACKEND_AUTH_FAILURE_HANDLER);
+        // Publish the error flow type such that any error sequence can branch on it.
+        messageContext.setProperty(APIMgtGatewayConstants.API_ERROR_TYPE,
+                APIMgtGatewayConstants.API_ERROR_TYPE_BACKEND);
+        Mediator sequence = GatewayUtils.getErrorResponseFormatterSequence(
+                messageContext, APISecurityConstants.BACKEND_AUTH_FAILURE_HANDLER);
         if (sequence != null && !sequence.mediate(messageContext)) {
             return;
         }

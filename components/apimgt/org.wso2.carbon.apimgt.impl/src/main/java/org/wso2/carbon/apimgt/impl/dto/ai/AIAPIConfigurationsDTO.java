@@ -28,6 +28,7 @@ public class AIAPIConfigurationsDTO {
     private boolean enabled;
     private FailoverConfigurations failoverConfigurations = new FailoverConfigurations();
     private Long defaultRequestTimeout = DEFAULT_REQUEST_TIMEOUT;
+    private String customErrorResponseSequence;
 
     /**
      * Gets the enabled status.
@@ -87,6 +88,26 @@ public class AIAPIConfigurationsDTO {
     public void setDefaultRequestTimeout(Long defaultRequestTimeout) {
 
         this.defaultRequestTimeout = defaultRequestTimeout;
+    }
+
+    /**
+     * Gets the configured AI error response formatter sequence name.
+     *
+     * @return the sequence name, or null if not configured.
+     */
+    public String getCustomErrorResponseSequence() {
+
+        return customErrorResponseSequence;
+    }
+
+    /**
+     * Sets the AI error response formatter sequence name.
+     *
+     * @param customErrorResponseSequence the sequence name to use for formatting AI error responses.
+     */
+    public void setCustomErrorResponseSequence(String customErrorResponseSequence) {
+
+        this.customErrorResponseSequence = customErrorResponseSequence;
     }
 
     /**
