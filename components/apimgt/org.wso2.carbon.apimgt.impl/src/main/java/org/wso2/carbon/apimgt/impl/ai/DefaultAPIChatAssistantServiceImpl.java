@@ -70,7 +70,7 @@ public class DefaultAPIChatAssistantServiceImpl implements APIChatAssistant {
             response.setPrepareResponse(aiResponse);
             return response;
         } catch (JsonProcessingException e) {
-            String error = "Error while parsing OpenAPI definition to JSON";
+            String error = "Error while parsing OpenAPI definition to JSON for API ID: " + request.getApiId();
             log.error(error, e);
             throw new APIManagementException(error, e);
         }

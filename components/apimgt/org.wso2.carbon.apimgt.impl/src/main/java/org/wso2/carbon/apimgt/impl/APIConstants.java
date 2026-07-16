@@ -601,7 +601,7 @@ public final class APIConstants {
         public static final String MARKETPLACE_ASSISTANT_PUBLISH_API_RESOURCE = "ApiPublishResource";
         public static final String MARKETPLACE_ASSISTANT_DELETE_API_RESOURCE = "ApiDeleteResource";
         public static final String MARKETPLACE_ASSISTANT_API_COUNT_RESOURCE = "ApiCountResource";
-        public static final String MARKETPLACE_ASSISTANT_IMPL_CLASS = "MarketPlaceAssistantImplementation";
+        public static final String MARKETPLACE_ASSISTANT_IMPL_CLASS = "MarketplaceAssistantImplementation";
         public static final String MARKETPLACE_ASSISTANT_DEFAULT_IMPL =
                 "org.wso2.carbon.apimgt.impl.ai.DefaultMarketplaceAssistantServiceImpl";
         public static final String DESIGN_ASSISTANT_IMPL_CLASS = "DesignAssistantImplementation";
