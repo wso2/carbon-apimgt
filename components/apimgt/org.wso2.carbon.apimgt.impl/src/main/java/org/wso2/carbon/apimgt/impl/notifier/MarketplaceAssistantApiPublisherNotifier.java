@@ -17,21 +17,20 @@ package org.wso2.carbon.apimgt.impl.notifier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.MarketplaceAssistantRequest;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.impl.dto.ai.MarketplaceAssistantConfigurationDTO;
+import org.wso2.carbon.apimgt.impl.ai.MarketplaceAssistantServiceFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.Event;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 
 /**
@@ -41,8 +40,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
     protected ApiMgtDAO apiMgtDAO;
     private static final Log log = LogFactory.getLog(MarketplaceAssistantApiPublisherNotifier.class);
-    private static MarketplaceAssistantConfigurationDTO marketplaceAssistantConfigurationDto =
-            new MarketplaceAssistantConfigurationDTO();
 
     @Override
     public boolean publishEvent(Event event) throws NotifierException {
@@ -52,7 +49,6 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
         if (configuration == null) {
             log.error("API Manager configuration is not initialized.");
         } else {
-            marketplaceAssistantConfigurationDto = configuration.getMarketplaceAssistantConfigurationDto();
             process(event);
         }
         return true;
@@ -132,8 +128,14 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
                     getThreadLocalCarbonContext().getUsername());
             API api = apiProvider.getAPIbyUUID(apiId, apiMgtDAO.getOrganizationByAPIUUID(apiId));
 
-            MarketplaceAssistantPostTask task = new MarketplaceAssistantPostTask(api, apiEvent, apiId);
-            Thread thread = new Thread(task, "MarketplaceAssistantPostThread");
+            MarketplaceAssistantRequest request = new MarketplaceAssistantRequest();
+            request.setApi(api);
+            request.setUuid(apiId);
+            request.setTenantDomain(apiEvent.getTenantDomain());
+            request.setVersion(apiEvent.getApiVersion());
+            request.setVisibleRoles(apiEvent.getApiVisibleRoles());
+
+            Thread thread = new Thread(new MarketplaceAssistantPostTask(request), "MarketplaceAssistantPostThread");
             thread.start();
 
         } catch (APIManagementException e) {
@@ -144,108 +146,53 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
     }
 
     private void deleteRequest(APIEvent apiEvent) throws NotifierException {
-        String uuid = apiEvent.getUuid();
-        MarketplaceAssistantDeletionTask task = new MarketplaceAssistantDeletionTask(uuid);
-        Thread thread = new Thread(task, "MarketplaceAssistantDeletionThread");
+        MarketplaceAssistantRequest request = new MarketplaceAssistantRequest();
+        request.setUuid(apiEvent.getUuid());
+        Thread thread = new Thread(new MarketplaceAssistantDeletionTask(request), "MarketplaceAssistantDeletionThread");
         thread.start();
     }
 
+    /**
+     * Asynchronously publishes an API to the Marketplace Assistant vector store through the configured
+     * {@link org.wso2.carbon.apimgt.api.MarketplaceAssistant} implementation.
+     */
     class MarketplaceAssistantPostTask implements Runnable {
-        private API api;
-        private APIEvent apiEvent;
-        private String apiId;
-        public MarketplaceAssistantPostTask(API api, APIEvent apiEvent, String apiId) {
-            this.api = api;
-            this.apiEvent = apiEvent;
-            this.apiId = apiId;
+        private final MarketplaceAssistantRequest request;
+
+        MarketplaceAssistantPostTask(MarketplaceAssistantRequest request) {
+            this.request = request;
         }
 
         @Override
         public void run() {
             try {
-                String api_type = api.getType();
-                if (APIConstants.API_TYPE_MCP.equals(api_type)) {
-                    return;
-                }
-                JSONObject payload = new JSONObject();
-
-                payload.put(APIConstants.API_SPEC_TYPE, api_type);
-
-                switch (api_type) {
-                    case APIConstants.API_TYPE_GRAPHQL:
-                        payload.put(APIConstants.API_SPEC_TYPE_GRAPHQL, api.getGraphQLSchema());
-                        break;
-                    case APIConstants.API_TYPE_ASYNC:
-                    case APIConstants.API_TYPE_WS:
-                    case APIConstants.API_TYPE_WEBSUB:
-                    case APIConstants.API_TYPE_SSE:
-                    case APIConstants.API_TYPE_WEBHOOK:
-                        payload.put(APIConstants.API_SPEC_TYPE_ASYNC, api.getAsyncApiDefinition());
-                        break;
-                    case APIConstants.API_TYPE_HTTP:
-                    case APIConstants.API_TYPE_PRODUCT:
-                    case APIConstants.API_TYPE_SOAP:
-                    case APIConstants.API_TYPE_SOAPTOREST:
-                        payload.put(APIConstants.API_SPEC_TYPE_REST, api.getSwaggerDefinition());
-                        break;
-                    default:
-                        break;
-                }
-
-                payload.put(APIConstants.UUID, api.getUuid());
-                payload.put(APIConstants.DESCRIPTION, api.getDescription());
-                payload.put(APIConstants.API_SPEC_NAME, api.getId().getApiName());
-                payload.put(APIConstants.TENANT_DOMAIN, apiEvent.getTenantDomain());
-                payload.put(APIConstants.VERSION, apiEvent.getApiVersion());
-
-                String visibleRoles = apiEvent.getApiVisibleRoles();
-                if (visibleRoles == null) {
-                    visibleRoles = "";  // Assign an empty string if null
-                }
-                payload.put(APIConstants.VISIBILITYROLES, visibleRoles.toLowerCase());
-                payload.put(APIConstants.APIM_VERSION, APIUtil.getAPIMVersion());
-
-                if (marketplaceAssistantConfigurationDto.isKeyProvided()) {
-                    APIUtil.invokeAIService(marketplaceAssistantConfigurationDto.getEndpoint(),
-                            marketplaceAssistantConfigurationDto.getTokenEndpoint(),
-                            marketplaceAssistantConfigurationDto.getKey(),
-                            marketplaceAssistantConfigurationDto.getApiPublishResource(), payload.toString(), null);
-                } else if (marketplaceAssistantConfigurationDto.isAuthTokenProvided()) {
-                    APIUtil.invokeAIService(marketplaceAssistantConfigurationDto.getEndpoint(), null,
-                            marketplaceAssistantConfigurationDto.getAccessToken(),
-                            marketplaceAssistantConfigurationDto.getApiPublishResource(), payload.toString(), null);
-                }
+                MarketplaceAssistantServiceFactory.getMarketplaceAssistantService().publishAPI(request);
             } catch (APIManagementException e) {
                 String errorMessage = "Error encountered while Uploading the API with UUID: " +
-                        apiId + " to the vector database" + e.getMessage();
+                        request.getUuid() + " to the vector database" + e.getMessage();
                 log.error(errorMessage, e);
             }
         }
     }
 
+    /**
+     * Asynchronously deletes an API from the Marketplace Assistant vector store through the configured
+     * {@link org.wso2.carbon.apimgt.api.MarketplaceAssistant} implementation.
+     */
     class MarketplaceAssistantDeletionTask implements Runnable {
-        private String uuid;
-        public MarketplaceAssistantDeletionTask(String uuid) {
-            this.uuid = uuid;
+        private final MarketplaceAssistantRequest request;
+
+        MarketplaceAssistantDeletionTask(MarketplaceAssistantRequest request) {
+            this.request = request;
         }
 
         @Override
         public void run() {
             try {
-                if (marketplaceAssistantConfigurationDto.isKeyProvided()) {
-                    APIUtil.marketplaceAssistantDeleteService(marketplaceAssistantConfigurationDto.getEndpoint(),
-                            marketplaceAssistantConfigurationDto.getTokenEndpoint(),
-                            marketplaceAssistantConfigurationDto.getKey(),
-                            marketplaceAssistantConfigurationDto.getApiDeleteResource(), uuid);
-                } else if (marketplaceAssistantConfigurationDto.isAuthTokenProvided()) {
-                    APIUtil.marketplaceAssistantDeleteService(marketplaceAssistantConfigurationDto.getEndpoint(),
-                            null,
-                            marketplaceAssistantConfigurationDto.getAccessToken(),
-                            marketplaceAssistantConfigurationDto.getApiDeleteResource(), uuid);
-                }
+                MarketplaceAssistantServiceFactory.getMarketplaceAssistantService().deleteAPI(request);
             } catch (APIManagementException e) {
                 String errorMessage = "Error encountered while Deleting the API with UUID: " +
-                        uuid + " from the vector database" + e.getMessage();
+                        request.getUuid() + " from the vector database" + e.getMessage();
                 log.error(errorMessage, e);
             }
         }

@@ -26,7 +26,7 @@ package org.wso2.carbon.apimgt.api;
  * decouples the Publisher REST layer from any specific AI service contract, allowing deployments to plug in their
  * own AI service by configuring a custom implementation class under
  * {@code <DesignAssistant><DesignAssistanceImplementation></DesignAssistanceImplementation></DesignAssistant>} in
- * {@code api-manager.xml}. When no implementation is configured, {@code DefaultDesignAssistantService} is used,
+ * {@code api-manager.xml}. When no implementation is configured, {@code DefaultDesignAssistantServiceImpl} is used,
  * preserving the out-of-the-box behaviour.
  * <p>
  * Implementations must be thread-safe and provide a public no-argument constructor, as a single instance is created

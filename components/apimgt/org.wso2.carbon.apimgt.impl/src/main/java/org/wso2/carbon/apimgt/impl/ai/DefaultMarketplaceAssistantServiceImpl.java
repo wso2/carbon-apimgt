@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.MarketplaceAssistant;
 import org.wso2.carbon.apimgt.api.MarketplaceAssistantRequest;
 import org.wso2.carbon.apimgt.api.MarketplaceAssistantResponse;
+import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.ai.MarketplaceAssistantConfigurationDTO;
@@ -42,9 +43,9 @@ import java.io.IOException;
  * This preserves the out-of-the-box Marketplace Assistant behaviour and is used whenever no custom implementation
  * class is configured.
  */
-public class DefaultMarketplaceAssistantService implements MarketplaceAssistant {
+public class DefaultMarketplaceAssistantServiceImpl implements MarketplaceAssistant {
 
-    private static final Log log = LogFactory.getLog(DefaultMarketplaceAssistantService.class);
+    private static final Log log = LogFactory.getLog(DefaultMarketplaceAssistantServiceImpl.class);
 
     @Override
     public MarketplaceAssistantResponse execute(MarketplaceAssistantRequest request) throws APIManagementException {
@@ -117,6 +118,80 @@ public class DefaultMarketplaceAssistantService implements MarketplaceAssistant 
                     log.error("Error while closing the CloseableHttpResponse", e);
                 }
             }
+        }
+    }
+
+    @Override
+    public void publishAPI(MarketplaceAssistantRequest request) throws APIManagementException {
+        MarketplaceAssistantConfigurationDTO configDto = getConfiguration();
+        if (configDto == null || !(configDto.isKeyProvided() || configDto.isAuthTokenProvided())) {
+            return;
+        }
+        API api = request.getApi();
+        if (api == null) {
+            return;
+        }
+        String apiType = api.getType();
+        if (APIConstants.API_TYPE_MCP.equals(apiType)) {
+            return;
+        }
+
+        JSONObject payload = new JSONObject();
+        payload.put(APIConstants.API_SPEC_TYPE, apiType);
+        switch (apiType) {
+            case APIConstants.API_TYPE_GRAPHQL:
+                payload.put(APIConstants.API_SPEC_TYPE_GRAPHQL, api.getGraphQLSchema());
+                break;
+            case APIConstants.API_TYPE_ASYNC:
+            case APIConstants.API_TYPE_WS:
+            case APIConstants.API_TYPE_WEBSUB:
+            case APIConstants.API_TYPE_SSE:
+            case APIConstants.API_TYPE_WEBHOOK:
+                payload.put(APIConstants.API_SPEC_TYPE_ASYNC, api.getAsyncApiDefinition());
+                break;
+            case APIConstants.API_TYPE_HTTP:
+            case APIConstants.API_TYPE_PRODUCT:
+            case APIConstants.API_TYPE_SOAP:
+            case APIConstants.API_TYPE_SOAPTOREST:
+                payload.put(APIConstants.API_SPEC_TYPE_REST, api.getSwaggerDefinition());
+                break;
+            default:
+                break;
+        }
+
+        payload.put(APIConstants.UUID, api.getUuid());
+        payload.put(APIConstants.DESCRIPTION, api.getDescription());
+        payload.put(APIConstants.API_SPEC_NAME, api.getId().getApiName());
+        payload.put(APIConstants.TENANT_DOMAIN, request.getTenantDomain());
+        payload.put(APIConstants.VERSION, request.getVersion());
+        String visibleRoles = request.getVisibleRoles();
+        if (visibleRoles == null) {
+            visibleRoles = "";
+        }
+        payload.put(APIConstants.VISIBILITYROLES, visibleRoles.toLowerCase());
+        payload.put(APIConstants.APIM_VERSION, APIUtil.getAPIMVersion());
+
+        if (configDto.isKeyProvided()) {
+            APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(), configDto.getKey(),
+                    configDto.getApiPublishResource(), payload.toString(), null);
+        } else {
+            APIUtil.invokeAIService(configDto.getEndpoint(), null, configDto.getAccessToken(),
+                    configDto.getApiPublishResource(), payload.toString(), null);
+        }
+    }
+
+    @Override
+    public void deleteAPI(MarketplaceAssistantRequest request) throws APIManagementException {
+        MarketplaceAssistantConfigurationDTO configDto = getConfiguration();
+        if (configDto == null || !(configDto.isKeyProvided() || configDto.isAuthTokenProvided())) {
+            return;
+        }
+        if (configDto.isKeyProvided()) {
+            APIUtil.marketplaceAssistantDeleteService(configDto.getEndpoint(), configDto.getTokenEndpoint(),
+                    configDto.getKey(), configDto.getApiDeleteResource(), request.getUuid());
+        } else {
+            APIUtil.marketplaceAssistantDeleteService(configDto.getEndpoint(), null,
+                    configDto.getAccessToken(), configDto.getApiDeleteResource(), request.getUuid());
         }
     }
 

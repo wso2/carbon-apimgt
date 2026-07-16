@@ -35,9 +35,9 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
  * This preserves the out-of-the-box API Design Assistant behaviour and is used whenever no custom implementation
  * class is configured.
  */
-public class DefaultDesignAssistantService implements DesignAssistant {
+public class DefaultDesignAssistantServiceImpl implements DesignAssistant {
 
-    private static final Log log = LogFactory.getLog(DefaultDesignAssistantService.class);
+    private static final Log log = LogFactory.getLog(DefaultDesignAssistantServiceImpl.class);
     public static final String TEXT = "text";
     public static final String SESSIONID = "sessionId";
 

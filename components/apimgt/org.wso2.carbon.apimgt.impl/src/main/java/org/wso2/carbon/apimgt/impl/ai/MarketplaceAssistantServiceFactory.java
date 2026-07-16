@@ -34,7 +34,7 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
  * The implementation class is read from the {@code <MarketplaceAssistant><MarketPlaceAssistanceImplementation>}
  * configuration and instantiated reflectively via its public no-argument constructor - the same extensibility
  * pattern used elsewhere in the product (e.g. token revocation notifier, key validation handlers). When no class is
- * configured, {@link DefaultMarketplaceAssistantService} is used. The resolved instance is cached, as the configured
+ * configured, {@link DefaultMarketplaceAssistantServiceImpl} is used. The resolved instance is cached, as the configured
  * implementation does not change at runtime.
  */
 public class MarketplaceAssistantServiceFactory {

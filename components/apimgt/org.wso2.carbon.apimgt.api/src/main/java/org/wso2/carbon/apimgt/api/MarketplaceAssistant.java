@@ -25,7 +25,7 @@ package org.wso2.carbon.apimgt.api;
  * decouples the Developer Portal REST layer from any specific AI service contract, allowing deployments to plug in
  * their own AI service by configuring a custom implementation class under
  * {@code <MarketplaceAssistant><MarketPlaceAssistanceImplementation></MarketPlaceAssistanceImplementation></MarketplaceAssistant>}
- * in {@code api-manager.xml}. When no implementation is configured, {@code DefaultMarketplaceAssistantService} is
+ * in {@code api-manager.xml}. When no implementation is configured, {@code DefaultMarketplaceAssistantServiceImpl} is
  * used, preserving the out-of-the-box behaviour.
  * <p>
  * Implementations must be thread-safe and provide a public no-argument constructor, as a single instance is created
@@ -54,4 +54,23 @@ public interface MarketplaceAssistant {
      * @throws APIManagementException if an error occurs while invoking the AI service
      */
     MarketplaceAssistantResponse getApiCount(MarketplaceAssistantRequest request) throws APIManagementException;
+
+    /**
+     * Publishes an API to the Marketplace Assistant vector store. Invoked asynchronously by the API publisher
+     * notifier when an API is published/created.
+     *
+     * @param request the request context (the {@code api} together with {@code tenantDomain}, {@code version} and
+     *                {@code visibleRoles}, plus any additional properties)
+     * @throws APIManagementException if an error occurs while invoking the AI service
+     */
+    void publishAPI(MarketplaceAssistantRequest request) throws APIManagementException;
+
+    /**
+     * Deletes an API from the Marketplace Assistant vector store. Invoked asynchronously by the API publisher
+     * notifier when an API is deleted/demoted.
+     *
+     * @param request the request context (the {@code uuid} of the API to delete, plus any additional properties)
+     * @throws APIManagementException if an error occurs while invoking the AI service
+     */
+    void deleteAPI(MarketplaceAssistantRequest request) throws APIManagementException;
 }

@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.api;
 
+import org.wso2.carbon.apimgt.api.model.API;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,6 +30,11 @@ import java.util.Map;
  * fields it needs (ignoring, for example, {@link #getUsername()} if its AI service does not require it), and new
  * fields can be added over time without breaking existing implementations. Any information not modelled as a typed
  * field can be supplied through {@link #getAdditionalProperties()}.
+ * <p>
+ * The {@code query}/{@code history}/{@code organization}/{@code username} fields carry chat context (execute,
+ * getApiCount), while {@code api}/{@code uuid}/{@code tenantDomain}/{@code version}/{@code visibleRoles} carry the
+ * context of an API publish/delete to the vector store (publishAPI, deleteAPI). An implementation reads only the
+ * fields relevant to the operation being invoked.
  */
 public class MarketplaceAssistantRequest {
 
@@ -35,6 +42,11 @@ public class MarketplaceAssistantRequest {
     private String history;
     private String organization;
     private String username;
+    private API api;
+    private String uuid;
+    private String tenantDomain;
+    private String version;
+    private String visibleRoles;
     private final Map<String, Object> additionalProperties = new HashMap<>();
 
     public String getQuery() {
@@ -67,6 +79,46 @@ public class MarketplaceAssistantRequest {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public API getApi() {
+        return api;
+    }
+
+    public void setApi(API api) {
+        this.api = api;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
+    public String getTenantDomain() {
+        return tenantDomain;
+    }
+
+    public void setTenantDomain(String tenantDomain) {
+        this.tenantDomain = tenantDomain;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public String getVisibleRoles() {
+        return visibleRoles;
+    }
+
+    public void setVisibleRoles(String visibleRoles) {
+        this.visibleRoles = visibleRoles;
     }
 
     public Map<String, Object> getAdditionalProperties() {

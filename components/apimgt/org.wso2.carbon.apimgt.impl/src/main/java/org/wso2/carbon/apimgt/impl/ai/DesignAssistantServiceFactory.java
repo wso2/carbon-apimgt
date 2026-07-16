@@ -33,7 +33,7 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
  * <p>
  * The implementation class is read from the {@code <DesignAssistant><DesignAssistanceImplementation>} configuration
  * and instantiated reflectively via its public no-argument constructor. When no class is configured,
- * {@link DefaultDesignAssistantService} is used. The resolved instance is cached, as the configured implementation
+ * {@link DefaultDesignAssistantServiceImpl} is used. The resolved instance is cached, as the configured implementation
  * does not change at runtime.
  */
 public class DesignAssistantServiceFactory {

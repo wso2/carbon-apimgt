@@ -34,7 +34,7 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
  * The implementation class is read from the {@code <APIChat><ApiChatImplementation>} configuration and instantiated
  * reflectively via its public no-argument constructor - the same extensibility pattern used elsewhere in the product
  * (e.g. token revocation notifier, key validation handlers). When no class is configured,
- * {@link DefaultAPIChatAssistantService} is used. The resolved instance is cached, as the configured implementation does not
+ * {@link DefaultAPIChatAssistantServiceImpl} is used. The resolved instance is cached, as the configured implementation does not
  * change at runtime.
  */
 public class APIChatAssistantFactory {

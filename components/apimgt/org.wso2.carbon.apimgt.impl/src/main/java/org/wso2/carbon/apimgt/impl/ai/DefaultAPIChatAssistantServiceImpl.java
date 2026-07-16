@@ -39,13 +39,16 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
  * This preserves the out-of-the-box API Chat behaviour and is used whenever no custom implementation class is
  * configured.
  */
-public class DefaultAPIChatAssistantService implements APIChatAssistant {
+public class DefaultAPIChatAssistantServiceImpl implements APIChatAssistant {
 
-    private static final Log log = LogFactory.getLog(DefaultAPIChatAssistantService.class);
+    private static final Log log = LogFactory.getLog(DefaultAPIChatAssistantServiceImpl.class);
 
     @Override
     public APIChatResponse prepare(APIChatRequest request) throws APIManagementException {
         ApiChatConfigurationDTO configDto = getConfiguration();
+        if (configDto == null || !(configDto.isKeyProvided() || configDto.isAuthTokenProvided())) {
+            return null;
+        }
         try {
             // Generate the payload for the prepare call
             ObjectMapper objectMapper = new ObjectMapper();
