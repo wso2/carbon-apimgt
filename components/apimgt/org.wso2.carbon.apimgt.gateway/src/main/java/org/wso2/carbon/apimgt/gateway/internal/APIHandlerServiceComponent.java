@@ -54,6 +54,7 @@ import org.wso2.carbon.apimgt.gateway.AWSBedrockGuardrailProviderServiceImpl;
 import org.wso2.carbon.apimgt.gateway.AzureContentSafetyGuardrailProviderServiceImpl;
 import org.wso2.carbon.apimgt.gateway.AzureOpenAIEmbeddingProviderServiceImpl;
 import org.wso2.carbon.apimgt.gateway.AzureOpenAILLMProviderServiceImpl;
+import org.wso2.carbon.apimgt.gateway.ElastiCacheVectorDBProviderServiceImpl;
 import org.wso2.carbon.apimgt.gateway.HybridThrottleProcessor;
 import org.wso2.carbon.apimgt.gateway.MistralEmbeddingProviderServiceImpl;
 import org.wso2.carbon.apimgt.gateway.MistralLLMProviderServiceImpl;
@@ -288,6 +289,9 @@ public class APIHandlerServiceComponent {
                 switch (vectorDBProviderType) {
                     case APIConstants.AI.VECTOR_DB_PROVIDER_ZILLIZ_TYPE:
                         vectorDBProviderService = new ZillizVectorDBProviderServiceImpl();
+                        break;
+                    case APIConstants.AI.VECTOR_DB_PROVIDER_ELASTICACHE_TYPE:
+                        vectorDBProviderService = new ElastiCacheVectorDBProviderServiceImpl();
                         break;
                     default:
                         throw new APIManagementException("Unsupported vector DB provider type: "
