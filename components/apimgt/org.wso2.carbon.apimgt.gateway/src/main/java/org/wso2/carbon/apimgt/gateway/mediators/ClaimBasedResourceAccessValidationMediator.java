@@ -30,6 +30,10 @@ import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Collection;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -56,6 +60,13 @@ public class ClaimBasedResourceAccessValidationMediator extends AbstractMediator
     @Override
     public boolean mediate(MessageContext messageContext) {
 
+        try {
+            Map<String, Object> jwtTokenClaims = (Map<String, Object>) messageContext
+                    .getProperty(APIMgtGatewayConstants.JWT_CLAIMS);
+            Object claimValueSentInToken = jwtTokenClaims == null ? null : jwtTokenClaims.get(accessVerificationClaim);
+            List<String> tokenClaimValues = getClaimValues(claimValueSentInToken);
+
+            if (tokenClaimValues.isEmpty()) {
         Object claimValueSentInToken;
         Map<String, Object> jwtTokenClaims = (Map<String, Object>) messageContext
                 .getProperty(APIMgtGatewayConstants.JWT_CLAIMS);
@@ -87,12 +98,64 @@ public class ClaimBasedResourceAccessValidationMediator extends AbstractMediator
                             APISecurityConstants.API_AUTH_ACCESS_TOKEN_CLAIMS_MISMATCH_DESCRIPTION);
                 }
             }
+
+            if (isClaimMatched(tokenClaimValues) || shouldAllowValidation) {
+                log.debug("Claim values match or the flow is configured to allow when claims doesn't match. "
+                                  + "Hence the flow is allowed.");
+                return true;
+            }
+
+            log.debug("Claim values don't match. Hence the flow is not allowed.");
+            throw new APISecurityException(APISecurityConstants.API_AUTH_ACCESS_TOKEN_CLAIMS_MISMATCH,
+                                           APISecurityConstants.API_AUTH_ACCESS_TOKEN_CLAIMS_MISMATCH_MESSAGE,
+                                           APISecurityConstants.API_AUTH_ACCESS_TOKEN_CLAIMS_MISMATCH_DESCRIPTION);
         } catch (APISecurityException e) {
             handleAuthFailure(e.getErrorCode(), messageContext, e.getMessage(), e.getDescription());
             return false;
         }
     }
 
+    private List<String> getClaimValues(Object claimValueSentInToken) {
+
+        List<String> tokenClaimValues = new ArrayList<>();
+        if (claimValueSentInToken == null) {
+            return tokenClaimValues;
+        }
+
+        if (claimValueSentInToken instanceof Collection<?>) {
+            for (Object claimValue : (Collection<?>) claimValueSentInToken) {
+                addClaimValue(tokenClaimValues, claimValue);
+            }
+        } else if (claimValueSentInToken.getClass().isArray()) {
+            for (int i = 0; i < Array.getLength(claimValueSentInToken); i++) {
+                addClaimValue(tokenClaimValues, Array.get(claimValueSentInToken, i));
+            }
+        } else {
+            addClaimValue(tokenClaimValues, claimValueSentInToken);
+        }
+        return tokenClaimValues;
+    }
+
+    private void addClaimValue(List<String> tokenClaimValues, Object claimValue) {
+
+        if (claimValue != null && StringUtils.isNotBlank(String.valueOf(claimValue))) {
+            tokenClaimValues.add(String.valueOf(claimValue));
+        }
+    }
+
+    private boolean isClaimMatched(List<String> tokenClaimValues) {
+
+        if (StringUtils.isNotBlank(accessVerificationClaimValueRegex)) {
+            log.debug("A regex is provided, hence, validating the claim values using the provided regex.");
+            Pattern pattern = Pattern.compile(accessVerificationClaimValueRegex);
+            Matcher configuredClaimValueMatcher = pattern.matcher(StringUtils.defaultString(accessVerificationClaimValue));
+            return configuredClaimValueMatcher.matches()
+                    && tokenClaimValues.stream().anyMatch(tokenClaimValue -> pattern.matcher(tokenClaimValue).matches());
+        }
+
+        log.debug("A regex is not provided, validating the claim values based on equality.");
+        return tokenClaimValues.stream()
+                .anyMatch(tokenClaimValue -> StringUtils.equals(accessVerificationClaimValue, tokenClaimValue));
     private boolean isClaimValueAbsent(Object claimValueSentInToken) {
 
         if (claimValueSentInToken instanceof Collection) {
