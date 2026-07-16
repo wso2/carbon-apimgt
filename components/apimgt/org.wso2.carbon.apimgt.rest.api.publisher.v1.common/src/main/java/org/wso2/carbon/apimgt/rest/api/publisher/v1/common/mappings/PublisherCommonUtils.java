@@ -2933,6 +2933,11 @@ public class PublisherCommonUtils {
         List<String> apiVersions = apiProvider.getApiVersionsMatchingApiNameAndOrganization(apiDtoTypeWrapper.getName(),
                 username, organization);
 
+        //Remove the {version} placeholder from the context template if it is present at end
+        if (context.endsWith("/" + APIConstants.VERSION_PLACEHOLDER)) {
+            context = context.split(Pattern.quote("/" + APIConstants.VERSION_PLACEHOLDER))[0];
+        }
+
         if (!apiVersions.isEmpty()) {
             for (String version : apiVersions) {
                 if (version.equalsIgnoreCase(apiDtoTypeWrapper.getVersion())) {
