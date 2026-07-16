@@ -38,8 +38,8 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 public class DefaultDesignAssistantServiceImpl implements DesignAssistant {
 
     private static final Log log = LogFactory.getLog(DefaultDesignAssistantServiceImpl.class);
-    public static final String TEXT = "text";
-    public static final String SESSIONID = "sessionId";
+    private static final String TEXT = "text";
+    private static final String SESSIONID = "sessionId";
 
     @Override
     public DesignAssistantResponse generatePayload(DesignAssistantRequest request) throws APIManagementException {
