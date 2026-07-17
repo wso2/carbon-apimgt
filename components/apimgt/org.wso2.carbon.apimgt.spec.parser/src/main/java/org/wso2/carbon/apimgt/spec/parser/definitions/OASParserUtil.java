@@ -1281,7 +1281,14 @@ public class OASParserUtil {
         }
         PermittedUrlsChecker checker = new PermittedUrlsChecker(
                 oasParserOptions.getRemoteRefAllowList(), oasParserOptions.getRemoteRefBlockList());
+        // Same per-file size cap the URL-fetch path applies (in MB). A remote $ref is small text, so an entry larger
+        // than this cannot legitimately be a ref-bearing document - skip it to avoid reading an oversized file fully.
+        long maxFileSize = Long.parseLong(APIConstants.API_PUBLISHER_IMPORT_OAS_FILE_SIZE_LIMIT_DEFAULT_MB)
+                * 1024L * 1024L;
         for (File file : FileUtils.listFiles(archiveDirectory, null, true)) {
+            if (file.length() > maxFileSize) {
+                continue;
+            }
             String fileContent;
             try {
                 fileContent = FileUtils.readFileToString(file, APISpecParserConstants.DigestAuthConstants.CHARSET);

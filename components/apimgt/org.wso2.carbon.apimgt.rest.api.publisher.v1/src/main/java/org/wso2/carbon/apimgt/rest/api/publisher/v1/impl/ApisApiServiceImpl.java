@@ -3054,7 +3054,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     private String updateSwagger(String apiId, String apiDefinition, String organization)
             throws APIManagementException, FaultGatewaysException {
         OASParserOptions oasParserOptions = APIUtil.buildRefResolutionOptions(
-                CommonUtil.getOasParserOptions(), organization);
+                CommonUtil.getOasParserOptions(), RestApiCommonUtil.getLoggedInUserTenantDomain());
         APIDefinitionValidationResponse response = OASParserUtil.validateAPIDefinition(apiDefinition, true,
                 oasParserOptions);
         if (!response.isValid()) {

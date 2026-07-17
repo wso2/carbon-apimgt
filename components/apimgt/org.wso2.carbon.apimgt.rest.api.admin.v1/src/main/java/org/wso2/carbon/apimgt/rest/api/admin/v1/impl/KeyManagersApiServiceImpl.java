@@ -37,10 +37,8 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -294,45 +292,39 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         urlFields.put("scope management endpoint", body.getScopeManagementEndpoint());
 
         for (Map.Entry<String, String> entry : urlFields.entrySet()) {
-            try {
-                validateKeyManagerURL(entry.getValue(), entry.getKey());
-            } catch (APIManagementException e) {
-                if (e.getErrorHandler() != null && e.getErrorHandler().getHttpStatusCode() == 400) {
-                    log.warn(e.getMessage(), e);
-                    RestApiUtil.handleBadRequest(e.getMessage());
-                } else {
-                    throw e;
-                }
-            }
+            validateKeyManagerURLOrBadRequest(entry.getValue(), entry.getKey());
         }
         if (body.getEndpoints() != null) {
             for (KeyManagerEndpointDTO endpoint : body.getEndpoints()) {
                 if (endpoint != null) {
-                    try {
-                        validateKeyManagerURL(endpoint.getValue(),
-                                "custom endpoint '" + endpoint.getName() + "'");
-                    } catch (APIManagementException e) {
-                        if (e.getErrorHandler() != null && e.getErrorHandler().getHttpStatusCode() == 400) {
-                            log.warn(e.getMessage(), e);
-                            RestApiUtil.handleBadRequest(e.getMessage());
-                        } else {
-                            throw e;
-                        }
-                    }
+                    validateKeyManagerURLOrBadRequest(endpoint.getValue(),
+                            "custom endpoint '" + endpoint.getName() + "'");
                 }
             }
         }
         if (body.getCertificates() != null
                 && KeyManagerCertificatesDTO.TypeEnum.JWKS.equals(body.getCertificates().getType())) {
-            try {
-                validateKeyManagerURL(body.getCertificates().getValue(), "JWKS endpoint");
-            } catch (APIManagementException e) {
-                if (e.getErrorHandler() != null && e.getErrorHandler().getHttpStatusCode() == 400) {
-                    log.warn(e.getMessage(), e);
-                    RestApiUtil.handleBadRequest(e.getMessage());
-                } else {
-                    throw e;
-                }
+            validateKeyManagerURLOrBadRequest(body.getCertificates().getValue(), "JWKS endpoint");
+        }
+    }
+
+    /**
+     * Validates a single Key Manager URL and translates a client error (HTTP 400) into a bad request response.
+     * Failures that are not client errors are propagated unchanged.
+     *
+     * @param url       URL to validate; blank and non-URL values are silently skipped
+     * @param fieldName descriptive name of the Key Manager URL field being validated
+     * @throws APIManagementException if URL validation fails with a non-client error
+     */
+    private void validateKeyManagerURLOrBadRequest(String url, String fieldName) throws APIManagementException {
+        try {
+            validateKeyManagerURL(url, fieldName);
+        } catch (APIManagementException e) {
+            if (e.getErrorHandler() != null && e.getErrorHandler().getHttpStatusCode() == 400) {
+                log.warn(e.getMessage(), e);
+                RestApiUtil.handleBadRequest(e.getMessage());
+            } else {
+                throw e;
             }
         }
     }

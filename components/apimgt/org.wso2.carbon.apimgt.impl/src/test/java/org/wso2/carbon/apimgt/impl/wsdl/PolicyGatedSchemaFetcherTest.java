@@ -25,6 +25,7 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.FileSizeLimitExceededException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -69,8 +70,8 @@ public class PolicyGatedSchemaFetcherTest {
             try {
                 read(in);
                 fail("expected size-limit failure");
-            } catch (Exception expected) {
-                // SizeLimitedInputStream aborts past the cap
+            } catch (FileSizeLimitExceededException expected) {
+                // SizeLimitedInputStream aborts past the cap with this specific type
             }
         } finally {
             s.stop(0);

@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.impl.wsdl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.base.MultitenantConstants;
@@ -37,7 +38,8 @@ final class WsdlTenantResolver {
 
     static String resolveTenantDomain() {
         try {
-            return PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+            return StringUtils.isBlank(tenantDomain) ? MultitenantConstants.SUPER_TENANT_DOMAIN_NAME : tenantDomain;
         } catch (NullPointerException e) {
             log.warn("CarbonContext tenant domain was unavailable while resolving the tenant for WSDL/schema "
                     + "reference policy evaluation; falling back to the super tenant domain ("
