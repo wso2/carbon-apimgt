@@ -962,12 +962,18 @@ public class OAS3Parser extends APIDefinition {
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
         String processedDefinition = OASParserUtil.preprocessYamlWithLimit(apiDefinition, parserOptions);
         OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
-        ParseOptions options = new ParseOptions();
+        ParseOptions options = parserOptions != null ? convertOptionsToParseOptions(parserOptions)
+                : new ParseOptions();
         options.setResolve(true);
         SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(processedDefinition, null, options);
         if (CollectionUtils.isNotEmpty(parseAttemptForV3.getMessages())) {
             validationResponse.setValid(false);
             for (String message : parseAttemptForV3.getMessages()) {
+                if (parserOptions != null && parserOptions.isNetworkAccessControlEnabled()
+                        && OASParserUtil.isUntrustedUrlInDefinition(message)) {
+                    throw new APIManagementException(ExceptionCodes.UNTRUSTED_URL_IN_DEFINITION.getErrorMessage(),
+                            ExceptionCodes.UNTRUSTED_URL_IN_DEFINITION);
+                }
                 OASParserUtil.addErrorToValidationResponse(validationResponse, message);
                 if (message.contains(APISpecParserConstants.OPENAPI_IS_MISSING_MSG)) {
                     ErrorItem errorItem = new ErrorItem();
@@ -2033,9 +2039,14 @@ public class OAS3Parser extends APIDefinition {
         return parseAttemptForV3.getOpenAPI();
     }
 
-    private ParseOptions convertOptionsToParseOptions(OASParserOptions options) {
+    ParseOptions convertOptionsToParseOptions(OASParserOptions options) {
         ParseOptions parserOptions = new ParseOptions();
         parserOptions.setExplicitStyleAndExplode(options.isExplicitStyleAndExplode());
+        // Enable swagger-parser's built-in Safe URL Resolver for embedded remote $refs only when a network
+        // access-control policy is configured; otherwise resolution stays unrestricted for backwards compatibility.
+        parserOptions.setSafelyResolveURL(options.isNetworkAccessControlEnabled());
+        parserOptions.setRemoteRefAllowList(options.getRemoteRefAllowList());
+        parserOptions.setRemoteRefBlockList(options.getRemoteRefBlockList());
         return parserOptions;
     }
 

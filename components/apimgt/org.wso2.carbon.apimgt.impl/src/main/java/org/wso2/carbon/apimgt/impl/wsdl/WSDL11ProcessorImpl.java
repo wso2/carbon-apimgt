@@ -114,19 +114,29 @@ public class WSDL11ProcessorImpl extends AbstractWSDLProcessor {
         // switch off the verbose mode
         wsdlReader.setFeature(JAVAX_WSDL_VERBOSE_MODE, false);
         wsdlReader.setFeature(JAVAX_WSDL_IMPORT_DOCUMENTS, false);
+        AccessControlledWSDLLocator locator = new AccessControlledWSDLLocator(null, null, resolveTenantDomain());
         try {
-            wsdlDefinition = wsdlReader.readWSDL(null, getSecuredParsedDocumentFromContent(wsdlContent));
+            wsdlDefinition = wsdlReader.readWSDL(locator, getSecuredParsedDocumentFromContent(wsdlContent)
+                    .getDocumentElement());
             if (log.isDebugEnabled()) {
                 log.debug("Successfully initialized an instance of " + this.getClass().getSimpleName()
                         + " with a single WSDL.");
             }
         } catch (WSDLException | APIManagementException e) {
-            //This implementation class cannot process the WSDL.
             log.debug("Cannot process the WSDL by " + this.getClass().getName(), e);
             setError(new ErrorItem(ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getErrorMessage(), e.getMessage(),
                     ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getErrorCode(),
                     ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getHttpStatusCode()));
+        } catch (SchemaResolutionRuntimeException e) {
+            // Genuine (non-policy) resolution failure (policy blocks are reported separately). The cause may carry
+            // a URL or local path, so log it server-side only and keep the client ErrorItem generic.
+            log.warn("Genuine failure while resolving a nested WSDL schema reference", e.getCause());
+            setError(new ErrorItem(ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getErrorMessage(),
+                    ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getErrorDescription(),
+                    ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getErrorCode(),
+                    ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getHttpStatusCode()));
         }
+        reportBlockedReferencesIfAny(locator);
         return !hasError;
     }
 
@@ -138,6 +148,23 @@ public class WSDL11ProcessorImpl extends AbstractWSDLProcessor {
         // switch off the verbose mode
         wsdlReader.setFeature(JAVAX_WSDL_VERBOSE_MODE, false);
         wsdlReader.setFeature(JAVAX_WSDL_IMPORT_DOCUMENTS, false);
+        // For a file: URL, contain relative refs to the WSDL's parent dir so a sibling schema resolves while
+        // resolveFilePath blocks traversal/absolute paths; a remote WSDL leaves it null and uses the gated fetcher.
+        String archiveRoot = null;
+        if ("file".equalsIgnoreCase(url.getProtocol())) {
+            try {
+                java.nio.file.Path parent = java.nio.file.Paths.get(url.toURI()).getParent();
+                // A file: WSDL at the filesystem root has parent "/"; using it as the containment root
+                // would be vacuous, so leave archiveRoot null (block relative local refs).
+                if (parent != null && parent.normalize().getNameCount() > 0) {
+                    archiveRoot = parent.toString();
+                }
+            } catch (Exception e) {
+                // leave archiveRoot null -> relative local refs are blocked, as before this fix.
+            }
+        }
+        AccessControlledWSDLLocator locator = new AccessControlledWSDLLocator(archiveRoot, url.toString(),
+                resolveTenantDomain());
         try {
             String maxWSDLSizeStr = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                     .getAPIManagerConfiguration().getFirstProperty(
@@ -146,7 +173,8 @@ public class WSDL11ProcessorImpl extends AbstractWSDLProcessor {
                 maxWSDLSizeStr = org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_WSDL_FILE_SIZE_LIMIT_DEFAULT_MB;
             }
             long maxFileSize = Long.parseLong(maxWSDLSizeStr) * 1024L * 1024L;
-            wsdlDefinition = wsdlReader.readWSDL(url.toString(), getSecuredParsedDocumentFromURL(url, maxFileSize));
+            wsdlDefinition = wsdlReader.readWSDL(locator, getSecuredParsedDocumentFromURL(url, maxFileSize)
+                    .getDocumentElement());
             if (log.isDebugEnabled()) {
                 log.debug("Successfully initialized an instance of " + this.getClass().getSimpleName()
                         + " with a single WSDL.");
@@ -166,7 +194,19 @@ public class WSDL11ProcessorImpl extends AbstractWSDLProcessor {
                         ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getErrorCode(),
                         ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getHttpStatusCode()));
             }
+        } catch (SchemaResolutionRuntimeException e) {
+            // Genuine (non-policy) failure -- see the init(byte[]) catch above. The cause may carry the attempted
+            // remote URL, so it is logged server-side only and kept out of the client-facing ErrorItem.
+            if (log.isDebugEnabled()) {
+                log.debug("Cannot process the WSDL by " + this.getClass().getName(), e);
+            }
+            log.warn("Genuine failure while resolving a nested WSDL schema reference", e.getCause());
+            setError(new ErrorItem(ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getErrorMessage(),
+                    ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getErrorDescription(),
+                    ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getErrorCode(),
+                    ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getHttpStatusCode()));
         }
+        reportBlockedReferencesIfAny(locator);
         return !hasError;
     }
 
@@ -177,6 +217,10 @@ public class WSDL11ProcessorImpl extends AbstractWSDLProcessor {
         wsdlArchiveExtractedPath = path;
         WSDLReader wsdlReader = getWsdlFactoryInstance().newWSDLReader();
 
+        boolean anyBlocked = false;
+        // Declared outside the try/loop so the catch clause below can still inspect the in-flight file's
+        // locator if readWSDL blows up mid-loop.
+        AccessControlledWSDLLocator locator = null;
         try {
             // switch off the verbose mode
             wsdlReader.setFeature(JAVAX_WSDL_VERBOSE_MODE, false);
@@ -186,13 +230,17 @@ public class WSDL11ProcessorImpl extends AbstractWSDLProcessor {
             if (log.isDebugEnabled()) {
                 log.debug("Found " + foundWSDLFiles.size() + " WSDL file(s) in path " + path);
             }
+            String tenantDomain = resolveTenantDomain();
             for (File file : foundWSDLFiles) {
                 String absWSDLPath = file.getAbsolutePath();
                 if (log.isDebugEnabled()) {
                     log.debug("Processing WSDL file: " + absWSDLPath);
                 }
-                Definition definition = wsdlReader.readWSDL(absWSDLPath, getSecuredParsedDocumentFromPath(absWSDLPath));
+                locator = new AccessControlledWSDLLocator(path, absWSDLPath, tenantDomain);
+                Definition definition = wsdlReader.readWSDL(locator, getSecuredParsedDocumentFromPath(absWSDLPath)
+                        .getDocumentElement());
                 pathToDefinitionMap.put(absWSDLPath, definition);
+                anyBlocked |= locator.hasBlockedReferences();
 
                 // set the first found WSDL as wsdlDefinition variable assuming that it is the root WSDL
                 if (wsdlDefinition == null) {
@@ -211,6 +259,21 @@ public class WSDL11ProcessorImpl extends AbstractWSDLProcessor {
             setError(new ErrorItem(ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getErrorMessage(), e.getMessage(),
                     ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getErrorCode(),
                     ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getHttpStatusCode()));
+        } catch (SchemaResolutionRuntimeException e) {
+            // Genuine (non-policy) failure (see init(byte[]) above). The cause may carry a local path or URL, so
+            // log it server-side only; the debug path below is the caller's own archive path, not the offending ref.
+            log.debug(this.getClass().getName() + " was unable to process the WSDL Files for the path: " + path, e);
+            log.warn("Genuine failure while resolving a nested WSDL schema reference", e.getCause());
+            setError(new ErrorItem(ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getErrorMessage(),
+                    ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getErrorDescription(),
+                    ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getErrorCode(),
+                    ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getHttpStatusCode()));
+        }
+        if (locator != null && locator.hasBlockedReferences()) {
+            anyBlocked = true;
+        }
+        if (anyBlocked) {
+            setError(ExceptionCodes.UNTRUSTED_URL_IN_DEFINITION);
         }
         return !hasError;
     }
@@ -538,5 +601,20 @@ public class WSDL11ProcessorImpl extends AbstractWSDLProcessor {
     private void setError(ErrorHandler error) {
         this.hasError = true;
         this.error = error;
+    }
+
+    private String resolveTenantDomain() {
+        return WsdlTenantResolver.resolveTenantDomain();
+    }
+
+    /**
+     * If the locator blocked any nested schema reference by the network-security policy (or by the
+     * archive-containment/local-absolute rules), report it to the user as {@link ExceptionCodes#UNTRUSTED_URL}
+     * (parity with the WSDL 2.0 / OpenAPI $ref case).
+     */
+    private void reportBlockedReferencesIfAny(AccessControlledWSDLLocator locator) {
+        if (locator != null && locator.hasBlockedReferences()) {
+            setError(ExceptionCodes.UNTRUSTED_URL_IN_DEFINITION);
+        }
     }
 }

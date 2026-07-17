@@ -656,6 +656,9 @@ public class RestApiPublisherUtils {
                         validateOpenAPIDefinition(definitionUrl, definition, fileDetail, inlineDefinition,
                                 true, isServiceAPI);
             } catch (APIManagementException e) {
+                if (e.getErrorHandler() != null && e.getErrorHandler().getHttpStatusCode() == 400) {
+                    throw RestApiUtil.buildBadRequestException(e.getErrorHandler().getErrorDescription());
+                }
                 RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
                 return null;
             }

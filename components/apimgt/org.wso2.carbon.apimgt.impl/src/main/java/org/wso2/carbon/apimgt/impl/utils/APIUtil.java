@@ -130,6 +130,7 @@ import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.Mediation;
+import org.wso2.carbon.apimgt.api.model.OASParserOptions;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
@@ -12531,6 +12532,103 @@ public final class APIUtil {
                 }
             }
             applyAccessControlPolicy(host, tenantMode, tenantHosts, tenantBlockPrivate);
+        }
+    }
+
+    /**
+     * Builds a per-request {@link OASParserOptions} carrying the remote-$ref allow/block lists derived from the
+     * platform and tenant network access-control policy. Never mutates {@code base} (may be a shared singleton).
+     * allow-mode hosts → allow-list; deny-mode hosts → block-list; platform and tenant lists are unioned.
+     * Private-network blocking is handled by the resolver itself and needs no list entry here.
+     *
+     * @param base         base options to copy non-access-control settings from (may be null)
+     * @param tenantDomain the tenant domain whose config should be merged in
+     * @return a new {@link OASParserOptions} instance; never null
+     */
+    public static OASParserOptions buildRefResolutionOptions(OASParserOptions base, String tenantDomain)
+            throws APIManagementException {
+        OASParserOptions options = new OASParserOptions(base);
+        List<String> allowList = new ArrayList<>();
+        List<String> blockList = new ArrayList<>();
+        // Whether any network access-control policy is configured. With no policy (neither platform nor tenant),
+        // safe resolution stays off so the parser keeps resolving remote refs as before (backwards compatibility).
+        boolean policyConfigured = false;
+
+        // Platform policy (static fields populated in init()).
+        if (networkSecurityEnabled) {
+            policyConfigured = true;
+            validateNetworkSecurityMode(networkSecurityMode);
+            if (networkSecurityHosts != null) {
+                if (APIConstants.NetworkSecurityAccessControl.MODE_ALLOW.equalsIgnoreCase(networkSecurityMode)) {
+                    allowList.addAll(networkSecurityHosts);
+                } else if (APIConstants.NetworkSecurityAccessControl.MODE_DENY.equalsIgnoreCase(networkSecurityMode)) {
+                    blockList.addAll(networkSecurityHosts);
+                }
+            }
+        }
+
+        // Tenant policy. Only the config read is guarded; a misconfigured tenant policy must surface, not be swallowed.
+        JSONObject tenantConfig;
+        try {
+            tenantConfig = getTenantConfig(tenantDomain);
+        } catch (APIManagementException e) {
+            log.warn("Could not read tenant network access-control policy for $ref resolution; "
+                    + "proceeding with platform policy only.", e);
+            tenantConfig = null;
+        }
+        if (tenantConfig != null) {
+            Object nsac = tenantConfig.get(APIConstants.NetworkSecurityAccessControl.TENANT_CONFIG_KEY);
+            if (nsac instanceof JSONObject) {
+                policyConfigured = true;
+                JSONObject policy = (JSONObject) nsac;
+                String tMode = (String) policy.get(APIConstants.NetworkSecurityAccessControl.TENANT_MODE);
+                Object tHostsObj = policy.get(APIConstants.NetworkSecurityAccessControl.TENANT_HOSTS);
+                List<String> tHosts = new ArrayList<>();
+                if (tHostsObj instanceof JSONArray) {
+                    for (Object h : (JSONArray) tHostsObj) {
+                        tHosts.add(h.toString());
+                    }
+                }
+                validateNetworkSecurityMode(tMode);
+                if (APIConstants.NetworkSecurityAccessControl.MODE_ALLOW.equalsIgnoreCase(tMode)) {
+                    allowList.addAll(tHosts);
+                } else if (APIConstants.NetworkSecurityAccessControl.MODE_DENY.equalsIgnoreCase(tMode)) {
+                    blockList.addAll(tHosts);
+                }
+            }
+        }
+
+        if (!allowList.isEmpty()) {
+            options.setRemoteRefAllowList(allowList);
+        }
+        if (!blockList.isEmpty()) {
+            options.setRemoteRefBlockList(blockList);
+        }
+        options.setNetworkAccessControlEnabled(policyConfigured);
+        return options;
+    }
+
+    /**
+     * Validates the configured network access-control mode for an enabled policy. A blank mode is permitted (it means
+     * private-network blocking only, with no host allow/deny list). Any non-blank value other than
+     * {@code allow}/{@code deny} is a misconfiguration and is rejected, mirroring {@code applyAccessControlPolicy}.
+     *
+     * @param mode the configured mode, or {@code null}/blank for the private-network-only policy
+     * @throws APIManagementException with {@code NETWORK_SECURITY_ACCESS_CONTROL_MISCONFIGURED} if the mode is invalid
+     */
+    private static void validateNetworkSecurityMode(String mode) throws APIManagementException {
+        // Blank mode is valid (private-network-only) and handled by applyAccessControlPolicy; not a misconfiguration.
+        if (StringUtils.isBlank(mode)) {
+            return;
+        }
+        if (!APIConstants.NetworkSecurityAccessControl.MODE_ALLOW.equalsIgnoreCase(mode)
+                && !APIConstants.NetworkSecurityAccessControl.MODE_DENY.equalsIgnoreCase(mode)) {
+            APIManagementException ex = new APIManagementException(
+                    ExceptionCodes.NETWORK_SECURITY_ACCESS_CONTROL_MISCONFIGURED.getErrorMessage(),
+                    ExceptionCodes.NETWORK_SECURITY_ACCESS_CONTROL_MISCONFIGURED);
+            log.error("Network security access control misconfiguration: mode='" + mode + "' is not a valid value "
+                    + "(expected 'allow' or 'deny').", ex);
+            throw ex;
         }
     }
 

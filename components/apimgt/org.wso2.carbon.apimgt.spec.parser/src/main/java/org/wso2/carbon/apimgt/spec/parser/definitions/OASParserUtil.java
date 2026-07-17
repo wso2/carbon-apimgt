@@ -62,6 +62,9 @@ import io.swagger.v3.parser.ObjectMapperFactory;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.converter.SwaggerConverter;
 import io.swagger.v3.parser.core.models.ParseOptions;
+import io.swagger.v3.parser.urlresolver.PermittedUrlsChecker;
+import io.swagger.v3.parser.urlresolver.exceptions.HostDeniedException;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -107,6 +110,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -1003,6 +1007,9 @@ public class OASParserUtil {
         SwaggerVersion version;
         version = getSwaggerVersion(content);
         String filePath = masterSwagger.getAbsolutePath();
+        // Gate remote (http/https) $refs in the archive through the policy gate before parsing with resolution
+        // enabled, so the parser can't fetch them without host validation; local/relative sibling refs are untouched.
+        gateArchiveRemoteRefs(archiveDirectory, oasParserOptions);
         if (SwaggerVersion.OPEN_API.equals(version)) {
             OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
             ParseOptions options = new ParseOptions();
@@ -1109,10 +1116,20 @@ public class OASParserUtil {
             if (!validationResponse.isValid()) {
                 for (ErrorHandler handler : validationResponse.getErrorItems()) {
                     if (ExceptionCodes.INVALID_OAS3_FOUND.getErrorCode() == handler.getErrorCode()) {
-                        return tryOAS2Validation(apiDefinition, returnJsonContent);
+                        return tryOAS2Validation(apiDefinition, returnJsonContent, oasParserOptions);
                     }
                 }
             }
+        } catch (APIManagementException e) {
+            // A policy-gate block on a remote ref must surface as its own 400 error, not be folded into a generic
+            // parse error, so re-throw it; other APIManagementExceptions stay recorded as a validation error item.
+            if (e.getErrorHandler() != null
+                    && ExceptionCodes.UNTRUSTED_URL_IN_DEFINITION.getErrorCode() == e.getErrorHandler()
+                    .getErrorCode()) {
+                throw e;
+            }
+            //catching a generic exception as there can be runtime exceptions when parsing happens
+            addErrorToValidationResponse(validationResponse, e);
         } catch (Exception e) {
             //catching a generic exception as there can be runtime exceptions when parsing happens
             addErrorToValidationResponse(validationResponse, e);
@@ -1136,6 +1153,27 @@ public class OASParserUtil {
         errorItem.setDescription(e.toString());
         validationResponse.getErrorItems().add(errorItem);
         return errorItem;
+    }
+
+    /**
+     * Determine whether the given parser message signals that a URL embedded in the definition was blocked by the
+     * network access control policy (the safe URL resolver's host-denied signal). The message fragments below are
+     * the ones emitted by the swagger-parser safe URL resolver when it refuses to resolve a remote {@code $ref}.
+     *
+     * @param message a parser message
+     * @return {@code true} if the message indicates an embedded URL was blocked by the policy
+     */
+    public static boolean isUntrustedUrlInDefinition(String message) {
+        if (message == null) {
+            return false;
+        }
+        return message.contains("is restricted. URL [")
+                || message.contains("is part of the explicit denylist")
+                || message.contains("does not use a supported protocol. URL [")
+                || message.contains("Failed to resolve IP from hostname. Hostname [")
+                || message.contains("Failed to get hostname from URL. URL [")
+                || message.contains("Failed to create new URL with IP.")
+                || message.contains("Failed to parse URL. URL [");
     }
 
 
@@ -1186,24 +1224,30 @@ public class OASParserUtil {
         if (!validationResponse.isValid()) {
             for (ErrorHandler handler : validationResponse.getErrorItems()) {
                 if (ExceptionCodes.INVALID_OAS3_FOUND.getErrorCode() == handler.getErrorCode()) {
-                    return tryOAS2Validation(apiDefinition, returnJsonContent);
+                    return tryOAS2Validation(apiDefinition, returnJsonContent, oasParserOptions);
                 }
             }
         }
         return validationResponse;
     }
     /**
-     * Try to validate a give openAPI definition using swagger parser
+     * Try to validate a give openAPI definition using swagger parser, gating any remote {@code $ref} URLs present
+     * in the definition through the network access control policy (allow/block list + restricted-IP-range checks)
+     * before handing the definition to the legacy Swagger 2.0 parser, which otherwise fetches remote refs without
+     * any host validation.
      *
      * @param apiDefinition     definition
      * @param returnJsonContent whether to return definition as a json content
+     * @param oasParserOptions  optional OpenAPI parser options; may be {@code null} to use defaults
      * @return APIDefinitionValidationResponse
      * @throws APIManagementException if error occurred while parsing definition
      */
-    private static APIDefinitionValidationResponse tryOAS2Validation(String apiDefinition, boolean returnJsonContent)
-            throws APIManagementException {
+    private static APIDefinitionValidationResponse tryOAS2Validation(String apiDefinition, boolean returnJsonContent,
+            OASParserOptions oasParserOptions) throws APIManagementException {
+        // Remote refs are gated inside OAS2Parser via swagger-parser's built-in Safe URL Resolver (enabled only
+        // when a policy is configured; no-op otherwise), which also validates refs nested in a fetched remote doc.
         APIDefinitionValidationResponse validationResponse =
-                oas2Parser.validateAPIDefinition(apiDefinition, returnJsonContent);
+                oas2Parser.validateAPIDefinition(apiDefinition, returnJsonContent, oasParserOptions);
         if (!validationResponse.isValid()) {
             for (ErrorHandler handler : validationResponse.getErrorItems()) {
                 if (ExceptionCodes.INVALID_OAS2_FOUND.getErrorCode() == handler.getErrorCode()) {
@@ -1213,6 +1257,111 @@ public class OASParserUtil {
             }
         }
         return validationResponse;
+    }
+
+    /**
+     * Gate every remote (http/https) {@code $ref} found in any file of an extracted OpenAPI archive through the
+     * network access control policy, before the archive is parsed with resolution enabled. The archive parser
+     * inlines local sibling files and would otherwise transitively fetch remote refs (from the master document or
+     * any sibling file) without host validation. Local/relative refs are intentionally left untouched so multi-file
+     * archives still resolve. Only the (non-transitively-fetched) refs present in the archive's own files are
+     * covered; refs nested inside a remote document that is itself fetched are not visible here.
+     *
+     * @param archiveDirectory the root directory of the extracted archive
+     * @param oasParserOptions parser options carrying the network access control policy; may be {@code null}
+     * @throws APIManagementException with {@link ExceptionCodes#UNTRUSTED_URL_IN_DEFINITION} if a remote ref is not
+     *         permitted by the policy
+     */
+    private static void gateArchiveRemoteRefs(File archiveDirectory,
+            OASParserOptions oasParserOptions) throws APIManagementException {
+        // Only gate remote refs when a network access-control policy is configured. Without one, the archive parser
+        // resolves refs as it always has - preserving backwards compatibility for deployments without the policy.
+        if (oasParserOptions == null || !oasParserOptions.isNetworkAccessControlEnabled()) {
+            return;
+        }
+        PermittedUrlsChecker checker = new PermittedUrlsChecker(
+                oasParserOptions.getRemoteRefAllowList(), oasParserOptions.getRemoteRefBlockList());
+        for (File file : FileUtils.listFiles(archiveDirectory, null, true)) {
+            String fileContent;
+            try {
+                fileContent = FileUtils.readFileToString(file, APISpecParserConstants.DigestAuthConstants.CHARSET);
+            } catch (IOException e) {
+                // Unreadable/binary file: nothing to gate here; the parser will surface any real problem later.
+                continue;
+            }
+            for (String refUrl : extractRemoteRefUrls(fileContent)) {
+                try {
+                    checker.verify(refUrl);
+                } catch (HostDeniedException e) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Rejected OpenAPI archive referencing a disallowed remote URL: " + refUrl, e);
+                    }
+                    throw new APIManagementException(ExceptionCodes.UNTRUSTED_URL_IN_DEFINITION);
+                }
+            }
+        }
+    }
+
+    /**
+     * Walk the given JSON definition tree and collect every remote (http/https) {@code $ref} URL present in it.
+     * Used to gate the legacy OpenAPI 2.0 parser (which otherwise fetches remote refs without host validation)
+     * through the network access control policy before parsing. Only top-level (non-transitively-fetched) refs
+     * present in the original document are covered; refs nested inside a remote document that is itself fetched
+     * are not visible here.
+     *
+     * @param jsonDefinition the OpenAPI/Swagger definition, as JSON or YAML text
+     * @return a set of distinct remote {@code $ref} URL values found in the definition; empty if none are found
+     *         or if the definition cannot be parsed
+     */
+    private static Set<String> extractRemoteRefUrls(String jsonDefinition) {
+        Set<String> refUrls = new HashSet<>();
+        try {
+            // The definition may still be YAML here, so a YAML-backed mapper is used: it parses YAML and JSON alike
+            // (JSON is a subset of YAML), so remote refs are found regardless of format.
+            JsonNode root = new ObjectMapper(new YAMLFactory()).readTree(jsonDefinition);
+            collectRemoteRefUrls(root, refUrls);
+        } catch (IOException | RuntimeException e) {
+            // Malformed JSON (or any unexpected parsing issue) here is not this method's concern - the legacy
+            // parser invoked afterwards will surface a proper parse error to the caller. Fail safe with no refs.
+            if (log.isDebugEnabled()) {
+                log.debug("Could not parse OpenAPI definition while scanning for remote $ref URLs", e);
+            }
+        }
+        return refUrls;
+    }
+
+    private static final String REF_FIELD_NAME = "$ref";
+
+    /**
+     * Recursively walk a JSON tree collecting the string value of every {@code $ref} field whose value starts
+     * with {@code http://} or {@code https://}.
+     *
+     * @param node    the current JSON node
+     * @param refUrls the set to accumulate discovered remote ref URLs into
+     */
+    private static void collectRemoteRefUrls(JsonNode node, Set<String> refUrls) {
+        if (node == null) {
+            return;
+        }
+        if (node.isObject()) {
+            Iterator<Map.Entry<String, JsonNode>> fields = node.fields();
+            while (fields.hasNext()) {
+                Map.Entry<String, JsonNode> field = fields.next();
+                JsonNode value = field.getValue();
+                if (REF_FIELD_NAME.equals(field.getKey()) && value != null && value.isTextual()) {
+                    String refValue = value.textValue();
+                    if (refValue != null && (refValue.startsWith("http://") || refValue.startsWith("https://"))) {
+                        refUrls.add(refValue);
+                    }
+                } else {
+                    collectRemoteRefUrls(value, refUrls);
+                }
+            }
+        } else if (node.isArray()) {
+            for (JsonNode element : node) {
+                collectRemoteRefUrls(element, refUrls);
+            }
+        }
     }
 
     /**
