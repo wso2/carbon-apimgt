@@ -514,6 +514,36 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
             }
         }
 
+        // Request/response body (optional)
+        if (AnalyticsPayloadUtil.shouldSendPayloads()) {
+            log.debug("Including request/response body in analytics event");
+            int sizeLimit = AnalyticsPayloadUtil.getPayloadSizeLimit();
+            // Request body was captured in the request flow and stashed on the message context.
+            Object requestBody = messageContext.getProperty(Constants.REQUEST_BODY);
+            if (requestBody instanceof String) {
+                custom.put(Constants.REQUEST_BODY, requestBody);
+                Object reqEncoding = messageContext.getProperty(Constants.REQUEST_BODY_TRANSFER_ENCODING);
+                if (reqEncoding instanceof String) {
+                    custom.put(Constants.REQUEST_BODY_TRANSFER_ENCODING, reqEncoding);
+                }
+                // Convey the request Content-Type so Moesif can label/parse the body even when
+                // send_headers is off. (The response Content-Type already rides as responseContentType.)
+                String reqContentType = getRequestContentType();
+                if (reqContentType != null) {
+                    custom.put(Constants.REQUEST_CONTENT_TYPE, reqContentType);
+                }
+            }
+            // Response body is built and read here, at event-collection time.
+            AnalyticsPayloadUtil.CapturedBody responseBody =
+                    AnalyticsPayloadUtil.extractPayload(messageContext, sizeLimit, "response");
+            if (responseBody != null && responseBody.getBody() != null) {
+                custom.put(Constants.RESPONSE_BODY, responseBody.getBody());
+                if (responseBody.getTransferEncoding() != null) {
+                    custom.put(Constants.RESPONSE_BODY_TRANSFER_ENCODING, responseBody.getTransferEncoding());
+                }
+            }
+        }
+
         // API attributes (egress/subtype)
         Object apiObj = messageContext.getProperty(API_OBJECT);
         if (apiObj instanceof org.wso2.carbon.apimgt.keymgt.model.entity.API) {
@@ -845,6 +875,33 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
             return headers.get(HttpHeaders.CONTENT_TYPE).toString();
         }
         return UNKNOWN_VALUE;
+    }
+
+    /**
+     * The request Content-Type, read case-insensitively from the request headers stashed as analytics
+     * metadata during the request-in flow ({@code REQUEST_HEADERS}). Used to convey the request body's
+     * media type to Moesif independently of {@code send_headers}.
+     *
+     * @return the request Content-Type, or {@code null} if unavailable
+     */
+    @SuppressWarnings("unchecked")
+    private String getRequestContentType() {
+        if (!(messageContext instanceof Axis2MessageContext)) {
+            return null;
+        }
+        Map<String, Object> analyticsMeta = ((Axis2MessageContext) messageContext).getAnalyticsMetadata();
+        if (analyticsMeta == null) {
+            return null;
+        }
+        Object reqHeadersObj = analyticsMeta.get(REQUEST_HEADERS);
+        if (reqHeadersObj instanceof Map) {
+            for (Map.Entry<String, Object> e : ((Map<String, Object>) reqHeadersObj).entrySet()) {
+                if (HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(String.valueOf(e.getKey())) && e.getValue() != null) {
+                    return e.getValue().toString();
+                }
+            }
+        }
+        return null;
     }
 
     private String getCommonName() {

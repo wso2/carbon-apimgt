@@ -90,6 +90,16 @@ public class Constants {
     public static final String REQUEST_HEADER_MASK = "request_headers";
     public static final String MASK_VALUE = "*****";
 
+    public static final String SEND_PAYLOAD = "send_payloads";
+    public static final String REQUEST_BODY = "requestBody";
+    public static final String RESPONSE_BODY = "responseBody";
+    public static final String REQUEST_BODY_TRANSFER_ENCODING = "requestBodyTransferEncoding";
+    public static final String RESPONSE_BODY_TRANSFER_ENCODING = "responseBodyTransferEncoding";
+    public static final String TRANSFER_ENCODING_BASE64 = "base64";
+    public static final String PAYLOAD_SIZE_LIMIT = "payload_size_limit";
+    public static final int DEFAULT_PAYLOAD_SIZE_LIMIT = 100000;
+    public static final String REQUEST_CONTENT_TYPE = "requestContentType";
+
     public static final String AI_METADATA = "aiMetadata";
     public static final String AI_VENDOR_NAME = "vendorName";
     public static final String AI_VENDOR_VERSION = "vendorVersion";
