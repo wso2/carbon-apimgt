@@ -141,20 +141,23 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
 
     @Override
     public boolean init(URL url) throws APIMgtWSDLException {
-        super.init(url);
-        return initModels();
+        // super.init returns false (and records UNTRUSTED_URL_IN_DEFINITION) when a nested reference was blocked
+        // by the network access-control policy; short-circuit so initModels() cannot override that outcome.
+        return super.init(url) && initModels();
     }
 
     @Override
     public boolean init(byte[] wsdlContent) throws APIMgtWSDLException {
-        super.init(wsdlContent);
-        return initModels();
+        // super.init returns false (and records UNTRUSTED_URL_IN_DEFINITION) when a nested reference was blocked
+        // by the network access-control policy; short-circuit so initModels() cannot override that outcome.
+        return super.init(wsdlContent) && initModels();
     }
 
     @Override
     public boolean initPath(String pathToExtractedZip) throws APIMgtWSDLException {
-        super.initPath(pathToExtractedZip);
-        return initModels();
+        // super.initPath returns false (and records UNTRUSTED_URL_IN_DEFINITION) when a nested reference was blocked
+        // by the network access-control policy; short-circuit so initModels() cannot override that outcome.
+        return super.initPath(pathToExtractedZip) && initModels();
     }
 
     /**
@@ -511,6 +514,11 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
             return basedSchemas.get(ns);
         }
         String schemaUrl = ns + ".xsd";
+        // Only a real remote HTTP(S) namespace is fetchable. A non-URL namespace (e.g. a urn:) is not a network
+        // reference, so skip the remote fetch entirely and let the local/base-XSD fallback run instead of failing.
+        if (schemaUrl == null || !(schemaUrl.startsWith("http://") || schemaUrl.startsWith("https://"))) {
+            return null;
+        }
         // Gate this namespace-derived remote fetch through the network access-control policy before opening a
         // connection; no-op when unconfigured, else a blocked/internal host throws UNTRUSTED_URL to fail the import.
         String tenantDomain = WsdlTenantResolver.resolveTenantDomain();

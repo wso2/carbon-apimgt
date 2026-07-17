@@ -1388,11 +1388,12 @@
           "$id": "#/properties/NetworkSecurityAccessControl/properties/BlockPrivateNetworkAccess",
           "type": "boolean",
           "title": "BlockPrivateNetworkAccess schema",
-          "description": "When true, blocks outbound requests resolving to private/reserved IP ranges. Hosts matched by the Hosts list are exempt.",
+          "description": "When true, blocks outbound requests resolving to private/reserved IP ranges. In allow mode, hosts matched by the Hosts list are exempt from private-network blocking.",
           "default": false,
           "examples": [true, false]
         }
       },
+      "required": ["Mode"],
       "additionalProperties": false
     }
   },

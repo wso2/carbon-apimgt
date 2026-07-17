@@ -403,7 +403,7 @@ public class WSDL20ProcessorImpl extends AbstractWSDLProcessor {
 
     /**
      * If the resolver blocked any remote nested reference by the network-security policy, report it to
-     * the user as {@link ExceptionCodes#UNTRUSTED_URL} (parity with the OpenAPI $ref case).
+     * the user as {@link ExceptionCodes#UNTRUSTED_URL_IN_DEFINITION} (parity with the OpenAPI $ref case).
      */
     private void reportBlockedReferencesIfAny(WSDLReader reader) {
         if (reader.getURIResolver() instanceof AccessControlledUriResolver

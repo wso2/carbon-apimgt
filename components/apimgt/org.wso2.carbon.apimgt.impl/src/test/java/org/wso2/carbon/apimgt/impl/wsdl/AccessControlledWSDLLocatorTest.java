@@ -29,6 +29,8 @@ import org.xml.sax.InputSource;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
@@ -262,8 +264,12 @@ public class AccessControlledWSDLLocatorTest {
 
     private static String read(InputSource is) throws IOException {
         if (is.getCharacterStream() != null) {
-            return IOUtils.toString(is.getCharacterStream());
+            try (Reader reader = is.getCharacterStream()) {
+                return IOUtils.toString(reader);
+            }
         }
-        return IOUtils.toString(is.getByteStream(), StandardCharsets.UTF_8);
+        try (InputStream in = is.getByteStream()) {
+            return IOUtils.toString(in, StandardCharsets.UTF_8);
+        }
     }
 }
