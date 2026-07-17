@@ -1174,11 +1174,14 @@ public class RegistryPersistenceUtil {
                     boolean isRoleEveryOne = false;
                     /*If no roles have defined, authorize for everyone role */
                     if (roles != null) {
-                        if (roles.length == 1 && "".equals(roles[0])) {
+                        if (roles.length == 1 && StringUtils.isBlank(roles[0])) {
                             authManager.authorizeRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
                             isRoleEveryOne = true;
                         } else {
                             for (String role : roles) {
+                                if (StringUtils.isBlank(role)) {
+                                    continue;
+                                }
                                 if (APIConstants.EVERYONE_ROLE.equalsIgnoreCase(role.trim())) {
                                     isRoleEveryOne = true;
                                 }
@@ -1215,13 +1218,23 @@ public class RegistryPersistenceUtil {
 
                 if (visibility != null && APIConstants.API_RESTRICTED_VISIBILITY.equalsIgnoreCase(visibility)) {
                     boolean isRoleEveryOne = false;
+                    /*If no roles have defined, authorize for everyone role */
                     if (roles != null) {
-                        for (String role : roles) {
-                            if (APIConstants.EVERYONE_ROLE.equalsIgnoreCase(role.trim())) {
-                                isRoleEveryOne = true;
+                        if (roles.length == 1 && StringUtils.isBlank(roles[0])) {
+                            authorizationManager.authorizeRole(APIConstants.EVERYONE_ROLE, resourcePath,
+                                    ActionConstants.GET);
+                            isRoleEveryOne = true;
+                        } else {
+                            for (String role : roles) {
+                                if (StringUtils.isBlank(role)) {
+                                    continue;
+                                }
+                                if (APIConstants.EVERYONE_ROLE.equalsIgnoreCase(role.trim())) {
+                                    isRoleEveryOne = true;
+                                }
+                                authorizationManager.authorizeRole(role.trim(), resourcePath, ActionConstants.GET);
+                                publisherAccessRoles.append(",").append(role.trim().toLowerCase());
                             }
-                            authorizationManager.authorizeRole(role.trim(), resourcePath, ActionConstants.GET);
-                            publisherAccessRoles.append(",").append(role.toLowerCase());
                         }
                     }
                     if (!isRoleEveryOne) {
@@ -2041,8 +2054,8 @@ public class RegistryPersistenceUtil {
         String provider = null;
         try {
             String segment = RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR;
-            int startIndex = apiPath.lastIndexOf(segment) + segment.length();
-            int endIndex = apiPath.lastIndexOf(APIConstants.API_RESOURCE_NAME);
+            int startIndex = StringUtils.lastIndexOfIgnoreCase(apiPath, segment) + segment.length();
+            int endIndex = StringUtils.lastIndexOfIgnoreCase(apiPath, APIConstants.API_RESOURCE_NAME);
             String apiVersion = apiPath.substring(startIndex, endIndex);
             provider = extractProviderFromPath(apiPath, apiName, apiVersion);
         } catch (APIPersistenceException | StringIndexOutOfBoundsException e) {
@@ -2077,7 +2090,7 @@ public class RegistryPersistenceUtil {
         }
         String nameVersionApiSegment = RegistryConstants.PATH_SEPARATOR + apiName
                 + RegistryConstants.PATH_SEPARATOR + apiVersion + APIConstants.API_RESOURCE_NAME;
-        int endIndex = apiPath.lastIndexOf(nameVersionApiSegment);
+        int endIndex = StringUtils.lastIndexOfIgnoreCase(apiPath, nameVersionApiSegment);
         if (endIndex < 0) {
             throw new APIPersistenceException("Unable to extract provider from path: " + apiPath
                     + ". Expected segment '" + nameVersionApiSegment + "' not found.");

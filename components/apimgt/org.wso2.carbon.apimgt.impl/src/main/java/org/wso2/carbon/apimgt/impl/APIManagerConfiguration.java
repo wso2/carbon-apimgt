@@ -51,6 +51,7 @@ import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.common.gateway.configdto.HttpClientConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIMGovernanceConfigDTO;
+import org.wso2.carbon.apimgt.impl.dto.ConnectGatewayConfig;
 import org.wso2.carbon.apimgt.impl.dto.DistributedThrottleConfig;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
@@ -182,6 +183,7 @@ public class APIManagerConfiguration {
     private String hashingAlgorithm = SHA_256;
     private boolean isTransactionCounterEnabled;
     private static boolean isMCPSupportEnabled = true;
+    private static boolean isMCPEnforceAuthForAllMethods = true;
     private static String devportalMode = APIConstants.DEVPORTAL_MODE_HYBRID;
     private static volatile boolean isRuntimeReadOnly = false;
 
@@ -265,6 +267,23 @@ public class APIManagerConfiguration {
     private JSONArray customProperties = new JSONArray();
     private GatewayNotificationConfiguration gatewayNotificationConfiguration = new GatewayNotificationConfiguration();
     private PlatformGatewayConnectConfig platformGatewayConnectConfig = new PlatformGatewayConnectConfig();
+
+    private static final Map<String, String> PUBLISHER_IMPORT_FILE_SIZE_LIMIT_DEFAULTS;
+
+    static {
+        Map<String, String> defaults = new HashMap<>();
+        defaults.put(org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_OAS_FILE_SIZE_LIMIT,
+                org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_OAS_FILE_SIZE_LIMIT_DEFAULT_MB);
+        defaults.put(org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_ASYNC_FILE_SIZE_LIMIT,
+                org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_ASYNC_FILE_SIZE_LIMIT_DEFAULT_MB);
+        defaults.put(org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_WSDL_FILE_SIZE_LIMIT,
+                org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_WSDL_FILE_SIZE_LIMIT_DEFAULT_MB);
+        defaults.put(org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_GRAPHQL_FILE_SIZE_LIMIT,
+                org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_GRAPHQL_FILE_SIZE_LIMIT_DEFAULT_MB);
+        defaults.put(org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_MCP_FILE_SIZE_LIMIT,
+                org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_MCP_FILE_SIZE_LIMIT_DEFAULT_MB);
+        PUBLISHER_IMPORT_FILE_SIZE_LIMIT_DEFAULTS = Collections.unmodifiableMap(defaults);
+    }
 
     /**
      * Returns the configuration of the Identity Provider.
@@ -685,33 +704,9 @@ public class APIManagerConfiguration {
             } else if (elementHasText(element)) {
                 String key = getKey(nameStack);
                 String value = MiscellaneousUtil.resolve(element, secretResolver);
-                if (org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_OAS_FILE_SIZE_LIMIT.equals(key)) {
-                    String maxFileSize = StringUtils.isNumeric(value) ?
-                            value :
-                            org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_OAS_FILE_SIZE_LIMIT_DEFAULT_MB;
-                    addToConfiguration(key, APIUtil.replaceSystemProperty(maxFileSize));
-                } else if (org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_ASYNC_FILE_SIZE_LIMIT.equals(
-                        key)) {
-                    String maxFileSize = StringUtils.isNumeric(value) ?
-                            value :
-                            org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_ASYNC_FILE_SIZE_LIMIT_DEFAULT_MB;
-                    addToConfiguration(key, APIUtil.replaceSystemProperty(maxFileSize));
-                } else if (org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_WSDL_FILE_SIZE_LIMIT.equals(
-                        key)) {
-                    String maxFileSize = StringUtils.isNumeric(value) ?
-                            value :
-                            org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_WSDL_FILE_SIZE_LIMIT_DEFAULT_MB;
-                    addToConfiguration(key, APIUtil.replaceSystemProperty(maxFileSize));
-                } else if (org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_GRAPHQL_FILE_SIZE_LIMIT.equals(key)) {
-                    String maxFileSize = StringUtils.isNumeric(value) ?
-                            value :
-                            org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_GRAPHQL_FILE_SIZE_LIMIT_DEFAULT_MB;
-                    addToConfiguration(key, APIUtil.replaceSystemProperty(maxFileSize));
-                } else if (org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_MCP_FILE_SIZE_LIMIT.equals(
-                        key)) {
-                    String maxFileSize = StringUtils.isNumeric(value) ?
-                            value :
-                            org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_MCP_FILE_SIZE_LIMIT_DEFAULT_MB;
+                String defaultFileSizeLimit = PUBLISHER_IMPORT_FILE_SIZE_LIMIT_DEFAULTS.get(key);
+                if (defaultFileSizeLimit != null) {
+                    String maxFileSize = StringUtils.isNumeric(value) ? value : defaultFileSizeLimit;
                     addToConfiguration(key, APIUtil.replaceSystemProperty(maxFileSize));
                 } else {
                     addToConfiguration(key, APIUtil.replaceSystemProperty(value));
@@ -3160,6 +3155,13 @@ public class APIManagerConfiguration {
                 log.debug("RoundRobin configurations are not defined in AI configuration.");
             }
         }
+        OMElement errorResponseFormatSequenceElement =
+                omElement.getFirstChildWithName(new QName(APIConstants.AI.AI_CUSTOM_ERROR_RESPONSE_SEQUENCE));
+        if (errorResponseFormatSequenceElement != null
+                && StringUtils.isNotEmpty(errorResponseFormatSequenceElement.getText())) {
+            aiapiConfigurationsDTO.setCustomErrorResponseSequence(
+                    errorResponseFormatSequenceElement.getText().trim());
+        }
     }
 
     public boolean isEnableAiConfiguration() {
@@ -3190,6 +3192,21 @@ public class APIManagerConfiguration {
             isMCPSupportEnabled = Boolean.parseBoolean(mcpServerConfigElement.getText().trim());
             System.setProperty(APIConstants.ENABLE_MCP_SUPPORT, Boolean.toString(isMCPSupportEnabled));
         }
+
+        OMElement mcpEnforceAuthForAllMethodsElement =
+                omElement.getFirstChildWithName(new QName(APIConstants.AI.MCP_ENFORCE_AUTH_FOR_ALL));
+        if (mcpEnforceAuthForAllMethodsElement != null
+                && StringUtils.isNotBlank(mcpEnforceAuthForAllMethodsElement.getText())) {
+            String enforceAuthValue = mcpEnforceAuthForAllMethodsElement.getText().trim();
+            // Validate the value to ensure it's either "true" or "false"
+            if (Boolean.TRUE.toString().equalsIgnoreCase(enforceAuthValue)
+                    || Boolean.FALSE.toString().equalsIgnoreCase(enforceAuthValue)) {
+                isMCPEnforceAuthForAllMethods = Boolean.parseBoolean(enforceAuthValue);
+            } else {
+                log.warn("Invalid value for " + APIConstants.AI.MCP_ENFORCE_AUTH_FOR_ALL
+                        + ". Using default: " + isMCPEnforceAuthForAllMethods);
+            }
+        }
     }
 
     /**
@@ -3200,6 +3217,17 @@ public class APIManagerConfiguration {
     public boolean isMCPSupportEnabled() {
 
         return isMCPSupportEnabled;
+    }
+
+    /**
+     * Returns whether the Gateway should enforce authentication for all MCP methods.
+     * Default is true to ensure security
+     *
+     * @return true if authentication should be enforced for all methods, false otherwise.
+     */
+    public boolean isMCPEnforceAuthForAllMethods() {
+
+        return isMCPEnforceAuthForAllMethods;
     }
 
     /**
@@ -3644,6 +3672,66 @@ public class APIManagerConfiguration {
             if (!platformGatewayVersions.isEmpty()) {
                 platformGatewayConnectConfig.setPlatformGatewayVersions(platformGatewayVersions);
             }
+            List<ConnectGatewayConfig> connectGateways = new ArrayList<>();
+            int declaredConnectEntryCount = 0;
+            OMElement connectGatewaysElem = pgConnectElem.getFirstChildWithName(
+                    new QName(APIConstants.GatewayNotification.CONNECT_GATEWAYS));
+            if (connectGatewaysElem != null) {
+                Iterator<?> connectIt = connectGatewaysElem.getChildrenWithName(
+                        new QName(APIConstants.GatewayNotification.CONNECT));
+                while (connectIt != null && connectIt.hasNext()) {
+                    declaredConnectEntryCount++;
+                    OMElement connectElem = (OMElement) connectIt.next();
+                    if (connectElem == null) {
+                        continue;
+                    }
+                    ConnectGatewayConfig entry = new ConnectGatewayConfig();
+                    OMElement rt = connectElem.getFirstChildWithName(
+                            new QName(APIConstants.GatewayNotification.REGISTRATION_TOKEN));
+                    if (rt != null) {
+                        String resolvedToken = MiscellaneousUtil.resolve(rt, secretResolver);
+                        if (resolvedToken != null && !resolvedToken.trim().isEmpty()) {
+                            entry.setRegistrationToken(resolvedToken.trim());
+                        }
+                    }
+                    OMElement nameEl = connectElem.getFirstChildWithName(
+                            new QName(APIConstants.GatewayNotification.CONNECT_NAME));
+                    if (nameEl != null && nameEl.getText() != null) {
+                        entry.setName(nameEl.getText().trim());
+                    }
+                    OMElement displayEl = connectElem.getFirstChildWithName(
+                            new QName(APIConstants.GatewayNotification.CONNECT_DISPLAY_NAME));
+                    if (displayEl != null && displayEl.getText() != null) {
+                        entry.setDisplayName(displayEl.getText().trim());
+                    }
+                    OMElement descEl = connectElem.getFirstChildWithName(
+                            new QName(APIConstants.GatewayNotification.CONNECT_DESCRIPTION));
+                    if (descEl != null && descEl.getText() != null) {
+                        entry.setDescription(descEl.getText().trim());
+                    }
+                    OMElement urlEl = connectElem.getFirstChildWithName(
+                            new QName(APIConstants.GatewayNotification.CONNECT_URL));
+                    if (urlEl != null && urlEl.getText() != null && !urlEl.getText().trim().isEmpty()) {
+                        try {
+                            entry.setUrl(urlEl.getText().trim());
+                        } catch (IllegalArgumentException e) {
+                            log.error("Skipping [[apim.platform_gateway.connect]] entry " + declaredConnectEntryCount
+                                    + " (name=" + entry.getName() + "): invalid url - " + e.getMessage());
+                            continue;
+                        }
+                    }
+                    OMElement orgEl = connectElem.getFirstChildWithName(
+                            new QName(APIConstants.GatewayNotification.CONNECT_ORGANIZATION));
+                    if (orgEl != null && orgEl.getText() != null && !orgEl.getText().trim().isEmpty()) {
+                        entry.setOrganization(orgEl.getText().trim());
+                    }
+                    connectGateways.add(entry);
+                }
+            }
+            platformGatewayConnectConfig.setDeclaredConnectEntryCount(declaredConnectEntryCount);
+            if (!connectGateways.isEmpty()) {
+                platformGatewayConnectConfig.setConnectGateways(connectGateways);
+            }
         }
     }
 
@@ -3652,7 +3740,8 @@ public class APIManagerConfiguration {
     }
 
     /**
-     * API Platform Gateway metadata config (e.g. supported versions for UI).
+     * Platform Gateway connect-with-token config ({@code [[apim.platform_gateway.connect]]}) and
+     * version metadata ({@code apim.platform_gateway.versions}).
      */
     public PlatformGatewayConnectConfig getPlatformGatewayConnectConfig() {
         return platformGatewayConnectConfig;

@@ -20,14 +20,19 @@ package org.wso2.carbon.apimgt.gateway;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.commons.throttle.core.DistributedCounterException;
 import org.apache.synapse.commons.throttle.core.DistributedCounterManager;
 import org.wso2.carbon.apimgt.impl.dto.RedisConfig;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.Response;
 import redis.clients.jedis.Transaction;
+import redis.clients.jedis.exceptions.JedisConnectionException;
 import redis.clients.jedis.exceptions.JedisException;
+import redis.clients.jedis.exceptions.JedisExhaustedPoolException;
 import redis.clients.jedis.params.SetParams;
+
+import java.util.List;
 
 /**
  * Redis Base Distributed Counter Manager for Throttler.
@@ -493,6 +498,9 @@ public class RedisBaseDistributedCountManager implements DistributedCounterManag
                 }
                 return acquired;
             }
+        } catch (JedisException e) {
+            throw new DistributedCounterException(
+                    "Redis error acquiring lock for key: " + key, e, toKind(e));
         } finally {
             if (log.isTraceEnabled()) {
                 log.trace("Time Taken to setLockWithExpiry :" + (System.currentTimeMillis() - startTime));
@@ -538,5 +546,116 @@ public class RedisBaseDistributedCountManager implements DistributedCounterManag
             }
         }
     }
-}
 
+    @Override
+    public long[] getWindowState(String key) {
+        long startTime = System.currentTimeMillis();
+        try {
+            try (Jedis jedis = redisPool.getResource()) {
+                List<String> vals = jedis.hmget(key, "ts", "counter");
+                if (vals == null) {
+                    return new long[]{0L, 0L};
+                }
+                try {
+                    String tsValue = vals.get(0);
+                    String counterValue = vals.get(1);
+                    if (tsValue == null || counterValue == null) {
+                        if (tsValue != null || counterValue != null) {
+                            log.warn("Incomplete window state in Redis for key: " + key
+                                    + " (ts=" + tsValue + ", counter=" + counterValue
+                                    + "). Treating as empty window.");
+                        }
+                        return new long[]{0L, 0L};
+                    }
+                    long ts = Long.parseLong(tsValue);
+                    long counter = Long.parseLong(counterValue);
+                    return new long[]{ts, counter};
+                } catch (RuntimeException e) {
+                    // Catches NumberFormatException (corrupted field value) and
+                    // IndexOutOfBoundsException (unexpected short list from Jedis).
+                    log.warn("Corrupted or unexpected window state in Redis for key: " + key
+                            + " vals=" + vals + ". Treating as empty window.", e);
+                    return new long[]{0L, 0L};
+                }
+            }
+        } catch (JedisException e) {
+            throw new DistributedCounterException(
+                    "Redis error in getWindowState for key: " + key, e, toKind(e));
+        } finally {
+            if (log.isTraceEnabled()) {
+                log.trace("Time Taken to getWindowState :" + (System.currentTimeMillis() - startTime));
+            }
+        }
+    }
+
+    @Override
+    public void setWindow(String key, long count, long ts, long expiryTime) {
+        long startTime = System.currentTimeMillis();
+        try {
+            try (Jedis jedis = redisPool.getResource()) {
+                Transaction tx = jedis.multi();
+                tx.hset(key, "ts", String.valueOf(ts));
+                tx.hset(key, "counter", String.valueOf(count));
+                tx.pexpireAt(key, expiryTime);
+                List<Object> results = tx.exec();
+                if (results == null || results.size() < 3) {
+                    throw new DistributedCounterException(
+                            "Transaction failed for setWindow on key: " + key
+                            + " results=" + results, null, DistributedCounterException.Kind.TRANSACTION_ABORT);
+                }
+            }
+        } catch (JedisException e) {
+            throw new DistributedCounterException(
+                    "Redis error in setWindow for key: " + key, e, toKind(e));
+        } finally {
+            if (log.isTraceEnabled()) {
+                log.trace("Time Taken to setWindow :" + (System.currentTimeMillis() - startTime));
+            }
+        }
+    }
+
+    @Override
+    public long incrWindowCounter(String key, long delta, long expiryTime) {
+        long startTime = System.currentTimeMillis();
+        try {
+            try (Jedis jedis = redisPool.getResource()) {
+                Transaction tx = jedis.multi();
+                Response<Long> counterResp = tx.hincrBy(key, "counter", delta);
+                // pexpireAt guards against the narrow race where the hash TTL fires between
+                // the caller's pre-check and this call: HINCRBY auto-creates a bare hash
+                // with no TTL; pexpireAt ensures it always expires at the window boundary.
+                tx.pexpireAt(key, expiryTime);
+                List<Object> results = tx.exec();
+                if (results == null || results.size() < 2) {
+                    throw new DistributedCounterException(
+                            "Transaction failed for incrWindowCounter on key: " + key
+                            + " results=" + results, null, DistributedCounterException.Kind.TRANSACTION_ABORT);
+                }
+                Long newCounter = counterResp.get();
+                if (newCounter == null) {
+                    throw new DistributedCounterException(
+                            "Counter increment returned null for key: " + key, null,
+                            DistributedCounterException.Kind.SERVER_ERROR);
+                }
+                return newCounter;
+            }
+        } catch (JedisException e) {
+            throw new DistributedCounterException(
+                    "Redis error in incrWindowCounter for key: " + key, e, toKind(e));
+        } finally {
+            if (log.isTraceEnabled()) {
+                log.trace("Time Taken to incrWindowCounter :" + (System.currentTimeMillis() - startTime));
+            }
+        }
+    }
+
+    private static DistributedCounterException.Kind toKind(JedisException e) {
+        if (e instanceof JedisExhaustedPoolException) {
+            return DistributedCounterException.Kind.POOL_EXHAUSTED;
+        }
+        if (e instanceof JedisConnectionException) {
+            return DistributedCounterException.Kind.CONNECTION_FAILURE;
+        }
+        return DistributedCounterException.Kind.SERVER_ERROR;
+    }
+}

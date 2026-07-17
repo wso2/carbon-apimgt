@@ -603,11 +603,13 @@ public final class APIConstants {
         public static final String AI_CONFIGURATION = "AiConfiguration";
         public static final String MCP = "MCP";
         public static final String MCP_SUPPORT_ENABLED = "Enabled";
+        public static final String MCP_ENFORCE_AUTH_FOR_ALL = "EnforceAuthForAllMCPMethods";
         public static final String AI_CONFIGURATION_FAILOVER_CONFIGURATIONS = "FailoverConfigurations";
         public static final String AI_CONFIGURATION_ROUND_ROBIN_CONFIGURATIONS = "RoundRobinConfigurations";
         public static final String AI_CONFIGURATION_FAILOVER_CONFIGURATIONS_FAILOVER_ENDPOINTS_LIMIT =
                 "FailoverEndpointsLimit";
         public static final String AI_CONFIGURATION_DEFAULT_REQUEST_TIMEOUT = "DefaultRequestTimout";
+        public static final String AI_CUSTOM_ERROR_RESPONSE_SEQUENCE = "CustomErrorResponseSequence";
 
         public static final String DESIGN_ASSISTANT = "DesignAssistant";
         public static final String DESIGN_ASSISTANT_ENABLED = "Enabled";
@@ -2970,7 +2972,6 @@ public final class APIConstants {
 
     // AWS Lambda: Constants for aws lambda
     public static final String AWS_SECRET_KEY = "AWS_SECRET_KEY";
-    public static final int AWS_ENCRYPTED_SECRET_KEY_LENGTH = 620;
     public static final int AWS_DEFAULT_CONNECTION_TIMEOUT = 50000;
     public static final String AMZN_ACCESS_KEY = "amznAccessKey";
     public static final String AMZN_SECRET_KEY = "amznSecretKey";
@@ -3813,6 +3814,7 @@ public final class APIConstants {
         public static final String METHOD_RESOURCES_LIST = "resources/list";
         public static final String METHOD_RESOURCE_TEMPLATE_LIST = "resources/templates/list";
         public static final String METHOD_PROMPTS_LIST = "prompts/list";
+        public static final String METHOD_SET_LOG_LEVEL = "logging/setLevel";
         public static final List<String> ALLOWED_METHODS = Arrays.asList(METHOD_INITIALIZE, METHOD_TOOL_LIST,
                 METHOD_TOOL_CALL, METHOD_PING, METHOD_NOTIFICATION_INITIALIZED, METHOD_RESOURCES_LIST, METHOD_PROMPTS_LIST,
                 METHOD_RESOURCE_TEMPLATE_LIST);
@@ -3879,6 +3881,7 @@ public final class APIConstants {
         public static final String SSE_DATA_PREFIX = "data:";
 
         public static final String MCP_AUTH_CLAIM = "MCP_AUTHENTICATED";
+        public static final String MCP_PATH_APPENDED_METADATA_KEY = "mcpPathAppended";
 
         /**
          * This class contains constants used for RPC processing
@@ -3977,6 +3980,16 @@ public final class APIConstants {
 
         public static final String PLATFORM_GATEWAY_CONNECT_CONFIGURATION = "PlatformGatewayConnectConfiguration";
         public static final String PLATFORM_GATEWAY_VERSIONS = "PlatformGatewayVersions";
+        public static final String CONNECT_GATEWAYS = "ConnectGateways";
+        public static final String CONNECT = "Connect";
+        public static final String REGISTRATION_TOKEN = "RegistrationToken";
+        public static final String CONNECT_NAME = "Name";
+        public static final String CONNECT_DISPLAY_NAME = "DisplayName";
+        public static final String CONNECT_DESCRIPTION = "Description";
+        public static final String CONNECT_URL = "Url";
+        public static final String CONNECT_ORGANIZATION = "Organization";
+        /** Original gateway base URL (scheme/host/port/path) for platform gateway environments. */
+        public static final String GATEWAY_BASE_URL = "gatewayBaseUrl";
         public static final String VERSION = "Version";
         public static final String API_KEY_NOTIFICATION = "APIKeyNotification";
         public static final String QUEUE_SIZE = "QueueSize";

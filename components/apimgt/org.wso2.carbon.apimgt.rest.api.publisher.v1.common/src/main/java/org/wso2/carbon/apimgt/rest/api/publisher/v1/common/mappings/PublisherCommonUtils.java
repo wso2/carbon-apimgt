@@ -165,6 +165,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -445,7 +446,7 @@ public class PublisherCommonUtils {
         }
         Backend backend = backends.get(0);
 
-        Set<URITemplate> updatedTemplates = new HashSet<>();
+        Set<URITemplate> updatedTemplates = new LinkedHashSet<>();
         if (APIConstants.API_SUBTYPE_DIRECT_BACKEND.equals(originalAPI.getSubtype())) {
             updatedTemplates = updateTemplatesFromDefinition(backend.getDefinition(), null,
                     backend.getId(), originalAPI.getSubtype(), apiToUpdate.getUriTemplates()
@@ -2900,7 +2901,16 @@ public class PublisherCommonUtils {
                             apiDtoTypeWrapper.getVersion()));
         }
 
-        if (apiProvider.isApiNameWithDifferentCaseExist(apiDtoTypeWrapper.getName(), organization)) {
+        // Block only when this create would INTRODUCE a new case-variant. If an exact-case
+        // name already exists in the tenant, the request is either a duplicate (caught later
+        // in this same method by the version-uniqueness check via
+        // getApiVersionsMatchingApiNameAndOrganization, then by the duplicate-context check,
+        // and ultimately by the AM_API (API_PROVIDER, API_NAME, API_VERSION, ORGANIZATION)
+        // unique constraint) or a legitimate new-version path -- either way, the existing
+        // case-variant sibling (if any) is a pre-existing legacy state that predates this
+        // check, so blocking here would be over-strict.
+        if (apiProvider.isApiNameWithDifferentCaseExist(apiDtoTypeWrapper.getName(), organization)
+                && !apiProvider.isApiNameExistExactCase(apiDtoTypeWrapper.getName(), organization)) {
             throw new APIManagementException(
                     "API with name " + apiDtoTypeWrapper.getName() + " already exists.",
                     ExceptionCodes.from(ExceptionCodes.API_NAME_ALREADY_EXISTS, apiDtoTypeWrapper.getName()));
@@ -2931,6 +2941,11 @@ public class PublisherCommonUtils {
 
         List<String> apiVersions = apiProvider.getApiVersionsMatchingApiNameAndOrganization(apiDtoTypeWrapper.getName(),
                 username, organization);
+
+        //Remove the {version} placeholder from the context template if it is present at end
+        if (context.endsWith("/" + APIConstants.VERSION_PLACEHOLDER)) {
+            context = context.split(Pattern.quote("/" + APIConstants.VERSION_PLACEHOLDER))[0];
+        }
 
         if (!apiVersions.isEmpty()) {
             for (String version : apiVersions) {
@@ -3026,6 +3041,11 @@ public class PublisherCommonUtils {
             api.getMetadata().put(APIConstants.MCP.PROTOCOL_VERSION_KEY,
                     (protocolVersion != null && !protocolVersion.isEmpty()) ? protocolVersion
                             : APIConstants.MCP.PROTOCOL_VERSION_2025_JUNE);
+            String existing = api.getMetadata().get(APIConstants.MCP.MCP_PATH_APPENDED_METADATA_KEY);
+            if (existing == null) {
+                api.getMetadata().put(APIConstants.MCP.MCP_PATH_APPENDED_METADATA_KEY,
+                        Boolean.FALSE.toString());
+            }
         }
         return api;
     }
@@ -5114,7 +5134,8 @@ public class PublisherCommonUtils {
      * @throws APIManagementException On unexpected internal errors
      */
     public static MCPServerValidationResponseDTO validateMCPServer(String serverUrl, SecurityInfoDTO securityInfo,
-                                                                   boolean returnTools, String organization)
+                                                                   boolean returnTools,
+                                                                   String organization)
             throws APIManagementException {
 
         MCPServerValidationResponseDTO response =

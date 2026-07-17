@@ -51,6 +51,7 @@ import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.restapi.publisher.ApisApiServiceImplUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -696,6 +697,9 @@ public class RestApiPublisherUtils {
             } else {
                 String msg = StringUtils.defaultIfBlank(result.getErrorMessage(),
                         "MCP server validation failed for URL: " + definitionUrl);
+                if (log.isDebugEnabled()) {
+                    log.debug("MCP server validation failed for server URL: " + definitionUrl);
+                }
                 throw RestApiUtil.buildBadRequestException(msg);
             }
         }

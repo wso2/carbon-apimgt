@@ -33,6 +33,8 @@ import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Application;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.EventCategory;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultCategory;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
+import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.mcp.request.Params;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
@@ -413,5 +415,45 @@ public class SynapseAnalyticsDataProviderTestCase {
         Field field = SynapseAnalyticsDataProvider.class.getDeclaredField("buildResponseMessage");
         field.setAccessible(true);
         field.set(provider, value);
+    }
+
+    /**
+     * Client Credentials grant: username is "anonymous" but applicationUUID is populated because
+     * subscription validation succeeded. isAnonymous() must return false so that real app fields
+     * are not overwritten with "anonymous" in analytics.
+     */
+    @Test
+    public void testIsAnonymousReturnsFalseForClientCredentialsGrantWithPopulatedApplicationUUID() {
+        AuthenticationContext authContext = new AuthenticationContext();
+        authContext.setAuthenticated(true);
+        authContext.setUsername(APIConstants.END_USER_ANONYMOUS);
+        authContext.setApplicationUUID("550e8400-e29b-41d4-a716-446655440000");
+
+        Axis2MessageContext messageContext = mockAxis2MessageContext(Collections.emptyMap(), Collections.emptyMap());
+        Mockito.when(messageContext.getProperty(APISecurityUtils.API_AUTH_CONTEXT)).thenReturn(authContext);
+
+        SynapseAnalyticsDataProvider provider = new SynapseAnalyticsDataProvider(messageContext);
+
+        Assert.assertFalse(provider.isAnonymous());
+    }
+
+    /**
+     * Open/unsecured API: username is "anonymous" and applicationUUID is null because
+     * APIAuthenticationHandler never sets it. isAnonymous() must return true so that
+     * analytics correctly reports "anonymous".
+     */
+    @Test
+    public void testIsAnonymousReturnsTrueForOpenApiWithNullApplicationUUID() {
+        AuthenticationContext authContext = new AuthenticationContext();
+        authContext.setAuthenticated(true);
+        authContext.setUsername(APIConstants.END_USER_ANONYMOUS);
+        authContext.setApplicationUUID(null);
+
+        Axis2MessageContext messageContext = mockAxis2MessageContext(Collections.emptyMap(), Collections.emptyMap());
+        Mockito.when(messageContext.getProperty(APISecurityUtils.API_AUTH_CONTEXT)).thenReturn(authContext);
+
+        SynapseAnalyticsDataProvider provider = new SynapseAnalyticsDataProvider(messageContext);
+
+        Assert.assertTrue(provider.isAnonymous());
     }
 }
