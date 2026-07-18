@@ -344,21 +344,41 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         if (StringUtils.isBlank(url)) {
             return;
         }
+        URI parsedUrl;
         try {
-            new URI(url).getHost();
+            parsedUrl = new URI(url);
         } catch (URISyntaxException e) {
-            return; // not a URL (e.g. "none"), skip validation
+            return; // not a URI, skip validation
+        }
+        // Only an absolute URL (scheme + host) is outbound-fetchable. Non-URL sentinels such as "none" and relative
+        // values are not, so skip them for backward compatibility instead of failing them as malformed.
+        if (parsedUrl.getScheme() == null || StringUtils.isBlank(parsedUrl.getHost())) {
+            return;
         }
         try {
             APIUtil.validateRemoteURL(url, RestApiCommonUtil.getLoggedInUserTenantDomain());
         } catch (APIManagementException e) {
-            if (e.getErrorHandler() != null && e.getErrorHandler().getHttpStatusCode() == 400) {
-                throw new APIManagementException(
-                        "Invalid Key Manager URL configuration. The " + fieldName
-                                + " URL is not trusted. Please contact the system administrator.",
-                        e.getErrorHandler());
-            }
-            throw e;
+            throw toKeyManagerUrlError(e, fieldName);
         }
+    }
+
+    /**
+     * Maps a Key Manager URL validation failure to the exception to surface. Only a policy block (UNTRUSTED_URL) means
+     * the URL is untrusted, so that is re-thrown with a field-specific message; any other error (e.g. a malformed URL)
+     * is propagated unchanged so its message stays accurate.
+     *
+     * @param e         the validation failure raised by {@code validateRemoteURL}
+     * @param fieldName descriptive name of the Key Manager URL field being validated
+     * @return the exception to throw
+     */
+    private APIManagementException toKeyManagerUrlError(APIManagementException e, String fieldName) {
+        if (e.getErrorHandler() != null
+                && e.getErrorHandler().getErrorCode() == ExceptionCodes.UNTRUSTED_URL.getErrorCode()) {
+            return new APIManagementException(
+                    "Invalid Key Manager URL configuration. The " + fieldName
+                            + " URL is not trusted. Please contact the system administrator.",
+                    e.getErrorHandler());
+        }
+        return e;
     }
 }

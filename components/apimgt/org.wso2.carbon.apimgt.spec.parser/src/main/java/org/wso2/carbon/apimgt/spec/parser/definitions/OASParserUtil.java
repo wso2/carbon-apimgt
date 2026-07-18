@@ -1260,42 +1260,55 @@ public class OASParserUtil {
     }
 
     /**
-     * Gate every remote (http/https) {@code $ref} found in any file of an extracted OpenAPI archive through the
-     * network access control policy, before the archive is parsed with resolution enabled. The archive parser
-     * inlines local sibling files and would otherwise transitively fetch remote refs (from the master document or
-     * any sibling file) without host validation. Local/relative refs are intentionally left untouched so multi-file
-     * archives still resolve. Only the (non-transitively-fetched) refs present in the archive's own files are
-     * covered; refs nested inside a remote document that is itself fetched are not visible here.
+     * Validate the {@code $ref}s in an extracted OpenAPI archive before it is parsed with resolution enabled. The
+     * archive parser inlines sibling files and resolves references transitively; without this gate it would fetch
+     * remote refs without host validation and follow local references that escape the archive.
+     * <ul>
+     *   <li>Remote (http/https) refs are checked against the network access-control policy when one is configured
+     *       (when none is, they resolve as before, preserving backwards compatibility).</li>
+     *   <li>Local references are always confined to the archive: a {@code file:} reference, an absolute path, or a
+     *       relative path that escapes the extracted directory (e.g. {@code ../../../etc/passwd}) is rejected so
+     *       resolution cannot read arbitrary local files. References that stay within the archive are left untouched
+     *       so multi-file archives still resolve.</li>
+     * </ul>
+     * Only the refs present in the archive's own files are covered; refs nested inside a remote document that is itself
+     * fetched are not visible here.
      *
      * @param archiveDirectory the root directory of the extracted archive
      * @param oasParserOptions parser options carrying the network access control policy; may be {@code null}
      * @throws APIManagementException with {@link ExceptionCodes#UNTRUSTED_URL_IN_DEFINITION} if a remote ref is not
-     *         permitted by the policy
+     *         permitted by the policy or a local ref escapes the archive
      */
     private static void gateArchiveRemoteRefs(File archiveDirectory,
             OASParserOptions oasParserOptions) throws APIManagementException {
-        // Only gate remote refs when a network access-control policy is configured. Without one, the archive parser
-        // resolves refs as it always has - preserving backwards compatibility for deployments without the policy.
-        if (oasParserOptions == null || !oasParserOptions.isNetworkAccessControlEnabled()) {
-            return;
+        // A network access-control policy gates remote (http/https) refs; when none is configured those resolve as
+        // before (backwards compatibility). Local-reference containment is enforced regardless, since a ref that
+        // escapes the archive (via ../ or file:) could read arbitrary local files during resolution.
+        boolean policyConfigured = oasParserOptions != null && oasParserOptions.isNetworkAccessControlEnabled();
+        PermittedUrlsChecker checker = policyConfigured
+                ? new PermittedUrlsChecker(oasParserOptions.getRemoteRefAllowList(),
+                        oasParserOptions.getRemoteRefBlockList())
+                : null;
+        String archiveRoot;
+        try {
+            archiveRoot = archiveDirectory.getCanonicalPath();
+        } catch (IOException e) {
+            throw new APIManagementException("Could not resolve the OpenAPI archive directory for reference "
+                    + "containment validation.", e);
         }
-        PermittedUrlsChecker checker = new PermittedUrlsChecker(
-                oasParserOptions.getRemoteRefAllowList(), oasParserOptions.getRemoteRefBlockList());
-        // Same per-file size cap the URL-fetch path applies (in MB). A remote $ref is small text, so a larger entry
-        // is not a legitimate ref-bearing document. Fail closed: reject the whole archive rather than skipping the
-        // file, because the archive parser would still resolve that file's remote refs - skipping the scan here would
-        // bypass the network access-control policy.
+        // Same per-file size cap the URL-fetch path applies (in MB). A ref-bearing document is small text; a larger
+        // entry cannot be scanned, so fail closed and reject the archive rather than letting the parser resolve an
+        // unscanned file's references.
         long maxFileSize = Long.parseLong(APIConstants.API_PUBLISHER_IMPORT_OAS_FILE_SIZE_LIMIT_DEFAULT_MB)
                 * 1024L * 1024L;
         for (File file : FileUtils.listFiles(archiveDirectory, null, true)) {
             if (file.length() > maxFileSize) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Rejecting OpenAPI archive: file '" + file.getName() + "' exceeds the maximum size that "
-                            + "can be validated against the network access-control policy.");
+                    log.debug("Rejecting OpenAPI archive: file '" + file.getName()
+                            + "' exceeds the maximum size that can be validated.");
                 }
-                throw new APIManagementException("OpenAPI archive contains a file too large to validate against the "
-                        + "network access-control policy: " + file.getName(),
-                        ExceptionCodes.UNTRUSTED_URL_IN_DEFINITION);
+                throw new APIManagementException("OpenAPI archive contains a file too large to validate: "
+                        + file.getName(), ExceptionCodes.UNTRUSTED_URL_IN_DEFINITION);
             }
             String fileContent;
             try {
@@ -1304,15 +1317,113 @@ public class OASParserUtil {
                 // Unreadable/binary file: nothing to gate here; the parser will surface any real problem later.
                 continue;
             }
-            for (String refUrl : extractRemoteRefUrls(fileContent)) {
-                try {
-                    checker.verify(refUrl);
-                } catch (HostDeniedException e) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Rejected OpenAPI archive referencing a disallowed remote URL: " + refUrl, e);
+            for (String ref : extractRefValues(fileContent)) {
+                if (ref.startsWith("http://") || ref.startsWith("https://")) {
+                    if (policyConfigured) {
+                        try {
+                            checker.verify(ref);
+                        } catch (HostDeniedException e) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Rejected OpenAPI archive referencing a disallowed remote URL: " + ref, e);
+                            }
+                            throw new APIManagementException(ExceptionCodes.UNTRUSTED_URL_IN_DEFINITION);
+                        }
                     }
-                    throw new APIManagementException(ExceptionCodes.UNTRUSTED_URL_IN_DEFINITION);
+                } else {
+                    enforceLocalRefWithinArchive(ref, file, archiveRoot);
                 }
+            }
+        }
+    }
+
+    /**
+     * Rejects a non-HTTP(S) archive reference that would resolve outside the extracted archive directory. A {@code
+     * file:} reference, an absolute path, or a relative path that escapes the archive root (e.g. {@code
+     * ../../../etc/passwd}) is treated as an attempt to read a local file during resolution and fails the import.
+     * Same-document fragments (e.g. {@code #/components/...}) and references that stay within the archive are left
+     * untouched so legitimate multi-file archives still resolve.
+     *
+     * @param ref           the raw {@code $ref} value
+     * @param referringFile the archive file the reference was found in
+     * @param archiveRoot   the canonical path of the extracted archive root
+     * @throws APIManagementException with {@link ExceptionCodes#UNTRUSTED_URL_IN_DEFINITION} if the reference escapes
+     *         the archive
+     */
+    private static void enforceLocalRefWithinArchive(String ref, File referringFile, String archiveRoot)
+            throws APIManagementException {
+        // The file target is everything before the JSON-pointer fragment.
+        int hashIndex = ref.indexOf('#');
+        String pathPart = hashIndex >= 0 ? ref.substring(0, hashIndex) : ref;
+        // A same-document fragment reference has no file target to contain.
+        if (pathPart.isEmpty()) {
+            return;
+        }
+        // A file: reference or an absolute path is never a legitimate archive-relative reference; it points the
+        // resolver at an absolute local path.
+        if (pathPart.toLowerCase().startsWith("file:") || pathPart.startsWith("/") || pathPart.startsWith("\\")
+                || pathPart.matches("^[a-zA-Z]:[\\\\/].*")) {
+            if (log.isDebugEnabled()) {
+                log.debug("Rejecting OpenAPI archive with an absolute/file: reference: " + ref);
+            }
+            throw new APIManagementException(ExceptionCodes.UNTRUSTED_URL_IN_DEFINITION);
+        }
+        try {
+            String target = new File(referringFile.getParentFile(), pathPart).getCanonicalPath();
+            if (!target.equals(archiveRoot) && !target.startsWith(archiveRoot + File.separator)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Rejecting OpenAPI archive with a reference that escapes the archive root: " + ref);
+                }
+                throw new APIManagementException(ExceptionCodes.UNTRUSTED_URL_IN_DEFINITION);
+            }
+        } catch (IOException e) {
+            // Could not canonicalize the target; fail closed rather than let an unvalidated path reach the resolver.
+            throw new APIManagementException("Could not validate an OpenAPI archive reference for containment.", e);
+        }
+    }
+
+    /**
+     * Collect the value of every {@code $ref} field in the given archive file content, regardless of scheme, so both
+     * remote (host-validated) and local (containment-checked) references can be inspected before resolution.
+     *
+     * @param jsonDefinition the OpenAPI/Swagger content, as JSON or YAML text
+     * @return a set of distinct {@code $ref} values; empty if none are found or the content cannot be parsed
+     */
+    private static Set<String> extractRefValues(String jsonDefinition) {
+        Set<String> refs = new HashSet<>();
+        try {
+            JsonNode root = new ObjectMapper(new YAMLFactory()).readTree(jsonDefinition);
+            collectRefValues(root, refs);
+        } catch (IOException | RuntimeException e) {
+            // Malformed content here is not this method's concern - the parser invoked afterwards surfaces a proper
+            // parse error. Fail safe with no refs.
+            if (log.isDebugEnabled()) {
+                log.debug("Could not parse OpenAPI archive file while scanning for $ref values", e);
+            }
+        }
+        return refs;
+    }
+
+    private static void collectRefValues(JsonNode node, Set<String> refs) {
+        if (node == null) {
+            return;
+        }
+        if (node.isObject()) {
+            Iterator<Map.Entry<String, JsonNode>> fields = node.fields();
+            while (fields.hasNext()) {
+                Map.Entry<String, JsonNode> field = fields.next();
+                JsonNode value = field.getValue();
+                if (REF_FIELD_NAME.equals(field.getKey()) && value != null && value.isTextual()) {
+                    String refValue = value.textValue();
+                    if (refValue != null && !refValue.isEmpty()) {
+                        refs.add(refValue);
+                    }
+                } else {
+                    collectRefValues(value, refs);
+                }
+            }
+        } else if (node.isArray()) {
+            for (JsonNode element : node) {
+                collectRefValues(element, refs);
             }
         }
     }
