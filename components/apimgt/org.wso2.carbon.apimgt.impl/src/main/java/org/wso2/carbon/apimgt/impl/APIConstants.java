@@ -4024,6 +4024,9 @@ public final class APIConstants {
         public static final String BLOCK_PRIVATE_NETWORK_ACCESS = CONFIG_PREFIX + "BlockPrivateNetworkAccess";
         public static final String MODE_ALLOW = "allow";
         public static final String MODE_DENY = "deny";
+        // Wildcard deny-list entry for the remote-$ref resolver: matches every host, so an allow-mode policy denies
+        // everything not on its allow-list (a restrictive whitelist).
+        public static final String MATCH_ALL_HOSTS = "*";
 
         // Tenant config JSON keys (under "NetworkSecurityAccessControl" in tenant-conf.json)
         public static final String TENANT_CONFIG_KEY = "NetworkSecurityAccessControl";

@@ -12537,8 +12537,20 @@ public final class APIUtil {
 
     /**
      * Builds a per-request {@link OASParserOptions} carrying the remote-$ref allow/block lists derived from the
-     * platform and tenant network access-control policy. Never mutates {@code base} (may be a shared singleton).
-     * allow-mode hosts → allow-list; deny-mode hosts → block-list; platform and tenant lists are unioned.
+     * platform and tenant network access-control policy, combined as a logical AND (defense-in-depth): a remote
+     * reference must be permitted by both the platform and the tenant policy. Never mutates {@code base} (may be a
+     * shared singleton).
+     * <p>
+     * The lists are mapped onto the resolver, whose allow-list short-circuits to ALLOW (bypassing the block-list) and
+     * whose block-list is a wildcard-capable denylist:
+     * <ul>
+     *   <li>deny-mode hosts (from either policy) are unioned into the block-list;</li>
+     *   <li>allow-mode hosts go to the allow-list - the intersection when both policies are allow-mode, otherwise the
+     *       single allow-mode list;</li>
+     *   <li>any denied host is removed from the allow-list so it cannot short-circuit the block-list;</li>
+     *   <li>if either policy is allow-mode, a {@code "*"} entry is added to the block-list so everything not on the
+     *       allow-list is denied - a restrictive whitelist, matching {@code applyAccessControlPolicy}.</li>
+     * </ul>
      * Private-network blocking is handled by the resolver itself and needs no list entry here.
      *
      * @param base         base options to copy non-access-control settings from (may be null)
@@ -12548,8 +12560,10 @@ public final class APIUtil {
     public static OASParserOptions buildRefResolutionOptions(OASParserOptions base, String tenantDomain)
             throws APIManagementException {
         OASParserOptions options = new OASParserOptions(base);
-        List<String> allowList = new ArrayList<>();
-        List<String> blockList = new ArrayList<>();
+        // Each allow-mode policy contributes one host set; deny-mode hosts from every policy are unioned. A remote ref
+        // must pass both policies (AND), so allow sets are intersected and deny sets are unioned (see combine below).
+        List<List<String>> allowModeHostSets = new ArrayList<>();
+        Set<String> denyHosts = new HashSet<>();
         // Whether any network access-control policy is configured. With no policy (neither platform nor tenant),
         // safe resolution stays off so the parser keeps resolving remote refs as before (backwards compatibility).
         boolean policyConfigured = false;
@@ -12558,12 +12572,11 @@ public final class APIUtil {
         if (networkSecurityEnabled) {
             policyConfigured = true;
             validateNetworkSecurityMode(networkSecurityMode);
-            if (networkSecurityHosts != null) {
-                if (APIConstants.NetworkSecurityAccessControl.MODE_ALLOW.equalsIgnoreCase(networkSecurityMode)) {
-                    allowList.addAll(networkSecurityHosts);
-                } else if (APIConstants.NetworkSecurityAccessControl.MODE_DENY.equalsIgnoreCase(networkSecurityMode)) {
-                    blockList.addAll(networkSecurityHosts);
-                }
+            if (APIConstants.NetworkSecurityAccessControl.MODE_ALLOW.equalsIgnoreCase(networkSecurityMode)) {
+                allowModeHostSets.add(networkSecurityHosts != null ? networkSecurityHosts : new ArrayList<>());
+            } else if (APIConstants.NetworkSecurityAccessControl.MODE_DENY.equalsIgnoreCase(networkSecurityMode)
+                    && networkSecurityHosts != null) {
+                denyHosts.addAll(networkSecurityHosts);
             }
         }
 
@@ -12591,11 +12604,23 @@ public final class APIUtil {
                 }
                 validateNetworkSecurityMode(tMode);
                 if (APIConstants.NetworkSecurityAccessControl.MODE_ALLOW.equalsIgnoreCase(tMode)) {
-                    allowList.addAll(tHosts);
+                    allowModeHostSets.add(tHosts);
                 } else if (APIConstants.NetworkSecurityAccessControl.MODE_DENY.equalsIgnoreCase(tMode)) {
-                    blockList.addAll(tHosts);
+                    denyHosts.addAll(tHosts);
                 }
             }
+        }
+
+        // Intersect the allow-mode host sets (a host must be allowed by every allow-mode policy under the AND policy).
+        List<String> allowList = intersectAllowModeHostSets(allowModeHostSets);
+        // A denied host must never remain on the allow-list: the resolver's allow-list short-circuits to ALLOW and
+        // would otherwise bypass the block-list for a host that another policy denies.
+        allowList.removeAll(denyHosts);
+        List<String> blockList = new ArrayList<>(denyHosts);
+        // Allow-mode is a restrictive whitelist (deny everything not explicitly allowed). The resolver's allow-list
+        // only exempts hosts, so a wildcard deny is what enforces "block the rest".
+        if (!allowModeHostSets.isEmpty()) {
+            blockList.add(APIConstants.NetworkSecurityAccessControl.MATCH_ALL_HOSTS);
         }
 
         if (!allowList.isEmpty()) {
@@ -12606,6 +12631,25 @@ public final class APIUtil {
         }
         options.setNetworkAccessControlEnabled(policyConfigured);
         return options;
+    }
+
+    /**
+     * Intersects the allow-mode host sets collected from the platform and tenant policies for the remote-$ref
+     * resolver. With both policies in allow mode the result is their intersection (a host must be allowed by both
+     * under the AND policy); with a single allow-mode policy it is that policy's list; with none it is empty.
+     *
+     * @param allowModeHostSets one host set per allow-mode policy (may be empty)
+     * @return a new, mutable list holding the intersection of the given sets; empty if none were provided
+     */
+    private static List<String> intersectAllowModeHostSets(List<List<String>> allowModeHostSets) {
+        if (allowModeHostSets.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<String> combined = new ArrayList<>(allowModeHostSets.get(0));
+        for (int i = 1; i < allowModeHostSets.size(); i++) {
+            combined.retainAll(allowModeHostSets.get(i));
+        }
+        return combined;
     }
 
     /**
