@@ -1281,13 +1281,21 @@ public class OASParserUtil {
         }
         PermittedUrlsChecker checker = new PermittedUrlsChecker(
                 oasParserOptions.getRemoteRefAllowList(), oasParserOptions.getRemoteRefBlockList());
-        // Same per-file size cap the URL-fetch path applies (in MB). A remote $ref is small text, so an entry larger
-        // than this cannot legitimately be a ref-bearing document - skip it to avoid reading an oversized file fully.
+        // Same per-file size cap the URL-fetch path applies (in MB). A remote $ref is small text, so a larger entry
+        // is not a legitimate ref-bearing document. Fail closed: reject the whole archive rather than skipping the
+        // file, because the archive parser would still resolve that file's remote refs - skipping the scan here would
+        // bypass the network access-control policy.
         long maxFileSize = Long.parseLong(APIConstants.API_PUBLISHER_IMPORT_OAS_FILE_SIZE_LIMIT_DEFAULT_MB)
                 * 1024L * 1024L;
         for (File file : FileUtils.listFiles(archiveDirectory, null, true)) {
             if (file.length() > maxFileSize) {
-                continue;
+                if (log.isDebugEnabled()) {
+                    log.debug("Rejecting OpenAPI archive: file '" + file.getName() + "' exceeds the maximum size that "
+                            + "can be validated against the network access-control policy.");
+                }
+                throw new APIManagementException("OpenAPI archive contains a file too large to validate against the "
+                        + "network access-control policy: " + file.getName(),
+                        ExceptionCodes.UNTRUSTED_URL_IN_DEFINITION);
             }
             String fileContent;
             try {
