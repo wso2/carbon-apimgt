@@ -183,4 +183,73 @@ public class OASParserUtilArchiveRefTest {
         Assert.assertTrue("A multi-file archive whose master references a local sibling file must still validate",
                 response.isValid());
     }
+
+    private static String masterWithSchemaRef(String title, String ref) {
+        return "openapi: 3.0.0\n"
+                + "info:\n"
+                + "  title: " + title + "\n"
+                + "  version: 1.0.0\n"
+                + "paths:\n"
+                + "  /pets:\n"
+                + "    get:\n"
+                + "      summary: list\n"
+                + "      responses:\n"
+                + "        '200':\n"
+                + "          description: OK\n"
+                + "          content:\n"
+                + "            application/json:\n"
+                + "              schema:\n"
+                + "                $ref: '" + ref + "'\n";
+    }
+
+    @Test
+    public void testArchivePathTraversalRefIsRejected() throws Exception {
+        Map<String, String> entries = new LinkedHashMap<>();
+        entries.put("archive/swagger.yaml",
+                masterWithSchemaRef("Archive Traversal API", "../../../../../../etc/passwd#/root"));
+        byte[] zipBytes = buildZip(entries);
+
+        try {
+            OASParserUtil.extractAndValidateOpenAPIArchive(
+                    new ByteArrayInputStream(zipBytes), false, blockLoopbackOptions());
+            Assert.fail("An archive whose master carries a path-traversal $ref must be rejected");
+        } catch (APIManagementException e) {
+            Assert.assertEquals("A traversal $ref must surface as UNTRUSTED_URL_IN_DEFINITION",
+                    ExceptionCodes.UNTRUSTED_URL_IN_DEFINITION.getErrorCode(), e.getErrorHandler().getErrorCode());
+        }
+    }
+
+    @Test
+    public void testArchiveFileSchemeRefIsRejected() throws Exception {
+        Map<String, String> entries = new LinkedHashMap<>();
+        entries.put("archive/swagger.yaml",
+                masterWithSchemaRef("Archive File Scheme API", "file:///etc/passwd#/root"));
+        byte[] zipBytes = buildZip(entries);
+
+        try {
+            OASParserUtil.extractAndValidateOpenAPIArchive(
+                    new ByteArrayInputStream(zipBytes), false, blockLoopbackOptions());
+            Assert.fail("An archive whose master carries a file: $ref must be rejected");
+        } catch (APIManagementException e) {
+            Assert.assertEquals("A file: $ref must surface as UNTRUSTED_URL_IN_DEFINITION",
+                    ExceptionCodes.UNTRUSTED_URL_IN_DEFINITION.getErrorCode(), e.getErrorHandler().getErrorCode());
+        }
+    }
+
+    @Test
+    public void testArchivePathTraversalRejectedWithoutPolicy() throws Exception {
+        // Local-reference containment is enforced even when no network access-control policy is configured.
+        Map<String, String> entries = new LinkedHashMap<>();
+        entries.put("archive/swagger.yaml",
+                masterWithSchemaRef("Archive Traversal No Policy API", "../../../../../../etc/passwd#/root"));
+        byte[] zipBytes = buildZip(entries);
+
+        try {
+            OASParserUtil.extractAndValidateOpenAPIArchive(new ByteArrayInputStream(zipBytes), false, null);
+            Assert.fail("Local-reference containment must apply even without a network access-control policy");
+        } catch (APIManagementException e) {
+            Assert.assertEquals(ExceptionCodes.UNTRUSTED_URL_IN_DEFINITION.getErrorCode(),
+                    e.getErrorHandler().getErrorCode());
+        }
+    }
 }
