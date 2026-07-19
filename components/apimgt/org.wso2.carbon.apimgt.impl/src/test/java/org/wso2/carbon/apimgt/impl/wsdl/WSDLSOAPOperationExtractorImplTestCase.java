@@ -32,6 +32,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -53,12 +54,18 @@ public class WSDLSOAPOperationExtractorImplTestCase {
 
     private static Set<WSDLSOAPOperation> operations;
 
+    private APIManagerConfigurationService previousConfigurationService;
+    private APIMConfigService previousApimConfigService;
+
     @Before
     public void setup() throws Exception {
         System.setProperty("carbon.home", WSDLSOAPOperationExtractorImplTestCase.class.getResource("/").getFile());
         // Building the Swagger model resolves namespace-derived schemas through APIUtil.validateRemoteURL, which
         // consults the tenant configuration. Establish a super-tenant CarbonContext and empty configuration so that
         // lookup resolves to a no-op (no policy configured) instead of failing when the test runs outside a tenant flow.
+        // Capture the process-wide services so they can be restored after the test, avoiding leaking the mocks.
+        previousConfigurationService = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
+        previousApimConfigService = ServiceReferenceHolder.getInstance().getApimConfigService();
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(
                 new APIManagerConfigurationServiceImpl(new APIManagerConfiguration()));
         ServiceReferenceHolder.getInstance().setAPIMConfigService(Mockito.mock(APIMConfigService.class));
@@ -79,6 +86,8 @@ public class WSDLSOAPOperationExtractorImplTestCase {
     @After
     public void endTenantFlow() {
         PrivilegedCarbonContext.endTenantFlow();
+        ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(previousConfigurationService);
+        ServiceReferenceHolder.getInstance().setAPIMConfigService(previousApimConfigService);
     }
     @Test
     public void testGetWsdlDefinition() throws Exception {

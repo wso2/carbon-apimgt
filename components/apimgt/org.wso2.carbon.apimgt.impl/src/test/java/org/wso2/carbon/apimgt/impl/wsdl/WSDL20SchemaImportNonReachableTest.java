@@ -26,6 +26,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -78,8 +79,14 @@ public class WSDL20SchemaImportNonReachableTest {
 
     // initPath() reads size-limit config via ServiceReferenceHolder and calls resolveTenantDomain(), which reads
     // PrivilegedCarbonContext and throws outside a tenant flow -- needed even though the resolver is never reached.
+    private APIManagerConfigurationService previousConfigurationService;
+    private APIMConfigService previousApimConfigService;
+
     @Before
     public void wireApiManagerConfigurationService() {
+        // Capture the process-wide services so they can be restored after the test, avoiding leaking the no-op mocks.
+        previousConfigurationService = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
+        previousApimConfigService = ServiceReferenceHolder.getInstance().getApimConfigService();
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(
                 new APIManagerConfigurationServiceImpl(new APIManagerConfiguration()));
         ServiceReferenceHolder.getInstance().setAPIMConfigService(new NoOpApimConfigService());
@@ -91,6 +98,8 @@ public class WSDL20SchemaImportNonReachableTest {
     @After
     public void endTenantFlow() {
         PrivilegedCarbonContext.endTenantFlow();
+        ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(previousConfigurationService);
+        ServiceReferenceHolder.getInstance().setAPIMConfigService(previousApimConfigService);
     }
 
     /** Trivial no-op {@link APIMConfigService}: no tenant config stored for any organization. */
