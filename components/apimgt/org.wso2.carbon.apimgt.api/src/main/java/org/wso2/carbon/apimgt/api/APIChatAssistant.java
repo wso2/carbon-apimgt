@@ -25,7 +25,7 @@ package org.wso2.carbon.apimgt.api;
  * building the request payload, invoking the service over whatever transport/auth mechanism it requires, and
  * returning the response body. This decouples the API Chat logic from any specific AI service contract, allowing
  * deployments to plug in their own AI service by configuring a custom implementation class under
- * {@code <APIChat><ApiChatImplementation></ApiChatImplementation></APIChat>} in {@code api-manager.xml}. When no
+ * {@code <APIChat><ApiChatAssistantImplementation></ApiChatAssistantImplementation></APIChat>} in {@code api-manager.xml}. When no
  * implementation is configured, {@code DefaultAPIChatAssistantServiceImpl} is used, preserving the out-of-the-box behaviour.
  * <p>
  * Implementations must be thread-safe and provide a public no-argument constructor, as a single instance is created
