@@ -225,6 +225,10 @@ public class ApiMgtDAO {
         multiGroupAppSharingEnabled = APIUtil.isMultiGroupAppSharingEnabled();
     }
 
+    private static String str(Object value) {
+        return value != null ? value.toString() : null;
+    }
+
     /**
      * Method to get the instance of the ApiMgtDAO.
      *
@@ -16713,13 +16717,13 @@ public class ApiMgtDAO {
                     for (Map<String, Object> api : apis) {
                         insertStmt.setString(1, envName);
                         insertStmt.setString(2, organization);
-                        insertStmt.setString(3, (String) api.get("id"));
-                        insertStmt.setString(4, (String) api.get("apiName"));
-                        insertStmt.setString(5, (String) api.get("version"));
-                        insertStmt.setString(6, (String) api.get("description"));
-                        insertStmt.setString(7, (String) api.get("context"));
-                        insertStmt.setString(8, (String) api.getOrDefault("apiType", "HTTP"));
-                        insertStmt.setString(9, (String) api.get("gatewayType"));
+                        insertStmt.setString(3, str(api.get("id")));
+                        insertStmt.setString(4, str(api.get("apiName")));
+                        insertStmt.setString(5, str(api.get("version")));
+                        insertStmt.setString(6, str(api.get("description")));
+                        insertStmt.setString(7, str(api.get("context")));
+                        insertStmt.setString(8, str(api.getOrDefault("apiType", "HTTP")));
+                        insertStmt.setString(9, str(api.get("gatewayType")));
                         String refArtifact = api.get("referenceArtifact") != null
                                 ? api.get("referenceArtifact").toString() : null;
                         if (refArtifact != null) {
@@ -16728,7 +16732,7 @@ public class ApiMgtDAO {
                         } else {
                             insertStmt.setNull(10, java.sql.Types.BLOB);
                         }
-                        insertStmt.setString(11, (String) api.get("status"));
+                        insertStmt.setString(11, str(api.get("status")));
                         insertStmt.setTimestamp(12, discoveredAt);
                         insertStmt.addBatch();
                     }
@@ -16866,21 +16870,30 @@ public class ApiMgtDAO {
             throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
-            try (PreparedStatement stmt = connection.prepareStatement(
-                    SQLConstants.ADD_FEDERATED_DISCOVERY_CACHE_ENTRY_SQL)) {
-                stmt.setString(1, envName);
-                stmt.setString(2, organization);
-                stmt.setString(3, "__TASK_STATUS__");
-                stmt.setString(4, taskId);
-                stmt.setString(5, null);
-                stmt.setString(6, error);
-                stmt.setString(7, null);
-                stmt.setString(8, "HTTP");
-                stmt.setString(9, null);
-                stmt.setNull(10, java.sql.Types.BLOB);
-                stmt.setString(11, status);
-                stmt.setTimestamp(12, now);
-                stmt.executeUpdate();
+            try {
+                try (PreparedStatement deleteStmt = connection.prepareStatement(
+                        SQLConstants.DELETE_FEDERATED_DISCOVERY_CACHE_ENTRY_SQL)) {
+                    deleteStmt.setString(1, envName);
+                    deleteStmt.setString(2, organization);
+                    deleteStmt.setString(3, "__TASK_STATUS__");
+                    deleteStmt.executeUpdate();
+                }
+                try (PreparedStatement insertStmt = connection.prepareStatement(
+                        SQLConstants.ADD_FEDERATED_DISCOVERY_CACHE_ENTRY_SQL)) {
+                    insertStmt.setString(1, envName);
+                    insertStmt.setString(2, organization);
+                    insertStmt.setString(3, "__TASK_STATUS__");
+                    insertStmt.setString(4, taskId);
+                    insertStmt.setString(5, null);
+                    insertStmt.setString(6, error);
+                    insertStmt.setString(7, null);
+                    insertStmt.setString(8, "HTTP");
+                    insertStmt.setString(9, null);
+                    insertStmt.setNull(10, java.sql.Types.BLOB);
+                    insertStmt.setString(11, status);
+                    insertStmt.setTimestamp(12, now);
+                    insertStmt.executeUpdate();
+                }
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();

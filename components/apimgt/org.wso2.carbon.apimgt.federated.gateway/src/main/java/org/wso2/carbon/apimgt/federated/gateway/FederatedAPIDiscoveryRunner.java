@@ -581,6 +581,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
     @Override
     public Map<String, List<DiscoveredAPI>> discoverExternalAPIs(Environment environment, String organization)
             throws APIManagementException {
+        boolean debugLogEnabled = log.isDebugEnabled();
         FederatedAPIDiscovery discovery = getFederatedAPIDiscovery(environment, organization);
         List<DiscoveredAPI> allAPIs = discovery.discoverMetadata();
         List<DiscoveredAPI> newAPIs = new ArrayList<>();
@@ -627,6 +628,12 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                 if (!isExists) {
                     stripHeavyDefinition(discoveredAPI);
                     newAPIs.add(discoveredAPI);
+                    continue;
+                }
+                if (publishedAPIsList.contains(apiKey) || publishedAPIsList.contains(envScopedKey)) {
+                    if (debugLogEnabled) {
+                        log.debug("API: " + apiKey + " was published from CP. Skipping discovery comparison.");
+                    }
                     continue;
                 }
                 String matchedKey = null;
