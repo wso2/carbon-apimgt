@@ -1239,6 +1239,11 @@ public class GatewayUtils {
 
     public static void setCommonHTTPAttributes(TelemetrySpan tracingSpan,
                                                org.apache.synapse.MessageContext messageContext) {
+        // to prevent if message context is not axis2messageontext or tracing span is null
+        if(tracingSpan == null || messageContext == null || !(messageContext instanceof Axis2MessageContext)) {
+            return;
+        }
+
         try {
             org.apache.axis2.context.MessageContext axis2MessageContext =
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext();
@@ -1263,6 +1268,9 @@ public class GatewayUtils {
             }
         } catch (Exception e) {
             log.error("Error while setting common HTTP attributes on the tracing span.", e);
+            // for debugging purpose
+//            if (log.isDebugEnabled()) {
+//                log.debug("Error while setting common HTTP attributes on the tracing span.", e);
         }
     }
 
