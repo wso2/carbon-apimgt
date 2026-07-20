@@ -201,6 +201,8 @@ public class APIThrottleHandler extends AbstractHandler {
                     TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - executionStartTime));
             context.stop();
             if (TelemetryUtil.telemetryEnabled()) {
+                // set Http attributes right before finishing the span, so http.status.code is captured
+                GatewayUtils.setCommonHTTPAttributes(throttlingLatencySpan, messageContext);
                 TelemetryLogUtil.exitSpan(previousTracingIds);
                 TelemetryUtil.finishSpan(throttlingLatencySpan);
             } else if (Util.tracingEnabled()) {
