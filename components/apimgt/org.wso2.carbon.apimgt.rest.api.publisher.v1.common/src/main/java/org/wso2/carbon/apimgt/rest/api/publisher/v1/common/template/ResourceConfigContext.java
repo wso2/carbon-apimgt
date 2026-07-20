@@ -22,6 +22,8 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.util.ArrayList;
@@ -68,7 +70,11 @@ public class ResourceConfigContext extends ConfigContextDecorator {
         if (api != null) {
             context.put("resources", api.getUriTemplates());
             context.put("apiType", api.getType());
-            context.put("faultSequence", faultSeqExt != null ? faultSeqExt : api.getFaultSequence());
+            String faultSeq = (faultSeqExt != null) ? faultSeqExt : api.getFaultSequence();
+            if (faultSeq == null && APIConstants.API_SUBTYPE_AI_API.equals(api.getSubtype())) {
+                faultSeq = APIManagerConfiguration.getAiApiConfigurationsDTO().getCustomErrorResponseSequence();
+            }
+            context.put("faultSequence", faultSeq);
         } else if (apiProduct != null) {
             //Here we aggregate duplicate resourceURIs of an API and populate httpVerbs set in the uri template
             List<APIProductResource> productResources = new ArrayList<>(apiProduct.getProductResources());

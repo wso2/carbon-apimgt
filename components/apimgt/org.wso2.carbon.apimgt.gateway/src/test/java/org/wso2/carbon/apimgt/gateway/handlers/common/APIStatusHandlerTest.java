@@ -45,7 +45,8 @@ public class APIStatusHandlerTest {
         API api = Mockito.mock(API.class);
         MessageContext messageContext = Mockito.mock(MessageContext.class);
         Mediator mediator = Mockito.mock(Mediator.class);
-        Mockito.when(messageContext.getSequence(APISecurityConstants.API_BLOCKED_SEQUENCE)).thenReturn(mediator);
+        PowerMockito.when(GatewayUtils.getErrorResponseFormatterSequence(messageContext,
+                APISecurityConstants.API_BLOCKED_SEQUENCE)).thenReturn(mediator);
         Mockito.when(mediator.mediate(messageContext)).thenReturn(true);
         Mockito.doNothing().when(messageContext).setProperty(APIMgtGatewayConstants.API_STATUS, APIConstants.BLOCKED);
         PowerMockito.when(GatewayUtils.getAPI(messageContext)).thenReturn(api);
