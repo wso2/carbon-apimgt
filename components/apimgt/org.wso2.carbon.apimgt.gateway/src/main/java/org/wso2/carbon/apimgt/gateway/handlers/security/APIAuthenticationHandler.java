@@ -574,6 +574,8 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                 handleAuthFailure(messageContext, e);
         } finally {
             if (TelemetryUtil.telemetryEnabled()) {
+                // set Http attributes right before finishing the span, so http.status.code is captured
+                GatewayUtils.setCommonHTTPAttributes(keySpan, messageContext);
                 TelemetryLogUtil.exitSpan(previousTracingIds);
                 TelemetryUtil.finishSpan(keySpan);
             } else if (Util.tracingEnabled()) {
