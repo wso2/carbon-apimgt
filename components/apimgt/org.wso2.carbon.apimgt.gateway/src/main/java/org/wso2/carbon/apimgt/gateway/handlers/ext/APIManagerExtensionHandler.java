@@ -17,6 +17,7 @@
 package org.wso2.carbon.apimgt.gateway.handlers.ext;
 
 
+import io.opentelemetry.api.trace.SpanKind;
 import org.apache.axis2.Constants;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.commons.logging.Log;
@@ -111,7 +112,7 @@ public class APIManagerExtensionHandler extends AbstractHandler {
                     (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
             TelemetryTracer tracer = ServiceReferenceHolder.getInstance().getTelemetryTracer();
             requestMediationSpan = TelemetryUtil.startSpan(APIMgtGatewayConstants.REQUEST_MEDIATION,
-                    responseLatencySpan, tracer);
+                    responseLatencySpan, tracer, SpanKind.INTERNAL);
         } else if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =
                     (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
@@ -166,7 +167,7 @@ public class APIManagerExtensionHandler extends AbstractHandler {
                     (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
             TelemetryTracer tracer = ServiceReferenceHolder.getInstance().getTelemetryTracer();
             responseMediationSpan =
-                    TelemetryUtil.startSpan(APIMgtGatewayConstants.RESPONSE_MEDIATION, responseLatencySpan, tracer);
+                    TelemetryUtil.startSpan(APIMgtGatewayConstants.RESPONSE_MEDIATION, responseLatencySpan, tracer, SpanKind.INTERNAL);// added client span kind
         } else if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =
                     (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
