@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.SimplifiedEndpoint;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.SoapToRestMediationDto;
+import org.wso2.carbon.apimgt.impl.dto.WebSubHubConfig;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -192,6 +193,18 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
                         context.put(WEBSUB_ENABLE_SUBSCRIBER_VERIFICATION, api.isEnableSubscriberVerification());
                     } else {
                         context.put(WEBSUB_ENABLE_SUBSCRIBER_VERIFICATION, false);
+                    }
+
+                    WebSubHubConfig webSubHubConfig = ServiceReferenceHolder.getInstance()
+                            .getAPIManagerConfiguration().getWebSubHubConfig();
+                    if (webSubHubConfig != null && webSubHubConfig.isEnabled()) {
+                        context.put("useExternalWebSubHub", true);
+                        context.put("externalWebSubHubEndpoint", webSubHubConfig.getUrl());
+                        context.put("disableTopicContextPrefix", webSubHubConfig.isTopicContextPrefixDisabled());
+                    } else {
+                        context.put("useExternalWebSubHub", false);
+                        context.put("externalWebSubHubEndpoint", null);
+                        context.put("disableTopicContextPrefix", false);
                     }
                 } else if (APIConstants.GRAPHQL_API.equals(api.getType())) {
                     boolean isSubscriptionAvailable = false;
