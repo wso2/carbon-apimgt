@@ -30,6 +30,7 @@ import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
@@ -112,7 +113,7 @@ public class APIManagerExtensionHandler extends AbstractHandler {
                     (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
             TelemetryTracer tracer = ServiceReferenceHolder.getInstance().getTelemetryTracer();
             requestMediationSpan = TelemetryUtil.startSpan(APIMgtGatewayConstants.REQUEST_MEDIATION,
-                    responseLatencySpan, tracer, SpanKind.INTERNAL);
+                    responseLatencySpan, tracer, SpanKind.INTERNAL); // added internal span kind
         } else if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =
                     (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
@@ -145,6 +146,8 @@ public class APIManagerExtensionHandler extends AbstractHandler {
             throw e;
         } finally {
             if (TelemetryUtil.telemetryEnabled()) {
+                // set Http attributes right before finishing the span, so http.status.code is captured
+                GatewayUtils.setCommonHTTPAttributes(requestMediationSpan, messageContext);
                 TelemetryUtil.finishSpan(requestMediationSpan);
 
             } else if (Util.tracingEnabled()) {
@@ -188,6 +191,8 @@ public class APIManagerExtensionHandler extends AbstractHandler {
             throw e;
         } finally {
             if (TelemetryUtil.telemetryEnabled()) {
+                // set Http attributes right before finishing the span, so http.status.code is captured
+                GatewayUtils.setCommonHTTPAttributes(responseMediationSpan, messageContext);
                 TelemetryUtil.finishSpan(responseMediationSpan);
             } else if (Util.tracingEnabled()) {
                 Util.finishSpan(responseMediationTracingSpan);
