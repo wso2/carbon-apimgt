@@ -22,6 +22,7 @@ package org.wso2.carbon.apimgt.gateway;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -30,22 +31,28 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.GuardrailProviderService;
+import org.wso2.carbon.apimgt.api.ManagedIdentityTokenProvider;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.api.dto.GuardrailProviderConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.Map;
 
 /**
  * Azure Content Safety Guardrail Provider Service.
  * This service interacts with the Azure Content Safety API to perform content safety checks.
+ * Supports both API-key authentication and Azure Workload Identity (UMI) authentication.
  */
 public class AzureContentSafetyGuardrailProviderServiceImpl implements GuardrailProviderService {
 
     private String contentSafetyEndpoint;
     private String contentSafetyApiKey;
+
+    /** Non-null when {@code auth_type=umi} is configured; null for API-key auth. */
+    private ManagedIdentityTokenProvider umiTokenProvider;
 
     private long retrievalTimeout;
     private int maxRetryCount;
@@ -59,14 +66,34 @@ public class AzureContentSafetyGuardrailProviderServiceImpl implements Guardrail
             throw new APIManagementException("Azure content safety provider configuration not found");
         }
 
-        contentSafetyEndpoint = providerConfig.getProperties()
-                .get(APIConstants.AI.GUARDRAIL_PROVIDER_AZURE_CONTENTSAFETY_ENDPOINT);
-        contentSafetyApiKey = providerConfig.getProperties()
-                .get(APIConstants.AI.GUARDRAIL_PROVIDER_AZURE_CONTENTSAFETY_KEY);
+        contentSafetyEndpoint = StringUtils.trimToNull(providerConfig.getProperties()
+                .get(APIConstants.AI.GUARDRAIL_PROVIDER_AZURE_CONTENTSAFETY_ENDPOINT));
 
-        if (contentSafetyEndpoint == null || contentSafetyApiKey == null) {
-            throw new APIManagementException(
-                    "Missing required Azure content safety configuration: 'key', 'endpoint'");
+        if (contentSafetyEndpoint == null) {
+            throw new APIManagementException("Missing required Azure content safety configuration: "
+                    + APIConstants.AI.GUARDRAIL_PROVIDER_AZURE_CONTENTSAFETY_ENDPOINT);
+        }
+
+        String authType = StringUtils.trimToEmpty(providerConfig.getProperties().getOrDefault(
+                APIConstants.AI.AUTH_TYPE, APIConstants.AI.AUTH_TYPE_API_KEY));
+
+        if (APIConstants.AI.AUTH_TYPE_UMI.equalsIgnoreCase(authType)) {
+            umiTokenProvider = new AzureUmiTokenProvider();
+            // *.cognitiveservices.azure.com requires cognitiveservices.azure.com scope.
+            // override via umi_scope in provider properties.
+            String scope = providerConfig.getProperties().getOrDefault(
+                    APIConstants.AI.AZURE_UMI_SCOPE_KEY,
+                    APIConstants.AI.AZURE_UMI_COGNITIVE_SERVICES_SCOPE);
+            umiTokenProvider.init(Collections.singletonMap(APIConstants.AI.AZURE_UMI_SCOPE_KEY, scope));
+            contentSafetyApiKey = null;
+        } else {
+            contentSafetyApiKey = StringUtils.trimToNull(providerConfig.getProperties()
+                    .get(APIConstants.AI.GUARDRAIL_PROVIDER_AZURE_CONTENTSAFETY_KEY));
+            if (contentSafetyApiKey == null) {
+                throw new APIManagementException("Missing required Azure content safety configuration: "
+                        + APIConstants.AI.GUARDRAIL_PROVIDER_AZURE_CONTENTSAFETY_KEY);
+            }
+            umiTokenProvider = null;
         }
 
         // Retry parameters
@@ -105,7 +132,12 @@ public class AzureContentSafetyGuardrailProviderServiceImpl implements Guardrail
                 + "/" + service.replaceFirst("^/+", "");
         HttpClient httpClient = APIUtil.getHttpClient(url);
         HttpPost post = new HttpPost(url);
-        post.setHeader(APIConstants.AI.AZURE_OCP_APIM_SUBSCRIPTION_KEY_HEADER, contentSafetyApiKey);
+        if (umiTokenProvider != null) {
+            post.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
+                    APIConstants.AUTHORIZATION_BEARER + umiTokenProvider.getAccessToken());
+        } else {
+            post.setHeader(APIConstants.AI.AZURE_OCP_APIM_SUBSCRIPTION_KEY_HEADER, contentSafetyApiKey);
+        }
         post.setHeader(APIConstants.HEADER_CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
 
         try {

@@ -752,6 +752,26 @@ public final class APIConstants {
                 "You are an API routing assistant. Analyze the user request and determine the best category. " +
                 "Respond with ONLY the category name, nothing else.";
 
+        // Auth type selection — shared across embedding and guardrail providers
+        public static final String AUTH_TYPE = "auth_type";
+        public static final String AUTH_TYPE_API_KEY = "apikey";
+        public static final String AUTH_TYPE_UMI = "umi";
+
+        // Azure UMI (Workload Identity) token provider
+        public static final String AZURE_UMI_TOKEN_PROVIDER_TYPE = "azure-umi";
+        // Scope for Azure OpenAI / Content Safety (*.openai.azure.com, *.cognitiveservices.azure.com) endpoints.
+        public static final String AZURE_UMI_COGNITIVE_SERVICES_SCOPE = "https://cognitiveservices.azure.com/.default";
+        // XML path prefix for the AzureUMI config block.
+        public static final String AZURE_UMI = AI + ".AzureUMI.";
+        // AI Foundry (*.services.ai.azure.com) scope — defaults via default.json.
+        public static final String AZURE_UMI_SCOPE = AZURE_UMI + "Scope";
+        // Key used in the properties map
+        public static final String AZURE_UMI_SCOPE_KEY = "azure_umi_scope";
+        // Environment variables injected by the AKS Workload Identity mutating webhook
+        public static final String AZURE_UMI_ENV_TENANT_ID = "AZURE_TENANT_ID";
+        public static final String AZURE_UMI_ENV_CLIENT_ID = "AZURE_CLIENT_ID";
+        public static final String AZURE_UMI_ENV_FEDERATED_TOKEN_FILE = "AZURE_FEDERATED_TOKEN_FILE";
+
         private AI() {
 
         }
@@ -2141,6 +2161,8 @@ public final class APIConstants {
     public static final String ENDPOINT_SECURITY_TYPE_API_KEY = "apikey";
     public static final String ENDPOINT_SECURITY_TYPE_AWS =
             org.wso2.carbon.apimgt.api.APIConstants.ENDPOINT_SECURITY_TYPE_AWS;
+    public static final String ENDPOINT_SECURITY_TYPE_UMI =
+            org.wso2.carbon.apimgt.api.APIConstants.ENDPOINT_SECURITY_TYPE_UMI;
     public static final String ENDPOINT_SECURITY_API_KEY_IDENTIFIER = "apiKeyIdentifier";
     public static final String ENDPOINT_SECURITY_API_KEY_VALUE = "apiKeyValue";
     public static final String ENDPOINT_SECURITY_API_KEY_IDENTIFIER_TYPE = "apiKeyIdentifierType";
