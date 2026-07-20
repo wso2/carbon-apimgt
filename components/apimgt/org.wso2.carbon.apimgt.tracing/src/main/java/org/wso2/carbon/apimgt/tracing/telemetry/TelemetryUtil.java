@@ -22,6 +22,8 @@ import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanBuilder;
+import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.context.propagation.TextMapGetter;
@@ -34,6 +36,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.tracing.internal.ServiceReferenceHolder;
 
+//import java.lang.ProcessHandle;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -58,12 +61,20 @@ public class TelemetryUtil {
      * @param tracer     Initialized {@link io.opentelemetry.api.trace.Tracer}.
      * @return TelemetrySpan object.
      */
-    public static TelemetrySpan startSpan(String spanName, TelemetrySpan parentSpan, TelemetryTracer tracer) {
+    public static TelemetrySpan startSpan(String spanName, TelemetrySpan parentSpan,
+                                          TelemetryTracer tracer, SpanKind spanKind) {
 
-        Span childSpan;
+//        Span childSpan;
+        SpanBuilder builder = tracer.getTelemetryTracingTracer().spanBuilder(spanName);
+
+        if (spanKind != null) {
+            builder.setSpanKind(spanKind);
+        }
+
         if (parentSpan == null) {
-            Span span = tracer.getTelemetryTracingTracer().spanBuilder(spanName).startSpan();
-            return new TelemetrySpan(span);
+//            Span span = tracer.getTelemetryTracingTracer().spanBuilder(spanName).startSpan();
+//            return new TelemetrySpan(span); // Opentelemtry Span wraps using TelemtrySpan
+            return new TelemetrySpan(builder.startSpan());
         } else {
             Object sp = parentSpan.getSpan();
             if (sp != null) {
@@ -71,18 +82,21 @@ public class TelemetryUtil {
                     log.debug("Parent span exist");
                 }
                 if (sp instanceof Span) {
-                    childSpan = tracer.getTelemetryTracingTracer().spanBuilder(spanName).setParent(Context.current()
-                            .with((Span) sp)).startSpan();
+//                    childSpan = tracer.getTelemetryTracingTracer().spanBuilder(spanName).setParent(Context.current()
+//                            .with((Span) sp)).startSpan();
+                    builder.setParent(Context.current().with((Span) sp));
                 } else {
-                    childSpan =
-                            tracer.getTelemetryTracingTracer().spanBuilder(spanName)
-                                    .setParent((Context) sp).startSpan();
+//                    childSpan =
+//                            tracer.getTelemetryTracingTracer().spanBuilder(spanName)
+//                                    .setParent((Context) sp).startSpan();
+                    builder.setParent((Context) sp);
                 }
             } else {
-                childSpan = tracer.getTelemetryTracingTracer().spanBuilder(spanName).startSpan();
+//                childSpan = tracer.getTelemetryTracingTracer().spanBuilder(spanName).startSpan();
+                    builder.startSpan();
             }
         }
-        return new TelemetrySpan(childSpan);
+        return new TelemetrySpan(builder.startSpan());
     }
 
     /**
@@ -93,12 +107,20 @@ public class TelemetryUtil {
      * @param tracer     Initialized {@link io.opentelemetry.api.trace.Tracer}.
      * @return TelemetrySpan object.
      */
-    public static TelemetrySpan startSpan(String spanName, Context parentSpan, TelemetryTracer tracer) {
+    public static TelemetrySpan startSpan(String spanName, Context parentSpan,
+                                          TelemetryTracer tracer, SpanKind spanKind) {
 
-        Span childSpan;
-        childSpan = tracer.getTelemetryTracingTracer().spanBuilder(spanName).setParent(parentSpan).startSpan();
+//        Span childSpan;
+//        childSpan = tracer.getTelemetryTracingTracer().spanBuilder(spanName).setParent(parentSpan).startSpan();
+        SpanBuilder builder = tracer.getTelemetryTracingTracer().spanBuilder(spanName);
 
-        return new TelemetrySpan(childSpan);
+        if (spanKind != null) {
+            builder.setSpanKind(spanKind);
+        }
+
+        builder.setParent(parentSpan);
+//        return new TelemetrySpan(childSpan);
+        return new TelemetrySpan(builder.startSpan());
     }
 
     /**
@@ -113,7 +135,7 @@ public class TelemetryUtil {
         Object sp = span.getSpan();
         if (sp instanceof Span) {
             ((Span) sp).setAttribute(key, value);
-        }
+        } //Span kind......
     }
 
     /**
@@ -243,8 +265,8 @@ public class TelemetryUtil {
     /**
      * Gets the tracer provider resource with the provided default service name.
      *
-     * @param defaultServiceName    Default service name.
-     * @return                      Tracer provider resource.
+     * @param defaultServiceName Default service name.
+     * @return Tracer provider resource.
      */
     public static Resource getTracerProviderResource(String defaultServiceName) {
         APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
@@ -277,8 +299,19 @@ public class TelemetryUtil {
         Attributes attributes = attributesBuilder.build();
 
         Resource tracerProviderResource = Resource.getDefault();
+
+        //adding process id since the java serviceprovider won't be able to load the processPidResourceProvider
+        // because of osgi bundle hss different classloaders
+        long pid = ProcessHandle.current().pid();
+        Attributes processAttributes = Attributes.builder()
+                .put(TelemetryConstants.PROCESS_PID, pid)
+                .build();
+        Resource processResource = Resource.create(processAttributes);
+
         Resource serviceNameResource = Resource.create(
                 Attributes.of(ServiceAttributes.SERVICE_NAME, defaultServiceName));
+        // adding process id to the trace
+        tracerProviderResource = tracerProviderResource.merge(processResource);
         tracerProviderResource = tracerProviderResource.merge(serviceNameResource);
         tracerProviderResource = tracerProviderResource.merge(Resource.create(attributes));
 

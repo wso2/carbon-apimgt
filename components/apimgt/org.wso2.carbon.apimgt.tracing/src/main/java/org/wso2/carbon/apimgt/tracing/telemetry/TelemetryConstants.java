@@ -36,6 +36,8 @@ public class TelemetryConstants {
     static final String TRACER_ID = "Tracer Id";
     static final String SPAN_ID = "Span Id";
     static final String TRACER = "tracer";
+    static final String PROCESS_PID = "process.pid";
+
     /**
      * Jaeger Constants.
      */
