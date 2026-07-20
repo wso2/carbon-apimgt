@@ -683,6 +683,8 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                     System.currentTimeMillis() - executionStartTime);
             context3.stop();
             if (TelemetryUtil.telemetryEnabled()) {
+                // set Http attributes right before finishing the span, so http.status.code is captured
+                GatewayUtils.setCommonHTTPAttributes(throttleLatencySpan, messageContext);
                 TelemetryUtil.finishSpan(throttleLatencySpan);
             } else if (Util.tracingEnabled()) {
                 Util.finishSpan(throttleLatencyTracingSpan);
@@ -742,6 +744,8 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                         System.currentTimeMillis() - executionStartTime);
                 context3.stop();
                 if (TelemetryUtil.telemetryEnabled()) {
+                    // set Http attributes right before finishing the span, so http.status.code is captured
+                    GatewayUtils.setCommonHTTPAttributes(throttleLatencySpan, messageContext);
                     TelemetryUtil.finishSpan(throttleLatencySpan);
                 } else if (Util.tracingEnabled()) {
                     Util.finishSpan(throttleLatencyTracingSpan);

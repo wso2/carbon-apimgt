@@ -87,40 +87,40 @@ public class OTLPTelemetry implements APIMOpenTelemetry {
 //                }
 //            }
 
-            boolean useHttp;
-            if(TelemetryConstants.HTTP_PROTOCOL.equalsIgnoreCase(otlpProtocol)) {
-                useHttp = true;
-            } else if(TelemetryConstants.GRPC_PROTOCOL.equalsIgnoreCase(otlpProtocol)) {
-                useHttp = false;
-            } else {
-                log.warn("OTLP protocol '" + otlpProtocol + "' is invalid. Defaulting to gRPC.");
-                useHttp = false;
-            }
+        boolean useHttp;
+        if (TelemetryConstants.HTTP_PROTOCOL.equalsIgnoreCase(otlpProtocol)) {
+            useHttp = true;
+        } else if (TelemetryConstants.GRPC_PROTOCOL.equalsIgnoreCase(otlpProtocol)) {
+            useHttp = false;
+        } else {
+            log.warn("OTLP protocol '" + otlpProtocol + "' is invalid. Defaulting to gRPC.");
+            useHttp = false;
+        }
 
 //            if (log.isDebugEnabled()) {
 //                log.debug("OTLP exporter: " + otlpGrpcSpanExporterBuilder + " is configured at " + endPointURL);
 //            }
-            if (StringUtils.isNotEmpty(endPointURL)) {
-                SpanExporter spanExporter = buildSpanExporter(useHttp, endPointURL, headerKey, headerValue);
+        if (StringUtils.isNotEmpty(endPointURL)) {
+            SpanExporter spanExporter = buildSpanExporter(useHttp, endPointURL, headerKey, headerValue);
 
-                sdkTracerProvider = SdkTracerProvider.builder()
-                        .addSpanProcessor(BatchSpanProcessor.builder(spanExporter).build())
-                        .setResource(TelemetryUtil.getTracerProviderResource(serviceName))
-                        .setSampler(getConfiguredSampler())
-                        .build();
-
-                openTelemetry = OpenTelemetrySdk.builder()
-                        .setTracerProvider(sdkTracerProvider).
-                    setPropagators(ContextPropagators.create(W3CTraceContextPropagator.getInstance()))
+            sdkTracerProvider = SdkTracerProvider.builder()
+                    .addSpanProcessor(BatchSpanProcessor.builder(spanExporter).build())
+                    .setResource(TelemetryUtil.getTracerProviderResource(serviceName))
+                    .setSampler(getConfiguredSampler())
                     .build();
 
-                if (log.isDebugEnabled()) {
-                    log.debug("OpenTelemetry instance: " + openTelemetry + " is configured.");
-                }
-            } else {
-                log.error("The OTLP endpoint URL is not configured properly. Hence, the OTLP tracer " +
-                        "initialization failed.");
+            openTelemetry = OpenTelemetrySdk.builder()
+                    .setTracerProvider(sdkTracerProvider).
+                setPropagators(ContextPropagators.create(W3CTraceContextPropagator.getInstance()))
+                .build();
+
+            if (log.isDebugEnabled()) {
+                log.debug("OpenTelemetry instance: " + openTelemetry + " is configured.");
             }
+        } else {
+            log.error("The OTLP endpoint URL is not configured properly. Hence, the OTLP tracer " +
+                    "initialization failed.");
+        }
     }
 
     @Override
