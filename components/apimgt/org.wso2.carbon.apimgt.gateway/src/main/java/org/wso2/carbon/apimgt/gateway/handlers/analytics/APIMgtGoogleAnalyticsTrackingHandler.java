@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.analytics;
 
+import io.opentelemetry.api.trace.SpanKind;
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.Constants;
 import org.apache.axis2.util.JavaUtils;
@@ -91,7 +92,7 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
                     (TelemetrySpan) msgCtx.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
             tracer = ServiceReferenceHolder.getInstance().getTelemetryTracer();
             span = TelemetryUtil.startSpan(APIMgtGatewayConstants.GOOGLE_ANALYTICS_HANDLER, responseLatencySpan,
-                    tracer);
+                    tracer, SpanKind.CLIENT);// added span kind CLIENT
         } else if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =
                     (TracingSpan) msgCtx.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);

@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security;
 
+import io.opentelemetry.api.trace.SpanKind;
 import org.apache.axis2.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -418,7 +419,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             TelemetrySpan responseLatencySpan =
                     (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
             TelemetryTracer tracer = ServiceReferenceHolder.getInstance().getTelemetryTracer();
-            keySpan = TelemetryUtil.startSpan(APIMgtGatewayConstants.KEY_VALIDATION, responseLatencySpan, tracer);
+            keySpan = TelemetryUtil.startSpan(APIMgtGatewayConstants.KEY_VALIDATION, responseLatencySpan, tracer, SpanKind.INTERNAL);//Add span kind internal
             messageContext.setProperty(APIMgtGatewayConstants.KEY_VALIDATION, keySpan);
             org.apache.axis2.context.MessageContext axis2MC =
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext();

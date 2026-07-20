@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.gateway.handlers.common;
 
 import com.atlassian.oai.validator.model.Headers;
+import io.opentelemetry.api.trace.SpanKind;
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -89,7 +90,7 @@ public class APIMgtLatencyStatsHandler extends AbstractHandler {
                     (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
             TelemetryTracer tracer = ServiceReferenceHolder.getInstance().getTelemetryTracer();
             TelemetrySpan span = TelemetryUtil.startSpan(APIMgtGatewayConstants.RESOURCE_SPAN, responseLatencySpan,
-                    tracer);
+                    tracer, SpanKind.INTERNAL);// added internal span kind
             messageContext.setProperty(APIMgtGatewayConstants.RESOURCE_SPAN, span);
         } else if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =

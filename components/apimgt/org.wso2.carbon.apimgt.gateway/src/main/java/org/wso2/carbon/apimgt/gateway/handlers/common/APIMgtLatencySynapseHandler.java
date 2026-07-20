@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.common;
 
+import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Context;
 import org.apache.synapse.AbstractSynapseHandler;
 import org.apache.synapse.MessageContext;
@@ -51,15 +52,19 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
         }
 
         if (TelemetryUtil.telemetryEnabled()) {
+            //synapse message context -> axis2 message context
             org.apache.axis2.context.MessageContext axis2MessageContext =
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+            //retrieves all http request headers (opentelemtry stores tracing info inside http headers)
             Map headersMap =
                     (Map) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
             if (headersMap != null) {
                 Context spanContext = TelemetryUtil.extract(headersMap);
 
                 TelemetrySpan responseLatencySpan = TelemetryUtil.startSpan(APIMgtGatewayConstants.RESPONSE_LATENCY,
-                        spanContext, telemetryTracer);
+                        spanContext, telemetryTracer, SpanKind.SERVER); // added server span kind
+
+
                 GatewayUtils.setRequestRelatedTags(responseLatencySpan, messageContext);
                 messageContext.setProperty(APIMgtGatewayConstants.RESPONSE_LATENCY, responseLatencySpan);
             }
@@ -97,7 +102,7 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
                 TelemetrySpan parentSpan =
                         (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
                 TelemetrySpan backendLatencySpan = TelemetryUtil.startSpan(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN,
-                        parentSpan, telemetryTracer);
+                        parentSpan, telemetryTracer, SpanKind.CLIENT); // added client span kind
                 messageContext.setProperty(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN, backendLatencySpan);
                 TelemetryUtil.inject(backendLatencySpan, tracerSpecificCarrier);
             }
