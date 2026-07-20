@@ -2438,7 +2438,7 @@ public class PublisherCommonUtils {
                 if (APIConstants.API_SUBTYPE_EXISTING_API.equals(apiToAdd.getSubtype())
                         && !apiToAdd.getUriTemplates().isEmpty()) {
                     Set<URITemplate> updatedTemplates = resolveExistingMCPBackendAPI(apiToAdd, apiProvider,
-                            organization, oasParser);
+                            organization);
                     apiToAdd.setUriTemplates(updatedTemplates);
                 }
                 apiDefinition = new OAS3Parser().generateAPIDefinition(swaggerData);
@@ -2505,12 +2505,11 @@ public class PublisherCommonUtils {
      * @param apiToAdd     API being added
      * @param apiProvider  APIProvider instance
      * @param organization Tenant domain
-     * @param oasParser    OpenAPI parser
      * @return updated set of URI templates
      * @throws APIManagementException if reference API not found or other processing errors occur
      */
     private static Set<URITemplate> resolveExistingMCPBackendAPI(API apiToAdd, APIProvider apiProvider,
-                                                                 String organization, APIDefinition oasParser)
+                                                                 String organization)
             throws APIManagementException {
 
         URITemplate template = apiToAdd.getUriTemplates().iterator().next();
@@ -2542,6 +2541,7 @@ public class PublisherCommonUtils {
             log.error(error);
             throw new APIManagementException(error, ExceptionCodes.INVALID_REFERENCE_API);
         }
+        APIDefinition oasParser = OASParserUtil.getOASParser(refApi.getSwaggerDefinition());
         return generateMCPFeatures(apiToAdd.getSubtype(), refApi.getSwaggerDefinition(),
                 apiToAdd.getUriTemplates(), refApi.getId(), oasParser);
     }
