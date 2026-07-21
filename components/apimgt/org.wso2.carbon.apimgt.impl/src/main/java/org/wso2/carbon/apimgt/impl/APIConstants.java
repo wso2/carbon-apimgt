@@ -609,6 +609,7 @@ public final class APIConstants {
         public static final String AI_CONFIGURATION_FAILOVER_CONFIGURATIONS_FAILOVER_ENDPOINTS_LIMIT =
                 "FailoverEndpointsLimit";
         public static final String AI_CONFIGURATION_DEFAULT_REQUEST_TIMEOUT = "DefaultRequestTimout";
+        public static final String AI_CUSTOM_ERROR_RESPONSE_SEQUENCE = "CustomErrorResponseSequence";
 
         public static final String DESIGN_ASSISTANT = "DesignAssistant";
         public static final String DESIGN_ASSISTANT_ENABLED = "Enabled";
