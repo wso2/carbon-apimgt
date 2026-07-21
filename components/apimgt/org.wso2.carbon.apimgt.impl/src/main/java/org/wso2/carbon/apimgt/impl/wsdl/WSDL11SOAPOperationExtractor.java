@@ -297,10 +297,21 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
      * @param importedSchemas schemas imported from the definition or a referenced schema
      */
     private void resolveImportedXSDs(Map importedSchemas) {
+        resolveImportedXSDs(importedSchemas, new HashSet<String>());
+    }
+
+    /**
+     * Recursively resolve imported schemas, including schemas imported by an already-imported schema, guarding
+     * against cyclic and diamond imports by tracking schema URLs that have already been visited.
+     *
+     * @param importedSchemas schemas imported from the definition or a referenced schema
+     * @param visitedSchemas  schema URLs that have already been processed in this resolution chain
+     */
+    private void resolveImportedXSDs(Map importedSchemas, Set<String> visitedSchemas) {
 
         for (Object importedSchemaObj : importedSchemas.keySet()) {
             String schemaUrl = (String) importedSchemaObj;
-            if (importedSchemas.get(schemaUrl) == null) {
+            if (importedSchemas.get(schemaUrl) == null || !visitedSchemas.add(schemaUrl)) {
                 continue;
             }
             Vector vector = (Vector) importedSchemas.get(schemaUrl);
@@ -311,7 +322,7 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
                 Schema referencedSchema = ((SchemaImport) schemaVector).getReferencedSchema();
                 if (referencedSchema != null && referencedSchema.getElement() != null) {
                     if (referencedSchema.getImports() != null) {
-                        resolveImportedXSDs(referencedSchema.getImports());
+                        resolveImportedXSDs(referencedSchema.getImports(), visitedSchemas);
                     }
                     if (referencedSchema.getElement().hasChildNodes()) {
                         schemaNodeList.addAll(SOAPOperationBindingUtils
