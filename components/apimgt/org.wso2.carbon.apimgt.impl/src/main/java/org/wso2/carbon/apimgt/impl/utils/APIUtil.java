@@ -10356,8 +10356,18 @@ public final class APIUtil {
 
     @UsedByMigrationClient
     public static String getX509certificateContent(String certificate) {
+        if (certificate.contains(APIConstants.BEGIN_CERTIFICATE_STRING)
+                && certificate.contains(APIConstants.END_CERTIFICATE_STRING)) {
+            // Extract only the content between the BEGIN/END markers, discarding any characters
+            // (e.g. trailing spaces, \r, \n, [\r], [\n]) that load balancers may append outside them.
+            certificate = certificate.substring(certificate.indexOf(APIConstants.BEGIN_CERTIFICATE_STRING)
+                            + APIConstants.BEGIN_CERTIFICATE_STRING.length(),
+                    certificate.indexOf(APIConstants.END_CERTIFICATE_STRING));
+        }
         String content = certificate.replaceAll(APIConstants.BEGIN_CERTIFICATE_STRING, "")
-                .replaceAll(APIConstants.END_CERTIFICATE_STRING, "");
+                .replaceAll(APIConstants.END_CERTIFICATE_STRING, "")
+                // remove illegal base64 characters such as spaces, \r, \n, [\r], [\n]
+                .replaceAll("\\\\r|\\\\n|\\r|\\n|\\[|]| ", "");
 
         return content.trim();
     }
