@@ -1014,7 +1014,7 @@ public class SQLConstants {
 
     public static final String GET_API_AVERAGE_RATING_SQL =
             " SELECT " +
-            "   CAST(AVG(RATING) AS DECIMAL) AS RATING " +
+            "   AVG(CAST(RATING AS DECIMAL(10,3))) AS RATING " +
             " FROM " +
             "   AM_API_RATINGS " +
             " WHERE " +
