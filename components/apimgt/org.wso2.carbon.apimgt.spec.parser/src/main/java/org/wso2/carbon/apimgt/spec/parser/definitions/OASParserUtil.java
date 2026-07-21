@@ -47,7 +47,6 @@ import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.info.License;
-import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
@@ -903,9 +902,30 @@ public class OASParserUtil {
             return;
         }
         Set<Schema<?>> visited = Collections.newSetFromMap(new IdentityHashMap<>());
-        if (openAPI.getComponents() != null && openAPI.getComponents().getSchemas() != null) {
-            for (Object schema : openAPI.getComponents().getSchemas().values()) {
-                stripBinaryFormatExamplesFromSchema((Schema<?>) schema, visited);
+        Components components = openAPI.getComponents();
+        if (components != null) {
+            if (components.getSchemas() != null) {
+                for (Object schema : components.getSchemas().values()) {
+                    stripBinaryFormatExamplesFromSchema((Schema<?>) schema, visited);
+                }
+            }
+            if (components.getRequestBodies() != null) {
+                for (RequestBody requestBody : components.getRequestBodies().values()) {
+                    stripBinaryFormatExamplesFromRequestBody(requestBody, visited);
+                }
+            }
+            if (components.getResponses() != null) {
+                for (ApiResponse response : components.getResponses().values()) {
+                    stripBinaryFormatExamplesFromResponse(response, visited);
+                }
+            }
+            if (components.getParameters() != null) {
+                for (Parameter parameter : components.getParameters().values()) {
+                    stripBinaryFormatExamplesFromParameter(parameter, visited);
+                }
+            }
+            if (components.getHeaders() != null) {
+                stripBinaryFormatExamplesFromHeaders(components.getHeaders(), visited);
             }
         }
         if (openAPI.getPaths() == null) {
@@ -913,21 +933,54 @@ public class OASParserUtil {
         }
         for (PathItem pathItem : openAPI.getPaths().values()) {
             for (Operation operation : pathItem.readOperations()) {
-                if (operation.getRequestBody() != null) {
-                    stripBinaryFormatExamplesFromContent(operation.getRequestBody().getContent(), visited);
-                }
+                stripBinaryFormatExamplesFromRequestBody(operation.getRequestBody(), visited);
                 if (operation.getResponses() != null) {
                     for (ApiResponse response : operation.getResponses().values()) {
-                        stripBinaryFormatExamplesFromContent(response.getContent(), visited);
+                        stripBinaryFormatExamplesFromResponse(response, visited);
                     }
                 }
                 if (operation.getParameters() != null) {
                     for (Parameter parameter : operation.getParameters()) {
-                        stripBinaryFormatExamplesFromSchema(parameter.getSchema(), visited);
-                        stripBinaryFormatExamplesFromContent(parameter.getContent(), visited);
+                        stripBinaryFormatExamplesFromParameter(parameter, visited);
                     }
                 }
             }
+        }
+    }
+
+    private static void stripBinaryFormatExamplesFromRequestBody(RequestBody requestBody, Set<Schema<?>> visited) {
+        if (requestBody == null) {
+            return;
+        }
+        stripBinaryFormatExamplesFromContent(requestBody.getContent(), visited);
+    }
+
+    private static void stripBinaryFormatExamplesFromResponse(ApiResponse response, Set<Schema<?>> visited) {
+        if (response == null) {
+            return;
+        }
+        stripBinaryFormatExamplesFromContent(response.getContent(), visited);
+        stripBinaryFormatExamplesFromHeaders(response.getHeaders(), visited);
+    }
+
+    private static void stripBinaryFormatExamplesFromParameter(Parameter parameter, Set<Schema<?>> visited) {
+        if (parameter == null) {
+            return;
+        }
+        stripBinaryFormatExamplesFromSchema(parameter.getSchema(), visited);
+        stripBinaryFormatExamplesFromContent(parameter.getContent(), visited);
+    }
+
+    private static void stripBinaryFormatExamplesFromHeaders(Map<String, Header> headers, Set<Schema<?>> visited) {
+        if (headers == null) {
+            return;
+        }
+        for (Header header : headers.values()) {
+            if (header == null) {
+                continue;
+            }
+            stripBinaryFormatExamplesFromSchema(header.getSchema(), visited);
+            stripBinaryFormatExamplesFromContent(header.getContent(), visited);
         }
     }
 
@@ -958,11 +1011,11 @@ public class OASParserUtil {
         if (schema.getAdditionalProperties() instanceof Schema) {
             stripBinaryFormatExamplesFromSchema((Schema<?>) schema.getAdditionalProperties(), visited);
         }
-        if (schema instanceof ComposedSchema) {
-            ComposedSchema composedSchema = (ComposedSchema) schema;
-            stripBinaryFormatExamplesFromSchemaList(composedSchema.getAllOf(), visited);
-            stripBinaryFormatExamplesFromSchemaList(composedSchema.getAnyOf(), visited);
-            stripBinaryFormatExamplesFromSchemaList(composedSchema.getOneOf(), visited);
+        stripBinaryFormatExamplesFromSchemaList(schema.getAllOf(), visited);
+        stripBinaryFormatExamplesFromSchemaList(schema.getAnyOf(), visited);
+        stripBinaryFormatExamplesFromSchemaList(schema.getOneOf(), visited);
+        if (schema.getNot() != null) {
+            stripBinaryFormatExamplesFromSchema(schema.getNot(), visited);
         }
     }
 
