@@ -28,6 +28,7 @@ import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporterBuilder;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
+import io.opentelemetry.sdk.trace.SpanLimits;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
@@ -70,23 +71,6 @@ public class OTLPTelemetry implements APIMOpenTelemetry {
                     configuration.getFirstProperty(headerProperty) : null;
         }
 
-//        if (StringUtils.isNotEmpty(endPointURL)) {
-//            OtlpGrpcSpanExporterBuilder otlpGrpcSpanExporterBuilder = null;
-//            if (headerKey != null && headerValue != null) {
-//                otlpGrpcSpanExporterBuilder = OtlpGrpcSpanExporter.builder()
-//                        .setEndpoint(endPointURL)
-//                        .setCompression("gzip")
-//                        .addHeader(headerKey, headerValue);
-//            } else {
-//                otlpGrpcSpanExporterBuilder = OtlpGrpcSpanExporter.builder()
-//                        .setEndpoint(endPointURL)
-//                        .setCompression("gzip");
-//                if (log.isDebugEnabled()) {
-//                    log.debug("OTLP exporter: " + otlpGrpcSpanExporterBuilder + " is configured at " + endPointURL +
-//                            " without headers.");
-//                }
-//            }
-
         boolean useHttp;
         if (TelemetryConstants.HTTP_PROTOCOL.equalsIgnoreCase(otlpProtocol)) {
             useHttp = true;
@@ -97,22 +81,24 @@ public class OTLPTelemetry implements APIMOpenTelemetry {
             useHttp = false;
         }
 
-//            if (log.isDebugEnabled()) {
-//                log.debug("OTLP exporter: " + otlpGrpcSpanExporterBuilder + " is configured at " + endPointURL);
-//            }
         if (StringUtils.isNotEmpty(endPointURL)) {
             SpanExporter spanExporter = buildSpanExporter(useHttp, endPointURL, headerKey, headerValue);
+
+            SpanLimits spanLimits = SpanLimits.builder()
+                    .setMaxNumberOfAttributes(256)
+                    .build();
 
             sdkTracerProvider = SdkTracerProvider.builder()
                     .addSpanProcessor(BatchSpanProcessor.builder(spanExporter).build())
                     .setResource(TelemetryUtil.getTracerProviderResource(serviceName))
                     .setSampler(getConfiguredSampler())
+                    .setSpanLimits(spanLimits)
                     .build();
 
             openTelemetry = OpenTelemetrySdk.builder()
-                    .setTracerProvider(sdkTracerProvider).
-                setPropagators(ContextPropagators.create(W3CTraceContextPropagator.getInstance()))
-                .build();
+                    .setTracerProvider(sdkTracerProvider)
+                    .setPropagators(ContextPropagators.create(W3CTraceContextPropagator.getInstance()))
+                    .build();
 
             if (log.isDebugEnabled()) {
                 log.debug("OpenTelemetry instance: " + openTelemetry + " is configured.");
