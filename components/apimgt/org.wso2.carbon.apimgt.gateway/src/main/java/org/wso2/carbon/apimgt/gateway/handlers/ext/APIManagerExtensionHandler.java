@@ -114,6 +114,7 @@ public class APIManagerExtensionHandler extends AbstractHandler {
             TelemetryTracer tracer = ServiceReferenceHolder.getInstance().getTelemetryTracer();
             requestMediationSpan = TelemetryUtil.startSpan(APIMgtGatewayConstants.REQUEST_MEDIATION,
                     responseLatencySpan, tracer, SpanKind.INTERNAL); // added internal span kind
+//            GatewayUtils.setCommonHTTPAttributes(requestMediationSpan, messageContext);
         } else if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =
                     (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
@@ -171,6 +172,7 @@ public class APIManagerExtensionHandler extends AbstractHandler {
             TelemetryTracer tracer = ServiceReferenceHolder.getInstance().getTelemetryTracer();
             responseMediationSpan =
                     TelemetryUtil.startSpan(APIMgtGatewayConstants.RESPONSE_MEDIATION, responseLatencySpan, tracer, SpanKind.INTERNAL);// added client span kind
+//            GatewayUtils.setCommonHTTPAttributes(responseMediationSpan, messageContext);
         } else if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =
                     (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
