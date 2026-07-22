@@ -155,13 +155,16 @@ public class InboundWebsocketProcessorUtilTest {
         String subscriptionLevelThrottleKey = apiKeyValidationInfoDTO.getApplicationId() + ":"
                 + inboundMessageContext.getApiContext() + ":" + inboundMessageContext.getVersion();
         String applicationLevelThrottleKey = apiKeyValidationInfoDTO.getApplicationId() + ":"
-                + apiKeyValidationInfoDTO.getEndUserName() + "@" + apiKeyValidationInfoDTO.getSubscriberTenantDomain();
+                + apiKeyValidationInfoDTO.getEndUserName();
         PowerMockito.when(WebsocketUtil.getThrottleStatus(verbInfoDTO.getRequestKey(), subscriptionLevelThrottleKey,
                 applicationLevelThrottleKey)).thenReturn(null);
         Mockito.when(dataPublisher.tryPublish(Mockito.anyObject())).thenReturn(true);
         InboundProcessorResponseDTO inboundProcessorResponseDTO =
                 InboundWebsocketProcessorUtil.doThrottleForGraphQL(msgSize, verbInfoDTO, inboundMessageContext,
                         operationId);
+        PowerMockito.verifyStatic(WebsocketUtil.class);
+        WebsocketUtil.getThrottleStatus(verbInfoDTO.getRequestKey(), subscriptionLevelThrottleKey,
+                applicationLevelThrottleKey);
         Assert.assertFalse(inboundProcessorResponseDTO.isError());
         Assert.assertNull(inboundProcessorResponseDTO.getErrorMessage());
         Assert.assertFalse(inboundProcessorResponseDTO.isCloseConnection());
@@ -196,8 +199,7 @@ public class InboundWebsocketProcessorUtilTest {
                 apiKeyValidationInfoDTO.getApplicationId() + ":" + inboundMessageContext.getApiContext() + ":"
                         + inboundMessageContext.getVersion();
         String applicationLevelThrottleKey =
-                apiKeyValidationInfoDTO.getApplicationId() + ":" + apiKeyValidationInfoDTO.getEndUserName() + "@"
-                        + apiKeyValidationInfoDTO.getSubscriberTenantDomain();
+                apiKeyValidationInfoDTO.getApplicationId() + ":" + apiKeyValidationInfoDTO.getEndUserName();
         Mockito.when(dataPublisher.tryPublish(Mockito.anyObject())).thenReturn(true);
 
         PowerMockito.when(WebsocketUtil.getThrottleStatus(verbInfoDTO.getRequestKey(), subscriptionLevelThrottleKey,
@@ -249,7 +251,7 @@ public class InboundWebsocketProcessorUtilTest {
 
         String subscriptionLevelThrottleKey = apiKeyValidationInfoDTO.getApplicationId() + ":"
                 + inboundMessageContext.getApiContext() + ":" + inboundMessageContext.getVersion();
-        // Non-super-tenant format: no "@tenantDomain" suffix, unlike the super-tenant case.
+        // Application-level throttle key is tenant-agnostic
         String applicationLevelThrottleKey =
                 apiKeyValidationInfoDTO.getApplicationId() + ":" + apiKeyValidationInfoDTO.getEndUserName();
         PowerMockito.when(WebsocketUtil.getThrottleStatus(verbInfoDTO.getRequestKey(), subscriptionLevelThrottleKey,
@@ -258,6 +260,9 @@ public class InboundWebsocketProcessorUtilTest {
         InboundProcessorResponseDTO inboundProcessorResponseDTO =
                 InboundWebsocketProcessorUtil.doThrottleForGraphQL(msgSize, verbInfoDTO, inboundMessageContext,
                         operationId);
+        PowerMockito.verifyStatic(WebsocketUtil.class);
+        WebsocketUtil.getThrottleStatus(verbInfoDTO.getRequestKey(), subscriptionLevelThrottleKey,
+                applicationLevelThrottleKey);
         Assert.assertFalse(inboundProcessorResponseDTO.isError());
         Assert.assertNull(inboundProcessorResponseDTO.getErrorMessage());
         Assert.assertFalse(inboundProcessorResponseDTO.isCloseConnection());
