@@ -143,6 +143,7 @@ public class InboundWebsocketProcessorUtilTest {
         apiKeyValidationInfoDTO.setTier(APIConstants.UNLIMITED_TIER);
         apiKeyValidationInfoDTO.setSubscriberTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         apiKeyValidationInfoDTO.setSubscriber("admin");
+        apiKeyValidationInfoDTO.setEndUserName("otherUser");
         apiKeyValidationInfoDTO.setApiName("GraphQLAPI");
         apiKeyValidationInfoDTO.setApplicationId("12");
         inboundMessageContext.setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
@@ -154,7 +155,7 @@ public class InboundWebsocketProcessorUtilTest {
         String subscriptionLevelThrottleKey = apiKeyValidationInfoDTO.getApplicationId() + ":"
                 + inboundMessageContext.getApiContext() + ":" + inboundMessageContext.getVersion();
         String applicationLevelThrottleKey = apiKeyValidationInfoDTO.getApplicationId() + ":"
-                + apiKeyValidationInfoDTO.getSubscriber() + "@" + apiKeyValidationInfoDTO.getSubscriberTenantDomain();
+                + apiKeyValidationInfoDTO.getEndUserName() + "@" + apiKeyValidationInfoDTO.getSubscriberTenantDomain();
         PowerMockito.when(WebsocketUtil.getThrottleStatus(verbInfoDTO.getRequestKey(), subscriptionLevelThrottleKey,
                 applicationLevelThrottleKey)).thenReturn(null);
         Mockito.when(dataPublisher.tryPublish(Mockito.anyObject())).thenReturn(true);
@@ -179,6 +180,7 @@ public class InboundWebsocketProcessorUtilTest {
         apiKeyValidationInfoDTO.setTier(APIConstants.UNLIMITED_TIER);
         apiKeyValidationInfoDTO.setSubscriberTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         apiKeyValidationInfoDTO.setSubscriber("admin");
+        apiKeyValidationInfoDTO.setEndUserName("otherUser");
         apiKeyValidationInfoDTO.setApiName("GraphQLAPI");
         apiKeyValidationInfoDTO.setApplicationId("12");
         inboundMessageContext.setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
@@ -194,7 +196,7 @@ public class InboundWebsocketProcessorUtilTest {
                 apiKeyValidationInfoDTO.getApplicationId() + ":" + inboundMessageContext.getApiContext() + ":"
                         + inboundMessageContext.getVersion();
         String applicationLevelThrottleKey =
-                apiKeyValidationInfoDTO.getApplicationId() + ":" + apiKeyValidationInfoDTO.getSubscriber() + "@"
+                apiKeyValidationInfoDTO.getApplicationId() + ":" + apiKeyValidationInfoDTO.getEndUserName() + "@"
                         + apiKeyValidationInfoDTO.getSubscriberTenantDomain();
         Mockito.when(dataPublisher.tryPublish(Mockito.anyObject())).thenReturn(true);
 
@@ -220,6 +222,45 @@ public class InboundWebsocketProcessorUtilTest {
                 WebSocketApiConstants.FrameErrorConstants.THROTTLED_OUT_ERROR_MESSAGE);
         org.junit.Assert.assertEquals(String.valueOf(payload.get(WebSocketApiConstants.FrameErrorConstants.ERROR_CODE)),
                 String.valueOf(WebSocketApiConstants.FrameErrorConstants.THROTTLED_OUT_ERROR));
+    }
+
+    @Test
+    public void testDoThrottleApplicationLevelKeyForNonSuperTenant() {
+        InboundMessageContext inboundMessageContext = new InboundMessageContext();
+        int msgSize = 100;
+        VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
+        verbInfoDTO.setThrottling("Gold");
+        verbInfoDTO.setRequestKey("liftStatusChange");
+        String operationId = "1";
+        String tenantDomain = "abc.com";
+        APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
+        apiKeyValidationInfoDTO.setApplicationTier(APIConstants.UNLIMITED_TIER);
+        apiKeyValidationInfoDTO.setTier(APIConstants.UNLIMITED_TIER);
+        apiKeyValidationInfoDTO.setSubscriberTenantDomain(tenantDomain);
+        apiKeyValidationInfoDTO.setSubscriber("admin");
+        apiKeyValidationInfoDTO.setEndUserName("otherUser");
+        apiKeyValidationInfoDTO.setApiName("GraphQLAPI");
+        apiKeyValidationInfoDTO.setApplicationId("12");
+        inboundMessageContext.setTenantDomain(tenantDomain);
+        inboundMessageContext.setApiContext("/graphql");
+        inboundMessageContext.setVersion("1.0.0");
+        inboundMessageContext.setUserIP("198.162.10.2");
+        inboundMessageContext.setInfoDTO(apiKeyValidationInfoDTO);
+
+        String subscriptionLevelThrottleKey = apiKeyValidationInfoDTO.getApplicationId() + ":"
+                + inboundMessageContext.getApiContext() + ":" + inboundMessageContext.getVersion();
+        // Non-super-tenant format: no "@tenantDomain" suffix, unlike the super-tenant case.
+        String applicationLevelThrottleKey =
+                apiKeyValidationInfoDTO.getApplicationId() + ":" + apiKeyValidationInfoDTO.getEndUserName();
+        PowerMockito.when(WebsocketUtil.getThrottleStatus(verbInfoDTO.getRequestKey(), subscriptionLevelThrottleKey,
+                applicationLevelThrottleKey)).thenReturn(null);
+        Mockito.when(dataPublisher.tryPublish(Mockito.anyObject())).thenReturn(true);
+        InboundProcessorResponseDTO inboundProcessorResponseDTO =
+                InboundWebsocketProcessorUtil.doThrottleForGraphQL(msgSize, verbInfoDTO, inboundMessageContext,
+                        operationId);
+        Assert.assertFalse(inboundProcessorResponseDTO.isError());
+        Assert.assertNull(inboundProcessorResponseDTO.getErrorMessage());
+        Assert.assertFalse(inboundProcessorResponseDTO.isCloseConnection());
     }
 
     @Test
