@@ -98,6 +98,7 @@ public class Constants {
     public static final String TRANSFER_ENCODING_BASE64 = "base64";
     public static final String PAYLOAD_SIZE_LIMIT = "payload_size_limit";
     public static final int DEFAULT_PAYLOAD_SIZE_LIMIT = 100000;
+    public static final String CAPTURE_PAYLOADS_WITHOUT_CONTENT_LENGTH = "capture_payloads_without_content_length";
     public static final String REQUEST_CONTENT_TYPE = "requestContentType";
 
     public static final String AI_METADATA = "aiMetadata";
