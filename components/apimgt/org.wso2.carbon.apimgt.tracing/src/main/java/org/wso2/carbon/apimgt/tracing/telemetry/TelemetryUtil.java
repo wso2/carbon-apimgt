@@ -302,7 +302,7 @@ public class TelemetryUtil {
 
         //adding process id since the java serviceprovider won't be able to load the processPidResourceProvider
         // because of osgi bundle hss different classloaders
-        long pid = ProcessHandle.current().pid();
+        long pid = java.lang.ProcessHandle.current().pid();
         Attributes processAttributes = Attributes.builder()
                 .put(TelemetryConstants.PROCESS_PID, pid)
                 .build();
