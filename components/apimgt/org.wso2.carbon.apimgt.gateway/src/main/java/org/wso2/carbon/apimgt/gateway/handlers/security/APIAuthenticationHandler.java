@@ -420,6 +420,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                     (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
             TelemetryTracer tracer = ServiceReferenceHolder.getInstance().getTelemetryTracer();
             keySpan = TelemetryUtil.startSpan(APIMgtGatewayConstants.KEY_VALIDATION, responseLatencySpan, tracer, SpanKind.INTERNAL);//Add span kind internal
+//            GatewayUtils.setCommonHTTPAttributes(keySpan, messageContext);
             messageContext.setProperty(APIMgtGatewayConstants.KEY_VALIDATION, keySpan);
             org.apache.axis2.context.MessageContext axis2MC =
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext();
