@@ -44,6 +44,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.callbacks.Callback;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.info.License;
@@ -927,24 +928,71 @@ public class OASParserUtil {
             if (components.getHeaders() != null) {
                 stripBinaryFormatExamplesFromHeaders(components.getHeaders(), visited);
             }
-        }
-        if (openAPI.getPaths() == null) {
-            return;
-        }
-        for (PathItem pathItem : openAPI.getPaths().values()) {
-            for (Operation operation : pathItem.readOperations()) {
-                stripBinaryFormatExamplesFromRequestBody(operation.getRequestBody(), visited);
-                if (operation.getResponses() != null) {
-                    for (ApiResponse response : operation.getResponses().values()) {
-                        stripBinaryFormatExamplesFromResponse(response, visited);
-                    }
-                }
-                if (operation.getParameters() != null) {
-                    for (Parameter parameter : operation.getParameters()) {
-                        stripBinaryFormatExamplesFromParameter(parameter, visited);
-                    }
+            if (components.getPathItems() != null) {
+                for (PathItem pathItem : components.getPathItems().values()) {
+                    stripBinaryFormatExamplesFromPathItem(pathItem, visited);
                 }
             }
+            if (components.getCallbacks() != null) {
+                for (Callback callback : components.getCallbacks().values()) {
+                    stripBinaryFormatExamplesFromCallback(callback, visited);
+                }
+            }
+        }
+        if (openAPI.getPaths() != null) {
+            for (PathItem pathItem : openAPI.getPaths().values()) {
+                stripBinaryFormatExamplesFromPathItem(pathItem, visited);
+            }
+        }
+        if (openAPI.getWebhooks() != null) {
+            for (PathItem pathItem : openAPI.getWebhooks().values()) {
+                stripBinaryFormatExamplesFromPathItem(pathItem, visited);
+            }
+        }
+    }
+
+    private static void stripBinaryFormatExamplesFromPathItem(PathItem pathItem, Set<Schema<?>> visited) {
+        if (pathItem == null) {
+            return;
+        }
+        if (pathItem.getParameters() != null) {
+            for (Parameter parameter : pathItem.getParameters()) {
+                stripBinaryFormatExamplesFromParameter(parameter, visited);
+            }
+        }
+        for (Operation operation : pathItem.readOperations()) {
+            stripBinaryFormatExamplesFromOperation(operation, visited);
+        }
+    }
+
+    private static void stripBinaryFormatExamplesFromOperation(Operation operation, Set<Schema<?>> visited) {
+        if (operation == null) {
+            return;
+        }
+        stripBinaryFormatExamplesFromRequestBody(operation.getRequestBody(), visited);
+        if (operation.getResponses() != null) {
+            for (ApiResponse response : operation.getResponses().values()) {
+                stripBinaryFormatExamplesFromResponse(response, visited);
+            }
+        }
+        if (operation.getParameters() != null) {
+            for (Parameter parameter : operation.getParameters()) {
+                stripBinaryFormatExamplesFromParameter(parameter, visited);
+            }
+        }
+        if (operation.getCallbacks() != null) {
+            for (Callback callback : operation.getCallbacks().values()) {
+                stripBinaryFormatExamplesFromCallback(callback, visited);
+            }
+        }
+    }
+
+    private static void stripBinaryFormatExamplesFromCallback(Callback callback, Set<Schema<?>> visited) {
+        if (callback == null) {
+            return;
+        }
+        for (PathItem pathItem : callback.values()) {
+            stripBinaryFormatExamplesFromPathItem(pathItem, visited);
         }
     }
 
