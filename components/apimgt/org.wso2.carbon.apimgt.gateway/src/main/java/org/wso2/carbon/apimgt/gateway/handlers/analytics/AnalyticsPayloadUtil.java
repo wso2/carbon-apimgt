@@ -33,6 +33,7 @@ import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.Map;
 
@@ -55,6 +56,10 @@ import static org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS;
 public class AnalyticsPayloadUtil {
 
     private static final Log log = LogFactory.getLog(AnalyticsPayloadUtil.class);
+
+    // Guards the invalid-payload_size_limit warning so a misconfigured value is logged once rather than
+    // on every capture attempt (getPayloadSizeLimit is called per request/response).
+    private static volatile boolean invalidLimitWarned = false;
 
     private AnalyticsPayloadUtil() {
     }
@@ -105,18 +110,51 @@ public class AnalyticsPayloadUtil {
             try {
                 int limit = Integer.parseInt(configs.get(Constants.PAYLOAD_SIZE_LIMIT));
                 if (limit > 0) {
+                    invalidLimitWarned = false;
                     return limit;
                 }
                 // A non-positive limit would silently drop every body (and break size math), so treat
                 // it as invalid rather than honouring it.
-                log.warn("Non-positive " + Constants.PAYLOAD_SIZE_LIMIT + " analytics property value. Using default "
-                        + Constants.DEFAULT_PAYLOAD_SIZE_LIMIT);
+                warnInvalidLimitOnce("Non-positive " + Constants.PAYLOAD_SIZE_LIMIT
+                        + " analytics property value. Using default " + Constants.DEFAULT_PAYLOAD_SIZE_LIMIT);
             } catch (NumberFormatException e) {
-                log.warn("Invalid " + Constants.PAYLOAD_SIZE_LIMIT + " analytics property value. Using default "
-                        + Constants.DEFAULT_PAYLOAD_SIZE_LIMIT);
+                warnInvalidLimitOnce("Invalid " + Constants.PAYLOAD_SIZE_LIMIT
+                        + " analytics property value. Using default " + Constants.DEFAULT_PAYLOAD_SIZE_LIMIT);
             }
         }
         return Constants.DEFAULT_PAYLOAD_SIZE_LIMIT;
+    }
+
+    /**
+     * Logs the invalid-{@code payload_size_limit} warning at most once per stretch of misconfiguration,
+     * so a bad value does not flood the logs on every per-request/response capture attempt. The flag is
+     * reset once a valid limit is read again, so a later re-misconfiguration is warned about afresh.
+     */
+    private static void warnInvalidLimitOnce(String message) {
+        if (!invalidLimitWarned) {
+            invalidLimitWarned = true;
+            log.warn(message);
+        }
+    }
+
+    /**
+     * Whether to capture payloads that do not declare a {@code Content-Length} (e.g. chunked
+     * transfer-encoding), read from the {@code capture_payloads_without_content_length} analytics
+     * property. Defaults to {@code false}.
+     *
+     * <p>Such a body cannot be size-checked before {@link RelayUtils#buildMessage} materializes it in
+     * full, so capturing a large chunked body would buffer the whole thing into memory (an OOM risk
+     * under load) only to drop it afterwards if it exceeds {@code payload_size_limit}. It is therefore
+     * off by default: with the flag off these bodies are skipped (never built), so the default
+     * configuration is memory-safe. An operator who needs them and has headroom can opt in, accepting
+     * the memory cost. Applies symmetrically to request and response capture.</p>
+     *
+     * @return true if bodies without a declared Content-Length should be captured
+     */
+    public static boolean shouldCapturePayloadsWithoutContentLength() {
+        Map<String, String> configs = APIManagerConfiguration.getAnalyticsProperties();
+        return configs != null
+                && Boolean.parseBoolean(configs.get(Constants.CAPTURE_PAYLOADS_WITHOUT_CONTENT_LENGTH));
     }
 
     /**
@@ -129,8 +167,11 @@ public class AnalyticsPayloadUtil {
      * truncated, so the publisher never has to deal with a partial/invalid body. Where the payload
      * advertises its size via a {@code Content-Length} header the check is applied <b>before</b>
      * {@link RelayUtils#buildMessage} so an oversized body is never buffered into memory or
-     * re-serialized. A chunked body with no {@code Content-Length} is still built and then dropped
-     * (the size is unknowable without reading it).</p>
+     * re-serialized. A body with no {@code Content-Length} (e.g. chunked transfer-encoding) cannot be
+     * size-checked before building, so by default it is <b>skipped</b> (never built) to keep the
+     * default configuration memory-safe; set {@code capture_payloads_without_content_length=true} to
+     * capture it anyway (it is then built in full and dropped afterwards if it exceeds the limit,
+     * accepting the memory cost). See {@link #shouldCapturePayloadsWithoutContentLength()}.</p>
      *
      * <p>Works for both the request (called from {@code handleRequestOutFlow}, just before the backend
      * send) and the response (called at event-collection time). When a body is captured,
@@ -139,8 +180,9 @@ public class AnalyticsPayloadUtil {
      * read-only build pattern used by the AI mediator and the threat-protection/schema validators.
      * Requests with no entity body (GET/DELETE) are skipped so they are left byte-identical.</p>
      *
-     * <p>The limit is compared against bytes for the pre-build {@code Content-Length} gate and the
-     * binary path, and against {@link String#length()} (characters) for text/JSON/XML.</p>
+     * <p>The limit is compared against bytes throughout: the declared {@code Content-Length} for the
+     * pre-build gate, the decoded byte count for the binary path, and the UTF-8 encoded byte length
+     * for text/JSON/XML.</p>
      *
      * <p>When {@code send_payloads} is enabled but a body is nonetheless skipped or dropped, the reason
      * is logged at debug level (keyed by {@code direction}) so operators are not left wondering why a
@@ -182,6 +224,20 @@ public class AnalyticsPayloadUtil {
                     log.debug("Dropping " + direction + " body from analytics: declared Content-Length "
                             + declaredLength + " bytes exceeds " + Constants.PAYLOAD_SIZE_LIMIT + " of " + sizeLimit
                             + "; body not built. Increase " + Constants.PAYLOAD_SIZE_LIMIT + " to capture it.");
+                }
+                return null;
+            }
+
+            // No declared Content-Length (e.g. chunked transfer-encoding): the size cannot be bounded
+            // before building, so building here would materialize the whole body in memory (an OOM risk
+            // under load). Skip it unless the operator has explicitly opted in. Off by default keeps the
+            // default configuration memory-safe; applies symmetrically to request and response.
+            if (declaredLength < 0 && !shouldCapturePayloadsWithoutContentLength()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("No " + direction + " body captured for analytics: no Content-Length header "
+                            + "(e.g. chunked transfer-encoding), so the body size cannot be bounded before "
+                            + "building. Set " + Constants.CAPTURE_PAYLOADS_WITHOUT_CONTENT_LENGTH
+                            + "=true to capture it (materializes the full body in memory).");
                 }
                 return null;
             }
@@ -241,19 +297,23 @@ public class AnalyticsPayloadUtil {
     }
 
     /**
-     * Wraps a text/JSON/XML payload, dropping it (returning {@code null}) when it exceeds
-     * {@code sizeLimit} characters so only a whole body is ever published. A drop is logged at debug
-     * level (keyed by {@code direction}/{@code kind}) so a missing body can be explained.
+     * Wraps a text/JSON/XML payload, dropping it (returning {@code null}) when its UTF-8 encoded size
+     * exceeds {@code sizeLimit} bytes so only a whole body is ever published. Measuring bytes (not
+     * {@link String#length()}, which counts UTF-16 code units) keeps this consistent with the
+     * byte-based pre-build {@code Content-Length} gate and binary path, and with the byte semantics of
+     * {@code payload_size_limit}. A drop is logged at debug level (keyed by {@code direction}/
+     * {@code kind}) so a missing body can be explained.
      */
     private static CapturedBody capture(String payload, int sizeLimit, String transferEncoding,
                                         String direction, String kind) {
         if (payload == null) {
             return null;
         }
-        if (payload.length() > sizeLimit) {
+        int byteLength = payload.getBytes(StandardCharsets.UTF_8).length;
+        if (byteLength > sizeLimit) {
             if (log.isDebugEnabled()) {
-                log.debug("Dropping " + direction + " " + kind + " body from analytics: " + payload.length()
-                        + " characters exceeds " + Constants.PAYLOAD_SIZE_LIMIT + " of " + sizeLimit
+                log.debug("Dropping " + direction + " " + kind + " body from analytics: " + byteLength
+                        + " bytes exceeds " + Constants.PAYLOAD_SIZE_LIMIT + " of " + sizeLimit
                         + ". Increase " + Constants.PAYLOAD_SIZE_LIMIT + " to capture it.");
             }
             return null;

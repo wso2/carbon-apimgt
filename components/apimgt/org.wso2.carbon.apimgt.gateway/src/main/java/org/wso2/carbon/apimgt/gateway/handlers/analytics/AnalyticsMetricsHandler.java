@@ -65,7 +65,6 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
 
     @Override
     public boolean handleRequestOutFlow(MessageContext messageContext) {
-        messageContext.setProperty(Constants.BACKEND_START_TIME_PROPERTY, System.currentTimeMillis());
         // Capture the request payload here (request-out flow), the last point before the backend send
         // where the request envelope is still current. Gated by the send_payloads analytics property.
         // Building here sets MESSAGE_BUILDER_INVOKED before the pass-through sender reads it, so the
@@ -83,6 +82,9 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
                 }
             }
         }
+        // Mark backend-start after payload capture so the request build/serialization time counts as
+        // request-mediation latency rather than backend latency.
+        messageContext.setProperty(Constants.BACKEND_START_TIME_PROPERTY, System.currentTimeMillis());
         return true;
     }
 
@@ -99,7 +101,7 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
             return false;
         }
         Object skipPublishMetrics = messageContext.getProperty(Constants.SKIP_METRICS_PUBLISHING);
-        if (skipPublishMetrics != null && (Boolean) skipPublishMetrics) {
+        if (Boolean.TRUE.equals(skipPublishMetrics)) {
             return false;
         }
         return !GatewayUtils.checkForFileBasedApiContexts(ApiUtils.getFullRequestPath(messageContext),
