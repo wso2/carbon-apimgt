@@ -87,10 +87,10 @@ public class DefaultMarketplaceAssistantServiceImplTest {
         Assert.assertNull("execute() must return null when configuration is not initialized", response);
     }
 
-    @Test
-    public void testPublishApiIsNoOpWhenCredentialsAbsent() throws APIManagementException {
-        // A publishable REST API is supplied so that, if the credential guard were removed, publishAPI() would
-        // reach the AI invocation - making the "never invoked" assertion meaningful rather than trivially true.
+    @Test(expected = APIManagementException.class)
+    public void testPublishApiFailsWhenCredentialsAbsent() throws APIManagementException {
+        // publishAPI() validates the configuration up-front (before touching the request), so it fails fast when
+        // no credentials are configured and never reaches the AI invocation.
         MarketplaceAssistantRequest request = new MarketplaceAssistantRequest();
         API api = Mockito.mock(API.class);
         Mockito.when(api.getType()).thenReturn(APIConstants.API_TYPE_HTTP);
@@ -99,20 +99,13 @@ public class DefaultMarketplaceAssistantServiceImplTest {
 
         service.publishAPI(request);
 
-        PowerMockito.verifyStatic(APIUtil.class, Mockito.never());
-        APIUtil.invokeAIService(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
-                Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
     }
 
-    @Test
-    public void testDeleteApiIsNoOpWhenCredentialsAbsent() throws APIManagementException {
+    @Test(expected = APIManagementException.class)
+    public void testDeleteApiFailsWhenCredentialsAbsent() throws APIManagementException {
         MarketplaceAssistantRequest request = new MarketplaceAssistantRequest();
         request.setUuid("some-uuid");
 
         service.deleteAPI(request);
-
-        PowerMockito.verifyStatic(APIUtil.class, Mockito.never());
-        APIUtil.marketplaceAssistantDeleteService(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
-                Mockito.anyString(), Mockito.anyString());
     }
 }

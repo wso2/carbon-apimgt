@@ -50,9 +50,6 @@ public class DefaultMarketplaceAssistantServiceImpl implements MarketplaceAssist
     @Override
     public MarketplaceAssistantResponse execute(MarketplaceAssistantRequest request) throws APIManagementException {
         MarketplaceAssistantConfigurationDTO configDto = getConfiguration();
-        if (configDto == null || !(configDto.isKeyProvided() || configDto.isAuthTokenProvided())) {
-            return null;
-        }
 
         String userRoles = new Gson().toJson(APIUtil.getListOfRoles(request.getUsername()));
 
@@ -80,9 +77,6 @@ public class DefaultMarketplaceAssistantServiceImpl implements MarketplaceAssist
     @Override
     public MarketplaceAssistantResponse getApiCount(MarketplaceAssistantRequest request) throws APIManagementException {
         MarketplaceAssistantConfigurationDTO configDto = getConfiguration();
-        if (configDto == null || !(configDto.isKeyProvided() || configDto.isAuthTokenProvided())) {
-            return null;
-        }
 
         CloseableHttpResponse httpResponse = null;
         try {
@@ -124,9 +118,6 @@ public class DefaultMarketplaceAssistantServiceImpl implements MarketplaceAssist
     @Override
     public void publishAPI(MarketplaceAssistantRequest request) throws APIManagementException {
         MarketplaceAssistantConfigurationDTO configDto = getConfiguration();
-        if (configDto == null || !(configDto.isKeyProvided() || configDto.isAuthTokenProvided())) {
-            return;
-        }
         API api = request.getApi();
         if (api == null) {
             return;
@@ -183,9 +174,6 @@ public class DefaultMarketplaceAssistantServiceImpl implements MarketplaceAssist
     @Override
     public void deleteAPI(MarketplaceAssistantRequest request) throws APIManagementException {
         MarketplaceAssistantConfigurationDTO configDto = getConfiguration();
-        if (configDto == null || !(configDto.isKeyProvided() || configDto.isAuthTokenProvided())) {
-            return;
-        }
         if (configDto.isKeyProvided()) {
             APIUtil.marketplaceAssistantDeleteService(configDto.getEndpoint(), configDto.getTokenEndpoint(),
                     configDto.getKey(), configDto.getApiDeleteResource(), request.getUuid());
@@ -195,13 +183,18 @@ public class DefaultMarketplaceAssistantServiceImpl implements MarketplaceAssist
         }
     }
 
-    private MarketplaceAssistantConfigurationDTO getConfiguration() {
+    private MarketplaceAssistantConfigurationDTO getConfiguration() throws APIManagementException {
         APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration();
         if (configuration == null) {
-            log.error("API Manager configuration is not initialized.");
-            return null;
+            throw new APIManagementException("API Manager configuration is not initialized.");
         }
-        return configuration.getMarketplaceAssistantConfigurationDto();
+        MarketplaceAssistantConfigurationDTO configDto = configuration.getMarketplaceAssistantConfigurationDto();
+        if (configDto == null || !(configDto.isKeyProvided() || configDto.isAuthTokenProvided())) {
+            String errorMessage = "Marketplace Assistant service is not configured properly. Please provide the " + "API key or the access token in the configuration.";
+            log.error(errorMessage);
+            throw new APIManagementException(errorMessage);
+        }
+        return configDto;
     }
 }

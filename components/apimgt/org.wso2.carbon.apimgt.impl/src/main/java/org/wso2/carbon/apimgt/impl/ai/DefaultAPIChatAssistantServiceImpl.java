@@ -46,9 +46,6 @@ public class DefaultAPIChatAssistantServiceImpl implements APIChatAssistant {
     @Override
     public APIChatResponse prepare(APIChatRequest request) throws APIManagementException {
         ApiChatConfigurationDTO configDto = getConfiguration();
-        if (configDto == null || !(configDto.isKeyProvided() || configDto.isAuthTokenProvided())) {
-            return null;
-        }
         try {
             // Generate the payload for the prepare call
             ObjectMapper objectMapper = new ObjectMapper();
@@ -100,6 +97,13 @@ public class DefaultAPIChatAssistantServiceImpl implements APIChatAssistant {
         if (configuration == null) {
             throw new APIManagementException("API Manager configuration is not initialized.");
         }
-        return configuration.getApiChatConfigurationDto();
+        ApiChatConfigurationDTO configDto = configuration.getApiChatConfigurationDto();
+        if (configDto == null || !(configDto.isKeyProvided() || configDto.isAuthTokenProvided())) {
+            String errorMessage = "API Chat service is not configured properly. Please provide the API key or the "
+                    + "access token in the configuration.";
+            log.error(errorMessage);
+            throw new APIManagementException(errorMessage);
+        }
+        return configDto;
     }
 }

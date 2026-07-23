@@ -44,9 +44,6 @@ public class DefaultDesignAssistantServiceImpl implements DesignAssistant {
     @Override
     public DesignAssistantResponse generatePayload(DesignAssistantRequest request) throws APIManagementException {
         DesignAssistantConfigurationDTO configDto = getConfiguration();
-        if (configDto == null || !(configDto.isKeyProvided() || configDto.isAuthTokenProvided())) {
-            return null;
-        }
 
         JSONObject payload = new JSONObject();
         payload.put(SESSIONID, request.getSessionId());
@@ -68,9 +65,6 @@ public class DefaultDesignAssistantServiceImpl implements DesignAssistant {
     @Override
     public DesignAssistantResponse chat(DesignAssistantRequest request) throws APIManagementException {
         DesignAssistantConfigurationDTO configDto = getConfiguration();
-        if (configDto == null || !(configDto.isKeyProvided() || configDto.isAuthTokenProvided())) {
-            return null;
-        }
 
         JSONObject payload = new JSONObject();
         payload.put(TEXT, request.getText());
@@ -90,13 +84,18 @@ public class DefaultDesignAssistantServiceImpl implements DesignAssistant {
         return response;
     }
 
-    private DesignAssistantConfigurationDTO getConfiguration() {
+    private DesignAssistantConfigurationDTO getConfiguration() throws APIManagementException {
         APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration();
         if (configuration == null) {
-            log.error("API Manager configuration is not initialized.");
-            return null;
+            throw new APIManagementException("API Manager configuration is not initialized.");
         }
-        return configuration.getDesignAssistantConfigurationDto();
+        DesignAssistantConfigurationDTO configDto = configuration.getDesignAssistantConfigurationDto();
+        if (configDto == null || !(configDto.isKeyProvided() || configDto.isAuthTokenProvided())) {
+            String errorMessage = "API Design Assistant service is not configured properly. Please provide the " + "API key or the access token in the configuration.";
+            log.error(errorMessage);
+            throw new APIManagementException(errorMessage);
+        }
+        return configDto;
     }
 }
