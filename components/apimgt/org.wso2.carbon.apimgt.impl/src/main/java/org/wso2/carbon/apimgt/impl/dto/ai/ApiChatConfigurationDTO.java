@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.impl.dto.ai;
 
+import org.wso2.carbon.apimgt.impl.APIConstants;
+
 /**
  * This class represent the API chat configuration DTO.
  */
@@ -32,6 +34,7 @@ public class ApiChatConfigurationDTO {
     private boolean isEnabled;
     private boolean isAuthTokenProvided;
     private boolean isKeyProvided;
+    private String implementationClass = APIConstants.AI.API_CHAT_DEFAULT_IMPL;
 
     public String getAccessToken() {
         return accessToken;
@@ -103,5 +106,12 @@ public class ApiChatConfigurationDTO {
 
     public void setKeyProvided(boolean keyProvided) {
         this.isKeyProvided = keyProvided;
+    }
+    public String getImplementationClass() {
+        return implementationClass;
+    }
+
+    public void setImplementationClass(String implementationClass) {
+        this.implementationClass = implementationClass;
     }
 }

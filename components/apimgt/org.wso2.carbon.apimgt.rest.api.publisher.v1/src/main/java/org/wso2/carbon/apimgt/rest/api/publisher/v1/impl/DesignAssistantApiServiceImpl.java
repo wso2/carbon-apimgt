@@ -17,18 +17,15 @@
  */
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.dto.ai.DesignAssistantConfigurationDTO;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.api.DesignAssistant;
+import org.wso2.carbon.apimgt.api.DesignAssistantRequest;
+import org.wso2.carbon.apimgt.api.DesignAssistantResponse;
+import org.wso2.carbon.apimgt.impl.ai.DesignAssistantServiceFactory;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.DesignAssistantApiService;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
@@ -46,50 +43,30 @@ import java.io.IOException;
 public class DesignAssistantApiServiceImpl implements DesignAssistantApiService {
 
     private static final Log log = LogFactory.getLog(DesignAssistantApiServiceImpl.class);
-    private static DesignAssistantConfigurationDTO configDto;
-    public static final String TEXT = "text";
-    public static final String SESSIONID = "sessionId";
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Override
     public Response designAssistantApiPayloadGen(DesignAssistantGenAPIPayloadDTO designAssistantGenAPIPayloadDTO,
                                                  MessageContext messageContext) throws APIManagementException {
-        APIManagerConfiguration configuration = ServiceReferenceHolder.
-                getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
-
-        if (configuration == null) {
-            log.error("API Manager configuration is not initialized.");
-        } else {
-            configDto = configuration.getDesignAssistantConfigurationDto();
-        }
         try {
-            if (configDto.isKeyProvided() || configDto.isAuthTokenProvided()) {
-                String sessionId = designAssistantGenAPIPayloadDTO.getSessionId();
-                boolean isChatQueryEmpty = StringUtils.isEmpty(sessionId);
-                if (isChatQueryEmpty) {
-                    String errorMessage = "Payload is badly formatted. Expected to have 'sessionId'";
-                    RestApiUtil.handleBadRequest(errorMessage, log);
-                    return null;
-                }
-
-                JSONObject payload = new JSONObject();
-                payload.put(SESSIONID, sessionId);
-
-                String response;
-                if (configDto.isKeyProvided()) {
-                    response = APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(),
-                            configDto.getKey(), configDto.getGenApiPayloadResource(), payload.toString(), null);
- 
-                } else {
-                    response = APIUtil.invokeAIService(configDto.getEndpoint(), null,
-                            configDto.getAccessToken(), configDto.getGenApiPayloadResource(), payload.toString(), null);
-
-                }
-
-                DesignAssistantAPIPayloadResponseDTO responseDTO = new DesignAssistantAPIPayloadResponseDTO();
-                responseDTO.setGeneratedPayload(response);
-
-                return Response.ok(responseDTO).build();
+            String sessionId = designAssistantGenAPIPayloadDTO.getSessionId();
+            if (StringUtils.isEmpty(sessionId)) {
+                String errorMessage = "Payload is badly formatted. Expected to have 'sessionId'";
+                RestApiUtil.handleBadRequest(errorMessage, log);
+                return null;
             }
+
+            DesignAssistantRequest request = new DesignAssistantRequest();
+            request.setSessionId(sessionId);
+
+            DesignAssistant designAssistantService = DesignAssistantServiceFactory.getDesignAssistantService();
+            DesignAssistantResponse response = designAssistantService.generatePayload(request);
+            if (response == null || response.getPayload() == null) {
+                return null;
+            }
+            DesignAssistantAPIPayloadResponseDTO responseDTO = new DesignAssistantAPIPayloadResponseDTO();
+            responseDTO.setGeneratedPayload(response.getPayload());
+            return Response.ok(responseDTO).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAIServiceNotAccessible(e)) {
                 return Response.status(Response.Status.UNAUTHORIZED).entity(e.getMessage()).build();
@@ -107,43 +84,26 @@ public class DesignAssistantApiServiceImpl implements DesignAssistantApiService 
     @Override
     public Response designAssistantChat(DesignAssistantChatQueryDTO designAssistantChatQueryDTO,
                                                  MessageContext messageContext) throws APIManagementException {
-        APIManagerConfiguration configuration = ServiceReferenceHolder.
-                getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
-
-        if (configuration == null) {
-            log.error("API Manager configuration is not initialized.");
-        } else {
-            configDto = configuration.getDesignAssistantConfigurationDto();
-        }
         try {
-            if (configDto.isKeyProvided() || configDto.isAuthTokenProvided()) {
-                String sessionId = designAssistantChatQueryDTO.getSessionId();
-                boolean isChatQueryEmpty = StringUtils.isEmpty(sessionId);
-                if (isChatQueryEmpty) {
-                    String errorMessage = "Payload is badly formatted. Expected to have 'sessionId'";
-                    RestApiUtil.handleBadRequest(errorMessage, log);
-                    return null;
-                }
-
-                JSONObject payload = new JSONObject();
-
-                payload.put(TEXT, designAssistantChatQueryDTO.getText());
-                payload.put(SESSIONID, sessionId);
-
-                String response;
-                if (configDto.isKeyProvided()) {
-                    response = APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(),
-                            configDto.getKey(), configDto.getChatResource(), payload.toString(), null);
-    
-                } else {
-                    response = APIUtil.invokeAIService(configDto.getEndpoint(), null,
-                            configDto.getAccessToken(), configDto.getChatResource(), payload.toString(), null);
-
-                }
-                ObjectMapper objectMapper = new ObjectMapper();
-                DesignAssistantChatResponseDTO responseDTO = objectMapper.readValue(response, DesignAssistantChatResponseDTO.class);
-                return Response.ok(responseDTO).build();
+            String sessionId = designAssistantChatQueryDTO.getSessionId();
+            if (StringUtils.isEmpty(sessionId)) {
+                String errorMessage = "Payload is badly formatted. Expected to have 'sessionId'";
+                RestApiUtil.handleBadRequest(errorMessage, log);
+                return null;
             }
+
+            DesignAssistantRequest request = new DesignAssistantRequest();
+            request.setSessionId(sessionId);
+            request.setText(designAssistantChatQueryDTO.getText());
+
+            DesignAssistant designAssistantService = DesignAssistantServiceFactory.getDesignAssistantService();
+            DesignAssistantResponse response = designAssistantService.chat(request);
+            if (response == null || response.getChatResponse() == null) {
+                return null;
+            }
+            DesignAssistantChatResponseDTO responseDTO = OBJECT_MAPPER.readValue(response.getChatResponse(),
+                    DesignAssistantChatResponseDTO.class);
+            return Response.ok(responseDTO).build();
         } catch (APIManagementException | IOException e) {
             if (RestApiUtil.isDueToAIServiceNotAccessible(e)) {
                 return Response.status(Response.Status.UNAUTHORIZED).entity(e.getMessage()).build();

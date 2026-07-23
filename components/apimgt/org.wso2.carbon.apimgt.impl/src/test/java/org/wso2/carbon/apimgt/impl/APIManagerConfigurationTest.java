@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.impl;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
+import org.junit.After;
 import org.junit.Test;
 import org.testng.Assert;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -157,5 +158,106 @@ public class APIManagerConfigurationTest {
         Assert.assertEquals(1, connectConfig.getConnectGateways().size());
         Assert.assertTrue(connectConfig.getConnectGateways().get(0).getRegistrationToken().isEmpty());
         Assert.assertEquals("https://gw.example.com:8243", connectConfig.getConnectGateways().get(0).getUrl());
+    }
+
+    // ------------------------------------------------------------------------------------------------------------
+    // AI-service implementation-class parsing (pluggable AI extension points).
+    // The AI config DTOs are static on APIManagerConfiguration, so reset them after each test to avoid leakage.
+    // ------------------------------------------------------------------------------------------------------------
+
+    @After
+    public void resetAiImplementationClasses() {
+        APIManagerConfiguration config = new APIManagerConfiguration();
+        config.getMarketplaceAssistantConfigurationDto()
+                .setImplementationClass(APIConstants.AI.MARKETPLACE_ASSISTANT_DEFAULT_IMPL);
+        config.getApiChatConfigurationDto().setImplementationClass(APIConstants.AI.API_CHAT_DEFAULT_IMPL);
+        config.getDesignAssistantConfigurationDto()
+                .setImplementationClass(APIConstants.AI.DESIGN_ASSISTANT_DEFAULT_IMPL);
+    }
+
+    @Test
+    public void testMarketplaceAssistantImplementationClassParsedAndTrimmed() throws XMLStreamException {
+        String xml = "<MarketplaceAssistant>"
+                + "<Enabled>true</Enabled>"
+                + "<Resources></Resources>"
+                + "<MarketplaceAssistantImplementation>  org.example.CustomMarketplaceAssistant  "
+                + "</MarketplaceAssistantImplementation>"
+                + "</MarketplaceAssistant>";
+        OMElement element = AXIOMUtil.stringToOM(xml);
+        APIManagerConfiguration config = new APIManagerConfiguration();
+        config.setMarketplaceAssistantConfiguration(element);
+        Assert.assertEquals(config.getMarketplaceAssistantConfigurationDto().getImplementationClass(),
+                "org.example.CustomMarketplaceAssistant");
+    }
+
+    @Test
+    public void testMarketplaceAssistantImplementationClassUnchangedWhenElementAbsent() throws XMLStreamException {
+        APIManagerConfiguration config = new APIManagerConfiguration();
+        config.getMarketplaceAssistantConfigurationDto().setImplementationClass("org.example.Sentinel");
+        String xml = "<MarketplaceAssistant><Enabled>true</Enabled><Resources></Resources></MarketplaceAssistant>";
+        config.setMarketplaceAssistantConfiguration(AXIOMUtil.stringToOM(xml));
+        Assert.assertEquals(config.getMarketplaceAssistantConfigurationDto().getImplementationClass(),
+                "org.example.Sentinel");
+    }
+
+    @Test
+    public void testMarketplaceAssistantImplementationClassUnchangedWhenElementBlank() throws XMLStreamException {
+        APIManagerConfiguration config = new APIManagerConfiguration();
+        config.getMarketplaceAssistantConfigurationDto().setImplementationClass("org.example.Sentinel");
+        String xml = "<MarketplaceAssistant><Enabled>true</Enabled><Resources></Resources>"
+                + "<MarketplaceAssistantImplementation>   </MarketplaceAssistantImplementation></MarketplaceAssistant>";
+        config.setMarketplaceAssistantConfiguration(AXIOMUtil.stringToOM(xml));
+        Assert.assertEquals(config.getMarketplaceAssistantConfigurationDto().getImplementationClass(),
+                "org.example.Sentinel");
+    }
+
+    @Test
+    public void testApiChatImplementationClassParsedAndTrimmed() throws XMLStreamException {
+        String xml = "<APIChat>"
+                + "<Enabled>true</Enabled>"
+                + "<Resources></Resources>"
+                + "<ApiChatAssistantImplementation>  org.example.CustomApiChatAssistant  "
+                + "</ApiChatAssistantImplementation>"
+                + "</APIChat>";
+        OMElement element = AXIOMUtil.stringToOM(xml);
+        APIManagerConfiguration config = new APIManagerConfiguration();
+        config.setApiChatConfiguration(element);
+        Assert.assertEquals(config.getApiChatConfigurationDto().getImplementationClass(),
+                "org.example.CustomApiChatAssistant");
+    }
+
+    @Test
+    public void testApiChatImplementationClassUnchangedWhenElementAbsent() throws XMLStreamException {
+        APIManagerConfiguration config = new APIManagerConfiguration();
+        config.getApiChatConfigurationDto().setImplementationClass("org.example.Sentinel");
+        String xml = "<APIChat><Enabled>true</Enabled><Resources></Resources></APIChat>";
+        config.setApiChatConfiguration(AXIOMUtil.stringToOM(xml));
+        Assert.assertEquals(config.getApiChatConfigurationDto().getImplementationClass(),
+                "org.example.Sentinel");
+    }
+
+    @Test
+    public void testDesignAssistantImplementationClassParsedAndTrimmed() throws XMLStreamException {
+        String xml = "<DesignAssistant>"
+                + "<Enabled>true</Enabled>"
+                + "<Resources></Resources>"
+                + "<DesignAssistantImplementation>  org.example.CustomDesignAssistant  "
+                + "</DesignAssistantImplementation>"
+                + "</DesignAssistant>";
+        OMElement element = AXIOMUtil.stringToOM(xml);
+        APIManagerConfiguration config = new APIManagerConfiguration();
+        config.setDesignAssistantConfiguration(element);
+        Assert.assertEquals(config.getDesignAssistantConfigurationDto().getImplementationClass(),
+                "org.example.CustomDesignAssistant");
+    }
+
+    @Test
+    public void testDesignAssistantImplementationClassUnchangedWhenElementAbsent() throws XMLStreamException {
+        APIManagerConfiguration config = new APIManagerConfiguration();
+        config.getDesignAssistantConfigurationDto().setImplementationClass("org.example.Sentinel");
+        String xml = "<DesignAssistant><Enabled>true</Enabled><Resources></Resources></DesignAssistant>";
+        config.setDesignAssistantConfiguration(AXIOMUtil.stringToOM(xml));
+        Assert.assertEquals(config.getDesignAssistantConfigurationDto().getImplementationClass(),
+                "org.example.Sentinel");
     }
 }

@@ -18,10 +18,6 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -99,6 +95,10 @@ import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
+import org.wso2.carbon.apimgt.api.model.ApplicationResponse;
+import org.wso2.carbon.apimgt.api.APIChatRequest;
+import org.wso2.carbon.apimgt.api.APIChatResponse;
+import org.wso2.carbon.apimgt.impl.ai.APIChatAssistantFactory;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.ApiChatConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
@@ -4199,40 +4199,25 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     @Override
     public String invokeApiChatExecute(String apiChatRequestId, String requestPayload) throws APIManagementException {
-        ApiChatConfigurationDTO configDto =
-                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
-                        .getApiChatConfigurationDto();
-        if (configDto.isKeyProvided()) {
-            return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(), configDto.getKey(),
-                    configDto.getExecuteResource(), requestPayload, apiChatRequestId);
-        }
-        return APIUtil.invokeAIService(configDto.getEndpoint(), null, configDto.getAccessToken(),
-                configDto.getExecuteResource(), requestPayload, apiChatRequestId);
+        APIChatRequest request = new APIChatRequest();
+        request.setAction(APIConstants.AI.API_CHAT_ACTION_EXECUTE);
+        request.setApiChatRequestId(apiChatRequestId);
+        request.setRequestPayload(requestPayload);
+        APIChatResponse response = APIChatAssistantFactory.getAPIChatService().execute(request);
+        return response != null ? response.getExecuteResponse() : null;
     }
 
     @Override
     public String invokeApiChatPrepare(String apiId, String apiChatRequestId, String organization)
             throws APIManagementException {
-        try {
-            // Generate the payload for prepare call
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode openAPIDefinitionJsonNode = objectMapper.readTree(getOpenAPIDefinition(apiId, organization));
-            ObjectNode payload = objectMapper.createObjectNode();
-            payload.set(APIConstants.OPEN_API, openAPIDefinitionJsonNode);
-
-            ApiChatConfigurationDTO configDto = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                    .getAPIManagerConfiguration().getApiChatConfigurationDto();
-            if (configDto.isKeyProvided()) {
-                return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(),
-                        configDto.getKey(), configDto.getPrepareResource(), payload.toString(), apiChatRequestId);
-            }
-            return APIUtil.invokeAIService(configDto.getEndpoint(), null, configDto.getAccessToken(),
-                    configDto.getPrepareResource(), payload.toString(), apiChatRequestId);
-        } catch (JsonProcessingException e) {
-            String error = "Error while parsing OpenAPI definition of API ID: " + apiId + " to JSON";
-            log.error(error, e);
-            throw new APIManagementException(error, e);
-        }
+        APIChatRequest request = new APIChatRequest();
+        request.setAction(APIConstants.AI.API_CHAT_ACTION_PREPARE);
+        request.setApiId(apiId);
+        request.setApiChatRequestId(apiChatRequestId);
+        request.setOrganization(organization);
+        request.setOpenAPIDefinition(getOpenAPIDefinition(apiId, organization));
+        APIChatResponse response = APIChatAssistantFactory.getAPIChatService().prepare(request);
+        return response != null ? response.getPrepareResponse() : null;
     }
 
     @Override

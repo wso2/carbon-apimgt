@@ -299,119 +299,115 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apiChatPost(String apiId, String apiChatAction, ApiChatRequestDTO apiChatRequestDTO,
             MessageContext messageContext) throws APIManagementException {
-        ApiChatConfigurationDTO configDto = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiChatConfigurationDto();
-        if (configDto.isAuthTokenProvided() || configDto.isKeyProvided()) {
             // Check the action
-            if (apiChatAction.equals(APIConstants.AI.API_CHAT_ACTION_PREPARE)) {
-                // Determine whether the request body is valid. Request body should have a request UUID.
-                if (StringUtils.isEmpty(apiId) || StringUtils.isEmpty(apiChatRequestDTO.getApiChatRequestId())) {
-                    String errorMessage = "Error while executing the prepare statement as request is badly formatted";
-                    RestApiUtil.handleBadRequest(errorMessage, log);
-                    return null;
-                }
+        if (apiChatAction.equals(APIConstants.AI.API_CHAT_ACTION_PREPARE)) {
+            // Determine whether the request body is valid. Request body should have a request UUID.
+            if (StringUtils.isEmpty(apiId) || StringUtils.isEmpty(apiChatRequestDTO.getApiChatRequestId())) {
+                String errorMessage = "Error while executing the prepare statement as request is badly formatted";
+                RestApiUtil.handleBadRequest(errorMessage, log);
+                return null;
+            }
 
-                try {
-                    String organization = RestApiUtil.getValidatedOrganization(messageContext);
-                    APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-                    String prepareResponse = apiConsumer.invokeApiChatPrepare(apiId,
-                            apiChatRequestDTO.getApiChatRequestId(), organization);
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    ApiChatResponseDTO preparationResponseDTO = objectMapper.readValue(prepareResponse,
-                            ApiChatResponseDTO.class);
-                    return Response.status(Response.Status.CREATED).entity(preparationResponseDTO).build();
-                } catch (APIManagementException e) {
-                    if (RestApiUtil.isDueToAIServiceNotAccessible(e)) {
-                        return Response.status(Response.Status.UNAUTHORIZED).entity(e.getMessage()).build();
-                    } else if (RestApiUtil.isDueToAIServiceThrottled(e)) {
-                        return Response.status(Response.Status.TOO_MANY_REQUESTS).entity(e.getMessage()).build();
-                    } else {
-                        String errorMessage = "Error encountered while executing the prepare statement of API Chat.";
-                        RestApiUtil.handleInternalServerError(errorMessage, e, log);
-                    }
-                } catch (IOException e) {
+            try {
+                String organization = RestApiUtil.getValidatedOrganization(messageContext);
+                APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+                String prepareResponse = apiConsumer.invokeApiChatPrepare(apiId,
+                        apiChatRequestDTO.getApiChatRequestId(), organization);
+                ObjectMapper objectMapper = new ObjectMapper();
+                ApiChatResponseDTO preparationResponseDTO = objectMapper.readValue(prepareResponse,
+                        ApiChatResponseDTO.class);
+                return Response.status(Response.Status.CREATED).entity(preparationResponseDTO).build();
+            } catch (APIManagementException e) {
+                if (RestApiUtil.isDueToAIServiceNotAccessible(e)) {
+                    return Response.status(Response.Status.UNAUTHORIZED).entity(e.getMessage()).build();
+                } else if (RestApiUtil.isDueToAIServiceThrottled(e)) {
+                    return Response.status(Response.Status.TOO_MANY_REQUESTS).entity(e.getMessage()).build();
+                } else {
                     String errorMessage = "Error encountered while executing the prepare statement of API Chat.";
                     RestApiUtil.handleInternalServerError(errorMessage, e, log);
                 }
+            } catch (IOException e) {
+                String errorMessage = "Error encountered while executing the prepare statement of API Chat.";
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
 
-            } else if (apiChatAction.equals(APIConstants.AI.API_CHAT_ACTION_EXECUTE)) {
-                // Determine whether the request body is valid.
+        } else if (apiChatAction.equals(APIConstants.AI.API_CHAT_ACTION_EXECUTE)) {
+            // Determine whether the request body is valid.
 
-                // Request body should have a request UUID
-                if (StringUtils.isEmpty(apiChatRequestDTO.getApiChatRequestId())) {
-                    String errorMessage = "Error executing the API Chat service. Payload is missing apiChatRequestId " +
-                            "value";
+            // Request body should have a request UUID
+            if (StringUtils.isEmpty(apiChatRequestDTO.getApiChatRequestId())) {
+                String errorMessage = "Error executing the API Chat service. Payload is missing apiChatRequestId " +
+                        "value";
+                RestApiUtil.handleBadRequest(errorMessage, log);
+                return null;
+            }
+
+            try {
+                APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+                String apiChatRequestId = apiChatRequestDTO.getApiChatRequestId();
+                boolean isTestInitializationRequest = !StringUtils.isEmpty(
+                        apiChatRequestDTO.getCommand()) && apiChatRequestDTO.getApiSpec() != null;
+                boolean isTestExecutionRequest = apiChatRequestDTO.getResponse() != null;
+                String requestPayload; // Request payload for Choreo deployed API Chat Agent
+
+                if (isTestInitializationRequest) {
+                    ApiChatRequestApiSpecDTO specDTO = apiChatRequestDTO.getApiSpec();
+                    APIChatAPISpec apiSpec = new APIChatAPISpec();
+                    apiSpec.setServiceUrl(specDTO.getServiceUrl());
+                    apiSpec.setTools(specDTO.getTools());
+
+                    APIChatTestInitializerInfo initializerInfo = new APIChatTestInitializerInfo();
+                    initializerInfo.setCommand(apiChatRequestDTO.getCommand());
+                    initializerInfo.setApiSpec(apiSpec);
+
+                    // Generate the payload for Choreo deployed API Chat Agent
+                    ObjectMapper payloadMapper = new ObjectMapper();
+                    requestPayload = payloadMapper.writeValueAsString(initializerInfo);
+                } else if (isTestExecutionRequest) {
+                    ApiChatRequestResponseDTO responseDTO = apiChatRequestDTO.getResponse();
+                    APIChatExecutionResponse responseInfo = new APIChatExecutionResponse();
+                    APIChatTestExecutionInfo executionInfo = new APIChatTestExecutionInfo();
+
+                    responseInfo.setCode(responseDTO.getCode());
+                    responseInfo.setPath(responseDTO.getPath());
+                    responseInfo.setHeaders(responseDTO.getHeaders());
+                    responseInfo.setBody(responseDTO.getBody());
+                    executionInfo.setResponse(responseInfo);
+
+                    // Generate the payload for Choreo deployed API Chat Agent
+                    ObjectMapper payloadMapper = new ObjectMapper();
+                    requestPayload = payloadMapper.writeValueAsString(executionInfo);
+                } else {
+                    // Request should either initialize test or provide test execution progress
+                    String errorMessage = "Payload is badly formatted. Expected to have either 'command' and " +
+                            "'apiSpec' or 'response'";
                     RestApiUtil.handleBadRequest(errorMessage, log);
                     return null;
                 }
 
-                try {
-                    APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-                    String apiChatRequestId = apiChatRequestDTO.getApiChatRequestId();
-                    boolean isTestInitializationRequest = !StringUtils.isEmpty(
-                            apiChatRequestDTO.getCommand()) && apiChatRequestDTO.getApiSpec() != null;
-                    boolean isTestExecutionRequest = apiChatRequestDTO.getResponse() != null;
-                    String requestPayload; // Request payload for Choreo deployed API Chat Agent
-
-                    if (isTestInitializationRequest) {
-                        ApiChatRequestApiSpecDTO specDTO = apiChatRequestDTO.getApiSpec();
-                        APIChatAPISpec apiSpec = new APIChatAPISpec();
-                        apiSpec.setServiceUrl(specDTO.getServiceUrl());
-                        apiSpec.setTools(specDTO.getTools());
-
-                        APIChatTestInitializerInfo initializerInfo = new APIChatTestInitializerInfo();
-                        initializerInfo.setCommand(apiChatRequestDTO.getCommand());
-                        initializerInfo.setApiSpec(apiSpec);
-
-                        // Generate the payload for Choreo deployed API Chat Agent
-                        ObjectMapper payloadMapper = new ObjectMapper();
-                        requestPayload = payloadMapper.writeValueAsString(initializerInfo);
-                    } else if (isTestExecutionRequest) {
-                        ApiChatRequestResponseDTO responseDTO = apiChatRequestDTO.getResponse();
-                        APIChatExecutionResponse responseInfo = new APIChatExecutionResponse();
-                        APIChatTestExecutionInfo executionInfo = new APIChatTestExecutionInfo();
-
-                        responseInfo.setCode(responseDTO.getCode());
-                        responseInfo.setPath(responseDTO.getPath());
-                        responseInfo.setHeaders(responseDTO.getHeaders());
-                        responseInfo.setBody(responseDTO.getBody());
-                        executionInfo.setResponse(responseInfo);
-
-                        // Generate the payload for Choreo deployed API Chat Agent
-                        ObjectMapper payloadMapper = new ObjectMapper();
-                        requestPayload = payloadMapper.writeValueAsString(executionInfo);
-                    } else {
-                        // Request should either initialize test or provide test execution progress
-                        String errorMessage = "Payload is badly formatted. Expected to have either 'command' and " +
-                                "'apiSpec' or 'response'";
-                        RestApiUtil.handleBadRequest(errorMessage, log);
-                        return null;
-                    }
-
-                    String executionResponse = apiConsumer.invokeApiChatExecute(apiChatRequestId, requestPayload);
-                    ObjectMapper responseMapper = new ObjectMapper();
-                    ApiChatResponseDTO responseDTO = responseMapper.readValue(executionResponse,
-                            ApiChatResponseDTO.class);
-                    return Response.status(Response.Status.CREATED).entity(responseDTO).build();
-                } catch (APIManagementException e) {
-                    if (RestApiUtil.isDueToAIServiceNotAccessible(e)) {
-                        return Response.status(Response.Status.UNAUTHORIZED).entity(e.getMessage()).build();
-                    } else if (RestApiUtil.isDueToAIServiceThrottled(e)) {
-                        return Response.status(Response.Status.TOO_MANY_REQUESTS).entity(e.getMessage()).build();
-                    } else {
-                        String errorMessage = "Error encountered while executing the API Chat service to " +
-                                "accommodate the specified testing requirement.";
-                        RestApiUtil.handleInternalServerError(errorMessage, e, log);
-                    }
-                } catch (IOException e) {
-                    String errorMessage = "Error encountered while executing the API Chat service to accommodate the " +
-                            "specified testing requirement.";
+                String executionResponse = apiConsumer.invokeApiChatExecute(apiChatRequestId, requestPayload);
+                ObjectMapper responseMapper = new ObjectMapper();
+                ApiChatResponseDTO responseDTO = responseMapper.readValue(executionResponse,
+                        ApiChatResponseDTO.class);
+                return Response.status(Response.Status.CREATED).entity(responseDTO).build();
+            } catch (APIManagementException e) {
+                if (RestApiUtil.isDueToAIServiceNotAccessible(e)) {
+                    return Response.status(Response.Status.UNAUTHORIZED).entity(e.getMessage()).build();
+                } else if (RestApiUtil.isDueToAIServiceThrottled(e)) {
+                    return Response.status(Response.Status.TOO_MANY_REQUESTS).entity(e.getMessage()).build();
+                } else {
+                    String errorMessage = "Error encountered while executing the API Chat service to " +
+                            "accommodate the specified testing requirement.";
                     RestApiUtil.handleInternalServerError(errorMessage, e, log);
                 }
-            } else {
-                String errorMessage = "Invalid action detected. Action is expected to be either 'PREPARE' or 'EXECUTE'";
-                RestApiUtil.handleBadRequest(errorMessage, log);
+            } catch (IOException e) {
+                String errorMessage = "Error encountered while executing the API Chat service to accommodate the " +
+                        "specified testing requirement.";
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
+        } else {
+            String errorMessage = "Invalid action detected. Action is expected to be either 'PREPARE' or 'EXECUTE'";
+            RestApiUtil.handleBadRequest(errorMessage, log);
         }
         return null;
     }

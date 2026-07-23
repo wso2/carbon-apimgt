@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.impl.dto.ai;
 
+import org.wso2.carbon.apimgt.impl.APIConstants;
+
 /**
  * This class represent the Marketplace Assistant configuration DTO.
  */
@@ -34,6 +36,7 @@ public class MarketplaceAssistantConfigurationDTO {
     private boolean isEnabled;
     private boolean isAuthTokenProvided;
     private boolean isKeyProvided;
+    private String implementationClass = APIConstants.AI.MARKETPLACE_ASSISTANT_DEFAULT_IMPL;
 
     public String getAccessToken() {
         return accessToken;
@@ -121,5 +124,13 @@ public class MarketplaceAssistantConfigurationDTO {
 
     public void setKeyProvided(boolean keyProvided) {
         this.isKeyProvided = keyProvided;
+    }
+
+    public String getImplementationClass() {
+        return implementationClass;
+    }
+
+    public void setImplementationClass(String implementationClass) {
+        this.implementationClass = implementationClass;
     }
 }
