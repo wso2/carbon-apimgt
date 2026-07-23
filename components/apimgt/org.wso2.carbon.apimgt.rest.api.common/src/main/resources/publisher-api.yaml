@@ -15420,7 +15420,7 @@ components:
           type: string
           example: Pizza Shack API Product
         context:
-          maxLength: 60
+          maxLength: 232
           minLength: 1
           type: string
           example: pizzaproduct
