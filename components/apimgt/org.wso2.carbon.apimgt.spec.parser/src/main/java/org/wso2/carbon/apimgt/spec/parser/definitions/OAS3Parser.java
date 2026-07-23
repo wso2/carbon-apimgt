@@ -2724,6 +2724,9 @@ public class OAS3Parser extends APIDefinition {
                     }
                 }
             }
+            // This path bypasses OASParserUtil.convertOAStoJSON, so the binary/byte-example guard has to
+            // be applied here explicitly as well - see stripBinaryFormatExamples for why this matters.
+            OASParserUtil.stripBinaryFormatExamples(openAPI);
             return Yaml.pretty().writeValueAsString(openAPI);
         } catch (JsonProcessingException e) {
             throw new APIManagementException("Error while removing examples from OpenAPI definition", e,

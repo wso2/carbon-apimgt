@@ -44,6 +44,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.callbacks.Callback;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.info.License;
@@ -104,9 +105,11 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -880,6 +883,200 @@ public class OASParserUtil {
     }
 
     /**
+     * Strip {@code example} values from any schema declared with {@code format: binary} or
+     * {@code format: byte}.
+     * <p>
+     * The bundled OpenAPI parser base64-encodes examples on these two formats during
+     * serialization but does not reliably decode them back on the next parse (verified
+     * empirically against the bundled swagger-parser version - both formats reproduce the
+     * same growth, not just {@code format: binary} as in earlier analyses of older parser
+     * versions). Since APIM fully round-trips (parse then re-serialize) the OpenAPI
+     * definition on every Publisher import/update, an example left on such a property gets
+     * re-encoded on top of itself on every cycle and grows unboundedly until the definition
+     * can no longer be parsed. Binary/byte content was never usable as a meaningful inline
+     * example to begin with, so dropping it is safe.
+     *
+     * @param openAPI OpenAPI object to sanitize in place
+     */
+    public static void stripBinaryFormatExamples(OpenAPI openAPI) {
+        if (openAPI == null) {
+            return;
+        }
+        Set<Schema<?>> visited = Collections.newSetFromMap(new IdentityHashMap<>());
+        Components components = openAPI.getComponents();
+        if (components != null) {
+            if (components.getSchemas() != null) {
+                for (Object schema : components.getSchemas().values()) {
+                    stripBinaryFormatExamplesFromSchema((Schema<?>) schema, visited);
+                }
+            }
+            if (components.getRequestBodies() != null) {
+                for (RequestBody requestBody : components.getRequestBodies().values()) {
+                    stripBinaryFormatExamplesFromRequestBody(requestBody, visited);
+                }
+            }
+            if (components.getResponses() != null) {
+                for (ApiResponse response : components.getResponses().values()) {
+                    stripBinaryFormatExamplesFromResponse(response, visited);
+                }
+            }
+            if (components.getParameters() != null) {
+                for (Parameter parameter : components.getParameters().values()) {
+                    stripBinaryFormatExamplesFromParameter(parameter, visited);
+                }
+            }
+            if (components.getHeaders() != null) {
+                stripBinaryFormatExamplesFromHeaders(components.getHeaders(), visited);
+            }
+            if (components.getPathItems() != null) {
+                for (PathItem pathItem : components.getPathItems().values()) {
+                    stripBinaryFormatExamplesFromPathItem(pathItem, visited);
+                }
+            }
+            if (components.getCallbacks() != null) {
+                for (Callback callback : components.getCallbacks().values()) {
+                    stripBinaryFormatExamplesFromCallback(callback, visited);
+                }
+            }
+        }
+        if (openAPI.getPaths() != null) {
+            for (PathItem pathItem : openAPI.getPaths().values()) {
+                stripBinaryFormatExamplesFromPathItem(pathItem, visited);
+            }
+        }
+        if (openAPI.getWebhooks() != null) {
+            for (PathItem pathItem : openAPI.getWebhooks().values()) {
+                stripBinaryFormatExamplesFromPathItem(pathItem, visited);
+            }
+        }
+    }
+
+    private static void stripBinaryFormatExamplesFromPathItem(PathItem pathItem, Set<Schema<?>> visited) {
+        if (pathItem == null) {
+            return;
+        }
+        if (pathItem.getParameters() != null) {
+            for (Parameter parameter : pathItem.getParameters()) {
+                stripBinaryFormatExamplesFromParameter(parameter, visited);
+            }
+        }
+        for (Operation operation : pathItem.readOperations()) {
+            stripBinaryFormatExamplesFromOperation(operation, visited);
+        }
+    }
+
+    private static void stripBinaryFormatExamplesFromOperation(Operation operation, Set<Schema<?>> visited) {
+        if (operation == null) {
+            return;
+        }
+        stripBinaryFormatExamplesFromRequestBody(operation.getRequestBody(), visited);
+        if (operation.getResponses() != null) {
+            for (ApiResponse response : operation.getResponses().values()) {
+                stripBinaryFormatExamplesFromResponse(response, visited);
+            }
+        }
+        if (operation.getParameters() != null) {
+            for (Parameter parameter : operation.getParameters()) {
+                stripBinaryFormatExamplesFromParameter(parameter, visited);
+            }
+        }
+        if (operation.getCallbacks() != null) {
+            for (Callback callback : operation.getCallbacks().values()) {
+                stripBinaryFormatExamplesFromCallback(callback, visited);
+            }
+        }
+    }
+
+    private static void stripBinaryFormatExamplesFromCallback(Callback callback, Set<Schema<?>> visited) {
+        if (callback == null) {
+            return;
+        }
+        for (PathItem pathItem : callback.values()) {
+            stripBinaryFormatExamplesFromPathItem(pathItem, visited);
+        }
+    }
+
+    private static void stripBinaryFormatExamplesFromRequestBody(RequestBody requestBody, Set<Schema<?>> visited) {
+        if (requestBody == null) {
+            return;
+        }
+        stripBinaryFormatExamplesFromContent(requestBody.getContent(), visited);
+    }
+
+    private static void stripBinaryFormatExamplesFromResponse(ApiResponse response, Set<Schema<?>> visited) {
+        if (response == null) {
+            return;
+        }
+        stripBinaryFormatExamplesFromContent(response.getContent(), visited);
+        stripBinaryFormatExamplesFromHeaders(response.getHeaders(), visited);
+    }
+
+    private static void stripBinaryFormatExamplesFromParameter(Parameter parameter, Set<Schema<?>> visited) {
+        if (parameter == null) {
+            return;
+        }
+        stripBinaryFormatExamplesFromSchema(parameter.getSchema(), visited);
+        stripBinaryFormatExamplesFromContent(parameter.getContent(), visited);
+    }
+
+    private static void stripBinaryFormatExamplesFromHeaders(Map<String, Header> headers, Set<Schema<?>> visited) {
+        if (headers == null) {
+            return;
+        }
+        for (Header header : headers.values()) {
+            if (header == null) {
+                continue;
+            }
+            stripBinaryFormatExamplesFromSchema(header.getSchema(), visited);
+            stripBinaryFormatExamplesFromContent(header.getContent(), visited);
+        }
+    }
+
+    private static void stripBinaryFormatExamplesFromContent(Content content, Set<Schema<?>> visited) {
+        if (content == null) {
+            return;
+        }
+        for (MediaType mediaType : content.values()) {
+            stripBinaryFormatExamplesFromSchema(mediaType.getSchema(), visited);
+        }
+    }
+
+    private static void stripBinaryFormatExamplesFromSchema(Schema<?> schema, Set<Schema<?>> visited) {
+        if (schema == null || !visited.add(schema)) {
+            return;
+        }
+        if (("binary".equals(schema.getFormat()) || "byte".equals(schema.getFormat())) && schema.getExample() != null) {
+            schema.setExample(null);
+        }
+        if (schema.getProperties() != null) {
+            for (Object propertySchema : schema.getProperties().values()) {
+                stripBinaryFormatExamplesFromSchema((Schema<?>) propertySchema, visited);
+            }
+        }
+        if (schema.getItems() != null) {
+            stripBinaryFormatExamplesFromSchema(schema.getItems(), visited);
+        }
+        if (schema.getAdditionalProperties() instanceof Schema) {
+            stripBinaryFormatExamplesFromSchema((Schema<?>) schema.getAdditionalProperties(), visited);
+        }
+        stripBinaryFormatExamplesFromSchemaList(schema.getAllOf(), visited);
+        stripBinaryFormatExamplesFromSchemaList(schema.getAnyOf(), visited);
+        stripBinaryFormatExamplesFromSchemaList(schema.getOneOf(), visited);
+        if (schema.getNot() != null) {
+            stripBinaryFormatExamplesFromSchema(schema.getNot(), visited);
+        }
+    }
+
+    private static void stripBinaryFormatExamplesFromSchemaList(List<Schema> schemas, Set<Schema<?>> visited) {
+        if (schemas == null) {
+            return;
+        }
+        for (Schema<?> nestedSchema : schemas) {
+            stripBinaryFormatExamplesFromSchema(nestedSchema, visited);
+        }
+    }
+
+    /**
      * Convert the OpenAPI 3.x Schema<T> format accordingly to the current Schema's OpenAPI version and resulting
      * API product OpenAPI version. This method picks the correct SchemaProcessor to do the conversion and hand over
      * the Schema object for that.
@@ -1033,6 +1230,11 @@ public class OASParserUtil {
     public static String convertOAStoJSON(OpenAPI oasDefinition) {
 
         String jsonString = null;
+        // Binary/byte-format examples are re-encoded on every parse/serialize round trip without ever
+        // being decoded back, so they grow unboundedly across repeated updates. Strip them here, at the
+        // single shared serialization entry point, so every caller (prettifyOAS3ToJson and its ~12 call
+        // sites, plus the direct callers of this method) is covered regardless of how the definition was parsed.
+        stripBinaryFormatExamples(oasDefinition);
         //Custom json mapper to parse OAS 3.1 definitions as the default parser drops mandatory licence.identifier field
         if (isOpenAPIVersion31(oasDefinition)) {
             ObjectMapper mapper = Json31.mapper().copy();
