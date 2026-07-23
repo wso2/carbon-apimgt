@@ -2719,6 +2719,15 @@ public class PublisherCommonUtils {
         if (externalExtractor != null) {
             externalExtractor.accept(endpoints);
         }
+        extractURLsFromEndpointConfig(endpointConfigObj, APIConstants.ENDPOINT_PRODUCTION_FAILOVERS, endpoints);
+        extractURLsFromEndpointConfig(endpointConfigObj, APIConstants.ENDPOINT_SANDBOX_FAILOVERS, endpoints);
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        for (String endpoint : endpoints) {
+            if (!endpoint.startsWith("jms:") && !endpoint.startsWith("consul(")
+                    && !endpoint.contains("{") && !endpoint.contains("}")) {
+                APIUtil.validateRemoteURL(endpoint, tenantDomain);
+            }
+        }
         return APIUtil.validateEndpointURLs(endpoints);
     }
 
@@ -4557,6 +4566,10 @@ public class PublisherCommonUtils {
             throw new APIManagementException("Invalid/Malformed endpoint URL detected",
                     ExceptionCodes.API_ENDPOINT_URL_INVALID);
         }
+        if (!endpointURL.startsWith("jms:") && !endpointURL.startsWith("consul(")
+                && !endpointURL.contains("{") && !endpointURL.contains("}")) {
+            APIUtil.validateRemoteURL(endpointURL, RestApiCommonUtil.getLoggedInUserTenantDomain());
+        }
 
         APIEndpointInfo apiEndpointUpdated = apiProvider.updateAPIEndpoint(apiId, apiEndpoint, organization);
         if (apiEndpointUpdated == null) {
@@ -4605,6 +4618,10 @@ public class PublisherCommonUtils {
         if (!APIUtil.validateEndpointURL(endpointURL)) {
             throw new APIManagementException("Invalid/Malformed endpoint URL detected",
                     ExceptionCodes.API_ENDPOINT_URL_INVALID);
+        }
+        if (!endpointURL.startsWith("jms:") && !endpointURL.startsWith("consul(")
+                && !endpointURL.contains("{") && !endpointURL.contains("}")) {
+            APIUtil.validateRemoteURL(endpointURL, RestApiCommonUtil.getLoggedInUserTenantDomain());
         }
 
         // validate endpoint name
@@ -5138,6 +5155,7 @@ public class PublisherCommonUtils {
             final String authHeader = securityInfo != null ? securityInfo.getHeader() : null;
             final String authValue = securityInfo != null ? securityInfo.getValue() : null;
 
+            APIUtil.validateRemoteURL(serverUrl, RestApiCommonUtil.getLoggedInUserTenantDomain());
             MCPInitializerAndToolFetcher fetcher =
                     new MCPInitializerAndToolFetcher(serverUrl, authHeader, authValue, secureRequested);
 

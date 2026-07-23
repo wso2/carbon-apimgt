@@ -657,6 +657,9 @@ public class RestApiPublisherUtils {
                         validateOpenAPIDefinition(definitionUrl, definition, fileDetail, inlineDefinition,
                                 true, isServiceAPI);
             } catch (APIManagementException e) {
+                if (e.getErrorHandler() != null && e.getErrorHandler().getHttpStatusCode() == 400) {
+                    throw RestApiUtil.buildBadRequestException(e.getErrorHandler().getErrorDescription());
+                }
                 RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
                 return null;
             }
@@ -749,6 +752,16 @@ public class RestApiPublisherUtils {
             throws APIManagementException {
         //validate inputs
         handleInvalidParams(fileInputStream, fileDetail, url, apiDefinition, isServiceAPI);
+        if (url != null) {
+            try {
+                APIUtil.validateRemoteURL(url, RestApiCommonUtil.getLoggedInUserTenantDomain());
+            } catch (APIManagementException e) {
+                if (e.getErrorHandler() != null && e.getErrorHandler().getHttpStatusCode() == 400) {
+                    throw RestApiUtil.buildBadRequestException(e.getErrorHandler().getErrorDescription());
+                }
+                throw e;
+            }
+        }
         String fileName = null;
 
         OpenAPIDefinitionValidationResponseDTO responseDTO;

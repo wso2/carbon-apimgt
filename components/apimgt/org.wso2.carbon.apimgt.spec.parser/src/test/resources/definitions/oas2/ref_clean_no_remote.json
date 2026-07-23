@@ -1,0 +1,25 @@
+{
+  "swagger": "2.0",
+  "info": { "title": "clean-no-remote-ref", "version": "1.0.0" },
+  "basePath": "/clean-no-remote-ref/1.0.0",
+  "paths": {
+    "/x": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "ok",
+            "schema": { "$ref": "#/definitions/X" }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "X": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" }
+      }
+    }
+  }
+}

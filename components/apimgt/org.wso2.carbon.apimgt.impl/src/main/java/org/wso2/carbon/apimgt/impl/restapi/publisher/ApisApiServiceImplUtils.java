@@ -78,6 +78,7 @@ import org.wso2.carbon.apimgt.spec.parser.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
 import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -659,8 +660,10 @@ public class ApisApiServiceImplUtils {
                                                                             boolean returnContent)
             throws APIManagementException {
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
-        OASParserOptions parserOptions = ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
-                .getAPIMDependencyConfigurations().getOasParserOptions();
+        OASParserOptions baseParserOptions = ServiceReferenceHolder.getInstance()
+                .getAPIMDependencyConfigurationService().getAPIMDependencyConfigurations().getOasParserOptions();
+        OASParserOptions parserOptions = APIUtil.buildRefResolutionOptions(baseParserOptions,
+                CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
         if (url != null) {
             try {
                 URL urlObj = new URL(url);

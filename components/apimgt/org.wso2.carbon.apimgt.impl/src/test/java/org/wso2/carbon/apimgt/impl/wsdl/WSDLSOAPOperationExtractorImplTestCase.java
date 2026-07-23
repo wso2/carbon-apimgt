@@ -21,19 +21,27 @@ import io.swagger.models.ModelImpl;
 import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.ObjectProperty;
 import io.swagger.models.properties.Property;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
+import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtilTest;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLSOAPOperation;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
+import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.util.List;
 import java.util.Map;
@@ -46,8 +54,26 @@ public class WSDLSOAPOperationExtractorImplTestCase {
 
     private static Set<WSDLSOAPOperation> operations;
 
+    private APIManagerConfigurationService previousConfigurationService;
+    private APIMConfigService previousApimConfigService;
+
     @Before
     public void setup() throws Exception {
+        System.setProperty("carbon.home", WSDLSOAPOperationExtractorImplTestCase.class.getResource("/").getFile());
+        // Building the Swagger model resolves namespace-derived schemas through APIUtil.validateRemoteURL, which
+        // consults the tenant configuration. Establish a super-tenant CarbonContext and empty configuration so that
+        // lookup resolves to a no-op (no policy configured) instead of failing when the test runs outside a tenant flow.
+        // Capture the process-wide services so they can be restored after the test, avoiding leaking the mocks.
+        previousConfigurationService = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
+        previousApimConfigService = ServiceReferenceHolder.getInstance().getApimConfigService();
+        ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(
+                new APIManagerConfigurationServiceImpl(new APIManagerConfiguration()));
+        ServiceReferenceHolder.getInstance().setAPIMConfigService(Mockito.mock(APIMConfigService.class));
+        PrivilegedCarbonContext.startTenantFlow();
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+        PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+
         APIMWSDLReader wsdlReader = new APIMWSDLReader(Thread.currentThread().getContextClassLoader()
                 .getResource("wsdls/phoneverify.wsdl").toExternalForm());
         byte[] wsdlContent = wsdlReader.getWSDL();
@@ -55,7 +81,13 @@ public class WSDLSOAPOperationExtractorImplTestCase {
                 wsdlReader);
 
         operations = processor.getWsdlInfo().getSoapBindingOperations();
-        System.setProperty("carbon.home", WSDLSOAPOperationExtractorImplTestCase.class.getResource("/").getFile());
+    }
+
+    @After
+    public void endTenantFlow() {
+        PrivilegedCarbonContext.endTenantFlow();
+        ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(previousConfigurationService);
+        ServiceReferenceHolder.getInstance().setAPIMConfigService(previousApimConfigService);
     }
     @Test
     public void testGetWsdlDefinition() throws Exception {

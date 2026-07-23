@@ -130,6 +130,7 @@ import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.Mediation;
+import org.wso2.carbon.apimgt.api.model.OASParserOptions;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
@@ -283,6 +284,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.NetworkInterface;
@@ -459,6 +461,10 @@ public final class APIUtil {
     private static double retryProgressionFactor;
     private static String gatewayTypes;
     private static int maxRetryCount;
+    private static boolean networkSecurityEnabled;
+    private static String networkSecurityMode;
+    private static List<String> networkSecurityHosts;
+    private static boolean networkSecurityBlockPrivateAccess;
 
     //constants for getting masked token
     private static final int MAX_LEN = 36;
@@ -486,6 +492,14 @@ public final class APIUtil {
         retryProgressionFactor = apiManagerConfiguration.getGatewayArtifactSynchronizerProperties()
                 .getRetryProgressionFactor();
         gatewayTypes = apiManagerConfiguration.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
+        networkSecurityEnabled = Boolean.parseBoolean(apiManagerConfiguration
+                .getFirstProperty(APIConstants.NetworkSecurityAccessControl.ENABLED));
+        networkSecurityMode = apiManagerConfiguration
+                .getFirstProperty(APIConstants.NetworkSecurityAccessControl.MODE);
+        networkSecurityHosts = apiManagerConfiguration
+                .getProperty(APIConstants.NetworkSecurityAccessControl.HOSTS);
+        networkSecurityBlockPrivateAccess = Boolean.parseBoolean(apiManagerConfiguration
+                .getFirstProperty(APIConstants.NetworkSecurityAccessControl.BLOCK_PRIVATE_NETWORK_ACCESS));
         try {
             eventPublisherFactory = ServiceReferenceHolder.getInstance().getEventPublisherFactory();
             eventPublishers.putIfAbsent(EventPublisherType.ASYNC_WEBHOOKS,
@@ -12456,4 +12470,411 @@ public final class APIUtil {
         }
         return hasRestrictedPrefix;
     }
+
+    /**
+     * Validates an outbound URL against platform and tenant network security access control policies.
+     * Blank URLs are silently skipped. Malformed URLs throw with {@code ExceptionCodes.MALFORMED_URL}.
+     *
+     * @param url          URL to validate; null or blank values are silently skipped
+     * @param tenantDomain tenant domain used to load tenant-level config
+     * @throws APIManagementException if the URL is malformed or blocked by an access control policy
+     */
+    public static void validateRemoteURL(String url, String tenantDomain) throws APIManagementException {
+        if (StringUtils.isBlank(url)) {
+            if (log.isDebugEnabled()) {
+                log.debug("URL validation skipped - blank URL provided");
+            }
+            return;
+        }
+
+        JSONObject tenantConfig = getTenantConfig(tenantDomain);
+        JSONObject tenantAccessControl = null;
+        if (tenantConfig != null) {
+            tenantAccessControl = (JSONObject) tenantConfig.get(
+                    APIConstants.NetworkSecurityAccessControl.TENANT_CONFIG_KEY);
+        }
+        boolean tenantEnabled = tenantAccessControl != null;
+
+        if (!networkSecurityEnabled && !tenantEnabled) {
+            return;
+        }
+
+        String host;
+        try {
+            host = new URI(url).getHost();
+            if (StringUtils.isBlank(host)) {
+                throw new APIManagementException("Could not extract a valid host from the provided URL: " + url,
+                        ExceptionCodes.MALFORMED_URL);
+            }
+        } catch (URISyntaxException e) {
+            throw new APIManagementException("The provided URL is malformed: " + url,
+                    ExceptionCodes.MALFORMED_URL);
+        }
+
+        if (networkSecurityEnabled) {
+            applyAccessControlPolicy(host, networkSecurityMode, networkSecurityHosts,
+                    networkSecurityBlockPrivateAccess);
+        }
+
+        if (tenantEnabled) {
+            String tenantMode = (String) tenantAccessControl.get(
+                    APIConstants.NetworkSecurityAccessControl.TENANT_MODE);
+            boolean tenantBlockPrivate = Boolean.TRUE.equals(
+                    tenantAccessControl.get(
+                            APIConstants.NetworkSecurityAccessControl.TENANT_BLOCK_PRIVATE_NETWORK_ACCESS));
+            JSONArray tenantHostsArray = (JSONArray) tenantAccessControl.get(
+                    APIConstants.NetworkSecurityAccessControl.TENANT_HOSTS);
+            List<String> tenantHosts = null;
+            if (tenantHostsArray != null) {
+                tenantHosts = new ArrayList<>();
+                for (Object tenantHost : tenantHostsArray) {
+                    tenantHosts.add(tenantHost.toString());
+                }
+            }
+            applyAccessControlPolicy(host, tenantMode, tenantHosts, tenantBlockPrivate);
+        }
+    }
+
+    /**
+     * Builds a per-request {@link OASParserOptions} carrying the remote-$ref allow/block lists derived from the
+     * platform and tenant network access-control policy, combined as a logical AND (defense-in-depth): a remote
+     * reference must be permitted by both the platform and the tenant policy. Never mutates {@code base} (may be a
+     * shared singleton).
+     * <p>
+     * The lists are mapped onto the resolver, whose allow-list short-circuits to ALLOW (bypassing the block-list) and
+     * whose block-list is a wildcard-capable denylist:
+     * <ul>
+     *   <li>deny-mode hosts (from either policy) are unioned into the block-list;</li>
+     *   <li>allow-mode hosts go to the allow-list - the intersection when both policies are allow-mode, otherwise the
+     *       single allow-mode list;</li>
+     *   <li>any denied host is removed from the allow-list so it cannot short-circuit the block-list;</li>
+     *   <li>if either policy is allow-mode, a {@code "*"} entry is added to the block-list so everything not on the
+     *       allow-list is denied - a restrictive whitelist, matching {@code applyAccessControlPolicy}.</li>
+     * </ul>
+     * Private-network blocking is handled by the resolver itself and needs no list entry here.
+     *
+     * @param base         base options to copy non-access-control settings from (may be null)
+     * @param tenantDomain the tenant domain whose config should be merged in
+     * @return a new {@link OASParserOptions} instance; never null
+     */
+    public static OASParserOptions buildRefResolutionOptions(OASParserOptions base, String tenantDomain)
+            throws APIManagementException {
+        OASParserOptions options = new OASParserOptions(base);
+        // Each allow-mode policy contributes one host set; deny-mode hosts from every policy are unioned. A remote ref
+        // must pass both policies (AND), so allow sets are intersected and deny sets are unioned (see combine below).
+        List<List<String>> allowModeHostSets = new ArrayList<>();
+        Set<String> denyHosts = new HashSet<>();
+        // Whether any network access-control policy is configured. With no policy (neither platform nor tenant),
+        // safe resolution stays off so the parser keeps resolving remote refs as before (backwards compatibility).
+        boolean policyConfigured = false;
+
+        // Platform policy (static fields populated in init()).
+        if (networkSecurityEnabled) {
+            policyConfigured = true;
+            validateNetworkSecurityMode(networkSecurityMode);
+            if (APIConstants.NetworkSecurityAccessControl.MODE_ALLOW.equalsIgnoreCase(networkSecurityMode)) {
+                allowModeHostSets.add(networkSecurityHosts != null ? networkSecurityHosts : new ArrayList<>());
+            } else if (APIConstants.NetworkSecurityAccessControl.MODE_DENY.equalsIgnoreCase(networkSecurityMode)
+                    && networkSecurityHosts != null) {
+                denyHosts.addAll(networkSecurityHosts);
+            }
+        }
+
+        // Tenant policy. Only the config read is guarded; a misconfigured tenant policy must surface, not be swallowed.
+        JSONObject tenantConfig;
+        try {
+            tenantConfig = getTenantConfig(tenantDomain);
+        } catch (APIManagementException e) {
+            log.warn("Could not read tenant network access-control policy for $ref resolution; "
+                    + "proceeding with platform policy only.", e);
+            tenantConfig = null;
+        }
+        if (tenantConfig != null) {
+            Object nsac = tenantConfig.get(APIConstants.NetworkSecurityAccessControl.TENANT_CONFIG_KEY);
+            if (nsac instanceof JSONObject) {
+                policyConfigured = true;
+                JSONObject policy = (JSONObject) nsac;
+                String tMode = (String) policy.get(APIConstants.NetworkSecurityAccessControl.TENANT_MODE);
+                Object tHostsObj = policy.get(APIConstants.NetworkSecurityAccessControl.TENANT_HOSTS);
+                List<String> tHosts = new ArrayList<>();
+                if (tHostsObj instanceof JSONArray) {
+                    for (Object h : (JSONArray) tHostsObj) {
+                        tHosts.add(h.toString());
+                    }
+                }
+                validateNetworkSecurityMode(tMode);
+                if (APIConstants.NetworkSecurityAccessControl.MODE_ALLOW.equalsIgnoreCase(tMode)) {
+                    allowModeHostSets.add(tHosts);
+                } else if (APIConstants.NetworkSecurityAccessControl.MODE_DENY.equalsIgnoreCase(tMode)) {
+                    denyHosts.addAll(tHosts);
+                }
+            }
+        }
+
+        // Intersect the allow-mode host sets (a host must be allowed by every allow-mode policy under the AND policy).
+        List<String> allowList = intersectAllowModeHostSets(allowModeHostSets);
+        // A denied host must never remain on the allow-list: the resolver's allow-list short-circuits to ALLOW and
+        // would otherwise bypass the block-list for a host that another policy denies.
+        allowList.removeAll(denyHosts);
+        List<String> blockList = new ArrayList<>(denyHosts);
+        // Allow-mode is a restrictive whitelist (deny everything not explicitly allowed). The resolver's allow-list
+        // only exempts hosts, so a wildcard deny is what enforces "block the rest".
+        if (!allowModeHostSets.isEmpty()) {
+            blockList.add(APIConstants.NetworkSecurityAccessControl.MATCH_ALL_HOSTS);
+        }
+
+        if (!allowList.isEmpty()) {
+            options.setRemoteRefAllowList(allowList);
+        }
+        if (!blockList.isEmpty()) {
+            options.setRemoteRefBlockList(blockList);
+        }
+        options.setNetworkAccessControlEnabled(policyConfigured);
+        return options;
+    }
+
+    /**
+     * Intersects the allow-mode host sets collected from the platform and tenant policies for the remote-$ref
+     * resolver. With both policies in allow mode the result is their intersection (a host must be allowed by both
+     * under the AND policy); with a single allow-mode policy it is that policy's list; with none it is empty.
+     *
+     * @param allowModeHostSets one host set per allow-mode policy (may be empty)
+     * @return a new, mutable list holding the intersection of the given sets; empty if none were provided
+     */
+    private static List<String> intersectAllowModeHostSets(List<List<String>> allowModeHostSets) {
+        if (allowModeHostSets.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<String> combined = new ArrayList<>(allowModeHostSets.get(0));
+        for (int i = 1; i < allowModeHostSets.size(); i++) {
+            combined.retainAll(allowModeHostSets.get(i));
+        }
+        return combined;
+    }
+
+    /**
+     * Validates the configured network access-control mode for an enabled policy. A blank mode is permitted (it means
+     * private-network blocking only, with no host allow/deny list). Any non-blank value other than
+     * {@code allow}/{@code deny} is a misconfiguration and is rejected, mirroring {@code applyAccessControlPolicy}.
+     *
+     * @param mode the configured mode, or {@code null}/blank for the private-network-only policy
+     * @throws APIManagementException with {@code NETWORK_SECURITY_ACCESS_CONTROL_MISCONFIGURED} if the mode is invalid
+     */
+    private static void validateNetworkSecurityMode(String mode) throws APIManagementException {
+        // Blank mode is valid (private-network-only) and handled by applyAccessControlPolicy; not a misconfiguration.
+        if (StringUtils.isBlank(mode)) {
+            return;
+        }
+        if (!APIConstants.NetworkSecurityAccessControl.MODE_ALLOW.equalsIgnoreCase(mode)
+                && !APIConstants.NetworkSecurityAccessControl.MODE_DENY.equalsIgnoreCase(mode)) {
+            APIManagementException ex = new APIManagementException(
+                    ExceptionCodes.NETWORK_SECURITY_ACCESS_CONTROL_MISCONFIGURED.getErrorMessage(),
+                    ExceptionCodes.NETWORK_SECURITY_ACCESS_CONTROL_MISCONFIGURED);
+            log.error("Network security access control misconfiguration: mode='" + mode + "' is not a valid value "
+                    + "(expected 'allow' or 'deny').", ex);
+            throw ex;
+        }
+    }
+
+    /**
+     * Extract endpoint URLs from endpoint config object.
+     *
+     * @param endpointConfigObj Endpoint config JSON object
+     * @param endpointType      Indicating which endpoint to be extracted
+     * @param endpoints         List of URLs. Extracted URL(s), if any, are added to this list.
+     */
+    public static void extractURLsFromEndpointConfig(org.json.JSONObject endpointConfigObj, String endpointType,
+                                                     ArrayList<String> endpoints) throws APIManagementException {
+        if (!endpointConfigObj.isNull(endpointType)) {
+            org.json.JSONObject endpointObj = endpointConfigObj.optJSONObject(endpointType);
+            if (endpointObj != null) {
+                String url = endpointObj.optString(APIConstants.API_DATA_URL, null);
+                if (StringUtils.isNotBlank(url)) {
+                    endpoints.add(url);
+                }
+            } else {
+                org.json.JSONArray endpointArray = endpointConfigObj.optJSONArray(endpointType);
+                if (endpointArray != null) {
+                    for (int i = 0; i < endpointArray.length(); i++) {
+                        String url = endpointArray.getJSONObject(i)
+                                .optString(APIConstants.API_DATA_URL, null);
+                        if (StringUtils.isNotBlank(url)) {
+                            endpoints.add(url);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private static void applyAccessControlPolicy(String host, String mode, List<String> hosts,
+                                                 boolean blockPrivateNetworkAccess) throws APIManagementException {
+
+        if (StringUtils.isBlank(mode)) {
+            if (hosts != null && !hosts.isEmpty()) {
+                log.warn("Network security access control has hosts configured but no mode is set. "
+                        + "The hosts list will be ignored. Set mode to 'allow' or 'deny'.");
+            }
+            // fall through to blank-mode private network check below
+        } else if (APIConstants.NetworkSecurityAccessControl.MODE_ALLOW.equalsIgnoreCase(mode)) {
+            if (hosts == null || hosts.isEmpty()) {
+                log.warn("Network security access control is configured with mode 'allow' but no hosts are defined. "
+                        + "All outbound requests will be blocked.");
+                throw buildURLBlockedException(host);
+            }
+            // hostname match → ALLOW immediately, DNS resolution skipped
+            if (isHostInList(host, hosts)) {
+                return;
+            }
+            // hostname did not match — resolve and check resolved IPs against allow list.
+            // hosts list is authoritative: blockPrivateNetworkAccess does not apply in allow mode.
+            InetAddress[] addresses;
+            try {
+                addresses = InetAddress.getAllByName(host);
+            } catch (UnknownHostException e) {
+                log.warn("Blocking outbound request to host: '" + host + "' — hostname could not be resolved.");
+                throw buildURLBlockedException(host);
+            }
+            if (isAnyResolvedIpInList(addresses, hosts)) {
+                return;
+            }
+            throw buildURLBlockedException(host);
+
+        } else if (APIConstants.NetworkSecurityAccessControl.MODE_DENY.equalsIgnoreCase(mode)) {
+            if (isHostInList(host, hosts)) {
+                throw buildURLBlockedException(host);
+            }
+            // hostname did not match — resolve once, reused for IP deny list check and private network check
+            InetAddress[] addresses;
+            try {
+                addresses = InetAddress.getAllByName(host);
+            } catch (UnknownHostException e) {
+                log.warn("Blocking outbound request to host: '" + host + "' — hostname could not be resolved.");
+                throw buildURLBlockedException(host);
+            }
+            if (isAnyResolvedIpInList(addresses, hosts)) {
+                log.warn("Blocking outbound request to host: '" + host + "' — a resolved IP is in the deny list.");
+                throw buildURLBlockedException(host);
+            }
+            if (blockPrivateNetworkAccess) {
+                for (InetAddress address : addresses) {
+                    if (isPrivateNetworkAddress(address)) {
+                        log.warn("Blocking private network access attempt to host: '" + host
+                                + "' (" + address.getHostAddress() + ")");
+                        throw buildURLBlockedException(host);
+                    }
+                }
+            }
+            return; // deny mode fully handled — do not fall through
+
+        } else {
+            APIManagementException ex = new APIManagementException(
+                    ExceptionCodes.NETWORK_SECURITY_ACCESS_CONTROL_MISCONFIGURED.getErrorMessage(),
+                    ExceptionCodes.NETWORK_SECURITY_ACCESS_CONTROL_MISCONFIGURED);
+            log.error("Network security access control misconfiguration: mode='" + mode + "' is not a valid value "
+                    + "(expected 'allow' or 'deny').", ex);
+            throw ex;
+        }
+
+        // Blank mode: hosts ignored, only blockPrivateNetworkAccess applies
+        if (blockPrivateNetworkAccess) {
+            try {
+                InetAddress[] addresses = InetAddress.getAllByName(host);
+                for (InetAddress address : addresses) {
+                    if (isPrivateNetworkAddress(address)) {
+                        log.warn("Blocking private network access attempt to host: '" + host
+                                + "' (" + address.getHostAddress() + ")");
+                        throw buildURLBlockedException(host);
+                    }
+                }
+            } catch (UnknownHostException e) {
+                log.warn("Blocking outbound request to host: '" + host + "' — hostname could not be resolved.");
+                throw buildURLBlockedException(host);
+            }
+        }
+    }
+
+    private static boolean isAnyResolvedIpInList(InetAddress[] addresses, List<String> hosts) {
+        if (hosts == null || addresses == null) {
+            return false;
+        }
+        for (InetAddress address : addresses) {
+            if (isHostInList(address.getHostAddress(), hosts)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isHostInList(String host, List<String> hosts) {
+        if (hosts == null) {
+            return false;
+        }
+        String normalizedHost = host.toLowerCase(Locale.ROOT);
+        for (String pattern : hosts) {
+            if (StringUtils.isBlank(pattern)) {
+                continue;
+            }
+            if (normalizedHost.matches(toWildcardRegex(pattern.toLowerCase(Locale.ROOT)))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks whether the given IP address belongs to a private, local, or otherwise
+     * non-public network range that should be blocked for outbound requests.
+     *
+     * This includes:
+     * <ul>
+     *     <li>Loopback addresses (e.g., 127.0.0.1, ::1)</li>
+     *     <li>Link-local addresses</li>
+     *     <li>Site-local/private addresses</li>
+     *     <li>Wildcard/any-local addresses</li>
+     *     <li>Multicast addresses</li>
+     *     <li>IPv6 Unique Local Addresses (fc00::/7)</li>
+     * </ul>
+     *
+     * @param address The resolved IP address to validate
+     * @return {@code true} if the address belongs to a blocked private or local
+     *         network range, {@code false} otherwise
+     */
+    private static boolean isPrivateNetworkAddress(InetAddress address) {
+        if (address instanceof Inet6Address) {
+            byte[] bytes = address.getAddress();
+            if ((bytes[0] & 0xFE) == 0xFC) {
+                return true; // IPv6 Unique Local Address (fc00::/7)
+            }
+        }
+        return address.isLoopbackAddress()
+                || address.isLinkLocalAddress()
+                || address.isSiteLocalAddress()
+                || address.isAnyLocalAddress()
+                || address.isMulticastAddress();
+    }
+
+    private static APIManagementException buildURLBlockedException(String host) {
+        APIManagementException ex = new APIManagementException(
+                "Outbound request blocked by network security access control policy.",
+                ExceptionCodes.UNTRUSTED_URL);
+        log.error("Outbound request to host '" + host + "' blocked by network security access control policy.", ex);
+        return ex;
+    }
+
+    /**
+     * Converts a simple wildcard host pattern into a safe Java regex.
+     * Uses Pattern.quote() to safely escape all literal parts so that users can
+     * write plain host patterns such as *.wso2.com or 169.254.* without needing
+     * to know regex syntax. Only '*' is treated as a wildcard.
+     *
+     * @param pattern wildcard host pattern (e.g. *.wso2.com, 169.254.*, *)
+     * @return equivalent anchored regex string
+     */
+    private static String toWildcardRegex(String pattern) {
+        return "^" + Arrays.stream(pattern.trim().split("\\*", -1))
+                .map(Pattern::quote)
+                .collect(Collectors.joining(".*")) + "$";
+    }
+
 }

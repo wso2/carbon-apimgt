@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<description xmlns="http://www.w3.org/ns/wsdl"
+             xmlns:xs="http://www.w3.org/2001/XMLSchema"
+             targetNamespace="urn:apim:blocked-reference">
+  <types><xs:schema targetNamespace="urn:apim:blocked-reference"/></types>
+</description>
