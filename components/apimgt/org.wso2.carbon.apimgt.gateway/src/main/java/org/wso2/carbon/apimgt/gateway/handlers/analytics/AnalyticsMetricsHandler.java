@@ -65,8 +65,47 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
 
     @Override
     public boolean handleRequestOutFlow(MessageContext messageContext) {
+        // Capture the request payload here (request-out flow), the last point before the backend send
+        // where the request envelope is still current. Gated by the send_payloads analytics property.
+        // Building here sets MESSAGE_BUILDER_INVOKED before the pass-through sender reads it, so the
+        // engine re-serializes the built message to the backend (forwarding is preserved); doing this
+        // at request-in instead would run addressing before dispatch and break the send.
+        if (shouldCaptureRequestPayload(messageContext)) {
+            AnalyticsPayloadUtil.CapturedBody requestBody =
+                    AnalyticsPayloadUtil.extractPayload(messageContext,
+                            AnalyticsPayloadUtil.getPayloadSizeLimit(), "request");
+            if (requestBody != null && requestBody.getBody() != null) {
+                messageContext.setProperty(Constants.REQUEST_BODY, requestBody.getBody());
+                if (requestBody.getTransferEncoding() != null) {
+                    messageContext.setProperty(Constants.REQUEST_BODY_TRANSFER_ENCODING,
+                            requestBody.getTransferEncoding());
+                }
+            }
+        }
+        // Mark backend-start after payload capture so the request build/serialization time counts as
+        // request-mediation latency rather than backend latency.
         messageContext.setProperty(Constants.BACKEND_START_TIME_PROPERTY, System.currentTimeMillis());
         return true;
+    }
+
+    /**
+     * Whether the request payload should be captured (and the message therefore built) on the
+     * request-out flow. Mirrors the skip conditions {@code handleResponseOutFlow} applies so we never
+     * build/re-serialize a request for a call that will not publish an analytics event: websocket
+     * subscriptions, file-based API contexts, and requests explicitly flagged {@code SKIP_METRICS_PUBLISHING}.
+     * Cheap checks are evaluated first and the file-based-context lookup last.
+     */
+    private boolean shouldCaptureRequestPayload(MessageContext messageContext) {
+        if (messageContext.getPropertyKeySet().contains(InboundWebsocketConstants.WEBSOCKET_SUBSCRIBER_PATH)
+                || !AnalyticsPayloadUtil.shouldSendPayloads()) {
+            return false;
+        }
+        Object skipPublishMetrics = messageContext.getProperty(Constants.SKIP_METRICS_PUBLISHING);
+        if (Boolean.TRUE.equals(skipPublishMetrics)) {
+            return false;
+        }
+        return !GatewayUtils.checkForFileBasedApiContexts(ApiUtils.getFullRequestPath(messageContext),
+                GatewayUtils.getTenantDomain());
     }
 
     @Override
