@@ -66,6 +66,7 @@ public class EndpointSecurityDTO {
     private String roleArn;
     private String roleRegion;
     private String roleExternalId;
+    private String authType;
 
     public EndpointSecurityDTO(EndpointSecurityDTO endpointSecurity) {
 
@@ -91,6 +92,7 @@ public class EndpointSecurityDTO {
         this.roleArn = endpointSecurity.roleArn;
         this.roleRegion = endpointSecurity.roleRegion;
         this.roleExternalId = endpointSecurity.roleExternalId;
+        this.authType = endpointSecurity.authType;
     }
 
     public EndpointSecurityDTO() {
@@ -380,6 +382,14 @@ public class EndpointSecurityDTO {
 
     public void setRoleExternalId(String roleExternalId) {
         this.roleExternalId = roleExternalId;
+    }
+
+    public String getAuthType() {
+        return authType;
+    }
+
+    public void setAuthType(String authType) {
+        this.authType = authType;
     }
 
     @Override

@@ -56,6 +56,7 @@ public class EndpointSecurity {
     private String roleArn = null;
     private String roleRegion = null;
     private String roleExternalId = null;
+    private String authType = null;
 
     private String customParameters = null;
 
@@ -338,6 +339,14 @@ public class EndpointSecurity {
 
     public void setRoleExternalId(String roleExternalId) {
         this.roleExternalId = roleExternalId;
+    }
+
+    public String getAuthType() {
+        return authType;
+    }
+
+    public void setAuthType(String authType) {
+        this.authType = authType;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

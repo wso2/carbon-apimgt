@@ -51,6 +51,15 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.AWSUtil;
+import software.amazon.awssdk.auth.credentials.AwsCredentials;
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.AwsSessionCredentials;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
+import software.amazon.awssdk.core.exception.SdkClientException;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.sts.StsClient;
+import software.amazon.awssdk.services.sts.auth.StsAssumeRoleCredentialsProvider;
+import software.amazon.awssdk.services.sts.model.AssumeRoleRequest;
 
 /**
  * This mediator is used to sign requests with AWS Signature Version 4.
@@ -65,6 +74,14 @@ public class AWSSigV4Signer extends AbstractMediator implements ManagedLifecycle
     private String roleArn;
     private String roleRegion;
     private String roleExternalId;
+    private String authType;
+
+    // Built once in init() and reused for every request when running in environment-credentials mode.
+    // The AWS SDK providers cache and auto-refresh the temporary credentials internally, so this must
+    // never be rebuilt per request.
+    private volatile AwsCredentialsProvider credentialsProvider;
+    private StsClient stsClient;
+    private static final String AWS_STS_SESSION_NAME = "apim-bedrock-session";
 
     @Override
     public boolean mediate(MessageContext messageContext) {
@@ -102,13 +119,27 @@ public class AWSSigV4Signer extends AbstractMediator implements ManagedLifecycle
                 incomingHeaders = (Map<String, String>) axis2Ctx.getProperty(
                         org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
             }
-            Map<String, String> headers = StringUtils.isNotBlank(roleArn)
-                    ? AWSUtil.generateAWSSignatureUsingAssumeRole(uri.getHost(), httpMethod.toUpperCase(), service,
-                            encodePathTrimSlashes(backendRequestResource), getQueryString(path), payload,
-                            accessKey, secretKey, region, null, roleArn, roleRegion, roleExternalId, new HashMap<>())
-                    : AWSUtil.generateAWSSignature(uri.getHost(), httpMethod.toUpperCase(), service,
-                            encodePathTrimSlashes(backendRequestResource), getQueryString(path), payload, accessKey,
-                            secretKey, region, null, new HashMap<>());
+            Map<String, String> headers;
+            if (isEnvironmentMode()) {
+                // Credentials are resolved from the runtime (EC2 instance profile / EKS IRSA), optionally
+                // wrapped with STS AssumeRole. These are temporary credentials, so the session token must
+                // be included in the signature.
+                AwsCredentials credentials = resolveEnvironmentCredentials();
+                String sessionToken = credentials instanceof AwsSessionCredentials
+                        ? ((AwsSessionCredentials) credentials).sessionToken() : null;
+                headers = AWSUtil.generateAWSSignature(uri.getHost(), httpMethod.toUpperCase(), service,
+                        encodePathTrimSlashes(backendRequestResource), getQueryString(path), payload,
+                        credentials.accessKeyId(), credentials.secretAccessKey(), region, sessionToken,
+                        new HashMap<>());
+            } else if (StringUtils.isNotBlank(roleArn)) {
+                headers = AWSUtil.generateAWSSignatureUsingAssumeRole(uri.getHost(), httpMethod.toUpperCase(),
+                        service, encodePathTrimSlashes(backendRequestResource), getQueryString(path), payload,
+                        accessKey, secretKey, region, null, roleArn, roleRegion, roleExternalId, new HashMap<>());
+            } else {
+                headers = AWSUtil.generateAWSSignature(uri.getHost(), httpMethod.toUpperCase(), service,
+                        encodePathTrimSlashes(backendRequestResource), getQueryString(path), payload, accessKey,
+                        secretKey, region, null, new HashMap<>());
+            }
             incomingHeaders.putAll(headers);
             axis2Ctx.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, incomingHeaders);
             return true;
@@ -181,6 +212,69 @@ public class AWSSigV4Signer extends AbstractMediator implements ManagedLifecycle
         this.roleExternalId = roleExternalId;
     }
 
+    public String getAuthType() {
+        return authType;
+    }
+
+    public void setAuthType(String authType) {
+        this.authType = authType;
+    }
+
+    /**
+     * Whether this signer resolves credentials from the runtime environment (EC2 instance profile /
+     * EKS IRSA) instead of using the stored access/secret keys.
+     *
+     * @return {@code true} if the configured auth type is "environment".
+     */
+    private boolean isEnvironmentMode() {
+        return APIConstants.ENDPOINT_SECURITY_AWS_AUTH_TYPE_ENVIRONMENT.equalsIgnoreCase(authType);
+    }
+
+    /**
+     * Resolves credentials from the cached environment credentials provider.
+     *
+     * @return the resolved AWS credentials (may be session credentials with a token).
+     */
+    private AwsCredentials resolveEnvironmentCredentials() {
+        try {
+            return credentialsProvider.resolveCredentials();
+        } catch (SdkClientException e) {
+            throw new SynapseException("Unable to resolve AWS credentials from the runtime environment " +
+                    "(EC2 instance profile / EKS IRSA). Verify that the gateway has an attached IAM role.", e);
+        }
+    }
+
+    /**
+     * Builds the credentials provider used in environment mode. The base provider is the AWS SDK
+     * default provider chain, which transparently resolves credentials from environment variables,
+     * the EKS web-identity token (IRSA), ECS container credentials, or EC2 instance metadata (VM).
+     * When a role ARN is configured, the base provider is wrapped with an STS AssumeRole provider so
+     * the role is assumed on top of the environment identity.
+     *
+     * @return the credentials provider to use for signing.
+     */
+    private AwsCredentialsProvider buildEnvironmentCredentialsProvider() {
+        AwsCredentialsProvider base = DefaultCredentialsProvider.create();
+        if (StringUtils.isBlank(roleArn)) {
+            return base;
+        }
+        String stsRegion = StringUtils.isNotBlank(roleRegion) ? roleRegion : region;
+        stsClient = StsClient.builder()
+                .region(Region.of(stsRegion))
+                .credentialsProvider(base)
+                .build();
+        AssumeRoleRequest.Builder assumeRoleRequest = AssumeRoleRequest.builder()
+                .roleArn(roleArn)
+                .roleSessionName(AWS_STS_SESSION_NAME);
+        if (StringUtils.isNotBlank(roleExternalId)) {
+            assumeRoleRequest.externalId(roleExternalId);
+        }
+        return StsAssumeRoleCredentialsProvider.builder()
+                .stsClient(stsClient)
+                .refreshRequest(assumeRoleRequest.build())
+                .build();
+    }
+
     private static String getQueryString(String request) {
         String queryString = null;
         if (request != null && request.contains("?")) {
@@ -200,20 +294,38 @@ public class AWSSigV4Signer extends AbstractMediator implements ManagedLifecycle
 
     @Override
     public void init(SynapseEnvironment synapseEnvironment) {
-        if (StringUtils.isEmpty(accessKey) || StringUtils.isEmpty(secretKey) || StringUtils.isEmpty(region) ||
-                StringUtils.isEmpty(service) || StringUtils.isEmpty(endpoint)) {
+        boolean environmentMode = isEnvironmentMode();
+        if (StringUtils.isEmpty(region) || StringUtils.isEmpty(service) || StringUtils.isEmpty(endpoint)) {
             throw new SynapseException("AWSSigV4Signer mediator is not properly configured. " +
-                    "Access Key, Secret Key, Region, Service and Endpoint are required.");
+                    "Region, Service and Endpoint are required.");
+        }
+        // Access/Secret keys are only required for stored-credentials mode. In environment mode the
+        // credentials are resolved from the runtime (EC2 instance profile / EKS IRSA).
+        if (!environmentMode && (StringUtils.isEmpty(accessKey) || StringUtils.isEmpty(secretKey))) {
+            throw new SynapseException("AWSSigV4Signer mediator is not properly configured. " +
+                    "Access Key and Secret Key are required for stored-credentials mode.");
         }
         if (StringUtils.isNotBlank(roleArn) != StringUtils.isNotBlank(roleRegion)) {
             throw new SynapseException("AWSSigV4Signer mediator is not properly configured. " +
                     "Role ARN and Role Region must be provided together to assume a role.");
         }
+        if (environmentMode) {
+            this.credentialsProvider = buildEnvironmentCredentialsProvider();
+        }
     }
 
     @Override
     public void destroy() {
-
+        if (credentialsProvider instanceof AutoCloseable) {
+            try {
+                ((AutoCloseable) credentialsProvider).close();
+            } catch (Exception e) {
+                log.warn("Error while closing the AWS credentials provider", e);
+            }
+        }
+        if (stsClient != null) {
+            stsClient.close();
+        }
     }
 
     @Override

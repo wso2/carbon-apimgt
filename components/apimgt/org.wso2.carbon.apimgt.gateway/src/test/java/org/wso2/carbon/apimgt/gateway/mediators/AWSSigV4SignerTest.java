@@ -104,8 +104,36 @@ public class AWSSigV4SignerTest {
             signer.init(mock(SynapseEnvironment.class));
             fail("Expected SynapseException for missing core fields");
         } catch (SynapseException e) {
-            assertTrue(e.getMessage().contains("Access Key, Secret Key, Region, Service and Endpoint are required"));
+            assertTrue(e.getMessage().contains("Region, Service and Endpoint are required"));
         }
+    }
+
+    @Test
+    public void testInitRejectsStoredModeWithoutKeys() {
+        // Stored-credentials mode (the default) still requires access/secret keys.
+        AWSSigV4Signer signer = new AWSSigV4Signer();
+        signer.setRegion(REGION);
+        signer.setService(SERVICE);
+        signer.setEndpoint(ENDPOINT);
+        try {
+            signer.init(mock(SynapseEnvironment.class));
+            fail("Expected SynapseException for stored mode without keys");
+        } catch (SynapseException e) {
+            assertTrue(e.getMessage().contains("Access Key and Secret Key are required for stored-credentials mode"));
+        }
+    }
+
+    @Test
+    public void testInitAllowsEnvironmentModeWithoutKeys() {
+        // Environment mode resolves credentials from the runtime (EC2 instance profile / EKS IRSA),
+        // so no static access/secret keys are required at configuration time.
+        AWSSigV4Signer signer = new AWSSigV4Signer();
+        signer.setRegion(REGION);
+        signer.setService(SERVICE);
+        signer.setEndpoint(ENDPOINT);
+        signer.setAuthType("environment");
+        signer.init(mock(SynapseEnvironment.class)); // should not throw
+        signer.destroy();
     }
 
     @Test
