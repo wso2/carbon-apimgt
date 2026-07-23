@@ -5707,8 +5707,7 @@ public class ApiMgtDAO {
             boolean initialAutoCommit = connection.getAutoCommit();
             connection.setAutoCommit(false);
             ps.setString(1, apiName);
-            ps.setString(2, username);
-            ps.setString(3, organization);
+            ps.setString(2, organization);
             try (ResultSet resultSet = ps.executeQuery()) {
                 while (resultSet.next()) {
                     versionList.add(resultSet.getString("API_VERSION"));
@@ -11769,6 +11768,50 @@ public class ApiMgtDAO {
             }
         } catch (SQLException e) {
             handleException("Failed to check different letter case api name availability : " + apiName, e);
+        }
+        return false;
+    }
+
+    /**
+     * Check whether an API with the given name in the exact same letter case already exists under the given
+     * tenant. Useful for distinguishing "the caller's name is a new letter-case variant of an existing name"
+     * from "the caller's name matches an existing row exactly" without depending on the database collation.
+     *
+     * @param apiName      candidate api name
+     * @param tenantDomain tenant domain name
+     * @param organization organization identifier
+     * @return true if a row with exact-case matching API_NAME already exists in this tenant/org
+     * @throws APIManagementException If failed to check exact-case api name availability
+     */
+    public boolean isApiNameExistExactCase(String apiName, String tenantDomain, String organization)
+            throws APIManagementException {
+
+        String contextParam = "/t/";
+        String query = SQLConstants.GET_API_NAME_DIFF_CASE_NOT_MATCHING_CONTEXT_SQL;
+        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            query = SQLConstants.GET_API_NAME_DIFF_CASE_MATCHING_CONTEXT_SQL;
+            contextParam += tenantDomain + '/';
+        }
+
+        // The SQL fetches rows whose name matches case-insensitively; the exact-case
+        // decision is made in Java via String.equals so this check is independent of the
+        // database collation (mirrors isApiNameWithDifferentCaseExist but returns true
+        // for the opposite condition: exact-case match found).
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            prepStmt.setString(1, apiName);
+            prepStmt.setString(2, contextParam + '%');
+            prepStmt.setString(3, organization);
+            try (ResultSet resultSet = prepStmt.executeQuery()) {
+                while (resultSet.next()) {
+                    String storedName = resultSet.getString("API_NAME");
+                    if (storedName != null && storedName.equals(apiName)) {
+                        return true;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to check exact-case api name availability : " + apiName, e);
         }
         return false;
     }
@@ -22621,6 +22664,8 @@ public class ApiMgtDAO {
                 removeGraphQLComplexityStatement.setInt(1, apiId);
                 removeGraphQLComplexityStatement.setString(2, apiRevision.getRevisionUUID());
                 removeGraphQLComplexityStatement.executeUpdate();
+                // Removing revision metadata entry from AM_API_REVISION_METADATA table
+                deleteAPIRevisionMetaData(connection, apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
 
                 // Removing related revision entries for operation policies
                 deleteAllAPISpecificOperationPoliciesByAPIUUID(connection, apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
@@ -22964,6 +23009,7 @@ public class ApiMgtDAO {
     public Set<SubscribedAPI> getPaginatedSubscribedAPIsByApplication(Application application, Integer offset,
                                                                       Integer limit, String organization)
             throws APIManagementException {
+                
         Set<SubscribedAPI> subscribedAPIs = new LinkedHashSet<>();
 
         try (Connection connection = APIMgtDBUtil.getConnection();
@@ -22974,35 +23020,33 @@ public class ApiMgtDAO {
             try (ResultSet result = ps.executeQuery()) {
                 int index = 0;
                 while (result.next()) {
-                    if (index >= offset && index < (limit + offset)) {
-                        String apiType = result.getString("TYPE");
-
-                        if (APIConstants.API_PRODUCT.equalsIgnoreCase(apiType)) {
-                            APIProductIdentifier identifier = new APIProductIdentifier(
-                                    APIUtil.replaceEmailDomain(result.getString("API_PROVIDER")),
-                                    result.getString("API_NAME"), result.getString("API_VERSION"));
-                            identifier.setUuid(result.getString("API_UUID"));
-                            SubscribedAPI subscribedAPI = new SubscribedAPI(application.getSubscriber(), identifier);
-                            subscribedAPI.setApplication(application);
-                            initSubscribedAPI(subscribedAPI, result);
-                            subscribedAPIs.add(subscribedAPI);
-                        } else {
-                            APIIdentifier identifier = new APIIdentifier(APIUtil.replaceEmailDomain(result.getString
-                                    ("API_PROVIDER")), result.getString("API_NAME"),
-                                    result.getString("API_VERSION"));
-                            identifier.setUuid(result.getString("API_UUID"));
-                            SubscribedAPI subscribedAPI = new SubscribedAPI(application.getSubscriber(), identifier);
-                            subscribedAPI.setApplication(application);
-                            initSubscribedAPI(subscribedAPI, result);
-                            subscribedAPIs.add(subscribedAPI);
-                        }
-
-                        if (index == limit + offset - 1) {
-                            break;
-                        }
+                    if (index++ < offset) {
+                        continue;
                     }
-                    index++;
+                    if (subscribedAPIs.size() >= limit) {
+                        break;
+                    }
+                    String apiType = result.getString("TYPE");
 
+                    if (APIConstants.API_PRODUCT.equalsIgnoreCase(apiType)) {
+                        APIProductIdentifier identifier = new APIProductIdentifier(
+                                APIUtil.replaceEmailDomain(result.getString("API_PROVIDER")),
+                                result.getString("API_NAME"), result.getString("API_VERSION"));
+                        identifier.setUuid(result.getString("API_UUID"));
+                        SubscribedAPI subscribedAPI = new SubscribedAPI(application.getSubscriber(), identifier);
+                        subscribedAPI.setApplication(application);
+                        initSubscribedAPI(subscribedAPI, result);
+                        subscribedAPIs.add(subscribedAPI);
+                    } else {
+                        APIIdentifier identifier = new APIIdentifier(APIUtil.replaceEmailDomain(result.getString
+                                ("API_PROVIDER")), result.getString("API_NAME"),
+                                result.getString("API_VERSION"));
+                        identifier.setUuid(result.getString("API_UUID"));
+                        SubscribedAPI subscribedAPI = new SubscribedAPI(application.getSubscriber(), identifier);
+                        subscribedAPI.setApplication(application);
+                        initSubscribedAPI(subscribedAPI, result);
+                        subscribedAPIs.add(subscribedAPI);
+                    }
                 }
             }
 
@@ -27338,16 +27382,8 @@ public class ApiMgtDAO {
             statement.setString(1, policyMappingUUID);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
-                    OperationPolicy operationPolicy = new OperationPolicy();
-                    operationPolicy.setPolicyName(rs.getString("POLICY_NAME"));
-                    operationPolicy.setPolicyVersion(rs.getString("POLICY_VERSION"));
-                    operationPolicy.setPolicyId(rs.getString("POLICY_UUID"));
-                    operationPolicy.setOrder(rs.getInt("POLICY_ORDER"));
-                    operationPolicy.setDirection(rs.getString("DIRECTION"));
-                    Map<String, Object> parameters =
-                    APIMgtDBUtil.convertJSONStringToMap(rs.getString("PARAMETERS"));
-                    operationPolicy.setParameters(parameters != null ? parameters : new HashMap<>());
-                    gatewayPolicies.add(operationPolicy);
+                    OperationPolicy policy = populateOperationPolicyWithRS(rs);
+                    gatewayPolicies.add(policy);
                 }
             }
         } catch (SQLException e) {
@@ -27688,7 +27724,7 @@ public class ApiMgtDAO {
 
     private void addGatewayPolicyMapping(Connection connection, List<OperationPolicy> gatewayPolicyList,
                                          String policyMappingUUID, String orgId)
-            throws SQLException, APIMgtResourceNotFoundException {
+            throws SQLException, APIMgtResourceNotFoundException, APIManagementException {
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(
                 SQLConstants.GatewayPolicyConstants.ADD_GATEWAY_POLICY_MAPPING)) {
@@ -27709,7 +27745,15 @@ public class ApiMgtDAO {
                     preparedStatement.setString(2, gatewayGlobalPolicy.getPolicyId());
                     preparedStatement.setInt(3, gatewayGlobalPolicy.getOrder());
                     preparedStatement.setString(4, gatewayGlobalPolicy.getDirection());
-                    preparedStatement.setString(5, paramJSON);
+
+                    byte[] paramBytes = paramJSON.getBytes(StandardCharsets.UTF_8);
+                    try (InputStream paramInputStream = new ByteArrayInputStream(paramBytes)) {
+                        preparedStatement.setBinaryStream(5, paramInputStream, paramBytes.length);
+                    } catch (IOException e) {
+                        log.error("Error creating or reading InputStream for Global policy");
+                        throw new APIManagementException("Error processing Global policy parameters for policy ID: " +
+                                gatewayGlobalPolicy.getPolicyId(), e);
+                    }
                     preparedStatement.addBatch();
                 }
             }

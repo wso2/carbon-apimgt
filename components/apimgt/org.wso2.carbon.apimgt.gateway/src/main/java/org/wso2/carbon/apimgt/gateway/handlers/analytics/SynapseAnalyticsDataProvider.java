@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.gateway.handlers.analytics;
 
 import com.google.gson.Gson;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.axiom.soap.SOAPBody;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.commons.logging.Log;
@@ -142,7 +143,8 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     public boolean isAnonymous() {
 
         AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(messageContext);
-        return isAuthenticated() && APIConstants.END_USER_ANONYMOUS.equalsIgnoreCase(authContext.getUsername());
+        return isAuthenticated() && APIConstants.END_USER_ANONYMOUS.equalsIgnoreCase(authContext.getUsername())
+                && StringUtils.isEmpty(authContext.getApplicationUUID());
     }
 
     @Override

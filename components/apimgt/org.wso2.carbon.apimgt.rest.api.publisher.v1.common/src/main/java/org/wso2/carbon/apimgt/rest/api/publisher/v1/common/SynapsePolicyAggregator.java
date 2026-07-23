@@ -21,6 +21,7 @@ import com.hubspot.jinjava.Jinjava;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -31,6 +32,7 @@ import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.OperationPolicyComparator;
@@ -97,6 +99,15 @@ public class SynapsePolicyAggregator {
 
         if (APIConstants.OPERATION_SEQUENCE_TYPE_FAULT.equals(flow)) {
             configMap.put("fault_sequence", true);
+            // For AI APIs, use the configured custom error response sequence as the
+            // operation-policy fault sequence when AI custom error formatting is enabled.
+            if (api != null && APIConstants.API_SUBTYPE_AI_API.equals(api.getSubtype())) {
+                String customErrorResponseSequence = APIManagerConfiguration.getAiApiConfigurationsDTO()
+                        .getCustomErrorResponseSequence();
+                if (StringUtils.isNotEmpty(customErrorResponseSequence)) {
+                    configMap.put("fault_sequence_name", customErrorResponseSequence);
+                }
+            }
         }
 
         if (!operationPolicyCaseList.isEmpty()) {

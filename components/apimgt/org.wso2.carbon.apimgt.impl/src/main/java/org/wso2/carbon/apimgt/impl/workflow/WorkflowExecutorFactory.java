@@ -85,7 +85,7 @@ public class WorkflowExecutorFactory {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
         }
-        //synchronized (cacheName.intern()){
+
         try {
             String cacheName = tenantDomain + "_" + APIConstants.WORKFLOW_CACHE_NAME;
             Cache workflowCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)

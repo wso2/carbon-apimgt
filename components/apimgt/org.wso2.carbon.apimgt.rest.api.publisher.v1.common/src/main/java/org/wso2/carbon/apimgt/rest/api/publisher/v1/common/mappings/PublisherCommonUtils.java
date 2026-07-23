@@ -2438,7 +2438,7 @@ public class PublisherCommonUtils {
                 if (APIConstants.API_SUBTYPE_EXISTING_API.equals(apiToAdd.getSubtype())
                         && !apiToAdd.getUriTemplates().isEmpty()) {
                     Set<URITemplate> updatedTemplates = resolveExistingMCPBackendAPI(apiToAdd, apiProvider,
-                            organization, oasParser);
+                            organization);
                     apiToAdd.setUriTemplates(updatedTemplates);
                 }
                 apiDefinition = new OAS3Parser().generateAPIDefinition(swaggerData);
@@ -2505,12 +2505,11 @@ public class PublisherCommonUtils {
      * @param apiToAdd     API being added
      * @param apiProvider  APIProvider instance
      * @param organization Tenant domain
-     * @param oasParser    OpenAPI parser
      * @return updated set of URI templates
      * @throws APIManagementException if reference API not found or other processing errors occur
      */
     private static Set<URITemplate> resolveExistingMCPBackendAPI(API apiToAdd, APIProvider apiProvider,
-                                                                 String organization, APIDefinition oasParser)
+                                                                 String organization)
             throws APIManagementException {
 
         URITemplate template = apiToAdd.getUriTemplates().iterator().next();
@@ -2542,6 +2541,7 @@ public class PublisherCommonUtils {
             log.error(error);
             throw new APIManagementException(error, ExceptionCodes.INVALID_REFERENCE_API);
         }
+        APIDefinition oasParser = OASParserUtil.getOASParser(refApi.getSwaggerDefinition());
         return generateMCPFeatures(apiToAdd.getSubtype(), refApi.getSwaggerDefinition(),
                 apiToAdd.getUriTemplates(), refApi.getId(), oasParser);
     }
@@ -2892,7 +2892,16 @@ public class PublisherCommonUtils {
                             apiDtoTypeWrapper.getVersion()));
         }
 
-        if (apiProvider.isApiNameWithDifferentCaseExist(apiDtoTypeWrapper.getName(), organization)) {
+        // Block only when this create would INTRODUCE a new case-variant. If an exact-case
+        // name already exists in the tenant, the request is either a duplicate (caught later
+        // in this same method by the version-uniqueness check via
+        // getApiVersionsMatchingApiNameAndOrganization, then by the duplicate-context check,
+        // and ultimately by the AM_API (API_PROVIDER, API_NAME, API_VERSION, ORGANIZATION)
+        // unique constraint) or a legitimate new-version path -- either way, the existing
+        // case-variant sibling (if any) is a pre-existing legacy state that predates this
+        // check, so blocking here would be over-strict.
+        if (apiProvider.isApiNameWithDifferentCaseExist(apiDtoTypeWrapper.getName(), organization)
+                && !apiProvider.isApiNameExistExactCase(apiDtoTypeWrapper.getName(), organization)) {
             throw new APIManagementException(
                     "API with name " + apiDtoTypeWrapper.getName() + " already exists.",
                     ExceptionCodes.from(ExceptionCodes.API_NAME_ALREADY_EXISTS, apiDtoTypeWrapper.getName()));
@@ -2923,6 +2932,11 @@ public class PublisherCommonUtils {
 
         List<String> apiVersions = apiProvider.getApiVersionsMatchingApiNameAndOrganization(apiDtoTypeWrapper.getName(),
                 username, organization);
+
+        //Remove the {version} placeholder from the context template if it is present at end
+        if (context.endsWith("/" + APIConstants.VERSION_PLACEHOLDER)) {
+            context = context.split(Pattern.quote("/" + APIConstants.VERSION_PLACEHOLDER))[0];
+        }
 
         if (!apiVersions.isEmpty()) {
             for (String version : apiVersions) {

@@ -609,6 +609,7 @@ public final class APIConstants {
         public static final String AI_CONFIGURATION_FAILOVER_CONFIGURATIONS_FAILOVER_ENDPOINTS_LIMIT =
                 "FailoverEndpointsLimit";
         public static final String AI_CONFIGURATION_DEFAULT_REQUEST_TIMEOUT = "DefaultRequestTimout";
+        public static final String AI_CUSTOM_ERROR_RESPONSE_SEQUENCE = "CustomErrorResponseSequence";
 
         public static final String DESIGN_ASSISTANT = "DesignAssistant";
         public static final String DESIGN_ASSISTANT_ENABLED = "Enabled";
@@ -3979,6 +3980,16 @@ public final class APIConstants {
 
         public static final String PLATFORM_GATEWAY_CONNECT_CONFIGURATION = "PlatformGatewayConnectConfiguration";
         public static final String PLATFORM_GATEWAY_VERSIONS = "PlatformGatewayVersions";
+        public static final String CONNECT_GATEWAYS = "ConnectGateways";
+        public static final String CONNECT = "Connect";
+        public static final String REGISTRATION_TOKEN = "RegistrationToken";
+        public static final String CONNECT_NAME = "Name";
+        public static final String CONNECT_DISPLAY_NAME = "DisplayName";
+        public static final String CONNECT_DESCRIPTION = "Description";
+        public static final String CONNECT_URL = "Url";
+        public static final String CONNECT_ORGANIZATION = "Organization";
+        /** Original gateway base URL (scheme/host/port/path) for platform gateway environments. */
+        public static final String GATEWAY_BASE_URL = "gatewayBaseUrl";
         public static final String VERSION = "Version";
         public static final String API_KEY_NOTIFICATION = "APIKeyNotification";
         public static final String QUEUE_SIZE = "QueueSize";
