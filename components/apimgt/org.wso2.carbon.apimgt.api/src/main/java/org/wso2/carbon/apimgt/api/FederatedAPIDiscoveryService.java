@@ -23,6 +23,7 @@ package org.wso2.carbon.apimgt.api;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.DiscoveredAPI;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -66,9 +67,10 @@ public interface FederatedAPIDiscoveryService {
      * @param apiIds       the list of external gateway API identifiers to import
      * @param environment  the federated environment
      * @param organization the organization
+     * @return list of API IDs that failed to import; empty if all succeeded
      * @throws APIManagementException if an error occurs
      */
-    default void importNewExternalAPIs(List<String> apiIds, Environment environment, String organization) throws APIManagementException {
+    default List<String> importNewExternalAPIs(List<String> apiIds, Environment environment, String organization) throws APIManagementException {
         throw new APIManagementException("importNewExternalAPIs is not supported.");
     }
 
@@ -79,9 +81,10 @@ public interface FederatedAPIDiscoveryService {
      * @param apiIds       the list of external gateway API identifiers to update
      * @param environment  the federated environment
      * @param organization the organization
+     * @return list of API IDs that failed to update; empty if all succeeded
      * @throws APIManagementException if an error occurs
      */
-    default void updateExternalAPIs(List<String> apiIds, Environment environment, String organization) throws APIManagementException {
+    default List<String> updateExternalAPIs(List<String> apiIds, Environment environment, String organization) throws APIManagementException {
         throw new APIManagementException("updateExternalAPIs is not supported.");
     }
 }

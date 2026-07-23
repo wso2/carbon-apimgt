@@ -139,13 +139,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  taskId:
-                    type: string
-                  status:
-                    type: string
-                    enum: [PENDING, COMPLETED, FAILED]
+                $ref: '#/components/schemas/DiscoveryTaskSubmitResponse'
         500:
           $ref: '#/components/responses/InternalServerError'
       security:
@@ -173,19 +167,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  taskId:
-                    type: string
-                  status:
-                    type: string
-                    enum: [PENDING, COMPLETED, FAILED]
-                  result:
-                    type: array
-                    items:
-                      type: object
-                  error:
-                    type: string
+                $ref: '#/components/schemas/DiscoveryTaskStatusResponse'
         404:
           $ref: '#/components/responses/NotFound'
       security:
@@ -275,14 +257,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  lastDiscoveredAt:
-                    type: string
-                  result:
-                    type: array
-                    items:
-                      type: object
+                $ref: '#/components/schemas/CachedDiscoveryResultResponse'
         404:
           $ref: '#/components/responses/NotFound'
       security:
@@ -19084,6 +19059,48 @@ components:
             $ref: '#/components/schemas/Label'
         pagination:
           $ref: '#/components/schemas/Pagination'
+    DiscoveryTaskSubmitResponse:
+      type: object
+      description: Response returned when a discovery task is submitted (or already running).
+      properties:
+        taskId:
+          type: string
+          description: Unique identifier of the discovery task.
+        status:
+          type: string
+          enum: [PENDING, COMPLETED, FAILED]
+          description: Current status of the discovery task.
+    DiscoveryTaskStatusResponse:
+      type: object
+      description: Current status and optional result of a discovery task.
+      properties:
+        taskId:
+          type: string
+          description: Unique identifier of the discovery task.
+        status:
+          type: string
+          enum: [PENDING, COMPLETED, FAILED]
+          description: Current status of the discovery task.
+        result:
+          type: array
+          description: List of discovered APIs (populated when status is COMPLETED).
+          items:
+            type: object
+        error:
+          type: string
+          description: Error message if the task failed.
+    CachedDiscoveryResultResponse:
+      type: object
+      description: Previously cached discovery results for an environment.
+      properties:
+        lastDiscoveredAt:
+          type: string
+          description: Timestamp of the last successful discovery run.
+        result:
+          type: array
+          description: List of cached discovered APIs.
+          items:
+            type: object
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.

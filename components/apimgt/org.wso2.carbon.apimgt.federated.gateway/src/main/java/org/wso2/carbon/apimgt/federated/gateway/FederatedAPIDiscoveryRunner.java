@@ -658,11 +658,12 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
     }
 
     @Override
-    public void importNewExternalAPIs(List<String> apiIds, Environment environment, String organization)
+    public List<String> importNewExternalAPIs(List<String> apiIds, Environment environment, String organization)
             throws APIManagementException {
         FederatedAPIDiscovery discovery = getFederatedAPIDiscovery(environment, organization);
         String adminUsername = APIUtil.getTenantAdminUserName(organization);
         FederatedGatewayUtil.startTenantFlow(organization, adminUsername);
+        List<String> failedIds = new ArrayList<>();
         try {
             ParsedApiIdentifiers parsed = parseApiIdentifiers(apiIds);
             List<String> realApiIds = parsed.getRealApiIds();
@@ -685,6 +686,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     DiscoveredAPI discoveredAPI = apiLookup.get(apiId);
                     if (discoveredAPI == null) {
                         log.error("Could not find discovered API matching ID: " + apiId + ". Skipping.");
+                        failedIds.add(apiId);
                         continue;
                     }
                     API api = discoveredAPI.getApi();
@@ -760,19 +762,22 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                 } catch (Exception e) {
                     log.error("Error importing API with ID: " + apiId
                             + " from environment: " + environment.getName(), e);
+                    failedIds.add(apiId);
                 }
             }
+            return failedIds;
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
     @Override
-    public void updateExternalAPIs(List<String> apiIds, Environment environment, String organization)
+    public List<String> updateExternalAPIs(List<String> apiIds, Environment environment, String organization)
             throws APIManagementException {
         FederatedAPIDiscovery discovery = getFederatedAPIDiscovery(environment, organization);
         String adminUsername = APIUtil.getTenantAdminUserName(organization);
         FederatedGatewayUtil.startTenantFlow(organization, adminUsername);
+        List<String> failedIds = new ArrayList<>();
         try {
             ParsedApiIdentifiers parsed = parseApiIdentifiers(apiIds);
             List<String> realApiIds = parsed.getRealApiIds();
@@ -788,6 +793,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     DiscoveredAPI discoveredAPI = apiLookup.get(apiId);
                     if (discoveredAPI == null) {
                         log.error("Could not find discovered API matching ID: " + apiId + ". Skipping.");
+                        failedIds.add(apiId);
                         continue;
                     }
                     API api = discoveredAPI.getApi();
@@ -817,8 +823,10 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                 } catch (Exception e) {
                     log.error("Error updating API with ID: " + apiId
                             + " from environment: " + environment.getName(), e);
+                    failedIds.add(apiId);
                 }
             }
+            return failedIds;
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }

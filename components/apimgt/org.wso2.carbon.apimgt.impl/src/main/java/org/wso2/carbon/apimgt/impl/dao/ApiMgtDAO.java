@@ -225,10 +225,6 @@ public class ApiMgtDAO {
         multiGroupAppSharingEnabled = APIUtil.isMultiGroupAppSharingEnabled();
     }
 
-    private static String toStringOrNull(Object value) {
-        return value != null ? value.toString() : null;
-    }
-
     /**
      * Method to get the instance of the ApiMgtDAO.
      *
@@ -16717,13 +16713,13 @@ public class ApiMgtDAO {
                     for (Map<String, Object> api : apis) {
                         insertStmt.setString(1, envName);
                         insertStmt.setString(2, organization);
-                        insertStmt.setString(3, toStringOrNull(api.get("id")));
-                        insertStmt.setString(4, toStringOrNull(api.get("apiName")));
-                        insertStmt.setString(5, toStringOrNull(api.get("version")));
-                        insertStmt.setString(6, toStringOrNull(api.get("description")));
-                        insertStmt.setString(7, toStringOrNull(api.get("context")));
-                        insertStmt.setString(8, toStringOrNull(api.getOrDefault("apiType", "HTTP")));
-                        insertStmt.setString(9, toStringOrNull(api.get("gatewayType")));
+                        insertStmt.setString(3, Objects.toString(api.get("id"), null));
+                        insertStmt.setString(4, Objects.toString(api.get("apiName"), null));
+                        insertStmt.setString(5, Objects.toString(api.get("version"), null));
+                        insertStmt.setString(6, Objects.toString(api.get("description"), null));
+                        insertStmt.setString(7, Objects.toString(api.get("context"), null));
+                        insertStmt.setString(8, Objects.toString(api.getOrDefault("apiType", "HTTP"), null));
+                        insertStmt.setString(9, Objects.toString(api.get("gatewayType"), null));
                         String refArtifact = api.get("referenceArtifact") != null
                                 ? api.get("referenceArtifact").toString() : null;
                         if (refArtifact != null) {
@@ -16732,7 +16728,7 @@ public class ApiMgtDAO {
                         } else {
                             insertStmt.setNull(10, java.sql.Types.BLOB);
                         }
-                        insertStmt.setString(11, toStringOrNull(api.get("status")));
+                        insertStmt.setString(11, Objects.toString(api.get("status"), null));
                         insertStmt.setTimestamp(12, discoveredAt);
                         insertStmt.addBatch();
                     }

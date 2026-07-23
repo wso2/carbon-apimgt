@@ -237,8 +237,15 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
             if (service == null) {
                 throw new APIManagementException("FederatedAPIDiscoveryService OSGi service is not available.");
             }
-            service.importNewExternalAPIs(requestBody, env, organization);
-            return Response.ok("{\"status\": \"APIs imported successfully\"}").build();
+            List<String> failedIds = service.importNewExternalAPIs(requestBody, env, organization);
+            if (failedIds.isEmpty()) {
+                return Response.ok("{\"status\": \"APIs imported successfully\"}").build();
+            }
+            String json = "{\"status\": \"APIs imported with some failures\","
+                    + "\"failedIds\": [" + failedIds.stream()
+                    .map(id -> "\"" + id.replace("\"", "\\\"") + "\"")
+                    .collect(java.util.stream.Collectors.joining(",")) + "]}";
+            return Response.ok(json).build();
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError(
                     "Error while importing federated APIs for environment: " + environment, e, log);
@@ -259,8 +266,15 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
             if (service == null) {
                 throw new APIManagementException("FederatedAPIDiscoveryService OSGi service is not available.");
             }
-            service.updateExternalAPIs(requestBody, env, organization);
-            return Response.ok("{\"status\": \"APIs updated successfully\"}").build();
+            List<String> failedIds = service.updateExternalAPIs(requestBody, env, organization);
+            if (failedIds.isEmpty()) {
+                return Response.ok("{\"status\": \"APIs updated successfully\"}").build();
+            }
+            String json = "{\"status\": \"APIs updated with some failures\","
+                    + "\"failedIds\": [" + failedIds.stream()
+                    .map(id -> "\"" + id.replace("\"", "\\\"") + "\"")
+                    .collect(java.util.stream.Collectors.joining(",")) + "]}";
+            return Response.ok(json).build();
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError(
                     "Error while updating federated APIs for environment: " + environment, e, log);
