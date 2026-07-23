@@ -53,6 +53,9 @@ public class EndpointSecurity {
     private String secretKey = null;
     private String region = null;
     private String service = null;
+    private String roleArn = null;
+    private String roleRegion = null;
+    private String roleExternalId = null;
 
     private String customParameters = null;
 
@@ -311,6 +314,30 @@ public class EndpointSecurity {
 
     public void setService(String service) {
         this.service = service;
+    }
+
+    public String getRoleArn() {
+        return roleArn;
+    }
+
+    public void setRoleArn(String roleArn) {
+        this.roleArn = roleArn;
+    }
+
+    public String getRoleRegion() {
+        return roleRegion;
+    }
+
+    public void setRoleRegion(String roleRegion) {
+        this.roleRegion = roleRegion;
+    }
+
+    public String getRoleExternalId() {
+        return roleExternalId;
+    }
+
+    public void setRoleExternalId(String roleExternalId) {
+        this.roleExternalId = roleExternalId;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

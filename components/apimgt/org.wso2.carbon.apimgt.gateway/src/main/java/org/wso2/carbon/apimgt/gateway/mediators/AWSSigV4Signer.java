@@ -62,6 +62,9 @@ public class AWSSigV4Signer extends AbstractMediator implements ManagedLifecycle
     private String region;
     private String service;
     private String endpoint;
+    private String roleArn;
+    private String roleRegion;
+    private String roleExternalId;
 
     @Override
     public boolean mediate(MessageContext messageContext) {
@@ -99,9 +102,13 @@ public class AWSSigV4Signer extends AbstractMediator implements ManagedLifecycle
                 incomingHeaders = (Map<String, String>) axis2Ctx.getProperty(
                         org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
             }
-            Map<String, String> headers = AWSUtil.generateAWSSignature(uri.getHost(), httpMethod.toUpperCase(), service,
-                    encodePathTrimSlashes(backendRequestResource), getQueryString(path), payload, accessKey, secretKey,
-                    region, null, new HashMap<>());
+            Map<String, String> headers = StringUtils.isNotBlank(roleArn)
+                    ? AWSUtil.generateAWSSignatureUsingAssumeRole(uri.getHost(), httpMethod.toUpperCase(), service,
+                            encodePathTrimSlashes(backendRequestResource), getQueryString(path), payload,
+                            accessKey, secretKey, region, null, roleArn, roleRegion, roleExternalId, new HashMap<>())
+                    : AWSUtil.generateAWSSignature(uri.getHost(), httpMethod.toUpperCase(), service,
+                            encodePathTrimSlashes(backendRequestResource), getQueryString(path), payload, accessKey,
+                            secretKey, region, null, new HashMap<>());
             incomingHeaders.putAll(headers);
             axis2Ctx.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, incomingHeaders);
             return true;
@@ -150,6 +157,30 @@ public class AWSSigV4Signer extends AbstractMediator implements ManagedLifecycle
         this.endpoint = endpoint;
     }
 
+    public String getRoleArn() {
+        return roleArn;
+    }
+
+    public void setRoleArn(String roleArn) {
+        this.roleArn = roleArn;
+    }
+
+    public String getRoleRegion() {
+        return roleRegion;
+    }
+
+    public void setRoleRegion(String roleRegion) {
+        this.roleRegion = roleRegion;
+    }
+
+    public String getRoleExternalId() {
+        return roleExternalId;
+    }
+
+    public void setRoleExternalId(String roleExternalId) {
+        this.roleExternalId = roleExternalId;
+    }
+
     private static String getQueryString(String request) {
         String queryString = null;
         if (request != null && request.contains("?")) {
@@ -173,6 +204,10 @@ public class AWSSigV4Signer extends AbstractMediator implements ManagedLifecycle
                 StringUtils.isEmpty(service) || StringUtils.isEmpty(endpoint)) {
             throw new SynapseException("AWSSigV4Signer mediator is not properly configured. " +
                     "Access Key, Secret Key, Region, Service and Endpoint are required.");
+        }
+        if (StringUtils.isNotBlank(roleArn) != StringUtils.isNotBlank(roleRegion)) {
+            throw new SynapseException("AWSSigV4Signer mediator is not properly configured. " +
+                    "Role ARN and Role Region must be provided together to assume a role.");
         }
     }
 
