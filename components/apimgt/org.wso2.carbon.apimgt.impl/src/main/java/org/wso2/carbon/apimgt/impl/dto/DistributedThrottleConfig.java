@@ -47,6 +47,8 @@ public class DistributedThrottleConfig {
     private int numTestsPerEvictionRun = -1;
     private boolean isSslEnabled;
     private int connectionTimeout;
+    private int socketTimeout;
+    private long maxWaitMillis = -1;
 
     public String getHost() {
         return host;
@@ -223,4 +225,19 @@ public class DistributedThrottleConfig {
         this.databaseId = databaseId;
     }
 
+    public int getSocketTimeout() {
+        return socketTimeout;
+    }
+
+    public void setSocketTimeout(int socketTimeout) {
+        this.socketTimeout = socketTimeout;
+    }
+
+    public long getMaxWaitMillis() {
+        return maxWaitMillis;
+    }
+
+    public void setMaxWaitMillis(long maxWaitMillis) {
+        this.maxWaitMillis = maxWaitMillis;
+    }
 }

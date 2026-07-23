@@ -1832,6 +1832,8 @@ public final class APIConstants {
     public static final String DISTRIBUTED_THROTTLE_MIN_EVICTABLE_IDLE_TIME_IN_MILLIS = "MinEvictableIdleTimeMillis";
     public static final String DISTRIBUTED_THROTTLE_TIME_BETWEEN_EVICTION_RUNS_IN_MILLIS = "TimeBetweenEvictionRunsMillis";
     public static final String DISTRIBUTED_THROTTLE_NUM_TESTS_PER_EVICTION_RUNS = "NumTestsPerEvictionRun";
+    public static final String DISTRIBUTED_THROTTLE_SOCKET_TIMEOUT = "SocketTimeout";
+    public static final String DISTRIBUTED_THROTTLE_MAX_WAIT_MILLIS = "MaxWaitMillis";
 
     // Solace Configurations
     public static final String SOLACE_CONFIG = "SolaceConfig";

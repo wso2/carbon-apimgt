@@ -618,6 +618,7 @@ public class APIManagerConfiguration {
                     OMElement password = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_PASSWORD));
                     OMElement databaseId = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_DATABASE_ID));
                     OMElement connectionTimeout = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_CONNECTION_TIMEOUT));
+                    OMElement socketTimeout = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_SOCKET_TIMEOUT));
                     OMElement isSslEnabled = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_IS_SSL_ENABLED));
 
                     if (host != null && StringUtils.isNotBlank(host.getText())) {
@@ -654,7 +655,15 @@ public class APIManagerConfiguration {
                             distributedThrottleConfig.setConnectionTimeout(Integer.parseInt(connectionTimeout.getText().trim()));
                         } catch (NumberFormatException e) {
                             log.warn("Invalid connectionTimeout value: " + connectionTimeout.getText(), e);
-                        }                    }
+                        }
+                    }
+                    if (socketTimeout != null) {
+                        try {
+                            distributedThrottleConfig.setSocketTimeout(Integer.parseInt(socketTimeout.getText().trim()));
+                        } catch (NumberFormatException e) {
+                            log.warn("Invalid socketTimeout value: " + socketTimeout.getText(), e);
+                        }
+                    }
                     if (isSslEnabled != null) {
                         distributedThrottleConfig.setSslEnabled(Boolean.parseBoolean(isSslEnabled.getText().trim()));
                     }
@@ -683,6 +692,8 @@ public class APIManagerConfiguration {
                                 distributedThrottleConfig.setTimeBetweenEvictionRunsMillis(Long.parseLong(propertyNode.getText()));
                             } else if (APIConstants.DISTRIBUTED_THROTTLE_NUM_TESTS_PER_EVICTION_RUNS.equals(propertyNode.getLocalName())) {
                                 distributedThrottleConfig.setNumTestsPerEvictionRun(Integer.parseInt(propertyNode.getText()));
+                            } else if (APIConstants.DISTRIBUTED_THROTTLE_MAX_WAIT_MILLIS.equals(propertyNode.getLocalName())) {
+                                distributedThrottleConfig.setMaxWaitMillis(Long.parseLong(propertyNode.getText()));
                             }
                         }
                     }

@@ -47,6 +47,8 @@ import java.util.Map;
 
 public class ThrottleStreamProcessor extends StreamProcessor implements SchedulingProcessor, FindableProcessor {
 
+    private static final ThreadLocal<Long> windowExpiryThreadLocal = new ThreadLocal<>();
+
     private long timeInMilliSeconds;
     private ComplexEventChunk<StreamEvent> expiredEventChunk = new ComplexEventChunk<StreamEvent>(true);
     private Scheduler scheduler;
@@ -130,6 +132,7 @@ public class ThrottleStreamProcessor extends StreamProcessor implements Scheduli
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
                            StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater) {
 
+        ComplexEventChunk<StreamEvent> resetEventChunk = null;
         synchronized (this) {
             if (expireEventTime != -1) {
                 if (expireEventTime - timeInMilliSeconds > streamEventChunk.getLast().getTimestamp()) {
@@ -146,13 +149,25 @@ public class ThrottleStreamProcessor extends StreamProcessor implements Scheduli
                 scheduler.notifyAt(expireEventTime);
             }
             long currentTime = executionPlanContext.getTimestampGenerator().currentTime();
-            boolean sendEvents;
+            boolean sendResetEvent;
             if (currentTime >= expireEventTime) {
                 expireEventTime += timeInMilliSeconds;
                 scheduler.notifyAt(expireEventTime);
-                sendEvents = true;
+                sendResetEvent = true;
             } else {
-                sendEvents = false;
+                sendResetEvent = false;
+            }
+
+            if (sendResetEvent) {
+                StreamEvent firstExpiredEvent = expiredEventChunk.getFirst();
+                if (firstExpiredEvent != null) {
+                    StreamEvent resetEvent = streamEventCloner.copyStreamEvent(firstExpiredEvent);
+                    resetEvent.setType(StreamEvent.Type.RESET);
+                    resetEvent.setTimestamp(expireEventTime);
+                    resetEventChunk = new ComplexEventChunk<StreamEvent>(true);
+                    resetEventChunk.add(resetEvent);
+                }
+                expiredEventChunk.clear();
             }
 
             while (streamEventChunk.hasNext()) {
@@ -162,22 +177,32 @@ public class ThrottleStreamProcessor extends StreamProcessor implements Scheduli
                 }
 
                 complexEventPopulater.populateComplexEvent(streamEvent, new Object[]{expireEventTime});
-                StreamEvent clonedStreamEvent = streamEventCloner.copyStreamEvent(streamEvent);
-                clonedStreamEvent.setType(StreamEvent.Type.EXPIRED);
-                clonedStreamEvent.setTimestamp(expireEventTime);
-                expiredEventChunk.add(clonedStreamEvent);
-            }
-            if (sendEvents) {
-                expiredEventChunk.reset();
-                if (expiredEventChunk.getFirst() != null) {
-                    streamEventChunk.add(expiredEventChunk.getFirst());
+                if (expiredEventChunk.getFirst() == null) {
+                    StreamEvent clonedStreamEvent = streamEventCloner.copyStreamEvent(streamEvent);
+                    clonedStreamEvent.setType(StreamEvent.Type.EXPIRED);
+                    clonedStreamEvent.setTimestamp(expireEventTime);
+                    expiredEventChunk.add(clonedStreamEvent);
                 }
-                expiredEventChunk.clear();
             }
+        }
+        if (resetEventChunk != null) {
+            resetEventChunk.setBatch(true);
+            windowExpiryThreadLocal.set(expireEventTime);
+            try {
+                nextProcessor.process(resetEventChunk);
+            } finally {
+                windowExpiryThreadLocal.remove();
+            }
+            resetEventChunk.setBatch(false);
         }
         if (streamEventChunk.getFirst() != null) {
             streamEventChunk.setBatch(true);
-            nextProcessor.process(streamEventChunk);
+            windowExpiryThreadLocal.set(expireEventTime);
+            try {
+                nextProcessor.process(streamEventChunk);
+            } finally {
+                windowExpiryThreadLocal.remove();
+            }
             streamEventChunk.setBatch(false);
         }
     }
@@ -214,6 +239,10 @@ public class ThrottleStreamProcessor extends StreamProcessor implements Scheduli
             Map<String, EventTable> eventTableMap) {
         return OperatorParser.constructOperator(expiredEventChunk, expression, matchingMetaStateHolder,
                 executionPlanContext, variableExpressionExecutors, eventTableMap, queryName);
+    }
+
+    static Long getThreadLocalWindowExpiry() {
+        return windowExpiryThreadLocal.get();
     }
 
     private long addTimeShift(long currentTime) {
