@@ -107,6 +107,9 @@ public class SubscriptionValidationSQLConstants {
                     "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND" +
                     "   APP.APPLICATION_ID = ? ";
 
+    public static final String GET_APPLICATION_BY_ID_AND_ORGANIZATION_SQL =
+            GET_APPLICATION_BY_ID_SQL + " AND APP.ORGANIZATION = ? ";
+
     public static final String GET_ORGANIZATION_SUBSCRIPTIONS_SQL =
             "SELECT " +
                     "   SUBS.UUID AS SUBSCRIPTION_UUID," +

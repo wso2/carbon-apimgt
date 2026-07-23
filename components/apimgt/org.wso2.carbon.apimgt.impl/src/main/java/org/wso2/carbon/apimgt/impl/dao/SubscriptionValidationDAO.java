@@ -877,6 +877,31 @@ public class SubscriptionValidationDAO {
     }
 
     /*
+     * @param applicationId : unique identifier of an application
+     * @param organization : organization that owns the application
+     * @return {@link List<Application>} a list with one element when the application belongs to the organization
+     * */
+    public List<Application> getApplicationById(int applicationId, String organization) {
+
+        List<Application> applicationList = new ArrayList<>();
+
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(
+                     SubscriptionValidationSQLConstants.GET_APPLICATION_BY_ID_AND_ORGANIZATION_SQL)) {
+            ps.setInt(1, applicationId);
+            ps.setString(2, organization);
+
+            try (ResultSet resultSet = ps.executeQuery()) {
+                addToApplicationList(applicationList, resultSet);
+            }
+
+        } catch (SQLException e) {
+            log.error("Error in loading Application by applicationId : " + applicationId, e);
+        }
+        return applicationList;
+    }
+
+    /*
      * @param policyName : name of an application level throttling policy
      * @return {@link ApplicationPolicy}
      * */

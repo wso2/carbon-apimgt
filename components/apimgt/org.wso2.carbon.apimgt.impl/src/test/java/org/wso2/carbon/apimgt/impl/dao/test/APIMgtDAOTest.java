@@ -58,6 +58,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dao.SubscriptionValidationDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
@@ -364,6 +365,42 @@ public class APIMgtDAOTest {
         assertNull(apiMgtDAO.getApplicationByName("testApplication2", null, null));
 
     }
+
+    @Test
+    public void testGetApplicationByIdAndOrganization() throws Exception {
+        String organization = "application-owner.example";
+        Subscriber subscriber = new Subscriber("APPLICATION_SCOPE_USER");
+        subscriber.setEmail("application-scope-user@example.com");
+        subscriber.setSubscribedDate(new Date());
+        subscriber.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+        apiMgtDAO.addSubscriber(subscriber, null);
+
+        Application application = new Application("scopedApplication", subscriber);
+        application.setUUID(UUID.randomUUID().toString());
+        int applicationId = -1;
+        try {
+            applicationId = apiMgtDAO.addApplication(application, subscriber.getName(), organization);
+            application.setId(applicationId);
+
+            SubscriptionValidationDAO subscriptionValidationDAO = new SubscriptionValidationDAO();
+            List<org.wso2.carbon.apimgt.api.model.subscription.Application> matchingApplications =
+                    subscriptionValidationDAO.getApplicationById(applicationId, organization);
+            List<org.wso2.carbon.apimgt.api.model.subscription.Application> foreignApplications =
+                    subscriptionValidationDAO.getApplicationById(applicationId, "other.example");
+
+            assertEquals(1, matchingApplications.size());
+            assertEquals(applicationId, matchingApplications.get(0).getId());
+            assertEquals(organization, matchingApplications.get(0).getOrganization());
+            assertTrue(foreignApplications.isEmpty());
+            assertEquals(1, subscriptionValidationDAO.getApplicationById(applicationId).size());
+        } finally {
+            if (applicationId > 0) {
+                apiMgtDAO.deleteApplication(application);
+            }
+            deleteSubscriber(subscriber.getId());
+        }
+    }
+
     @Test
     public void testKeyForwardCompatibilityWhenNewAPIVersion() throws Exception {
         List<API> oldApiVersionList = new ArrayList<>();
