@@ -225,7 +225,7 @@ public class ApiMgtDAO {
         multiGroupAppSharingEnabled = APIUtil.isMultiGroupAppSharingEnabled();
     }
 
-    private static String str(Object value) {
+    private static String toStringOrNull(Object value) {
         return value != null ? value.toString() : null;
     }
 
@@ -16717,13 +16717,13 @@ public class ApiMgtDAO {
                     for (Map<String, Object> api : apis) {
                         insertStmt.setString(1, envName);
                         insertStmt.setString(2, organization);
-                        insertStmt.setString(3, str(api.get("id")));
-                        insertStmt.setString(4, str(api.get("apiName")));
-                        insertStmt.setString(5, str(api.get("version")));
-                        insertStmt.setString(6, str(api.get("description")));
-                        insertStmt.setString(7, str(api.get("context")));
-                        insertStmt.setString(8, str(api.getOrDefault("apiType", "HTTP")));
-                        insertStmt.setString(9, str(api.get("gatewayType")));
+                        insertStmt.setString(3, toStringOrNull(api.get("id")));
+                        insertStmt.setString(4, toStringOrNull(api.get("apiName")));
+                        insertStmt.setString(5, toStringOrNull(api.get("version")));
+                        insertStmt.setString(6, toStringOrNull(api.get("description")));
+                        insertStmt.setString(7, toStringOrNull(api.get("context")));
+                        insertStmt.setString(8, toStringOrNull(api.getOrDefault("apiType", "HTTP")));
+                        insertStmt.setString(9, toStringOrNull(api.get("gatewayType")));
                         String refArtifact = api.get("referenceArtifact") != null
                                 ? api.get("referenceArtifact").toString() : null;
                         if (refArtifact != null) {
@@ -16732,7 +16732,7 @@ public class ApiMgtDAO {
                         } else {
                             insertStmt.setNull(10, java.sql.Types.BLOB);
                         }
-                        insertStmt.setString(11, str(api.get("status")));
+                        insertStmt.setString(11, toStringOrNull(api.get("status")));
                         insertStmt.setTimestamp(12, discoveredAt);
                         insertStmt.addBatch();
                     }
@@ -16916,8 +16916,7 @@ public class ApiMgtDAO {
             throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement stmt = connection.prepareStatement(
-                     "SELECT API_NAME, STATUS, DESCRIPTION FROM AM_FEDERATED_DISCOVERY_CACHE " +
-                     "WHERE ENVIRONMENT_NAME = ? AND ORGANIZATION = ? AND EXTERNAL_API_ID = '__TASK_STATUS__'")) {
+                     SQLConstants.GET_DISCOVERY_TASK_STATUS_SQL)) {
             stmt.setString(1, envName);
             stmt.setString(2, organization);
             try (java.sql.ResultSet rs = stmt.executeQuery()) {
@@ -16948,8 +16947,7 @@ public class ApiMgtDAO {
             throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement stmt = connection.prepareStatement(
-                     "SELECT API_NAME, STATUS, DESCRIPTION, DISCOVERED_AT FROM AM_FEDERATED_DISCOVERY_CACHE " +
-                     "WHERE ENVIRONMENT_NAME = ? AND ORGANIZATION = ? AND EXTERNAL_API_ID = '__TASK_STATUS__'")) {
+                     SQLConstants.GET_ACTIVE_DISCOVERY_TASK_SQL)) {
             stmt.setString(1, envName);
             stmt.setString(2, organization);
             try (java.sql.ResultSet rs = stmt.executeQuery()) {

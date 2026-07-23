@@ -45,27 +45,23 @@ import java.util.concurrent.Executors;
 /**
  * Implementation of the Federated API Discovery REST endpoints.
  *
- * <p><b>Async Discovery Pattern (sequence diagram):</b>
+ * <p><b>Async Discovery Pattern:</b>
  * <ol>
- *   <li>POST /federated-apis/discover → checks {@code ACTIVE_TASK_BY_ENV} for a running task.
+ *   <li>POST /federated-apis/discover → checks the DB for an active task for this env+org.
  *       If one exists (de-duplication), the same task ID is returned immediately with HTTP 202.</li>
- *   <li>Otherwise a new {@link DiscoveryTask} is created, registered in both
- *       {@code TASK_STORE} and {@code ACTIVE_TASK_BY_ENV}, submitted to the
- *       shared {@link #DISCOVERY_EXECUTOR} and HTTP 202 is returned with the new task ID.</li>
+ *   <li>Otherwise a new task is persisted as PENDING in the DB, submitted to the
+ *       shared {@link #DISCOVERY_EXECUTOR}, and HTTP 202 is returned with the new task ID.</li>
  *   <li>The background worker calls {@code discoverExternalAPIs}, converts the result,
  *       <b>persists it to the AM_FEDERATED_DISCOVERY_CACHE DB table</b>, and marks status COMPLETED
- *       (or FAILED on error). It also evicts itself from {@code ACTIVE_TASK_BY_ENV}.</li>
- *   <li>GET /federated-apis/status/{taskId} → reads from {@code TASK_STORE} and returns the
- *       current status. When COMPLETED, results are read from the DB cache.</li>
+ *       (or FAILED on error).</li>
+ *   <li>GET /federated-apis/status/{taskId} → reads task status from the DB and returns it.
+ *       When COMPLETED, results are read from the DB cache.</li>
  *   <li>GET /federated-apis/cached?environment=X → returns previously cached results from the DB
  *       without triggering a new gateway call. Includes lastDiscoveredAt timestamp.</li>
  * </ol>
  *
- * <p><b>Key change:</b> Discovery results are no longer held in JVM-local {@link ConcurrentHashMap}
- * objects. They are persisted to the {@code AM_FEDERATED_DISCOVERY_CACHE} table so they survive
- * page reloads, server restarts, and are available across cluster nodes.
- * The in-memory maps ({@code TASK_STORE}, {@code ACTIVE_TASK_BY_ENV}) are only used for
- * ephemeral, in-flight task tracking and de-duplication.
+ * <p>All task state and discovery results are persisted to the database, ensuring they survive
+ * page reloads, server restarts, and are available across cluster nodes.</p>
  */
 public class FederatedApisApiServiceImpl implements FederatedApisApiService {
 
@@ -77,6 +73,7 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
     private static final String STATUS_PENDING   = "PENDING";
     private static final String STATUS_COMPLETED = "COMPLETED";
     private static final String STATUS_FAILED    = "FAILED";
+    private static final long PENDING_TASK_TIMEOUT_MS = 300000; // 5 minutes
 
     // -----------------------------------------------------------------------
     // Background executor for discovery work
@@ -117,7 +114,7 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
 
             if (STATUS_PENDING.equals(dbStatus) && updatedAt != null) {
                 long elapsed = System.currentTimeMillis() - updatedAt.getTime();
-                if (elapsed < 300000) { // 5 minutes safety timeout
+                if (elapsed < PENDING_TASK_TIMEOUT_MS) {
                     log.info("Discovery already in progress in the DB cluster for env [" + environment
                             + "] org [" + organization + "], returning existing taskId: " + dbTaskId);
                     Map<String, Object> m = new HashMap<>();
@@ -145,6 +142,20 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
         java.sql.Timestamp now = new java.sql.Timestamp(System.currentTimeMillis());
         ApiMgtDAO.getInstance().updateDiscoveryTaskStatus(
                 environment, organization, taskId, STATUS_PENDING, null, now);
+
+        // --- Atomic guard: verify we won the race -----------------------------
+        Map<String, Object> currentTask = dao.getActiveDiscoveryTask(environment, organization);
+        String currentTaskId = currentTask != null ? (String) currentTask.get("taskId") : null;
+        if (!taskId.equals(currentTaskId)) {
+            // Another concurrent request won — return theirs instead
+            String existingStatus = currentTask != null ? (String) currentTask.get("status") : null;
+            log.info("Discovery task for env [" + environment + "] org [" + organization
+                    + "] was claimed by another request. Returning existing taskId: " + currentTaskId);
+            Map<String, Object> m = new HashMap<>();
+            m.put("taskId", currentTaskId);
+            m.put("status", existingStatus != null ? existingStatus : STATUS_PENDING);
+            return Response.accepted(m).build();
+        }
 
         // --- Submit to background worker --------------------------------------
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
