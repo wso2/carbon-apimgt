@@ -43,7 +43,7 @@ public class TelemetryConstants {
      */
     static final String JAEGER_CONFIG_PORT = "OpenTelemetry.RemoteTracer.Port";
     static final String JAEGER_CONFIG_HOST = "OpenTelemetry.RemoteTracer.HostName";
-    static final int JAEGER_DEFAULT_PORT = 4317; // 14250 is deprecated
+    static final int JAEGER_DEFAULT_PORT = 14250;
     static final String JAEGER_DEFAULT_HOST = "localhost";
 
     /**
