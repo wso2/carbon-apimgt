@@ -15,6 +15,8 @@
  */ 
 package org.wso2.carbon.apimgt.persistence.utils;
 
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -204,9 +206,7 @@ public class RegistryPersistenceDocUtil {
     }
 
     /**
-     * Get file type content location from API source path. The path is namespaced under the
-     * documentation's own id so that two different documents uploading a file with the same
-     * name never collide/overwrite each other.
+     * Get file type content location from API source path, namespaced under the documentation id.
      *
      * @param apiSourcePath the API source path
      * @param docId         documentation artifact id
@@ -215,8 +215,23 @@ public class RegistryPersistenceDocUtil {
      */
     public static String getDocumentFilePath(String apiSourcePath, String docId, String fileName) {
         return getDocumentBasePath(apiSourcePath) + APIConstants.DOCUMENT_FILE_DIR
-                + RegistryConstants.PATH_SEPARATOR + docId
-                + RegistryConstants.PATH_SEPARATOR + fileName;
+                + RegistryConstants.PATH_SEPARATOR + sanitizePathSegment(docId, "document id")
+                + RegistryConstants.PATH_SEPARATOR + sanitizePathSegment(fileName, "file name");
+    }
+
+    /**
+     * Restricts a value to a single, non-traversal path segment.
+     *
+     * @param value the untrusted value
+     * @param label label used in the error message if the value is invalid
+     * @return the sanitized value
+     */
+    private static String sanitizePathSegment(String value, String label) {
+        String sanitized = FilenameUtils.getName(value);
+        if (StringUtils.isBlank(sanitized) || "..".equals(sanitized) || ".".equals(sanitized)) {
+            throw new IllegalArgumentException("Invalid " + label + ": " + value);
+        }
+        return sanitized;
     }
 
     /**
