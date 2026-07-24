@@ -109,6 +109,7 @@ public class APIHandlerServiceComponent {
 
     private APIKeyValidatorClientPool clientPool;
     private ServiceRegistration registration;
+    private VectorDBProviderService vectorDBProviderService;
 
     @Activate
     protected void activate(ComponentContext context) {
@@ -285,7 +286,6 @@ public class APIHandlerServiceComponent {
         if (vectorDBProviderConfigurationDTO.getType() != null) {
             try {
                 String vectorDBProviderType = vectorDBProviderConfigurationDTO.getType();
-                VectorDBProviderService vectorDBProviderService;
                 switch (vectorDBProviderType) {
                     case APIConstants.AI.VECTOR_DB_PROVIDER_ZILLIZ_TYPE:
                         vectorDBProviderService = new ZillizVectorDBProviderServiceImpl();
@@ -343,6 +343,13 @@ public class APIHandlerServiceComponent {
         if (ServiceReferenceHolder.getInstance().getRedisPool() != null &&
                 !ServiceReferenceHolder.getInstance().getRedisPool().isClosed()) {
             ServiceReferenceHolder.getInstance().getRedisPool().destroy();
+        }
+        if (vectorDBProviderService != null) {
+            try {
+                vectorDBProviderService.close();
+            } catch (APIManagementException e) {
+                log.error("Error closing Vector DB provider service", e);
+            }
         }
     }
 

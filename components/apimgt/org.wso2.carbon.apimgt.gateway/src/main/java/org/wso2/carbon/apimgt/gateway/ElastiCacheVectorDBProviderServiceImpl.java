@@ -154,6 +154,14 @@ public class ElastiCacheVectorDBProviderServiceImpl implements VectorDBProviderS
         return APIConstants.AI.VECTOR_DB_PROVIDER_ELASTICACHE_TYPE;
     }
 
+    @Override
+    public void close() throws APIManagementException {
+        if (executor != null) {
+            log.debug("Closing AWS ElastiCache Vector DB provider");
+            executor.close();
+        }
+    }
+
     /**
      * Create a RediSearch vector index in ElastiCache if it does not already exist.
      */
@@ -404,6 +412,18 @@ public class ElastiCacheVectorDBProviderServiceImpl implements VectorDBProviderS
                 JEDIS_POOL_TIME_BETWEEN_EVICTION_RUNS_MILLIS, JEDIS_POOL_TIME_BETWEEN_EVICTION_RUNS_MILLIS_DEFAULT));
         poolConfig.setNumTestsPerEvictionRun(parseIntProperty(properties, JEDIS_POOL_NUM_TESTS_PER_EVICTION_RUN,
                 JEDIS_POOL_NUM_TESTS_PER_EVICTION_RUN_DEFAULT));
+        if (log.isDebugEnabled()) {
+            log.debug("Resolved Jedis pool config: maxTotal=" + poolConfig.getMaxTotal() +
+                    ", maxIdle=" + poolConfig.getMaxIdle() +
+                    ", minIdle=" + poolConfig.getMinIdle() +
+                    ", testOnBorrow=" + poolConfig.getTestOnBorrow() +
+                    ", testOnReturn=" + poolConfig.getTestOnReturn() +
+                    ", testWhileIdle=" + poolConfig.getTestWhileIdle() +
+                    ", blockWhenExhausted=" + poolConfig.getBlockWhenExhausted() +
+                    ", minEvictableIdleTimeMillis=" + poolConfig.getMinEvictableIdleTimeMillis() +
+                    ", timeBetweenEvictionRunsMillis=" + poolConfig.getTimeBetweenEvictionRunsMillis() +
+                    ", numTestsPerEvictionRun=" + poolConfig.getNumTestsPerEvictionRun());
+        }
         return poolConfig;
     }
 
