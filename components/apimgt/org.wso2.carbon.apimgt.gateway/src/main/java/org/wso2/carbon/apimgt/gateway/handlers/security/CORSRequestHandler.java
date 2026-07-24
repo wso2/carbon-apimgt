@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security;
 
+import io.opentelemetry.api.trace.SpanKind;
 import org.apache.axis2.Constants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,7 +35,6 @@ import org.apache.synapse.api.dispatch.RESTDispatcher;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
-import org.wso2.carbon.apimgt.gateway.handlers.LogsHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -140,7 +140,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
                     (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
             TelemetryTracer tracer = ServiceReferenceHolder.getInstance().getTelemetryTracer();
             corsRequestHandlerSpan =
-                    TelemetryUtil.startSpan(APIMgtGatewayConstants.CORS_REQUEST_HANDLER, responseLatencySpan, tracer);
+                    TelemetryUtil.startSpan(APIMgtGatewayConstants.CORS_REQUEST_HANDLER, responseLatencySpan, tracer, SpanKind.INTERNAL);
         } else if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =
                     (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
@@ -265,6 +265,8 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
         } finally {
             stopMetricTimer(context);
             if (TelemetryUtil.telemetryEnabled()) {
+                 // set Http attributes right before finishing the span, so http.status.code is captured
+                GatewayUtils.setCommonHTTPAttributes(corsRequestHandlerSpan, messageContext);
                 TelemetryUtil.finishSpan(corsRequestHandlerSpan);
             } else if (Util.tracingEnabled()) {
                 Util.finishSpan(corsRequestHandlerTracingSpan);

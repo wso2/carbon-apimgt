@@ -36,6 +36,8 @@ public class TelemetryConstants {
     static final String TRACER_ID = "Tracer Id";
     static final String SPAN_ID = "Span Id";
     static final String TRACER = "tracer";
+    static final String PROCESS_PID = "process.pid";
+
     /**
      * Jaeger Constants.
      */
@@ -64,6 +66,9 @@ public class TelemetryConstants {
      */
     static final String OTLP_CONFIG_URL = "OpenTelemetry.RemoteTracer.Url";
     static final String OPENTELEMETRY_PROPERTIES_PREFIX = "OpenTelemetry.RemoteTracer.Properties.";
+    static final String OTLP_CONFIG_PROTOCOL = "OpenTelemetry.RemoteTracer.Protocol";
+    static final String HTTP_PROTOCOL = "http";
+    static final String GRPC_PROTOCOL = "grpc";
 
     /**
      * Sampler Constants.

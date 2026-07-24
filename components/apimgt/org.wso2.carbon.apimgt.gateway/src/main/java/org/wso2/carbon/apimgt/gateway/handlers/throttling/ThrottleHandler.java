@@ -17,6 +17,7 @@
 */
 package org.wso2.carbon.apimgt.gateway.handlers.throttling;
 
+import io.opentelemetry.api.trace.SpanKind;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
@@ -650,7 +651,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                     (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
             TelemetryTracer tracer = ServiceReferenceHolder.getInstance().getTelemetryTracer();
             throttleLatencySpan = TelemetryUtil.startSpan(APIMgtGatewayConstants.THROTTLE_LATENCY,
-                        responseLatencySpan, tracer);
+                        responseLatencySpan, tracer, SpanKind.INTERNAL);
         } else if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =
                     (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
@@ -682,6 +683,8 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                     System.currentTimeMillis() - executionStartTime);
             context3.stop();
             if (TelemetryUtil.telemetryEnabled()) {
+                // set Http attributes right before finishing the span, so http.status.code is captured
+                GatewayUtils.setCommonHTTPAttributes(throttleLatencySpan, messageContext);
                 TelemetryUtil.finishSpan(throttleLatencySpan);
             } else if (Util.tracingEnabled()) {
                 Util.finishSpan(throttleLatencyTracingSpan);
@@ -712,7 +715,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                         (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
                 TelemetryTracer tracer = ServiceReferenceHolder.getInstance().getTelemetryTracer();
                 throttleLatencySpan = TelemetryUtil.startSpan(APIMgtGatewayConstants.THROTTLE_LATENCY,
-                        responseLatencySpan, tracer);
+                        responseLatencySpan, tracer, SpanKind.INTERNAL);
             } else if (Util.tracingEnabled()) {
                 TracingSpan responseLatencySpan =
                         (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
@@ -741,6 +744,8 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                         System.currentTimeMillis() - executionStartTime);
                 context3.stop();
                 if (TelemetryUtil.telemetryEnabled()) {
+                    // set Http attributes right before finishing the span, so http.status.code is captured
+                    GatewayUtils.setCommonHTTPAttributes(throttleLatencySpan, messageContext);
                     TelemetryUtil.finishSpan(throttleLatencySpan);
                 } else if (Util.tracingEnabled()) {
                     Util.finishSpan(throttleLatencyTracingSpan);
