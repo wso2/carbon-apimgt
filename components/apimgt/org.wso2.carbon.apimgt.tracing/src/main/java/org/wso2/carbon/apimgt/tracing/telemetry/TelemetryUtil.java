@@ -36,7 +36,6 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.tracing.internal.ServiceReferenceHolder;
 
-//import java.lang.ProcessHandle;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -64,7 +63,6 @@ public class TelemetryUtil {
     public static TelemetrySpan startSpan(String spanName, TelemetrySpan parentSpan,
                                           TelemetryTracer tracer, SpanKind spanKind) {
 
-//        Span childSpan;
         SpanBuilder builder = tracer.getTelemetryTracingTracer().spanBuilder(spanName);
 
         if (spanKind != null) {
@@ -72,8 +70,7 @@ public class TelemetryUtil {
         }
 
         if (parentSpan == null) {
-//            Span span = tracer.getTelemetryTracingTracer().spanBuilder(spanName).startSpan();
-//            return new TelemetrySpan(span); // Opentelemtry Span wraps using TelemtrySpan
+
             return new TelemetrySpan(builder.startSpan());
         } else {
             Object sp = parentSpan.getSpan();
@@ -82,18 +79,10 @@ public class TelemetryUtil {
                     log.debug("Parent span exist");
                 }
                 if (sp instanceof Span) {
-//                    childSpan = tracer.getTelemetryTracingTracer().spanBuilder(spanName).setParent(Context.current()
-//                            .with((Span) sp)).startSpan();
                     builder.setParent(Context.current().with((Span) sp));
                 } else {
-//                    childSpan =
-//                            tracer.getTelemetryTracingTracer().spanBuilder(spanName)
-//                                    .setParent((Context) sp).startSpan();
                     builder.setParent((Context) sp);
                 }
-            } else {
-//                childSpan = tracer.getTelemetryTracingTracer().spanBuilder(spanName).startSpan();
-                    builder.startSpan();
             }
         }
         return new TelemetrySpan(builder.startSpan());
@@ -110,8 +99,6 @@ public class TelemetryUtil {
     public static TelemetrySpan startSpan(String spanName, Context parentSpan,
                                           TelemetryTracer tracer, SpanKind spanKind) {
 
-//        Span childSpan;
-//        childSpan = tracer.getTelemetryTracingTracer().spanBuilder(spanName).setParent(parentSpan).startSpan();
         SpanBuilder builder = tracer.getTelemetryTracingTracer().spanBuilder(spanName);
 
         if (spanKind != null) {
@@ -119,7 +106,6 @@ public class TelemetryUtil {
         }
 
         builder.setParent(parentSpan);
-//        return new TelemetrySpan(childSpan);
         return new TelemetrySpan(builder.startSpan());
     }
 
@@ -135,7 +121,7 @@ public class TelemetryUtil {
         Object sp = span.getSpan();
         if (sp instanceof Span) {
             ((Span) sp).setAttribute(key, value);
-        } //Span kind......
+        }
     }
 
     /**
@@ -300,8 +286,8 @@ public class TelemetryUtil {
 
         Resource tracerProviderResource = Resource.getDefault();
 
-        //adding process id since the java serviceprovider won't be able to load the processPidResourceProvider
-        // because of osgi bundle hss different classloaders
+        // Adding process id since the Java service provider won't be able to load the processPidResourceProvider
+        // because OSGi bundles have different classloaders
         long pid = java.lang.ProcessHandle.current().pid();
         Attributes processAttributes = Attributes.builder()
                 .put(TelemetryConstants.PROCESS_PID, pid)
@@ -310,7 +296,7 @@ public class TelemetryUtil {
 
         Resource serviceNameResource = Resource.create(
                 Attributes.of(ServiceAttributes.SERVICE_NAME, defaultServiceName));
-        // adding process id to the trace
+        // Adding process id to the trace
         tracerProviderResource = tracerProviderResource.merge(processResource);
         tracerProviderResource = tracerProviderResource.merge(serviceNameResource);
         tracerProviderResource = tracerProviderResource.merge(Resource.create(attributes));

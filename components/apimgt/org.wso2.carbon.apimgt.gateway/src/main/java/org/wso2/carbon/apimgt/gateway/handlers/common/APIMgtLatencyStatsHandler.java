@@ -91,7 +91,7 @@ public class APIMgtLatencyStatsHandler extends AbstractHandler {
                     (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
             TelemetryTracer tracer = ServiceReferenceHolder.getInstance().getTelemetryTracer();
             TelemetrySpan span = TelemetryUtil.startSpan(APIMgtGatewayConstants.RESOURCE_SPAN, responseLatencySpan,
-                    tracer, SpanKind.INTERNAL);// added internal span kind
+                    tracer, SpanKind.INTERNAL);
             GatewayUtils.setCommonHTTPAttributes(span, messageContext);
             messageContext.setProperty(APIMgtGatewayConstants.RESOURCE_SPAN, span);
         } else if (Util.tracingEnabled()) {

@@ -1239,8 +1239,8 @@ public class GatewayUtils {
 
     public static void setCommonHTTPAttributes(TelemetrySpan tracingSpan,
                                                org.apache.synapse.MessageContext messageContext) {
-        // to prevent if message context is not axis2messageontext or tracing span is null
-        if(tracingSpan == null || !(messageContext instanceof Axis2MessageContext)) {
+        // Skip if the tracing span is null or the message context is not an Axis2MessageContext.
+        if (tracingSpan == null || !(messageContext instanceof Axis2MessageContext)) {
             return;
         }
 
