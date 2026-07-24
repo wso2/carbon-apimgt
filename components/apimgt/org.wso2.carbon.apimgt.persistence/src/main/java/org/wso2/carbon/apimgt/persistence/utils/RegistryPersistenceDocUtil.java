@@ -171,7 +171,8 @@ public class RegistryPersistenceDocUtil {
         String apiSourcePath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 RegistryPersistenceUtil.replaceEmailDomain(provider) + RegistryConstants.PATH_SEPARATOR +
                 apiName + RegistryConstants.PATH_SEPARATOR + version;
-        return getDocumentFilePath(apiSourcePath, fileName);
+        return getDocumentBasePath(apiSourcePath) + APIConstants.DOCUMENT_FILE_DIR
+                + RegistryConstants.PATH_SEPARATOR + fileName;
     }
 
     @Deprecated
@@ -196,15 +197,25 @@ public class RegistryPersistenceDocUtil {
                 + APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR;
     }
 
+    @Deprecated
+    public static String getDocumentFilePath(String apiSourcePath, String fileName) {
+        return getDocumentBasePath(apiSourcePath) + APIConstants.DOCUMENT_FILE_DIR
+                + RegistryConstants.PATH_SEPARATOR + fileName;
+    }
+
     /**
-     * Get file type content location from API source path.
+     * Get file type content location from API source path. The path is namespaced under the
+     * documentation's own id so that two different documents uploading a file with the same
+     * name never collide/overwrite each other.
      *
      * @param apiSourcePath the API source path
+     * @param docId         documentation artifact id
      * @param fileName      file name
      * @return document file path
      */
-    public static String getDocumentFilePath(String apiSourcePath, String fileName) {
+    public static String getDocumentFilePath(String apiSourcePath, String docId, String fileName) {
         return getDocumentBasePath(apiSourcePath) + APIConstants.DOCUMENT_FILE_DIR
+                + RegistryConstants.PATH_SEPARATOR + docId
                 + RegistryConstants.PATH_SEPARATOR + fileName;
     }
 
@@ -287,8 +298,10 @@ public class RegistryPersistenceDocUtil {
     @Deprecated
     public static String getDocumentationFilePath(Identifier id, String fileName) {
 
-        return getDocumentFilePath(APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR
+        String apiSourcePath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR
                 + RegistryPersistenceUtil.replaceEmailDomain(id.getProviderName()) + RegistryConstants.PATH_SEPARATOR
-                + id.getName() + RegistryConstants.PATH_SEPARATOR + id.getVersion(), fileName);
+                + id.getName() + RegistryConstants.PATH_SEPARATOR + id.getVersion();
+        return getDocumentBasePath(apiSourcePath) + APIConstants.DOCUMENT_FILE_DIR
+                + RegistryConstants.PATH_SEPARATOR + fileName;
     }
 }
