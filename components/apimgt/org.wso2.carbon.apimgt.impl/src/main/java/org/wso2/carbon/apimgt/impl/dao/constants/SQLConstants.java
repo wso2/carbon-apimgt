@@ -1161,15 +1161,16 @@ public class SQLConstants {
 
     public static final String GET_SIMPLE_APPLICATIONS =
             " SELECT " +
-            "   APPLICATION_ID, " +
-            "   NAME," +
-            "   USER_ID, " +
+            "   APP.UUID, " +
+            "   APP.APPLICATION_ID, " +
+            "   APP.NAME," +
+            "   SUB.USER_ID, " +
             "   APP.CREATED_BY " +
             " FROM" +
             "   AM_APPLICATION APP, " +
             "   AM_SUBSCRIBER SUB  " +
             " WHERE " +
-            "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID ";
+            "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID AND SUB.TENANT_ID = ?";
 
     public static final String GET_APPLICATIONS_BY_OWNER =
             "SELECT " +

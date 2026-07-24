@@ -459,6 +459,24 @@ public class RestApiCommonUtil {
     }
 
     /**
+     * Validates the tenant domain provided in the request header against the tenant domain of the logged in user.
+     * Cross-tenant access is only permitted for users with the admin permission.
+     *
+     * @param tenantDomainHeader tenant domain provided in the header.
+     * @return tenant domain to be used for the request processing.
+     */
+    public static String validateTenantDomain(String tenantDomainHeader) throws APIManagementException {
+        String tenantDomain = getLoggedInUserTenantDomain();
+        if (tenantDomainHeader == null || tenantDomain.equals(tenantDomainHeader)) {
+            return tenantDomain;
+        }
+        if (APIUtil.hasPermission(getLoggedInUsername(), APIConstants.Permissions.APIM_ADMIN)) {
+            return tenantDomainHeader;
+        }
+        return tenantDomain;
+    }
+
+    /**
      * Returns date in RFC3339 format.
      * Example: 2008-11-13T12:23:30-08:00
      *

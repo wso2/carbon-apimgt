@@ -19,7 +19,10 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
@@ -30,10 +33,14 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIRevision;
+import org.wso2.carbon.apimgt.api.model.ApiResult;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
+import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIDTOTypeWrapper;
@@ -46,7 +53,12 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerDTO;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 
 /**
  * Osgi Service implementation for import export API.
@@ -58,11 +70,14 @@ import java.io.InputStream;
 )
 public class ImportExportAPIServiceImpl implements ImportExportAPI {
 
+    private static final Log log = LogFactory.getLog(ImportExportAPIServiceImpl.class);
+
     @Override
     public File exportAPI(String apiId, String name, String version, String revisionNum, String providerName,
                           boolean preserveStatus, ExportFormat format, boolean preserveDocs,
                           boolean preserveCredentials,
-                          boolean exportLatestRevision, String originalDevPortalUrl, String organization)
+                          boolean exportLatestRevision, String originalDevPortalUrl, String organization,
+                          boolean exploded)
             throws APIManagementException, APIImportExportException {
 
         APIIdentifier apiIdentifier;
@@ -105,7 +120,72 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         apiIdentifier = api.getId();
         apiIdentifier.setUuid(exportAPIUUID);
         return ExportUtils.exportAPI(apiProvider, apiIdentifier, new APIDTOTypeWrapper(apiDtoToReturn), api, userName,
-                format, preserveStatus, preserveDocs, originalDevPortalUrl, organization, preserveCredentials);
+                format, preserveStatus, preserveDocs, originalDevPortalUrl, organization, preserveCredentials,
+                exploded);
+    }
+
+    @Override
+    public File exportAPIs(String organization, boolean allRevisions) throws APIManagementException {
+        List<ApiResult> allAPIs = ApiMgtDAO.getInstance().getAllAPIs(organization);
+        Path apiDirectory;
+        try {
+            apiDirectory = Files.createTempDirectory("extracted-apis-".concat(organization));
+        } catch (IOException e) {
+            throw new APIManagementException("Error while creating temporary directory for organization: "
+                    + organization, e);
+        }
+        for (ApiResult apiResult : allAPIs) {
+            Path path = null;
+            try {
+                File currentCopy = null;
+                try {
+                    path = Files.createDirectory(Path.of(apiDirectory.toString(), apiResult.getId()));
+                    currentCopy = exportAPI(apiResult.getId(), null, null, null, null, true, ExportFormat.YAML, true,
+                            true, false, null, organization, true);
+                    FileUtils.copyDirectory(currentCopy, path.toAbsolutePath().toFile(), true);
+                } finally {
+                    if (currentCopy != null) {
+                        FileUtils.deleteDirectory(currentCopy);
+                    }
+                }
+
+                if (allRevisions) {
+                    List<APIRevision> revisionsListByAPIUUID =
+                            ApiMgtDAO.getInstance().getRevisionsListByAPIUUID(apiResult.getId());
+                    if (revisionsListByAPIUUID != null && !revisionsListByAPIUUID.isEmpty()) {
+                        for (APIRevision revisionDto : revisionsListByAPIUUID) {
+                            Path revisionDirectoryPath = Files.createDirectories(
+                                    Path.of(path.toString(), "revisions", revisionDto.getRevisionUUID()));
+                            File revisionExportedFile = null;
+                            try {
+                                revisionExportedFile = exportAPI(apiResult.getId(), null, null,
+                                        Integer.toString(revisionDto.getId()), null, true, ExportFormat.YAML, true,
+                                        true, false, null, organization, true);
+                                FileUtils.copyDirectory(revisionExportedFile,
+                                        revisionDirectoryPath.toAbsolutePath().toFile(), true);
+                            } finally {
+                                if (revisionExportedFile != null) {
+                                    FileUtils.deleteDirectory(revisionExportedFile);
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (APIManagementException | APIImportExportException | IOException e) {
+                log.error("Error while exporting API with id " + apiResult.getId() + " for organization: "
+                        + organization, e);
+                if (path != null) {
+                    FileUtils.deleteQuietly(path.toFile());
+                }
+            }
+        }
+        try {
+            CommonUtil.archiveDirectory(apiDirectory.toAbsolutePath().toString());
+            FileUtils.deleteQuietly(apiDirectory.toFile());
+            return Paths.get(apiDirectory.toAbsolutePath().toString().concat(APIConstants.ZIP_FILE_EXTENSION)).toFile();
+        } catch (APIImportExportException e) {
+            throw new APIManagementException("Error while creating zip file for organization: " + organization, e);
+        }
     }
 
     @Override
@@ -148,7 +228,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         apiIdentifier = api.getId();
         apiIdentifier.setUuid(exportAPIUUID);
         return ExportUtils.exportAPI(apiProvider, apiIdentifier, new APIDTOTypeWrapper(apiDtoToReturn), api, userName,
-                format, preserveStatus, preserveDocs, originalDevPortalUrl, organization, preserveCredentials);
+                format, preserveStatus, preserveDocs, originalDevPortalUrl, organization, preserveCredentials, false);
     }
 
     @Override
@@ -173,13 +253,13 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
                     apiProvider);
             return ExportUtils.exportAPI(
                     apiProvider, apiIdentifier, new APIDTOTypeWrapper(mcpServerDtoToReturn), api, userName, format,
-                    preserveStatus, preserveDocs, StringUtils.EMPTY, organization, preserveCredentials
+                    preserveStatus, preserveDocs, StringUtils.EMPTY, organization, preserveCredentials, false
             );
         } else {
             APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, apiProvider);
             return ExportUtils.exportAPI(
                     apiProvider, apiIdentifier, new APIDTOTypeWrapper(apiDtoToReturn), api, userName, format,
-                    preserveStatus, preserveDocs, StringUtils.EMPTY, organization, preserveCredentials
+                    preserveStatus, preserveDocs, StringUtils.EMPTY, organization, preserveCredentials, false
             );
         }
     }

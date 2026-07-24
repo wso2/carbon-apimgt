@@ -456,8 +456,8 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
                 }
                 File apiProject = ExportUtils.exportAPI(
                         apiProvider, apiIdentifier, apiDtoTypeWrapper, api,
-                        apiIdentifier.getProviderName(), ExportFormat.YAML, true, true, 
-                        StringUtils.EMPTY, organization, false
+                        apiIdentifier.getProviderName(), ExportFormat.YAML, true, true,
+                        StringUtils.EMPTY, organization, false, false
                 ); // returns zip file
                 if (log.isDebugEnabled()) {
                     if (!isMCPServer) {

@@ -52,9 +52,37 @@ public interface ImportExportAPI {
      * @throws APIImportExportException
      */
     @UsedByMigrationClient
-    public File exportAPI(String apiId, String name, String version, String revisionNum, String providerName,
+    default File exportAPI(String apiId, String name, String version, String revisionNum, String providerName,
             boolean preserveStatus, ExportFormat format, boolean preserveDocs, boolean preserveCredentials,
             boolean exportLatestRevision, String originalDevPortalUrl, String organization)
+            throws APIManagementException, APIImportExportException {
+        return exportAPI(apiId, name, version, revisionNum, providerName, preserveStatus, format, preserveDocs,
+                preserveCredentials, exportLatestRevision, originalDevPortalUrl, organization, false);
+    }
+
+    /**
+     * Used to export API artifact
+     *
+     * @param apiId                UUID of API.
+     * @param name                 name of API.
+     * @param version              version of API.
+     * @param revisionNum          revision number.
+     * @param providerName         provider of API.
+     * @param preserveStatus       Preserve API status on export
+     * @param format               Format of output documents. Can be YAML or JSON
+     * @param preserveDocs         Preserve documentation on Export.
+     * @param exportLatestRevision Export the latest revision.
+     * @param originalDevPortalUrl Original DevPortal URL (redirect URL) for the original Store
+     *                             (This is used for advertise only APIs).
+     * @param organization          Organization
+     * @param exploded             Return an exploded (unarchived) export directory instead of a zip.
+     * @return API artifact.
+     * @throws APIManagementException
+     * @throws APIImportExportException
+     */
+    public File exportAPI(String apiId, String name, String version, String revisionNum, String providerName,
+            boolean preserveStatus, ExportFormat format, boolean preserveDocs, boolean preserveCredentials,
+            boolean exportLatestRevision, String originalDevPortalUrl, String organization, boolean exploded)
             throws APIManagementException, APIImportExportException;
 
     /**
@@ -98,6 +126,16 @@ public interface ImportExportAPI {
     public File exportAPI(String apiId, String revisionUUID, boolean preserveStatus, ExportFormat format,
                           boolean preserveDocs, boolean preserveCredentials, String organization)
             throws APIManagementException, APIImportExportException;
+
+    /**
+     * Used to export API artifacts of all APIs for a given organization, as a single zip archive.
+     *
+     * @param organization Organization
+     * @param allRevisions Whether to export all revisions of each API or not.
+     * @return API artifact.
+     * @throws APIManagementException if an error occurs while exporting APIs.
+     */
+    File exportAPIs(String organization, boolean allRevisions) throws APIManagementException;
 
     /**
      * Used to export API Product artifact
