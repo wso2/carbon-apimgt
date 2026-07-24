@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.SubscriptionValidationDAO;
 import org.wso2.carbon.apimgt.internal.service.SubscriptionsApiService;
 import org.wso2.carbon.apimgt.internal.service.utils.SubscriptionValidationDataUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -47,14 +48,18 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
         String organization = RestApiUtil.getOrganization(messageContext);
         if (StringUtils.isNotEmpty(applicationUUID) && StringUtils.isNotEmpty(apiUUID)) {
-            Subscription subscription = subscriptionValidationDAO.getSubscription(apiUUID, applicationUUID);
+            String authenticatedOrganization = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            Subscription subscription = getSubscription(subscriptionValidationDAO, apiUUID, applicationUUID,
+                    authenticatedOrganization);
             if (subscription != null) {
                 subscriptionList.add(subscription);
             }
             result = Response.ok().entity(
                     SubscriptionValidationDataUtil.fromSubscriptionToSubscriptionListDTO(subscriptionList)).build();
         } else if (apiId != null && appId != null) {
-            Subscription subscription = subscriptionValidationDAO.getSubscription(apiId, appId);
+            String authenticatedOrganization = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            Subscription subscription = getSubscription(subscriptionValidationDAO, apiId, appId,
+                    authenticatedOrganization);
             if (subscription != null) {
                 subscriptionList.add(subscription);
             }
@@ -77,5 +82,32 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         }
 
         return result;
+    }
+
+    static Subscription getSubscription(SubscriptionValidationDAO subscriptionValidationDAO, String apiUUID,
+                                        String applicationUUID, String authenticatedOrganization) {
+
+        if (StringUtils.isEmpty(authenticatedOrganization)) {
+            return null;
+        }
+        Subscription subscription = subscriptionValidationDAO.getSubscription(apiUUID, applicationUUID);
+        return isSubscriptionAccessibleForOrganization(subscription, authenticatedOrganization) ? subscription : null;
+    }
+
+    static Subscription getSubscription(SubscriptionValidationDAO subscriptionValidationDAO, int apiId, int appId,
+                                        String authenticatedOrganization) {
+
+        if (StringUtils.isEmpty(authenticatedOrganization)) {
+            return null;
+        }
+        Subscription subscription = subscriptionValidationDAO.getSubscription(apiId, appId);
+        return isSubscriptionAccessibleForOrganization(subscription, authenticatedOrganization) ? subscription : null;
+    }
+
+    private static boolean isSubscriptionAccessibleForOrganization(Subscription subscription, String organization) {
+
+        return subscription != null &&
+                (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(organization) ||
+                        organization.equalsIgnoreCase(subscription.getAppOrganization()));
     }
 }
