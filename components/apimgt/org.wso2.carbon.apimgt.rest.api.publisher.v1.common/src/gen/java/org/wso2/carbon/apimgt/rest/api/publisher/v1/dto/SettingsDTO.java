@@ -50,6 +50,7 @@ public class SettingsDTO   {
     private Boolean aiAuthTokenProvided = false;
     private Boolean isGatewayNotificationEnabled = false;
     private Boolean isMCPSupportEnabled = true;
+    private Boolean isFederatedAPIDiscoveryEnabled = true;
     private List<SettingsCustomPropertiesDTO> customProperties = new ArrayList<SettingsCustomPropertiesDTO>();
 
   /**
@@ -464,6 +465,24 @@ public class SettingsDTO   {
   }
 
   /**
+   * This indicates whether the Federated API Discovery is enabled or not.
+   **/
+  public SettingsDTO isFederatedAPIDiscoveryEnabled(Boolean isFederatedAPIDiscoveryEnabled) {
+    this.isFederatedAPIDiscoveryEnabled = isFederatedAPIDiscoveryEnabled;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "This indicates whether the Federated API Discovery is enabled or not.")
+  @JsonProperty("isFederatedAPIDiscoveryEnabled")
+  public Boolean isIsFederatedAPIDiscoveryEnabled() {
+    return isFederatedAPIDiscoveryEnabled;
+  }
+  public void setIsFederatedAPIDiscoveryEnabled(Boolean isFederatedAPIDiscoveryEnabled) {
+    this.isFederatedAPIDiscoveryEnabled = isFederatedAPIDiscoveryEnabled;
+  }
+
+  /**
    **/
   public SettingsDTO customProperties(List<SettingsCustomPropertiesDTO> customProperties) {
     this.customProperties = customProperties;
@@ -514,12 +533,13 @@ public class SettingsDTO   {
         Objects.equals(aiAuthTokenProvided, settings.aiAuthTokenProvided) &&
         Objects.equals(isGatewayNotificationEnabled, settings.isGatewayNotificationEnabled) &&
         Objects.equals(isMCPSupportEnabled, settings.isMCPSupportEnabled) &&
+        Objects.equals(isFederatedAPIDiscoveryEnabled, settings.isFederatedAPIDiscoveryEnabled) &&
         Objects.equals(customProperties, settings.customProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(devportalUrl, environment, gatewayTypes, gatewayFeatureCatalog, scopes, monetizationAttributes, subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, portalConfigurationOnlyModeEnabled, retryCallWithNewOAuthTokenEnabled, crossTenantSubscriptionEnabled, defaultAdvancePolicy, defaultSubscriptionPolicy, authorizationHeader, isJWTEnabledForLoginTokens, orgAccessControlEnabled, allowSubscriptionValidationDisabling, designAssistantEnabled, aiAuthTokenProvided, isGatewayNotificationEnabled, isMCPSupportEnabled, customProperties);
+    return Objects.hash(devportalUrl, environment, gatewayTypes, gatewayFeatureCatalog, scopes, monetizationAttributes, subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, portalConfigurationOnlyModeEnabled, retryCallWithNewOAuthTokenEnabled, crossTenantSubscriptionEnabled, defaultAdvancePolicy, defaultSubscriptionPolicy, authorizationHeader, isJWTEnabledForLoginTokens, orgAccessControlEnabled, allowSubscriptionValidationDisabling, designAssistantEnabled, aiAuthTokenProvided, isGatewayNotificationEnabled, isMCPSupportEnabled, isFederatedAPIDiscoveryEnabled, customProperties);
   }
 
   @Override
@@ -550,6 +570,7 @@ public class SettingsDTO   {
     sb.append("    aiAuthTokenProvided: ").append(toIndentedString(aiAuthTokenProvided)).append("\n");
     sb.append("    isGatewayNotificationEnabled: ").append(toIndentedString(isGatewayNotificationEnabled)).append("\n");
     sb.append("    isMCPSupportEnabled: ").append(toIndentedString(isMCPSupportEnabled)).append("\n");
+    sb.append("    isFederatedAPIDiscoveryEnabled: ").append(toIndentedString(isFederatedAPIDiscoveryEnabled)).append("\n");
     sb.append("    customProperties: ").append(toIndentedString(customProperties)).append("\n");
     sb.append("}");
     return sb.toString();
