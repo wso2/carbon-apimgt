@@ -197,6 +197,12 @@ public class RegistryPersistenceDocUtil {
                 + APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR;
     }
 
+    @Deprecated
+    public static String getDocumentFilePath(String apiSourcePath, String fileName) {
+        return getDocumentBasePath(apiSourcePath) + APIConstants.DOCUMENT_FILE_DIR
+                + RegistryConstants.PATH_SEPARATOR + fileName;
+    }
+
     /**
      * Get file type content location from API source path. The path is namespaced under the
      * documentation's own id so that two different documents uploading a file with the same
