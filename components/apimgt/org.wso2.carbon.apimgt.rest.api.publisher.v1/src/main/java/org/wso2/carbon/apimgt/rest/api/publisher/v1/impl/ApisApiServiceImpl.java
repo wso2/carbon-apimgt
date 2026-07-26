@@ -425,7 +425,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             //validate if api exists
-            CommonUtils.validateAPIExistence(apiId);
+            APIInfo apiInfo = CommonUtils.validateAPIExistence(apiId);
+            //validate API update operation permitted based on the LC state
+            validateAPIOperationsPerLC(apiInfo.getStatus().toString());
             PublisherCommonUtils.updateAPIEndpoint(apiId, endpointId, apIEndpointDTO, organization, apiProvider);
             APIEndpointInfo updatedAPIEndpoint = apiProvider.getAPIEndpointByUUID(apiId, endpointId, organization);
             APIEndpointDTO updatedAPIEndpointDTO = APIMappingUtil.fromAPIEndpointToDTO(updatedAPIEndpoint,
@@ -3793,6 +3795,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 throw new APIMgtResourceNotFoundException("API not found for id " + apiId,
                         ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
             }
+            //validate API update operation permitted based on the LC state
+            validateAPIOperationsPerLC(existingAPI.getStatus());
             //Get all existing versions of API
             Set<String> apiVersions = apiProvider.getAPIVersions(apiIdentifierFromTable.getProviderName(),
                     apiIdentifierFromTable.getApiName(), organization);
@@ -4388,13 +4392,20 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         //validate if api exists
         APIInfo apiInfo = CommonUtils.validateAPIExistence(apiId);
-        //validate API update operation permitted based on the LC state
-        validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
         //validate whether the API is advertise only
         APIDTO apiDto = getAPIByID(apiId, apiProvider, organization);
+
+        // Reject the request if API lifecycle is 'RETIRED'.
+        if (apiDto.getLifeCycleStatus().equals(APIConstants.RETIRED)) {
+            String errorMessage = "Deploying API Revisions is not supported for retired APIs. ApiId: " + apiId;
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.RETIRED_API_REVISION_DEPLOYMENT_UNSUPPORTED, apiId));
+        }
+        //validate API update operation permitted based on the LC state
+        validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
         // Cannot deploy an API with custom sequence to the APK gateway
         Map endpointConfigMap = (Map) apiDto.getEndpointConfig();
@@ -4403,12 +4414,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                 (String) endpointConfigMap.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity("Cannot Deploy an API with a Custom Sequence to APK Gateway: " + apiId).build();
-        }
-        // Reject the request if API lifecycle is 'RETIRED'.
-        if (apiDto.getLifeCycleStatus().equals(APIConstants.RETIRED)) {
-            String errorMessage = "Deploying API Revisions is not supported for retired APIs. ApiId: " + apiId;
-            throw new APIManagementException(errorMessage,
-                    ExceptionCodes.from(ExceptionCodes.RETIRED_API_REVISION_DEPLOYMENT_UNSUPPORTED, apiId));
         }
         if (apiDto != null && apiDto.getAdvertiseInfo() != null && Boolean.TRUE.equals(
                 apiDto.getAdvertiseInfo().isAdvertised())) {
