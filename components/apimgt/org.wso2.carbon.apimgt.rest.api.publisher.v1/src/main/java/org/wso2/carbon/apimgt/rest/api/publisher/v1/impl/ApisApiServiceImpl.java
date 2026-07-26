@@ -1096,6 +1096,10 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @throws APIManagementException if update is not allowed
      */
     private void validateAPIOperationsPerLC(String status) throws APIManagementException {
+        if (APIConstants.RETIRED.equals(status)) {
+            throw new APIManagementException(
+                    ExceptionCodes.from(ExceptionCodes.API_UPDATE_FORBIDDEN_PER_LC, status));
+        }
         boolean updatePermittedForPublishedDeprecated = false;
         String[] tokenScopes =
                 (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
@@ -4264,6 +4268,13 @@ public class ApisApiServiceImpl implements ApisApiService {
                         ExceptionCodes.from(ExceptionCodes.THIRD_PARTY_API_REVISION_CREATION_UNSUPPORTED, apiId));
             }
 
+            // Reject the request if API lifecycle is 'RETIRED'.
+            if (APIConstants.RETIRED.equals(apiInfo.getStatus().toString())) {
+                throw new APIManagementException(
+                        "Creating API Revisions is not supported for retired APIs. ApiId: " + apiId,
+                        ExceptionCodes.from(ExceptionCodes.RETIRED_API_REVISION_CREATION_UNSUPPORTED, apiId));
+            }
+
             //validate API update operation permitted based on the LC state
             validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
@@ -4299,7 +4310,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             String errorMessage = "Error while adding new API Revision for API : " + apiId;
             if ((e.getErrorHandler()
                     .getErrorCode() == ExceptionCodes.THIRD_PARTY_API_REVISION_CREATION_UNSUPPORTED.getErrorCode())
-                    || (e.getErrorHandler().getErrorCode() == ExceptionCodes.MAXIMUM_REVISIONS_REACHED.getErrorCode())) {
+                    || (e.getErrorHandler().getErrorCode() == ExceptionCodes.MAXIMUM_REVISIONS_REACHED.getErrorCode())
+                    || (e.getErrorHandler().getErrorCode()
+                    == ExceptionCodes.RETIRED_API_REVISION_CREATION_UNSUPPORTED.getErrorCode())) {
                 throw e;
             } else {
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);

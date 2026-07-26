@@ -772,6 +772,9 @@ public enum ExceptionCodes implements ErrorHandler {
 
     RETIRED_API_REVISION_DEPLOYMENT_UNSUPPORTED(903227, "Deploying API Revisions is not supported for retired APIs",
             400, "Deploying API Revisions is not supported for retired APIs. ApiId: %s"),
+
+    RETIRED_API_REVISION_CREATION_UNSUPPORTED(903252, "Creating API Revisions is not supported for retired APIs",
+            400, "Creating API Revisions is not supported for retired APIs. ApiId: %s"),
     ACTION_NOT_ALLOWED_FOR_API_INITIATED_FROM_GATEWAY(900517, "Retire action is not allowed for the API " +
             "which is initiated from the Gateway", 400,
             "Retire action is not allowed for the API which is initiated from the Gateway. ApiId: %s", false ),
