@@ -73,6 +73,15 @@ public class StandaloneRedisCommandExecutor implements RedisCommandExecutor {
     }
 
     @Override
+    public void delete(byte[] key) throws APIManagementException {
+        try (Jedis jedis = jedisPool.getResource()) {
+            jedis.del(key);
+        } catch (Exception e) {
+            throw new APIManagementException("Error executing DEL", e);
+        }
+    }
+
+    @Override
     public void close() {
         jedisPool.close();
     }

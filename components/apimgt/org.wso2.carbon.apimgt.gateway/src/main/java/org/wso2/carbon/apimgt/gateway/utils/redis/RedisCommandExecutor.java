@@ -75,6 +75,15 @@ public interface RedisCommandExecutor {
     void expire(byte[] key, int seconds) throws APIManagementException;
 
     /**
+     * Deletes a key, used as best-effort cleanup when a preceding operation on the same key
+     * (e.g. EXPIRE) fails after the key was already written.
+     *
+     * @param key the key to delete
+     * @throws APIManagementException if the DEL could not be executed
+     */
+    void delete(byte[] key) throws APIManagementException;
+
+    /**
      * Releases the underlying Redis connection(s)/pool held by this executor.
      */
     void close();

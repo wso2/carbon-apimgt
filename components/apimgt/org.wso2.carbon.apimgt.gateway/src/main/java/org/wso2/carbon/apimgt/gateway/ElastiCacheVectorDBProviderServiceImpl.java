@@ -266,6 +266,11 @@ public class ElastiCacheVectorDBProviderServiceImpl implements VectorDBProviderS
             executor.expire(key, ttl);
             log.info("Successfully stored response in ElastiCache for API ID: " + apiId);
         } catch (APIManagementException e) {
+            try {
+                executor.delete(key);
+            } catch (APIManagementException deleteEx) {
+                log.warn("Failed to clean up orphaned key after store failure for API ID " + apiId, deleteEx);
+            }
             String errorMsg = "Error storing embeddings in ElastiCache for API ID " + apiId + ": " + e.getMessage();
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e);
@@ -287,7 +292,12 @@ public class ElastiCacheVectorDBProviderServiceImpl implements VectorDBProviderS
             throw new APIManagementException("Missing required filter: 'api_id' or 'threshold'");
         }
         String apiId = filter.get(APIConstants.AI.VECTOR_DB_PROVIDER_API_ID);
-        double threshold = Double.parseDouble(filter.get(APIConstants.AI.VECTOR_DB_PROVIDER_THRESHOLD));
+        double threshold;
+        try {
+            threshold = Double.parseDouble(filter.get(APIConstants.AI.VECTOR_DB_PROVIDER_THRESHOLD));
+        } catch (NumberFormatException nfe) {
+            throw new APIManagementException("Invalid threshold value in filter", nfe);
+        }
         if (log.isDebugEnabled()) {
             log.debug("Retrieving similar response from ElastiCache for API ID: " + apiId);
         }
