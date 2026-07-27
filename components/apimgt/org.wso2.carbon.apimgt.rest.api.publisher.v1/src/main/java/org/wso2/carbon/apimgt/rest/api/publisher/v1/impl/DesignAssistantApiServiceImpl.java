@@ -22,7 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.DesignAssistant;
+import org.wso2.carbon.apimgt.api.AIService;
 import org.wso2.carbon.apimgt.api.DesignAssistantRequest;
 import org.wso2.carbon.apimgt.api.DesignAssistantResponse;
 import org.wso2.carbon.apimgt.impl.ai.AIServiceFactory;
@@ -59,7 +59,7 @@ public class DesignAssistantApiServiceImpl implements DesignAssistantApiService 
             DesignAssistantRequest request = new DesignAssistantRequest();
             request.setSessionId(sessionId);
 
-            DesignAssistant designAssistantService = AIServiceFactory.getDesignAssistantService();
+            AIService designAssistantService = AIServiceFactory.getAIService();
             DesignAssistantResponse response = designAssistantService.generatePayload(request);
             if (response == null || response.getPayload() == null) {
                 return null;
@@ -96,7 +96,7 @@ public class DesignAssistantApiServiceImpl implements DesignAssistantApiService 
             request.setSessionId(sessionId);
             request.setText(designAssistantChatQueryDTO.getText());
 
-            DesignAssistant designAssistantService = AIServiceFactory.getDesignAssistantService();
+            AIService designAssistantService = AIServiceFactory.getAIService();
             DesignAssistantResponse response = designAssistantService.chat(request);
             if (response == null || response.getChatResponse() == null) {
                 return null;

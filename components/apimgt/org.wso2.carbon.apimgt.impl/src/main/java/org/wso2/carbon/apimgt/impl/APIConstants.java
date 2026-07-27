@@ -577,6 +577,9 @@ public final class APIConstants {
     // Constants related to AI features: API chat, Marketplace Assistant, Guardrails
     public static class AI {
         public static final String AI = "AI";
+        // Single implementation class serving every AI capability (Design Assistant, Marketplace Assistant, API Chat)
+        public static final String AI_SERVICE_IMPL_CLASS = "AIServiceImplementation";
+        public static final String AI_SERVICE_DEFAULT_IMPL = "org.wso2.carbon.apimgt.impl.ai.DefaultAIServiceImpl";
         public static final String API_CHAT = "APIChat";
         public static final String ENABLED = "Enabled";
         public static final String API_CHAT_AUTH_TOKEN = "AuthToken";

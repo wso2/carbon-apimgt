@@ -143,6 +143,7 @@ public class APIManagerConfiguration {
     private static MarketplaceAssistantConfigurationDTO marketplaceAssistantConfigurationDto = new MarketplaceAssistantConfigurationDTO();
     private static ApiChatConfigurationDTO apiChatConfigurationDto = new ApiChatConfigurationDTO();
     private static DesignAssistantConfigurationDTO designAssistantConfigurationDto = new DesignAssistantConfigurationDTO();
+    private static String aiServiceImplementationClass = APIConstants.AI.AI_SERVICE_DEFAULT_IMPL;
     private static AIAPIConfigurationsDTO aiapiConfigurationsDTO = new AIAPIConfigurationsDTO();
     private static final APIMGovernanceConfigDTO apimGovConfigurationDto = new APIMGovernanceConfigDTO();
 
@@ -246,6 +247,17 @@ public class APIManagerConfiguration {
     public DesignAssistantConfigurationDTO getDesignAssistantConfigurationDto() {
 
         return designAssistantConfigurationDto;
+    }
+
+    /**
+     * Returns the single implementation class configured under {@code <AIServiceImplementation>} that serves every AI
+     * capability. Falls back to {@link APIConstants.AI#AI_SERVICE_DEFAULT_IMPL} when none is configured.
+     *
+     * @return the fully-qualified implementation class name
+     */
+    public String getAIServiceImplementationClass() {
+
+        return aiServiceImplementationClass;
     }
 
     private Set<APIStore> externalAPIStores = new HashSet<APIStore>();
@@ -883,6 +895,8 @@ public class APIManagerConfiguration {
                 setApiChatConfiguration(element);
             } else if (APIConstants.AI.DESIGN_ASSISTANT.equals(localName)) {
                 setDesignAssistantConfiguration(element);
+            } else if (APIConstants.AI.AI_SERVICE_IMPL_CLASS.equals(localName)) {
+                setAIServiceImplementation(element);
             } else if (APIConstants.AI.AI_CONFIGURATION.equals(localName)) {
                 setAiConfiguration(element);
             } else if (APIConstants.AI.MCP.equals(localName)) {
@@ -3401,6 +3415,18 @@ public class APIManagerConfiguration {
                     && StringUtils.isNotBlank(designAssistantImplClass.getText())) {
                 designAssistantConfigurationDto.setImplementationClass(designAssistantImplClass.getText().trim());
             }
+        }
+    }
+
+    /**
+     * Reads the single {@code <AIServiceImplementation>} element that selects the {@code AIService} implementation
+     * serving every AI capability. When omitted, the shipped {@code DefaultAIServiceImpl} is used.
+     *
+     * @param omElement the {@code <AIServiceImplementation>} configuration element
+     */
+    public void setAIServiceImplementation(OMElement omElement) {
+        if (omElement != null && StringUtils.isNotBlank(omElement.getText())) {
+            aiServiceImplementationClass = omElement.getText().trim();
         }
     }
 

@@ -4202,7 +4202,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         request.setAction(APIConstants.AI.API_CHAT_ACTION_EXECUTE);
         request.setApiChatRequestId(apiChatRequestId);
         request.setRequestPayload(requestPayload);
-        APIChatResponse response = AIServiceFactory.getAPIChatService().execute(request);
+        APIChatResponse response = AIServiceFactory.getAIService().execute(request);
         return response != null ? response.getExecuteResponse() : null;
     }
 
@@ -4215,7 +4215,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         request.setApiChatRequestId(apiChatRequestId);
         request.setOrganization(organization);
         request.setOpenAPIDefinition(getOpenAPIDefinition(apiId, organization));
-        APIChatResponse response = AIServiceFactory.getAPIChatService().prepare(request);
+        APIChatResponse response = AIServiceFactory.getAIService().prepare(request);
         return response != null ? response.getPrepareResponse() : null;
     }
 

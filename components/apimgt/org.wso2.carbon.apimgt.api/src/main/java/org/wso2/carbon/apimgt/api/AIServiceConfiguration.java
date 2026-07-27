@@ -22,93 +22,43 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Neutral carrier for the configuration handed to an {@link AIService} implementation through
+ * The resolved AI-service configuration handed to an {@link AIService} implementation through
  * {@link AIService#init(AIServiceConfiguration)}.
  * <p>
- * It models the settings common to the AI-service integrations - the service {@code endpoint}, an optional
- * {@code tokenEndpoint}, and either an API {@code key} or an {@code accessToken} - as typed fields, while everything
- * that varies between the individual assistants (for example the resource paths of the WSO2-hosted service) is carried
- * in a generic {@link #getProperties() property bag}. Keeping this a plain value object in the {@code api} module (as
- * opposed to the {@code impl}-module {@code *ConfigurationDTO} classes) is what lets a custom implementation be built
- * against {@code api} alone. This follows the same "typed common fields + property map" shape as
- * {@code KeyManagerConfiguration}.
+ * It carries one {@link AIServiceEndpointConfiguration} per AI capability - Design Assistant, Marketplace Assistant
+ * and API Chat - so each capability can be pointed at its own backend/credentials. Anything not modelled as a typed
+ * field can be supplied through the generic {@link #getProperties() property bag}. Because this is a plain
+ * {@code api}-module value object, an implementation reads everything it needs from here and never has to reach into
+ * the {@code impl}-module configuration ({@code APIManagerConfiguration}/{@code ServiceReferenceHolder}).
  */
 public class AIServiceConfiguration {
 
-    private boolean enabled;
-    private String endpoint;
-    private String tokenEndpoint;
-    private String key;
-    private String accessToken;
-    private boolean keyProvided;
-    private boolean authTokenProvided;
+    private final AIServiceEndpointConfiguration designAssistant = new AIServiceEndpointConfiguration();
+    private final AIServiceEndpointConfiguration marketplaceAssistant = new AIServiceEndpointConfiguration();
+    private final AIServiceEndpointConfiguration apiChat = new AIServiceEndpointConfiguration();
     private final Map<String, Object> properties = new HashMap<>();
 
-    public boolean isEnabled() {
-        return enabled;
+    public AIServiceEndpointConfiguration getDesignAssistant() {
+        return designAssistant;
     }
 
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
+    public AIServiceEndpointConfiguration getMarketplaceAssistant() {
+        return marketplaceAssistant;
     }
 
-    public String getEndpoint() {
-        return endpoint;
-    }
-
-    public void setEndpoint(String endpoint) {
-        this.endpoint = endpoint;
-    }
-
-    public String getTokenEndpoint() {
-        return tokenEndpoint;
-    }
-
-    public void setTokenEndpoint(String tokenEndpoint) {
-        this.tokenEndpoint = tokenEndpoint;
-    }
-
-    public String getKey() {
-        return key;
-    }
-
-    public void setKey(String key) {
-        this.key = key;
-    }
-
-    public String getAccessToken() {
-        return accessToken;
-    }
-
-    public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
-    }
-
-    public boolean isKeyProvided() {
-        return keyProvided;
-    }
-
-    public void setKeyProvided(boolean keyProvided) {
-        this.keyProvided = keyProvided;
-    }
-
-    public boolean isAuthTokenProvided() {
-        return authTokenProvided;
-    }
-
-    public void setAuthTokenProvided(boolean authTokenProvided) {
-        this.authTokenProvided = authTokenProvided;
+    public AIServiceEndpointConfiguration getApiChat() {
+        return apiChat;
     }
 
     public Map<String, Object> getProperties() {
         return properties;
     }
 
-    public void addProperty(String key, Object value) {
-        properties.put(key, value);
-    }
-
     public Object getProperty(String key) {
         return properties.get(key);
+    }
+
+    public void addProperty(String key, Object value) {
+        properties.put(key, value);
     }
 }

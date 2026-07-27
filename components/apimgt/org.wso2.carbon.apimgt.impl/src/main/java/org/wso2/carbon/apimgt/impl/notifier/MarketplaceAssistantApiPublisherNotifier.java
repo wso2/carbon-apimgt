@@ -154,7 +154,7 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
 
     /**
      * Asynchronously publishes an API to the Marketplace Assistant vector store through the configured
-     * {@link org.wso2.carbon.apimgt.api.MarketplaceAssistant} implementation.
+     * {@link org.wso2.carbon.apimgt.api.AIService} implementation.
      */
     class MarketplaceAssistantPostTask implements Runnable {
         private final MarketplaceAssistantRequest request;
@@ -166,7 +166,7 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
         @Override
         public void run() {
             try {
-                AIServiceFactory.getMarketplaceAssistantService().publishAPI(request);
+                AIServiceFactory.getAIService().publishAPI(request);
             } catch (APIManagementException e) {
                 String errorMessage = "Error encountered while Uploading the API with UUID: " +
                         request.getUuid() + " to the vector database" + e.getMessage();
@@ -177,7 +177,7 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
 
     /**
      * Asynchronously deletes an API from the Marketplace Assistant vector store through the configured
-     * {@link org.wso2.carbon.apimgt.api.MarketplaceAssistant} implementation.
+     * {@link org.wso2.carbon.apimgt.api.AIService} implementation.
      */
     class MarketplaceAssistantDeletionTask implements Runnable {
         private final MarketplaceAssistantRequest request;
@@ -189,7 +189,7 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
         @Override
         public void run() {
             try {
-                AIServiceFactory.getMarketplaceAssistantService().deleteAPI(request);
+                AIServiceFactory.getAIService().deleteAPI(request);
             } catch (APIManagementException e) {
                 String errorMessage = "Error encountered while Deleting the API with UUID: " +
                         request.getUuid() + " from the vector database" + e.getMessage();

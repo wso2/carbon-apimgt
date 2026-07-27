@@ -27,17 +27,10 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
+import org.wso2.carbon.apimgt.api.AIService;
 import org.wso2.carbon.apimgt.api.AIServiceConfiguration;
-import org.wso2.carbon.apimgt.api.APIChatAssistant;
-import org.wso2.carbon.apimgt.api.APIChatRequest;
-import org.wso2.carbon.apimgt.api.APIChatResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.DesignAssistant;
-import org.wso2.carbon.apimgt.api.DesignAssistantRequest;
-import org.wso2.carbon.apimgt.api.DesignAssistantResponse;
-import org.wso2.carbon.apimgt.api.MarketplaceAssistant;
-import org.wso2.carbon.apimgt.api.MarketplaceAssistantRequest;
-import org.wso2.carbon.apimgt.api.MarketplaceAssistantResponse;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dto.ai.ApiChatConfigurationDTO;
@@ -46,9 +39,9 @@ import org.wso2.carbon.apimgt.impl.dto.ai.MarketplaceAssistantConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 /**
- * Tests {@link AIServiceFactory}'s resolution of the configured {@link DesignAssistant}, {@link MarketplaceAssistant}
- * and {@link APIChatAssistant} implementations: default fallback, valid custom class, wrong-type / non-instantiable
- * rejection, injection of the resolved configuration, and instance caching.
+ * Tests {@link AIServiceFactory}'s resolution of the single configured {@link AIService} implementation that serves
+ * every AI capability: default fallback, valid custom class, wrong-type / non-instantiable rejection, injection of
+ * the resolved configuration, and caching.
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ServiceReferenceHolder.class})
@@ -57,80 +50,81 @@ public class AIServiceFactoryTest {
     private APIManagerConfigurationService configurationService;
     private APIManagerConfiguration configuration;
     private DesignAssistantConfigurationDTO designConfigDto;
-    private MarketplaceAssistantConfigurationDTO marketplaceConfigDto;
-    private ApiChatConfigurationDTO apiChatConfigDto;
 
     @Before
     public void setUp() {
-        // The factory caches each resolved instance in a static field; clear them so every test resolves afresh.
-        Whitebox.setInternalState(AIServiceFactory.class, "designAssistant", (DesignAssistant) null);
-        Whitebox.setInternalState(AIServiceFactory.class, "marketplaceAssistant", (MarketplaceAssistant) null);
-        Whitebox.setInternalState(AIServiceFactory.class, "apiChatAssistant", (APIChatAssistant) null);
+        // The factory caches the resolved instance in a static field; clear it so every test resolves afresh.
+        Whitebox.setInternalState(AIServiceFactory.class, "aiService", (AIService) null);
 
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
         ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
         configurationService = Mockito.mock(APIManagerConfigurationService.class);
         configuration = Mockito.mock(APIManagerConfiguration.class);
         designConfigDto = new DesignAssistantConfigurationDTO();
-        marketplaceConfigDto = new MarketplaceAssistantConfigurationDTO();
-        apiChatConfigDto = new ApiChatConfigurationDTO();
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
         Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(configurationService);
         Mockito.when(configurationService.getAPIManagerConfiguration()).thenReturn(configuration);
+        // By default no custom class is configured (the field defaults to the shipped implementation class name).
+        Mockito.when(configuration.getAIServiceImplementationClass())
+                .thenReturn(APIConstants.AI.AI_SERVICE_DEFAULT_IMPL);
+        // The factory reads the per-capability DTOs to build the injected configuration.
         Mockito.when(configuration.getDesignAssistantConfigurationDto()).thenReturn(designConfigDto);
-        Mockito.when(configuration.getMarketplaceAssistantConfigurationDto()).thenReturn(marketplaceConfigDto);
-        Mockito.when(configuration.getApiChatConfigurationDto()).thenReturn(apiChatConfigDto);
-    }
-
-    // ---- Design Assistant -------------------------------------------------------------------------------------
-
-    @Test
-    public void testReturnsDefaultDesignAssistantWhenNoImplClassConfigured() throws APIManagementException {
-        DesignAssistant service = AIServiceFactory.getDesignAssistantService();
-        Assert.assertTrue("Expected the default Design Assistant implementation",
-                service instanceof DefaultDesignAssistantServiceImpl);
+        Mockito.when(configuration.getMarketplaceAssistantConfigurationDto())
+                .thenReturn(new MarketplaceAssistantConfigurationDTO());
+        Mockito.when(configuration.getApiChatConfigurationDto()).thenReturn(new ApiChatConfigurationDTO());
     }
 
     @Test
-    public void testReturnsDefaultDesignAssistantWhenConfigurationNotInitialized() throws APIManagementException {
+    public void testReturnsDefaultImplWhenNoImplClassConfigured() throws APIManagementException {
+        AIService service = AIServiceFactory.getAIService();
+        Assert.assertTrue("Expected the default AI service implementation",
+                service instanceof DefaultAIServiceImpl);
+    }
+
+    @Test
+    public void testReturnsDefaultImplWhenConfigurationNotInitialized() throws APIManagementException {
         Mockito.when(configurationService.getAPIManagerConfiguration()).thenReturn(null);
-        DesignAssistant service = AIServiceFactory.getDesignAssistantService();
-        Assert.assertTrue("Expected the default Design Assistant implementation when configuration is null",
-                service instanceof DefaultDesignAssistantServiceImpl);
+        AIService service = AIServiceFactory.getAIService();
+        Assert.assertTrue("Expected the default AI service implementation when configuration is null",
+                service instanceof DefaultAIServiceImpl);
     }
 
     @Test
-    public void testReturnsDefaultDesignAssistantWhenImplClassBlank() throws APIManagementException {
-        designConfigDto.setImplementationClass("   ");
-        DesignAssistant service = AIServiceFactory.getDesignAssistantService();
-        Assert.assertTrue("Expected the default Design Assistant implementation when impl class is blank",
-                service instanceof DefaultDesignAssistantServiceImpl);
+    public void testReturnsDefaultImplWhenImplClassBlank() throws APIManagementException {
+        Mockito.when(configuration.getAIServiceImplementationClass()).thenReturn("   ");
+        AIService service = AIServiceFactory.getAIService();
+        Assert.assertTrue("Expected the default AI service implementation when impl class is blank",
+                service instanceof DefaultAIServiceImpl);
     }
 
     @Test
-    public void testReturnsConfiguredCustomDesignAssistant() throws APIManagementException {
-        designConfigDto.setImplementationClass(ValidTestDesignAssistant.class.getName());
-        DesignAssistant service = AIServiceFactory.getDesignAssistantService();
-        Assert.assertTrue("Expected the configured custom Design Assistant implementation",
-                service instanceof ValidTestDesignAssistant);
+    public void testReturnsConfiguredCustomImpl() throws APIManagementException {
+        Mockito.when(configuration.getAIServiceImplementationClass())
+                .thenReturn(ValidTestAIService.class.getName());
+        AIService service = AIServiceFactory.getAIService();
+        Assert.assertTrue("Expected the configured custom AI service implementation",
+                service instanceof ValidTestAIService);
     }
 
     @Test
-    public void testInjectsConfigurationIntoDesignAssistant() throws APIManagementException {
-        designConfigDto.setImplementationClass(ValidTestDesignAssistant.class.getName());
+    public void testInjectsConfigurationIntoImplementation() throws APIManagementException {
         designConfigDto.setEndpoint("https://ai.example.com");
-        DesignAssistant service = AIServiceFactory.getDesignAssistantService();
-        AIServiceConfiguration injected = ((ValidTestDesignAssistant) service).injectedConfiguration;
+        Mockito.when(configuration.getAIServiceImplementationClass())
+                .thenReturn(ValidTestAIService.class.getName());
+
+        AIService service = AIServiceFactory.getAIService();
+        AIServiceConfiguration injected = ((AbstractAIService) service).getConfiguration();
         Assert.assertNotNull("The factory must push the resolved configuration into the implementation", injected);
-        Assert.assertEquals("https://ai.example.com", injected.getEndpoint());
+        Assert.assertEquals("The injected Design Assistant endpoint should match api-manager.xml",
+                "https://ai.example.com", injected.getDesignAssistant().getEndpoint());
     }
 
     @Test
-    public void testThrowsWhenDesignAssistantClassDoesNotImplementSpi() {
-        designConfigDto.setImplementationClass(Object.class.getName());
+    public void testThrowsWhenConfiguredClassDoesNotImplementSpi() {
+        Mockito.when(configuration.getAIServiceImplementationClass()).thenReturn(Object.class.getName());
         try {
-            AIServiceFactory.getDesignAssistantService();
-            Assert.fail("Expected APIManagementException for a class that does not implement DesignAssistant");
+            AIServiceFactory.getAIService();
+            Assert.fail("Expected APIManagementException for a class that does not implement AIService");
         } catch (APIManagementException e) {
             Assert.assertTrue("Message should explain the type mismatch, but was: " + e.getMessage(),
                     e.getMessage().contains("does not implement"));
@@ -138,10 +132,11 @@ public class AIServiceFactoryTest {
     }
 
     @Test
-    public void testThrowsWhenDesignAssistantClassCannotBeInstantiated() {
-        designConfigDto.setImplementationClass("org.wso2.carbon.apimgt.impl.ai.NonExistentDesignAssistantImpl");
+    public void testThrowsWhenConfiguredClassCannotBeInstantiated() {
+        Mockito.when(configuration.getAIServiceImplementationClass())
+                .thenReturn("org.wso2.carbon.apimgt.impl.ai.NonExistentAIServiceImpl");
         try {
-            AIServiceFactory.getDesignAssistantService();
+            AIServiceFactory.getAIService();
             Assert.fail("Expected APIManagementException for a non-instantiable / missing class");
         } catch (APIManagementException e) {
             Assert.assertTrue("Message should indicate an instantiation error, but was: " + e.getMessage(),
@@ -150,151 +145,17 @@ public class AIServiceFactoryTest {
     }
 
     @Test
-    public void testCachesResolvedDesignAssistant() throws APIManagementException {
-        DesignAssistant first = AIServiceFactory.getDesignAssistantService();
-        DesignAssistant second = AIServiceFactory.getDesignAssistantService();
+    public void testCachesResolvedInstance() throws APIManagementException {
+        AIService first = AIServiceFactory.getAIService();
+        AIService second = AIServiceFactory.getAIService();
         Assert.assertSame("The factory should cache and return the same instance", first, second);
     }
 
-    // ---- Marketplace Assistant --------------------------------------------------------------------------------
-
-    @Test
-    public void testReturnsDefaultMarketplaceAssistantWhenNoImplClassConfigured() throws APIManagementException {
-        MarketplaceAssistant service = AIServiceFactory.getMarketplaceAssistantService();
-        Assert.assertTrue("Expected the default Marketplace Assistant implementation",
-                service instanceof DefaultMarketplaceAssistantServiceImpl);
-    }
-
-    @Test
-    public void testReturnsConfiguredCustomMarketplaceAssistant() throws APIManagementException {
-        marketplaceConfigDto.setImplementationClass(ValidTestMarketplaceAssistant.class.getName());
-        MarketplaceAssistant service = AIServiceFactory.getMarketplaceAssistantService();
-        Assert.assertTrue("Expected the configured custom Marketplace Assistant implementation",
-                service instanceof ValidTestMarketplaceAssistant);
-    }
-
-    @Test
-    public void testThrowsWhenMarketplaceAssistantClassDoesNotImplementSpi() {
-        marketplaceConfigDto.setImplementationClass(Object.class.getName());
-        try {
-            AIServiceFactory.getMarketplaceAssistantService();
-            Assert.fail("Expected APIManagementException for a class that does not implement MarketplaceAssistant");
-        } catch (APIManagementException e) {
-            Assert.assertTrue("Message should explain the type mismatch, but was: " + e.getMessage(),
-                    e.getMessage().contains("does not implement"));
-        }
-    }
-
-    @Test
-    public void testCachesResolvedMarketplaceAssistant() throws APIManagementException {
-        MarketplaceAssistant first = AIServiceFactory.getMarketplaceAssistantService();
-        MarketplaceAssistant second = AIServiceFactory.getMarketplaceAssistantService();
-        Assert.assertSame("The factory should cache and return the same instance", first, second);
-    }
-
-    // ---- API Chat -------------------------------------------------------------------------------------------
-
-    @Test
-    public void testReturnsDefaultAPIChatAssistantWhenNoImplClassConfigured() throws APIManagementException {
-        APIChatAssistant service = AIServiceFactory.getAPIChatService();
-        Assert.assertTrue("Expected the default API Chat implementation",
-                service instanceof DefaultAPIChatAssistantServiceImpl);
-    }
-
-    @Test
-    public void testReturnsConfiguredCustomAPIChatAssistant() throws APIManagementException {
-        apiChatConfigDto.setImplementationClass(ValidTestAPIChatAssistant.class.getName());
-        APIChatAssistant service = AIServiceFactory.getAPIChatService();
-        Assert.assertTrue("Expected the configured custom API Chat implementation",
-                service instanceof ValidTestAPIChatAssistant);
-    }
-
-    @Test
-    public void testThrowsWhenAPIChatAssistantClassDoesNotImplementSpi() {
-        apiChatConfigDto.setImplementationClass(Object.class.getName());
-        try {
-            AIServiceFactory.getAPIChatService();
-            Assert.fail("Expected APIManagementException for a class that does not implement APIChatAssistant");
-        } catch (APIManagementException e) {
-            Assert.assertTrue("Message should explain the type mismatch, but was: " + e.getMessage(),
-                    e.getMessage().contains("does not implement"));
-        }
-    }
-
-    @Test
-    public void testCachesResolvedAPIChatAssistant() throws APIManagementException {
-        APIChatAssistant first = AIServiceFactory.getAPIChatService();
-        APIChatAssistant second = AIServiceFactory.getAPIChatService();
-        Assert.assertSame("The factory should cache and return the same instance", first, second);
-    }
-
-    // ---- Test doubles ---------------------------------------------------------------------------------------
-
     /**
-     * Minimal valid {@link DesignAssistant} with a public no-arg constructor that captures the configuration it was
-     * initialized with, used to verify custom-class resolution and configuration injection.
+     * Minimal valid {@link AIService} with a public no-arg constructor. It extends {@link AbstractAIService} so it
+     * inherits every capability and the configuration injection, mirroring how a real custom implementation overrides
+     * only what it needs.
      */
-    public static class ValidTestDesignAssistant implements DesignAssistant {
-
-        private AIServiceConfiguration injectedConfiguration;
-
-        @Override
-        public void init(AIServiceConfiguration configuration) {
-            this.injectedConfiguration = configuration;
-        }
-
-        @Override
-        public DesignAssistantResponse generatePayload(DesignAssistantRequest request) {
-            return null;
-        }
-
-        @Override
-        public DesignAssistantResponse chat(DesignAssistantRequest request) {
-            return null;
-        }
-    }
-
-    /**
-     * Minimal valid {@link MarketplaceAssistant} with a public no-arg constructor, used to verify custom-class
-     * resolution.
-     */
-    public static class ValidTestMarketplaceAssistant implements MarketplaceAssistant {
-
-        @Override
-        public MarketplaceAssistantResponse execute(MarketplaceAssistantRequest request) {
-            return null;
-        }
-
-        @Override
-        public MarketplaceAssistantResponse getApiCount(MarketplaceAssistantRequest request) {
-            return null;
-        }
-
-        @Override
-        public void publishAPI(MarketplaceAssistantRequest request) {
-            // no-op test double
-        }
-
-        @Override
-        public void deleteAPI(MarketplaceAssistantRequest request) {
-            // no-op test double
-        }
-    }
-
-    /**
-     * Minimal valid {@link APIChatAssistant} with a public no-arg constructor, used to verify custom-class
-     * resolution.
-     */
-    public static class ValidTestAPIChatAssistant implements APIChatAssistant {
-
-        @Override
-        public APIChatResponse prepare(APIChatRequest request) {
-            return null;
-        }
-
-        @Override
-        public APIChatResponse execute(APIChatRequest request) {
-            return null;
-        }
+    public static class ValidTestAIService extends AbstractAIService {
     }
 }
