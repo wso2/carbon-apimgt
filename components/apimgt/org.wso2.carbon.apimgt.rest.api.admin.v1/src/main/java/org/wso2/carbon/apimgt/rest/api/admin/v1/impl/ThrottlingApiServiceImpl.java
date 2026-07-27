@@ -1227,32 +1227,42 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             throws ParseException, APIImportExportException, IOException {
 
         File importFolder = CommonUtil.createTempDirectory(null);
-        String uploadFileName = fileDetail == null ? null : fileDetail.getDataHandler().getName();
-        if (StringUtils.isEmpty(uploadFileName)) {
-            throw new APIImportExportException("Invalid file name. File name cannot be null or empty.");
+
+        try {  // E16-068: delete the import staging dir on every exit path (CWE-459 temp-leak)
+            String uploadFileName = fileDetail == null ? null : fileDetail.getDataHandler().getName();
+            if (StringUtils.isEmpty(uploadFileName)) {
+                throw new APIImportExportException("Invalid file name. File name cannot be null or empty.");
+            }
+
+            String uploadFileName = fileDetail == null ? null : fileDetail.getDataHandler().getName();
+            if (StringUtils.isEmpty(uploadFileName)) {
+                throw new APIImportExportException("Invalid file name. File name cannot be null or empty.");
+            }
+            // Validate file extension to prevent uploading unauthorized file types
+            String lowerCaseFileName = uploadFileName.toLowerCase();
+            boolean isYamlFile =
+                    lowerCaseFileName.endsWith(ImportExportConstants.YAML_EXTENSION) || lowerCaseFileName.endsWith(
+                            ImportExportConstants.YML_EXTENSION);
+            boolean isJsonFile = lowerCaseFileName.endsWith(ImportExportConstants.JSON_EXTENSION);
+            if (!isYamlFile && !isJsonFile) {
+                throw new APIImportExportException("Invalid file type. Only YAML and JSON files are allowed.");
+            }
+            String fileType = isYamlFile ?
+                    ImportExportConstants.EXPORT_POLICY_TYPE_YAML :
+                    ImportExportConstants.EXPORT_POLICY_TYPE_JSON;
+            // Validating the canonical path
+            String absolutePath = importFolder.getAbsolutePath() + File.separator + uploadFileName;
+            File targetFile = new File(absolutePath);
+            String canonicalPath = targetFile.getCanonicalPath();
+            String canonicalImportPath = importFolder.getCanonicalPath();
+            if (!canonicalPath.startsWith(canonicalImportPath + File.separator)) {
+                throw new APIImportExportException("Invalid file name.");
+            }
+            FileUtils.copyInputStreamToFile(uploadedInputStream, targetFile);
+            return preprocessImportedArtifact(absolutePath, fileType);
+        } finally {
+            FileUtils.deleteQuietly(importFolder);
         }
-        // Validate file extension to prevent uploading unauthorized file types
-        String lowerCaseFileName = uploadFileName.toLowerCase();
-        boolean isYamlFile =
-                lowerCaseFileName.endsWith(ImportExportConstants.YAML_EXTENSION) || lowerCaseFileName.endsWith(
-                        ImportExportConstants.YML_EXTENSION);
-        boolean isJsonFile = lowerCaseFileName.endsWith(ImportExportConstants.JSON_EXTENSION);
-        if (!isYamlFile && !isJsonFile) {
-            throw new APIImportExportException("Invalid file type. Only YAML and JSON files are allowed.");
-        }
-        String fileType = isYamlFile ?
-                ImportExportConstants.EXPORT_POLICY_TYPE_YAML :
-                ImportExportConstants.EXPORT_POLICY_TYPE_JSON;
-        // Validating the canonical path
-        String absolutePath = importFolder.getAbsolutePath() + File.separator + uploadFileName;
-        File targetFile = new File(absolutePath);
-        String canonicalPath = targetFile.getCanonicalPath();
-        String canonicalImportPath = importFolder.getCanonicalPath();
-        if (!canonicalPath.startsWith(canonicalImportPath + File.separator)) {
-            throw new APIImportExportException("Invalid file name.");
-        }
-        FileUtils.copyInputStreamToFile(uploadedInputStream, targetFile);
-        return preprocessImportedArtifact(absolutePath, fileType);
     }
 
     /**
