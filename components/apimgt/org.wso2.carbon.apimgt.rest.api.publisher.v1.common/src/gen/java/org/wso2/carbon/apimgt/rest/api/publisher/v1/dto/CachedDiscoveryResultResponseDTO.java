@@ -20,14 +20,14 @@ import javax.validation.Valid;
 
 
 
-public class InlineResponse2001DTO   {
+public class CachedDiscoveryResultResponseDTO   {
   
     private String lastDiscoveredAt = null;
     private List<Object> result = new ArrayList<Object>();
 
   /**
    **/
-  public InlineResponse2001DTO lastDiscoveredAt(String lastDiscoveredAt) {
+  public CachedDiscoveryResultResponseDTO lastDiscoveredAt(String lastDiscoveredAt) {
     this.lastDiscoveredAt = lastDiscoveredAt;
     return this;
   }
@@ -44,7 +44,7 @@ public class InlineResponse2001DTO   {
 
   /**
    **/
-  public InlineResponse2001DTO result(List<Object> result) {
+  public CachedDiscoveryResultResponseDTO result(List<Object> result) {
     this.result = result;
     return this;
   }
@@ -68,9 +68,9 @@ public class InlineResponse2001DTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    InlineResponse2001DTO inlineResponse2001 = (InlineResponse2001DTO) o;
-    return Objects.equals(lastDiscoveredAt, inlineResponse2001.lastDiscoveredAt) &&
-        Objects.equals(result, inlineResponse2001.result);
+    CachedDiscoveryResultResponseDTO cachedDiscoveryResultResponse = (CachedDiscoveryResultResponseDTO) o;
+    return Objects.equals(lastDiscoveredAt, cachedDiscoveryResultResponse.lastDiscoveredAt) &&
+        Objects.equals(result, cachedDiscoveryResultResponse.result);
   }
 
   @Override
@@ -81,7 +81,7 @@ public class InlineResponse2001DTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class InlineResponse2001DTO {\n");
+    sb.append("class CachedDiscoveryResultResponseDTO {\n");
     
     sb.append("    lastDiscoveredAt: ").append(toIndentedString(lastDiscoveredAt)).append("\n");
     sb.append("    result: ").append(toIndentedString(result)).append("\n");

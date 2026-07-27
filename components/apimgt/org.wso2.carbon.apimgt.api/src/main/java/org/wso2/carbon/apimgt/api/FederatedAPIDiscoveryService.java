@@ -22,9 +22,10 @@ package org.wso2.carbon.apimgt.api;
 
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.DiscoveredAPI;
+import org.wso2.carbon.apimgt.api.model.FederatedAPIImportRequest;
 
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This interface provides functionality to schedule or manually trigger the discovery of APIs from a federated environment.
@@ -55,36 +56,40 @@ public interface FederatedAPIDiscoveryService {
      * @return A map with keys NEW and UPDATE and corresponding lightweight DiscoveredAPI lists
      * @throws APIManagementException if an error occurs
      */
-    default java.util.Map<String, List<DiscoveredAPI>> discoverExternalAPIs(Environment environment, String organization)
+    default Map<String, List<DiscoveredAPI>> discoverExternalAPIs(Environment environment, String organization)
             throws APIManagementException {
         throw new APIManagementException("discoverExternalAPIs is not supported.");
     }
 
     /**
      * Imports brand-new APIs from the external gateway into WSO2.
-     * For each API ID, the full definition is fetched on-demand, then persisted.
+     * For each requested API, the full definition is fetched on-demand, then persisted.
      *
-     * @param apiIds       the list of external gateway API identifiers to import
+     * @param apiRequests  the APIs to import, each carrying the external gateway identifier and any
+     *                     optional display name / description overrides
      * @param environment  the federated environment
      * @param organization the organization
      * @return list of API IDs that failed to import; empty if all succeeded
      * @throws APIManagementException if an error occurs
      */
-    default List<String> importNewExternalAPIs(List<String> apiIds, Environment environment, String organization) throws APIManagementException {
+    default List<String> importNewExternalAPIs(List<FederatedAPIImportRequest> apiRequests, Environment environment,
+                                               String organization) throws APIManagementException {
         throw new APIManagementException("importNewExternalAPIs is not supported.");
     }
 
     /**
      * Updates existing WSO2 APIs whose definitions have changed on the external gateway.
-     * For each API ID, the full definition is fetched on-demand and the existing entry is updated.
+     * For each requested API, the full definition is fetched on-demand and the existing entry is updated.
      *
-     * @param apiIds       the list of external gateway API identifiers to update
+     * @param apiRequests  the APIs to update, each carrying the external gateway identifier and any
+     *                     optional display name / description overrides
      * @param environment  the federated environment
      * @param organization the organization
      * @return list of API IDs that failed to update; empty if all succeeded
      * @throws APIManagementException if an error occurs
      */
-    default List<String> updateExternalAPIs(List<String> apiIds, Environment environment, String organization) throws APIManagementException {
+    default List<String> updateExternalAPIs(List<FederatedAPIImportRequest> apiRequests, Environment environment,
+                                            String organization) throws APIManagementException {
         throw new APIManagementException("updateExternalAPIs is not supported.");
     }
 }

@@ -16685,6 +16685,37 @@ public class ApiMgtDAO {
     // Federated Discovery Cache DAO methods
     // -----------------------------------------------------------------------
 
+    // Column size limits for AM_FEDERATED_DISCOVERY_CACHE (must match the sql/*.sql table definitions).
+    private static final int FDC_EXTERNAL_API_ID_MAX_LENGTH = 255;
+    private static final int FDC_API_NAME_MAX_LENGTH = 255;
+    private static final int FDC_API_VERSION_MAX_LENGTH = 50;
+    private static final int FDC_DESCRIPTION_MAX_LENGTH = 2048;
+    private static final int FDC_CONTEXT_MAX_LENGTH = 512;
+    private static final int FDC_API_TYPE_MAX_LENGTH = 50;
+    private static final int FDC_GATEWAY_TYPE_MAX_LENGTH = 255;
+    private static final int FDC_STATUS_MAX_LENGTH = 20;
+
+    /**
+     * Truncates a value to at most {@code maxLength} characters so it always fits the target column,
+     * logging a warning when truncation actually occurs (data would otherwise be rejected by the DB with a
+     * "value too long for column" error on strict databases, e.g. a long exception message written to the
+     * DESCRIPTION column).
+     *
+     * @param value     the candidate value (may be null)
+     * @param maxLength the destination column's maximum length
+     * @param fieldName the column name, used only for the warning log
+     * @return {@code value} unchanged if null or within {@code maxLength}; otherwise the first
+     *         {@code maxLength} characters of {@code value}
+     */
+    private static String truncateForColumn(String value, int maxLength, String fieldName) {
+        if (value != null && value.length() > maxLength) {
+            log.warn("Truncating " + fieldName + " to " + maxLength
+                    + " characters before persisting to AM_FEDERATED_DISCOVERY_CACHE");
+            return value.substring(0, maxLength);
+        }
+        return value;
+    }
+
     /**
      * Delete all cached discovery entries for a given environment and organization,
      * then insert the new list of discovered APIs.
@@ -16695,7 +16726,7 @@ public class ApiMgtDAO {
      * @param discoveredAt timestamp of this discovery run
      */
     public void saveFederatedDiscoveryCache(String envName, String organization,
-                                            List<Map<String, Object>> apis, java.sql.Timestamp discoveredAt)
+                                            List<Map<String, Object>> apis, Timestamp discoveredAt)
             throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
@@ -16713,13 +16744,25 @@ public class ApiMgtDAO {
                     for (Map<String, Object> api : apis) {
                         insertStmt.setString(1, envName);
                         insertStmt.setString(2, organization);
-                        insertStmt.setString(3, Objects.toString(api.get("id"), null));
-                        insertStmt.setString(4, Objects.toString(api.get("apiName"), null));
-                        insertStmt.setString(5, Objects.toString(api.get("version"), null));
-                        insertStmt.setString(6, Objects.toString(api.get("description"), null));
-                        insertStmt.setString(7, Objects.toString(api.get("context"), null));
-                        insertStmt.setString(8, Objects.toString(api.getOrDefault("apiType", "HTTP"), null));
-                        insertStmt.setString(9, Objects.toString(api.get("gatewayType"), null));
+                        insertStmt.setString(3, truncateForColumn(
+                                Objects.toString(api.get("id"), null), FDC_EXTERNAL_API_ID_MAX_LENGTH,
+                                "EXTERNAL_API_ID"));
+                        insertStmt.setString(4, truncateForColumn(
+                                Objects.toString(api.get("apiName"), null), FDC_API_NAME_MAX_LENGTH, "API_NAME"));
+                        insertStmt.setString(5, truncateForColumn(
+                                Objects.toString(api.get("version"), null), FDC_API_VERSION_MAX_LENGTH,
+                                "API_VERSION"));
+                        insertStmt.setString(6, truncateForColumn(
+                                Objects.toString(api.get("description"), null), FDC_DESCRIPTION_MAX_LENGTH,
+                                "DESCRIPTION"));
+                        insertStmt.setString(7, truncateForColumn(
+                                Objects.toString(api.get("context"), null), FDC_CONTEXT_MAX_LENGTH, "CONTEXT"));
+                        insertStmt.setString(8, truncateForColumn(
+                                Objects.toString(api.getOrDefault("apiType", "HTTP"), null), FDC_API_TYPE_MAX_LENGTH,
+                                "API_TYPE"));
+                        insertStmt.setString(9, truncateForColumn(
+                                Objects.toString(api.get("gatewayType"), null), FDC_GATEWAY_TYPE_MAX_LENGTH,
+                                "GATEWAY_TYPE"));
                         String refArtifact = api.get("referenceArtifact") != null
                                 ? api.get("referenceArtifact").toString() : null;
                         if (refArtifact != null) {
@@ -16728,7 +16771,8 @@ public class ApiMgtDAO {
                         } else {
                             insertStmt.setNull(10, java.sql.Types.BLOB);
                         }
-                        insertStmt.setString(11, Objects.toString(api.get("status"), null));
+                        insertStmt.setString(11, truncateForColumn(
+                                Objects.toString(api.get("status"), null), FDC_STATUS_MAX_LENGTH, "STATUS"));
                         insertStmt.setTimestamp(12, discoveredAt);
                         insertStmt.addBatch();
                     }
@@ -16771,7 +16815,7 @@ public class ApiMgtDAO {
                     api.put("gatewayType", rs.getString("GATEWAY_TYPE"));
                     api.put("gatewayName", envName);
                     api.put("status", rs.getString("STATUS"));
-                    java.sql.Timestamp ts = rs.getTimestamp("DISCOVERED_AT");
+                    Timestamp ts = rs.getTimestamp("DISCOVERED_AT");
                     api.put("discoveredAt", ts != null ? ts.toInstant().toString() : null);
                     results.add(api);
                 }
@@ -16833,7 +16877,7 @@ public class ApiMgtDAO {
      *
      * @return Timestamp of last discovery, or null if never discovered
      */
-    public java.sql.Timestamp getLastFederatedDiscoveryTime(String envName, String organization)
+    public Timestamp getLastFederatedDiscoveryTime(String envName, String organization)
             throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement stmt = connection.prepareStatement(
@@ -16862,7 +16906,7 @@ public class ApiMgtDAO {
      * @param now          timestamp
      */
     public void updateDiscoveryTaskStatus(String envName, String organization, String taskId,
-                                          String status, String error, java.sql.Timestamp now)
+                                          String status, String error, Timestamp now)
             throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
@@ -16879,14 +16923,14 @@ public class ApiMgtDAO {
                     insertStmt.setString(1, envName);
                     insertStmt.setString(2, organization);
                     insertStmt.setString(3, "__TASK_STATUS__");
-                    insertStmt.setString(4, taskId);
+                    insertStmt.setString(4, truncateForColumn(taskId, FDC_API_NAME_MAX_LENGTH, "API_NAME"));
                     insertStmt.setString(5, null);
-                    insertStmt.setString(6, error);
+                    insertStmt.setString(6, truncateForColumn(error, FDC_DESCRIPTION_MAX_LENGTH, "DESCRIPTION"));
                     insertStmt.setString(7, null);
                     insertStmt.setString(8, "HTTP");
                     insertStmt.setString(9, null);
                     insertStmt.setNull(10, java.sql.Types.BLOB);
-                    insertStmt.setString(11, status);
+                    insertStmt.setString(11, truncateForColumn(status, FDC_STATUS_MAX_LENGTH, "STATUS"));
                     insertStmt.setTimestamp(12, now);
                     insertStmt.executeUpdate();
                 }

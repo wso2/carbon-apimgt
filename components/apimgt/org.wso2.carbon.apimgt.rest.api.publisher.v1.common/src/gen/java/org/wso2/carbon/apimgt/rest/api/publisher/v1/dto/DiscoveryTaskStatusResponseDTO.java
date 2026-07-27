@@ -20,7 +20,7 @@ import javax.validation.Valid;
 
 
 
-public class InlineResponse200DTO   {
+public class DiscoveryTaskStatusResponseDTO   {
   
     private String taskId = null;
 
@@ -61,7 +61,7 @@ return null;
 
   /**
    **/
-  public InlineResponse200DTO taskId(String taskId) {
+  public DiscoveryTaskStatusResponseDTO taskId(String taskId) {
     this.taskId = taskId;
     return this;
   }
@@ -78,7 +78,7 @@ return null;
 
   /**
    **/
-  public InlineResponse200DTO status(StatusEnum status) {
+  public DiscoveryTaskStatusResponseDTO status(StatusEnum status) {
     this.status = status;
     return this;
   }
@@ -95,7 +95,7 @@ return null;
 
   /**
    **/
-  public InlineResponse200DTO result(List<Object> result) {
+  public DiscoveryTaskStatusResponseDTO result(List<Object> result) {
     this.result = result;
     return this;
   }
@@ -112,7 +112,7 @@ return null;
 
   /**
    **/
-  public InlineResponse200DTO error(String error) {
+  public DiscoveryTaskStatusResponseDTO error(String error) {
     this.error = error;
     return this;
   }
@@ -136,11 +136,11 @@ return null;
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    InlineResponse200DTO inlineResponse200 = (InlineResponse200DTO) o;
-    return Objects.equals(taskId, inlineResponse200.taskId) &&
-        Objects.equals(status, inlineResponse200.status) &&
-        Objects.equals(result, inlineResponse200.result) &&
-        Objects.equals(error, inlineResponse200.error);
+    DiscoveryTaskStatusResponseDTO discoveryTaskStatusResponse = (DiscoveryTaskStatusResponseDTO) o;
+    return Objects.equals(taskId, discoveryTaskStatusResponse.taskId) &&
+        Objects.equals(status, discoveryTaskStatusResponse.status) &&
+        Objects.equals(result, discoveryTaskStatusResponse.result) &&
+        Objects.equals(error, discoveryTaskStatusResponse.error);
   }
 
   @Override
@@ -151,7 +151,7 @@ return null;
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class InlineResponse200DTO {\n");
+    sb.append("class DiscoveryTaskStatusResponseDTO {\n");
     
     sb.append("    taskId: ").append(toIndentedString(taskId)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");

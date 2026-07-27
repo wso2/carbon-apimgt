@@ -25,14 +25,18 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.FederatedAPIDiscoveryService;
 import org.wso2.carbon.apimgt.api.model.DiscoveredAPI;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.FederatedAPIImportRequest;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.FederatedApisApiService;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FederatedAPIImportRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FederatedAPIImportResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import javax.ws.rs.core.Response;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,6 +45,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Implementation of the Federated API Discovery REST endpoints.
@@ -86,6 +91,29 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
                 return t;
             });
 
+    /** Max wait for the discovery executor to terminate on webapp shutdown (seconds). */
+    private static final long SHUTDOWN_AWAIT_SECONDS = 10L;
+
+    /**
+     * Shuts down the discovery executor. Invoked when the Publisher REST API webapp is undeployed
+     * (see {@code FederatedApiDiscoveryLifecycleListener}) so worker threads are not leaked across
+     * redeployments. In-flight discovery tasks are interrupted; their DB entries remain PENDING and
+     * are reclaimed by the existing pending-task timeout.
+     */
+    public static void shutdownDiscoveryExecutor() {
+        DISCOVERY_EXECUTOR.shutdown();
+        try {
+            if (!DISCOVERY_EXECUTOR.awaitTermination(SHUTDOWN_AWAIT_SECONDS, TimeUnit.SECONDS)) {
+                DISCOVERY_EXECUTOR.shutdownNow();
+                log.warn("Federated API discovery executor did not terminate in time, forced shutdown");
+            }
+        } catch (InterruptedException e) {
+            DISCOVERY_EXECUTOR.shutdownNow();
+            Thread.currentThread().interrupt();
+            log.error("Interrupted while shutting down the federated API discovery executor", e);
+        }
+    }
+
     // -----------------------------------------------------------------------
     // Endpoints
     // -----------------------------------------------------------------------
@@ -102,7 +130,6 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
             throws APIManagementException {
 
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        String envKey = organization + "|" + environment;
 
         // --- DB-backed De-duplication check ----------------------------------
         ApiMgtDAO dao = ApiMgtDAO.getInstance();
@@ -110,7 +137,7 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
         if (activeTask != null) {
             String dbTaskId = (String) activeTask.get("taskId");
             String dbStatus = (String) activeTask.get("status");
-            java.sql.Timestamp updatedAt = (java.sql.Timestamp) activeTask.get("updatedAt");
+            Timestamp updatedAt = (Timestamp) activeTask.get("updatedAt");
 
             if (STATUS_PENDING.equals(dbStatus) && updatedAt != null) {
                 long elapsed = System.currentTimeMillis() - updatedAt.getTime();
@@ -139,7 +166,7 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
         String taskId = environment + "_" + UUID.randomUUID().toString();
 
         // Persist task status as PENDING in DB
-        java.sql.Timestamp now = new java.sql.Timestamp(System.currentTimeMillis());
+        Timestamp now = new Timestamp(System.currentTimeMillis());
         ApiMgtDAO.getInstance().updateDiscoveryTaskStatus(
                 environment, organization, taskId, STATUS_PENDING, null, now);
 
@@ -215,7 +242,7 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
         if (STATUS_COMPLETED.equals(status)) {
             List<Map<String, Object>> cachedApis = dao.getFederatedDiscoveryCache(environment, organization);
             m.put("result", cachedApis);
-            java.sql.Timestamp lastDiscovered = dao.getLastFederatedDiscoveryTime(environment, organization);
+            Timestamp lastDiscovered = dao.getLastFederatedDiscoveryTime(environment, organization);
             m.put("lastDiscoveredAt", lastDiscovered != null ? lastDiscovered.toInstant().toString() : null);
         } else if (STATUS_FAILED.equals(status) && error != null) {
             m.put("error", error);
@@ -228,7 +255,7 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
      * POST /federated-apis/import
      */
     @Override
-    public Response importFederatedAPIs(String environment, List<String> requestBody,
+    public Response importFederatedAPIs(String environment, List<FederatedAPIImportRequestDTO> requestBody,
             MessageContext messageContext) throws APIManagementException {
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -237,15 +264,8 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
             if (service == null) {
                 throw new APIManagementException("FederatedAPIDiscoveryService OSGi service is not available.");
             }
-            List<String> failedIds = service.importNewExternalAPIs(requestBody, env, organization);
-            if (failedIds.isEmpty()) {
-                return Response.ok("{\"status\": \"APIs imported successfully\"}").build();
-            }
-            String json = "{\"status\": \"APIs imported with some failures\","
-                    + "\"failedIds\": [" + failedIds.stream()
-                    .map(id -> "\"" + id.replace("\"", "\\\"") + "\"")
-                    .collect(java.util.stream.Collectors.joining(",")) + "]}";
-            return Response.ok(json).build();
+            List<String> failedIds = service.importNewExternalAPIs(toImportRequests(requestBody), env, organization);
+            return Response.ok(buildImportResponse(failedIds, "imported")).build();
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError(
                     "Error while importing federated APIs for environment: " + environment, e, log);
@@ -257,7 +277,7 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
      * POST /federated-apis/update
      */
     @Override
-    public Response updateFederatedAPIs(String environment, List<String> requestBody,
+    public Response updateFederatedAPIs(String environment, List<FederatedAPIImportRequestDTO> requestBody,
             MessageContext messageContext) throws APIManagementException {
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -266,20 +286,54 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
             if (service == null) {
                 throw new APIManagementException("FederatedAPIDiscoveryService OSGi service is not available.");
             }
-            List<String> failedIds = service.updateExternalAPIs(requestBody, env, organization);
-            if (failedIds.isEmpty()) {
-                return Response.ok("{\"status\": \"APIs updated successfully\"}").build();
-            }
-            String json = "{\"status\": \"APIs updated with some failures\","
-                    + "\"failedIds\": [" + failedIds.stream()
-                    .map(id -> "\"" + id.replace("\"", "\\\"") + "\"")
-                    .collect(java.util.stream.Collectors.joining(",")) + "]}";
-            return Response.ok(json).build();
+            List<String> failedIds = service.updateExternalAPIs(toImportRequests(requestBody), env, organization);
+            return Response.ok(buildImportResponse(failedIds, "updated")).build();
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError(
                     "Error while updating federated APIs for environment: " + environment, e, log);
             return null;
         }
+    }
+
+    /**
+     * Converts the incoming REST DTOs into the model objects consumed by the discovery service.
+     *
+     * @param requestBody the APIs requested by the caller
+     * @return the equivalent model objects, preserving the caller's order
+     * @throws APIManagementException if the request body is missing
+     */
+    private List<FederatedAPIImportRequest> toImportRequests(List<FederatedAPIImportRequestDTO> requestBody)
+            throws APIManagementException {
+        if (requestBody == null) {
+            throw new APIManagementException("Request body must not be null.");
+        }
+        List<FederatedAPIImportRequest> apiRequests = new ArrayList<>(requestBody.size());
+        for (FederatedAPIImportRequestDTO dto : requestBody) {
+            if (dto == null) {
+                throw new APIManagementException("Request body must not contain null entries.");
+            }
+            apiRequests.add(new FederatedAPIImportRequest(dto.getId(), dto.getDisplayName(), dto.getDescription()));
+        }
+        return apiRequests;
+    }
+
+    /**
+     * Builds the response describing the outcome of an import/update request.
+     *
+     * @param failedIds the identifiers that could not be processed; empty if all succeeded
+     * @param action    the past-tense action used in the status message ("imported" or "updated")
+     * @return the populated response DTO
+     */
+    private FederatedAPIImportResponseDTO buildImportResponse(List<String> failedIds, String action) {
+        FederatedAPIImportResponseDTO response = new FederatedAPIImportResponseDTO();
+        if (failedIds == null || failedIds.isEmpty()) {
+            response.setStatus("APIs " + action + " successfully");
+            response.setFailedIds(new ArrayList<>());
+        } else {
+            response.setStatus("APIs " + action + " with some failures");
+            response.setFailedIds(failedIds);
+        }
+        return response;
     }
 
     /**
@@ -296,7 +350,7 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
             ApiMgtDAO dao = ApiMgtDAO.getInstance();
 
             List<Map<String, Object>> cachedApis = dao.getFederatedDiscoveryCache(environment, organization);
-            java.sql.Timestamp lastDiscovered = dao.getLastFederatedDiscoveryTime(environment, organization);
+            Timestamp lastDiscovered = dao.getLastFederatedDiscoveryTime(environment, organization);
 
             Map<String, Object> response = new HashMap<>();
             response.put("environment", environment);
@@ -343,7 +397,7 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
             List<Map<String, Object>> result = convertToListOfMaps(discovered, env);
 
             // Persist results to the DB cache
-            java.sql.Timestamp now = new java.sql.Timestamp(System.currentTimeMillis());
+            Timestamp now = new Timestamp(System.currentTimeMillis());
             ApiMgtDAO.getInstance().saveFederatedDiscoveryCache(
                     env.getName(), organization, result, now);
 
@@ -357,7 +411,7 @@ public class FederatedApisApiServiceImpl implements FederatedApisApiService {
         } catch (Exception e) {
             log.error("Discovery task [" + taskId + "] failed: " + e.getMessage(), e);
             try {
-                java.sql.Timestamp now = new java.sql.Timestamp(System.currentTimeMillis());
+                Timestamp now = new Timestamp(System.currentTimeMillis());
                 ApiMgtDAO.getInstance().updateDiscoveryTaskStatus(
                         env.getName(), organization, taskId, STATUS_FAILED, e.getMessage(), now);
             } catch (Exception ex) {

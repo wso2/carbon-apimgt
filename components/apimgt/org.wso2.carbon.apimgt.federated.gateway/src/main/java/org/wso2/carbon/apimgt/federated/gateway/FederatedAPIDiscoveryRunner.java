@@ -21,11 +21,11 @@ package org.wso2.carbon.apimgt.federated.gateway;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.FederatedAPIDiscovery;
 import org.wso2.carbon.apimgt.api.FederatedAPIDiscoveryService;
@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.ApiResult;
 import org.wso2.carbon.apimgt.api.model.DiscoveredAPI;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.FederatedAPIImportRequest;
 import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
 import org.wso2.carbon.apimgt.api.model.GatewayMode;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -389,6 +390,18 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
         }
     }
 
+    /**
+     * Cancels the scheduled discovery tasks and shuts down the executors when this OSGi component is
+     * deactivated (server shutdown or bundle stop/refresh), so no threads are left behind.
+     */
+    @Deactivate
+    protected void deactivate() {
+        if (log.isDebugEnabled()) {
+            log.debug("Deactivating federated API discovery component. Shutting down executors.");
+        }
+        shutdown();
+    }
+
     public static void shutdown() {
         scheduledDiscoveryTasks.values().forEach(f -> f.cancel(false));
         executor.shutdown();
@@ -658,17 +671,15 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
     }
 
     @Override
-    public List<String> importNewExternalAPIs(List<String> apiIds, Environment environment, String organization)
-            throws APIManagementException {
+    public List<String> importNewExternalAPIs(List<FederatedAPIImportRequest> apiRequests, Environment environment,
+                                              String organization) throws APIManagementException {
         FederatedAPIDiscovery discovery = getFederatedAPIDiscovery(environment, organization);
         String adminUsername = APIUtil.getTenantAdminUserName(organization);
         FederatedGatewayUtil.startTenantFlow(organization, adminUsername);
         List<String> failedIds = new ArrayList<>();
         try {
-            ParsedApiIdentifiers parsed = parseApiIdentifiers(apiIds);
-            List<String> realApiIds = parsed.getRealApiIds();
-            Map<String, String> customDisplayNames = parsed.getCustomDisplayNames();
-            Map<String, String> customDescriptions = parsed.getCustomDescriptions();
+            List<String> realApiIds = extractApiIds(apiRequests);
+            Map<String, FederatedAPIImportRequest> requestsById = indexRequestsById(apiRequests);
 
             // Fetch the specific list of DiscoveredAPIs from the connector.
             List<DiscoveredAPI> allDiscoveredAPIs = discovery.discoverAPI(realApiIds);
@@ -691,7 +702,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     }
                     API api = discoveredAPI.getApi();
                     APIDTO apidto = fromAPItoDTO(api);
-                    applyCustomMetadata(api, apidto, apiId, customDisplayNames, customDescriptions);
+                    applyCustomMetadata(api, apidto, requestsById.get(apiId));
                     applyDefaultPoliciesIfMissing(apidto);
                     apidto.setInitiatedFromGateway(true);
 
@@ -772,17 +783,15 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
     }
 
     @Override
-    public List<String> updateExternalAPIs(List<String> apiIds, Environment environment, String organization)
-            throws APIManagementException {
+    public List<String> updateExternalAPIs(List<FederatedAPIImportRequest> apiRequests, Environment environment,
+                                           String organization) throws APIManagementException {
         FederatedAPIDiscovery discovery = getFederatedAPIDiscovery(environment, organization);
         String adminUsername = APIUtil.getTenantAdminUserName(organization);
         FederatedGatewayUtil.startTenantFlow(organization, adminUsername);
         List<String> failedIds = new ArrayList<>();
         try {
-            ParsedApiIdentifiers parsed = parseApiIdentifiers(apiIds);
-            List<String> realApiIds = parsed.getRealApiIds();
-            Map<String, String> customDisplayNames = parsed.getCustomDisplayNames();
-            Map<String, String> customDescriptions = parsed.getCustomDescriptions();
+            List<String> realApiIds = extractApiIds(apiRequests);
+            Map<String, FederatedAPIImportRequest> requestsById = indexRequestsById(apiRequests);
 
             List<DiscoveredAPI> allDiscoveredAPIs = discovery.discoverAPI(realApiIds);
             Map<String, DiscoveredAPI> apiLookup = buildApiLookup(allDiscoveredAPIs);
@@ -798,7 +807,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     }
                     API api = discoveredAPI.getApi();
                     APIDTO apidto = fromAPItoDTO(api);
-                    applyCustomMetadata(api, apidto, apiId, customDisplayNames, customDescriptions);
+                    applyCustomMetadata(api, apidto, requestsById.get(apiId));
                     applyDefaultPoliciesIfMissing(apidto);
                     apidto.setInitiatedFromGateway(true);
 
@@ -833,36 +842,39 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
     }
 
     /**
-     * Parses the incoming API identifiers. Each identifier may be either a plain ID/UUID or a JSON object of the
-     * form {@code {"id":"...","displayName":"...","description":"..."}} that carries custom metadata supplied from
-     * the UI. Any custom metadata is collected keyed by the resolved real ID.
+     * Extracts the external gateway identifiers from the incoming requests, preserving the caller's order.
      *
-     * @param apiIds the raw identifiers received from the caller
-     * @return a holder containing the resolved IDs and any custom display names / descriptions
+     * @param apiRequests the APIs requested by the caller
+     * @return the list of external gateway API identifiers
+     * @throws APIManagementException if {@code apiRequests} is null or any entry has no identifier
      */
-    private ParsedApiIdentifiers parseApiIdentifiers(List<String> apiIds) {
-        ParsedApiIdentifiers parsed = new ParsedApiIdentifiers();
-        for (String apiId : apiIds) {
-            String realId = apiId;
-            if (apiId != null && apiId.trim().startsWith("{") && apiId.trim().endsWith("}")) {
-                try {
-                    JsonObject json = new JsonParser().parse(apiId).getAsJsonObject();
-                    if (json.has("id")) {
-                        realId = json.get("id").getAsString();
-                    }
-                    if (json.has("displayName")) {
-                        parsed.customDisplayNames.put(realId, json.get("displayName").getAsString());
-                    }
-                    if (json.has("description")) {
-                        parsed.customDescriptions.put(realId, json.get("description").getAsString());
-                    }
-                } catch (Exception e) {
-                    log.error("Error parsing JSON apiId: " + apiId, e);
-                }
-            }
-            parsed.realApiIds.add(realId);
+    private List<String> extractApiIds(List<FederatedAPIImportRequest> apiRequests) throws APIManagementException {
+        if (apiRequests == null) {
+            throw new APIManagementException("API request list must not be null.");
         }
-        return parsed;
+        List<String> apiIds = new ArrayList<>(apiRequests.size());
+        for (FederatedAPIImportRequest apiRequest : apiRequests) {
+            if (apiRequest == null || StringUtils.isBlank(apiRequest.getId())) {
+                throw new APIManagementException("Each API request must carry a non-empty id.");
+            }
+            apiIds.add(apiRequest.getId());
+        }
+        return apiIds;
+    }
+
+    /**
+     * Indexes the incoming requests by their external gateway identifier so the optional metadata overrides can
+     * be looked up while each API is being processed.
+     *
+     * @param apiRequests the APIs requested by the caller
+     * @return a lookup from external gateway API identifier to the originating request
+     */
+    private Map<String, FederatedAPIImportRequest> indexRequestsById(List<FederatedAPIImportRequest> apiRequests) {
+        Map<String, FederatedAPIImportRequest> requestsById = new HashMap<>();
+        for (FederatedAPIImportRequest apiRequest : apiRequests) {
+            requestsById.put(apiRequest.getId(), apiRequest);
+        }
+        return requestsById;
     }
 
     /**
@@ -876,6 +888,9 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
     private Map<String, DiscoveredAPI> buildApiLookup(List<DiscoveredAPI> discoveredAPIs) {
         Map<String, DiscoveredAPI> apiLookup = new HashMap<>();
         for (DiscoveredAPI discovered : discoveredAPIs) {
+            if (discovered == null || discovered.getApi() == null) {
+                continue;
+            }
             API api = discovered.getApi();
             // Index by UUID (the gateway's native ID)
             if (api.getUuid() != null) {
@@ -888,28 +903,25 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
     }
 
     /**
-     * Applies any caller-supplied custom display name and description to both the API model and its DTO. Applying
-     * it to the model as well keeps subsequent checks (such as the environment-scoped display-name check) behaving
-     * exactly as before.
+     * Applies any caller-supplied display name and description overrides to both the API model and its DTO.
+     * Applying it to the model as well keeps subsequent checks (such as the environment-scoped display-name
+     * check) behaving exactly as before.
      *
-     * @param api                the API model
-     * @param apidto             the API DTO
-     * @param apiId              the resolved API identifier used to look up custom values
-     * @param customDisplayNames map of custom display names keyed by API identifier
-     * @param customDescriptions map of custom descriptions keyed by API identifier
+     * @param api        the API model
+     * @param apidto     the API DTO
+     * @param apiRequest the originating request carrying the optional overrides; may be null
      */
-    private void applyCustomMetadata(API api, APIDTO apidto, String apiId,
-                                     Map<String, String> customDisplayNames,
-                                     Map<String, String> customDescriptions) {
-        if (customDisplayNames.containsKey(apiId)) {
-            String displayName = customDisplayNames.get(apiId);
-            api.setDisplayName(displayName);
-            apidto.setDisplayName(displayName);
+    private void applyCustomMetadata(API api, APIDTO apidto, FederatedAPIImportRequest apiRequest) {
+        if (apiRequest == null) {
+            return;
         }
-        if (customDescriptions.containsKey(apiId)) {
-            String description = customDescriptions.get(apiId);
-            api.setDescription(description);
-            apidto.setDescription(description);
+        if (apiRequest.getDisplayName() != null) {
+            api.setDisplayName(apiRequest.getDisplayName());
+            apidto.setDisplayName(apiRequest.getDisplayName());
+        }
+        if (apiRequest.getDescription() != null) {
+            api.setDescription(apiRequest.getDescription());
+            apidto.setDescription(apiRequest.getDescription());
         }
     }
 
@@ -971,26 +983,5 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                 apiJson.toString(), api.getSwaggerDefinition(),
                 FederatedGatewayUtil.createDeploymentYaml(environment),
                 apidto.getName());
-    }
-
-    /**
-     * Simple holder for the result of {@link #parseApiIdentifiers(List)}.
-     */
-    private static class ParsedApiIdentifiers {
-        private final List<String> realApiIds = new ArrayList<>();
-        private final Map<String, String> customDisplayNames = new HashMap<>();
-        private final Map<String, String> customDescriptions = new HashMap<>();
-
-        private List<String> getRealApiIds() {
-            return realApiIds;
-        }
-
-        private Map<String, String> getCustomDisplayNames() {
-            return customDisplayNames;
-        }
-
-        private Map<String, String> getCustomDescriptions() {
-            return customDescriptions;
-        }
     }
 }

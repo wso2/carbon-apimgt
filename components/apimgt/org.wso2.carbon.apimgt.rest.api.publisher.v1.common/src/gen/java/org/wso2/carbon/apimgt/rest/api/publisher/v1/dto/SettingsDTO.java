@@ -50,7 +50,7 @@ public class SettingsDTO   {
     private Boolean aiAuthTokenProvided = false;
     private Boolean isGatewayNotificationEnabled = false;
     private Boolean isMCPSupportEnabled = true;
-    private Boolean isFederatedAPIDiscoveryEnabled = true;
+    private Boolean isFederatedDiscoverySchedulerEnabled = false;
     private List<SettingsCustomPropertiesDTO> customProperties = new ArrayList<SettingsCustomPropertiesDTO>();
 
   /**
@@ -467,19 +467,19 @@ public class SettingsDTO   {
   /**
    * This indicates whether the Federated API Discovery is enabled or not.
    **/
-  public SettingsDTO isFederatedAPIDiscoveryEnabled(Boolean isFederatedAPIDiscoveryEnabled) {
-    this.isFederatedAPIDiscoveryEnabled = isFederatedAPIDiscoveryEnabled;
+  public SettingsDTO isFederatedDiscoverySchedulerEnabled(Boolean isFederatedDiscoverySchedulerEnabled) {
+    this.isFederatedDiscoverySchedulerEnabled = isFederatedDiscoverySchedulerEnabled;
     return this;
   }
 
   
   @ApiModelProperty(value = "This indicates whether the Federated API Discovery is enabled or not.")
-  @JsonProperty("isFederatedAPIDiscoveryEnabled")
-  public Boolean isIsFederatedAPIDiscoveryEnabled() {
-    return isFederatedAPIDiscoveryEnabled;
+  @JsonProperty("isFederatedDiscoverySchedulerEnabled")
+  public Boolean isIsFederatedDiscoverySchedulerEnabled() {
+    return isFederatedDiscoverySchedulerEnabled;
   }
-  public void setIsFederatedAPIDiscoveryEnabled(Boolean isFederatedAPIDiscoveryEnabled) {
-    this.isFederatedAPIDiscoveryEnabled = isFederatedAPIDiscoveryEnabled;
+  public void setIsFederatedDiscoverySchedulerEnabled(Boolean isFederatedDiscoverySchedulerEnabled) {
+    this.isFederatedDiscoverySchedulerEnabled = isFederatedDiscoverySchedulerEnabled;
   }
 
   /**
@@ -533,13 +533,13 @@ public class SettingsDTO   {
         Objects.equals(aiAuthTokenProvided, settings.aiAuthTokenProvided) &&
         Objects.equals(isGatewayNotificationEnabled, settings.isGatewayNotificationEnabled) &&
         Objects.equals(isMCPSupportEnabled, settings.isMCPSupportEnabled) &&
-        Objects.equals(isFederatedAPIDiscoveryEnabled, settings.isFederatedAPIDiscoveryEnabled) &&
+        Objects.equals(isFederatedDiscoverySchedulerEnabled, settings.isFederatedDiscoverySchedulerEnabled) &&
         Objects.equals(customProperties, settings.customProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(devportalUrl, environment, gatewayTypes, gatewayFeatureCatalog, scopes, monetizationAttributes, subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, portalConfigurationOnlyModeEnabled, retryCallWithNewOAuthTokenEnabled, crossTenantSubscriptionEnabled, defaultAdvancePolicy, defaultSubscriptionPolicy, authorizationHeader, isJWTEnabledForLoginTokens, orgAccessControlEnabled, allowSubscriptionValidationDisabling, designAssistantEnabled, aiAuthTokenProvided, isGatewayNotificationEnabled, isMCPSupportEnabled, isFederatedAPIDiscoveryEnabled, customProperties);
+    return Objects.hash(devportalUrl, environment, gatewayTypes, gatewayFeatureCatalog, scopes, monetizationAttributes, subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, portalConfigurationOnlyModeEnabled, retryCallWithNewOAuthTokenEnabled, crossTenantSubscriptionEnabled, defaultAdvancePolicy, defaultSubscriptionPolicy, authorizationHeader, isJWTEnabledForLoginTokens, orgAccessControlEnabled, allowSubscriptionValidationDisabling, designAssistantEnabled, aiAuthTokenProvided, isGatewayNotificationEnabled, isMCPSupportEnabled, isFederatedDiscoverySchedulerEnabled, customProperties);
   }
 
   @Override
@@ -570,7 +570,7 @@ public class SettingsDTO   {
     sb.append("    aiAuthTokenProvided: ").append(toIndentedString(aiAuthTokenProvided)).append("\n");
     sb.append("    isGatewayNotificationEnabled: ").append(toIndentedString(isGatewayNotificationEnabled)).append("\n");
     sb.append("    isMCPSupportEnabled: ").append(toIndentedString(isMCPSupportEnabled)).append("\n");
-    sb.append("    isFederatedAPIDiscoveryEnabled: ").append(toIndentedString(isFederatedAPIDiscoveryEnabled)).append("\n");
+    sb.append("    isFederatedDiscoverySchedulerEnabled: ").append(toIndentedString(isFederatedDiscoverySchedulerEnabled)).append("\n");
     sb.append("    customProperties: ").append(toIndentedString(customProperties)).append("\n");
     sb.append("}");
     return sb.toString();

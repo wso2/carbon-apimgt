@@ -18,7 +18,7 @@ import javax.validation.Valid;
 
 
 
-public class InlineResponse202DTO   {
+public class DiscoveryTaskSubmitResponseDTO   {
   
     private String taskId = null;
 
@@ -57,7 +57,7 @@ return null;
 
   /**
    **/
-  public InlineResponse202DTO taskId(String taskId) {
+  public DiscoveryTaskSubmitResponseDTO taskId(String taskId) {
     this.taskId = taskId;
     return this;
   }
@@ -74,7 +74,7 @@ return null;
 
   /**
    **/
-  public InlineResponse202DTO status(StatusEnum status) {
+  public DiscoveryTaskSubmitResponseDTO status(StatusEnum status) {
     this.status = status;
     return this;
   }
@@ -98,9 +98,9 @@ return null;
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    InlineResponse202DTO inlineResponse202 = (InlineResponse202DTO) o;
-    return Objects.equals(taskId, inlineResponse202.taskId) &&
-        Objects.equals(status, inlineResponse202.status);
+    DiscoveryTaskSubmitResponseDTO discoveryTaskSubmitResponse = (DiscoveryTaskSubmitResponseDTO) o;
+    return Objects.equals(taskId, discoveryTaskSubmitResponse.taskId) &&
+        Objects.equals(status, discoveryTaskSubmitResponse.status);
   }
 
   @Override
@@ -111,7 +111,7 @@ return null;
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class InlineResponse202DTO {\n");
+    sb.append("class DiscoveryTaskSubmitResponseDTO {\n");
     
     sb.append("    taskId: ").append(toIndentedString(taskId)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
