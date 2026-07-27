@@ -26,7 +26,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.MarketplaceAssistant;
 import org.wso2.carbon.apimgt.api.MarketplaceAssistantRequest;
 import org.wso2.carbon.apimgt.api.MarketplaceAssistantResponse;
-import org.wso2.carbon.apimgt.impl.ai.MarketplaceAssistantServiceFactory;
+import org.wso2.carbon.apimgt.impl.ai.AIServiceFactory;
 import org.wso2.carbon.apimgt.rest.api.store.v1.*;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
@@ -68,7 +68,7 @@ public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantA
             request.setUsername(username);
 
             MarketplaceAssistant marketplaceAssistantService =
-                    MarketplaceAssistantServiceFactory.getMarketplaceAssistantService();
+                    AIServiceFactory.getMarketplaceAssistantService();
             MarketplaceAssistantResponse response = marketplaceAssistantService.execute(request);
             if (response == null || response.getExecuteResponse() == null) {
                 return null;
@@ -99,7 +99,7 @@ public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantA
             request.setOrganization(organization);
 
             MarketplaceAssistant marketplaceAssistantService =
-                    MarketplaceAssistantServiceFactory.getMarketplaceAssistantService();
+                    AIServiceFactory.getMarketplaceAssistantService();
             MarketplaceAssistantResponse response = marketplaceAssistantService.getApiCount(request);
             if (response == null || response.getCount() == null) {
                 return null;

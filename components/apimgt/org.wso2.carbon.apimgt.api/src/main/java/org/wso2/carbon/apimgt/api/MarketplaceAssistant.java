@@ -29,9 +29,11 @@ package org.wso2.carbon.apimgt.api;
  * used, preserving the out-of-the-box behaviour.
  * <p>
  * Implementations must be thread-safe and provide a public no-argument constructor, as a single instance is created
- * and cached by {@code MarketplaceAssistantServiceFactory}.
+ * and cached by {@code AIServiceFactory}. The resolved configuration is delivered through
+ * {@link AIService#init(AIServiceConfiguration)}, so an implementation need not depend on the {@code impl}-module
+ * configuration classes.
  */
-public interface MarketplaceAssistant {
+public interface MarketplaceAssistant extends AIService {
 
     /**
      * Executes a Marketplace Assistant chat query against the underlying AI service.

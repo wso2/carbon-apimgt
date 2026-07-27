@@ -29,9 +29,11 @@ package org.wso2.carbon.apimgt.api;
  * implementation is configured, {@code DefaultAPIChatAssistantServiceImpl} is used, preserving the out-of-the-box behaviour.
  * <p>
  * Implementations must be thread-safe and provide a public no-argument constructor, as a single instance is created
- * and cached by {@code APIChatServiceFactory}.
+ * and cached by {@code AIServiceFactory}. The resolved configuration is delivered through
+ * {@link AIService#init(AIServiceConfiguration)}, so an implementation need not depend on the {@code impl}-module
+ * configuration classes.
  */
-public interface APIChatAssistant {
+public interface APIChatAssistant extends AIService {
 
     /**
      * Executes the API Chat "prepare" stage against the underlying AI service.

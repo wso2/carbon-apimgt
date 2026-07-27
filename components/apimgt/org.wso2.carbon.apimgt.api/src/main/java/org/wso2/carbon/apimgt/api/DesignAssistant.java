@@ -30,9 +30,11 @@ package org.wso2.carbon.apimgt.api;
  * preserving the out-of-the-box behaviour.
  * <p>
  * Implementations must be thread-safe and provide a public no-argument constructor, as a single instance is created
- * and cached by {@code DesignAssistantServiceFactory}.
+ * and cached by {@code AIServiceFactory}. The resolved configuration is delivered through
+ * {@link AIService#init(AIServiceConfiguration)}, so an implementation need not depend on the {@code impl}-module
+ * configuration classes.
  */
-public interface DesignAssistant {
+public interface DesignAssistant extends AIService {
     /**
      * Generates an API payload for the given design session.
      *

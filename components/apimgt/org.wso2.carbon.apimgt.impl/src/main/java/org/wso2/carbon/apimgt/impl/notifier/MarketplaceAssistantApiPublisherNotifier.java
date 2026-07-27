@@ -24,7 +24,7 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.impl.ai.MarketplaceAssistantServiceFactory;
+import org.wso2.carbon.apimgt.impl.ai.AIServiceFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
@@ -166,7 +166,7 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
         @Override
         public void run() {
             try {
-                MarketplaceAssistantServiceFactory.getMarketplaceAssistantService().publishAPI(request);
+                AIServiceFactory.getMarketplaceAssistantService().publishAPI(request);
             } catch (APIManagementException e) {
                 String errorMessage = "Error encountered while Uploading the API with UUID: " +
                         request.getUuid() + " to the vector database" + e.getMessage();
@@ -189,7 +189,7 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
         @Override
         public void run() {
             try {
-                MarketplaceAssistantServiceFactory.getMarketplaceAssistantService().deleteAPI(request);
+                AIServiceFactory.getMarketplaceAssistantService().deleteAPI(request);
             } catch (APIManagementException e) {
                 String errorMessage = "Error encountered while Deleting the API with UUID: " +
                         request.getUuid() + " from the vector database" + e.getMessage();

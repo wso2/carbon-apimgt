@@ -25,15 +25,13 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.api.AIServiceConfiguration;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.MarketplaceAssistant;
 import org.wso2.carbon.apimgt.api.MarketplaceAssistantRequest;
 import org.wso2.carbon.apimgt.api.MarketplaceAssistantResponse;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.dto.ai.MarketplaceAssistantConfigurationDTO;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.IOException;
@@ -47,9 +45,16 @@ public class DefaultMarketplaceAssistantServiceImpl implements MarketplaceAssist
 
     private static final Log log = LogFactory.getLog(DefaultMarketplaceAssistantServiceImpl.class);
 
+    private AIServiceConfiguration configuration;
+
+    @Override
+    public void init(AIServiceConfiguration configuration) {
+        this.configuration = configuration;
+    }
+
     @Override
     public MarketplaceAssistantResponse execute(MarketplaceAssistantRequest request) throws APIManagementException {
-        MarketplaceAssistantConfigurationDTO configDto = getConfiguration();
+        AIServiceConfiguration config = getValidatedConfiguration();
 
         String userRoles = new Gson().toJson(APIUtil.getListOfRoles(request.getUsername()));
 
@@ -60,13 +65,14 @@ public class DefaultMarketplaceAssistantServiceImpl implements MarketplaceAssist
         payload.put(APIConstants.USERROLES, userRoles.toLowerCase());
         payload.put(APIConstants.APIM_VERSION, APIUtil.getAPIMVersion());
 
+        String chatResource = (String) config.getProperty(APIConstants.AI.MARKETPLACE_ASSISTANT_CHAT_RESOURCE);
         String aiResponse;
-        if (configDto.isKeyProvided()) {
-            aiResponse = APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(),
-                    configDto.getKey(), configDto.getChatResource(), payload.toString(), null);
+        if (config.isKeyProvided()) {
+            aiResponse = APIUtil.invokeAIService(config.getEndpoint(), config.getTokenEndpoint(),
+                    config.getKey(), chatResource, payload.toString(), null);
         } else {
-            aiResponse = APIUtil.invokeAIService(configDto.getEndpoint(), null,
-                    configDto.getAccessToken(), configDto.getChatResource(), payload.toString(), null);
+            aiResponse = APIUtil.invokeAIService(config.getEndpoint(), null,
+                    config.getAccessToken(), chatResource, payload.toString(), null);
         }
 
         MarketplaceAssistantResponse response = new MarketplaceAssistantResponse();
@@ -76,16 +82,17 @@ public class DefaultMarketplaceAssistantServiceImpl implements MarketplaceAssist
 
     @Override
     public MarketplaceAssistantResponse getApiCount(MarketplaceAssistantRequest request) throws APIManagementException {
-        MarketplaceAssistantConfigurationDTO configDto = getConfiguration();
+        AIServiceConfiguration config = getValidatedConfiguration();
 
+        String apiCountResource = (String) config.getProperty(APIConstants.AI.MARKETPLACE_ASSISTANT_API_COUNT_RESOURCE);
         CloseableHttpResponse httpResponse = null;
         try {
-            if (configDto.isKeyProvided()) {
-                httpResponse = APIUtil.getMarketplaceChatApiCount(configDto.getEndpoint(),
-                        configDto.getTokenEndpoint(), configDto.getKey(), configDto.getApiCountResource());
+            if (config.isKeyProvided()) {
+                httpResponse = APIUtil.getMarketplaceChatApiCount(config.getEndpoint(),
+                        config.getTokenEndpoint(), config.getKey(), apiCountResource);
             } else {
-                httpResponse = APIUtil.getMarketplaceChatApiCount(configDto.getEndpoint(),
-                        null, configDto.getAccessToken(), configDto.getApiCountResource());
+                httpResponse = APIUtil.getMarketplaceChatApiCount(config.getEndpoint(),
+                        null, config.getAccessToken(), apiCountResource);
             }
             int statusCode = httpResponse.getStatusLine().getStatusCode();
             if (statusCode == HttpStatus.SC_OK) {
@@ -117,7 +124,7 @@ public class DefaultMarketplaceAssistantServiceImpl implements MarketplaceAssist
 
     @Override
     public void publishAPI(MarketplaceAssistantRequest request) throws APIManagementException {
-        MarketplaceAssistantConfigurationDTO configDto = getConfiguration();
+        AIServiceConfiguration config = getValidatedConfiguration();
         API api = request.getApi();
         if (api == null) {
             return;
@@ -162,39 +169,39 @@ public class DefaultMarketplaceAssistantServiceImpl implements MarketplaceAssist
         payload.put(APIConstants.VISIBILITYROLES, visibleRoles.toLowerCase());
         payload.put(APIConstants.APIM_VERSION, APIUtil.getAPIMVersion());
 
-        if (configDto.isKeyProvided()) {
-            APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(), configDto.getKey(),
-                    configDto.getApiPublishResource(), payload.toString(), null);
+        String apiPublishResource =
+                (String) config.getProperty(APIConstants.AI.MARKETPLACE_ASSISTANT_PUBLISH_API_RESOURCE);
+        if (config.isKeyProvided()) {
+            APIUtil.invokeAIService(config.getEndpoint(), config.getTokenEndpoint(), config.getKey(),
+                    apiPublishResource, payload.toString(), null);
         } else {
-            APIUtil.invokeAIService(configDto.getEndpoint(), null, configDto.getAccessToken(),
-                    configDto.getApiPublishResource(), payload.toString(), null);
+            APIUtil.invokeAIService(config.getEndpoint(), null, config.getAccessToken(),
+                    apiPublishResource, payload.toString(), null);
         }
     }
 
     @Override
     public void deleteAPI(MarketplaceAssistantRequest request) throws APIManagementException {
-        MarketplaceAssistantConfigurationDTO configDto = getConfiguration();
-        if (configDto.isKeyProvided()) {
-            APIUtil.marketplaceAssistantDeleteService(configDto.getEndpoint(), configDto.getTokenEndpoint(),
-                    configDto.getKey(), configDto.getApiDeleteResource(), request.getUuid());
+        AIServiceConfiguration config = getValidatedConfiguration();
+        String apiDeleteResource =
+                (String) config.getProperty(APIConstants.AI.MARKETPLACE_ASSISTANT_DELETE_API_RESOURCE);
+        if (config.isKeyProvided()) {
+            APIUtil.marketplaceAssistantDeleteService(config.getEndpoint(), config.getTokenEndpoint(),
+                    config.getKey(), apiDeleteResource, request.getUuid());
         } else {
-            APIUtil.marketplaceAssistantDeleteService(configDto.getEndpoint(), null,
-                    configDto.getAccessToken(), configDto.getApiDeleteResource(), request.getUuid());
+            APIUtil.marketplaceAssistantDeleteService(config.getEndpoint(), null,
+                    config.getAccessToken(), apiDeleteResource, request.getUuid());
         }
     }
 
-    private MarketplaceAssistantConfigurationDTO getConfiguration() throws APIManagementException {
-        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        if (configuration == null) {
-            throw new APIManagementException("API Manager configuration is not initialized.");
-        }
-        MarketplaceAssistantConfigurationDTO configDto = configuration.getMarketplaceAssistantConfigurationDto();
-        if (configDto == null || !(configDto.isKeyProvided() || configDto.isAuthTokenProvided())) {
-            String errorMessage = "Marketplace Assistant service is not configured properly. Please provide the " + "API key or the access token in the configuration.";
+    private AIServiceConfiguration getValidatedConfiguration() throws APIManagementException {
+        AIServiceConfiguration config = this.configuration;
+        if (config == null || !(config.isKeyProvided() || config.isAuthTokenProvided())) {
+            String errorMessage = "Marketplace Assistant service is not configured properly. Please provide the "
+                    + "API key or the access token in the configuration.";
             log.error(errorMessage);
             throw new APIManagementException(errorMessage);
         }
-        return configDto;
+        return config;
     }
 }

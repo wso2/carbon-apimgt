@@ -98,9 +98,8 @@ import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 import org.wso2.carbon.apimgt.api.model.ApplicationResponse;
 import org.wso2.carbon.apimgt.api.APIChatRequest;
 import org.wso2.carbon.apimgt.api.APIChatResponse;
-import org.wso2.carbon.apimgt.impl.ai.APIChatAssistantFactory;
+import org.wso2.carbon.apimgt.impl.ai.AIServiceFactory;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyDTO;
-import org.wso2.carbon.apimgt.impl.dto.ai.ApiChatConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationDTO;
@@ -4203,7 +4202,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         request.setAction(APIConstants.AI.API_CHAT_ACTION_EXECUTE);
         request.setApiChatRequestId(apiChatRequestId);
         request.setRequestPayload(requestPayload);
-        APIChatResponse response = APIChatAssistantFactory.getAPIChatService().execute(request);
+        APIChatResponse response = AIServiceFactory.getAPIChatService().execute(request);
         return response != null ? response.getExecuteResponse() : null;
     }
 
@@ -4216,7 +4215,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         request.setApiChatRequestId(apiChatRequestId);
         request.setOrganization(organization);
         request.setOpenAPIDefinition(getOpenAPIDefinition(apiId, organization));
-        APIChatResponse response = APIChatAssistantFactory.getAPIChatService().prepare(request);
+        APIChatResponse response = AIServiceFactory.getAPIChatService().prepare(request);
         return response != null ? response.getPrepareResponse() : null;
     }
 

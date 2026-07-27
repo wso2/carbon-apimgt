@@ -21,13 +21,12 @@ package org.wso2.carbon.apimgt.impl.ai;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.api.AIServiceConfiguration;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.DesignAssistant;
 import org.wso2.carbon.apimgt.api.DesignAssistantRequest;
 import org.wso2.carbon.apimgt.api.DesignAssistantResponse;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.dto.ai.DesignAssistantConfigurationDTO;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 /**
@@ -41,20 +40,29 @@ public class DefaultDesignAssistantServiceImpl implements DesignAssistant {
     private static final String TEXT = "text";
     private static final String SESSIONID = "sessionId";
 
+    private AIServiceConfiguration configuration;
+
+    @Override
+    public void init(AIServiceConfiguration configuration) {
+        this.configuration = configuration;
+    }
+
     @Override
     public DesignAssistantResponse generatePayload(DesignAssistantRequest request) throws APIManagementException {
-        DesignAssistantConfigurationDTO configDto = getConfiguration();
+        AIServiceConfiguration config = getValidatedConfiguration();
 
         JSONObject payload = new JSONObject();
         payload.put(SESSIONID, request.getSessionId());
 
+        String genApiPayloadResource =
+                (String) config.getProperty(APIConstants.AI.DESIGN_ASSISTANT_GEN_API_PAYLOAD_RESOURCE);
         String aiResponse;
-        if (configDto.isKeyProvided()) {
-            aiResponse = APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(),
-                    configDto.getKey(), configDto.getGenApiPayloadResource(), payload.toString(), null);
+        if (config.isKeyProvided()) {
+            aiResponse = APIUtil.invokeAIService(config.getEndpoint(), config.getTokenEndpoint(),
+                    config.getKey(), genApiPayloadResource, payload.toString(), null);
         } else {
-            aiResponse = APIUtil.invokeAIService(configDto.getEndpoint(), null, configDto.getAccessToken(),
-                    configDto.getGenApiPayloadResource(), payload.toString(), null);
+            aiResponse = APIUtil.invokeAIService(config.getEndpoint(), null, config.getAccessToken(),
+                    genApiPayloadResource, payload.toString(), null);
         }
 
         DesignAssistantResponse response = new DesignAssistantResponse();
@@ -64,19 +72,20 @@ public class DefaultDesignAssistantServiceImpl implements DesignAssistant {
 
     @Override
     public DesignAssistantResponse chat(DesignAssistantRequest request) throws APIManagementException {
-        DesignAssistantConfigurationDTO configDto = getConfiguration();
+        AIServiceConfiguration config = getValidatedConfiguration();
 
         JSONObject payload = new JSONObject();
         payload.put(TEXT, request.getText());
         payload.put(SESSIONID, request.getSessionId());
 
+        String chatResource = (String) config.getProperty(APIConstants.AI.DESIGN_ASSISTANT_CHAT_RESOURCE);
         String aiResponse;
-        if (configDto.isKeyProvided()) {
-            aiResponse = APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(),
-                    configDto.getKey(), configDto.getChatResource(), payload.toString(), null);
+        if (config.isKeyProvided()) {
+            aiResponse = APIUtil.invokeAIService(config.getEndpoint(), config.getTokenEndpoint(),
+                    config.getKey(), chatResource, payload.toString(), null);
         } else {
-            aiResponse = APIUtil.invokeAIService(configDto.getEndpoint(), null, configDto.getAccessToken(),
-                    configDto.getChatResource(), payload.toString(), null);
+            aiResponse = APIUtil.invokeAIService(config.getEndpoint(), null, config.getAccessToken(),
+                    chatResource, payload.toString(), null);
         }
 
         DesignAssistantResponse response = new DesignAssistantResponse();
@@ -84,18 +93,14 @@ public class DefaultDesignAssistantServiceImpl implements DesignAssistant {
         return response;
     }
 
-    private DesignAssistantConfigurationDTO getConfiguration() throws APIManagementException {
-        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        if (configuration == null) {
-            throw new APIManagementException("API Manager configuration is not initialized.");
-        }
-        DesignAssistantConfigurationDTO configDto = configuration.getDesignAssistantConfigurationDto();
-        if (configDto == null || !(configDto.isKeyProvided() || configDto.isAuthTokenProvided())) {
-            String errorMessage = "API Design Assistant service is not configured properly. Please provide the " + "API key or the access token in the configuration.";
+    private AIServiceConfiguration getValidatedConfiguration() throws APIManagementException {
+        AIServiceConfiguration config = this.configuration;
+        if (config == null || !(config.isKeyProvided() || config.isAuthTokenProvided())) {
+            String errorMessage = "API Design Assistant service is not configured properly. Please provide the "
+                    + "API key or the access token in the configuration.";
             log.error(errorMessage);
             throw new APIManagementException(errorMessage);
         }
-        return configDto;
+        return config;
     }
 }

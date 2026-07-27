@@ -24,14 +24,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.AIServiceConfiguration;
 import org.wso2.carbon.apimgt.api.APIChatAssistant;
 import org.wso2.carbon.apimgt.api.APIChatRequest;
 import org.wso2.carbon.apimgt.api.APIChatResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.dto.ai.ApiChatConfigurationDTO;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 /**
@@ -43,9 +41,16 @@ public class DefaultAPIChatAssistantServiceImpl implements APIChatAssistant {
 
     private static final Log log = LogFactory.getLog(DefaultAPIChatAssistantServiceImpl.class);
 
+    private AIServiceConfiguration configuration;
+
+    @Override
+    public void init(AIServiceConfiguration configuration) {
+        this.configuration = configuration;
+    }
+
     @Override
     public APIChatResponse prepare(APIChatRequest request) throws APIManagementException {
-        ApiChatConfigurationDTO configDto = getConfiguration();
+        AIServiceConfiguration config = getValidatedConfiguration();
         try {
             // Generate the payload for the prepare call
             ObjectMapper objectMapper = new ObjectMapper();
@@ -53,14 +58,15 @@ public class DefaultAPIChatAssistantServiceImpl implements APIChatAssistant {
             ObjectNode payload = objectMapper.createObjectNode();
             payload.set(APIConstants.OPEN_API, openAPIDefinitionJsonNode);
 
+            String prepareResource = (String) config.getProperty(APIConstants.AI.API_CHAT_PREPARE_RESOURCE);
             String aiResponse;
-            if (configDto.isKeyProvided()) {
-                aiResponse = APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(),
-                        configDto.getKey(), configDto.getPrepareResource(), payload.toString(),
+            if (config.isKeyProvided()) {
+                aiResponse = APIUtil.invokeAIService(config.getEndpoint(), config.getTokenEndpoint(),
+                        config.getKey(), prepareResource, payload.toString(),
                         request.getApiChatRequestId());
             } else {
-                aiResponse = APIUtil.invokeAIService(configDto.getEndpoint(), null, configDto.getAccessToken(),
-                        configDto.getPrepareResource(), payload.toString(), request.getApiChatRequestId());
+                aiResponse = APIUtil.invokeAIService(config.getEndpoint(), null, config.getAccessToken(),
+                        prepareResource, payload.toString(), request.getApiChatRequestId());
             }
 
             APIChatResponse response = new APIChatResponse();
@@ -75,15 +81,16 @@ public class DefaultAPIChatAssistantServiceImpl implements APIChatAssistant {
 
     @Override
     public APIChatResponse execute(APIChatRequest request) throws APIManagementException {
-        ApiChatConfigurationDTO configDto = getConfiguration();
+        AIServiceConfiguration config = getValidatedConfiguration();
+        String executeResource = (String) config.getProperty(APIConstants.AI.API_CHAT_EXECUTE_RESOURCE);
         String aiResponse;
-        if (configDto.isKeyProvided()) {
-            aiResponse = APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(),
-                    configDto.getKey(), configDto.getExecuteResource(), request.getRequestPayload(),
+        if (config.isKeyProvided()) {
+            aiResponse = APIUtil.invokeAIService(config.getEndpoint(), config.getTokenEndpoint(),
+                    config.getKey(), executeResource, request.getRequestPayload(),
                     request.getApiChatRequestId());
         } else {
-            aiResponse = APIUtil.invokeAIService(configDto.getEndpoint(), null, configDto.getAccessToken(),
-                    configDto.getExecuteResource(), request.getRequestPayload(), request.getApiChatRequestId());
+            aiResponse = APIUtil.invokeAIService(config.getEndpoint(), null, config.getAccessToken(),
+                    executeResource, request.getRequestPayload(), request.getApiChatRequestId());
         }
 
         APIChatResponse response = new APIChatResponse();
@@ -91,19 +98,14 @@ public class DefaultAPIChatAssistantServiceImpl implements APIChatAssistant {
         return response;
     }
 
-    private ApiChatConfigurationDTO getConfiguration() throws APIManagementException {
-        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        if (configuration == null) {
-            throw new APIManagementException("API Manager configuration is not initialized.");
-        }
-        ApiChatConfigurationDTO configDto = configuration.getApiChatConfigurationDto();
-        if (configDto == null || !(configDto.isKeyProvided() || configDto.isAuthTokenProvided())) {
+    private AIServiceConfiguration getValidatedConfiguration() throws APIManagementException {
+        AIServiceConfiguration config = this.configuration;
+        if (config == null || !(config.isKeyProvided() || config.isAuthTokenProvided())) {
             String errorMessage = "API Chat service is not configured properly. Please provide the API key or the "
                     + "access token in the configuration.";
             log.error(errorMessage);
             throw new APIManagementException(errorMessage);
         }
-        return configDto;
+        return config;
     }
 }
