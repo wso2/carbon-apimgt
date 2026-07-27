@@ -601,6 +601,13 @@ public final class APIConstants {
         public static final String MARKETPLACE_ASSISTANT_DELETE_API_RESOURCE = "ApiDeleteResource";
         public static final String MARKETPLACE_ASSISTANT_API_COUNT_RESOURCE = "ApiCountResource";
         public static final String AI_CONFIGURATION = "AiConfiguration";
+
+        /**
+         * Fully qualified class name of the AIRequestPropertyEnricher implementation used to attach
+         * additional properties to outbound AI service request payloads. Configured with
+         * [apim.ai] propertyEnricherImpl in deployment.toml.
+         */
+        public static final String PROPERTY_ENRICHER_IMPL = "PropertyEnricherImpl";
         public static final String MCP = "MCP";
         public static final String MCP_SUPPORT_ENABLED = "Enabled";
         public static final String MCP_ENFORCE_AUTH_FOR_ALL = "EnforceAuthForAllMCPMethods";

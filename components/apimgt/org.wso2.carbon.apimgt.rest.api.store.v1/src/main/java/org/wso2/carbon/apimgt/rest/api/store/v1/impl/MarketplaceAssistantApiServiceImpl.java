@@ -26,6 +26,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.api.AIRequestContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -46,6 +47,7 @@ import org.wso2.carbon.identity.oauth.OAuthUtil;
 import org.wso2.carbon.identity.oauth2.authz.OAuthAuthzReqMessageContext;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import javax.ws.rs.core.Response;
 
@@ -83,7 +85,8 @@ public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantA
                 String history = new Gson().toJson(marketplaceAssistantRequestDTO.getHistory());
 
                 String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
-                String userRoles = new Gson().toJson(APIUtil.getListOfRoles(username));
+                String[] roles = APIUtil.getListOfRoles(username);
+                String userRoles = new Gson().toJson(roles);
 
                 payload.put(APIConstants.QUERY, marketplaceAssistantRequestDTO.getQuery());
                 payload.put(APIConstants.HISTORY, history);
@@ -91,13 +94,18 @@ public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantA
                 payload.put(APIConstants.USERROLES, userRoles.toLowerCase());
                 payload.put(APIConstants.APIM_VERSION, APIUtil.getAPIMVersion());
 
+                AIRequestContext context = APIUtil.buildAIRequestContext(organization,
+                        configDto.getChatResource(), null);
+                context.setUserRoles(roles == null ? null : Arrays.asList(roles));
+
                 String response;
                 if (configDto.isKeyProvided()) {
                     response = APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(),
-                            configDto.getKey(), configDto.getChatResource(), payload.toString(), null);
+                            configDto.getKey(), configDto.getChatResource(), payload.toString(), null, context);
                 } else {
                     response = APIUtil.invokeAIService(configDto.getEndpoint(), null,
-                            configDto.getAccessToken(), configDto.getChatResource(), payload.toString(), null);
+                            configDto.getAccessToken(), configDto.getChatResource(), payload.toString(), null,
+                            context);
                 }
                 ObjectMapper objectMapper = new ObjectMapper();
                 MarketplaceAssistantResponseDTO executeResponseDTO = objectMapper.readValue(response,

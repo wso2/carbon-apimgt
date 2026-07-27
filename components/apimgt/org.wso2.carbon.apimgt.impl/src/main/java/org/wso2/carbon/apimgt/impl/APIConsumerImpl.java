@@ -42,6 +42,7 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIDefinition;
+import org.wso2.carbon.apimgt.api.AIRequestContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
@@ -4202,12 +4203,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         ApiChatConfigurationDTO configDto =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
                         .getApiChatConfigurationDto();
+        AIRequestContext context = APIUtil.buildAIRequestContext(tenantDomain, configDto.getExecuteResource(),
+                apiChatRequestId);
         if (configDto.isKeyProvided()) {
             return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(), configDto.getKey(),
-                    configDto.getExecuteResource(), requestPayload, apiChatRequestId);
+                    configDto.getExecuteResource(), requestPayload, apiChatRequestId, context);
         }
         return APIUtil.invokeAIService(configDto.getEndpoint(), null, configDto.getAccessToken(),
-                configDto.getExecuteResource(), requestPayload, apiChatRequestId);
+                configDto.getExecuteResource(), requestPayload, apiChatRequestId, context);
     }
 
     @Override
@@ -4222,12 +4225,15 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
             ApiChatConfigurationDTO configDto = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                     .getAPIManagerConfiguration().getApiChatConfigurationDto();
+            AIRequestContext context = APIUtil.buildAIRequestContext(organization, configDto.getPrepareResource(),
+                    apiChatRequestId);
             if (configDto.isKeyProvided()) {
                 return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(),
-                        configDto.getKey(), configDto.getPrepareResource(), payload.toString(), apiChatRequestId);
+                        configDto.getKey(), configDto.getPrepareResource(), payload.toString(), apiChatRequestId,
+                        context);
             }
             return APIUtil.invokeAIService(configDto.getEndpoint(), null, configDto.getAccessToken(),
-                    configDto.getPrepareResource(), payload.toString(), apiChatRequestId);
+                    configDto.getPrepareResource(), payload.toString(), apiChatRequestId, context);
         } catch (JsonProcessingException e) {
             String error = "Error while parsing OpenAPI definition of API ID: " + apiId + " to JSON";
             log.error(error, e);

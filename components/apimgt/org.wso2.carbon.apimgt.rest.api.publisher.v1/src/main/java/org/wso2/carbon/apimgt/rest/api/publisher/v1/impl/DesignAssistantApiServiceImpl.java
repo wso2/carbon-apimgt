@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.api.AIRequestContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -74,14 +75,20 @@ public class DesignAssistantApiServiceImpl implements DesignAssistantApiService 
                 JSONObject payload = new JSONObject();
                 payload.put(SESSIONID, sessionId);
 
+                AIRequestContext context = APIUtil.buildAIRequestContext(
+                        RestApiUtil.getValidatedOrganization(messageContext),
+                        configDto.getGenApiPayloadResource(), null);
+
                 String response;
                 if (configDto.isKeyProvided()) {
                     response = APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(),
-                            configDto.getKey(), configDto.getGenApiPayloadResource(), payload.toString(), null);
- 
+                            configDto.getKey(), configDto.getGenApiPayloadResource(), payload.toString(), null,
+                            context);
+
                 } else {
                     response = APIUtil.invokeAIService(configDto.getEndpoint(), null,
-                            configDto.getAccessToken(), configDto.getGenApiPayloadResource(), payload.toString(), null);
+                            configDto.getAccessToken(), configDto.getGenApiPayloadResource(), payload.toString(), null,
+                            context);
 
                 }
 
@@ -130,14 +137,18 @@ public class DesignAssistantApiServiceImpl implements DesignAssistantApiService 
                 payload.put(TEXT, designAssistantChatQueryDTO.getText());
                 payload.put(SESSIONID, sessionId);
 
+                AIRequestContext context = APIUtil.buildAIRequestContext(
+                        RestApiUtil.getValidatedOrganization(messageContext),
+                        configDto.getChatResource(), null);
+
                 String response;
                 if (configDto.isKeyProvided()) {
                     response = APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(),
-                            configDto.getKey(), configDto.getChatResource(), payload.toString(), null);
-    
+                            configDto.getKey(), configDto.getChatResource(), payload.toString(), null, context);
+
                 } else {
                     response = APIUtil.invokeAIService(configDto.getEndpoint(), null,
-                            configDto.getAccessToken(), configDto.getChatResource(), payload.toString(), null);
+                            configDto.getAccessToken(), configDto.getChatResource(), payload.toString(), null, context);
 
                 }
                 ObjectMapper objectMapper = new ObjectMapper();
