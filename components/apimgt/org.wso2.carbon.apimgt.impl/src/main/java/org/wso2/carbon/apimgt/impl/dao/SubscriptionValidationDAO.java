@@ -1277,7 +1277,9 @@ public class SubscriptionValidationDAO {
                         String revision = resultSet.getString("REVISION_UUID");
                         api.setStatus(resultSet.getString("STATUS"));
                         api.setOrganization(resultSet.getString("ORGANIZATION"));
-                        api.setIsDefaultVersion(isAPIDefaultVersion(connection, provider, name, version));
+                        String publishedDefaultApiVersion = getAPIDefaultVersion(connection, provider, name);
+                        setDefaultVersionContext(apiType, api, version, publishedDefaultApiVersion,
+                                api.getContext(), api.getContextTemplate());
                         if (resultSet.getString("IS_EGRESS") != null) {
                             api.setEgress(parseInt(resultSet.getString("IS_EGRESS")));
                         }
