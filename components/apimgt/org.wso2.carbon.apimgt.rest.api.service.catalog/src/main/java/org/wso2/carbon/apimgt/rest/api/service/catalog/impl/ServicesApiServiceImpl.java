@@ -258,87 +258,93 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         List<ServiceEntry> servicesWithInvalidDefinition = new ArrayList<>();
 
         // unzip the uploaded zip
-        try {
-            FileBasedServicesImportExportManager importExportManager =
-                    new FileBasedServicesImportExportManager(tempDirPath);
-            importExportManager.importService(fileInputStream);
-        } catch (APIMgtResourceAlreadyExistsException e) {
-            RestApiUtil.handleResourceAlreadyExistsError("Error while importing Service", e, log);
-        }
+        try {  // ensure the per-request temp dir is always cleaned up
+            // unzip the uploaded zip
+            try {
+                FileBasedServicesImportExportManager importExportManager =
+                        new FileBasedServicesImportExportManager(tempDirPath);
+                importExportManager.importService(fileInputStream);
+            } catch (APIMgtResourceAlreadyExistsException e) {
+                RestApiUtil.handleResourceAlreadyExistsError("Error while importing Service", e, log);
+            }
 
-        newResourcesHash = Md5HashGenerator.generateHash(tempDirPath, serviceCatalog.hashingAlgorithm());
-        serviceEntries = ServiceEntryMappingUtil.fromDirToServiceEntryMap(tempDirPath);
-        Map<String, Boolean> validationResults = new HashMap<>();
-        if (overwrite && StringUtils.isNotEmpty(verifier)) {
-            validationResults = validateVerifier(verifier, tenantId);
-        }
-        try {
-            for (Map.Entry<String, ServiceEntry> entry : serviceEntries.entrySet()) {
-                String key = entry.getKey();
-                serviceEntries.get(key).setMd5(newResourcesHash.get(key));
-                ServiceEntry service = serviceEntries.get(key);
-                byte[] definitionFileByteArray = getDefinitionFromInput(service.getEndpointDef());
-                if (validateAndRetrieveServiceDefinition(definitionFileByteArray, service.getDefUrl(),
-                        service.getDefinitionType()).isValid() ||
-                        (ServiceEntry.DefinitionType.WSDL1.equals(service.getDefinitionType())
-                                && APIMWSDLReader.validateWSDLFile(definitionFileByteArray).isValid())) {
-                    service.setEndpointDef(new ByteArrayInputStream(definitionFileByteArray));
-                } else {
-                    servicesWithInvalidDefinition.add(service);
-                }
-                if (overwrite) {
-                    if (StringUtils.isNotEmpty(verifier) && validationResults
-                            .containsKey(service.getServiceKey()) && !validationResults.get(service.getServiceKey())) {
-                        serviceListToIgnore.add(service);
+            newResourcesHash = Md5HashGenerator.generateHash(tempDirPath, serviceCatalog.hashingAlgorithm());
+            serviceEntries = ServiceEntryMappingUtil.fromDirToServiceEntryMap(tempDirPath);
+            Map<String, Boolean> validationResults = new HashMap<>();
+            if (overwrite && StringUtils.isNotEmpty(verifier)) {
+                validationResults = validateVerifier(verifier, tenantId);
+            }
+            try {
+                for (Map.Entry<String, ServiceEntry> entry : serviceEntries.entrySet()) {
+                    String key = entry.getKey();
+                    serviceEntries.get(key).setMd5(newResourcesHash.get(key));
+                    ServiceEntry service = serviceEntries.get(key);
+                    byte[] definitionFileByteArray = getDefinitionFromInput(service.getEndpointDef());
+                    if (validateAndRetrieveServiceDefinition(definitionFileByteArray, service.getDefUrl(),
+                            service.getDefinitionType()).isValid() ||
+                            (ServiceEntry.DefinitionType.WSDL1.equals(service.getDefinitionType())
+                                    && APIMWSDLReader.validateWSDLFile(definitionFileByteArray).isValid())) {
+                        service.setEndpointDef(new ByteArrayInputStream(definitionFileByteArray));
+                    } else {
+                        servicesWithInvalidDefinition.add(service);
+                    }
+                    if (overwrite) {
+                        if (StringUtils.isNotEmpty(verifier) && validationResults
+                                .containsKey(service.getServiceKey()) && !validationResults.get(service.getServiceKey())) {
+                            serviceListToIgnore.add(service);
+                        } else {
+                            serviceListToImport.add(service);
+                        }
                     } else {
                         serviceListToImport.add(service);
                     }
-                } else {
-                    serviceListToImport.add(service);
                 }
+            } catch (IOException e) {
+                RestApiUtil.handleInternalServerError("Error when reading the service definition content", log);
             }
-        } catch (IOException e) {
-            RestApiUtil.handleInternalServerError("Error when reading the service definition content", log);
-        }
-        if (servicesWithInvalidDefinition.size() > 0) {
-            serviceList = ServiceEntryMappingUtil.fromServiceListToDTOList(servicesWithInvalidDefinition);
-            String errorMsg = "The Service import has been failed as invalid service definition provided";
-            return Response.status(Response.Status.BAD_REQUEST).entity(getErrorDTO(RestApiConstants
-            .STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 400L, errorMsg, new JSONArray(serviceList).toString())).build();
-        }
-        if (serviceListToIgnore.size() > 0) {
-            serviceList = ServiceEntryMappingUtil.fromServiceListToDTOList(serviceListToIgnore);
-            String errorMsg = "The Service import has been failed since to verifier validation fails";
+            if (servicesWithInvalidDefinition.size() > 0) {
+                serviceList = ServiceEntryMappingUtil.fromServiceListToDTOList(servicesWithInvalidDefinition);
+                String errorMsg = "The Service import has been failed as invalid service definition provided";
+                return Response.status(Response.Status.BAD_REQUEST).entity(getErrorDTO(RestApiConstants
+                        .STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 400L, errorMsg, new JSONArray(serviceList).toString())).build();
+            }
+            if (serviceListToIgnore.size() > 0) {
+                serviceList = ServiceEntryMappingUtil.fromServiceListToDTOList(serviceListToIgnore);
+                String errorMsg = "The Service import has been failed since to verifier validation fails";
 
-            return Response.status(Response.Status.BAD_REQUEST).entity(getErrorDTO(RestApiConstants
-            .STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 400L, errorMsg, new JSONArray(serviceList).toString())).build();
-        } else {
-            List<ServiceEntry> importedServiceList = new ArrayList<>();
-            List<ServiceEntry> retrievedServiceList = new ArrayList<>();
-            try {
-                if (serviceListToImport.size() > 0) {
-                    importedServiceList = serviceCatalog.importServices(serviceListToImport, tenantId, userName,
-                            overwrite);
+                return Response.status(Response.Status.BAD_REQUEST).entity(getErrorDTO(RestApiConstants
+                        .STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 400L, errorMsg, new JSONArray(serviceList).toString())).build();
+            } else {
+                List<ServiceEntry> importedServiceList = new ArrayList<>();
+                List<ServiceEntry> retrievedServiceList = new ArrayList<>();
+                try {
+                    if (serviceListToImport.size() > 0) {
+                        importedServiceList = serviceCatalog.importServices(serviceListToImport, tenantId, userName,
+                                overwrite);
+                    }
+                } catch (APIManagementException e) {
+                    if (ExceptionCodes.SERVICE_IMPORT_FAILED_WITHOUT_OVERWRITE.getErrorCode() == e.getErrorHandler()
+                            .getErrorCode()) {
+                        RestApiUtil.handleBadRequest("Cannot update existing services when overwrite is false", log);
+                    } else {
+                        RestApiUtil.handleInternalServerError("Error when importing services to service catalog",
+                                e, log);
+                    }
                 }
-            } catch (APIManagementException e) {
-                if (ExceptionCodes.SERVICE_IMPORT_FAILED_WITHOUT_OVERWRITE.getErrorCode() == e.getErrorHandler()
-                        .getErrorCode()) {
-                    RestApiUtil.handleBadRequest("Cannot update existing services when overwrite is false", log);
-                } else {
-                    RestApiUtil.handleInternalServerError("Error when importing services to service catalog",
-                            e, log);
+                if (importedServiceList == null) {
+                    RestApiUtil.handleBadRequest("Cannot update the name or version or key or definition type of an " +
+                            "existing service", log);
                 }
+                for (ServiceEntry service : importedServiceList) {
+                    retrievedServiceList.add(serviceCatalog.getServiceByKey(service.getServiceKey(), tenantId));
+                }
+                serviceList = ServiceEntryMappingUtil.fromServiceListToDTOList(retrievedServiceList);
+                return Response.ok().entity(ServiceEntryMappingUtil
+                        .fromServiceInfoDTOToServiceInfoListDTO(serviceList)).build();
             }
-            if (importedServiceList == null) {
-                RestApiUtil.handleBadRequest("Cannot update the name or version or key or definition type of an " +
-                        "existing service", log);
-            }
-            for (ServiceEntry service : importedServiceList) {
-                retrievedServiceList.add(serviceCatalog.getServiceByKey(service.getServiceKey(), tenantId));
-            }
-            serviceList = ServiceEntryMappingUtil.fromServiceListToDTOList(retrievedServiceList);
-            return Response.ok().entity(ServiceEntryMappingUtil
-                    .fromServiceInfoDTOToServiceInfoListDTO(serviceList)).build();
+        } finally {
+            // delete the per-request staging dir on every exit path (CWE-459 temp-leak)
+            org.apache.commons.io.FileUtils.deleteQuietly(new java.io.File(tempDirPath));
         }
     }
 
