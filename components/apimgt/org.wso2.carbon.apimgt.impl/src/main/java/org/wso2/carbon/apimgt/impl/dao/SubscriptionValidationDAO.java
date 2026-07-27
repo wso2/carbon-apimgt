@@ -1613,8 +1613,6 @@ public class SubscriptionValidationDAO {
                     return resultSet.getString("PUBLISHED_DEFAULT_API_VERSION");
                 }
             }
-        } catch (SQLException e) {
-            log.error("Error while loading default version", e);
         }
         return null;
     }
