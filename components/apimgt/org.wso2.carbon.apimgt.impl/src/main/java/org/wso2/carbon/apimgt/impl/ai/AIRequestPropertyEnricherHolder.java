@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.AIRequestContext;
 import org.wso2.carbon.apimgt.api.AIRequestPropertyEnricher;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -31,10 +32,14 @@ import java.util.Map;
 
 /**
  * Loads and holds the single {@link AIRequestPropertyEnricher} instance used by all AI assistance features, and
- * resolves the additional properties for a given {@link AIRequestContext}.
+ * resolves the additional properties of an outbound AI service request through
+ * {@link #resolveProperties(AIRequestContext, PropertyResolver)}.
  * <p>
  * The implementation class is read from the {@code propertyEnricherImpl} configuration under {@code [apim.ai]}. When it
  * is not configured, or cannot be loaded, {@link DefaultAIRequestPropertyEnricher} is used, which adds no properties.
+ * <p>
+ * This class knows nothing about the individual AI assistance operations, so supporting a new one never requires
+ * changing it. See {@link #resolveProperties(AIRequestContext, PropertyResolver)}.
  * <p>
  * Resolving the properties is best effort: a failing or misbehaving implementation is logged and the request is
  * dispatched without the additional properties, so a faulty extension can never fail an AI request.
@@ -68,15 +73,25 @@ public class AIRequestPropertyEnricherHolder {
     }
 
     /**
-     * Resolves the additional properties to be added to an outbound AI service request payload.
+     * Resolves the additional properties of one AI assistance operation, by invoking the enricher method the given
+     * resolver selects.
+     * <p>
+     * This is the only entry point the payload construction sites use. It is deliberately generic: support for a new AI
+     * assistance operation is added by declaring a method on {@link AIRequestPropertyEnricher}, giving it an empty
+     * implementation in {@link org.wso2.carbon.apimgt.api.AbstractAIRequestPropertyEnricher} and calling this method
+     * from the site that builds the payload. This class does not change.
+     * <p>
+     * Resolving is best effort. A missing enricher, a {@code null} return and any failure raised by the enricher all
+     * degrade to no additional properties, so a faulty extension can never fail an AI request.
      *
-     * @param context details of the request being dispatched
-     * @return properties to add to the payload, never {@code null}. Empty when no enricher is configured or when the
-     * configured enricher fails.
+     * @param context  details of the request being dispatched. When {@code null} no properties are resolved.
+     * @param resolver invokes the {@link AIRequestPropertyEnricher} method of the operation being dispatched, typically
+     *                 as a lambda, for example {@code enricher -> enricher.getApiChatExecuteProperties(context)}
+     * @return properties to add to the payload, never {@code null}
      */
-    public Map<String, Object> getAdditionalProperties(AIRequestContext context) {
+    public Map<String, Object> resolveProperties(AIRequestContext context, PropertyResolver resolver) {
 
-        if (context == null) {
+        if (context == null || resolver == null) {
             return Collections.emptyMap();
         }
         AIRequestPropertyEnricher propertyEnricher = getEnricher();
@@ -84,21 +99,41 @@ public class AIRequestPropertyEnricherHolder {
             return Collections.emptyMap();
         }
         try {
-            Map<String, Object> additionalProperties = propertyEnricher.getAdditionalProperties(context);
+            Map<String, Object> additionalProperties = resolver.resolve(propertyEnricher);
             return additionalProperties == null
                     ? Collections.<String, Object>emptyMap()
                     : additionalProperties;
         } catch (Throwable t) {
             // Deliberately catching Throwable. A custom enricher must never be able to fail an AI request, so any
             // failure, including errors such as NoClassDefFoundError raised by a partially deployed extension,
-            // degrades to no additional properties.
-            log.error("Error while resolving the additional properties of the AI service request for resource: "
-                    + context.getResource() + ". Proceeding without the additional properties.", t);
+            // degrades to no additional properties. The stack trace identifies the enricher method that failed.
+            log.error("Error while resolving the additional properties of an AI service request from "
+                    + propertyEnricher.getClass().getName() + ". Proceeding without the additional properties.", t);
             return Collections.emptyMap();
         }
     }
 
     /**
+     * Selects the {@link AIRequestPropertyEnricher} method to invoke for the operation being dispatched. Implemented at
+     * the payload construction site, normally as a lambda passed to
+     * {@link #resolveProperties(AIRequestContext, PropertyResolver)}.
+     */
+    @FunctionalInterface
+    public interface PropertyResolver {
+
+        /**
+         * @param enricher the configured enricher
+         * @return the properties the enricher returns for the operation being dispatched
+         * @throws APIManagementException if the enricher cannot resolve the properties. The request is then dispatched
+         *                                without the additional properties; it is not failed.
+         */
+        Map<String, Object> resolve(AIRequestPropertyEnricher enricher) throws APIManagementException;
+    }
+
+    /**
+     * Not exposed on purpose. Callers go through {@link #resolveProperties(AIRequestContext, PropertyResolver)} so that
+     * the {@code null} check and the failure handling cannot be forgotten at a call site.
+     *
      * @return the enricher instance, or {@code null} when the API Manager configuration is not yet available and
      * resolution has to be retried later.
      */

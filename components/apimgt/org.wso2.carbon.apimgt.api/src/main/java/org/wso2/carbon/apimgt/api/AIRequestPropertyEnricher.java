@@ -20,35 +20,93 @@ package org.wso2.carbon.apimgt.api;
 import java.util.Map;
 
 /**
- * Extension point used to attach additional properties to the payload of an outbound AI service request.
+ * Extension point used to attach additional properties to the payloads of outbound AI service requests.
  * <p>
- * Every AI assistance feature (Marketplace Assistant, API Chat, Design Assistant) dispatches its outbound request
- * through a single invocation path, and that path consults the configured implementation of this interface right
- * before the request is sent. The properties returned by {@link #getAdditionalProperties(AIRequestContext)} are added
- * to the outgoing JSON payload as new top level attributes. Attributes the product already places in the payload are
- * never replaced, so an implementation can only contribute new ones.
+ * There is one method per AI assistance operation. Each is invoked only when that particular operation builds its
+ * payload, so an implementation contributes properties exactly to the operations whose methods it overrides and leaves
+ * every other payload untouched. An implementation that only needs to add properties to the Marketplace Assistant chat
+ * request overrides {@link #getMarketplaceAssistantChatProperties(AIRequestContext)} alone.
+ * <p>
+ * The properties returned are added to the outgoing JSON payload as new top level attributes. Attributes the product
+ * already places in the payload are never replaced, so an implementation can only contribute new ones.
  * <p>
  * The implementation is selected with the {@code propertyEnricherImpl} configuration under {@code [apim.ai]} in
- * {@code deployment.toml}. A single implementation serves every AI assistance feature; use
- * {@link AIRequestContext#getResource()} to return different properties per AI service operation.
+ * {@code deployment.toml}. A single implementation serves every AI assistance operation.
  * <p>
- * Implementations must be thread safe and stateless with respect to a single request. One instance is created lazily
- * at first use and shared across all concurrent requests. Perform expensive initialisation in the constructor, not in
- * {@link #getAdditionalProperties(AIRequestContext)}, which runs on the request critical path.
+ * Implementations must be thread safe and stateless with respect to a single request. One instance is created lazily at
+ * first use and shared across all concurrent requests. Perform expensive initialisation in the constructor, not in
+ * these methods, which run on the request critical path.
  * <p>
- * Implementations are advised to extend {@link AbstractAIRequestPropertyEnricher} rather than implementing this
- * interface directly, so that future additions to the contract do not break them.
+ * Implementations are expected to extend {@link AbstractAIRequestPropertyEnricher}, which returns an empty map from
+ * every method, rather than implementing this interface directly. Doing so keeps an implementation source compatible
+ * when methods are added for new AI assistance operations.
  */
 public interface AIRequestPropertyEnricher {
 
     /**
-     * Returns the additional properties to be added to the outbound AI service request payload.
+     * Returns the additional properties for the Marketplace Assistant chat request, raised when a Developer Portal user
+     * sends a query to the Marketplace Assistant.
      *
-     * @param context details of the AI service request being dispatched. Never {@code null}, but individual attributes
-     *                such as {@link AIRequestContext#getUsername()} may be {@code null} depending on the feature.
+     * @param context details of the AI service request being dispatched
      * @return properties to add to the payload. An empty map or {@code null} means no properties are added.
      * @throws APIManagementException if the properties cannot be resolved. The request is then dispatched without the
      *                                additional properties; it is not failed.
      */
-    Map<String, Object> getAdditionalProperties(AIRequestContext context) throws APIManagementException;
+    Map<String, Object> getMarketplaceAssistantChatProperties(AIRequestContext context) throws APIManagementException;
+
+    /**
+     * Returns the additional properties for the Marketplace Assistant API publish request, raised asynchronously by a
+     * notifier when an API is published to the vector database. There is no end user behind this request, so
+     * {@link AIRequestContext#getUsername()} is {@code null}.
+     *
+     * @param context details of the AI service request being dispatched
+     * @return properties to add to the payload. An empty map or {@code null} means no properties are added.
+     * @throws APIManagementException if the properties cannot be resolved. The request is then dispatched without the
+     *                                additional properties; it is not failed.
+     */
+    Map<String, Object> getMarketplaceAssistantApiPublishProperties(AIRequestContext context)
+            throws APIManagementException;
+
+    /**
+     * Returns the additional properties for the API Chat prepare request, which uploads the API definition to the AI
+     * service before a test run begins.
+     *
+     * @param context details of the AI service request being dispatched
+     * @return properties to add to the payload. An empty map or {@code null} means no properties are added.
+     * @throws APIManagementException if the properties cannot be resolved. The request is then dispatched without the
+     *                                additional properties; it is not failed.
+     */
+    Map<String, Object> getApiChatPrepareProperties(AIRequestContext context) throws APIManagementException;
+
+    /**
+     * Returns the additional properties for the API Chat execute request, raised for each step of an API Chat test run.
+     *
+     * @param context details of the AI service request being dispatched
+     * @return properties to add to the payload. An empty map or {@code null} means no properties are added.
+     * @throws APIManagementException if the properties cannot be resolved. The request is then dispatched without the
+     *                                additional properties; it is not failed.
+     */
+    Map<String, Object> getApiChatExecuteProperties(AIRequestContext context) throws APIManagementException;
+
+    /**
+     * Returns the additional properties for the Design Assistant chat request, raised when a Publisher user describes
+     * an API to the Design Assistant.
+     *
+     * @param context details of the AI service request being dispatched
+     * @return properties to add to the payload. An empty map or {@code null} means no properties are added.
+     * @throws APIManagementException if the properties cannot be resolved. The request is then dispatched without the
+     *                                additional properties; it is not failed.
+     */
+    Map<String, Object> getDesignAssistantChatProperties(AIRequestContext context) throws APIManagementException;
+
+    /**
+     * Returns the additional properties for the Design Assistant payload generation request, which turns a completed
+     * design session into an API payload.
+     *
+     * @param context details of the AI service request being dispatched
+     * @return properties to add to the payload. An empty map or {@code null} means no properties are added.
+     * @throws APIManagementException if the properties cannot be resolved. The request is then dispatched without the
+     *                                additional properties; it is not failed.
+     */
+    Map<String, Object> getDesignAssistantPayloadGenProperties(AIRequestContext context) throws APIManagementException;
 }

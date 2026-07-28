@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.api.AIRequestContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.ai.AIRequestPropertyEnricherHolder;
 import org.wso2.carbon.apimgt.impl.dto.ai.MarketplaceAssistantConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -97,15 +98,17 @@ public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantA
                 AIRequestContext context = APIUtil.buildAIRequestContext(organization,
                         configDto.getChatResource(), null);
                 context.setUserRoles(roles == null ? null : Arrays.asList(roles));
+                String finalPayload = APIUtil.addAdditionalPropertiesToPayload(payload.toString(),
+                        AIRequestPropertyEnricherHolder.getInstance().resolveProperties(context,
+                                enricher -> enricher.getMarketplaceAssistantChatProperties(context)));
 
                 String response;
                 if (configDto.isKeyProvided()) {
                     response = APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(),
-                            configDto.getKey(), configDto.getChatResource(), payload.toString(), null, context);
+                            configDto.getKey(), configDto.getChatResource(), finalPayload, null);
                 } else {
                     response = APIUtil.invokeAIService(configDto.getEndpoint(), null,
-                            configDto.getAccessToken(), configDto.getChatResource(), payload.toString(), null,
-                            context);
+                            configDto.getAccessToken(), configDto.getChatResource(), finalPayload, null);
                 }
                 ObjectMapper objectMapper = new ObjectMapper();
                 MarketplaceAssistantResponseDTO executeResponseDTO = objectMapper.readValue(response,

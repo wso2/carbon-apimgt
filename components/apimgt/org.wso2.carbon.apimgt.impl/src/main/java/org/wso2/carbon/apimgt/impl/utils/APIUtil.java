@@ -178,7 +178,6 @@ import org.wso2.carbon.apimgt.impl.IDPConfiguration;
 import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
 import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
-import org.wso2.carbon.apimgt.impl.ai.AIRequestPropertyEnricherHolder;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.CorrelationConfigDAO;
@@ -11840,57 +11839,9 @@ public final class APIUtil {
      */
     public static String invokeAIService(String endpoint, String tokenEndpoint, String key, String resource,
                                          String payload, String requestId) throws APIManagementException {
-        return invokeAIService(endpoint, tokenEndpoint, key, resource, payload, requestId, null);
-    }
-
-    /**
-     * Builds the context handed to the configured {@link org.wso2.carbon.apimgt.api.AIRequestPropertyEnricher} for an
-     * outbound AI service request. The invoking user is resolved from the carbon context.
-     * <p>
-     * User roles are deliberately not resolved here, since that would add a user store call to every AI request. A
-     * caller that has already resolved them should set them on the returned context with
-     * {@link AIRequestContext#setUserRoles(java.util.List)}.
-     *
-     * @param organization organization, that is the tenant domain, the request belongs to
-     * @param resource     AI service resource the request is dispatched to
-     * @param requestId    correlation id of the request, or null when the feature does not use one
-     * @return the request context
-     */
-    public static AIRequestContext buildAIRequestContext(String organization, String resource, String requestId) {
-        AIRequestContext context = new AIRequestContext();
-        context.setOrganization(organization);
-        context.setResource(resource);
-        context.setRequestId(requestId);
-        context.setUsername(CarbonContext.getThreadLocalCarbonContext().getUsername());
-        return context;
-    }
-
-    /**
-     * This method is used to invoke the Choreo deployed AI service. This can handle both API Chat and Marketplace
-     * Assistant related POST calls.
-     * <p>
-     * When a context is provided, the configured {@link org.wso2.carbon.apimgt.api.AIRequestPropertyEnricher} is
-     * consulted and the properties it returns are merged into the payload as additional top level attributes before
-     * the request is dispatched.
-     *
-     * @param endpoint      Endpoint to be invoked
-     * @param tokenEndpoint Endpoint to be invoked to get the token using key
-     * @param key           AI Subscription key
-     * @param resource      Specifies the backend resource the request should be forwarded to
-     * @param payload       Request payload that needs to be attached to the request
-     * @param requestId     UUID of the request, so that AI service can track the progress
-     * @param context       Context of the request, used to enrich the payload with additional properties. When null,
-     *                      the payload is dispatched as is
-     * @return returns the response if invocation is successful
-     * @throws APIManagementException if an error occurs while invoking the AI service
-     */
-    public static String invokeAIService(String endpoint, String tokenEndpoint, String key, String resource,
-                                         String payload, String requestId, AIRequestContext context)
-            throws APIManagementException {
         HttpPost preparePost = new HttpPost(endpoint + resource);
-        String finalPayload = addAdditionalPropertiesToPayload(payload, context);
         try (CloseableHttpResponse response = executeAIRequest(preparePost, endpoint,
-                tokenEndpoint, key, requestId, finalPayload)) {
+                tokenEndpoint, key, requestId, payload)) {
             int statusCode = response.getStatusLine().getStatusCode();
             String responseStr = EntityUtils.toString(response.getEntity());
             if (statusCode == HttpStatus.SC_CREATED) {
@@ -11923,26 +11874,43 @@ public final class APIUtil {
     }
 
     /**
-     * Adds the properties resolved by the configured {@link org.wso2.carbon.apimgt.api.AIRequestPropertyEnricher} to
-     * the given AI service request payload.
+     * Builds the context handed to the configured {@link org.wso2.carbon.apimgt.api.AIRequestPropertyEnricher} for an
+     * outbound AI service request. The invoking user is resolved from the carbon context.
+     * <p>
+     * User roles are deliberately not resolved here, since that would add a user store call to every AI request. A
+     * caller that has already resolved them should set them on the returned context with
+     * {@link AIRequestContext#setUserRoles(java.util.List)}.
+     *
+     * @param organization organization, that is the tenant domain, the request belongs to
+     * @param resource     AI service resource the request is dispatched to
+     * @param requestId    correlation id of the request, or null when the feature does not use one
+     * @return the request context
+     */
+    public static AIRequestContext buildAIRequestContext(String organization, String resource, String requestId) {
+        AIRequestContext context = new AIRequestContext();
+        context.setOrganization(organization);
+        context.setResource(resource);
+        context.setRequestId(requestId);
+        context.setUsername(CarbonContext.getThreadLocalCarbonContext().getUsername());
+        return context;
+    }
+
+    /**
+     * Adds the given properties, resolved from the configured
+     * {@link org.wso2.carbon.apimgt.api.AIRequestPropertyEnricher}, to an AI service request payload.
      * <p>
      * This is purely additive. Attributes the product already placed in the payload are kept as they are and are never
      * overridden, so an enricher can only contribute new attributes. It is also best effort: if the payload is not a
-     * JSON object, or the enricher fails, the original payload is returned unchanged rather than failing the request.
+     * JSON object, the original payload is returned unchanged rather than failing the request.
      *
-     * @param payload the payload built by the calling feature
-     * @param context details of the request, or null to dispatch the payload as is
+     * @param payload              the payload built by the calling feature
+     * @param additionalProperties properties to add, typically obtained from
+     *                             {@code AIRequestPropertyEnricherHolder}. Null or empty leaves the payload untouched
      * @return the payload to dispatch
      */
-    private static String addAdditionalPropertiesToPayload(String payload, AIRequestContext context) {
+    public static String addAdditionalPropertiesToPayload(String payload, Map<String, Object> additionalProperties) {
 
-        if (context == null || StringUtils.isBlank(payload)) {
-            return payload;
-        }
-
-        Map<String, Object> additionalProperties =
-                AIRequestPropertyEnricherHolder.getInstance().getAdditionalProperties(context);
-        if (additionalProperties.isEmpty()) {
+        if (additionalProperties == null || additionalProperties.isEmpty() || StringUtils.isBlank(payload)) {
             return payload;
         }
 
@@ -11950,8 +11918,7 @@ public final class APIUtil {
         try {
             payloadJson = new org.json.JSONObject(payload);
         } catch (JSONException e) {
-            log.warn("AI service request payload for resource " + context.getResource() + " is not a JSON object. "
-                    + "Skipping the additional properties.", e);
+            log.warn("AI service request payload is not a JSON object. Skipping the additional properties.", e);
             return payload;
         }
 
@@ -11963,7 +11930,7 @@ public final class APIUtil {
             }
             if (payloadJson.has(key)) {
                 log.warn("Property '" + key + "' returned by the AI request property enricher is already present in "
-                        + "the payload of resource " + context.getResource() + ". Retaining the existing value.");
+                        + "the AI service request payload. Retaining the existing value.");
                 continue;
             }
             try {
@@ -11971,7 +11938,7 @@ public final class APIUtil {
                 propertiesAdded = true;
             } catch (JSONException e) {
                 log.warn("Property '" + key + "' returned by the AI request property enricher could not be added to "
-                        + "the payload of resource " + context.getResource() + ". Skipping the property.", e);
+                        + "the AI service request payload. Skipping the property.", e);
             }
         }
         return propertiesAdded ? payloadJson.toString() : payload;

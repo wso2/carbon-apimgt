@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.AIRequestContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.ai.AIRequestPropertyEnricherHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.ai.DesignAssistantConfigurationDTO;
@@ -78,17 +79,18 @@ public class DesignAssistantApiServiceImpl implements DesignAssistantApiService 
                 AIRequestContext context = APIUtil.buildAIRequestContext(
                         RestApiUtil.getValidatedOrganization(messageContext),
                         configDto.getGenApiPayloadResource(), null);
+                String finalPayload = APIUtil.addAdditionalPropertiesToPayload(payload.toString(),
+                        AIRequestPropertyEnricherHolder.getInstance().resolveProperties(context,
+                                enricher -> enricher.getDesignAssistantPayloadGenProperties(context)));
 
                 String response;
                 if (configDto.isKeyProvided()) {
                     response = APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(),
-                            configDto.getKey(), configDto.getGenApiPayloadResource(), payload.toString(), null,
-                            context);
+                            configDto.getKey(), configDto.getGenApiPayloadResource(), finalPayload, null);
 
                 } else {
                     response = APIUtil.invokeAIService(configDto.getEndpoint(), null,
-                            configDto.getAccessToken(), configDto.getGenApiPayloadResource(), payload.toString(), null,
-                            context);
+                            configDto.getAccessToken(), configDto.getGenApiPayloadResource(), finalPayload, null);
 
                 }
 
@@ -140,15 +142,18 @@ public class DesignAssistantApiServiceImpl implements DesignAssistantApiService 
                 AIRequestContext context = APIUtil.buildAIRequestContext(
                         RestApiUtil.getValidatedOrganization(messageContext),
                         configDto.getChatResource(), null);
+                String finalPayload = APIUtil.addAdditionalPropertiesToPayload(payload.toString(),
+                        AIRequestPropertyEnricherHolder.getInstance().resolveProperties(context,
+                                enricher -> enricher.getDesignAssistantChatProperties(context)));
 
                 String response;
                 if (configDto.isKeyProvided()) {
                     response = APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(),
-                            configDto.getKey(), configDto.getChatResource(), payload.toString(), null, context);
+                            configDto.getKey(), configDto.getChatResource(), finalPayload, null);
 
                 } else {
                     response = APIUtil.invokeAIService(configDto.getEndpoint(), null,
-                            configDto.getAccessToken(), configDto.getChatResource(), payload.toString(), null, context);
+                            configDto.getAccessToken(), configDto.getChatResource(), finalPayload, null);
 
                 }
                 ObjectMapper objectMapper = new ObjectMapper();
