@@ -11891,7 +11891,8 @@ public final class APIUtil {
         context.setOrganization(organization);
         context.setResource(resource);
         context.setRequestId(requestId);
-        context.setUsername(CarbonContext.getThreadLocalCarbonContext().getUsername());
+        String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
+        context.setUsername(StringUtils.isEmpty(username) ? null : username);
         return context;
     }
 
@@ -11902,6 +11903,9 @@ public final class APIUtil {
      * This is purely additive. Attributes the product already placed in the payload are kept as they are and are never
      * overridden, so an enricher can only contribute new attributes. It is also best effort: if the payload is not a
      * JSON object, the original payload is returned unchanged rather than failing the request.
+     * <p>
+     * Property keys are trimmed and blank keys are skipped, so a key returned with surrounding whitespace resolves to
+     * the same attribute as its trimmed form rather than becoming a second, near identical attribute.
      *
      * @param payload              the payload built by the calling feature
      * @param additionalProperties properties to add, typically obtained from
@@ -11928,6 +11932,7 @@ public final class APIUtil {
             if (StringUtils.isBlank(key)) {
                 continue;
             }
+            key = key.trim();
             if (payloadJson.has(key)) {
                 log.warn("Property '" + key + "' returned by the AI request property enricher is already present in "
                         + "the AI service request payload. Retaining the existing value.");

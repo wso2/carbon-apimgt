@@ -185,6 +185,13 @@ public class AIRequestPropertyEnricherHolder {
         } catch (Exception e) {
             log.error("Error while initializing the AI request property enricher: " + implClass + ". Falling back to "
                     + DefaultAIRequestPropertyEnricher.class.getName(), e);
+        } catch (LinkageError e) {
+            // Loading the class runs its static initializer and links it, which raises errors rather than exceptions,
+            // for example ExceptionInInitializerError from a failing static initializer, NoClassDefFoundError from a
+            // partially deployed extension or UnsupportedClassVersionError from one built for a newer Java version.
+            // These are absorbed here so that a broken extension can never fail an AI request.
+            log.error("Error while loading the AI request property enricher: " + implClass + ". Falling back to "
+                    + DefaultAIRequestPropertyEnricher.class.getName(), e);
         }
         return new DefaultAIRequestPropertyEnricher();
     }
