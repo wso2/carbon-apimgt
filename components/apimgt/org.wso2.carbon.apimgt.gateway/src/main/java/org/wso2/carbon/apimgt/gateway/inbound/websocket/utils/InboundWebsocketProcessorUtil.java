@@ -208,12 +208,7 @@ public class InboundWebsocketProcessorUtil {
                 : infoDTO.getApiTier();
         String subscriptionLevelTier = infoDTO.getTier();
         String resourceLevelTier;
-        String authorizedUser;
-        if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(infoDTO.getSubscriberTenantDomain())) {
-            authorizedUser = infoDTO.getSubscriber() + "@" + infoDTO.getSubscriberTenantDomain();
-        } else {
-            authorizedUser = infoDTO.getSubscriber();
-        }
+        String authorizedUser = infoDTO.getEndUserName();
         String apiName = infoDTO.getApiName();
         String apiVersion = inboundMessageContext.getVersion();
         String appTenant = infoDTO.getSubscriberTenantDomain();
