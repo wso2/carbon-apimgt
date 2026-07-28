@@ -7043,7 +7043,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             APIUtil.logAuditMessage(APIConstants.AuditLogConstants.DOCUMENT_CONTENT, apiLogObject.toString(),
                     APIConstants.AuditLogConstants.UPDATED, this.username);
         } catch (DocumentationPersistenceException e) {
-            throw new APIManagementException("Error while adding content to doc " + docId);
+            throw new APIManagementException("Error while adding content to doc " + docId, e, e.getErrorHandler());
         }
     }
 

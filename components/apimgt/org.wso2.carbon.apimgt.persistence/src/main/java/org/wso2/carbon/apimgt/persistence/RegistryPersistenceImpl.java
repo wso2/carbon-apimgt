@@ -2846,6 +2846,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 updateDocArtifact.setAttribute("toggle", Boolean.toString(!toggle));
                 docArtifactManager.updateGenericArtifact(updateDocArtifact);
             }
+        } catch (IllegalArgumentException e) {
+            throw new DocumentationPersistenceException(e.getMessage(), e,
+                    ExceptionCodes.from(ExceptionCodes.DOCUMENT_INVALID_FILE_NAME, e.getMessage()));
         } catch (APIPersistenceException | RegistryException | APIManagementException | PersistenceException
                 | UserStoreException e) {
             throw new DocumentationPersistenceException("Error while adding document content", e);
