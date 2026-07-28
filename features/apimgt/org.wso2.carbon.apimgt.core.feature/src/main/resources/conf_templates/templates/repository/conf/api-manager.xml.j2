@@ -2103,6 +2103,11 @@
                 <Property name="{{key}}">{{value}}</Property>
                 {% endfor %}
           </VectorDBProvider>
+
+          <!-- Azure User-Managed Identity (UMI) Token Provider Configuration -->
+          <AzureUMI>
+              <Scope>{{apim.ai.azure_umi.scope}}</Scope>
+          </AzureUMI>
       </AI>
 
       <GatewayNotificationConfiguration>
