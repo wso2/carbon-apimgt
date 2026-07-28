@@ -3454,8 +3454,10 @@ public class PublisherCommonUtils {
                 ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
                         .getAPIMDependencyConfigurations().getOasParserOptions());
 
-        //Validate API with Federated Gateway before persisting to registry
-        APIUtil.validateApiWithFederatedGateway(existingAPI);
+        // Validate only CP-initiated APIs. Discovery-initiated APIs should not run deploy-path validation.
+        if (!existingAPI.isInitiatedFromGateway()) {
+            APIUtil.validateApiWithFederatedGateway(existingAPI);
+        }
 
         apiProvider.saveSwaggerDefinition(existingAPI, updatedApiDefinition, organization);
         existingAPI.setSwaggerDefinition(updatedApiDefinition);
