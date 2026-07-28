@@ -137,6 +137,42 @@ public class SubscriptionsApiServiceImplTest {
         assertEquals(1, dao.uuidCalls);
     }
 
+    @Test
+    public void testValidateOrganizationUsesAuthenticatedTenantForDifferentOrganization() {
+
+        assertEquals(TENANT_ORGANIZATION, validateAs(TENANT_ORGANIZATION, OTHER_ORGANIZATION));
+    }
+
+    @Test
+    public void testValidateOrganizationUsesAuthenticatedTenantForAllOrganizations() {
+
+        assertEquals(TENANT_ORGANIZATION, validateAs(TENANT_ORGANIZATION, "ALL"));
+    }
+
+    @Test
+    public void testValidateOrganizationPreservesRequestedOrganizationForSuperTenant() {
+
+        assertEquals(OTHER_ORGANIZATION, validateAs(
+                MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, OTHER_ORGANIZATION));
+    }
+
+    @Test
+    public void testValidateOrganizationPreservesMatchingOrganization() {
+
+        assertEquals(TENANT_ORGANIZATION, validateAs(TENANT_ORGANIZATION, TENANT_ORGANIZATION));
+    }
+
+    @Test
+    public void testValidateOrganizationUsesAuthenticatedTenantWhenRequestedOrganizationIsMissing() {
+
+        assertEquals(TENANT_ORGANIZATION, validateAs(TENANT_ORGANIZATION, null));
+    }
+
+    private String validateAs(String authenticatedOrganization, String requestedOrganization) {
+
+        return SubscriptionsApiServiceImpl.validateOrganization(requestedOrganization, authenticatedOrganization);
+    }
+
     private Subscription createSubscription(String applicationOrganization, String apiOrganization) {
 
         Subscription subscription = new Subscription();

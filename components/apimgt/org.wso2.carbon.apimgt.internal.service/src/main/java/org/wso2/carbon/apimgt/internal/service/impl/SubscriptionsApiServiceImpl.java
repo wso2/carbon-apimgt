@@ -46,7 +46,8 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         SubscriptionValidationDAO subscriptionValidationDAO = new SubscriptionValidationDAO();
         List<Subscription> subscriptionList = new ArrayList<>();
         xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
-        String organization = RestApiUtil.getOrganization(messageContext);
+        String organization = validateOrganization(RestApiUtil.getOrganization(messageContext),
+                RestApiCommonUtil.getLoggedInUserTenantDomain());
         if (StringUtils.isNotEmpty(applicationUUID) && StringUtils.isNotEmpty(apiUUID)) {
             String authenticatedOrganization = RestApiCommonUtil.getLoggedInUserTenantDomain();
             Subscription subscription = getSubscription(subscriptionValidationDAO, apiUUID, applicationUUID,
@@ -109,5 +110,14 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         return subscription != null &&
                 (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(organization) ||
                         organization.equalsIgnoreCase(subscription.getAppOrganization()));
+    }
+
+    static String validateOrganization(String requestedOrganization, String authenticatedOrganization) {
+
+        if (StringUtils.isEmpty(authenticatedOrganization)) {
+            return null;
+        }
+        return MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(authenticatedOrganization)
+                ? requestedOrganization : authenticatedOrganization;
     }
 }
