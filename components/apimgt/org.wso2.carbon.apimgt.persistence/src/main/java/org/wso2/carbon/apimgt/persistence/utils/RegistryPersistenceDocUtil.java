@@ -173,8 +173,7 @@ public class RegistryPersistenceDocUtil {
         String apiSourcePath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 RegistryPersistenceUtil.replaceEmailDomain(provider) + RegistryConstants.PATH_SEPARATOR +
                 apiName + RegistryConstants.PATH_SEPARATOR + version;
-        return getDocumentBasePath(apiSourcePath) + APIConstants.DOCUMENT_FILE_DIR
-                + RegistryConstants.PATH_SEPARATOR + fileName;
+        return getDocumentFilePath(apiSourcePath, fileName);
     }
 
     @Deprecated
@@ -316,7 +315,6 @@ public class RegistryPersistenceDocUtil {
         String apiSourcePath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR
                 + RegistryPersistenceUtil.replaceEmailDomain(id.getProviderName()) + RegistryConstants.PATH_SEPARATOR
                 + id.getName() + RegistryConstants.PATH_SEPARATOR + id.getVersion();
-        return getDocumentBasePath(apiSourcePath) + APIConstants.DOCUMENT_FILE_DIR
-                + RegistryConstants.PATH_SEPARATOR + fileName;
+        return getDocumentFilePath(apiSourcePath, fileName);
     }
 }
