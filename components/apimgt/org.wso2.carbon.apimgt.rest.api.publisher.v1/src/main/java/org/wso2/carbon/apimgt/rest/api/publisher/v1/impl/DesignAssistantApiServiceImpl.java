@@ -17,7 +17,6 @@
  */
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -26,7 +25,6 @@ import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.AIRequestContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.ai.AIRequestPropertyEnricherHolder;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.ai.DesignAssistantConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -81,7 +79,7 @@ public class DesignAssistantApiServiceImpl implements DesignAssistantApiService 
                         configDto.getGenApiPayloadResource(), null);
                 String finalPayload = APIUtil.addAdditionalPropertiesToPayload(payload.toString(),
                         AIRequestPropertyEnricherHolder.getInstance().resolveProperties(context,
-                                enricher -> enricher.getDesignAssistantPayloadGenProperties(context)));
+                                enricher -> enricher.enrichDesignAssistantPayloadGenProperties(context)));
 
                 String response;
                 if (configDto.isKeyProvided()) {
@@ -144,7 +142,7 @@ public class DesignAssistantApiServiceImpl implements DesignAssistantApiService 
                         configDto.getChatResource(), null);
                 String finalPayload = APIUtil.addAdditionalPropertiesToPayload(payload.toString(),
                         AIRequestPropertyEnricherHolder.getInstance().resolveProperties(context,
-                                enricher -> enricher.getDesignAssistantChatProperties(context)));
+                                enricher -> enricher.enrichDesignAssistantChatProperties(context)));
 
                 String response;
                 if (configDto.isKeyProvided()) {

@@ -44,40 +44,40 @@ import java.util.Map;
 public abstract class AbstractAIRequestPropertyEnricher implements AIRequestPropertyEnricher {
 
     @Override
-    public Map<String, Object> getMarketplaceAssistantChatProperties(AIRequestContext context)
+    public Map<String, Object> enrichMarketplaceAssistantChatProperties(AIRequestContext context)
             throws APIManagementException {
 
         return Collections.emptyMap();
     }
 
     @Override
-    public Map<String, Object> getMarketplaceAssistantApiPublishProperties(AIRequestContext context)
+    public Map<String, Object> enrichMarketplaceAssistantApiPublishProperties(AIRequestContext context)
             throws APIManagementException {
 
         return Collections.emptyMap();
     }
 
     @Override
-    public Map<String, Object> getApiChatPrepareProperties(AIRequestContext context) throws APIManagementException {
+    public Map<String, Object> enrichApiChatPrepareProperties(AIRequestContext context) throws APIManagementException {
 
         return Collections.emptyMap();
     }
 
     @Override
-    public Map<String, Object> getApiChatExecuteProperties(AIRequestContext context) throws APIManagementException {
+    public Map<String, Object> enrichApiChatExecuteProperties(AIRequestContext context) throws APIManagementException {
 
         return Collections.emptyMap();
     }
 
     @Override
-    public Map<String, Object> getDesignAssistantChatProperties(AIRequestContext context)
+    public Map<String, Object> enrichDesignAssistantChatProperties(AIRequestContext context)
             throws APIManagementException {
 
         return Collections.emptyMap();
     }
 
     @Override
-    public Map<String, Object> getDesignAssistantPayloadGenProperties(AIRequestContext context)
+    public Map<String, Object> enrichDesignAssistantPayloadGenProperties(AIRequestContext context)
             throws APIManagementException {
 
         return Collections.emptyMap();

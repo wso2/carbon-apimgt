@@ -43,12 +43,8 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.MarketplaceAssistantRequestD
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.MarketplaceAssistantResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
-import org.wso2.carbon.identity.oauth.OAuthUtil;
-import org.wso2.carbon.identity.oauth2.authz.OAuthAuthzReqMessageContext;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 import javax.ws.rs.core.Response;
 
@@ -86,8 +82,7 @@ public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantA
                 String history = new Gson().toJson(marketplaceAssistantRequestDTO.getHistory());
 
                 String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
-                String[] roles = APIUtil.getListOfRoles(username);
-                String userRoles = new Gson().toJson(roles);
+                String userRoles = new Gson().toJson(APIUtil.getListOfRoles(username));
 
                 payload.put(APIConstants.QUERY, marketplaceAssistantRequestDTO.getQuery());
                 payload.put(APIConstants.HISTORY, history);
@@ -97,10 +92,9 @@ public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantA
 
                 AIRequestContext context = APIUtil.buildAIRequestContext(organization,
                         configDto.getChatResource(), null);
-                context.setUserRoles(roles == null ? null : Arrays.asList(roles));
                 String finalPayload = APIUtil.addAdditionalPropertiesToPayload(payload.toString(),
                         AIRequestPropertyEnricherHolder.getInstance().resolveProperties(context,
-                                enricher -> enricher.getMarketplaceAssistantChatProperties(context)));
+                                enricher -> enricher.enrichMarketplaceAssistantChatProperties(context)));
 
                 String response;
                 if (configDto.isKeyProvided()) {

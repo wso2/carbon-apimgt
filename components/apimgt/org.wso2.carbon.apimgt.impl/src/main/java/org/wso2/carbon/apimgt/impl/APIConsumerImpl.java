@@ -4208,7 +4208,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 apiChatRequestId);
         String finalPayload = APIUtil.addAdditionalPropertiesToPayload(requestPayload,
                 AIRequestPropertyEnricherHolder.getInstance().resolveProperties(context,
-                        enricher -> enricher.getApiChatExecuteProperties(context)));
+                        enricher -> enricher.enrichApiChatExecuteProperties(context)));
         if (configDto.isKeyProvided()) {
             return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(), configDto.getKey(),
                     configDto.getExecuteResource(), finalPayload, apiChatRequestId);
@@ -4233,7 +4233,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     apiChatRequestId);
             String finalPayload = APIUtil.addAdditionalPropertiesToPayload(payload.toString(),
                     AIRequestPropertyEnricherHolder.getInstance().resolveProperties(context,
-                            enricher -> enricher.getApiChatPrepareProperties(context)));
+                            enricher -> enricher.enrichApiChatPrepareProperties(context)));
             if (configDto.isKeyProvided()) {
                 return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(),
                         configDto.getKey(), configDto.getPrepareResource(), finalPayload, apiChatRequestId);

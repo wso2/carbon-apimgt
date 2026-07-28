@@ -33,7 +33,6 @@ public class AIRequestContext {
 
     private String username;
     private String organization;
-    private List<String> userRoles;
     private String requestId;
     private String resource;
 
@@ -62,21 +61,6 @@ public class AIRequestContext {
     public void setOrganization(String organization) {
 
         this.organization = organization;
-    }
-
-    /**
-     * @return roles of the invoking user when the calling feature has already resolved them, otherwise {@code null}.
-     * Roles are not resolved eagerly for every feature to avoid an extra user store call on the request path. An
-     * implementation that needs them where they are {@code null} can resolve them itself from {@link #getUsername()}.
-     */
-    public List<String> getUserRoles() {
-
-        return userRoles;
-    }
-
-    public void setUserRoles(List<String> userRoles) {
-
-        this.userRoles = userRoles;
     }
 
     /**

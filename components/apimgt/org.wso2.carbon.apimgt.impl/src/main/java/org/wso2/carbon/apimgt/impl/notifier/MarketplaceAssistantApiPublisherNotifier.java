@@ -211,7 +211,7 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
                         marketplaceAssistantConfigurationDto.getApiPublishResource(), null);
                 String finalPayload = APIUtil.addAdditionalPropertiesToPayload(payload.toString(),
                         AIRequestPropertyEnricherHolder.getInstance().resolveProperties(context,
-                                enricher -> enricher.getMarketplaceAssistantApiPublishProperties(context)));
+                                enricher -> enricher.enrichMarketplaceAssistantApiPublishProperties(context)));
 
                 if (marketplaceAssistantConfigurationDto.isKeyProvided()) {
                     APIUtil.invokeAIService(marketplaceAssistantConfigurationDto.getEndpoint(),

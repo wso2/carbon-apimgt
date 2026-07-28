@@ -25,7 +25,7 @@ import java.util.Map;
  * There is one method per AI assistance operation. Each is invoked only when that particular operation builds its
  * payload, so an implementation contributes properties exactly to the operations whose methods it overrides and leaves
  * every other payload untouched. An implementation that only needs to add properties to the Marketplace Assistant chat
- * request overrides {@link #getMarketplaceAssistantChatProperties(AIRequestContext)} alone.
+ * request overrides {@link #enrichMarketplaceAssistantChatProperties(AIRequestContext)} alone.
  * <p>
  * The properties returned are added to the outgoing JSON payload as new top level attributes. Attributes the product
  * already places in the payload are never replaced, so an implementation can only contribute new ones.
@@ -52,7 +52,7 @@ public interface AIRequestPropertyEnricher {
      * @throws APIManagementException if the properties cannot be resolved. The request is then dispatched without the
      *                                additional properties; it is not failed.
      */
-    Map<String, Object> getMarketplaceAssistantChatProperties(AIRequestContext context) throws APIManagementException;
+    Map<String, Object> enrichMarketplaceAssistantChatProperties(AIRequestContext context) throws APIManagementException;
 
     /**
      * Returns the additional properties for the Marketplace Assistant API publish request, raised asynchronously by a
@@ -64,7 +64,7 @@ public interface AIRequestPropertyEnricher {
      * @throws APIManagementException if the properties cannot be resolved. The request is then dispatched without the
      *                                additional properties; it is not failed.
      */
-    Map<String, Object> getMarketplaceAssistantApiPublishProperties(AIRequestContext context)
+    Map<String, Object> enrichMarketplaceAssistantApiPublishProperties(AIRequestContext context)
             throws APIManagementException;
 
     /**
@@ -76,7 +76,7 @@ public interface AIRequestPropertyEnricher {
      * @throws APIManagementException if the properties cannot be resolved. The request is then dispatched without the
      *                                additional properties; it is not failed.
      */
-    Map<String, Object> getApiChatPrepareProperties(AIRequestContext context) throws APIManagementException;
+    Map<String, Object> enrichApiChatPrepareProperties(AIRequestContext context) throws APIManagementException;
 
     /**
      * Returns the additional properties for the API Chat execute request, raised for each step of an API Chat test run.
@@ -86,7 +86,7 @@ public interface AIRequestPropertyEnricher {
      * @throws APIManagementException if the properties cannot be resolved. The request is then dispatched without the
      *                                additional properties; it is not failed.
      */
-    Map<String, Object> getApiChatExecuteProperties(AIRequestContext context) throws APIManagementException;
+    Map<String, Object> enrichApiChatExecuteProperties(AIRequestContext context) throws APIManagementException;
 
     /**
      * Returns the additional properties for the Design Assistant chat request, raised when a Publisher user describes
@@ -97,7 +97,7 @@ public interface AIRequestPropertyEnricher {
      * @throws APIManagementException if the properties cannot be resolved. The request is then dispatched without the
      *                                additional properties; it is not failed.
      */
-    Map<String, Object> getDesignAssistantChatProperties(AIRequestContext context) throws APIManagementException;
+    Map<String, Object> enrichDesignAssistantChatProperties(AIRequestContext context) throws APIManagementException;
 
     /**
      * Returns the additional properties for the Design Assistant payload generation request, which turns a completed
@@ -108,5 +108,5 @@ public interface AIRequestPropertyEnricher {
      * @throws APIManagementException if the properties cannot be resolved. The request is then dispatched without the
      *                                additional properties; it is not failed.
      */
-    Map<String, Object> getDesignAssistantPayloadGenProperties(AIRequestContext context) throws APIManagementException;
+    Map<String, Object> enrichDesignAssistantPayloadGenProperties(AIRequestContext context) throws APIManagementException;
 }
