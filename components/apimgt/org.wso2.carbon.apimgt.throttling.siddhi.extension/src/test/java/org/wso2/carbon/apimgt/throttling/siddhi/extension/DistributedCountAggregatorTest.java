@@ -385,7 +385,9 @@ public class DistributedCountAggregatorTest {
                 1, fakeClient.expireMillisCount.get());
         Assert.assertTrue("PEXPIRE TTL must be positive", fakeClient.lastExpireMillisTTL > 0);
 
-        // Second sync: keyHasTTL is now true — no additional PEXPIRE.
+        // Second sync: another delta forces the INCRBY branch again, but keyHasTTL is now
+        // true — no additional PEXPIRE.
+        aggregator.processAdd((Object) null);
         aggregator.currentState();
         Assert.assertEquals("PEXPIRE must not be called again when keyHasTTL is already true",
                 1, fakeClient.expireMillisCount.get());
