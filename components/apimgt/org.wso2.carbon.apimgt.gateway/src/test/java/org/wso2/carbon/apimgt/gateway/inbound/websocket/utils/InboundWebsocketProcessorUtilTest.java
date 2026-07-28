@@ -36,7 +36,10 @@ import org.wso2.carbon.apimgt.gateway.dto.WebSocketThrottleResponseDTO;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.WebsocketUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.WebsocketWSClient;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APIKeyValidator;
+import org.wso2.carbon.apimgt.gateway.inbound.websocket.Authentication.Authenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
@@ -168,6 +171,14 @@ public class InboundWebsocketProcessorUtilTest {
         Assert.assertFalse(inboundProcessorResponseDTO.isError());
         Assert.assertNull(inboundProcessorResponseDTO.getErrorMessage());
         Assert.assertFalse(inboundProcessorResponseDTO.isCloseConnection());
+        // Tenant-flow guard (fails if doThrottle's startTenantFlow/setTenantDomain/endTenantFlow line is removed):
+        // doThrottle() establishes and balances its own tenant flow from the request context.
+        PowerMockito.verifyStatic(PrivilegedCarbonContext.class, Mockito.times(1));
+        PrivilegedCarbonContext.startTenantFlow();
+        PowerMockito.verifyStatic(PrivilegedCarbonContext.class, Mockito.times(1));
+        PrivilegedCarbonContext.endTenantFlow();
+        Mockito.verify(PrivilegedCarbonContext.getThreadLocalCarbonContext(), Mockito.times(1))
+                .setTenantDomain(inboundMessageContext.getTenantDomain(), true);
     }
 
     @Test
@@ -366,6 +377,144 @@ public class InboundWebsocketProcessorUtilTest {
         InboundProcessorResponseDTO responseDTO = InboundWebsocketProcessorUtil.authenticateToken(
                 inboundMessageContext);
         Assert.assertTrue(responseDTO.isError());
+    }
+
+    /**
+     * Regression guard for the WS tenant-flow leak. authenticateToken must open a tenant flow from the
+     * request's own context and balance it with an endTenantFlow() on the success path, so a frame never
+     * resolves the tenant a previous handshake left on the shared netty event-loop thread. The inner
+     * authenticate(...) is stubbed so the assertion isolates authenticateToken's own start/end pair.
+     */
+    @Test
+    public void authenticateTokenBalancesTenantFlowOnSuccess() throws Exception {
+        InboundMessageContext inboundMessageContext = createWebSocketApiMessageContext();
+        PowerMockito.stub(PowerMockito.method(InboundWebsocketProcessorUtil.class, "authenticate",
+                        InboundMessageContext.class))
+                .toReturn(new InboundProcessorResponseDTO());
+
+        InboundProcessorResponseDTO responseDTO = InboundWebsocketProcessorUtil.authenticateToken(
+                inboundMessageContext);
+
+        Assert.assertFalse(responseDTO.isError());
+        PowerMockito.verifyStatic(PrivilegedCarbonContext.class, Mockito.times(1));
+        PrivilegedCarbonContext.startTenantFlow();
+        PowerMockito.verifyStatic(PrivilegedCarbonContext.class, Mockito.times(1));
+        PrivilegedCarbonContext.endTenantFlow();
+        // The tenant set on the flow must be THIS request's own tenant (overwrite=true), not one inherited
+        // from the thread — that is what makes the frame resolve the correct key manager.
+        Mockito.verify(PrivilegedCarbonContext.getThreadLocalCarbonContext(), Mockito.times(1))
+                .setTenantDomain(inboundMessageContext.getTenantDomain(), true);
+    }
+
+    /**
+     * The critical half of the tenant-flow leak fix: endTenantFlow() must run even when authentication
+     * throws, or an exception mid-frame would leave the request's tenant leaked on the shared event-loop
+     * thread. Stub the inner authenticate(...) to throw and assert the flow is still ended (finally ran)
+     * while the exception propagates.
+     */
+    @Test
+    public void authenticateTokenEndsTenantFlowWhenAuthenticationThrows() throws Exception {
+        InboundMessageContext inboundMessageContext = createWebSocketApiMessageContext();
+        PowerMockito.stub(PowerMockito.method(InboundWebsocketProcessorUtil.class, "authenticate",
+                        InboundMessageContext.class))
+                .toThrow(new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                        "forced failure to verify the tenant flow is still ended"));
+
+        try {
+            InboundWebsocketProcessorUtil.authenticateToken(inboundMessageContext);
+            Assert.fail("Expected APISecurityException to propagate from authenticateToken");
+        } catch (APISecurityException expected) {
+            // expected — the finally block must still end the tenant flow
+        }
+
+        PowerMockito.verifyStatic(PrivilegedCarbonContext.class, Mockito.times(1));
+        PrivilegedCarbonContext.startTenantFlow();
+        PowerMockito.verifyStatic(PrivilegedCarbonContext.class, Mockito.times(1));
+        PrivilegedCarbonContext.endTenantFlow();
+    }
+
+    /**
+     * Regression guard for the second WS tenant-flow gap (the one the integration suite surfaced):
+     * authorizeGraphQLSubscriptionEvents is the worker that invokes JWTValidator.validateScopesForGraphQLSubscriptions,
+     * which reads the tenant from the shared event-loop thread. It must open a tenant flow from THIS request's own
+     * context and balance it, so a GraphQL-subscription frame's scope check resolves the correct tenant instead of a
+     * null/stale one left on the thread. The JWTValidator is mocked so the assertion isolates the tenant-flow pair.
+     */
+    @Test
+    public void authorizeGraphQLSubscriptionEventsBalancesTenantFlowOnSuccess() throws Exception {
+        InboundMessageContext inboundMessageContext = createWebSocketApiMessageContext();
+        inboundMessageContext.setJWTToken(true);
+        PowerMockito.whenNew(APIKeyValidator.class).withAnyArguments()
+                .thenReturn(Mockito.mock(APIKeyValidator.class));
+        JWTValidator jwtValidator = Mockito.mock(JWTValidator.class);
+        PowerMockito.whenNew(JWTValidator.class).withAnyArguments().thenReturn(jwtValidator);
+
+        boolean authorized = InboundWebsocketProcessorUtil.authorizeGraphQLSubscriptionEvents(
+                "liftStatusChange", inboundMessageContext);
+
+        Assert.assertTrue(authorized);
+        PowerMockito.verifyStatic(PrivilegedCarbonContext.class, Mockito.times(1));
+        PrivilegedCarbonContext.startTenantFlow();
+        PowerMockito.verifyStatic(PrivilegedCarbonContext.class, Mockito.times(1));
+        PrivilegedCarbonContext.endTenantFlow();
+        // The tenant set for the scope check must be THIS request's own tenant (overwrite=true), not one left
+        // on the shared thread — that is what makes validateScopesForGraphQLSubscriptions resolve the right KM.
+        Mockito.verify(PrivilegedCarbonContext.getThreadLocalCarbonContext(), Mockito.times(1))
+                .setTenantDomain(inboundMessageContext.getTenantDomain(), true);
+    }
+
+    /**
+     * The tenant flow around the subscription-event scope check must be ended even when the scope validation
+     * throws, or a rejected frame would leak the request's tenant onto the shared event-loop thread.
+     */
+    @Test
+    public void authorizeGraphQLSubscriptionEventsEndsTenantFlowWhenValidationThrows() throws Exception {
+        InboundMessageContext inboundMessageContext = createWebSocketApiMessageContext();
+        inboundMessageContext.setJWTToken(true);
+        PowerMockito.whenNew(APIKeyValidator.class).withAnyArguments()
+                .thenReturn(Mockito.mock(APIKeyValidator.class));
+        JWTValidator jwtValidator = Mockito.mock(JWTValidator.class);
+        PowerMockito.whenNew(JWTValidator.class).withAnyArguments().thenReturn(jwtValidator);
+        Mockito.doThrow(new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                        "forced scope-validation failure to verify the tenant flow is still ended"))
+                .when(jwtValidator).validateScopesForGraphQLSubscriptions(Mockito.any(), Mockito.any(),
+                        Mockito.any(), Mockito.any(), Mockito.any());
+
+        try {
+            InboundWebsocketProcessorUtil.authorizeGraphQLSubscriptionEvents("liftStatusChange",
+                    inboundMessageContext);
+            Assert.fail("Expected APISecurityException to propagate from authorizeGraphQLSubscriptionEvents");
+        } catch (APISecurityException expected) {
+            // expected — the finally block must still end the tenant flow
+        }
+
+        PowerMockito.verifyStatic(PrivilegedCarbonContext.class, Mockito.times(1));
+        PrivilegedCarbonContext.startTenantFlow();
+        PowerMockito.verifyStatic(PrivilegedCarbonContext.class, Mockito.times(1));
+        PrivilegedCarbonContext.endTenantFlow();
+    }
+
+    /**
+     * Guard for the handshake-auth tenant flow: isAuthenticated() must open a tenant flow from the request's own
+     * context and balance it. The authenticator is stubbed so validateToken() short-circuits before authenticate(),
+     * isolating isAuthenticated()'s own start/set/end pair. Fails if that tenancy line is removed.
+     */
+    @Test
+    public void isAuthenticatedBalancesTenantFlow() throws Exception {
+        InboundMessageContext inboundMessageContext = createWebSocketApiMessageContext();
+        Authenticator authenticator = Mockito.mock(Authenticator.class);
+        Mockito.when(authenticator.validateToken(Mockito.any())).thenReturn(false);
+        inboundMessageContext.setAuthenticator(authenticator);
+
+        boolean authenticated = InboundWebsocketProcessorUtil.isAuthenticated(inboundMessageContext);
+
+        Assert.assertFalse(authenticated);
+        PowerMockito.verifyStatic(PrivilegedCarbonContext.class, Mockito.times(1));
+        PrivilegedCarbonContext.startTenantFlow();
+        PowerMockito.verifyStatic(PrivilegedCarbonContext.class, Mockito.times(1));
+        PrivilegedCarbonContext.endTenantFlow();
+        Mockito.verify(PrivilegedCarbonContext.getThreadLocalCarbonContext(), Mockito.times(1))
+                .setTenantDomain(inboundMessageContext.getTenantDomain(), true);
     }
 
     @Test
