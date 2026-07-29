@@ -94,7 +94,12 @@ public interface ImportExportAPI {
      * @return API artifact.
      * @throws APIManagementException
      * @throws APIImportExportException
+     * @deprecated This overload uses a shared identity-keyed temp directory and is concurrency-unsafe: concurrent
+     * exports of the same API can corrupt each other's archives. Use
+     * {@link #exportAPI(String, String, boolean, ExportFormat, boolean, boolean, String, boolean)} with
+     * {@code requestScoped = true} for concurrency-safe exports.
      */
+    @Deprecated
     public File exportAPI(String apiId, String revisionUUID, boolean preserveStatus, ExportFormat format,
                           boolean preserveDocs, boolean preserveCredentials, String organization)
             throws APIManagementException, APIImportExportException;
@@ -111,9 +116,66 @@ public interface ImportExportAPI {
      * @return API artifact.
      * @throws APIManagementException
      * @throws APIImportExportException
+     * @deprecated This overload uses a shared identity-keyed temp directory and is concurrency-unsafe: concurrent
+     * exports of the same API Product can corrupt each other's archives. Use
+     * {@link #exportAPIProduct(String, String, boolean, ExportFormat, boolean, boolean, String, boolean)} with
+     * {@code requestScoped = true} for concurrency-safe exports.
      */
+    @Deprecated
     public File exportAPIProduct(String apiId, String revisionUUID, boolean preserveStatus, ExportFormat format,
                           boolean preserveDocs, boolean preserveCredentials, String organization)
+            throws APIManagementException, APIImportExportException;
+
+    /**
+     * Used to export API artifact.
+     * <p>
+     * When {@code requestScoped} is {@code true}, the archive lives under a UNIQUE per-call parent, so
+     * concurrent exports of the same API never collide or read each other's content, and the CALLER owns the temp
+     * directory and must delete {@code returnedFile.getParentFile()} once the archive is consumed. When it is
+     * {@code false}, the legacy shared identity-keyed temp directory is used (concurrency-unsafe, no caller cleanup).
+     *
+     * @param apiId               UUID of API.
+     * @param revisionUUID        UUID of revision.
+     * @param preserveStatus      Preserve API status on export
+     * @param format              Format of output documents. Can be YAML or JSON
+     * @param preserveDocs        Preserve documentation on Export.
+     * @param preserveCredentials Preserve credentials on export
+     * @param organization        Organization
+     * @param requestScoped If {@code true}, assemble under a unique per-call parent (caller owns cleanup);
+     *                             if {@code false}, use the shared identity-keyed temp directory (legacy behaviour).
+     * @return API artifact.
+     * @throws APIManagementException
+     * @throws APIImportExportException
+     */
+    public File exportAPI(String apiId, String revisionUUID, boolean preserveStatus, ExportFormat format,
+                          boolean preserveDocs, boolean preserveCredentials, String organization,
+                          boolean requestScoped)
+            throws APIManagementException, APIImportExportException;
+
+    /**
+     * Used to export API Product artifact.
+     * <p>
+     * When {@code requestScoped} is {@code true}, the archive lives under a UNIQUE per-call parent, so
+     * concurrent exports of the same API Product never collide, and the CALLER owns the temp directory and must
+     * delete {@code returnedFile.getParentFile()} once consumed. When it is {@code false}, the legacy shared
+     * identity-keyed temp directory is used (concurrency-unsafe, no caller cleanup).
+     *
+     * @param apiId               UUID of API Product.
+     * @param revisionUUID        UUID of revision.
+     * @param preserveStatus      Preserve API status on export
+     * @param format              Format of output documents. Can be YAML or JSON
+     * @param preserveDocs        Preserve documentation on Export.
+     * @param preserveCredentials Preserve credentials on export
+     * @param organization        Organization
+     * @param requestScoped If {@code true}, assemble under a unique per-call parent (caller owns cleanup);
+     *                             if {@code false}, use the shared identity-keyed temp directory (legacy behaviour).
+     * @return API Product artifact.
+     * @throws APIManagementException
+     * @throws APIImportExportException
+     */
+    public File exportAPIProduct(String apiId, String revisionUUID, boolean preserveStatus,
+                          ExportFormat format, boolean preserveDocs, boolean preserveCredentials, String organization,
+                          boolean requestScoped)
             throws APIManagementException, APIImportExportException;
 
     /**

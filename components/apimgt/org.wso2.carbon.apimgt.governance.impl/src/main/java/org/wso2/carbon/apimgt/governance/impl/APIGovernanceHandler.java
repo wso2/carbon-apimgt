@@ -22,6 +22,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -454,21 +455,28 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
                     apiDtoTypeWrapper = new APIDTOTypeWrapper(apiDtoToReturn);
                     isMCPServer = false;
                 }
+                // Request-scoped export: the archive lives under a UNIQUE temp parent (no shared-name collision
+                // with a concurrent user/revision export), so the bytes read here are always this call's own.
                 File apiProject = ExportUtils.exportAPI(
                         apiProvider, apiIdentifier, apiDtoTypeWrapper, api,
-                        apiIdentifier.getProviderName(), ExportFormat.YAML, true, true, 
-                        StringUtils.EMPTY, organization, false
-                ); // returns zip file
-                if (log.isDebugEnabled()) {
-                    if (!isMCPServer) {
-                        log.debug("Successfully exported API with id " + apiId + " in organization "
-                                + organization + " with revision " + revisionId);
-                    } else {
-                        log.debug("Successfully exported MCP Server with id " + apiId + " in organization "
-                                + organization + " with revision " + revisionId);
+                        apiIdentifier.getProviderName(), ExportFormat.YAML, true, true,
+                        StringUtils.EMPTY, organization, false, true
+                ); // returns a zip inside a caller-owned unique temp directory
+                try {
+                    if (log.isDebugEnabled()) {
+                        if (!isMCPServer) {
+                            log.debug("Successfully exported API with id " + apiId + " in organization "
+                                    + organization + " with revision " + revisionId);
+                        } else {
+                            log.debug("Successfully exported MCP Server with id " + apiId + " in organization "
+                                    + organization + " with revision " + revisionId);
+                        }
                     }
+                    return Files.readAllBytes(apiProject.toPath());
+                } finally {
+                    // Delete the request-scoped temp directory produced by the per-request export.
+                    FileUtils.deleteQuietly(apiProject.getParentFile());
                 }
-                return Files.readAllBytes(apiProject.toPath());
             } catch (APIManagementException | APIImportExportException | IOException e) {
                 throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_APIM_PROJECT, e,
                         apiId, organization);
