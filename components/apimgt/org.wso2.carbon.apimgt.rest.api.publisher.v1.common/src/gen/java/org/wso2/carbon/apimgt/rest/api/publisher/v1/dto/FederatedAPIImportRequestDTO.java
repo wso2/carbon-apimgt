@@ -19,20 +19,20 @@ import javax.validation.Valid;
 
 
 public class FederatedAPIImportRequestDTO   {
-
+  
     private String id = null;
     private String displayName = null;
     private String description = null;
 
   /**
-   * Identifier of the API on the federated gateway. Either the gateway&#39;s native API ID or the composite \&quot;name:version\&quot; key of a discovered API.
+   * Identifier of the API on the federated gateway. Either the gateway&#39;s native API ID or the composite \&quot;name:version\&quot; key of a discovered API. 
    **/
   public FederatedAPIImportRequestDTO id(String id) {
     this.id = id;
     return this;
   }
 
-
+  
   @ApiModelProperty(example = "abcd1234", required = true, value = "Identifier of the API on the federated gateway. Either the gateway's native API ID or the composite \"name:version\" key of a discovered API. ")
   @JsonProperty("id")
   @NotNull
@@ -51,7 +51,7 @@ public class FederatedAPIImportRequestDTO   {
     return this;
   }
 
-
+  
   @ApiModelProperty(example = "Customer API", value = "Optional display name to assign to the API instead of the discovered one.")
   @JsonProperty("displayName")
   public String getDisplayName() {
@@ -69,7 +69,7 @@ public class FederatedAPIImportRequestDTO   {
     return this;
   }
 
-
+  
   @ApiModelProperty(example = "Provides customer details.", value = "Optional description to assign to the API instead of the discovered one.")
   @JsonProperty("description")
   public String getDescription() {
@@ -103,7 +103,7 @@ public class FederatedAPIImportRequestDTO   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class FederatedAPIImportRequestDTO {\n");
-
+    
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");

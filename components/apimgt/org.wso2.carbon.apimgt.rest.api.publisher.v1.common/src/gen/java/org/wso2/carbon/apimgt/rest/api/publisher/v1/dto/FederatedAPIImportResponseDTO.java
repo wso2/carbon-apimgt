@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.validation.constraints.*;
 
+/**
+ * Outcome of an import/update request for a set of federated APIs.
+ **/
 
 import io.swagger.annotations.*;
 import java.util.Objects;
@@ -17,11 +20,11 @@ import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
-
+@ApiModel(description = "Outcome of an import/update request for a set of federated APIs.")
 
 
 public class FederatedAPIImportResponseDTO   {
-
+  
     private String status = null;
     private List<String> failedIds = new ArrayList<String>();
 
@@ -33,7 +36,7 @@ public class FederatedAPIImportResponseDTO   {
     return this;
   }
 
-
+  
   @ApiModelProperty(value = "Human readable summary of the outcome.")
   @JsonProperty("status")
   public String getStatus() {
@@ -51,7 +54,7 @@ public class FederatedAPIImportResponseDTO   {
     return this;
   }
 
-
+  
   @ApiModelProperty(value = "Identifiers of the APIs that could not be imported or updated.")
   @JsonProperty("failedIds")
   public List<String> getFailedIds() {
@@ -84,7 +87,7 @@ public class FederatedAPIImportResponseDTO   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class FederatedAPIImportResponseDTO {\n");
-
+    
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    failedIds: ").append(toIndentedString(failedIds)).append("\n");
     sb.append("}");

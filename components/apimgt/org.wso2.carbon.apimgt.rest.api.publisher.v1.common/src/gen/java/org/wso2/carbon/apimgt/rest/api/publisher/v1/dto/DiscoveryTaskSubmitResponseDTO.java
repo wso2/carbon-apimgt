@@ -6,6 +6,9 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import javax.validation.constraints.*;
 
+/**
+ * Response returned when a discovery task is submitted (or already running).
+ **/
 
 import io.swagger.annotations.*;
 import java.util.Objects;
@@ -15,7 +18,7 @@ import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
-
+@ApiModel(description = "Response returned when a discovery task is submitted (or already running).")
 
 
 public class DiscoveryTaskSubmitResponseDTO   {
@@ -56,6 +59,7 @@ return null;
     private StatusEnum status = null;
 
   /**
+   * Unique identifier of the discovery task.
    **/
   public DiscoveryTaskSubmitResponseDTO taskId(String taskId) {
     this.taskId = taskId;
@@ -63,7 +67,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "Unique identifier of the discovery task.")
   @JsonProperty("taskId")
   public String getTaskId() {
     return taskId;
@@ -73,6 +77,7 @@ return null;
   }
 
   /**
+   * Current status of the discovery task.
    **/
   public DiscoveryTaskSubmitResponseDTO status(StatusEnum status) {
     this.status = status;
@@ -80,7 +85,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "Current status of the discovery task.")
   @JsonProperty("status")
   public StatusEnum getStatus() {
     return status;

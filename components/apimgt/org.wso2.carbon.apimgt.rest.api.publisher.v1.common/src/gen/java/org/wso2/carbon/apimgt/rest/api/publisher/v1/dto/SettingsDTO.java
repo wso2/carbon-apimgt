@@ -465,7 +465,7 @@ public class SettingsDTO   {
   }
 
   /**
-   * This indicates whether the Federated API Discovery is enabled or not.
+   * This indicates whether the scheduled (periodic) federated API discovery is enabled. When enabled, APIs are discovered and imported automatically in the background. When disabled, discovery is performed on demand from the Publisher. 
    **/
   public SettingsDTO isFederatedDiscoverySchedulerEnabled(Boolean isFederatedDiscoverySchedulerEnabled) {
     this.isFederatedDiscoverySchedulerEnabled = isFederatedDiscoverySchedulerEnabled;
@@ -473,7 +473,7 @@ public class SettingsDTO   {
   }
 
   
-  @ApiModelProperty(value = "This indicates whether the Federated API Discovery is enabled or not.")
+  @ApiModelProperty(value = "This indicates whether the scheduled (periodic) federated API discovery is enabled. When enabled, APIs are discovered and imported automatically in the background. When disabled, discovery is performed on demand from the Publisher. ")
   @JsonProperty("isFederatedDiscoverySchedulerEnabled")
   public Boolean isIsFederatedDiscoverySchedulerEnabled() {
     return isFederatedDiscoverySchedulerEnabled;

@@ -1,9 +1,9 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CachedDiscoveryResultResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DiscoveryTaskStatusResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DiscoveryTaskSubmitResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FederatedAPIImportRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FederatedAPIImportResponseDTO;
 import java.util.List;
@@ -95,32 +95,32 @@ FederatedApisApiService delegate = new FederatedApisApiServiceImpl();
     @POST
     @Path("/import")
     @Consumes({ "application/json" })
-    
+    @Produces({ "application/json" })
     @ApiOperation(value = "Import discovered APIs", notes = "Import explicitly selected new APIs", response = FederatedAPIImportResponseDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "Federated APIs",  })
-    @ApiResponses(value = {
+    @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK", response = FederatedAPIImportResponseDTO.class) })
-    public Response importFederatedAPIs( @NotNull @ApiParam(value = "Name of the environment/gateway",required=true)  @QueryParam("environment") String environment, @ApiParam(value = "List of APIs to import, each identified by its federated gateway ID" ,required=true) List<FederatedAPIImportRequestDTO> requestBody) throws APIManagementException{
-        return delegate.importFederatedAPIs(environment, requestBody, securityContext);
+    public Response importFederatedAPIs( @NotNull @ApiParam(value = "Name of the environment/gateway",required=true)  @QueryParam("environment") String environment, @ApiParam(value = "List of APIs to import, each identified by its federated gateway ID" ,required=true) List<FederatedAPIImportRequestDTO> federatedAPIImportRequestDTO) throws APIManagementException{
+        return delegate.importFederatedAPIs(environment, federatedAPIImportRequestDTO, securityContext);
     }
 
     @POST
     @Path("/update")
     @Consumes({ "application/json" })
-    
+    @Produces({ "application/json" })
     @ApiOperation(value = "Update existing federated APIs", notes = "Update explicitly selected APIs from a specified federated gateway", response = FederatedAPIImportResponseDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "Federated APIs" })
-    @ApiResponses(value = {
+    @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK", response = FederatedAPIImportResponseDTO.class) })
-    public Response updateFederatedAPIs( @NotNull @ApiParam(value = "Name of the environment/gateway",required=true)  @QueryParam("environment") String environment, @ApiParam(value = "List of APIs to update, each identified by its federated gateway ID" ,required=true) List<FederatedAPIImportRequestDTO> requestBody) throws APIManagementException{
-        return delegate.updateFederatedAPIs(environment, requestBody, securityContext);
+    public Response updateFederatedAPIs( @NotNull @ApiParam(value = "Name of the environment/gateway",required=true)  @QueryParam("environment") String environment, @ApiParam(value = "List of APIs to update, each identified by its federated gateway ID" ,required=true) List<FederatedAPIImportRequestDTO> federatedAPIImportRequestDTO) throws APIManagementException{
+        return delegate.updateFederatedAPIs(environment, federatedAPIImportRequestDTO, securityContext);
     }
 }

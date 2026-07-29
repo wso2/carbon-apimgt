@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.validation.constraints.*;
 
+/**
+ * Previously cached discovery results for an environment.
+ **/
 
 import io.swagger.annotations.*;
 import java.util.Objects;
@@ -17,7 +20,7 @@ import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
-
+@ApiModel(description = "Previously cached discovery results for an environment.")
 
 
 public class CachedDiscoveryResultResponseDTO   {
@@ -26,6 +29,7 @@ public class CachedDiscoveryResultResponseDTO   {
     private List<Object> result = new ArrayList<Object>();
 
   /**
+   * Timestamp of the last successful discovery run.
    **/
   public CachedDiscoveryResultResponseDTO lastDiscoveredAt(String lastDiscoveredAt) {
     this.lastDiscoveredAt = lastDiscoveredAt;
@@ -33,7 +37,7 @@ public class CachedDiscoveryResultResponseDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "Timestamp of the last successful discovery run.")
   @JsonProperty("lastDiscoveredAt")
   public String getLastDiscoveredAt() {
     return lastDiscoveredAt;
@@ -43,6 +47,7 @@ public class CachedDiscoveryResultResponseDTO   {
   }
 
   /**
+   * List of cached discovered APIs.
    **/
   public CachedDiscoveryResultResponseDTO result(List<Object> result) {
     this.result = result;
@@ -50,7 +55,7 @@ public class CachedDiscoveryResultResponseDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "List of cached discovered APIs.")
   @JsonProperty("result")
   public List<Object> getResult() {
     return result;

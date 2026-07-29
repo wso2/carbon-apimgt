@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.validation.constraints.*;
 
+/**
+ * Current status and optional result of a discovery task.
+ **/
 
 import io.swagger.annotations.*;
 import java.util.Objects;
@@ -17,7 +20,7 @@ import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
-
+@ApiModel(description = "Current status and optional result of a discovery task.")
 
 
 public class DiscoveryTaskStatusResponseDTO   {
@@ -60,6 +63,7 @@ return null;
     private String error = null;
 
   /**
+   * Unique identifier of the discovery task.
    **/
   public DiscoveryTaskStatusResponseDTO taskId(String taskId) {
     this.taskId = taskId;
@@ -67,7 +71,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "Unique identifier of the discovery task.")
   @JsonProperty("taskId")
   public String getTaskId() {
     return taskId;
@@ -77,6 +81,7 @@ return null;
   }
 
   /**
+   * Current status of the discovery task.
    **/
   public DiscoveryTaskStatusResponseDTO status(StatusEnum status) {
     this.status = status;
@@ -84,7 +89,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "Current status of the discovery task.")
   @JsonProperty("status")
   public StatusEnum getStatus() {
     return status;
@@ -94,6 +99,7 @@ return null;
   }
 
   /**
+   * List of discovered APIs (populated when status is COMPLETED).
    **/
   public DiscoveryTaskStatusResponseDTO result(List<Object> result) {
     this.result = result;
@@ -101,7 +107,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "List of discovered APIs (populated when status is COMPLETED).")
   @JsonProperty("result")
   public List<Object> getResult() {
     return result;
@@ -111,6 +117,7 @@ return null;
   }
 
   /**
+   * Error message if the task failed.
    **/
   public DiscoveryTaskStatusResponseDTO error(String error) {
     this.error = error;
@@ -118,7 +125,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "Error message if the task failed.")
   @JsonProperty("error")
   public String getError() {
     return error;
