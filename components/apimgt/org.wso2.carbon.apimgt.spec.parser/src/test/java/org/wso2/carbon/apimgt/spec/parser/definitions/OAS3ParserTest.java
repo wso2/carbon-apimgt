@@ -551,4 +551,51 @@ public class OAS3ParserTest extends OASTestBase {
         apiScopes.add(petLocalScope);
         return apiScopes;
     }
+
+    /**
+     * Regression test for the unbounded growth bug where {@code format: binary} / {@code format: byte}
+     * schema examples get re-encoded on every parse-then-serialize round trip (mirrors what APIM does
+     * on every Publisher import/update via prettifyOAS3ToJson -> OASParserUtil.convertOAStoJSON).
+     * Without the fix, the example on each affected property grows a little larger every cycle until
+     * the definition eventually exceeds Jackson's StreamReadConstraints.maxStringLength and can no
+     * longer be parsed at all.
+     */
+    @Test
+    public void testBinaryAndByteFormatExamplesDoNotGrowOnRepeatedUpdates() throws Exception {
+        String definition = "{\"openapi\":\"3.0.1\",\"info\":{\"title\":\"T\",\"version\":\"1.0.0\"},"
+                + "\"paths\":{\"/docs\":{\"post\":{\"requestBody\":{\"content\":{\"application/json\":"
+                + "{\"schema\":{\"$ref\":\"#/components/schemas/Req\"}}}},"
+                + "\"responses\":{\"200\":{\"description\":\"ok\"}}}}},"
+                + "\"components\":{\"schemas\":{\"Req\":{\"type\":\"object\",\"properties\":{"
+                + "\"documentContent\":{\"type\":\"string\",\"format\":\"binary\","
+                + "\"example\":\"<binary PDF content>\"},"
+                + "\"checksum\":{\"type\":\"string\",\"format\":\"byte\",\"example\":\"aGVsbG8=\"},"
+                + "\"label\":{\"type\":\"string\",\"example\":\"hello world\"}"
+                + "}}}}}";
+
+        String current = definition;
+        int stableLength = -1;
+        for (int cycle = 0; cycle <= 5; cycle++) {
+            OpenAPI openAPI = oas3Parser.getOpenAPI(current);
+            current = oas3Parser.prettifyOAS3ToJson(openAPI);
+
+            if (cycle == 0) {
+                stableLength = current.length();
+            } else {
+                // The definition must stop changing size after the first update cycle - if this
+                // assertion ever fails, the binary/byte example growth bug has resurfaced.
+                Assert.assertEquals("Definition size changed on cycle " + cycle
+                        + " - binary/byte example growth bug may have resurfaced.", stableLength, current.length());
+            }
+        }
+
+        OpenAPI finalApi = oas3Parser.getOpenAPI(current);
+        Map<String, io.swagger.v3.oas.models.media.Schema> properties =
+                finalApi.getComponents().getSchemas().get("Req").getProperties();
+
+        Assert.assertNull("format: binary example should be stripped", properties.get("documentContent").getExample());
+        Assert.assertNull("format: byte example should be stripped", properties.get("checksum").getExample());
+        Assert.assertEquals("plain string example must be left untouched", "hello world",
+                properties.get("label").getExample());
+    }
 }
