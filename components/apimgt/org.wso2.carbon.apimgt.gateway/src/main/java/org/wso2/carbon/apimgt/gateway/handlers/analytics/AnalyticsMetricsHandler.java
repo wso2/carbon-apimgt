@@ -75,9 +75,9 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
                     AnalyticsPayloadUtil.extractPayload(messageContext,
                             AnalyticsPayloadUtil.getPayloadSizeLimit(), "request");
             if (requestBody != null && requestBody.getBody() != null) {
-                messageContext.setProperty(Constants.REQUEST_BODY, requestBody.getBody());
+                messageContext.setProperty(Constants.REQUEST_BODY_PROPERTY, requestBody.getBody());
                 if (requestBody.getTransferEncoding() != null) {
-                    messageContext.setProperty(Constants.REQUEST_BODY_TRANSFER_ENCODING,
+                    messageContext.setProperty(Constants.REQUEST_BODY_TRANSFER_ENCODING_PROPERTY,
                             requestBody.getTransferEncoding());
                 }
             }

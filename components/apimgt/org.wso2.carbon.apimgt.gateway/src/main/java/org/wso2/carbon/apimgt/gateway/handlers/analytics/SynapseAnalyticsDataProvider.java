@@ -518,11 +518,12 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         if (AnalyticsPayloadUtil.shouldSendPayloads()) {
             log.debug("Including request/response body in analytics event");
             int sizeLimit = AnalyticsPayloadUtil.getPayloadSizeLimit();
-            // Request body was captured in the request flow and stashed on the message context.
-            Object requestBody = messageContext.getProperty(Constants.REQUEST_BODY);
+            // Request body was captured in the request flow and stashed on the message context under
+            // internal (namespaced) property keys; it is published under the wire keys.
+            Object requestBody = messageContext.getProperty(Constants.REQUEST_BODY_PROPERTY);
             if (requestBody instanceof String) {
                 custom.put(Constants.REQUEST_BODY, requestBody);
-                Object reqEncoding = messageContext.getProperty(Constants.REQUEST_BODY_TRANSFER_ENCODING);
+                Object reqEncoding = messageContext.getProperty(Constants.REQUEST_BODY_TRANSFER_ENCODING_PROPERTY);
                 if (reqEncoding instanceof String) {
                     custom.put(Constants.REQUEST_BODY_TRANSFER_ENCODING, reqEncoding);
                 }

@@ -31,9 +31,11 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 
@@ -46,14 +48,15 @@ import static org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS;
  *
  * <p>Body capture is an opt-in feature (gated by the {@code send_payloads} analytics property) because it
  * forces the pass-through message to be built into memory and captures potentially sensitive data.
- * All content types are captured except streaming ({@code text/event-stream}) and {@code multipart/*},
- * which have no single materializable body. JSON and text payloads are captured as-is; binary payloads
+ * All content types are captured except those excluded by {@link #isExcludedContentType} — streaming
+ * ({@code text/event-stream}), {@code multipart/*}, and {@code application/x-www-form-urlencoded}.
+ * JSON and text payloads are captured as-is; binary payloads
  * are Base64-encoded (mirroring the Moesif standard, where the publisher tags them
  * {@code transferEncoding=base64}). A payload larger than the configurable size limit is dropped
  * (not truncated) so the publisher only ever receives a whole, valid body or nothing; the backend
  * always receives the full body regardless.</p>
  */
-public class AnalyticsPayloadUtil {
+public final class AnalyticsPayloadUtil {
 
     private static final Log log = LogFactory.getLog(AnalyticsPayloadUtil.class);
 
@@ -89,20 +92,25 @@ public class AnalyticsPayloadUtil {
 
     /**
      * Whether request/response body capture is enabled via the {@code send_payloads} analytics property
-     * (named to match the sibling {@code send_headers} option). Defaults to {@code false}.
+     * (named to match the sibling {@code send_headers} option). Requires analytics to be enabled — when
+     * analytics is off nothing is published, so capturing (and building) a payload would be pure waste.
+     * Defaults to {@code false}.
      *
      * @return true if body capture is enabled
      */
     public static boolean shouldSendPayloads() {
+        if (!APIUtil.isAnalyticsEnabled()) {
+            return false;
+        }
         Map<String, String> configs = APIManagerConfiguration.getAnalyticsProperties();
         return configs != null && Boolean.parseBoolean(configs.get(Constants.SEND_PAYLOAD));
     }
 
     /**
-     * Maximum number of bytes/characters captured per body, read from the {@code payload_size_limit}
-     * analytics property. Falls back to {@link Constants#DEFAULT_PAYLOAD_SIZE_LIMIT} when unset or invalid.
+     * Maximum number of bytes captured per body, read from the {@code payload_size_limit} analytics
+     * property. Falls back to {@link Constants#DEFAULT_PAYLOAD_SIZE_LIMIT_BYTES} when unset or invalid.
      *
-     * @return the payload size limit
+     * @return the payload size limit in bytes
      */
     public static int getPayloadSizeLimit() {
         Map<String, String> configs = APIManagerConfiguration.getAnalyticsProperties();
@@ -110,19 +118,21 @@ public class AnalyticsPayloadUtil {
             try {
                 int limit = Integer.parseInt(configs.get(Constants.PAYLOAD_SIZE_LIMIT));
                 if (limit > 0) {
-                    invalidLimitWarned = false;
+                    if (invalidLimitWarned) {
+                        invalidLimitWarned = false;
+                    }
                     return limit;
                 }
                 // A non-positive limit would silently drop every body (and break size math), so treat
                 // it as invalid rather than honouring it.
                 warnInvalidLimitOnce("Non-positive " + Constants.PAYLOAD_SIZE_LIMIT
-                        + " analytics property value. Using default " + Constants.DEFAULT_PAYLOAD_SIZE_LIMIT);
+                        + " analytics property value. Using default " + Constants.DEFAULT_PAYLOAD_SIZE_LIMIT_BYTES);
             } catch (NumberFormatException e) {
                 warnInvalidLimitOnce("Invalid " + Constants.PAYLOAD_SIZE_LIMIT
-                        + " analytics property value. Using default " + Constants.DEFAULT_PAYLOAD_SIZE_LIMIT);
+                        + " analytics property value. Using default " + Constants.DEFAULT_PAYLOAD_SIZE_LIMIT_BYTES);
             }
         }
-        return Constants.DEFAULT_PAYLOAD_SIZE_LIMIT;
+        return Constants.DEFAULT_PAYLOAD_SIZE_LIMIT_BYTES;
     }
 
     /**
@@ -189,7 +199,7 @@ public class AnalyticsPayloadUtil {
      * body is missing from Moesif.</p>
      *
      * @param messageContext the Synapse message context (request or response)
-     * @param sizeLimit      maximum number of characters (text) or bytes (binary) to capture
+     * @param sizeLimit      maximum number of bytes to capture
      * @param direction      {@code "request"} or {@code "response"}, used only for debug log messages
      * @return the captured body, or {@code null} if there is nothing capturable or it exceeds the limit
      */
@@ -230,9 +240,14 @@ public class AnalyticsPayloadUtil {
 
             // No declared Content-Length (e.g. chunked transfer-encoding): the size cannot be bounded
             // before building, so building here would materialize the whole body in memory (an OOM risk
-            // under load). Skip it unless the operator has explicitly opted in. Off by default keeps the
-            // default configuration memory-safe; applies symmetrically to request and response.
-            if (declaredLength < 0 && !shouldCapturePayloadsWithoutContentLength()) {
+            // under load). Skip it unless the operator has explicitly opted in — UNLESS the message was
+            // already built earlier in the flow (a content-aware mediator, or getResponseSize with
+            // build_response_message=true). In that case the memory has already been spent, so skipping
+            // would only drop the body for free; capture it. Off by default keeps the default
+            // configuration memory-safe; applies symmetrically to request and response.
+            boolean alreadyBuilt =
+                    Boolean.TRUE.equals(axis2MC.getProperty(PassThroughConstants.MESSAGE_BUILDER_INVOKED));
+            if (declaredLength < 0 && !alreadyBuilt && !shouldCapturePayloadsWithoutContentLength()) {
                 if (log.isDebugEnabled()) {
                     log.debug("No " + direction + " body captured for analytics: no Content-Length header "
                             + "(e.g. chunked transfer-encoding), so the body size cannot be bounded before "
@@ -246,7 +261,7 @@ public class AnalyticsPayloadUtil {
 
             // JSON: return the text as-is; the publisher's BodyParser renders it as a structured object.
             if (JsonUtil.hasAJsonPayload(axis2MC)) {
-                return capture(JsonUtil.jsonPayloadToString(axis2MC), sizeLimit, null, direction, "JSON");
+                return capture(JsonUtil.jsonPayloadToString(axis2MC), sizeLimit, direction, "JSON");
             }
 
             SOAPEnvelope env = axis2MC.getEnvelope();
@@ -281,10 +296,18 @@ public class AnalyticsPayloadUtil {
                 return new CapturedBody(Base64.encodeBase64String(bytes), Constants.TRANSFER_ENCODING_BASE64);
             } else if (BaseConstants.DEFAULT_TEXT_WRAPPER.equals(firstElement.getQName())) {
                 // Plain text payload.
-                return capture(firstElement.getText(), sizeLimit, null, direction, "text");
+                return capture(firstElement.getText(), sizeLimit, direction, "text");
             } else {
-                // XML / SOAP payload.
-                return capture(firstElement.toString(), sizeLimit, null, direction, "XML/SOAP");
+                // XML / SOAP payload: serialise every child element of the body so a multi-element body
+                // is not silently truncated to its first element. For the common single-element REST XML
+                // body this is identical to the first element's serialisation. Deliberately not
+                // soapBody.toString(), which would wrap the content in a synthetic <soapenv:Body>.
+                StringBuilder xml = new StringBuilder();
+                Iterator<OMElement> childElements = soapBody.getChildElements();
+                while (childElements.hasNext()) {
+                    xml.append(childElements.next().toString());
+                }
+                return capture(xml.toString(), sizeLimit, direction, "XML/SOAP");
             }
         } catch (IOException | XMLStreamException e) {
             log.error("Error occurred while capturing the " + direction + " message payload for analytics", e);
@@ -304,8 +327,7 @@ public class AnalyticsPayloadUtil {
      * {@code payload_size_limit}. A drop is logged at debug level (keyed by {@code direction}/
      * {@code kind}) so a missing body can be explained.
      */
-    private static CapturedBody capture(String payload, int sizeLimit, String transferEncoding,
-                                        String direction, String kind) {
+    private static CapturedBody capture(String payload, int sizeLimit, String direction, String kind) {
         if (payload == null) {
             return null;
         }
@@ -318,7 +340,7 @@ public class AnalyticsPayloadUtil {
             }
             return null;
         }
-        return new CapturedBody(payload, transferEncoding);
+        return new CapturedBody(payload, null);
     }
 
     /**
@@ -354,14 +376,22 @@ public class AnalyticsPayloadUtil {
     }
 
     /**
-     * Streaming (SSE) and multipart payloads have no single materializable body and must never be
-     * captured (building/buffering them would be incorrect or disruptive).
+     * Content types that must never be captured, left to stream through untouched:
+     * <ul>
+     *   <li>{@code text/event-stream} (SSE) and {@code multipart/*} — no single materializable body.</li>
+     *   <li>{@code application/x-www-form-urlencoded} — Axis2 materializes this into an operation-named
+     *       XML tree (not a text/binary wrapper), so it would be published as XML whose representation
+     *       disagrees with its {@code Content-Type}; building it also re-serializes the form to the
+     *       backend via the form formatter (a forwarding risk). Excluded on both counts.</li>
+     * </ul>
      */
     private static boolean isExcludedContentType(String contentType) {
         if (contentType == null) {
             return false;
         }
         String lower = contentType.toLowerCase(Locale.ROOT);
-        return lower.contains("event-stream") || lower.startsWith("multipart/");
+        return lower.startsWith("text/event-stream")
+                || lower.startsWith("multipart/")
+                || lower.startsWith("application/x-www-form-urlencoded");
     }
 }
