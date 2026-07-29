@@ -16767,9 +16767,9 @@ public class ApiMgtDAO {
                                 ? api.get("referenceArtifact").toString() : null;
                         if (refArtifact != null) {
                             insertStmt.setBinaryStream(10,
-                                    new java.io.ByteArrayInputStream(refArtifact.getBytes()));
+                                    new ByteArrayInputStream(refArtifact.getBytes()));
                         } else {
-                            insertStmt.setNull(10, java.sql.Types.BLOB);
+                            insertStmt.setNull(10, Types.BLOB);
                         }
                         insertStmt.setString(11, truncateForColumn(
                                 Objects.toString(api.get("status"), null), FDC_STATUS_MAX_LENGTH, "STATUS"));
@@ -16803,9 +16803,9 @@ public class ApiMgtDAO {
                      SQLConstants.GET_FEDERATED_DISCOVERY_CACHE_BY_ENV_SQL)) {
             stmt.setString(1, envName);
             stmt.setString(2, organization);
-            try (java.sql.ResultSet rs = stmt.executeQuery()) {
+            try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    Map<String, Object> api = new java.util.HashMap<>();
+                    Map<String, Object> api = new HashMap<>();
                     api.put("id", rs.getString("EXTERNAL_API_ID"));
                     api.put("apiName", rs.getString("API_NAME"));
                     api.put("version", rs.getString("API_VERSION"));
@@ -16884,7 +16884,7 @@ public class ApiMgtDAO {
                      SQLConstants.GET_LAST_FEDERATED_DISCOVERY_TIME_SQL)) {
             stmt.setString(1, envName);
             stmt.setString(2, organization);
-            try (java.sql.ResultSet rs = stmt.executeQuery()) {
+            try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     return rs.getTimestamp("LAST_DISCOVERED");
                 }
@@ -16929,7 +16929,7 @@ public class ApiMgtDAO {
                     insertStmt.setString(7, null);
                     insertStmt.setString(8, "HTTP");
                     insertStmt.setString(9, null);
-                    insertStmt.setNull(10, java.sql.Types.BLOB);
+                    insertStmt.setNull(10, Types.BLOB);
                     insertStmt.setString(11, truncateForColumn(status, FDC_STATUS_MAX_LENGTH, "STATUS"));
                     insertStmt.setTimestamp(12, now);
                     insertStmt.executeUpdate();
@@ -16959,7 +16959,7 @@ public class ApiMgtDAO {
                      SQLConstants.GET_DISCOVERY_TASK_STATUS_SQL)) {
             stmt.setString(1, envName);
             stmt.setString(2, organization);
-            try (java.sql.ResultSet rs = stmt.executeQuery()) {
+            try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     String dbTaskId = rs.getString("API_NAME");
                     if (taskId.equals(dbTaskId)) {
@@ -16990,7 +16990,7 @@ public class ApiMgtDAO {
                      SQLConstants.GET_ACTIVE_DISCOVERY_TASK_SQL)) {
             stmt.setString(1, envName);
             stmt.setString(2, organization);
-            try (java.sql.ResultSet rs = stmt.executeQuery()) {
+            try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     Map<String, Object> taskMap = new HashMap<>();
                     taskMap.put("taskId", rs.getString("API_NAME"));
