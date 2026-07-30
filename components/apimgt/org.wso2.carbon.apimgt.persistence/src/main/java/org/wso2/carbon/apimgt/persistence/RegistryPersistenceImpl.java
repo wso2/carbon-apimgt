@@ -2946,10 +2946,13 @@ public class RegistryPersistenceImpl implements APIPersistence {
     public void deleteDocumentation(Organization org, String apiId, String docId)
             throws DocumentationPersistenceException {
         boolean isTenantFlowStarted = false;
+        boolean transactionCommitted = false;
+        Registry registry = null;
         try {
             RegistryHolder holder = getRegistry(org.getName());
-            Registry registry = holder.getRegistry();
+            registry = holder.getRegistry();
             isTenantFlowStarted = holder.isTenantFlowStarted();
+            registry.beginTransaction();
             GenericArtifactManager artifactManager = RegistryPersistenceDocUtil.getDocumentArtifactManager(registry);
             if (artifactManager == null) {
                 String errorMessage = "Failed to retrieve artifact manager when removing documentation of " + apiId
@@ -2965,10 +2968,18 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     registry.delete(docPath);
                 }
             }
-
+            registry.commitTransaction();
+            transactionCommitted = true;
         } catch (RegistryException | APIPersistenceException e) {
             throw new DocumentationPersistenceException("Failed to delete documentation", e);
         } finally {
+            try {
+                if (registry != null && !transactionCommitted) {
+                    registry.rollbackTransaction();
+                }
+            } catch (RegistryException ex) {
+                log.error("Error while rolling back the transaction for documentation delete of API: " + apiId, ex);
+            }
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
             }
