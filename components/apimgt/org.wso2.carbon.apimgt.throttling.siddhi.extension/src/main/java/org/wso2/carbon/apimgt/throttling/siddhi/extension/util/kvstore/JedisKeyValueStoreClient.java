@@ -69,9 +69,9 @@ public class JedisKeyValueStoreClient implements KeyValueStoreClient {
                 user = distributedConfig.getUser();
                 password = distributedConfig.getPassword();
                 databaseId = distributedConfig.getDatabaseId();
-                connectionTimeout = distributedConfig.getConnectionTimeout() != 0
+                connectionTimeout = distributedConfig.getConnectionTimeout() > 0
                         ? distributedConfig.getConnectionTimeout() : Protocol.DEFAULT_TIMEOUT;
-                socketTimeout = distributedConfig.getSocketTimeout() != 0
+                socketTimeout = distributedConfig.getSocketTimeout() > 0
                         ? distributedConfig.getSocketTimeout() : Protocol.DEFAULT_TIMEOUT;
                 sslEnabled = distributedConfig.isSslEnabled();
                 poolConfig.setMaxTotal(distributedConfig.getMaxTotal());
@@ -94,9 +94,9 @@ public class JedisKeyValueStoreClient implements KeyValueStoreClient {
                     user = redisConfig.getUser();
                     password = redisConfig.getPassword();
                     databaseId = redisConfig.getDatabaseId();
-                    connectionTimeout = redisConfig.getConnectionTimeout() != 0
+                    connectionTimeout = redisConfig.getConnectionTimeout() > 0
                             ? redisConfig.getConnectionTimeout() : Protocol.DEFAULT_TIMEOUT;
-                    socketTimeout = redisConfig.getSocketTimeout() != 0
+                    socketTimeout = redisConfig.getSocketTimeout() > 0
                             ? redisConfig.getSocketTimeout() : Protocol.DEFAULT_TIMEOUT;
                     sslEnabled = redisConfig.isSslEnabled();
                     poolConfig.setMaxTotal(redisConfig.getMaxTotal());

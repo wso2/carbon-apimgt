@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.throttling.siddhi.extension;
 
 import java.util.AbstractMap;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.CompletableFuture;
@@ -105,6 +106,10 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
         }
         if (distributedThrottlingEnabled && throttleKey != null) {
             this.key = "wso2_throttler:" + throttleKey;
+            Long windowExpiry = ThrottleStreamProcessor.getThreadLocalWindowExpiry();
+            if (windowExpiry != null) {
+                this.storedWindowExpiry = windowExpiry;
+            }
             try {
                 this.kvStoreClient = KeyValueStoreManager.getClient();
                 if (this.kvStoreClient != null) {
@@ -142,18 +147,24 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
 
     /**
      * Writes the given value to the key-value store with the remaining TTL of the current window.
-     * Does nothing when {@code storedWindowExpiry} is not yet known or has already passed.
+     * Does nothing when {@code storedWindowExpiry} is not yet known or has already passed —
+     * callers must check the return value rather than assume the write happened.
      *
      * @param value the value to store for this aggregator's key.
+     * @return true if the value was actually written to the key-value store, false if the write
+     *         was skipped because the window expiry was unknown or already in the past.
      */
-    private void writeCounterValue(String value) {
+    private boolean writeCounterValue(String value) {
         long windowExpiry = storedWindowExpiry;
-        if (windowExpiry > 0) {
-            long remainingMillis = windowExpiry - System.currentTimeMillis();
-            if (remainingMillis > 0) {
-                kvStoreClient.setWithExpiry(key, value, remainingMillis);
-            }
+        if (windowExpiry <= 0) {
+            return false;
         }
+        long remainingMillis = windowExpiry - System.currentTimeMillis();
+        if (remainingMillis <= 0) {
+            return false;
+        }
+        kvStoreClient.setWithExpiry(key, value, remainingMillis);
+        return true;
     }
 
     /**
@@ -169,11 +180,14 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
             }
             if (pendingReset) {
                 try {
-                    writeCounterValue("0");
                     // Do NOT reset localCounter here — reset() already zeroed it at window boundary.
                     // Any increments to localCounter since then belong to the new window and are valid.
-                    pendingReset = false; // cleared only on success — failure retried next tick
-                    keyHasTTL = true;
+                    if (writeCounterValue("0")) {
+                        pendingReset = false; // cleared only on a confirmed write — retried next tick otherwise
+                        keyHasTTL = true;
+                    } else {
+                        keyHasTTL = false;
+                    }
                 } catch (KeyValueStoreException e) {
                     long currentTimeMillis = System.currentTimeMillis();
                     if (currentTimeMillis - lastErrorLogTimestamp.get() > ERROR_LOG_INTERVAL_MS) {
@@ -184,11 +198,6 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
                 return;
             }
             long currentUnsyncedCount = unsyncedCounter.getAndSet(0L);
-            if (pendingReset) {
-                // reset() fired between our initial pendingReset check and getAndSet —
-                // discard the captured old-window delta; the next tick will PSETEX 0.
-                return;
-            }
             try {
                 if (currentUnsyncedCount == 0) {
                     String kvStoreValue = kvStoreClient.get(key);
@@ -301,6 +310,8 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
      *
      * @param data The event data to be removed.
      * @return The updated value of the local counter after decrement.
+     * Note: not invoked in practice for throttle plans, since {@link ThrottleStreamProcessor}
+     * never emits EXPIRED events to this selector.
      */
     @Override
     public Object processRemove(Object data) {
@@ -404,7 +415,7 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
     @Override
     public void restoreState(Object[] state) {
         if (log.isDebugEnabled()) {
-            log.debug("DistributedCountAggregator: restoreState called with state: " + state);
+            log.debug("DistributedCountAggregator: restoreState called with state: " + Arrays.toString(state));
         }
         Map.Entry<String, Object> stateEntry = (Map.Entry<String, Object>) state[0];
         long restoredValue = (Long) stateEntry.getValue();
@@ -432,8 +443,15 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
         // Lock only for the fast in-memory writes — no Redis call inside.
         synchronized (kvStoreLock) {
             unsyncedCounter.set(0L);
-            pendingReset = false;
-            localCounter.set(counterToRestore);
+            // Do NOT clear pendingReset here. If a reset() flagged an unflushed PSETEX 0 and this
+            // restore landed before the sync thread flushed it, dropping the flag would leave the
+            // previous window's total in Redis. Keep it pending (the next sync tick still flushes
+            // it) and seed localCounter to 0 to match what reset() already intended.
+            if (pendingReset) {
+                localCounter.set(0L);
+            } else {
+                localCounter.set(counterToRestore);
+            }
         }
 
         // Key absent in Redis — attempt to seed with 0; no-op if storedWindowExpiry is not yet known.
@@ -568,7 +586,7 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
         }
     }
 
-    private boolean isResetRequested(Object[] data) {
+    private static boolean isResetRequested(Object[] data) {
         return data != null && data.length > 1 && Boolean.TRUE.equals(data[1]);
     }
 

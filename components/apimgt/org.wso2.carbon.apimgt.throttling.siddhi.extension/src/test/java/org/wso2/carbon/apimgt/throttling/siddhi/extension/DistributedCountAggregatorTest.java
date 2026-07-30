@@ -285,6 +285,10 @@ public class DistributedCountAggregatorTest {
 
     @After
     public void tearDown() throws Exception {
+        // Stop any scheduler started by the Siddhi-based tests so its periodic task cannot
+        // sync aggregators belonging to a later test.
+        DistributedCountAttributeAggregator.shutdownScheduler();
+
         // Reset all static state between tests.
         setStaticField(DistributedCountAttributeAggregator.class, "DISTRIBUTED_THROTTLE_CONFIG", null);
         setStaticField(DistributedCountAttributeAggregator.class, "distributedThrottlingEnabled", false);
@@ -525,7 +529,9 @@ public class DistributedCountAggregatorTest {
     /**
      * writeCounterValue() must be a no-op when storedWindowExpiry is 0 (not yet known).
      * Concretely: reset() called before any window expiry is known — the subsequent
-     * syncWithKVStore() must clear pendingReset without issuing a PSETEX.
+     * syncWithKVStore() must NOT issue a PSETEX, and since nothing was actually written,
+     * pendingReset must stay true so a later tick (once the expiry is known) retries the flush
+     * instead of silently losing the reset.
      */
     @Test
     public void writeCounterValueIsNoOpWhenStoredWindowExpiryIsZero() throws Exception {
@@ -540,13 +546,14 @@ public class DistributedCountAggregatorTest {
 
         Assert.assertEquals("PSETEX must not be called when storedWindowExpiry is 0",
                 0, fakeClient.setWithExpiryCount.get());
-        Assert.assertFalse("pendingReset must still be cleared even when writeCounterValue is a no-op",
+        Assert.assertTrue("pendingReset must remain true since nothing was actually written to Redis",
                 (boolean) getInstanceField(aggregator, "pendingReset"));
     }
 
     /**
      * writeCounterValue() must be a no-op when the window has already expired
-     * (storedWindowExpiry is in the past). No PSETEX must be sent in this case.
+     * (storedWindowExpiry is in the past). No PSETEX must be sent in this case, and since the
+     * reset was never actually flushed, pendingReset must stay true so the next tick retries it.
      */
     @Test
     public void writeCounterValueIsNoOpWhenWindowHasExpired() throws Exception {
@@ -559,7 +566,7 @@ public class DistributedCountAggregatorTest {
 
         Assert.assertEquals("PSETEX must not be called when the window has already expired",
                 0, fakeClient.setWithExpiryCount.get());
-        Assert.assertFalse("pendingReset must be cleared regardless of whether PSETEX was sent",
+        Assert.assertTrue("pendingReset must remain true since the write never actually happened",
                 (boolean) getInstanceField(aggregator, "pendingReset"));
     }
 
@@ -891,18 +898,20 @@ public class DistributedCountAggregatorTest {
     }
 
     /**
-     * restoreState() must clear pendingReset inside the lock so that the sync thread does not
-     * issue a stale PSETEX "0" after state has been freshly restored from Redis.
+     * restoreState() must NOT clear an unflushed pendingReset. Dropping it would leave the
+     * previous window's stale total sitting in Redis forever, since nothing would ever issue
+     * the pending PSETEX "0" afterwards. The flag must survive the restore so the next sync
+     * tick still flushes it.
      */
     @Test
-    public void restoreStateClearsPendingReset() throws Exception {
+    public void restoreStateDoesNotClearPendingReset() throws Exception {
         DistributedCountAttributeAggregator aggregator = createAggregator("testKey15");
         setInstanceField(aggregator, "pendingReset", true);
 
         Object[] state = new Object[]{new AbstractMap.SimpleEntry<String, Object>("Value", 3L)};
         aggregator.restoreState(state);
 
-        Assert.assertFalse("restoreState() must clear pendingReset to prevent stale PSETEX retries",
+        Assert.assertTrue("restoreState() must preserve an unflushed pendingReset, not drop it",
                 (boolean) getInstanceField(aggregator, "pendingReset"));
     }
 
