@@ -25,6 +25,7 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.internal.service.dto.BlockConditionsDTO;
@@ -33,6 +34,7 @@ import org.wso2.carbon.apimgt.internal.service.dto.RevokedEventsDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.RevokedJWTConsumerKeyDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.RevokedJWTDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.RevokedJWTSubjectEntityDTO;
+import org.wso2.carbon.apimgt.internal.service.model.RevokedJWTEventData;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -304,5 +306,77 @@ public final class BlockConditionDBUtil {
         revokedEventsDTO.setRevokedJWTConsumerKeyList(getRevokedJWTConsumerKeys());
         revokedEventsDTO.setRevokedJWTSubjectEntityList(getRevokedJWTSubjectEntities());
         return revokedEventsDTO;
+    }
+
+    /**
+     * Retrieves revoked JWT event data with the ownership information required by the internal REST service.
+     *
+     * @return revoked JWT event data with ownership information
+     */
+    public static RevokedJWTEventData getRevokedJWTEventsWithOwnership() throws APIManagementException {
+
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            return getRevokedJWTEventsWithOwnership(conn);
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while fetching revoked JWT events from database", e);
+        }
+    }
+
+    static RevokedJWTEventData getRevokedJWTEventsWithOwnership(Connection connection) throws SQLException {
+
+        RevokedJWTEventData revokedJWTEventData = new RevokedJWTEventData();
+        addRevokedJWTsWithOwnership(connection, revokedJWTEventData);
+        addRevokedJWTConsumerKeysWithOwnership(connection, revokedJWTEventData);
+        addRevokedJWTSubjectEntitiesWithOwnership(connection, revokedJWTEventData);
+        return revokedJWTEventData;
+    }
+
+    static void addRevokedJWTsWithOwnership(Connection connection, RevokedJWTEventData revokedJWTEventData)
+            throws SQLException {
+
+        String sqlQuery = "SELECT SIGNATURE, EXPIRY_TIMESTAMP, TENANT_ID FROM AM_REVOKED_JWT";
+        try (PreparedStatement ps = connection.prepareStatement(sqlQuery);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                revokedJWTEventData.getRevokedJWTList().add(new RevokedJWTEventData.RevokedJWTData(
+                        rs.getString("SIGNATURE"), rs.getLong("EXPIRY_TIMESTAMP"), rs.getInt("TENANT_ID")));
+            }
+        }
+    }
+
+    static void addRevokedJWTConsumerKeysWithOwnership(Connection connection,
+                                                       RevokedJWTEventData revokedJWTEventData) throws SQLException {
+
+        String sqlQuery = "SELECT CONSUMER_KEY, TIME_REVOKED, ORGANIZATION FROM AM_APP_REVOKED_EVENT";
+        try (PreparedStatement ps = connection.prepareStatement(sqlQuery);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                RevokedJWTConsumerKeyDTO revokedJWTConsumerKeyDTO = new RevokedJWTConsumerKeyDTO();
+                revokedJWTConsumerKeyDTO.setConsumerKey(rs.getString("CONSUMER_KEY"));
+                revokedJWTConsumerKeyDTO.setRevocationTime(rs.getTimestamp("TIME_REVOKED",
+                        Calendar.getInstance(TimeZone.getTimeZone("UTC"))).getTime());
+                revokedJWTConsumerKeyDTO.setOrganization(rs.getString("ORGANIZATION"));
+                revokedJWTEventData.getRevokedJWTConsumerKeyList().add(revokedJWTConsumerKeyDTO);
+            }
+        }
+    }
+
+    static void addRevokedJWTSubjectEntitiesWithOwnership(Connection connection,
+                                                          RevokedJWTEventData revokedJWTEventData) throws SQLException {
+
+        String sqlQuery = "SELECT ENTITY_ID, ENTITY_TYPE, TIME_REVOKED, ORGANIZATION "
+                + "FROM AM_SUBJECT_ENTITY_REVOKED_EVENT";
+        try (PreparedStatement ps = connection.prepareStatement(sqlQuery);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                RevokedJWTSubjectEntityDTO revokedJWTSubjectEntityDTO = new RevokedJWTSubjectEntityDTO();
+                revokedJWTSubjectEntityDTO.setEntityId(rs.getString("ENTITY_ID"));
+                revokedJWTSubjectEntityDTO.setEntityType(rs.getString("ENTITY_TYPE"));
+                revokedJWTSubjectEntityDTO.setRevocationTime(rs.getTimestamp("TIME_REVOKED",
+                        Calendar.getInstance(TimeZone.getTimeZone("UTC"))).getTime());
+                revokedJWTSubjectEntityDTO.setOrganization(rs.getString("ORGANIZATION"));
+                revokedJWTEventData.getRevokedJWTSubjectEntityList().add(revokedJWTSubjectEntityDTO);
+            }
+        }
     }
 }
