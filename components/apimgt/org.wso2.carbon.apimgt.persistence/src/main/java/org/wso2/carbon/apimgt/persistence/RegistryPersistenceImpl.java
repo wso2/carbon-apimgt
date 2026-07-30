@@ -2967,7 +2967,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 log.error(errorMessage);
                 throw new DocumentationPersistenceException(errorMessage, ExceptionCodes.DOCUMENT_NOT_FOUND);
             }
-            deleteDocumentationContent(registry, artifact);
+            deleteDocumentationContent(registry, artifact, apiId, docId);
             String docPath = artifact.getPath();
             if (docPath != null) {
                 if (registry.resourceExists(docPath)) {
@@ -3000,16 +3000,19 @@ public class RegistryPersistenceImpl implements APIPersistence {
      *
      * @param registry Registry
      * @param artifact GenericArtifact of the documentation
+     * @param apiId    API identifier, used to give context in error messages
+     * @param docId    Document identifier, used to give context in error messages
      * @throws RegistryException                on failure
      * @throws DocumentationPersistenceException on failure
      */
-    private void deleteDocumentationContent(Registry registry, GenericArtifact artifact)
+    private void deleteDocumentationContent(Registry registry, GenericArtifact artifact, String apiId, String docId)
             throws RegistryException, DocumentationPersistenceException {
         Documentation documentation = RegistryPersistenceDocUtil.getDocumentation(artifact);
         if (documentation.getSourceType().equals(Documentation.DocumentSourceType.FILE)) {
             String resource = documentation.getFilePath();
             if (resource == null) {
-                throw new DocumentationPersistenceException("Invalid resource Path " + resource);
+                throw new DocumentationPersistenceException("Invalid file resource path for API " + apiId
+                        + " Document ID " + docId);
             }
 
             String[] resourceSplitPath = resource.split(RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH);
@@ -3018,19 +3021,22 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     registry.delete(resourceSplitPath[1]);
                 }
             } else {
-                throw new DocumentationPersistenceException("Invalid resource Path " + resource);
+                throw new DocumentationPersistenceException("Invalid file resource path " + resource + " for API "
+                        + apiId + " Document ID " + docId);
             }
         } else if (documentation.getSourceType().equals(Documentation.DocumentSourceType.INLINE)
                 || documentation.getSourceType().equals(Documentation.DocumentSourceType.MARKDOWN)) {
             String artifactPath = artifact.getPath();
             if (artifactPath == null) {
-                throw new DocumentationPersistenceException("Invalid resource Path " + artifactPath);
+                throw new DocumentationPersistenceException("Invalid artifact path for API " + apiId
+                        + " Document ID " + docId);
             }
 
             String docNameSuffix = RegistryConstants.PATH_SEPARATOR + documentation.getName();
             int docNameIndex = artifactPath.lastIndexOf(docNameSuffix);
             if (docNameIndex == -1) {
-                throw new DocumentationPersistenceException("Invalid resource Path " + artifactPath);
+                throw new DocumentationPersistenceException("Invalid artifact path " + artifactPath + " for API "
+                        + apiId + " Document ID " + docId);
             }
             String docBasePath = artifactPath.substring(0, docNameIndex);
             String contentPath = docBasePath
