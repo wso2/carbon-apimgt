@@ -318,15 +318,56 @@ public class RestApiPublisherUtils {
         }
     }
 
+    /**
+     * Exports operation-policy data.
+     *
+     * @deprecated This overload uses a shared identity-keyed temp directory and is concurrency-unsafe: concurrent
+     * exports of the same operation policy can corrupt each other's archives. Use
+     * {@link #exportOperationPolicyData(OperationPolicyData, String, boolean)} with
+     * {@code requestScoped = true} for concurrency-safe exports.
+     */
+    @Deprecated
     public static File exportOperationPolicyData(OperationPolicyData policyData, String format)
             throws APIManagementException {
+        return exportOperationPolicyData(policyData, format, false);
+    }
+
+    /**
+     * Exports operation-policy data.
+     * <p>
+     * When {@code requestScoped} is {@code false}, the export is assembled in the shared identity-keyed temp
+     * directory and the returned archive is the stable {@code ${java.io.tmpdir}/<name>_<version>.zip} path (no caller
+     * cleanup required). This is concurrency-unsafe: concurrent exports of the same policy share that directory.
+     * <p>
+     * When {@code requestScoped} is {@code true}, the export is assembled under a UNIQUE per-call parent so
+     * concurrent exports of the same policy never collide, and the returned archive lives inside that unique parent.
+     * The CALLER owns the temp directory and must delete {@code returnedFile.getParentFile()} once consumed.
+     *
+     * @param policyData           the operation-policy data to export
+     * @param format               format of the exported policy specification (YAML or JSON)
+     * @param requestScoped If {@code true}, assemble under a unique per-call parent (caller owns cleanup);
+     *                             if {@code false}, use the shared identity-keyed temp directory (legacy behaviour).
+     * @return archive containing the operation-policy
+     * @throws APIManagementException if the export fails
+     */
+    public static File exportOperationPolicyData(OperationPolicyData policyData, String format,
+            boolean requestScoped) throws APIManagementException {
 
         File exportFolder = null;
         try {
             String sanitizedPolicyName = policyData.getSpecification().getName()
                     .replaceAll(APIConstants.POLICY_FILENAME_INVALID_CHARS_REGEX, "");
-            exportFolder = CommonUtil.createTempDirectoryFromName(sanitizedPolicyName + "_" +
-                    policyData.getSpecification().getVersion());
+            if (requestScoped) {
+                // Assemble under a per-export UNIQUE private working root so concurrent exports of the SAME policy
+                // never share a temp directory; the caller owns cleanup of the returned archive's parent.
+                String policyDirName = sanitizedPolicyName + "_" + policyData.getSpecification().getVersion();
+                File workRoot = CommonUtil.createTempDirectory(null);
+                exportFolder = new File(workRoot, policyDirName);
+                CommonUtil.createDirectory(exportFolder.getPath());
+            } else {
+                exportFolder = CommonUtil.createTempDirectoryFromName(sanitizedPolicyName + "_" +
+                        policyData.getSpecification().getVersion());
+            }
             String exportAPIBasePath = exportFolder.toString();
             String archivePath = exportAPIBasePath.concat(File.separator + sanitizedPolicyName);
             CommonUtil.createDirectory(archivePath);
@@ -352,9 +393,16 @@ public class RestApiPublisherUtils {
             }
 
             CommonUtil.archiveDirectory(exportAPIBasePath);
-            FileUtils.deleteQuietly(new File(exportAPIBasePath));
+            if (!requestScoped) {
+                FileUtils.deleteQuietly(new File(exportAPIBasePath));
+            }
             return new File(exportAPIBasePath + APIConstants.ZIP_FILE_EXTENSION);
         } catch (APIImportExportException | IOException e) {
+            // Request-scoped export owns its unique temp dir (exportFolder's parent); reclaim it on failure since
+            // the caller gets no File back. The shared-path (requestScoped == false) branch is left untouched.
+            if (requestScoped && exportFolder != null) {
+                FileUtils.deleteQuietly(exportFolder.getParentFile());
+            }
             throw new APIManagementException("Error while exporting operation policy", e);
         }
     }

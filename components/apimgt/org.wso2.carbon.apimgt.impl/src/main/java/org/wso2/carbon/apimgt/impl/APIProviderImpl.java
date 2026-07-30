@@ -25,6 +25,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.Constants;
 import org.apache.axis2.util.JavaUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringEscapeUtils;
@@ -7462,10 +7463,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     + apiRevision.getApiUUID(), e);
         }
         if (importExportAPI != null) {
+            File artifact = null;
             try {
-                File artifact = importExportAPI
-                        .exportAPI(apiRevision.getApiUUID(), revisionUUID, true, ExportFormat.JSON, false, true,
-                                organization);
+                // Request-scoped export: the artifact lives under a UNIQUE temp parent, so a concurrent export of
+                // the same API (another revision, Governance, a user download) can never overwrite the bytes we
+                // persist here as the gateway artifact.
+                artifact = importExportAPI
+                        .exportAPI(apiRevision.getApiUUID(), revisionUUID, true, ExportFormat.JSON, false,
+                                true, organization, true);
 
                 String apiType = apiMgtDAO.getAPITypeFromUUID(apiId.getUUID());
                 if (StringUtils.equals(apiType, APIConstants.API_TYPE_MCP)) {
@@ -7488,6 +7493,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             } catch (APIImportExportException | ArtifactSynchronizerException e) {
                 throw new APIManagementException("Error while Store the Revision Artifact",
                         ExceptionCodes.from(ExceptionCodes.API_REVISION_UUID_NOT_FOUND));
+            } finally {
+                if (artifact != null) {
+                    FileUtils.deleteQuietly(artifact.getParentFile());
+                }
             }
         }
         return revisionUUID;
@@ -8433,10 +8442,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         apiRevision.setRevisionUUID(revisionUUID);
         apiMgtDAO.addAPIProductRevision(apiRevision);
+        File artifact = null;
         try {
-            File artifact = importExportAPI
+            // Request-scoped export: unique temp parent, so a concurrent same-product export can't overwrite the
+            // bytes we persist here as the gateway artifact.
+            artifact = importExportAPI
                     .exportAPIProduct(apiRevision.getApiUUID(), revisionUUID, true, ExportFormat.JSON,
-                            false, true, organization);
+                            false, true, organization, true);
             gatewayArtifactsMgtDAO
                     .addGatewayAPIArtifactAndMetaData(apiRevision.getApiUUID(), apiProductIdentifier.getName(),
                             apiProductIdentifier.getVersion(), apiRevision.getRevisionUUID(), tenantDomain,
@@ -8448,6 +8460,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (APIImportExportException | ArtifactSynchronizerException e) {
             throw new APIManagementException("Error while Store the Revision Artifact",
                     ExceptionCodes.from(ExceptionCodes.API_REVISION_UUID_NOT_FOUND));
+        } finally {
+            if (artifact != null) {
+                FileUtils.deleteQuietly(artifact.getParentFile());
+            }
         }
         return revisionUUID;
     }

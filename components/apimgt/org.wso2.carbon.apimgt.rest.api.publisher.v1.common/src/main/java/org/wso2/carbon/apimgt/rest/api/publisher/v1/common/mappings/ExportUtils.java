@@ -199,11 +199,57 @@ public class ExportUtils {
      * @param preserveCredentials  Preserve credentials on export
      * @return File containing the exported API artifact.
      * @throws APIManagementException If an error occurs while getting governance registry
+     * @deprecated This overload uses a shared {@code ${java.io.tmpdir}/<identifier>/} working directory and is
+     * concurrency-unsafe: concurrent exports of the same API collide on that directory and can corrupt each other's
+     * archives. Use {@link #exportAPI(APIProvider, APIIdentifier, APIDTOTypeWrapper, API, String, ExportFormat,
+     * boolean, boolean, String, String, boolean, boolean)} with {@code requestScoped = true} for
+     * concurrency-safe exports.
      */
+    @Deprecated
     public static File exportAPI(APIProvider apiProvider, APIIdentifier apiIdentifier, APIDTOTypeWrapper apiDtoToReturn,
                                  API api, String userName, ExportFormat exportFormat, boolean preserveStatus,
                                  boolean preserveDocs, String originalDevPortalUrl, String organization,
                                  boolean preserveCredentials) throws APIManagementException, APIImportExportException {
+        return exportAPI(apiProvider, apiIdentifier, apiDtoToReturn, api, userName, exportFormat, preserveStatus,
+                preserveDocs, originalDevPortalUrl, organization, preserveCredentials, false);
+    }
+
+    /**
+     * Exports an API from API Manager for a given API. Meta information, API icon, documentation,
+     * WSDL and sequences are exported.
+     * <p>
+     * When {@code requestScoped} is {@code false}, the export is assembled in the shared
+     * {@code ${java.io.tmpdir}/<identifier>/} directory and the returned archive is the stable
+     * {@code ${java.io.tmpdir}/<identifier>.zip} path (no caller cleanup required). This is concurrency-unsafe:
+     * concurrent exports of the same API share that directory.
+     * <p>
+     * When {@code requestScoped} is {@code true}, the export is assembled under a UNIQUE per-call parent so
+     * concurrent exports of the same API never collide, and the returned archive lives inside that unique parent.
+     * The CALLER owns the temp directory and must delete {@code returnedFile.getParentFile()} once the archive is
+     * consumed.
+     *
+     * @param apiProvider          API Provider
+     * @param apiIdentifier        API Identifier
+     * @param apiDtoToReturn       API DTO
+     * @param api                  API
+     * @param userName             Username
+     * @param exportFormat         Format of output documents. Can be YAML or JSON
+     * @param preserveStatus       Preserve API status on export
+     * @param preserveDocs         Preserve documentation on Export.
+     * @param originalDevPortalUrl Original DevPortal URL (redirect URL) for the original Store
+     *                             (This is used for advertise only APIs).
+     * @param organization         Organization
+     * @param preserveCredentials  Preserve credentials on export
+     * @param requestScoped If {@code true}, assemble under a unique per-call parent (caller owns cleanup);
+     *                             if {@code false}, use the shared identity-keyed temp directory (legacy behaviour).
+     * @return File containing the exported API artifact.
+     * @throws APIManagementException If an error occurs while getting governance registry
+     */
+    public static File exportAPI(APIProvider apiProvider, APIIdentifier apiIdentifier, APIDTOTypeWrapper apiDtoToReturn,
+                                 API api, String userName, ExportFormat exportFormat, boolean preserveStatus,
+                                 boolean preserveDocs, String originalDevPortalUrl, String organization,
+                                 boolean preserveCredentials, boolean requestScoped)
+            throws APIManagementException, APIImportExportException {
 
         int tenantId;
         String currentApiUuid;
@@ -219,7 +265,18 @@ public class ExportUtils {
             currentApiUuid = apiDtoToReturn.getId();
         }
 
-        File exportFolder = CommonUtil.createTempDirectory(apiIdentifier);
+        File workRoot = null;
+        File exportFolder;
+        if (requestScoped) {
+            // Assemble under a per-export UNIQUE private working root so concurrent exports of the SAME API never
+            // share a temp directory; the caller owns cleanup of the returned archive's parent.
+            workRoot = CommonUtil.createTempDirectory(null);
+            exportFolder = new File(workRoot, apiIdentifier.toString());
+            CommonUtil.createDirectory(exportFolder.getPath());
+        } else {
+            exportFolder = CommonUtil.createTempDirectory(apiIdentifier);
+        }
+        try {
         String exportAPIBasePath = exportFolder.toString();
         String archivePath = exportAPIBasePath
                 .concat(File.separator + apiIdentifier.getApiName() + "-" + apiIdentifier.getVersion());
@@ -306,8 +363,18 @@ public class ExportUtils {
                 organization, currentApiUuid);
 
         CommonUtil.archiveDirectory(exportAPIBasePath);
-        FileUtils.deleteQuietly(new File(exportAPIBasePath));
+        if (!requestScoped) {
+            FileUtils.deleteQuietly(new File(exportAPIBasePath));
+        }
         return new File(exportAPIBasePath + APIConstants.ZIP_FILE_EXTENSION);
+        } catch (APIManagementException | APIImportExportException | RuntimeException e) {
+            // Request-scoped export owns its unique temp dir; reclaim it on failure since the caller gets no
+            // File back and cannot. The shared-path (requestScoped == false) branch keeps its original behaviour.
+            if (requestScoped && workRoot != null) {
+                FileUtils.deleteQuietly(workRoot);
+            }
+            throw e;
+        }
     }
 
     /**
@@ -338,17 +405,67 @@ public class ExportUtils {
      * @param exportFormat          Format of output documents. Can be YAML or JSON
      * @param preserveStatus        Preserve API Product status on export
      * @param organization          Organization Identifier
-     * @return
+     * @return File containing the exported API Product artifact.
      * @throws APIManagementException If an error occurs while getting governance registry
+     * @deprecated This overload uses a shared {@code ${java.io.tmpdir}/<identifier>/} working directory and is
+     * concurrency-unsafe: concurrent exports of the same API Product collide on that directory and can corrupt each
+     * other's archives. Use {@link #exportApiProduct(APIProvider, APIProductIdentifier, APIProductDTO, String,
+     * ExportFormat, Boolean, boolean, boolean, String, boolean)} with {@code requestScoped = true} for
+     * concurrency-safe exports.
      */
+    @Deprecated
     public static File exportApiProduct(APIProvider apiProvider, APIProductIdentifier apiProductIdentifier,
             APIProductDTO apiProductDtoToReturn, String userName, ExportFormat exportFormat, Boolean preserveStatus,
             boolean preserveDocs, boolean preserveCredentials, String organization)
             throws APIManagementException, APIImportExportException {
+        return exportApiProduct(apiProvider, apiProductIdentifier, apiProductDtoToReturn, userName, exportFormat,
+                preserveStatus, preserveDocs, preserveCredentials, organization, false);
+    }
+
+    /**
+     * Exports an API Product from API Manager for a given API Product. MMeta information, API Product icon,
+     * documentation, client certificates and dependent APIs are exported.
+     * <p>
+     * When {@code requestScoped} is {@code false}, the export is assembled in the shared
+     * {@code ${java.io.tmpdir}/<identifier>/} directory and the returned archive is the stable
+     * {@code ${java.io.tmpdir}/<identifier>.zip} path (no caller cleanup required). This is concurrency-unsafe:
+     * concurrent exports of the same API Product share that directory.
+     * <p>
+     * When {@code requestScoped} is {@code true}, the export is assembled under a UNIQUE per-call parent so
+     * concurrent exports of the same API Product never collide, and the returned archive lives inside that unique
+     * parent. The CALLER owns the temp directory and must delete {@code returnedFile.getParentFile()} once consumed.
+     *
+     * @param apiProvider           API Provider
+     * @param apiProductIdentifier  API Product Identifier
+     * @param apiProductDtoToReturn API Product DTO
+     * @param userName              Username
+     * @param exportFormat          Format of output documents. Can be YAML or JSON
+     * @param preserveStatus        Preserve API Product status on export
+     * @param organization          Organization Identifier
+     * @param requestScoped  If {@code true}, assemble under a unique per-call parent (caller owns cleanup);
+     *                              if {@code false}, use the shared identity-keyed temp directory (legacy behaviour).
+     * @return File containing the exported API Product artifact.
+     * @throws APIManagementException If an error occurs while getting governance registry
+     */
+    public static File exportApiProduct(APIProvider apiProvider, APIProductIdentifier apiProductIdentifier,
+            APIProductDTO apiProductDtoToReturn, String userName, ExportFormat exportFormat, Boolean preserveStatus,
+            boolean preserveDocs, boolean preserveCredentials, String organization, boolean requestScoped)
+            throws APIManagementException, APIImportExportException {
 
         int tenantId = 0;
         // Create temp location for storing API Product data
-        File exportFolder = CommonUtil.createTempDirectory(apiProductIdentifier);
+        File workRoot = null;
+        File exportFolder;
+        if (requestScoped) {
+            // Assemble under a per-export UNIQUE private working root so concurrent exports of the SAME product never
+            // share a temp directory; the caller owns cleanup of the returned archive's parent.
+            workRoot = CommonUtil.createTempDirectory(null);
+            exportFolder = new File(workRoot, apiProductIdentifier.toString());
+            CommonUtil.createDirectory(exportFolder.getPath());
+        } else {
+            exportFolder = CommonUtil.createTempDirectory(apiProductIdentifier);
+        }
+        try {
         String exportAPIBasePath = exportFolder.toString();
         String archivePath = exportAPIBasePath
                 .concat(File.separator + apiProductIdentifier.getName() + "-" + apiProductIdentifier.getVersion());
@@ -380,8 +497,18 @@ public class ExportUtils {
                 organization);
 
         CommonUtil.archiveDirectory(exportAPIBasePath);
-        FileUtils.deleteQuietly(new File(exportAPIBasePath));
+        if (!requestScoped) {
+            FileUtils.deleteQuietly(new File(exportAPIBasePath));
+        }
         return new File(exportAPIBasePath + APIConstants.ZIP_FILE_EXTENSION);
+        } catch (APIManagementException | APIImportExportException | RuntimeException e) {
+            // Request-scoped export owns its unique temp dir; reclaim it on failure since the caller gets no
+            // File back and cannot. The shared-path (requestScoped == false) branch keeps its original behaviour.
+            if (requestScoped && workRoot != null) {
+                FileUtils.deleteQuietly(workRoot);
+            }
+            throw e;
+        }
     }
 
     /**

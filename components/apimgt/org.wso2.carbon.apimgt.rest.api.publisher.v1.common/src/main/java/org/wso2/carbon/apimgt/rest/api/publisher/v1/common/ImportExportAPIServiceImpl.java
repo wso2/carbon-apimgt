@@ -151,9 +151,19 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
                 format, preserveStatus, preserveDocs, originalDevPortalUrl, organization, preserveCredentials);
     }
 
+    @Deprecated
     @Override
     public File exportAPI(String apiId, String revisionUUID, boolean preserveStatus, ExportFormat format,
                           boolean preserveDocs, boolean preserveCredentials, String organization)
+            throws APIManagementException, APIImportExportException {
+        return exportAPI(apiId, revisionUUID, preserveStatus, format, preserveDocs, preserveCredentials,
+                organization, false);
+    }
+
+    @Override
+    public File exportAPI(String apiId, String revisionUUID, boolean preserveStatus, ExportFormat format,
+                          boolean preserveDocs, boolean preserveCredentials, String organization,
+                          boolean requestScoped)
             throws APIManagementException, APIImportExportException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -168,25 +178,31 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         API api = apiProvider.getAPIbyUUID(revisionUUID, organization);
         api.setUuid(apiId);
         apiIdentifier.setUuid(apiId);
+        APIDTOTypeWrapper dtoWrapper;
         if (APIConstants.API_TYPE_MCP.equals(api.getType())) {
-            MCPServerDTO mcpServerDtoToReturn = APIMappingUtil.fromAPItoMCPServerDTO(api, preserveCredentials,
-                    apiProvider);
-            return ExportUtils.exportAPI(
-                    apiProvider, apiIdentifier, new APIDTOTypeWrapper(mcpServerDtoToReturn), api, userName, format,
-                    preserveStatus, preserveDocs, StringUtils.EMPTY, organization, preserveCredentials
-            );
+            dtoWrapper = new APIDTOTypeWrapper(APIMappingUtil.fromAPItoMCPServerDTO(api, preserveCredentials,
+                    apiProvider));
         } else {
-            APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, apiProvider);
-            return ExportUtils.exportAPI(
-                    apiProvider, apiIdentifier, new APIDTOTypeWrapper(apiDtoToReturn), api, userName, format,
-                    preserveStatus, preserveDocs, StringUtils.EMPTY, organization, preserveCredentials
-            );
+            dtoWrapper = new APIDTOTypeWrapper(APIMappingUtil.fromAPItoDTO(api, preserveCredentials, apiProvider));
         }
+        return ExportUtils.exportAPI(apiProvider, apiIdentifier, dtoWrapper, api, userName, format,
+                preserveStatus, preserveDocs, StringUtils.EMPTY, organization, preserveCredentials,
+                requestScoped);
     }
 
+    @Deprecated
     @Override
     public File exportAPIProduct(String apiId, String revisionUUID, boolean preserveStatus, ExportFormat format,
                                  boolean preserveDocs, boolean preserveCredentials, String organization)
+            throws APIManagementException, APIImportExportException {
+        return exportAPIProduct(apiId, revisionUUID, preserveStatus, format, preserveDocs,
+                preserveCredentials, organization, false);
+    }
+
+    @Override
+    public File exportAPIProduct(String apiId, String revisionUUID, boolean preserveStatus,
+                                 ExportFormat format, boolean preserveDocs, boolean preserveCredentials,
+                                 String organization, boolean requestScoped)
             throws APIManagementException, APIImportExportException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -195,7 +211,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         APIProduct product = apiProvider.getAPIProductbyUUID(revisionUUID, organization);
         APIProductDTO apiProductDtoToReturn = APIMappingUtil.fromAPIProducttoDTO(product, preserveCredentials);
         return ExportUtils.exportApiProduct(apiProvider, apiProductIdentifier, apiProductDtoToReturn, userName,
-                format, preserveStatus, preserveDocs, preserveCredentials, organization);
+                format, preserveStatus, preserveDocs, preserveCredentials, organization, requestScoped);
     }
 
     @Override
