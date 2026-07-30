@@ -2958,6 +2958,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 throw new DocumentationPersistenceException(errorMessage);
             }
             GenericArtifact artifact = artifactManager.getGenericArtifact(docId);
+            deleteDocumentationContent(registry, artifact);
             String docPath = artifact.getPath();
             if (docPath != null) {
                 if (registry.resourceExists(docPath)) {
@@ -2970,6 +2971,39 @@ public class RegistryPersistenceImpl implements APIPersistence {
         } finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+    }
+
+    /**
+     * Deletes the content resource of a documentation artifact, if one exists. FILE and INLINE/MARKDOWN documents
+     * store their content in a separate registry resource from the artifact itself; URL documents have no such
+     * resource.
+     *
+     * @param registry Registry
+     * @param artifact GenericArtifact of the documentation
+     * @throws RegistryException                on failure
+     * @throws DocumentationPersistenceException on failure
+     */
+    private void deleteDocumentationContent(Registry registry, GenericArtifact artifact)
+            throws RegistryException, DocumentationPersistenceException {
+        Documentation documentation = RegistryPersistenceDocUtil.getDocumentation(artifact);
+        if (documentation.getSourceType().equals(Documentation.DocumentSourceType.FILE)) {
+            String resource = documentation.getFilePath();
+            if (resource != null) {
+                String[] resourceSplitPath = resource.split(RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH);
+                if (resourceSplitPath.length == 2 && registry.resourceExists(resourceSplitPath[1])) {
+                    registry.delete(resourceSplitPath[1]);
+                }
+            }
+        } else if (documentation.getSourceType().equals(Documentation.DocumentSourceType.INLINE)
+                || documentation.getSourceType().equals(Documentation.DocumentSourceType.MARKDOWN)) {
+            String contentPath = artifact.getPath()
+                    .replace(RegistryConstants.PATH_SEPARATOR + documentation.getName(), "")
+                    + RegistryConstants.PATH_SEPARATOR + APIConstants.INLINE_DOCUMENT_CONTENT_DIR
+                    + RegistryConstants.PATH_SEPARATOR + documentation.getName();
+            if (registry.resourceExists(contentPath)) {
+                registry.delete(contentPath);
             }
         }
     }
