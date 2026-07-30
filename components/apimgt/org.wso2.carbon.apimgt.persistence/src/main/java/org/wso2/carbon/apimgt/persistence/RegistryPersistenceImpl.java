@@ -2990,15 +2990,26 @@ public class RegistryPersistenceImpl implements APIPersistence {
         Documentation documentation = RegistryPersistenceDocUtil.getDocumentation(artifact);
         if (documentation.getSourceType().equals(Documentation.DocumentSourceType.FILE)) {
             String resource = documentation.getFilePath();
-            if (resource != null) {
-                String[] resourceSplitPath = resource.split(RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH);
-                if (resourceSplitPath.length == 2 && registry.resourceExists(resourceSplitPath[1])) {
+            if (resource == null) {
+                throw new DocumentationPersistenceException("Invalid resource Path " + resource);
+            }
+
+            String[] resourceSplitPath = resource.split(RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH);
+            if (resourceSplitPath.length == 2) {
+                if (registry.resourceExists(resourceSplitPath[1])) {
                     registry.delete(resourceSplitPath[1]);
                 }
+            } else {
+                throw new DocumentationPersistenceException("Invalid resource Path " + resource);
             }
         } else if (documentation.getSourceType().equals(Documentation.DocumentSourceType.INLINE)
                 || documentation.getSourceType().equals(Documentation.DocumentSourceType.MARKDOWN)) {
-            String contentPath = artifact.getPath()
+            String artifactPath = artifact.getPath();
+            if (artifactPath == null) {
+                throw new DocumentationPersistenceException("Invalid resource Path " + artifactPath);
+            }
+
+            String contentPath = artifactPath
                     .replace(RegistryConstants.PATH_SEPARATOR + documentation.getName(), "")
                     + RegistryConstants.PATH_SEPARATOR + APIConstants.INLINE_DOCUMENT_CONTENT_DIR
                     + RegistryConstants.PATH_SEPARATOR + documentation.getName();
