@@ -3009,8 +3009,13 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 throw new DocumentationPersistenceException("Invalid resource Path " + artifactPath);
             }
 
-            String contentPath = artifactPath
-                    .replace(RegistryConstants.PATH_SEPARATOR + documentation.getName(), "")
+            String docNameSuffix = RegistryConstants.PATH_SEPARATOR + documentation.getName();
+            int docNameIndex = artifactPath.lastIndexOf(docNameSuffix);
+            if (docNameIndex == -1) {
+                throw new DocumentationPersistenceException("Invalid resource Path " + artifactPath);
+            }
+            String docBasePath = artifactPath.substring(0, docNameIndex);
+            String contentPath = docBasePath
                     + RegistryConstants.PATH_SEPARATOR + APIConstants.INLINE_DOCUMENT_CONTENT_DIR
                     + RegistryConstants.PATH_SEPARATOR + documentation.getName();
             if (registry.resourceExists(contentPath)) {
