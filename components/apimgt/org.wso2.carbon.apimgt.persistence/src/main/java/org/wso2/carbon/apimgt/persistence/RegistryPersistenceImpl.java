@@ -2961,6 +2961,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 throw new DocumentationPersistenceException(errorMessage);
             }
             GenericArtifact artifact = artifactManager.getGenericArtifact(docId);
+            if (artifact == null) {
+                String errorMessage = "Failed to retrieve documentation artifact for API " + apiId
+                        + " Document ID " + docId;
+                log.error(errorMessage);
+                throw new DocumentationPersistenceException(errorMessage, ExceptionCodes.DOCUMENT_NOT_FOUND);
+            }
             deleteDocumentationContent(registry, artifact);
             String docPath = artifact.getPath();
             if (docPath != null) {
