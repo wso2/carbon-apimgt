@@ -2969,11 +2969,19 @@ public class RegistryPersistenceImpl implements APIPersistence {
             }
             deleteDocumentationContent(registry, artifact, apiId, docId);
             String docPath = artifact.getPath();
-            if (docPath != null) {
-                if (registry.resourceExists(docPath)) {
-                    registry.delete(docPath);
-                }
+            if (docPath == null) {
+                String errorMessage = "Failed to retrieve path of documentation artifact for API " + apiId
+                        + " Document ID " + docId;
+                log.error(errorMessage);
+                throw new DocumentationPersistenceException(errorMessage);
             }
+            if (!registry.resourceExists(docPath)) {
+                String errorMessage = "Failed to retrieve documentation artifact for API " + apiId
+                        + " Document ID " + docId;
+                log.error(errorMessage);
+                throw new DocumentationPersistenceException(errorMessage, ExceptionCodes.DOCUMENT_NOT_FOUND);
+            }
+            registry.delete(docPath);
             registry.commitTransaction();
             transactionCommitted = true;
         } catch (RegistryException | APIPersistenceException e) {
