@@ -32,52 +32,161 @@ import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
- * This is a custom extension, written for a certain throttler.
- * Upon arrival of a request, looking at the key in the request, this throttler first decides whether to throttle the request or not.
- * If that decision is different to what it was for the previous request (with the same key),
- * then this processor emits this request as an event; hence the name emitOnStateChange.
+ * Custom Siddhi StreamProcessor used by the API-M Traffic Manager's throttle pipeline
+ * to de-duplicate outgoing GlobalThrottleStream events.
  * <p/>
- * If this request is the first request from a certain key, then that requested will be emitted out.
+ * Emission rules (unchanged from the original implementation):
+ * <ul>
+ *   <li>An event with {@code isThrottled = true} is <b>always</b> emitted, regardless of the
+ *       previous state. This keeps the downstream gateway's throttle cache warm for
+ *       currently-blocked keys.</li>
+ *   <li>An event with {@code isThrottled = false} is emitted only when the previous state
+ *       for that key was {@code true} (transition true -> false, i.e. un-throttle notification).</li>
+ *   <li>Repeated {@code false} events for the same key are dropped (dedup).</li>
+ *   <li>A brand-new key seen with {@code isThrottled = false} is dropped: the gateway
+ *       already treats absent keys as un-throttled, so the event would be a no-op.</li>
+ * </ul>
  * <p/>
- * This is useful when the throttler needs to alert only when the throttling decision is changed, in contrast to alerting about every decision taken.
+ * Memory-bounding: only currently-throttled keys are retained in {@code throttleStateMap}, and each
+ * entry has a configurable TTL. Once the TTL expires (or the key transitions back to un-throttled),
+ * the entry is removed. Keys that are not throttled are never stored. The gateway's downstream
+ * throttle cache ages out its own entries via {@code expiryTimeStamp}, so a Traffic Manager
+ * restart / eviction is safe.
+ * <p/>
+ * Concurrency:
+ * <ul>
+ *   <li>Per-key state transitions in {@link #process} use {@link ConcurrentHashMap#compute} so the
+ *       "check previous state, decide new value" step happens atomically inside the map's bin
+ *       lock. Two concurrent {@code process} invocations against the same key cannot lose or
+ *       stale-overwrite each other's updates.</li>
+ *   <li>{@code throttleStateMap} is {@code volatile}: {@link #restoreState} reassigns it to a new
+ *       instance, and readers on other threads must observe the swap immediately.</li>
+ *   <li>Expired-entry cleanup runs off the event-processing hot path on a daemon
+ *       {@link ScheduledExecutorService} started in {@link #start()} and shut down in
+ *       {@link #stop()}. Under high-cardinality traffic this keeps the O(n) map sweep from
+ *       introducing latency spikes on the thread dispatching events.</li>
+ * </ul>
+ * <p/>
+ * Timing uses {@link System#nanoTime()} exclusively for expiry and sweep decisions. This makes
+ * the map robust to wall-clock adjustments (NTP jumps, admin changes). The trade-off is that
+ * a snapshot taken in one JVM cannot be replayed literally into another, because {@code nanoTime}
+ * is per-JVM. {@link #restoreState(Object[])} therefore treats restored entries as
+ * "recently throttled" and reassigns them a fresh TTL.
+ * <p/>
+ * TTL is set via the system property {@code siddhi.throttle.state.ttl.minutes} (default: 24 hours).
+ * The default covers every batch window shape APIM ships (per-minute, per-hour, per-day quotas)
+ * with headroom, so a key throttled at the very start of any window is guaranteed to still be in
+ * the map when the next window's traffic arrives. Operators can lower it for extreme-cardinality
+ * traffic where a tighter memory ceiling matters more than covering the longest windows.
  * <p/>
  * Usage:
+ * <pre>
  * throttler:emitOnStateChange(key, isThrottled)
- * <p/>
- * Parameters:
- * key: The key coming in the request, based on which throttling decision was made.
- * isThrottled: The throttling decision made.
- * <p/>
- * Example on usage:
+ * </pre>
+ * <ul>
+ *   <li>{@code key}: throttle key evaluated by the enclosing query.</li>
+ *   <li>{@code isThrottled}: throttle decision made by the enclosing query.</li>
+ * </ul>
+ * Example:
+ * <pre>
  * from DecisionStream#throttler:emitOnStateChange(key, isThrottled)
  * select *
  * insert into AlertStream;
+ * </pre>
  */
 public class EmitOnStateChange extends StreamProcessor {
+
+    private static final String TTL_SYSTEM_PROPERTY = "siddhi.throttle.state.ttl.minutes";
+    // 24 hours -- comfortably above the longest batch window shape APIM supports (daily quotas),
+    // while still keeping the map memory-bounded. Operators can shrink it via the system property
+    // if extreme-cardinality traffic warrants a tighter ceiling.
+    private static final long DEFAULT_TTL_MINUTES = 24L * 60L;
+    private static final long SWEEP_INTERVAL_SECONDS = 60L;
+
     private VariableExpressionExecutor keyExpressionExecutor;
     private VariableExpressionExecutor isThrottledExpressionExecutor;
-    private Map<String, Boolean> throttleStateMap = new HashMap<String, Boolean>();
+
+    // Map value = absolute expiry deadline expressed in System.nanoTime() units.
+    // Presence with an unexpired value == "was throttled recently".
+    // Absence or expired == "was not throttled" (treated identically).
+    // volatile: restoreState() reassigns this field to a new map; readers must observe the swap.
+    private volatile ConcurrentHashMap<String, Long> throttleStateMap = new ConcurrentHashMap<String, Long>();
+
+    private final long ttlNanos = resolveTtlNanos();
+
+    // Daemon-thread scheduler that runs the expired-entry sweep off the event hot path.
+    private volatile ScheduledExecutorService sweepExecutor;
 
     @Override
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
                            StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater) {
+        final long nowNanos = System.nanoTime();
         while (streamEventChunk.hasNext()) {
             StreamEvent event = streamEventChunk.next();
             Boolean currentThrottleState = (Boolean) isThrottledExpressionExecutor.execute(event);
             String key = (String) keyExpressionExecutor.execute(event);
-            Boolean lastThrottleState = throttleStateMap.get(key);
-            if (lastThrottleState == currentThrottleState && !currentThrottleState) {
+            final boolean isThrottledNow = Boolean.TRUE.equals(currentThrottleState);
+
+            // Atomically inspect the previous state and set the new one, so a concurrent
+            // put/remove for the same key cannot interleave.
+            //   - previous entry present & unexpired -> "was throttled"
+            //   - isThrottledNow == true             -> refresh expiry (keep in map)
+            //   - isThrottledNow == false            -> drop from map (remove or stay absent)
+            final boolean[] wasThrottled = { false };
+            throttleStateMap.compute(key, (k, existingExpiry) -> {
+                if (existingExpiry != null && nowNanos - existingExpiry <= 0) {
+                    wasThrottled[0] = true;
+                }
+                if (isThrottledNow) {
+                    return nowNanos + ttlNanos;
+                }
+                return null;
+            });
+
+            // Drop only when both prior and current state are "not throttled".
+            if (!isThrottledNow && !wasThrottled[0]) {
                 streamEventChunk.remove();
-            } else {
-                throttleStateMap.put(key, currentThrottleState);
             }
         }
+
         nextProcessor.process(streamEventChunk);
+    }
+
+    private void sweepExpired() {
+        long nowNanos = System.nanoTime();
+        Iterator<Map.Entry<String, Long>> it = throttleStateMap.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<String, Long> entry = it.next();
+            // Subtraction handles the theoretical wraparound of nanoTime cleanly.
+            if (nowNanos - entry.getValue() > 0) {
+                it.remove();
+            }
+        }
+    }
+
+    private static long resolveTtlNanos() {
+        long minutes = DEFAULT_TTL_MINUTES;
+        String raw = System.getProperty(TTL_SYSTEM_PROPERTY);
+        if (raw != null && !raw.isEmpty()) {
+            try {
+                long parsed = Long.parseLong(raw.trim());
+                if (parsed > 0) {
+                    minutes = parsed;
+                }
+            } catch (NumberFormatException ignored) {
+                // fall through to default
+            }
+        }
+        return minutes * 60L * 1000L * 1000L * 1000L;
     }
 
     @Override
@@ -108,12 +217,24 @@ public class EmitOnStateChange extends StreamProcessor {
 
     @Override
     public void start() {
-        //Nothing to do.
+        if (sweepExecutor == null) {
+            sweepExecutor = Executors.newSingleThreadScheduledExecutor(runnable -> {
+                Thread t = new Thread(runnable, "throttle-state-sweeper");
+                t.setDaemon(true);
+                return t;
+            });
+            sweepExecutor.scheduleAtFixedRate(this::sweepExpired,
+                    SWEEP_INTERVAL_SECONDS, SWEEP_INTERVAL_SECONDS, TimeUnit.SECONDS);
+        }
     }
 
     @Override
     public void stop() {
-        //Nothing to do.
+        ScheduledExecutorService current = sweepExecutor;
+        sweepExecutor = null;
+        if (current != null) {
+            current.shutdownNow();
+        }
     }
 
     @Override
@@ -122,7 +243,27 @@ public class EmitOnStateChange extends StreamProcessor {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void restoreState(Object[] state) {
-        throttleStateMap = (HashMap<String, Boolean>) state[0];
+        Object stored = state[0];
+        ConcurrentHashMap<String, Long> replacement = new ConcurrentHashMap<String, Long>();
+        if (stored instanceof Map) {
+            Map<String, ?> snapshot = (Map<String, ?>) stored;
+            // Snapshot values are opaque here: they may be nanoTime deadlines from this same JVM,
+            // legacy millis-based values from an earlier build of this extension, or Boolean flags
+            // from the pre-fix HashMap<String, Boolean> shape. Since nanoTime is per-JVM (not
+            // portable across restarts or HA failover), treat every restored key as "recently
+            // throttled" and reassign a fresh TTL. Legacy FALSE entries are dropped because in
+            // the new model they are equivalent to "not in map".
+            long freshDeadlineNanos = System.nanoTime() + ttlNanos;
+            for (Map.Entry<String, ?> entry : snapshot.entrySet()) {
+                Object v = entry.getValue();
+                if (Boolean.FALSE.equals(v)) {
+                    continue;
+                }
+                replacement.put(entry.getKey(), freshDeadlineNanos);
+            }
+        }
+        throttleStateMap = replacement;
     }
 }
