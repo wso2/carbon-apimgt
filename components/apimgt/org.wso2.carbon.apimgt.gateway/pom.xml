@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>9.33.159-SNAPSHOT</version>
+        <version>9.33.164-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -345,6 +345,10 @@
         <dependency>
             <groupId>org.wso2.carbon.mcp.transformer</groupId>
             <artifactId>mcp-transformer-java</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.azure.resourcemanager</groupId>
+            <artifactId>azure-resourcemanager-apimanagement</artifactId>
         </dependency>
     </dependencies>
 
