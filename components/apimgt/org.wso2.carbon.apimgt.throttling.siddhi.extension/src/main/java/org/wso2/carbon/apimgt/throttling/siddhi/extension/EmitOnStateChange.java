@@ -166,9 +166,14 @@ public class EmitOnStateChange extends StreamProcessor {
         Iterator<Map.Entry<String, Long>> it = throttleStateMap.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<String, Long> entry = it.next();
+            Long expiryAtSweep = entry.getValue();
             // Subtraction handles the theoretical wraparound of nanoTime cleanly.
-            if (nowNanos - entry.getValue() > 0) {
-                it.remove();
+            if (nowNanos - expiryAtSweep > 0) {
+                // Conditional remove: if process() has refreshed the entry between our read of
+                // entry.getValue() and this call, the stored value no longer matches expiryAtSweep
+                // and the remove is a no-op, preserving the refreshed (still-live) state.
+                // Iterator.remove() would delete unconditionally by key.
+                throttleStateMap.remove(entry.getKey(), expiryAtSweep);
             }
         }
     }
