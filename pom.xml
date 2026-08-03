@@ -1827,6 +1827,16 @@
                 <version>${org.wso2.orbit.com.amazonaws.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.wso2.orbit.com.google.auth-library-oauth2-http</groupId>
+                <artifactId>google-auth-library-oauth2-http</artifactId>
+                <version>${google.auth.library.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.com.google.http-client</groupId>
+                <artifactId>google-http-client</artifactId>
+                <version>${google.http.client.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.wso2.orbit.io.jaeger</groupId>
                 <artifactId>jaeger-client-jdk21</artifactId>
                 <version>${jaeger.client.version}</version>
@@ -2101,7 +2111,10 @@
         <carbon.analytics.common.version>5.4.9</carbon.analytics.common.version>
 
         <!-- Carbon kernel version -->
-        <carbon.kernel.version>4.11.17</carbon.kernel.version>
+        <!-- NOTE: bumped for the CryptoUtil.encryptAndBase64EncodeLargeData / base64DecodeAndDecryptLargeData
+             additions (any-size secret encryption, used by the Vertex AI GCP service-account key). This must
+             point to the carbon-kernel build that carries those methods; adjust to the actual released version. -->
+        <carbon.kernel.version>4.11.20-SNAPSHOT</carbon.kernel.version>
         <carbon.kernel.feature.version>${carbon.kernel.version}</carbon.kernel.feature.version>
         <carbon.kernel.package.import.version.range>[4.5.0, 5.0.0)</carbon.kernel.package.import.version.range>
 
@@ -2337,6 +2350,10 @@
         <import.package.version.commons.codec>[1.14.0,3.0.0)</import.package.version.commons.codec>
 
         <org.wso2.orbit.com.amazonaws.version>2.30.22.wso2v3</org.wso2.orbit.com.amazonaws.version>
+        <!-- Google auth (Vertex AI backend OAuth2), backed by the WSO2 orbit-wrapped bundle. -->
+        <google.auth.library.version>1.49.0.wso2v1</google.auth.library.version>
+        <google.http.client.version>2.1.1.wso2v1</google.http.client.version>
+        <google.auth.library.import.version.range>[1.0.0, 2.0.0)</google.auth.library.import.version.range>
         <org.wso2.orbit.com.amazonaws.version.range>[2.20, 2.50]</org.wso2.orbit.com.amazonaws.version.range>
 
         <zipkin.version>2.27.1</zipkin.version>
