@@ -114,6 +114,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -972,6 +973,22 @@ public class OASParserUtil {
      */
     public static APIDefinitionValidationResponse extractAndValidateOpenAPIArchive(InputStream inputStream,
             boolean returnContent, OASParserOptions oasParserOptions) throws APIManagementException {
+        return extractAndValidateOpenAPIArchive(inputStream, returnContent, oasParserOptions, null);
+    }
+
+    /**
+     * Extract the archive file and validates the openAPI definition.
+     *
+     * @param inputStream       file as input stream
+     * @param returnContent     whether to return the content of the definition in the response DTO
+     * @param oasParserOptions  optional OpenAPI parser options; may be {@code null} to use defaults
+     * @param maxContentSizeStr per-file size limit (in MB); may be {@code null} to use the default
+     * @return APIDefinitionValidationResponse
+     * @throws APIManagementException if error occurred while parsing definition
+     */
+    public static APIDefinitionValidationResponse extractAndValidateOpenAPIArchive(InputStream inputStream,
+            boolean returnContent, OASParserOptions oasParserOptions, String maxContentSizeStr)
+            throws APIManagementException {
         String path = System.getProperty(APISpecParserConstants.JAVA_IO_TMPDIR) + File.separator +
                 APISpecParserConstants.OPENAPI_ARCHIVES_TEMP_FOLDER + File.separator + UUID.randomUUID().toString();
         String archivePath = path + File.separator + APISpecParserConstants.OPENAPI_ARCHIVE_ZIP_FILE;
@@ -1009,7 +1026,7 @@ public class OASParserUtil {
         String filePath = masterSwagger.getAbsolutePath();
         // Gate remote (http/https) $refs in the archive through the policy gate before parsing with resolution
         // enabled, so the parser can't fetch them without host validation; local/relative sibling refs are untouched.
-        gateArchiveRemoteRefs(archiveDirectory, oasParserOptions);
+        gateArchiveRemoteRefs(archiveDirectory, oasParserOptions, maxContentSizeStr);
         if (SwaggerVersion.OPEN_API.equals(version)) {
             OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
             ParseOptions options = new ParseOptions();
@@ -1280,7 +1297,7 @@ public class OASParserUtil {
      *         permitted by the policy or a local ref escapes the archive
      */
     private static void gateArchiveRemoteRefs(File archiveDirectory,
-            OASParserOptions oasParserOptions) throws APIManagementException {
+            OASParserOptions oasParserOptions, String maxContentSizeStr) throws APIManagementException {
         // A network access-control policy gates remote (http/https) refs; when none is configured those resolve as
         // before (backwards compatibility). Local-reference containment is enforced regardless, since a ref that
         // escapes the archive (via ../ or file:) could read arbitrary local files during resolution.
@@ -1296,11 +1313,11 @@ public class OASParserUtil {
             throw new APIManagementException("Could not resolve the OpenAPI archive directory for reference "
                     + "containment validation.", e);
         }
-        // Same per-file size cap the URL-fetch path applies (in MB). A ref-bearing document is small text; a larger
-        // entry cannot be scanned, so fail closed and reject the archive rather than letting the parser resolve an
-        // unscanned file's references.
-        long maxFileSize = Long.parseLong(APIConstants.API_PUBLISHER_IMPORT_OAS_FILE_SIZE_LIMIT_DEFAULT_MB)
-                * 1024L * 1024L;
+        // Reject archive entries larger than the configured size cap; they cannot be safely scanned.
+        String effectiveLimit = (maxContentSizeStr != null && !maxContentSizeStr.trim().isEmpty())
+                ? maxContentSizeStr.trim()
+                : APIConstants.API_PUBLISHER_IMPORT_OAS_FILE_SIZE_LIMIT_DEFAULT_MB;
+        long maxFileSize = Long.parseLong(effectiveLimit) * 1024L * 1024L;
         for (File file : FileUtils.listFiles(archiveDirectory, null, true)) {
             if (file.length() > maxFileSize) {
                 if (log.isDebugEnabled()) {
@@ -1360,7 +1377,7 @@ public class OASParserUtil {
         }
         // A file: reference or an absolute path is never a legitimate archive-relative reference; it points the
         // resolver at an absolute local path.
-        if (pathPart.toLowerCase().startsWith("file:") || pathPart.startsWith("/") || pathPart.startsWith("\\")
+        if (pathPart.toLowerCase(Locale.ROOT).startsWith("file:") || pathPart.startsWith("/") || pathPart.startsWith("\\")
                 || pathPart.matches("^[a-zA-Z]:[\\\\/].*")) {
             if (log.isDebugEnabled()) {
                 log.debug("Rejecting OpenAPI archive with an absolute/file: reference: " + ref);
