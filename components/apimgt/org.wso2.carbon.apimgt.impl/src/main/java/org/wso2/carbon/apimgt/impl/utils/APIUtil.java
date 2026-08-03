@@ -12488,6 +12488,24 @@ public final class APIUtil {
             return;
         }
 
+        // JMS and Consul endpoint URLs are not resolvable hosts and are validated elsewhere; skip them.
+        if (url.startsWith("jms:") || url.startsWith("consul(")) {
+            return;
+        }
+
+        // A parameterized (templated) host cannot be resolved, so skip it; a concrete host is still validated
+        // even when only the path/query is parameterized.
+        String host = null;
+        if (url.contains("{") || url.contains("}")) {
+            host = extractConcreteHost(url);
+            if (host == null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("URL validation skipped - parameterized host: " + url);
+                }
+                return;
+            }
+        }
+
         JSONObject tenantConfig = getTenantConfig(tenantDomain);
         JSONObject tenantAccessControl = null;
         if (tenantConfig != null) {
@@ -12500,16 +12518,17 @@ public final class APIUtil {
             return;
         }
 
-        String host;
-        try {
-            host = new URI(url).getHost();
-            if (StringUtils.isBlank(host)) {
-                throw new APIManagementException("Could not extract a valid host from the provided URL: " + url,
+        if (host == null) {
+            try {
+                host = new URI(url).getHost();
+                if (StringUtils.isBlank(host)) {
+                    throw new APIManagementException("Could not extract a valid host from the provided URL: " + url,
+                            ExceptionCodes.MALFORMED_URL);
+                }
+            } catch (URISyntaxException e) {
+                throw new APIManagementException("The provided URL is malformed: " + url,
                         ExceptionCodes.MALFORMED_URL);
             }
-        } catch (URISyntaxException e) {
-            throw new APIManagementException("The provided URL is malformed: " + url,
-                    ExceptionCodes.MALFORMED_URL);
         }
 
         if (networkSecurityEnabled) {
@@ -12533,6 +12552,39 @@ public final class APIUtil {
                 }
             }
             applyAccessControlPolicy(host, tenantMode, tenantHosts, tenantBlockPrivate);
+        }
+    }
+
+    /**
+     * Extracts the concrete host from a parameterized URL, ignoring a parameterized path or query. Returns
+     * {@code null} when the host (authority) is itself parameterized and therefore not resolvable.
+     *
+     * @param url the URL, which may contain '{'/'}' template markers
+     * @return the concrete host, or {@code null} if it cannot be determined
+     */
+    private static String extractConcreteHost(String url) {
+        int schemeSeparator = url.indexOf("://");
+        if (schemeSeparator < 0) {
+            return null;
+        }
+        int authorityEnd = url.length();
+        for (int i = schemeSeparator + 3; i < url.length(); i++) {
+            char c = url.charAt(i);
+            if (c == '/' || c == '?' || c == '#') {
+                authorityEnd = i;
+                break;
+            }
+        }
+        String authority = url.substring(schemeSeparator + 3, authorityEnd);
+        if (authority.isEmpty() || authority.contains("{") || authority.contains("}")) {
+            return null;
+        }
+        try {
+            // Parse only scheme://authority so a parameterized path/query does not break host resolution.
+            String host = new URI(url.substring(0, authorityEnd)).getHost();
+            return StringUtils.isBlank(host) ? null : host;
+        } catch (URISyntaxException e) {
+            return null;
         }
     }
 
@@ -12697,8 +12749,12 @@ public final class APIUtil {
                 org.json.JSONArray endpointArray = endpointConfigObj.optJSONArray(endpointType);
                 if (endpointArray != null) {
                     for (int i = 0; i < endpointArray.length(); i++) {
-                        String url = endpointArray.getJSONObject(i)
-                                .optString(APIConstants.API_DATA_URL, null);
+                        org.json.JSONObject endpointEntry = endpointArray.optJSONObject(i);
+                        if (endpointEntry == null) {
+                            // Skip malformed (non-object) entries instead of failing the request.
+                            continue;
+                        }
+                        String url = endpointEntry.optString(APIConstants.API_DATA_URL, null);
                         if (StringUtils.isNotBlank(url)) {
                             endpoints.add(url);
                         }

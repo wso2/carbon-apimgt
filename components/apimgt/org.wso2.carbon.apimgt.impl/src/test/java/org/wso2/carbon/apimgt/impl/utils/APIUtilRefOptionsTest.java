@@ -252,6 +252,60 @@ public class APIUtilRefOptionsTest {
         assertSameElements(Arrays.asList("*"), out.getRemoteRefBlockList());
     }
 
+    @Test
+    public void testValidateRemoteURLSkipsParameterizedEndpointWhenPolicyEnabled() throws Exception {
+        // A parameterized backend endpoint template (resolved to a concrete host later at the gateway) must not be
+        // rejected as malformed when the network access-control policy is enabled — mirroring validateEndpointURL.
+        PowerMockito.spy(APIUtil.class);
+        PowerMockito.doReturn(null).when(APIUtil.class, "getTenantConfig", TENANT);
+        setPlatform(true, "deny", java.util.Collections.<String>emptyList());
+
+        // No APIManagementException expected for any of these.
+        APIUtil.validateRemoteURL("http://{uri.var.host}:{uri.var.port}/context", TENANT);
+        APIUtil.validateRemoteURL("https://{tenant}.example.com/api", TENANT);
+        APIUtil.validateRemoteURL("jms:/queue?transport.jms.ConnectionFactoryJNDIName=QueueConnectionFactory", TENANT);
+        APIUtil.validateRemoteURL("consul(http://127.0.0.1:8500 dc1.myService)", TENANT);
+    }
+
+    @Test
+    public void testValidateRemoteURLBlocksConcreteHostWithParameterizedPath() throws Exception {
+        // A concrete, resolvable host must still be validated when only the path/query is parameterized;
+        // a parameterized host itself remains exempt.
+        PowerMockito.spy(APIUtil.class);
+        PowerMockito.doReturn(null).when(APIUtil.class, "getTenantConfig", TENANT);
+        Whitebox.setInternalState(APIUtil.class, "networkSecurityEnabled", true);
+        Whitebox.setInternalState(APIUtil.class, "networkSecurityMode", "deny");
+        Whitebox.setInternalState(APIUtil.class, "networkSecurityHosts", java.util.Collections.<String>emptyList());
+        Whitebox.setInternalState(APIUtil.class, "networkSecurityBlockPrivateAccess", true);
+
+        try {
+            APIUtil.validateRemoteURL("http://127.0.0.1/{resource}", TENANT);
+            Assert.fail("A private host must be blocked even when the path is parameterized");
+        } catch (APIManagementException e) {
+            // expected: the concrete loopback host is blocked by the private-network check
+        }
+        // A parameterized host is not resolvable and stays exempt.
+        APIUtil.validateRemoteURL("http://{uri.var.host}/{resource}", TENANT);
+    }
+
+    @Test
+    public void testExtractURLsFromEndpointConfigSkipsNonObjectArrayElements() throws Exception {
+        // A malformed endpoint config with a non-object array element must be skipped, not throw an unchecked
+        // JSONException that surfaces as HTTP 500.
+        org.json.JSONArray prod = new org.json.JSONArray();
+        prod.put("http://bare-string.example.com/api");   // non-object element (must be skipped)
+        org.json.JSONObject valid = new org.json.JSONObject();
+        valid.put(APIConstants.API_DATA_URL, "http://valid.example.com/api");
+        prod.put(valid);                                  // valid object element
+        org.json.JSONObject endpointConfig = new org.json.JSONObject();
+        endpointConfig.put(APIConstants.API_DATA_PRODUCTION_ENDPOINTS, prod);
+
+        java.util.ArrayList<String> endpoints = new java.util.ArrayList<>();
+        APIUtil.extractURLsFromEndpointConfig(endpointConfig, APIConstants.API_DATA_PRODUCTION_ENDPOINTS, endpoints);
+
+        Assert.assertEquals(java.util.Collections.singletonList("http://valid.example.com/api"), endpoints);
+    }
+
     private static void setPlatform(boolean enabled, String mode, java.util.List<String> hosts) {
         Whitebox.setInternalState(APIUtil.class, "networkSecurityEnabled", enabled);
         Whitebox.setInternalState(APIUtil.class, "networkSecurityMode", mode);

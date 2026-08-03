@@ -664,17 +664,18 @@ public class ApisApiServiceImplUtils {
                 .getAPIMDependencyConfigurationService().getAPIMDependencyConfigurations().getOasParserOptions();
         OASParserOptions parserOptions = APIUtil.buildRefResolutionOptions(baseParserOptions,
                 CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+        // Resolve the configured import size limit once so all validation paths honor it.
+        String maxContentSizeStr = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getFirstProperty(
+                        org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_OAS_FILE_SIZE_LIMIT);
+        if (maxContentSizeStr == null || maxContentSizeStr.trim().isEmpty()) {
+            maxContentSizeStr = org.wso2.carbon.apimgt.api.
+                    APIConstants.API_PUBLISHER_IMPORT_OAS_FILE_SIZE_LIMIT_DEFAULT_MB;
+        }
         if (url != null) {
             try {
                 URL urlObj = new URL(url);
                 HttpClient httpClient = APIUtil.getHttpClient(urlObj.getPort(), urlObj.getProtocol());
-                String maxContentSizeStr = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                        .getAPIManagerConfiguration().getFirstProperty(
-                                org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_OAS_FILE_SIZE_LIMIT);
-                if (maxContentSizeStr == null || maxContentSizeStr.trim().isEmpty()) {
-                    maxContentSizeStr = org.wso2.carbon.apimgt.api.
-                            APIConstants.API_PUBLISHER_IMPORT_OAS_FILE_SIZE_LIMIT_DEFAULT_MB;
-                }
                 validationResponse = OASParserUtil.validateAPIDefinitionByURL(url, httpClient, returnContent,
                         parserOptions, maxContentSizeStr);
             } catch (MalformedURLException e) {
@@ -685,7 +686,7 @@ public class ApisApiServiceImplUtils {
                 if (fileName != null) {
                     if (fileName.endsWith(".zip")) {
                         validationResponse = OASParserUtil.extractAndValidateOpenAPIArchive(inputStream, returnContent,
-                                parserOptions);
+                                parserOptions, maxContentSizeStr);
                     } else {
                         String openAPIContent = IOUtils.toString(inputStream, CHARSET);
                         validationResponse = OASParserUtil.validateAPIDefinition(openAPIContent, returnContent,

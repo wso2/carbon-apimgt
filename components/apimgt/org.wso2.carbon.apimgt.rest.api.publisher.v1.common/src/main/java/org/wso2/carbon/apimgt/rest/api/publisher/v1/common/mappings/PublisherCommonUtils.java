@@ -2755,9 +2755,30 @@ public class PublisherCommonUtils {
                             errorHandler);
                 }
             } else {
-                org.json.JSONArray endpointArray = endpointConfigObj.getJSONArray(endpointType);
-                for (int i = 0; i < endpointArray.length(); i++) {
-                    endpoints.add((String) endpointArray.getJSONObject(i).get(APIConstants.API_DATA_URL));
+                org.json.JSONArray endpointArray = endpointConfigObj.optJSONArray(endpointType);
+                if (endpointArray != null && endpointArray.length() > 0) {
+                    boolean urlFound = false;
+                    for (int i = 0; i < endpointArray.length(); i++) {
+                        // Skip malformed (non-object) entries instead of failing the request.
+                        org.json.JSONObject endpointEntry = endpointArray.optJSONObject(i);
+                        if (endpointEntry == null) {
+                            continue;
+                        }
+                        String url = endpointEntry.optString(APIConstants.API_DATA_URL, null);
+                        if (StringUtils.isNotBlank(url)) {
+                            endpoints.add(url);
+                            urlFound = true;
+                        }
+                    }
+                    if (!urlFound) {
+                        // A populated endpoint array with no usable URL is a client error for this endpoint type.
+                        ErrorHandler errorHandler = ExceptionCodes.from(ExceptionCodes.ENDPOINT_URL_NOT_PROVIDED,
+                                endpointType);
+                        throw new APIManagementException(
+                                "Url is not provided for the endpoint type: " + endpointType + " in the endpoint " +
+                                        "config",
+                                errorHandler);
+                    }
                 }
             }
         }
