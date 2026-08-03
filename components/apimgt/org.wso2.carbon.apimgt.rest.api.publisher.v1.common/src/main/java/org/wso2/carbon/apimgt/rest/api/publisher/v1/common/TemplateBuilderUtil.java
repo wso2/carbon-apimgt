@@ -74,6 +74,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
 import org.wso2.carbon.apimgt.spec.parser.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
+import org.wso2.carbon.core.util.CryptoException;
+import org.wso2.carbon.core.util.CryptoUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -1198,14 +1200,36 @@ public class TemplateBuilderUtil {
      * @param endpoints The list of endpoints to simplify
      * @return A list of simplified endpoint DTOs
      */
-    public static List<SimplifiedEndpoint> simplifyEndpoints(List<EndpointDTO> endpoints) {
+    public static List<SimplifiedEndpoint> simplifyEndpoints(List<EndpointDTO> endpoints)
+            throws APIManagementException {
 
         if (endpoints == null || endpoints.isEmpty()) {
             return new ArrayList<>();
         }
-        return endpoints.stream()
+        List<SimplifiedEndpoint> simplifiedEndpoints = endpoints.stream()
                 .map(SimplifiedEndpoint::new)
                 .collect(Collectors.toList());
+        // Last-mile decrypt for the gateway: the GCP service-account key is encrypted at rest, so decrypt it here
+        // so GCPOAuth2TokenInjector receives usable service-account JSON. base64DecodeAndDecryptLargeData routes
+        // on the storage format (single-shot or chunked); the guard lets plaintext/already-decrypted values pass
+        // through unchanged.
+        CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+        for (SimplifiedEndpoint simplifiedEndpoint : simplifiedEndpoints) {
+            String serviceAccountKey = simplifiedEndpoint.getServiceAccountKey();
+            if (StringUtils.isNotEmpty(serviceAccountKey)) {
+                try {
+                    if (cryptoUtil.isChunkedCipherText(serviceAccountKey)
+                            || cryptoUtil.base64DecodeAndIsSelfContainedCipherText(serviceAccountKey)) {
+                        simplifiedEndpoint.setServiceAccountKey(
+                                new String(cryptoUtil.base64DecodeAndDecryptLargeData(serviceAccountKey)));
+                    }
+                } catch (CryptoException e) {
+                    throw new APIManagementException("Error while decrypting the GCP service-account key for "
+                            + "endpoint " + simplifiedEndpoint.getEndpointName(), e);
+                }
+            }
+        }
+        return simplifiedEndpoints;
     }
 
     private static void addWebsocketTopicMappings(API api, APIDTO apidto) {

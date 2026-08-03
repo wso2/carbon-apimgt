@@ -313,6 +313,15 @@
             <groupId>org.wso2.orbit.software.amazon.awssdk</groupId>
             <artifactId>aws-core</artifactId>
         </dependency>
+        <!--
+            Google service-account OAuth2 (JWT Bearer assertion grant) support for Vertex AI backends,
+            backed by the WSO2 orbit-wrapped bundle (org.wso2.orbit.com.google.auth-library-oauth2-http)
+            exposing com.google.auth.oauth2.*, mirroring how the AWS SDK is packaged above.
+        -->
+        <dependency>
+            <groupId>org.wso2.orbit.com.google.auth-library-oauth2-http</groupId>
+            <artifactId>google-auth-library-oauth2-http</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.jedis</artifactId>
@@ -517,6 +526,7 @@
                             software.amazon.awssdk.core.*; version="${org.wso2.orbit.com.amazonaws.version.range}"; resolution:=optional,
                             software.amazon.awssdk.awscore.*; version="${org.wso2.orbit.com.amazonaws.version.range}"; resolution:=optional,
                             software.amazon.awssdk.retries.*; version="${org.wso2.orbit.com.amazonaws.version.range}"; resolution:=optional,
+                            com.google.auth.*; version="${google.auth.library.import.version.range}"; resolution:=optional,
                             org.apache.servicemix.bundles.jedis.*; version="${servicemix.bundles.jedis.version}",
                             com.nimbusds.jwt.*,
                             org.apache.commons.codec.*,

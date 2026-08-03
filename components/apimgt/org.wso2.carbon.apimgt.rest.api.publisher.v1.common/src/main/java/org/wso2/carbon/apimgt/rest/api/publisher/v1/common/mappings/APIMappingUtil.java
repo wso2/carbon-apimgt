@@ -1762,6 +1762,14 @@ public class APIMappingUtil {
                                         new String(cryptoUtil.base64DecodeAndDecrypt(awsSecretKey)));
                             }
                         }
+                        if (APIConstants.ENDPOINT_SECURITY_TYPE_GCP.equals(productionEndpointType)) {
+                            String serviceAccountKey = (String) productionEndpointSecurity.get(
+                                    APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY);
+                            if (StringUtils.isNotEmpty(serviceAccountKey)) {
+                                productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY,
+                                        new String(cryptoUtil.base64DecodeAndDecryptLargeData(serviceAccountKey)));
+                            }
+                        }
                         endpointSecurity.put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION,
                                 productionEndpointSecurity);
                         endpointConfigJson.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
@@ -1808,6 +1816,14 @@ public class APIMappingUtil {
                             if (StringUtils.isNotEmpty(awsSecretKey)) {
                                 sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY,
                                         new String(cryptoUtil.base64DecodeAndDecrypt(awsSecretKey)));
+                            }
+                        }
+                        if (APIConstants.ENDPOINT_SECURITY_TYPE_GCP.equals(sandboxEndpointType)) {
+                            String serviceAccountKey = (String) sandboxEndpointSecurity
+                                    .get(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY);
+                            if (StringUtils.isNotEmpty(serviceAccountKey)) {
+                                sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY,
+                                        new String(cryptoUtil.base64DecodeAndDecryptLargeData(serviceAccountKey)));
                             }
                         }
                         endpointSecurity.put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX,
@@ -4866,6 +4882,10 @@ public class APIMappingUtil {
                 if (sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY) != null) {
                     sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY, StringUtils.EMPTY);
                 }
+                if (sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY) != null) {
+                    sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY,
+                            StringUtils.EMPTY);
+                }
                 Object customParamsObj =
                         sandboxEndpointSecurity.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
                 if (customParamsObj != null) {
@@ -4895,6 +4915,10 @@ public class APIMappingUtil {
                 }
                 if (productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY) != null) {
                     productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY, StringUtils.EMPTY);
+                }
+                if (productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY) != null) {
+                    productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY,
+                            StringUtils.EMPTY);
                 }
                 Object customParamsObj =
                         productionEndpointSecurity.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
@@ -4999,6 +5023,12 @@ public class APIMappingUtil {
             if (StringUtils.isNotEmpty(awsSecretKeyValue)) {
                 deploymentStage.put(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY,
                         new String(cryptoUtil.base64DecodeAndDecrypt(awsSecretKeyValue)));
+            }
+            String gcpServiceAccountKeyValue =
+                    (String) deploymentStage.get(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY);
+            if (StringUtils.isNotEmpty(gcpServiceAccountKeyValue)) {
+                deploymentStage.put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY,
+                        new String(cryptoUtil.base64DecodeAndDecryptLargeData(gcpServiceAccountKeyValue)));
             }
 
             // In the API/MCP retrieval path, custom parameters are stored as a String.

@@ -531,6 +531,8 @@ public final class APIConstants {
     public static final String HASHING = "Hashing";
     public static final String HASGING_ALGORITHM= "HashingAlgorithm";
     public static final String ENDPOINT_SECURITY_AWS_SECRET_KEY = "secretKey";
+    public static final String ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY =
+            org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants.GCP_SERVICE_ACCOUNT_KEY;
     public static final String DEVPORTAL_MODE_HYBRID = "HYBRID";
     public static final String DEVPORTAL_MODE_MCP_ONLY = "MCP_ONLY";
     public static final String DEVPORTAL_MODE_API_ONLY = "API_ONLY";
@@ -2163,6 +2165,8 @@ public final class APIConstants {
     public static final String ENDPOINT_SECURITY_TYPE_API_KEY = "apikey";
     public static final String ENDPOINT_SECURITY_TYPE_AWS =
             org.wso2.carbon.apimgt.api.APIConstants.ENDPOINT_SECURITY_TYPE_AWS;
+    public static final String ENDPOINT_SECURITY_TYPE_GCP =
+            org.wso2.carbon.apimgt.api.APIConstants.ENDPOINT_SECURITY_TYPE_GCP;
     public static final String ENDPOINT_SECURITY_TYPE_UMI =
             org.wso2.carbon.apimgt.api.APIConstants.ENDPOINT_SECURITY_TYPE_UMI;
     public static final String ENDPOINT_SECURITY_API_KEY_IDENTIFIER = "apiKeyIdentifier";

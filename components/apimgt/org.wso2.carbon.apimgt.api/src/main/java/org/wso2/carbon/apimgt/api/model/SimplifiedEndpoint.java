@@ -33,6 +33,7 @@ public class SimplifiedEndpoint {
     private String secretKey;
     private String region;
     private String service;
+    private String serviceAccountKey;
     private String endpoint;
     private String deploymentStage;
     private static final String PRODUCTION = "PRODUCTION";
@@ -85,6 +86,7 @@ public class SimplifiedEndpoint {
             this.secretKey = endpointSecurity.getSecretKey();
             this.region = endpointSecurity.getRegion();
             this.service = endpointSecurity.getService();
+            this.serviceAccountKey = endpointSecurity.getServiceAccountKey();
             this.endpoint = endpointDetails.getUrl();
         }
     }
@@ -182,6 +184,14 @@ public class SimplifiedEndpoint {
 
     public void setService(String service) {
         this.service = service;
+    }
+
+    public String getServiceAccountKey() {
+        return serviceAccountKey;
+    }
+
+    public void setServiceAccountKey(String serviceAccountKey) {
+        this.serviceAccountKey = serviceAccountKey;
     }
 
     public String getEndpoint() {

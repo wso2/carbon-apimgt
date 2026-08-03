@@ -63,6 +63,7 @@ public class EndpointSecurityDTO {
     private String secretKey;
     private String region;
     private String service;
+    private String serviceAccountKey;
 
     public EndpointSecurityDTO(EndpointSecurityDTO endpointSecurity) {
 
@@ -85,6 +86,7 @@ public class EndpointSecurityDTO {
         this.secretKey = endpointSecurity.secretKey;
         this.region = endpointSecurity.region;
         this.service = endpointSecurity.service;
+        this.serviceAccountKey = endpointSecurity.serviceAccountKey;
     }
 
     public EndpointSecurityDTO() {
@@ -350,6 +352,14 @@ public class EndpointSecurityDTO {
 
     public void setService(String service) {
         this.service = service;
+    }
+
+    public String getServiceAccountKey() {
+        return serviceAccountKey;
+    }
+
+    public void setServiceAccountKey(String serviceAccountKey) {
+        this.serviceAccountKey = serviceAccountKey;
     }
 
     @Override
