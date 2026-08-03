@@ -32,12 +32,16 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.SynapseException;
 import org.apache.synapse.api.ApiUtils;
+import org.apache.synapse.api.dispatch.URITemplateHelper;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
+import org.wso2.carbon.apimgt.common.gateway.dto.ExtensionType;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.apimgt.gateway.handlers.ext.listener.ExtensionListenerUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -49,6 +53,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -75,7 +80,13 @@ public class WebhookApiHandler extends APIAuthenticationHandler {
     private static final Log log = LogFactory.getLog(WebhookApiHandler.class);
     private static final String EMPTY_STRING = "";
     private static final String TEXT_CONTENT_TYPE = "text/plain";
+    private static final String REST_API_CONTEXT_PROPERTY_KEY = "REST_API_CONTEXT";
+    private static final String SANITIZED_REST_API_CONTEXT_PROPERTY_KEY = "SANITIZED_API_CONTEXT";
+    private static final String WEBSUB_MATCHED_TOPIC = "WEBSUB_MATCHED_TOPIC";
+    private static final String WEBSUB_REQUESTED_TOPIC = "WEBSUB_REQUESTED_TOPIC";
+    private static final String WEBSUB_URL_PATTERNS = "WEBSUB_URL_PATTERNS";
 
+    private final String type = ExtensionType.WEBSUB_TOPIC_RESOLVER.toString();
     private String eventReceiverResourcePath = APIConstants.WebHookProperties.DEFAULT_SUBSCRIPTION_RESOURCE_PATH;
     private String topicQueryParamName = APIConstants.WebHookProperties.DEFAULT_TOPIC_QUERY_PARAM_NAME;
 
@@ -83,6 +94,12 @@ public class WebhookApiHandler extends APIAuthenticationHandler {
     public boolean handleRequest(MessageContext synCtx) {
 
         String requestSubPath = getRequestSubPath(synCtx);
+        String apiContext = (String) synCtx.getProperty(REST_API_CONTEXT_PROPERTY_KEY);
+        if (apiContext != null) {
+            String sanitizedApiContext = apiContext.replace("/", "__");
+            synCtx.setProperty(SANITIZED_REST_API_CONTEXT_PROPERTY_KEY, sanitizedApiContext);
+        }
+
         // all other requests are assumed to be for subscription as there will be only 2 resources for web hook api
         if (!requestSubPath.startsWith(eventReceiverResourcePath)) {
             HashMap<String, String> hubParameters = new HashMap<>();
@@ -102,65 +119,47 @@ public class WebhookApiHandler extends APIAuthenticationHandler {
             axisCtx.setProperty(HTTP_METHOD, APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
             synCtx.setProperty(APIConstants.Webhooks.SUBSCRIPTION_PARAMETER_PROPERTY, hubParameters);
             synCtx.setProperty(APIConstants.API_TYPE, APIConstants.API_TYPE_WEBSUB);
-            synCtx.setProperty(APIConstants.API_ELECTED_RESOURCE,
-                               hubParameters.get(APIConstants.WebHookProperties.DEFAULT_TOPIC_QUERY_PARAM_NAME));
+
+            String providedTopic = hubParameters.get(APIConstants.WebHookProperties.DEFAULT_TOPIC_QUERY_PARAM_NAME);
+            String electedResource = resolveElectedResource(synCtx, providedTopic);
+            if (electedResource == null) {
+                return false;
+            }
+            synCtx.setProperty(APIConstants.API_ELECTED_RESOURCE, electedResource);
             synCtx.setProperty(ASYNC_MESSAGE_TYPE, ASYNC_MESSAGE_TYPE_SUBSCRIBE);
             boolean authenticationResolved = super.handleRequest(synCtx);
             ((Axis2MessageContext) synCtx).getAxis2MessageContext().
                     setProperty(Constants.Configuration.HTTP_METHOD, httpVerb);
-            return authenticationResolved;
+            if (authenticationResolved) {
+                return ExtensionListenerUtil.postProcessRequest(synCtx, type);
+            }
+            return false;
         } else {
-            boolean isValidTopic = validateTopic(synCtx);
-            synCtx.setProperty(APIConstants.TOPIC_VALIDITY, String.valueOf(isValidTopic));
-            org.apache.axis2.context.MessageContext axisMsgContext = ((Axis2MessageContext) synCtx).
-                    getAxis2MessageContext();
-            try {
-                RelayUtils.buildMessage(axisMsgContext);
-                String payload;
-                String contentType = getContentType(axisMsgContext);
-                if (JsonUtil.hasAJsonPayload(axisMsgContext)) {
-                    payload = JsonUtil.jsonPayloadToString(axisMsgContext);
-                } else if (contentType != null && contentType.contains(TEXT_CONTENT_TYPE)) {
-                    payload = synCtx.getEnvelope().getBody().getFirstElement().getText();
-                } else {
-                    payload = synCtx.getEnvelope().getBody().getFirstElement().toString();
-                }
-                synCtx.setProperty(APIConstants.Webhooks.PAYLOAD_PROPERTY, payload);
-                String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(true);
-                synCtx.setProperty(APIConstants.TENANT_DOMAIN_INFO_PROPERTY, tenantDomain);
-                return true;
-            } catch (IOException | XMLStreamException e) {
-                log.error("Error while building the message", e);
+            String providedTopic = extractTopicFromQueryParams(synCtx);
+            if (providedTopic == null) {
+                synCtx.setProperty(APIConstants.TOPIC_VALIDITY, String.valueOf(false));
+                return handleEventReceiver(synCtx);
+            }
+
+            String matchedTopic = invokeExtensionListenerForTopicMatching(synCtx, providedTopic);
+            if (matchedTopic == null && isExtensionListenerAborted(synCtx)) {
                 return false;
             }
+
+            boolean isValidTopic;
+            if (matchedTopic != null) {
+                isValidTopic = true;
+            } else {
+                isValidTopic = validateTopic(synCtx, providedTopic);
+            }
+            synCtx.setProperty(APIConstants.TOPIC_VALIDITY, String.valueOf(isValidTopic));
+            return handleEventReceiver(synCtx);
         }
     }
 
-    public boolean validateTopic(MessageContext messageContext) {
+    public boolean validateTopic(MessageContext messageContext, String topicName) {
         if (log.isDebugEnabled()) {
             log.debug("Validating topic for webhook event");
-        }
-        String urlQueryParams = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext()
-                .getProperty(APIConstants.TRANSPORT_URL_IN);
-        
-        if (urlQueryParams == null) {
-            log.debug("URL query parameters not found in the request");
-            return false;
-        }
-
-        List<NameValuePair> queryParameters;
-        try {
-            queryParameters = URLEncodedUtils.parse(new URI(urlQueryParams), StandardCharsets.UTF_8.name());
-        } catch (URISyntaxException e) {
-            log.error("Error parsing URI for topic validation: " + e.getMessage());
-            return false;
-        }
-        String topicName = null;
-        for (NameValuePair nvPair : queryParameters) {
-            if (APIConstants.Webhooks.TOPIC_QUERY_PARAM.equals(nvPair.getName())) {
-                topicName = nvPair.getValue();
-                break;
-            }
         }
 
         if (topicName == null || topicName.isEmpty()) {
@@ -172,11 +171,11 @@ public class WebhookApiHandler extends APIAuthenticationHandler {
 
         API api = GatewayUtils.getAPI(messageContext);
         if (api != null) {
-            for (URLMapping mapping : api.getUrlMappings()) {
-                if (topicName.equals(mapping.getUrlPattern())) {
-                    log.info("Valid topic found for webhook event");
-                    return true;
-                }
+            List<String> urlPatterns = getUrlPatterns(api.getUrlMappings());
+            String matchingTopic = getMatchingTopic(topicName, urlPatterns);
+            if (matchingTopic != null) {
+                log.info("Valid topic found for webhook event");
+                return true;
             }
         }
 
@@ -184,6 +183,50 @@ public class WebhookApiHandler extends APIAuthenticationHandler {
             log.debug("Topic validation failed for webhook event");
         }
         return false;
+    }
+
+    private String extractTopicFromQueryParams(MessageContext synCtx) {
+        String urlQueryParams = (String) ((Axis2MessageContext) synCtx).getAxis2MessageContext()
+                .getProperty(APIConstants.TRANSPORT_URL_IN);
+        if (urlQueryParams == null) {
+            return null;
+        }
+        try {
+            List<NameValuePair> queryParameters = URLEncodedUtils.parse(new URI(urlQueryParams),
+                    StandardCharsets.UTF_8.name());
+            for (NameValuePair nvPair : queryParameters) {
+                if (APIConstants.Webhooks.TOPIC_QUERY_PARAM.equals(nvPair.getName())) {
+                    return nvPair.getValue();
+                }
+            }
+        } catch (URISyntaxException e) {
+            log.error("Error parsing URI for topic extraction: " + e.getMessage());
+        }
+        return null;
+    }
+
+    private boolean handleEventReceiver(MessageContext synCtx) {
+        org.apache.axis2.context.MessageContext axisMsgContext = ((Axis2MessageContext) synCtx).
+                getAxis2MessageContext();
+        try {
+            RelayUtils.buildMessage(axisMsgContext);
+            String payload;
+            String contentType = getContentType(axisMsgContext);
+            if (JsonUtil.hasAJsonPayload(axisMsgContext)) {
+                payload = JsonUtil.jsonPayloadToString(axisMsgContext);
+            } else if (contentType != null && contentType.contains(TEXT_CONTENT_TYPE)) {
+                payload = synCtx.getEnvelope().getBody().getFirstElement().getText();
+            } else {
+                payload = synCtx.getEnvelope().getBody().getFirstElement().toString();
+            }
+            synCtx.setProperty(APIConstants.Webhooks.PAYLOAD_PROPERTY, payload);
+            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(true);
+            synCtx.setProperty(APIConstants.TENANT_DOMAIN_INFO_PROPERTY, tenantDomain);
+            return ExtensionListenerUtil.postProcessRequest(synCtx, type);
+        } catch (IOException | XMLStreamException e) {
+            log.error("Error while building the message", e);
+            return false;
+        }
     }
 
     private String getContentType(org.apache.axis2.context.MessageContext axisMsgContext) {
@@ -280,5 +323,126 @@ public class WebhookApiHandler extends APIAuthenticationHandler {
         return StringUtils.isNotEmpty(hubParameters.get(topicQueryParamName)) && StringUtils.isNotEmpty(
                 hubParameters.get(APIConstants.Webhooks.HUB_CALLBACK_QUERY_PARAM)) && StringUtils.isNotEmpty(
                 hubParameters.get(APIConstants.Webhooks.HUB_MODE_QUERY_PARAM));
+    }
+
+    private String resolveElectedResource(MessageContext synCtx, String providedTopic) {
+        Object apiObject = synCtx.getProperty("API");
+        List<String> urlPatterns = null;
+        if (apiObject != null) {
+            API api = (API) apiObject;
+            urlPatterns = getUrlPatterns(api.getUrlMappings());
+        }
+
+        String matchedTopic = invokeExtensionListenerForTopicMatching(synCtx, providedTopic, urlPatterns);
+        if (matchedTopic == null && isExtensionListenerAborted(synCtx)) {
+            return null;
+        }
+        if (matchedTopic != null) {
+            return matchedTopic;
+        }
+
+        // Fall back to default matching
+        if (urlPatterns != null) {
+            String fallbackMatch = getMatchingTopic(providedTopic, urlPatterns);
+            if (fallbackMatch != null) {
+                return fallbackMatch;
+            }
+        }
+        return providedTopic;
+    }
+
+    private String invokeExtensionListenerForTopicMatching(MessageContext synCtx, String providedTopic) {
+        Object apiObject = synCtx.getProperty("API");
+        List<String> urlPatterns = null;
+        if (apiObject != null) {
+            API api = (API) apiObject;
+            urlPatterns = getUrlPatterns(api.getUrlMappings());
+        }
+        return invokeExtensionListenerForTopicMatching(synCtx, providedTopic, urlPatterns);
+    }
+
+    @SuppressWarnings("unchecked")
+    private String invokeExtensionListenerForTopicMatching(MessageContext synCtx, String providedTopic,
+                                                           List<String> urlPatterns) {
+        Map<String, Object> existingCustomProps = (Map<String, Object>) synCtx.getProperty(
+                APIMgtGatewayConstants.CUSTOM_PROPERTY);
+
+        Map<String, Object> extensionInput = new HashMap<>();
+        if (existingCustomProps != null) {
+            extensionInput.putAll(existingCustomProps);
+        }
+        extensionInput.put(WEBSUB_REQUESTED_TOPIC, providedTopic);
+        extensionInput.put(WEBSUB_URL_PATTERNS, urlPatterns);
+        synCtx.setProperty(APIMgtGatewayConstants.CUSTOM_PROPERTY, extensionInput);
+
+        boolean continueFlow = ExtensionListenerUtil.preProcessRequest(synCtx, type);
+
+        Map<String, Object> extensionOutput = (Map<String, Object>) synCtx.getProperty(
+                APIMgtGatewayConstants.CUSTOM_PROPERTY);
+        String matchedTopic = extensionOutput != null ? (String) extensionOutput.get(WEBSUB_MATCHED_TOPIC) : null;
+
+        // Restore custom properties: merge original + output, removing temporary keys
+        Map<String, Object> restored = new HashMap<>();
+        if (existingCustomProps != null) {
+            restored.putAll(existingCustomProps);
+        }
+        if (extensionOutput != null) {
+            restored.putAll(extensionOutput);
+        }
+        restored.remove(WEBSUB_REQUESTED_TOPIC);
+        restored.remove(WEBSUB_URL_PATTERNS);
+
+        if (restored.isEmpty()) {
+            synCtx.setProperty(APIMgtGatewayConstants.CUSTOM_PROPERTY, null);
+        } else {
+            synCtx.setProperty(APIMgtGatewayConstants.CUSTOM_PROPERTY, restored);
+        }
+
+        if (!continueFlow) {
+            synCtx.setProperty("WEBSUB_EXTENSION_ABORTED", Boolean.TRUE);
+        } else {
+            synCtx.setProperty("WEBSUB_EXTENSION_ABORTED", null);
+        }
+
+        return matchedTopic;
+    }
+
+    private boolean isExtensionListenerAborted(MessageContext synCtx) {
+        return Boolean.TRUE.equals(synCtx.getProperty("WEBSUB_EXTENSION_ABORTED"));
+    }
+
+    private String getMatchingTopic(String providedTopic, List<String> urlPatterns) {
+        if (urlPatterns == null || urlPatterns.isEmpty()) {
+            return null;
+        }
+
+        // Check for exact match
+        for (String urlPattern : urlPatterns) {
+            if (providedTopic.equals(urlPattern)) {
+                return urlPattern;
+            }
+        }
+
+        // Check for URI template match (wildcard support)
+        for (String urlPattern : urlPatterns) {
+            URITemplateHelper uriTemplateHelper = new URITemplateHelper(urlPattern);
+            Map<String, String> variables = new HashMap<>();
+            if (uriTemplateHelper.getUriTemplate().matches(providedTopic, variables)) {
+                return urlPattern;
+            }
+        }
+
+        return null;
+    }
+
+    private List<String> getUrlPatterns(List<URLMapping> urlMappings) {
+        if (urlMappings == null) {
+            return null;
+        }
+        List<String> urlPatterns = new ArrayList<>();
+        for (URLMapping urlMapping : urlMappings) {
+            urlPatterns.add(urlMapping.getUrlPattern());
+        }
+        return urlPatterns;
     }
 }
