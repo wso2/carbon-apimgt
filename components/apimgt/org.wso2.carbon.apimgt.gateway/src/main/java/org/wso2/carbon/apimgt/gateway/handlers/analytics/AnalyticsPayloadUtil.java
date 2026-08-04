@@ -30,6 +30,7 @@ import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
@@ -38,6 +39,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -55,6 +58,13 @@ import static org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS;
  * {@code transferEncoding=base64}). A payload larger than the configurable size limit is dropped
  * (not truncated) so the publisher only ever receives a whole, valid body or nothing; the backend
  * always receives the full body regardless.</p>
+ *
+ * <p><b>Re-serialization caveat:</b> capturing a body requires building the pass-through message
+ * ({@link RelayUtils#buildMessage}), which sets {@code MESSAGE_BUILDER_INVOKED} and makes the engine
+ * re-serialize the built message when forwarding it. The forwarded body stays semantically equivalent
+ * but is not guaranteed byte-identical (whitespace, attribute/namespace ordering, JSON key formatting,
+ * chunking), so a signature computed over the raw bytes (JWS, an HMAC-signed body, WS-Security) may
+ * fail to verify at the recipient while {@code send_payloads} is enabled.</p>
  */
 public final class AnalyticsPayloadUtil {
 
@@ -64,7 +74,33 @@ public final class AnalyticsPayloadUtil {
     // on every capture attempt (getPayloadSizeLimit is called per request/response).
     private static volatile boolean invalidLimitWarned = false;
 
+    // Header names whose values carry credentials or session state and must never be published to
+    // analytics (matched case-insensitively): the default Authorization/ApiKey headers plus
+    // Cookie/Set-Cookie. A per-API custom auth-header name is not resolvable at this layer and remains
+    // a known gap.
+    private static final Set<String> SENSITIVE_HEADERS = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+
+    static {
+        SENSITIVE_HEADERS.add(APIConstants.AUTHORIZATION_HEADER_DEFAULT);
+        SENSITIVE_HEADERS.add(APIConstants.API_KEY_HEADER_DEFAULT);
+        SENSITIVE_HEADERS.add(APIConstants.COOKIE);
+        SENSITIVE_HEADERS.add("Set-Cookie");
+    }
+
     private AnalyticsPayloadUtil() {
+    }
+
+    /**
+     * Whether a header carries credentials or session state and so must never be published to
+     * analytics. Matched case-insensitively. Shared by the request-header capture
+     * ({@code AnalyticsMetricsHandler}) and the response-header publish
+     * ({@code SynapseAnalyticsDataProvider}) so the two directions cannot drift.
+     *
+     * @param name the header name
+     * @return {@code true} if the header must be stripped before publishing
+     */
+    public static boolean isSensitiveHeader(String name) {
+        return name != null && SENSITIVE_HEADERS.contains(name);
     }
 
     /**
