@@ -226,6 +226,21 @@ public final class AnalyticsPayloadUtil {
                 return null;
             }
 
+            // Safety filter: only build content types that have an explicitly registered message builder.
+            // A content type with no registered builder falls back to the default XML/SOAP builder, which
+            // fails on binary data (e.g. an image); and because building consumes the pass-through pipe,
+            // that failure would also corrupt the body being forwarded (to the backend for a request, or the
+            // client for a response). So leave any unknown content type unbuilt — it is passed through
+            // untouched and is simply not captured.
+            if (!hasRegisteredBuilder(axis2MC, contentType)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("No " + direction + " body captured for analytics: no message builder is "
+                            + "registered for content type '" + contentType + "', so the message is left "
+                            + "unbuilt (passed through untouched) to avoid corrupting the payload.");
+                }
+                return null;
+            }
+
             // Pre-build gate: if the payload advertises its size and it exceeds the limit, drop it now
             // without building — so an oversized body is never buffered into memory or re-serialized.
             long declaredLength = getDeclaredContentLength(axis2MC);
@@ -393,5 +408,46 @@ public final class AnalyticsPayloadUtil {
         return lower.startsWith("text/event-stream")
                 || lower.startsWith("multipart/")
                 || lower.startsWith("application/x-www-form-urlencoded");
+    }
+
+    /**
+     * Whether the Axis2 message-builder registry has a builder explicitly registered for this content
+     * type. This is the signal for "known, safely buildable content": a registered builder yields a
+     * proper representation (JSON/text/XML, or a binary wrapper for the relay builder), whereas a content
+     * type with <b>no</b> registered builder falls back to the default XML/SOAP builder, which throws on
+     * binary data (e.g. an image). Building also consumes the pass-through pipe, so such a failure would
+     * corrupt the body being forwarded (to the backend for a request, or the client for a response) —
+     * hence unknown content types must be left unbuilt.
+     *
+     * <p>Consulting the live registry (rather than a hard-coded list) means the filter automatically
+     * respects the deployment's {@code axis2.xml} and any operator-registered custom builders. Content-type
+     * parameters (e.g. {@code ; charset=utf-8}) are stripped before the lookup, mirroring how the
+     * transport selects a builder.</p>
+     *
+     * @param axis2MC     the Axis2 message context
+     * @param contentType the raw request/response {@code Content-Type} (may include parameters)
+     * @return {@code true} only if a builder is registered for the content type
+     */
+    private static boolean hasRegisteredBuilder(org.apache.axis2.context.MessageContext axis2MC,
+                                                String contentType) {
+        if (contentType == null) {
+            return false;
+        }
+        String type = contentType;
+        int paramIndex = type.indexOf(';');
+        if (paramIndex >= 0) {
+            type = type.substring(0, paramIndex);
+        }
+        type = type.trim().toLowerCase(Locale.ROOT);
+        if (type.isEmpty()) {
+            return false;
+        }
+        try {
+            // false = do not fall back to a default builder; return null when nothing is registered.
+            return axis2MC.getConfigurationContext().getAxisConfiguration().getMessageBuilder(type, false) != null;
+        } catch (RuntimeException e) {
+            // If the registry cannot be consulted for any reason, fail safe: do not build.
+            return false;
+        }
     }
 }
