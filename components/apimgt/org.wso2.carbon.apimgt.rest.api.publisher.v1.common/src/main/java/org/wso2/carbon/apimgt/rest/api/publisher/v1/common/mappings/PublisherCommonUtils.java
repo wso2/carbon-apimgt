@@ -1373,9 +1373,17 @@ public class PublisherCommonUtils {
                             .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION);
                     String productionEndpointType = (String) endpointSecurityProduction
                             .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
+                    String productionAuthType = (String) endpointSecurityProduction
+                            .get(APIConstants.ENDPOINT_SECURITY_AWS_AUTH_TYPE);
 
                     if (APIConstants.ENDPOINT_SECURITY_TYPE_AWS.equals(productionEndpointType)) {
-                        if (endpointSecurityProduction.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY) != null &&
+                        if (APIConstants.ENDPOINT_SECURITY_AWS_AUTH_TYPE_ENVIRONMENT.equalsIgnoreCase(
+                                productionAuthType)) {
+                            // Environment-credentials mode uses no static keys. Remove any secret key from
+                            // the payload so a plaintext secret can never be persisted.
+                            endpointSecurityProduction.remove(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY);
+                        } else if (endpointSecurityProduction.get(
+                                APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY) != null &&
                                 StringUtils.isNotEmpty(endpointSecurityProduction.get(
                                         APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY).toString()) &&
                                 !endpointSecurityProduction.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY)
@@ -1404,9 +1412,16 @@ public class PublisherCommonUtils {
                             .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX);
                     String sandboxEndpointType = (String) endpointSecuritySandbox
                             .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
+                    String sandboxAuthType = (String) endpointSecuritySandbox
+                            .get(APIConstants.ENDPOINT_SECURITY_AWS_AUTH_TYPE);
 
                     if (APIConstants.ENDPOINT_SECURITY_TYPE_AWS.equals(sandboxEndpointType)) {
-                        if (endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY) != null
+                        if (APIConstants.ENDPOINT_SECURITY_AWS_AUTH_TYPE_ENVIRONMENT.equalsIgnoreCase(
+                                sandboxAuthType)) {
+                            // Environment-credentials mode uses no static keys. Remove any secret key from
+                            // the payload so a plaintext secret can never be persisted.
+                            endpointSecuritySandbox.remove(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY);
+                        } else if (endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY) != null
                                 && StringUtils.isNotEmpty(
                                 endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY)
                                         .toString()) &&
@@ -1671,9 +1686,16 @@ public class PublisherCommonUtils {
                             APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION);
                     String productionEndpointType = (String) endpointSecurityProduction.get(
                             APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
+                    String productionAuthType = (String) endpointSecurityProduction.get(
+                            APIConstants.ENDPOINT_SECURITY_AWS_AUTH_TYPE);
 
                     if (APIConstants.ENDPOINT_SECURITY_TYPE_AWS.equals(productionEndpointType)) {
-                        if (endpointSecurityProduction.get(
+                        if (APIConstants.ENDPOINT_SECURITY_AWS_AUTH_TYPE_ENVIRONMENT.equalsIgnoreCase(
+                                productionAuthType)) {
+                            // Environment-credentials mode uses no static keys. Remove any secret key from
+                            // the payload so a plaintext secret can never be persisted.
+                            endpointSecurityProduction.remove(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY);
+                        } else if (endpointSecurityProduction.get(
                                 APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY) != null && StringUtils.isNotEmpty(
                                 endpointSecurityProduction.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY)
                                         .toString()) && !endpointSecurityProduction.get(
@@ -1705,9 +1727,16 @@ public class PublisherCommonUtils {
                             .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX);
                     String sandboxEndpointType = (String) endpointSecuritySandbox
                             .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
+                    String sandboxAuthType = (String) endpointSecuritySandbox
+                            .get(APIConstants.ENDPOINT_SECURITY_AWS_AUTH_TYPE);
 
                     if (APIConstants.ENDPOINT_SECURITY_TYPE_AWS.equals(sandboxEndpointType)) {
-                        if (endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY) != null
+                        if (APIConstants.ENDPOINT_SECURITY_AWS_AUTH_TYPE_ENVIRONMENT.equalsIgnoreCase(
+                                sandboxAuthType)) {
+                            // Environment-credentials mode uses no static keys. Remove any secret key from
+                            // the payload so a plaintext secret can never be persisted.
+                            endpointSecuritySandbox.remove(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY);
+                        } else if (endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY) != null
                                 && StringUtils.isNotEmpty(
                                 endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY)
                                         .toString()) &&
