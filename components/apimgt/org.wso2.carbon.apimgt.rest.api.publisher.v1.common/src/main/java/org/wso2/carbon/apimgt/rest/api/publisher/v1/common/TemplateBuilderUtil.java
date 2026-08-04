@@ -1090,7 +1090,17 @@ public class TemplateBuilderUtil {
             String apiConfig = null;
             if (APIConstants.API_SUBTYPE_AI_API.equals(api.getSubtype())) {
 
-                Map<String, List<SimplifiedEndpoint>> groupedEndpoints = simplifyEndpoints(endpointList).stream()
+                List<SimplifiedEndpoint> simplifiedEndpointList;
+                try {
+                    simplifiedEndpointList = simplifyEndpoints(endpointList);
+                } catch (RuntimeException e) {
+                    // simplifyEndpoints surfaces a GCP service-account key decryption failure (corrupted
+                    // ciphertext) as an unchecked exception. Map it to APIManagementException here so it flows
+                    // through the standard API error path instead of bypassing it as a generic server error.
+                    throw new APIManagementException("Error while decrypting endpoint security for AI API: "
+                            + api.getUuid(), e);
+                }
+                Map<String, List<SimplifiedEndpoint>> groupedEndpoints = simplifiedEndpointList.stream()
                         .collect(Collectors.groupingBy(SimplifiedEndpoint::getDeploymentStage));
 
                 List<SimplifiedEndpoint> productionEndpoints = new ArrayList<>(
