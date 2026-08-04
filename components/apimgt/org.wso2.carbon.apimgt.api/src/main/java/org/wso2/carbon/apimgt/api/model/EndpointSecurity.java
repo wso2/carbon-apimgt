@@ -90,6 +90,7 @@ public class EndpointSecurity {
         this.proxyConfigs = endpointSecurity.proxyConfigs;
         this.connectionTimeoutConfigType = endpointSecurity.connectionTimeoutConfigType;
         this.proxyConfigType = endpointSecurity.proxyConfigType;
+        this.serviceAccountKey = endpointSecurity.serviceAccountKey;
     }
 
     public EndpointSecurity() {

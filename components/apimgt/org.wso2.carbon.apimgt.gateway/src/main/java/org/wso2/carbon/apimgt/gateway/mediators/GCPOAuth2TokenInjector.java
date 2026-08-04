@@ -98,7 +98,7 @@ public class GCPOAuth2TokenInjector extends AbstractMediator implements ManagedL
         } catch (Throwable e) {
             // Catch Throwable (not just IOException) so class-loading Errors and any google-auth runtime
             // exception surface in the log with a full stack trace instead of Synapse's generic
-            // "Error occured in the mediation of the class mediator". Rethrown, never swallowed.
+            // "Error occurred in the mediation of the class mediator". Rethrown, never swallowed.
             log.error("GCPOAuth2TokenInjector failed while generating/injecting the GCP OAuth2 access token", e);
             throw new SynapseException("Error while generating the GCP OAuth2 access token: " + e.getMessage(), e);
         }

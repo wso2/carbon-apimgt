@@ -80,6 +80,7 @@ import org.wso2.carbon.core.util.CryptoUtil;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -1200,8 +1201,7 @@ public class TemplateBuilderUtil {
      * @param endpoints The list of endpoints to simplify
      * @return A list of simplified endpoint DTOs
      */
-    public static List<SimplifiedEndpoint> simplifyEndpoints(List<EndpointDTO> endpoints)
-            throws APIManagementException {
+    public static List<SimplifiedEndpoint> simplifyEndpoints(List<EndpointDTO> endpoints) {
 
         if (endpoints == null || endpoints.isEmpty()) {
             return new ArrayList<>();
@@ -1221,11 +1221,14 @@ public class TemplateBuilderUtil {
                     if (cryptoUtil.isChunkedCipherText(serviceAccountKey)
                             || cryptoUtil.base64DecodeAndIsSelfContainedCipherText(serviceAccountKey)) {
                         simplifiedEndpoint.setServiceAccountKey(
-                                new String(cryptoUtil.base64DecodeAndDecryptLargeData(serviceAccountKey)));
+                                new String(cryptoUtil.base64DecodeAndDecryptLargeData(serviceAccountKey),
+                                        StandardCharsets.UTF_8));
                     }
                 } catch (CryptoException e) {
-                    throw new APIManagementException("Error while decrypting the GCP service-account key for "
-                            + "endpoint " + simplifiedEndpoint.getEndpointName(), e);
+                    // Keep this public method free of checked exceptions (avoids a source/binary break for
+                    // callers). A decryption failure here is deploy-blocking, so surface it as unchecked.
+                    throw new RuntimeException("Error while decrypting the GCP service-account key for endpoint "
+                            + simplifiedEndpoint.getEndpointName(), e);
                 }
             }
         }

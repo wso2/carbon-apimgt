@@ -1490,7 +1490,8 @@ public class PublisherCommonUtils {
                                         .equals(oldProductionGCPKey)) {
                             String keyValue = endpointSecurityProduction
                                     .get(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY).toString();
-                            String encryptedKeyValue = cryptoUtil.encryptAndBase64EncodeLargeData(keyValue.getBytes());
+                            String encryptedKeyValue = cryptoUtil.encryptAndBase64EncodeLargeData(
+                                    keyValue.getBytes(StandardCharsets.UTF_8));
                             endpointSecurityProduction
                                     .put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY, encryptedKeyValue);
                         } else if (StringUtils.isNotBlank(oldProductionGCPKey)) {
@@ -1523,7 +1524,8 @@ public class PublisherCommonUtils {
                                         .equals(oldSandboxGCPKey)) {
                             String keyValue = endpointSecuritySandbox
                                     .get(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY).toString();
-                            String encryptedKeyValue = cryptoUtil.encryptAndBase64EncodeLargeData(keyValue.getBytes());
+                            String encryptedKeyValue = cryptoUtil.encryptAndBase64EncodeLargeData(
+                                    keyValue.getBytes(StandardCharsets.UTF_8));
                             endpointSecuritySandbox
                                     .put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY, encryptedKeyValue);
                         } else if (StringUtils.isNotBlank(oldSandboxGCPKey)) {
@@ -1883,12 +1885,17 @@ public class PublisherCommonUtils {
                                         APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY).equals(oldApiSecret)) {
                             String keyValue = endpointSecurityProduction.get(
                                     APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY).toString();
-                            String encryptedKeyValue = cryptoUtil.encryptAndBase64EncodeLargeData(keyValue.getBytes());
+                            String encryptedKeyValue = cryptoUtil.encryptAndBase64EncodeLargeData(
+                                    keyValue.getBytes(StandardCharsets.UTF_8));
                             endpointSecurityProduction.put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY,
                                     encryptedKeyValue);
                         } else if (StringUtils.isNotBlank(oldApiSecret)) {
+                            // oldApiSecret is the decrypted key (updateAPIEndpoint reads it with decryption),
+                            // so re-encrypt before storing to keep it encrypted at rest and decryptable on read.
+                            String encryptedOldKeyValue = cryptoUtil.encryptAndBase64EncodeLargeData(
+                                    oldApiSecret.getBytes(StandardCharsets.UTF_8));
                             endpointSecurityProduction.put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY,
-                                    oldApiSecret);
+                                    encryptedOldKeyValue);
                         } else {
                             String errorMessage = "GCP service-account key is not provided for production endpoint "
                                     + "security";
@@ -1919,12 +1926,17 @@ public class PublisherCommonUtils {
                                         .equals(oldApiSecret)) {
                             String keyValue = endpointSecuritySandbox
                                     .get(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY).toString();
-                            String encryptedKeyValue = cryptoUtil.encryptAndBase64EncodeLargeData(keyValue.getBytes());
+                            String encryptedKeyValue = cryptoUtil.encryptAndBase64EncodeLargeData(
+                                    keyValue.getBytes(StandardCharsets.UTF_8));
                             endpointSecuritySandbox
                                     .put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY, encryptedKeyValue);
                         } else if (StringUtils.isNotBlank(oldApiSecret)) {
+                            // oldApiSecret is the decrypted key (updateAPIEndpoint reads it with decryption),
+                            // so re-encrypt before storing to keep it encrypted at rest and decryptable on read.
+                            String encryptedOldKeyValue = cryptoUtil.encryptAndBase64EncodeLargeData(
+                                    oldApiSecret.getBytes(StandardCharsets.UTF_8));
                             endpointSecuritySandbox
-                                    .put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY, oldApiSecret);
+                                    .put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY, encryptedOldKeyValue);
                         } else {
                             String errorMessage = "GCP service-account key is not provided for sandbox endpoint "
                                     + "security";
