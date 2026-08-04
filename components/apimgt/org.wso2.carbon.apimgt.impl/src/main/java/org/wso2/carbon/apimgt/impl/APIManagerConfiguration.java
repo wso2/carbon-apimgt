@@ -182,6 +182,7 @@ public class APIManagerConfiguration {
     private String hashingAlgorithm = SHA_256;
     private boolean isTransactionCounterEnabled;
     private static boolean isMCPSupportEnabled = true;
+    private static boolean isFederatedAPIDiscoverySchedulerEnabled = false;
     private static String devportalMode = APIConstants.DEVPORTAL_MODE_HYBRID;
     private static volatile boolean isRuntimeReadOnly = false;
 
@@ -892,6 +893,8 @@ public class APIManagerConfiguration {
                 setAiConfiguration(element);
             } else if (APIConstants.AI.MCP.equals(localName)) {
                 setMCPConfigurations(element);
+            } else if ("FederatedAPIDiscovery".equals(localName)) {
+                setFederatedAPIDiscoveryConfigurations(element);
             } else if (APIConstants.TokenValidationConstants.TOKEN_VALIDATION_CONFIG.equals(localName)) {
                 setTokenValidation(element);
             } else if (APIConstants.ORG_BASED_ACCESS_CONTROL.equals(localName)) {
@@ -3200,6 +3203,21 @@ public class APIManagerConfiguration {
     public boolean isMCPSupportEnabled() {
 
         return isMCPSupportEnabled;
+    }
+
+    private void setFederatedAPIDiscoveryConfigurations(OMElement omElement) {
+        if (omElement == null) {
+            log.debug("FederatedAPIDiscovery configuration element is null. Skipping configuration parsing.");
+            return;
+        }
+        OMElement schedulerEnabledElement = omElement.getFirstChildWithName(new QName("EnableSchedulerDiscovery"));
+        if (schedulerEnabledElement != null && StringUtils.isNotEmpty(schedulerEnabledElement.getText())) {
+            isFederatedAPIDiscoverySchedulerEnabled = Boolean.parseBoolean(schedulerEnabledElement.getText().trim());
+        }
+    }
+
+    public boolean isFederatedAPIDiscoverySchedulerEnabled() {
+        return isFederatedAPIDiscoverySchedulerEnabled;
     }
 
     /**

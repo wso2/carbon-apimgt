@@ -16751,6 +16751,331 @@ public class ApiMgtDAO {
         }
     }
 
+    // -----------------------------------------------------------------------
+    // Federated Discovery Cache DAO methods
+    // -----------------------------------------------------------------------
+
+    // Column size limits for AM_FEDERATED_DISCOVERY_CACHE (must match the sql/*.sql table definitions).
+    private static final int FDC_EXTERNAL_API_ID_MAX_LENGTH = 255;
+    private static final int FDC_API_NAME_MAX_LENGTH = 255;
+    private static final int FDC_API_VERSION_MAX_LENGTH = 50;
+    private static final int FDC_DESCRIPTION_MAX_LENGTH = 2048;
+    private static final int FDC_CONTEXT_MAX_LENGTH = 512;
+    private static final int FDC_API_TYPE_MAX_LENGTH = 50;
+    private static final int FDC_GATEWAY_TYPE_MAX_LENGTH = 255;
+    private static final int FDC_STATUS_MAX_LENGTH = 20;
+
+    /**
+     * Truncates a value to at most {@code maxLength} characters so it always fits the target column,
+     * logging a warning when truncation actually occurs (data would otherwise be rejected by the DB with a
+     * "value too long for column" error on strict databases, e.g. a long exception message written to the
+     * DESCRIPTION column).
+     *
+     * @param value     the candidate value (may be null)
+     * @param maxLength the destination column's maximum length
+     * @param fieldName the column name, used only for the warning log
+     * @return {@code value} unchanged if null or within {@code maxLength}; otherwise the first
+     *         {@code maxLength} characters of {@code value}
+     */
+    private static String truncateForColumn(String value, int maxLength, String fieldName) {
+        if (value != null && value.length() > maxLength) {
+            log.warn("Truncating " + fieldName + " to " + maxLength
+                    + " characters before persisting to AM_FEDERATED_DISCOVERY_CACHE");
+            return value.substring(0, maxLength);
+        }
+        return value;
+    }
+
+    /**
+     * Delete all cached discovery entries for a given environment and organization,
+     * then insert the new list of discovered APIs.
+     *
+     * @param envName      environment name
+     * @param organization organization
+     * @param apis         list of discovered API maps (each map has keys: id, apiName, version, description, context, apiType, gatewayType, status)
+     * @param discoveredAt timestamp of this discovery run
+     */
+    public void saveFederatedDiscoveryCache(String envName, String organization,
+                                            List<Map<String, Object>> apis, Timestamp discoveredAt)
+            throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                // Delete existing cache for this env+org
+                try (PreparedStatement deleteStmt = connection.prepareStatement(
+                        SQLConstants.DELETE_FEDERATED_DISCOVERY_CACHE_BY_ENV_SQL)) {
+                    deleteStmt.setString(1, envName);
+                    deleteStmt.setString(2, organization);
+                    deleteStmt.executeUpdate();
+                }
+                // Insert new entries
+                try (PreparedStatement insertStmt = connection.prepareStatement(
+                        SQLConstants.ADD_FEDERATED_DISCOVERY_CACHE_ENTRY_SQL)) {
+                    for (Map<String, Object> api : apis) {
+                        insertStmt.setString(1, envName);
+                        insertStmt.setString(2, organization);
+                        insertStmt.setString(3, truncateForColumn(
+                                Objects.toString(api.get("id"), null), FDC_EXTERNAL_API_ID_MAX_LENGTH,
+                                "EXTERNAL_API_ID"));
+                        insertStmt.setString(4, truncateForColumn(
+                                Objects.toString(api.get("apiName"), null), FDC_API_NAME_MAX_LENGTH, "API_NAME"));
+                        insertStmt.setString(5, truncateForColumn(
+                                Objects.toString(api.get("version"), null), FDC_API_VERSION_MAX_LENGTH,
+                                "API_VERSION"));
+                        insertStmt.setString(6, truncateForColumn(
+                                Objects.toString(api.get("description"), null), FDC_DESCRIPTION_MAX_LENGTH,
+                                "DESCRIPTION"));
+                        insertStmt.setString(7, truncateForColumn(
+                                Objects.toString(api.get("context"), null), FDC_CONTEXT_MAX_LENGTH, "CONTEXT"));
+                        insertStmt.setString(8, truncateForColumn(
+                                Objects.toString(api.getOrDefault("apiType", "HTTP"), null), FDC_API_TYPE_MAX_LENGTH,
+                                "API_TYPE"));
+                        insertStmt.setString(9, truncateForColumn(
+                                Objects.toString(api.get("gatewayType"), null), FDC_GATEWAY_TYPE_MAX_LENGTH,
+                                "GATEWAY_TYPE"));
+                        String refArtifact = api.get("referenceArtifact") != null
+                                ? api.get("referenceArtifact").toString() : null;
+                        if (refArtifact != null) {
+                            insertStmt.setBinaryStream(10,
+                                    new ByteArrayInputStream(refArtifact.getBytes()));
+                        } else {
+                            insertStmt.setNull(10, Types.BLOB);
+                        }
+                        insertStmt.setString(11, truncateForColumn(
+                                Objects.toString(api.get("status"), null), FDC_STATUS_MAX_LENGTH, "STATUS"));
+                        insertStmt.setTimestamp(12, discoveredAt);
+                        insertStmt.addBatch();
+                    }
+                    insertStmt.executeBatch();
+                }
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Error saving federated discovery cache for env: " + envName, e);
+            }
+        } catch (SQLException e) {
+            handleException("Error saving federated discovery cache for env: " + envName, e);
+        }
+    }
+
+    /**
+     * Get cached discovery results for a given environment and organization.
+     *
+     * @param envName      environment name
+     * @param organization organization
+     * @return list of discovered API maps
+     */
+    public List<Map<String, Object>> getFederatedDiscoveryCache(String envName, String organization)
+            throws APIManagementException {
+        List<Map<String, Object>> results = new ArrayList<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(
+                     SQLConstants.GET_FEDERATED_DISCOVERY_CACHE_BY_ENV_SQL)) {
+            stmt.setString(1, envName);
+            stmt.setString(2, organization);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> api = new HashMap<>();
+                    api.put("id", rs.getString("EXTERNAL_API_ID"));
+                    api.put("apiName", rs.getString("API_NAME"));
+                    api.put("version", rs.getString("API_VERSION"));
+                    api.put("description", rs.getString("DESCRIPTION"));
+                    api.put("context", rs.getString("CONTEXT"));
+                    api.put("apiType", rs.getString("API_TYPE"));
+                    api.put("gatewayType", rs.getString("GATEWAY_TYPE"));
+                    api.put("gatewayName", envName);
+                    api.put("status", rs.getString("STATUS"));
+                    Timestamp ts = rs.getTimestamp("DISCOVERED_AT");
+                    api.put("discoveredAt", ts != null ? ts.toInstant().toString() : null);
+                    results.add(api);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error fetching federated discovery cache for env: " + envName, e);
+        }
+        return results;
+    }
+
+    /**
+     * Delete all cached discovery entries for a given environment and organization.
+     */
+    public void deleteFederatedDiscoveryCache(String envName, String organization)
+            throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try (PreparedStatement stmt = connection.prepareStatement(
+                    SQLConstants.DELETE_FEDERATED_DISCOVERY_CACHE_BY_ENV_SQL)) {
+                stmt.setString(1, envName);
+                stmt.setString(2, organization);
+                stmt.executeUpdate();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Error deleting federated discovery cache for env: " + envName, e);
+            }
+        } catch (SQLException e) {
+            handleException("Error deleting federated discovery cache for env: " + envName, e);
+        }
+    }
+
+    /**
+     * Delete a specific cached discovery entry for a given environment, organization and external API ID.
+     */
+    public void deleteFederatedDiscoveryCacheEntry(String envName, String organization, String externalApiId)
+            throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try (PreparedStatement stmt = connection.prepareStatement(
+                    SQLConstants.DELETE_FEDERATED_DISCOVERY_CACHE_ENTRY_SQL)) {
+                stmt.setString(1, envName);
+                stmt.setString(2, organization);
+                stmt.setString(3, externalApiId);
+                stmt.executeUpdate();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Error deleting federated discovery cache entry for API ID: " + externalApiId, e);
+            }
+        } catch (SQLException e) {
+            handleException("Error deleting federated discovery cache entry for API ID: " + externalApiId, e);
+        }
+    }
+
+
+    /**
+     * Get the last discovery timestamp for a given environment and organization.
+     *
+     * @return Timestamp of last discovery, or null if never discovered
+     */
+    public Timestamp getLastFederatedDiscoveryTime(String envName, String organization)
+            throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(
+                     SQLConstants.GET_LAST_FEDERATED_DISCOVERY_TIME_SQL)) {
+            stmt.setString(1, envName);
+            stmt.setString(2, organization);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getTimestamp("LAST_DISCOVERED");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error fetching last discovery time for env: " + envName, e);
+        }
+        return null;
+    }
+
+    /**
+     * Update the status of a federated discovery task in the database cache table.
+     *
+     * @param envName      environment name
+     * @param organization organization
+     * @param taskId       task ID
+     * @param status       status (PENDING, COMPLETED, FAILED)
+     * @param error        error message (if failed)
+     * @param now          timestamp
+     */
+    public void updateDiscoveryTaskStatus(String envName, String organization, String taskId,
+                                          String status, String error, Timestamp now)
+            throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                try (PreparedStatement deleteStmt = connection.prepareStatement(
+                        SQLConstants.DELETE_FEDERATED_DISCOVERY_CACHE_ENTRY_SQL)) {
+                    deleteStmt.setString(1, envName);
+                    deleteStmt.setString(2, organization);
+                    deleteStmt.setString(3, "__TASK_STATUS__");
+                    deleteStmt.executeUpdate();
+                }
+                try (PreparedStatement insertStmt = connection.prepareStatement(
+                        SQLConstants.ADD_FEDERATED_DISCOVERY_CACHE_ENTRY_SQL)) {
+                    insertStmt.setString(1, envName);
+                    insertStmt.setString(2, organization);
+                    insertStmt.setString(3, "__TASK_STATUS__");
+                    insertStmt.setString(4, truncateForColumn(taskId, FDC_API_NAME_MAX_LENGTH, "API_NAME"));
+                    insertStmt.setString(5, null);
+                    insertStmt.setString(6, truncateForColumn(error, FDC_DESCRIPTION_MAX_LENGTH, "DESCRIPTION"));
+                    insertStmt.setString(7, null);
+                    insertStmt.setString(8, "HTTP");
+                    insertStmt.setString(9, null);
+                    insertStmt.setNull(10, Types.BLOB);
+                    insertStmt.setString(11, truncateForColumn(status, FDC_STATUS_MAX_LENGTH, "STATUS"));
+                    insertStmt.setTimestamp(12, now);
+                    insertStmt.executeUpdate();
+                }
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Error updating federated discovery task status in DB for env: " + envName, e);
+            }
+        } catch (SQLException e) {
+            handleException("Error updating federated discovery task status in DB for env: " + envName, e);
+        }
+    }
+
+    /**
+     * Get the status of a federated discovery task from the database.
+     *
+     * @param envName      environment name
+     * @param organization organization
+     * @param taskId       task ID
+     * @return Map containing status and error, or null if not found/superseded
+     */
+    public Map<String, String> getDiscoveryTaskStatus(String envName, String organization, String taskId)
+            throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(
+                     SQLConstants.GET_DISCOVERY_TASK_STATUS_SQL)) {
+            stmt.setString(1, envName);
+            stmt.setString(2, organization);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    String dbTaskId = rs.getString("API_NAME");
+                    if (taskId.equals(dbTaskId)) {
+                        Map<String, String> statusMap = new HashMap<>();
+                        statusMap.put("status", rs.getString("STATUS"));
+                        statusMap.put("error", rs.getString("DESCRIPTION"));
+                        return statusMap;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error fetching discovery task status for task: " + taskId, e);
+        }
+        return null;
+    }
+
+    /**
+     * Retrieve the active discovery task details for a given environment and organization.
+     *
+     * @param envName      environment name
+     * @param organization organization
+     * @return Map containing taskId, status, error, and updatedAt, or null if no task exists
+     */
+    public Map<String, Object> getActiveDiscoveryTask(String envName, String organization)
+            throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(
+                     SQLConstants.GET_ACTIVE_DISCOVERY_TASK_SQL)) {
+            stmt.setString(1, envName);
+            stmt.setString(2, organization);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    Map<String, Object> taskMap = new HashMap<>();
+                    taskMap.put("taskId", rs.getString("API_NAME"));
+                    taskMap.put("status", rs.getString("STATUS"));
+                    taskMap.put("error", rs.getString("DESCRIPTION"));
+                    taskMap.put("updatedAt", rs.getTimestamp("DISCOVERED_AT"));
+                    return taskMap;
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error fetching active discovery task status for env: " + envName, e);
+        }
+        return null;
+    }
+
     private boolean isEmptyValuesInApplicationAttributesEnabled() {
         return Boolean.parseBoolean(ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
                 getAPIManagerConfiguration().getFirstProperty(APIConstants.ApplicationAttributes.

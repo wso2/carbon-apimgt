@@ -25,6 +25,13 @@
 
     <display-name>WSO2 APIM REST API</display-name>
     <description>WSO2 API Manager REST API</description>
+
+    <listener>
+        <listener-class>
+            org.wso2.carbon.apimgt.rest.api.publisher.v1.impl.FederatedApiDiscoveryLifecycleListener
+        </listener-class>
+    </listener>
+
     <servlet>
         <servlet-name>CXFServlet</servlet-name>
         <servlet-class>
@@ -59,7 +66,8 @@
                 org.wso2.carbon.apimgt.rest.api.publisher.v1.OrganizationsApi,
                 org.wso2.carbon.apimgt.rest.api.publisher.v1.DesignAssistantApi,
                 org.wso2.carbon.apimgt.rest.api.publisher.v1.AiServiceProvidersApi,
-                org.wso2.carbon.apimgt.rest.api.publisher.v1.McpServersApi
+                org.wso2.carbon.apimgt.rest.api.publisher.v1.McpServersApi,
+                org.wso2.carbon.apimgt.rest.api.publisher.v1.FederatedApisApi
             </param-value>
         </init-param>
         <init-param>
