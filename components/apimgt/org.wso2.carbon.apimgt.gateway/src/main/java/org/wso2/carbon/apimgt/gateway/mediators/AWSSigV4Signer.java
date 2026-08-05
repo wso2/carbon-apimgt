@@ -62,8 +62,6 @@ import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.AwsSessionCredentials;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
-import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
-import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.http.apache.ApacheHttpClient;
 import software.amazon.awssdk.regions.Region;
@@ -98,10 +96,6 @@ public class AWSSigV4Signer extends AbstractMediator implements ManagedLifecycle
     private AwsCredentialsProvider baseCredentialsProvider;
     private StsClient stsClient;
     private static final String AWS_STS_SESSION_NAME = "apim-bedrock-session";
-    // Request-scoped carriers for the credential-failure values, set on the message context.
-    private static final String AWS_CREDENTIAL_ERROR_CODE = "AWS_CREDENTIAL_ERROR_CODE";
-    private static final String AWS_CREDENTIAL_ERROR_MESSAGE = "AWS_CREDENTIAL_ERROR_MESSAGE";
-    private static final String AWS_CREDENTIAL_ERROR_DETAIL = "AWS_CREDENTIAL_ERROR_DETAIL";
 
     @Override
     public boolean mediate(MessageContext messageContext) {
@@ -146,14 +140,12 @@ public class AWSSigV4Signer extends AbstractMediator implements ManagedLifecycle
                 // assumes a role (STS AssumeRole). The provider caches and auto-refreshes internally, so
                 // no STS call is made per request. Temporary credentials carry a session token, which
                 // must be included in the signature.
-                AwsCredentials credentials = resolveProviderCredentials(messageContext);
+                AwsCredentials credentials = resolveProviderCredentials();
                 if (credentials == null) {
                     // Credentials could not be resolved (the cause is already logged). Stop here so the
                     // request is never forwarded to the backend unsigned.
                     return GatewayUtils.handleAWSAuthFailure(messageContext,
-                            failureProperty(messageContext, AWS_CREDENTIAL_ERROR_CODE),
-                            failureProperty(messageContext, AWS_CREDENTIAL_ERROR_MESSAGE),
-                            failureProperty(messageContext, AWS_CREDENTIAL_ERROR_DETAIL));
+                            APISecurityConstants.AWS_CREDENTIAL_RESOLUTION_ERROR_DESCRIPTION);
                 }
                 String sessionToken = credentials instanceof AwsSessionCredentials
                         ? ((AwsSessionCredentials) credentials).sessionToken() : null;
@@ -265,7 +257,7 @@ public class AWSSigV4Signer extends AbstractMediator implements ManagedLifecycle
      * when they could not be resolved. The cause is logged here; the caller turns a {@code null} into
      * an error response.
      */
-    private AwsCredentials resolveProviderCredentials(MessageContext messageContext) {
+    private AwsCredentials resolveProviderCredentials() {
         try {
             return credentialsProvider.resolveCredentials();
         } catch (SdkException e) {
@@ -273,64 +265,17 @@ public class AWSSigV4Signer extends AbstractMediator implements ManagedLifecycle
             // service exceptions such as StsException/AwsServiceException (AssumeRole denied, wrong
             // trust policy, invalid role ARN), so both are reported with the same actionable message.
             //
-            // Neither the exception nor its message is logged: the AWS text quotes the account id, the
-            // IAM user, the role ARN and the request id, and the stack trace header repeats it. Only the
-            // structured, non-identifying summary is recorded.
-            // Stored on the message context, not fields: this mediator instance is shared by every
-            // concurrent request, so fields would be raced between them.
-            setAwsFailureProperties(messageContext, e);
+            // The exception is deliberately not logged. Its message - and the stack trace header that
+            // repeats it - quotes the AWS account id, the IAM user and the role ARN, none of which
+            // should be written to the gateway log.
             log.error("Unable to resolve AWS credentials for signing. In environment mode, verify the gateway "
                     + "has an attached IAM role (EC2 instance profile / EKS IRSA); when assuming a role, verify "
-                    + "the role ARN, region, external ID and trust policy. Cause: "
-                    + failureProperty(messageContext, AWS_CREDENTIAL_ERROR_MESSAGE) + " ("
-                    + failureProperty(messageContext, AWS_CREDENTIAL_ERROR_DETAIL) + ")");
+                    + "the role ARN, region, external ID and trust policy.");
             return null;
         }
     }
 
-    /**
-     * Records the AWS failure on the message context so the response reports the backend's own error
-     * rather than a gateway-specific one.
-     *
-     * <p>Only AWS's status, error code and service name are used. Its message is never recorded: that
-     * text quotes the account id, the IAM user, the role ARN and the request id.</p>
-     *
-     * @param messageContext the message context of the current request.
-     * @param e              the AWS failure.
-     */
-    private void setAwsFailureProperties(MessageContext messageContext, SdkException e) {
-        if (e instanceof AwsServiceException) {
-            AwsServiceException serviceException = (AwsServiceException) e;
-            AwsErrorDetails errorDetails = serviceException.awsErrorDetails();
-            if (errorDetails != null && StringUtils.isNotBlank(errorDetails.errorCode())) {
-                // AWS answered: report its own status and error code. The raw AWS message is excluded
-                // because it quotes the account id, the IAM user, the role ARN and the request id.
-                messageContext.setProperty(AWS_CREDENTIAL_ERROR_CODE, String.valueOf(serviceException.statusCode()));
-                messageContext.setProperty(AWS_CREDENTIAL_ERROR_MESSAGE, errorDetails.errorCode());
-                messageContext.setProperty(AWS_CREDENTIAL_ERROR_DETAIL,
-                        errorDetails.serviceName() + ", HTTP " + serviceException.statusCode());
-                return;
-            }
-        }
-        // No AWS response at all - the credential chain found nothing, so there is no AWS status or
-        // error code to report. Fall back to the SDK exception type.
-        String failureType = e.getClass().getSimpleName();
-        messageContext.setProperty(AWS_CREDENTIAL_ERROR_CODE, failureType);
-        messageContext.setProperty(AWS_CREDENTIAL_ERROR_MESSAGE, failureType);
-        messageContext.setProperty(AWS_CREDENTIAL_ERROR_DETAIL, "No AWS credentials could be resolved");
-    }
 
-    /**
-     * Reads a failure property set by {@link #setAwsFailureProperties}.
-     *
-     * @param messageContext the message context of the current request.
-     * @param property       the property name.
-     * @return the value, or an empty string when absent.
-     */
-    private static String failureProperty(MessageContext messageContext, String property) {
-        Object value = messageContext.getProperty(property);
-        return value != null ? value.toString() : "";
-    }
 
 
     /**
@@ -424,8 +369,12 @@ public class AWSSigV4Signer extends AbstractMediator implements ManagedLifecycle
         // object from credentialsProvider (i.e. a role is assumed); without a role it IS
         // credentialsProvider and was already closed above, so we avoid a double close.
         closeQuietly(credentialsProvider);
-        if (stsClient != null) {
-            stsClient.close();
+        try {
+            if (stsClient != null) {
+                stsClient.close();
+            }
+        } catch (Exception e) {
+            log.warn("Error while closing the AWS STS client", e);
         }
         if (baseCredentialsProvider != credentialsProvider) {
             closeQuietly(baseCredentialsProvider);

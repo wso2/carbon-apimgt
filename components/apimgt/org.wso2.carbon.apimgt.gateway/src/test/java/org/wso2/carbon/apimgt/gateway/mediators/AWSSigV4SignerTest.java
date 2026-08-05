@@ -275,7 +275,7 @@ public class AWSSigV4SignerTest {
     public void testMediateReturnsFaultWhenAssumeRoleFails() throws Exception {
         PowerMockito.mockStatic(AWSUtil.class);
         PowerMockito.mockStatic(GatewayUtils.class);
-        PowerMockito.when(GatewayUtils.handleAWSAuthFailure(any(), anyString(), anyString(), anyString())).thenReturn(false);
+        PowerMockito.when(GatewayUtils.handleAWSAuthFailure(any(), anyString())).thenReturn(false);
 
         AWSSigV4Signer signer = newConfiguredSigner();
         signer.setRoleArn(ROLE_ARN);
@@ -292,7 +292,7 @@ public class AWSSigV4SignerTest {
         assertFalse("mediate() must halt the sequence", signer.mediate(buildGetMessageContext()));
 
         PowerMockito.verifyStatic(GatewayUtils.class, times(1));
-        GatewayUtils.handleAWSAuthFailure(any(), anyString(), anyString(), anyString());
+        GatewayUtils.handleAWSAuthFailure(any(), anyString());
         // The request must never be signed with unusable credentials.
         PowerMockito.verifyStatic(AWSUtil.class, times(0));
         AWSUtil.generateAWSSignature(anyString(), anyString(), anyString(), anyString(), any(), anyString(),
@@ -339,7 +339,7 @@ public class AWSSigV4SignerTest {
     public void testMediateReturnsFaultWhenEnvironmentResolutionFails() throws Exception {
         PowerMockito.mockStatic(AWSUtil.class);
         PowerMockito.mockStatic(GatewayUtils.class);
-        PowerMockito.when(GatewayUtils.handleAWSAuthFailure(any(), anyString(), anyString(), anyString())).thenReturn(false);
+        PowerMockito.when(GatewayUtils.handleAWSAuthFailure(any(), anyString())).thenReturn(false);
 
         AWSSigV4Signer signer = newConfiguredSigner();
         signer.setAuthType("environment");
@@ -355,7 +355,7 @@ public class AWSSigV4SignerTest {
         assertFalse("mediate() must halt the sequence", signer.mediate(buildGetMessageContext()));
 
         PowerMockito.verifyStatic(GatewayUtils.class, times(1));
-        GatewayUtils.handleAWSAuthFailure(any(), anyString(), anyString(), anyString());
+        GatewayUtils.handleAWSAuthFailure(any(), anyString());
     }
 
     // ---------------------------------------------------------------------

@@ -2050,36 +2050,20 @@ public class GatewayUtils {
      * caller instead of being surfaced outward.</p>
      *
      * @param messageContext the message context of the current request.
-     * @param errorCode      the backend's own error code, reported as-is.
-     * @param errorMessage   the backend's own error message, reported as-is.
-     * @param errorDetail    a client-safe description of the failure.
+     * @param errorDetail    a generic, client-safe description of the failure.
      * @return {@code false} always, so a mediator can {@code return} this directly to halt mediation.
      */
     public static boolean handleAWSAuthFailure(org.apache.synapse.MessageContext messageContext,
-                                               String errorCode, String errorMessage, String errorDetail) {
+                                               String errorDetail) {
 
-        messageContext.setProperty(SynapseConstants.ERROR_CODE, errorCode);
-        messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, errorMessage);
+        messageContext.setProperty(SynapseConstants.ERROR_CODE,
+                APISecurityConstants.AWS_CREDENTIAL_RESOLUTION_ERROR);
+        messageContext.setProperty(SynapseConstants.ERROR_MESSAGE,
+                APISecurityConstants.AWS_CREDENTIAL_RESOLUTION_ERROR_MESSAGE);
         messageContext.setProperty(SynapseConstants.ERROR_DETAIL, errorDetail);
         // Publish the error flow type such that any error sequence can branch on it.
         messageContext.setProperty(APIMgtGatewayConstants.API_ERROR_TYPE,
                 APIMgtGatewayConstants.API_ERROR_TYPE_BACKEND);
-        // Carry the status through to the error sequence, which otherwise defaults to 401.
-        messageContext.setProperty(APIMgtGatewayConstants.HTTP_RESPONSE_STATUS_CODE,
-                HttpStatus.SC_INTERNAL_SERVER_ERROR);
-
-        org.apache.axis2.context.MessageContext axis2MC =
-                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-        // Drain the pass-through pipe so the request body is not returned as the response and the
-        // connection is released once the fault has been sent.
-        axis2MC.setProperty(PassThroughConstants.MESSAGE_BUILDER_INVOKED, Boolean.TRUE);
-        try {
-            RelayUtils.consumeAndDiscardMessage(axis2MC);
-        } catch (AxisFault axisFault) {
-            // Logged and continued: the fault payload is set below regardless.
-            log.error("Error occurred while consuming and discarding the message", axisFault);
-        }
-
         Mediator sequence = getErrorResponseFormatterSequence(messageContext,
                 APISecurityConstants.BACKEND_AUTH_FAILURE_HANDLER);
         // Invoke the custom error handler specified by the user. If it handles the response itself, the
