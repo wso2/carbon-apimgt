@@ -33,8 +33,8 @@ import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.inbound.endpoint.protocol.websocket.InboundWebsocketConstants;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Global synapse handler to publish analytics data to analytics cloud.
@@ -65,8 +65,54 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
 
     @Override
     public boolean handleRequestOutFlow(MessageContext messageContext) {
+        // Capture the request payload here (request-out flow), the last point before the backend send
+        // where the request envelope is still current. Gated by the send_payloads analytics property.
+        // Building here sets MESSAGE_BUILDER_INVOKED before the pass-through sender reads it, so the
+        // engine re-serializes the built message to the backend (forwarding is preserved); doing this
+        // at request-in instead would run addressing before dispatch and break the send.
+        if (shouldCaptureRequestPayload(messageContext)) {
+            AnalyticsPayloadUtil.CapturedBody requestBody =
+                    AnalyticsPayloadUtil.extractPayload(messageContext,
+                            AnalyticsPayloadUtil.getPayloadSizeLimit(), "request");
+            if (requestBody != null && requestBody.getBody() != null) {
+                messageContext.setProperty(Constants.REQUEST_BODY_PROPERTY, requestBody.getBody());
+                if (requestBody.getTransferEncoding() != null) {
+                    messageContext.setProperty(Constants.REQUEST_BODY_TRANSFER_ENCODING_PROPERTY,
+                            requestBody.getTransferEncoding());
+                }
+            }
+        }
+        // Mark backend-start after payload capture so the request build/serialization time counts as
+        // request-mediation latency rather than backend latency.
         messageContext.setProperty(Constants.BACKEND_START_TIME_PROPERTY, System.currentTimeMillis());
         return true;
+    }
+
+    /**
+     * Whether the request payload should be captured (and the message therefore built) on the
+     * request-out flow. Mirrors the skip conditions {@code handleResponseOutFlow} applies so we never
+     * build/re-serialize a request for a call that will not publish it: websocket subscriptions,
+     * async/streaming APIs, file-based API contexts, and requests explicitly flagged
+     * {@code SKIP_METRICS_PUBLISHING}. Cheap checks are evaluated first and the file-based-context
+     * lookup last.
+     */
+    private boolean shouldCaptureRequestPayload(MessageContext messageContext) {
+        if (messageContext.getPropertyKeySet().contains(InboundWebsocketConstants.WEBSOCKET_SUBSCRIBER_PATH)
+                || !AnalyticsPayloadUtil.shouldSendPayloads()) {
+            return false;
+        }
+        Object skipPublishMetrics = messageContext.getProperty(Constants.SKIP_METRICS_PUBLISHING);
+        if (Boolean.TRUE.equals(skipPublishMetrics)) {
+            return false;
+        }
+        // Async/streaming APIs (SSE, webhooks) publish via AsyncAnalyticsDataProvider, which never
+        // reads the captured request body, so building it here would be pure waste. IS_ASYNC_API is
+        // set upstream (SseApiHandler / SubscribersPersistMediator) before this request-out flow.
+        if (Boolean.TRUE.equals(messageContext.getProperty(Constants.IS_ASYNC_API))) {
+            return false;
+        }
+        return !GatewayUtils.checkForFileBasedApiContexts(ApiUtils.getFullRequestPath(messageContext),
+                GatewayUtils.getTenantDomain());
     }
 
     @Override
@@ -154,14 +200,18 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
             return null; // no headers available
         }
 
-        Map<String, Object> headers = new HashMap<>((Map<String, ?>) transportHeadersObj);
+        // Copy into a case-insensitive map: the live transport-headers map is case-insensitive, and a
+        // plain HashMap copy would break exact-case lookups such as User-Agent for HTTP/2 clients
+        // (which send header names in lowercase).
+        Map<String, Object> headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        headers.putAll((Map<String, ?>) transportHeadersObj);
 
         if (!headers.isEmpty()) {
             if (log.isDebugEnabled()) {
                 log.debug("Processing " + headers.size() + " request headers for analytics");
             }
-            headers.keySet().removeIf(APIConstants.AUTHORIZATION_HEADER_DEFAULT::equalsIgnoreCase);
-            headers.keySet().removeIf(APIConstants.API_KEY_HEADER_DEFAULT::equalsIgnoreCase);
+            // Strip credential/session headers before storing them as analytics metadata.
+            headers.keySet().removeIf(AnalyticsPayloadUtil::isSensitiveHeader);
             axis2mc.setAnalyticsMetadata(Constants.REQUEST_HEADERS, headers);
             return (String) headers.get(APIConstants.USER_AGENT);
         }

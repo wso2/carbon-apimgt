@@ -271,7 +271,7 @@ return null;
   
   @ApiModelProperty(example = "pizzaproduct", value = "")
   @JsonProperty("context")
- @Size(min=1,max=60)  public String getContext() {
+ @Size(min=1,max=232)  public String getContext() {
     return context;
   }
   public void setContext(String context) {
