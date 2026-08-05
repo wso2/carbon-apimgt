@@ -35,8 +35,8 @@ import java.util.Map;
  * resolves the additional properties of an outbound AI service request through
  * {@link #resolveProperties(AIRequestContext, PropertyResolver)}.
  * <p>
- * The implementation class is read from the {@code propertyEnricherImpl} configuration under {@code [apim.ai]}. When it
- * is not configured, or cannot be loaded, no enricher is held at all and every payload is dispatched unchanged.
+ * The implementation class is read from the {@code property_enricher_impl} configuration under {@code [apim.ai]}. When
+ * it is not configured, or cannot be loaded, no enricher is held at all and every payload is dispatched unchanged.
  * <p>
  * This class knows nothing about the individual AI assistance operations, so supporting a new one never requires
  * changing it. See {@link #resolveProperties(AIRequestContext, PropertyResolver)}.
@@ -48,7 +48,7 @@ public class AIRequestPropertyEnricherHolder {
 
     private static final Log log = LogFactory.getLog(AIRequestPropertyEnricherHolder.class);
 
-    private static volatile AIRequestPropertyEnricherHolder instance;
+    private static final AIRequestPropertyEnricherHolder INSTANCE = new AIRequestPropertyEnricherHolder();
 
     /**
      * Resolved enricher, or {@code null} when none is configured or the configured one could not be loaded. Meaningful
@@ -70,14 +70,7 @@ public class AIRequestPropertyEnricherHolder {
 
     public static AIRequestPropertyEnricherHolder getInstance() {
 
-        if (instance == null) {
-            synchronized (AIRequestPropertyEnricherHolder.class) {
-                if (instance == null) {
-                    instance = new AIRequestPropertyEnricherHolder();
-                }
-            }
-        }
-        return instance;
+        return INSTANCE;
     }
 
     /**
@@ -94,7 +87,7 @@ public class AIRequestPropertyEnricherHolder {
      *
      * @param context  details of the request being dispatched. When {@code null} no properties are resolved.
      * @param resolver invokes the {@link AIRequestPropertyEnricher} method of the operation being dispatched, typically
-     *                 as a lambda, for example {@code enricher -> enricher.getApiChatExecuteProperties(context)}
+     *                 as a lambda, for example {@code enricher -> enricher.enrichApiChatExecuteProperties(context)}
      * @return properties to add to the payload, never {@code null}
      */
     public Map<String, Object> resolveProperties(AIRequestContext context, PropertyResolver resolver) {

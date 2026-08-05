@@ -367,11 +367,19 @@ public class AIRequestPropertyEnricherHolderTest {
         return context;
     }
 
+    /**
+     * Returns the shared holder to its unresolved state. The holder is an eagerly created singleton that cannot be
+     * replaced, so the resolution state is cleared on the instance rather than the instance being discarded.
+     */
     private static void resetHolder() throws Exception {
 
-        Field instance = AIRequestPropertyEnricherHolder.class.getDeclaredField("instance");
-        instance.setAccessible(true);
-        instance.set(null, null);
+        AIRequestPropertyEnricherHolder holder = AIRequestPropertyEnricherHolder.getInstance();
+        Field enricher = AIRequestPropertyEnricherHolder.class.getDeclaredField("enricher");
+        enricher.setAccessible(true);
+        enricher.set(holder, null);
+        Field enricherResolved = AIRequestPropertyEnricherHolder.class.getDeclaredField("enricherResolved");
+        enricherResolved.setAccessible(true);
+        enricherResolved.set(holder, false);
     }
 
     /**
