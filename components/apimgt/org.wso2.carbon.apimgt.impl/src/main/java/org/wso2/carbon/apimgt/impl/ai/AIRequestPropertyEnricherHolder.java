@@ -36,7 +36,7 @@ import java.util.Map;
  * {@link #resolveProperties(AIRequestContext, PropertyResolver)}.
  * <p>
  * The implementation class is read from the {@code propertyEnricherImpl} configuration under {@code [apim.ai]}. When it
- * is not configured, or cannot be loaded, {@link DefaultAIRequestPropertyEnricher} is used, which adds no properties.
+ * is not configured, or cannot be loaded, no enricher is held at all and every payload is dispatched unchanged.
  * <p>
  * This class knows nothing about the individual AI assistance operations, so supporting a new one never requires
  * changing it. See {@link #resolveProperties(AIRequestContext, PropertyResolver)}.
@@ -51,10 +51,18 @@ public class AIRequestPropertyEnricherHolder {
     private static volatile AIRequestPropertyEnricherHolder instance;
 
     /**
-     * Resolved enricher. Left {@code null} while the API Manager configuration is not yet available so that resolution
-     * is retried on a later request instead of permanently falling back to the default.
+     * Resolved enricher, or {@code null} when none is configured or the configured one could not be loaded. Meaningful
+     * only once {@link #enricherResolved} is set.
      */
     private volatile AIRequestPropertyEnricher enricher;
+
+    /**
+     * Set once the API Manager configuration has been read, whether or not that yielded an enricher. Left false while
+     * the configuration is not yet available, so that resolution is retried on a later request rather than permanently
+     * caching "no enricher"; and set even when no enricher is configured, so that the common case is resolved once
+     * instead of on every request.
+     */
+    private volatile boolean enricherResolved;
 
     private AIRequestPropertyEnricherHolder() {
 
@@ -134,43 +142,50 @@ public class AIRequestPropertyEnricherHolder {
      * Not exposed on purpose. Callers go through {@link #resolveProperties(AIRequestContext, PropertyResolver)} so that
      * the {@code null} check and the failure handling cannot be forgotten at a call site.
      *
-     * @return the enricher instance, or {@code null} when the API Manager configuration is not yet available and
-     * resolution has to be retried later.
+     * @return the enricher instance, or {@code null} when none is configured, the configured one could not be loaded,
+     * or the API Manager configuration is not yet available and resolution has to be retried later.
      */
     private AIRequestPropertyEnricher getEnricher() {
 
-        AIRequestPropertyEnricher resolved = enricher;
-        if (resolved == null) {
-            synchronized (this) {
-                resolved = enricher;
-                if (resolved == null) {
-                    resolved = loadEnricher();
-                    enricher = resolved;
-                }
-            }
+        if (enricherResolved) {
+            return enricher;
         }
-        return resolved;
+        synchronized (this) {
+            if (enricherResolved) {
+                return enricher;
+            }
+            APIManagerConfigurationService configurationService =
+                    ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
+            APIManagerConfiguration configuration =
+                    configurationService == null ? null : configurationService.getAPIManagerConfiguration();
+            if (configuration == null) {
+                // Deliberately leaves enricherResolved false so that a later request retries, rather than caching
+                // "no enricher" for the lifetime of the server because one early request arrived before startup
+                // registered the configuration service.
+                log.debug("API Manager configuration is not available yet. Deferring AI request property enricher "
+                        + "initialization.");
+                return null;
+            }
+            enricher = loadEnricher(configuration.getAIRequestPropertyEnricherImpl());
+            enricherResolved = true;
+            return enricher;
+        }
     }
 
-    private AIRequestPropertyEnricher loadEnricher() {
+    /**
+     * @param implClass the configured implementation class name, which may be null or blank
+     * @return the enricher instance, or {@code null} when none is configured or the configured one could not be loaded.
+     * No no-op stand in is created: {@link #resolveProperties(AIRequestContext, PropertyResolver)} already treats a
+     * missing enricher as "add no properties", so a null enricher and one that returns empty maps are indistinguishable
+     * to a caller.
+     */
+    private AIRequestPropertyEnricher loadEnricher(String implClass) {
 
-        APIManagerConfigurationService configurationService =
-                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
-        APIManagerConfiguration configuration =
-                configurationService == null ? null : configurationService.getAPIManagerConfiguration();
-        if (configuration == null) {
-            log.debug("API Manager configuration is not available yet. Deferring AI request property enricher "
-                    + "initialization.");
-            return null;
-        }
-
-        String implClass = configuration.getAIRequestPropertyEnricherImpl();
         if (StringUtils.isBlank(implClass)) {
             if (log.isDebugEnabled()) {
-                log.debug("No AI request property enricher configured. Using "
-                        + DefaultAIRequestPropertyEnricher.class.getName());
+                log.debug("No AI request property enricher configured");
             }
-            return new DefaultAIRequestPropertyEnricher();
+            return null;
         }
 
         try {
@@ -180,19 +195,19 @@ public class AIRequestPropertyEnricherHolder {
             return loaded;
         } catch (ClassCastException e) {
             log.error("Configured AI request property enricher " + implClass + " does not implement "
-                    + AIRequestPropertyEnricher.class.getName() + ". Falling back to "
-                    + DefaultAIRequestPropertyEnricher.class.getName(), e);
+                    + AIRequestPropertyEnricher.class.getName()
+                    + ". AI service request payloads are dispatched without additional properties.", e);
         } catch (Exception e) {
-            log.error("Error while initializing the AI request property enricher: " + implClass + ". Falling back to "
-                    + DefaultAIRequestPropertyEnricher.class.getName(), e);
+            log.error("Error while initializing the AI request property enricher: " + implClass
+                    + ". AI service request payloads are dispatched without additional properties.", e);
         } catch (LinkageError e) {
             // Loading the class runs its static initializer and links it, which raises errors rather than exceptions,
             // for example ExceptionInInitializerError from a failing static initializer, NoClassDefFoundError from a
             // partially deployed extension or UnsupportedClassVersionError from one built for a newer Java version.
             // These are absorbed here so that a broken extension can never fail an AI request.
-            log.error("Error while loading the AI request property enricher: " + implClass + ". Falling back to "
-                    + DefaultAIRequestPropertyEnricher.class.getName(), e);
+            log.error("Error while loading the AI request property enricher: " + implClass
+                    + ". AI service request payloads are dispatched without additional properties.", e);
         }
-        return new DefaultAIRequestPropertyEnricher();
+        return null;
     }
 }

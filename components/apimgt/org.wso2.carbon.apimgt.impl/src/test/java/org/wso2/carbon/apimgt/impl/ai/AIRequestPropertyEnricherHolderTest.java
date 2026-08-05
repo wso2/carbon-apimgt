@@ -180,23 +180,37 @@ public class AIRequestPropertyEnricherHolderTest {
     }
 
     @Test
-    public void testUnconfiguredEnricherFallsBackToDefault() throws Exception {
+    public void testUnconfiguredEnricherHoldsNoEnricher() throws Exception {
 
         Mockito.when(configuration.getAIRequestPropertyEnricherImpl()).thenReturn(null);
 
         Assert.assertTrue("An unconfigured enricher must resolve no properties", resolveMarketplaceChat().isEmpty());
-        Assert.assertTrue("The no-op default enricher must be used",
-                cachedEnricher() instanceof DefaultAIRequestPropertyEnricher);
+        Assert.assertNull("No enricher must be held when none is configured", cachedEnricher());
     }
 
     @Test
-    public void testBlankEnricherConfigurationFallsBackToDefault() throws Exception {
+    public void testBlankEnricherConfigurationHoldsNoEnricher() throws Exception {
 
         Mockito.when(configuration.getAIRequestPropertyEnricherImpl()).thenReturn("   ");
 
         Assert.assertTrue("A blank configuration must resolve no properties", resolveMarketplaceChat().isEmpty());
-        Assert.assertTrue("The no-op default enricher must be used",
-                cachedEnricher() instanceof DefaultAIRequestPropertyEnricher);
+        Assert.assertNull("No enricher must be held when none is configured", cachedEnricher());
+    }
+
+    /**
+     * "No enricher configured" is the default state of a deployment, and a null enricher cannot itself record that
+     * resolution already happened. This pins that it is still resolved once rather than on every AI request.
+     */
+    @Test
+    public void testUnconfiguredEnricherIsResolvedOnlyOnce() {
+
+        Mockito.when(configuration.getAIRequestPropertyEnricherImpl()).thenReturn(null);
+
+        resolveMarketplaceChat();
+        resolveMarketplaceChat();
+        resolveMarketplaceChat();
+
+        Mockito.verify(configuration, Mockito.times(1)).getAIRequestPropertyEnricherImpl();
     }
 
     @Test
@@ -210,46 +224,42 @@ public class AIRequestPropertyEnricherHolderTest {
     }
 
     @Test
-    public void testMissingEnricherClassFallsBackToDefault() throws Exception {
+    public void testMissingEnricherClassHoldsNoEnricher() throws Exception {
 
         Mockito.when(configuration.getAIRequestPropertyEnricherImpl()).thenReturn("com.acme.NoSuchEnricher");
 
         Assert.assertTrue("A missing class must resolve no properties", resolveMarketplaceChat().isEmpty());
-        Assert.assertTrue("A missing class must fall back to the no-op default enricher",
-                cachedEnricher() instanceof DefaultAIRequestPropertyEnricher);
+        Assert.assertNull("A missing class must leave no enricher held", cachedEnricher());
     }
 
     @Test
-    public void testClassNotImplementingTheInterfaceFallsBackToDefault() throws Exception {
+    public void testClassNotImplementingTheInterfaceHoldsNoEnricher() throws Exception {
 
         Mockito.when(configuration.getAIRequestPropertyEnricherImpl()).thenReturn(NotAnEnricher.class.getName());
 
         Assert.assertTrue("A class of the wrong type must resolve no properties", resolveMarketplaceChat().isEmpty());
-        Assert.assertTrue("A class of the wrong type must fall back to the no-op default enricher",
-                cachedEnricher() instanceof DefaultAIRequestPropertyEnricher);
+        Assert.assertNull("A class of the wrong type must leave no enricher held", cachedEnricher());
     }
 
     @Test
-    public void testEnricherWithoutDefaultConstructorFallsBackToDefault() throws Exception {
+    public void testEnricherWithoutDefaultConstructorHoldsNoEnricher() throws Exception {
 
         Mockito.when(configuration.getAIRequestPropertyEnricherImpl())
                 .thenReturn(NoDefaultConstructorEnricher.class.getName());
 
         Assert.assertTrue("A class without a no-argument constructor must resolve no properties",
                 resolveMarketplaceChat().isEmpty());
-        Assert.assertTrue("A class without a no-argument constructor must fall back to the no-op default enricher",
-                cachedEnricher() instanceof DefaultAIRequestPropertyEnricher);
+        Assert.assertNull("A class without a no-argument constructor must leave no enricher held", cachedEnricher());
     }
 
     @Test
-    public void testEnricherThrowingFromConstructorFallsBackToDefault() throws Exception {
+    public void testEnricherThrowingFromConstructorHoldsNoEnricher() throws Exception {
 
         Mockito.when(configuration.getAIRequestPropertyEnricherImpl())
                 .thenReturn(ConstructorFailingEnricher.class.getName());
 
         Assert.assertTrue("A constructor failure must resolve no properties", resolveMarketplaceChat().isEmpty());
-        Assert.assertTrue("A constructor failure must fall back to the no-op default enricher",
-                cachedEnricher() instanceof DefaultAIRequestPropertyEnricher);
+        Assert.assertNull("A constructor failure must leave no enricher held", cachedEnricher());
     }
 
     /**
@@ -259,15 +269,14 @@ public class AIRequestPropertyEnricherHolderTest {
      * {@code resolveProperties}.
      */
     @Test
-    public void testEnricherWithFailingStaticInitializerFallsBackToDefault() throws Exception {
+    public void testEnricherWithFailingStaticInitializerHoldsNoEnricher() throws Exception {
 
         Mockito.when(configuration.getAIRequestPropertyEnricherImpl())
                 .thenReturn(StaticInitializerFailingEnricher.class.getName());
 
         Assert.assertTrue("A failing static initializer must resolve no properties",
                 resolveMarketplaceChat().isEmpty());
-        Assert.assertTrue("A failing static initializer must fall back to the no-op default enricher",
-                cachedEnricher() instanceof DefaultAIRequestPropertyEnricher);
+        Assert.assertNull("A failing static initializer must leave no enricher held", cachedEnricher());
     }
 
     @Test

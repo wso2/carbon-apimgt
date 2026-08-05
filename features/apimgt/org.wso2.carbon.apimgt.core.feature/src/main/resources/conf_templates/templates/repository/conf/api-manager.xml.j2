@@ -2121,7 +2121,9 @@
                 <Property name="{{key}}">{{value}}</Property>
                 {% endfor %}
           </VectorDBProvider>
+          {% if apim.ai.property_enricher_impl is defined %}
           <PropertyEnricherImpl>{{apim.ai.property_enricher_impl}}</PropertyEnricherImpl>
+          {% endif %}
 
           <!-- Azure User-Managed Identity (UMI) Token Provider Configuration -->
           <AzureUMI>
