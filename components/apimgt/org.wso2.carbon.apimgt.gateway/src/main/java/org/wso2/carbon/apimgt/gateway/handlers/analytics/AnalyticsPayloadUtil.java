@@ -1,0 +1,489 @@
+/*
+ *  Copyright (c) 2026, WSO2 LLC. (http://www.wso2.com) All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
+
+package org.wso2.carbon.apimgt.gateway.handlers.analytics;
+
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.soap.SOAPBody;
+import org.apache.axiom.soap.SOAPEnvelope;
+import org.apache.axis2.transport.base.BaseConstants;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpHeaders;
+import org.apache.synapse.MessageContext;
+import org.apache.synapse.commons.json.JsonUtil;
+import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.apache.synapse.transport.passthru.PassThroughConstants;
+import org.apache.synapse.transport.passthru.util.RelayUtils;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+
+import javax.xml.stream.XMLStreamException;
+
+import static org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS;
+
+/**
+ * Utility for capturing the request/response payload (body) for analytics publishing.
+ *
+ * <p>Body capture is an opt-in feature (gated by the {@code send_payloads} analytics property) because it
+ * forces the pass-through message to be built into memory and captures potentially sensitive data.
+ * All content types are captured except those excluded by {@link #isExcludedContentType} — streaming
+ * ({@code text/event-stream}), {@code multipart/*}, and {@code application/x-www-form-urlencoded}.
+ * JSON and text payloads are captured as-is; binary payloads
+ * are Base64-encoded (mirroring the Moesif standard, where the publisher tags them
+ * {@code transferEncoding=base64}). A payload larger than the configurable size limit is dropped
+ * (not truncated) so the publisher only ever receives a whole, valid body or nothing; the backend
+ * always receives the full body regardless.</p>
+ *
+ * <p><b>Re-serialization caveat:</b> capturing a body requires building the pass-through message
+ * ({@link RelayUtils#buildMessage}), which sets {@code MESSAGE_BUILDER_INVOKED} and makes the engine
+ * re-serialize the built message when forwarding it. The forwarded body stays semantically equivalent
+ * but is not guaranteed byte-identical (whitespace, attribute/namespace ordering, JSON key formatting,
+ * chunking), so a signature computed over the raw bytes (JWS, an HMAC-signed body, WS-Security) may
+ * fail to verify at the recipient while {@code send_payloads} is enabled.</p>
+ */
+public final class AnalyticsPayloadUtil {
+
+    private static final Log log = LogFactory.getLog(AnalyticsPayloadUtil.class);
+
+    // Guards the invalid-payload_size_limit warning so a misconfigured value is logged once rather than
+    // on every capture attempt (getPayloadSizeLimit is called per request/response).
+    private static volatile boolean invalidLimitWarned = false;
+
+    // Header names whose values carry credentials or session state and must never be published to
+    // analytics (matched case-insensitively): the default Authorization/ApiKey headers plus
+    // Cookie/Set-Cookie. A per-API custom auth-header name is not resolvable at this layer and remains
+    // a known gap.
+    private static final Set<String> SENSITIVE_HEADERS = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+
+    static {
+        SENSITIVE_HEADERS.add(APIConstants.AUTHORIZATION_HEADER_DEFAULT);
+        SENSITIVE_HEADERS.add(APIConstants.API_KEY_HEADER_DEFAULT);
+        SENSITIVE_HEADERS.add(APIConstants.COOKIE);
+        SENSITIVE_HEADERS.add("Set-Cookie");
+    }
+
+    private AnalyticsPayloadUtil() {
+    }
+
+    /**
+     * Whether a header carries credentials or session state and so must never be published to
+     * analytics. Matched case-insensitively. Shared by the request-header capture
+     * ({@code AnalyticsMetricsHandler}) and the response-header publish
+     * ({@code SynapseAnalyticsDataProvider}) so the two directions cannot drift.
+     *
+     * @param name the header name
+     * @return {@code true} if the header must be stripped before publishing
+     */
+    public static boolean isSensitiveHeader(String name) {
+        return name != null && SENSITIVE_HEADERS.contains(name);
+    }
+
+    /**
+     * Holds a captured body together with its Moesif transfer-encoding hint.
+     * {@code transferEncoding} is {@code "base64"} for pre-encoded binary payloads and {@code null}
+     * for JSON/text (the publisher decides JSON-vs-base64 for those via Moesif's {@code BodyParser}).
+     */
+    public static class CapturedBody {
+        private final String body;
+        private final String transferEncoding;
+
+        CapturedBody(String body, String transferEncoding) {
+            this.body = body;
+            this.transferEncoding = transferEncoding;
+        }
+
+        public String getBody() {
+            return body;
+        }
+
+        public String getTransferEncoding() {
+            return transferEncoding;
+        }
+    }
+
+    /**
+     * Whether request/response body capture is enabled via the {@code send_payloads} analytics property
+     * (named to match the sibling {@code send_headers} option). Requires analytics to be enabled — when
+     * analytics is off nothing is published, so capturing (and building) a payload would be pure waste.
+     * Defaults to {@code false}.
+     *
+     * @return true if body capture is enabled
+     */
+    public static boolean shouldSendPayloads() {
+        if (!APIUtil.isAnalyticsEnabled()) {
+            return false;
+        }
+        Map<String, String> configs = APIManagerConfiguration.getAnalyticsProperties();
+        return configs != null && Boolean.parseBoolean(configs.get(Constants.SEND_PAYLOAD));
+    }
+
+    /**
+     * Maximum number of bytes captured per body, read from the {@code payload_size_limit} analytics
+     * property. Falls back to {@link Constants#DEFAULT_PAYLOAD_SIZE_LIMIT_BYTES} when unset or invalid.
+     *
+     * @return the payload size limit in bytes
+     */
+    public static int getPayloadSizeLimit() {
+        Map<String, String> configs = APIManagerConfiguration.getAnalyticsProperties();
+        if (configs != null && configs.get(Constants.PAYLOAD_SIZE_LIMIT) != null) {
+            try {
+                int limit = Integer.parseInt(configs.get(Constants.PAYLOAD_SIZE_LIMIT));
+                if (limit > 0) {
+                    if (invalidLimitWarned) {
+                        invalidLimitWarned = false;
+                    }
+                    return limit;
+                }
+                // A non-positive limit would silently drop every body (and break size math), so treat
+                // it as invalid rather than honouring it.
+                warnInvalidLimitOnce("Non-positive " + Constants.PAYLOAD_SIZE_LIMIT
+                        + " analytics property value. Using default " + Constants.DEFAULT_PAYLOAD_SIZE_LIMIT_BYTES);
+            } catch (NumberFormatException e) {
+                warnInvalidLimitOnce("Invalid " + Constants.PAYLOAD_SIZE_LIMIT
+                        + " analytics property value. Using default " + Constants.DEFAULT_PAYLOAD_SIZE_LIMIT_BYTES);
+            }
+        }
+        return Constants.DEFAULT_PAYLOAD_SIZE_LIMIT_BYTES;
+    }
+
+    /**
+     * Logs the invalid-{@code payload_size_limit} warning at most once per stretch of misconfiguration,
+     * so a bad value does not flood the logs on every per-request/response capture attempt. The flag is
+     * reset once a valid limit is read again, so a later re-misconfiguration is warned about afresh.
+     */
+    private static void warnInvalidLimitOnce(String message) {
+        if (!invalidLimitWarned) {
+            invalidLimitWarned = true;
+            log.warn(message);
+        }
+    }
+
+    /**
+     * Whether to capture payloads that do not declare a {@code Content-Length} (e.g. chunked
+     * transfer-encoding), read from the {@code capture_payloads_without_content_length} analytics
+     * property. Defaults to {@code false}.
+     *
+     * <p>Such a body cannot be size-checked before {@link RelayUtils#buildMessage} materializes it in
+     * full, so capturing a large chunked body would buffer the whole thing into memory (an OOM risk
+     * under load) only to drop it afterwards if it exceeds {@code payload_size_limit}. It is therefore
+     * off by default: with the flag off these bodies are skipped (never built), so the default
+     * configuration is memory-safe. An operator who needs them and has headroom can opt in, accepting
+     * the memory cost. Applies symmetrically to request and response capture.</p>
+     *
+     * @return true if bodies without a declared Content-Length should be captured
+     */
+    public static boolean shouldCapturePayloadsWithoutContentLength() {
+        Map<String, String> configs = APIManagerConfiguration.getAnalyticsProperties();
+        return configs != null
+                && Boolean.parseBoolean(configs.get(Constants.CAPTURE_PAYLOADS_WITHOUT_CONTENT_LENGTH));
+    }
+
+    /**
+     * Builds the message (materializing the pass-through stream) and returns the captured body along
+     * with its transfer-encoding hint. Streaming ({@code text/event-stream}) and {@code multipart/*}
+     * payloads are skipped. JSON and text are returned verbatim with a {@code null} encoding; binary
+     * payloads are Base64-encoded with encoding {@code "base64"}.
+     *
+     * <p>A body larger than {@code sizeLimit} is <b>dropped</b> (returns {@code null}) rather than
+     * truncated, so the publisher never has to deal with a partial/invalid body. Where the payload
+     * advertises its size via a {@code Content-Length} header the check is applied <b>before</b>
+     * {@link RelayUtils#buildMessage} so an oversized body is never buffered into memory or
+     * re-serialized. A body with no {@code Content-Length} (e.g. chunked transfer-encoding) cannot be
+     * size-checked before building, so by default it is <b>skipped</b> (never built) to keep the
+     * default configuration memory-safe; set {@code capture_payloads_without_content_length=true} to
+     * capture it anyway (it is then built in full and dropped afterwards if it exceeds the limit,
+     * accepting the memory cost). See {@link #shouldCapturePayloadsWithoutContentLength()}.</p>
+     *
+     * <p>Works for both the request (called from {@code handleRequestOutFlow}, just before the backend
+     * send) and the response (called at event-collection time). When a body is captured,
+     * {@link RelayUtils#buildMessage} sets {@code MESSAGE_BUILDER_INVOKED}, so the pass-through sender
+     * re-serializes the built envelope to the backend — forwarding is preserved. This is the same
+     * read-only build pattern used by the AI mediator and the threat-protection/schema validators.
+     * Requests with no entity body (GET/DELETE) are skipped so they are left byte-identical.</p>
+     *
+     * <p>The limit is compared against bytes throughout: the declared {@code Content-Length} for the
+     * pre-build gate, the decoded byte count for the binary path, and the UTF-8 encoded byte length
+     * for text/JSON/XML.</p>
+     *
+     * <p>When {@code send_payloads} is enabled but a body is nonetheless skipped or dropped, the reason
+     * is logged at debug level (keyed by {@code direction}) so operators are not left wondering why a
+     * body is missing from Moesif.</p>
+     *
+     * @param messageContext the Synapse message context (request or response)
+     * @param sizeLimit      maximum number of bytes to capture
+     * @param direction      {@code "request"} or {@code "response"}, used only for debug log messages
+     * @return the captured body, or {@code null} if there is nothing capturable or it exceeds the limit
+     */
+    public static CapturedBody extractPayload(MessageContext messageContext, int sizeLimit, String direction) {
+        try {
+            org.apache.axis2.context.MessageContext axis2MC =
+                    ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+
+            // Nothing to capture (and nothing to build) for entity-less requests such as GET/DELETE.
+            if (Boolean.TRUE.equals(axis2MC.getProperty(PassThroughConstants.NO_ENTITY_BODY))) {
+                if (log.isDebugEnabled()) {
+                    log.debug("No " + direction + " body captured for analytics: message has no entity body "
+                            + "(e.g. GET/DELETE).");
+                }
+                return null;
+            }
+
+            String contentType = getContentType(axis2MC);
+            if (isExcludedContentType(contentType)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("No " + direction + " body captured for analytics: content type '" + contentType
+                            + "' is excluded (streaming/multipart bodies are never captured).");
+                }
+                return null;
+            }
+
+            // Safety filter: only build content types that have an explicitly registered message builder.
+            // A content type with no registered builder falls back to the default XML/SOAP builder, which
+            // fails on binary data (e.g. an image); and because building consumes the pass-through pipe,
+            // that failure would also corrupt the body being forwarded (to the backend for a request, or the
+            // client for a response). So leave any unknown content type unbuilt — it is passed through
+            // untouched and is simply not captured.
+            if (!hasRegisteredBuilder(axis2MC, contentType)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("No " + direction + " body captured for analytics: no message builder is "
+                            + "registered for content type '" + contentType + "', so the message is left "
+                            + "unbuilt (passed through untouched) to avoid corrupting the payload.");
+                }
+                return null;
+            }
+
+            // Pre-build gate: if the payload advertises its size and it exceeds the limit, drop it now
+            // without building — so an oversized body is never buffered into memory or re-serialized.
+            long declaredLength = getDeclaredContentLength(axis2MC);
+            if (declaredLength > sizeLimit) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Dropping " + direction + " body from analytics: declared Content-Length "
+                            + declaredLength + " bytes exceeds " + Constants.PAYLOAD_SIZE_LIMIT + " of " + sizeLimit
+                            + "; body not built. Increase " + Constants.PAYLOAD_SIZE_LIMIT + " to capture it.");
+                }
+                return null;
+            }
+
+            // No declared Content-Length (e.g. chunked transfer-encoding): the size cannot be bounded
+            // before building, so building here would materialize the whole body in memory (an OOM risk
+            // under load). Skip it unless the operator has explicitly opted in — UNLESS the message was
+            // already built earlier in the flow (a content-aware mediator, or getResponseSize with
+            // build_response_message=true). In that case the memory has already been spent, so skipping
+            // would only drop the body for free; capture it. Off by default keeps the default
+            // configuration memory-safe; applies symmetrically to request and response.
+            boolean alreadyBuilt =
+                    Boolean.TRUE.equals(axis2MC.getProperty(PassThroughConstants.MESSAGE_BUILDER_INVOKED));
+            if (declaredLength < 0 && !alreadyBuilt && !shouldCapturePayloadsWithoutContentLength()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("No " + direction + " body captured for analytics: no Content-Length header "
+                            + "(e.g. chunked transfer-encoding), so the body size cannot be bounded before "
+                            + "building. Set " + Constants.CAPTURE_PAYLOADS_WITHOUT_CONTENT_LENGTH
+                            + "=true to capture it (materializes the full body in memory).");
+                }
+                return null;
+            }
+
+            RelayUtils.buildMessage(axis2MC);
+
+            // JSON: return the text as-is; the publisher's BodyParser renders it as a structured object.
+            if (JsonUtil.hasAJsonPayload(axis2MC)) {
+                return capture(JsonUtil.jsonPayloadToString(axis2MC), sizeLimit, direction, "JSON");
+            }
+
+            SOAPEnvelope env = axis2MC.getEnvelope();
+            if (env == null || env.getBody() == null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("No " + direction + " body captured for analytics: message has no SOAP body.");
+                }
+                return null;
+            }
+            SOAPBody soapBody = env.getBody();
+            OMElement firstElement = soapBody.getFirstElement();
+            if (firstElement == null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("No " + direction + " body captured for analytics: message body is empty.");
+                }
+                return null;
+            }
+            env.buildWithAttachments();
+
+            if (BaseConstants.DEFAULT_BINARY_WRAPPER.equals(firstElement.getQName())) {
+                // Binary payload: the wrapper's text is the Base64 of the raw bytes. Decode, and drop
+                // the whole body if the raw bytes exceed the limit; otherwise pass the bytes through.
+                byte[] bytes = Base64.decodeBase64(firstElement.getText());
+                if (bytes.length > sizeLimit) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Dropping " + direction + " binary body from analytics: " + bytes.length
+                                + " bytes exceeds " + Constants.PAYLOAD_SIZE_LIMIT + " of " + sizeLimit
+                                + ". Increase " + Constants.PAYLOAD_SIZE_LIMIT + " to capture it.");
+                    }
+                    return null;
+                }
+                return new CapturedBody(Base64.encodeBase64String(bytes), Constants.TRANSFER_ENCODING_BASE64);
+            } else if (BaseConstants.DEFAULT_TEXT_WRAPPER.equals(firstElement.getQName())) {
+                // Plain text payload.
+                return capture(firstElement.getText(), sizeLimit, direction, "text");
+            } else {
+                // XML / SOAP payload: serialise every child element of the body so a multi-element body
+                // is not silently truncated to its first element. For the common single-element REST XML
+                // body this is identical to the first element's serialisation. Deliberately not
+                // soapBody.toString(), which would wrap the content in a synthetic <soapenv:Body>.
+                StringBuilder xml = new StringBuilder();
+                Iterator<OMElement> childElements = soapBody.getChildElements();
+                while (childElements.hasNext()) {
+                    xml.append(childElements.next().toString());
+                }
+                return capture(xml.toString(), sizeLimit, direction, "XML/SOAP");
+            }
+        } catch (IOException | XMLStreamException e) {
+            log.error("Error occurred while capturing the " + direction + " message payload for analytics", e);
+            return null;
+        } catch (RuntimeException e) {
+            // Fail safe: payload capture must never disrupt the request/response flow.
+            log.error("Unexpected error while capturing the " + direction + " message payload for analytics", e);
+            return null;
+        }
+    }
+
+    /**
+     * Wraps a text/JSON/XML payload, dropping it (returning {@code null}) when its UTF-8 encoded size
+     * exceeds {@code sizeLimit} bytes so only a whole body is ever published. Measuring bytes (not
+     * {@link String#length()}, which counts UTF-16 code units) keeps this consistent with the
+     * byte-based pre-build {@code Content-Length} gate and binary path, and with the byte semantics of
+     * {@code payload_size_limit}. A drop is logged at debug level (keyed by {@code direction}/
+     * {@code kind}) so a missing body can be explained.
+     */
+    private static CapturedBody capture(String payload, int sizeLimit, String direction, String kind) {
+        if (payload == null) {
+            return null;
+        }
+        int byteLength = payload.getBytes(StandardCharsets.UTF_8).length;
+        if (byteLength > sizeLimit) {
+            if (log.isDebugEnabled()) {
+                log.debug("Dropping " + direction + " " + kind + " body from analytics: " + byteLength
+                        + " bytes exceeds " + Constants.PAYLOAD_SIZE_LIMIT + " of " + sizeLimit
+                        + ". Increase " + Constants.PAYLOAD_SIZE_LIMIT + " to capture it.");
+            }
+            return null;
+        }
+        return new CapturedBody(payload, null);
+    }
+
+    /**
+     * The declared body size from the {@code Content-Length} transport header, or {@code -1} when it is
+     * absent (e.g. chunked transfer-encoding) or unparseable. Read before building so an oversized body
+     * can be skipped without buffering it. The transport-headers map is case-insensitive, matching the
+     * exact-case lookup idiom used elsewhere (e.g. {@code getRequestSize}/{@code getResponseSize}).
+     */
+    private static long getDeclaredContentLength(org.apache.axis2.context.MessageContext axis2MC) {
+        Object headersObj = axis2MC.getProperty(TRANSPORT_HEADERS);
+        if (headersObj instanceof Map) {
+            Object contentLength = ((Map) headersObj).get(HttpHeaders.CONTENT_LENGTH);
+            if (contentLength != null) {
+                try {
+                    return Long.parseLong(contentLength.toString().trim());
+                } catch (NumberFormatException e) {
+                    return -1;
+                }
+            }
+        }
+        return -1;
+    }
+
+    private static String getContentType(org.apache.axis2.context.MessageContext axis2MC) {
+        Object headersObj = axis2MC.getProperty(TRANSPORT_HEADERS);
+        if (headersObj instanceof Map) {
+            Object contentType = ((Map) headersObj).get(HttpHeaders.CONTENT_TYPE);
+            if (contentType != null) {
+                return contentType.toString();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Content types that must never be captured, left to stream through untouched:
+     * <ul>
+     *   <li>{@code text/event-stream} (SSE) and {@code multipart/*} — no single materializable body.</li>
+     *   <li>{@code application/x-www-form-urlencoded} — Axis2 materializes this into an operation-named
+     *       XML tree (not a text/binary wrapper), so it would be published as XML whose representation
+     *       disagrees with its {@code Content-Type}; building it also re-serializes the form to the
+     *       backend via the form formatter (a forwarding risk). Excluded on both counts.</li>
+     * </ul>
+     */
+    private static boolean isExcludedContentType(String contentType) {
+        if (contentType == null) {
+            return false;
+        }
+        String lower = contentType.toLowerCase(Locale.ROOT);
+        return lower.startsWith("text/event-stream")
+                || lower.startsWith("multipart/")
+                || lower.startsWith("application/x-www-form-urlencoded");
+    }
+
+    /**
+     * Whether the Axis2 message-builder registry has a builder explicitly registered for this content
+     * type. This is the signal for "known, safely buildable content": a registered builder yields a
+     * proper representation (JSON/text/XML, or a binary wrapper for the relay builder), whereas a content
+     * type with <b>no</b> registered builder falls back to the default XML/SOAP builder, which throws on
+     * binary data (e.g. an image). Building also consumes the pass-through pipe, so such a failure would
+     * corrupt the body being forwarded (to the backend for a request, or the client for a response) —
+     * hence unknown content types must be left unbuilt.
+     *
+     * <p>Consulting the live registry (rather than a hard-coded list) means the filter automatically
+     * respects the deployment's {@code axis2.xml} and any operator-registered custom builders. Content-type
+     * parameters (e.g. {@code ; charset=utf-8}) are stripped before the lookup, mirroring how the
+     * transport selects a builder.</p>
+     *
+     * @param axis2MC     the Axis2 message context
+     * @param contentType the raw request/response {@code Content-Type} (may include parameters)
+     * @return {@code true} only if a builder is registered for the content type
+     */
+    private static boolean hasRegisteredBuilder(org.apache.axis2.context.MessageContext axis2MC,
+                                                String contentType) {
+        if (contentType == null) {
+            return false;
+        }
+        String type = contentType;
+        int paramIndex = type.indexOf(';');
+        if (paramIndex >= 0) {
+            type = type.substring(0, paramIndex);
+        }
+        type = type.trim().toLowerCase(Locale.ROOT);
+        if (type.isEmpty()) {
+            return false;
+        }
+        try {
+            // false = do not fall back to a default builder; return null when nothing is registered.
+            return axis2MC.getConfigurationContext().getAxisConfiguration().getMessageBuilder(type, false) != null;
+        } catch (RuntimeException e) {
+            // If the registry cannot be consulted for any reason, fail safe: do not build.
+            return false;
+        }
+    }
+}
