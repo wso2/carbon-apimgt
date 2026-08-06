@@ -669,6 +669,7 @@ public enum ExceptionCodes implements ErrorHandler {
     AI_SERVICE_PROVIDER_INVALID_METADATA_IDENTIFIER(903104, "Invalid metadata identifier", 400, "%s"),
 
     DOCUMENT_NAME_ILLEGAL_CHARACTERS(902016, "Document name cannot contain illegal characters", 400, "Document name contains one or more illegal characters"),
+    DOCUMENT_INVALID_FILE_NAME(902062, "Invalid document file name", 400, "%s"),
 
     // Compliance related errors
     COMPLIANCE_VIOLATION_ERROR(903300, "Request does not adhere to governance standards", 400, "%s", false),
