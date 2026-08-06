@@ -23006,6 +23006,18 @@ public class ApiMgtDAO {
         return subscribedAPIs;
     }
 
+    /**
+     * Retrieves all the subscriptions of the given application, including both plain API subscriptions and
+     * API Product subscriptions. Each returned {@link SubscribedAPI} is backed by the identifier type matching
+     * its subscription (APIIdentifier or APIProductIdentifier).
+     * <p>
+     * Unlike {@link #getSubscribedAPIsByApplication(Application)}, which filters out API Product subscriptions
+     * for backward compatibility with its existing callers, this method returns the complete set of subscriptions.
+     *
+     * @param application Application for which the subscriptions should be retrieved.
+     * @return a set of {@link SubscribedAPI} containing both API and API Product subscriptions of the application.
+     * @throws APIManagementException if an error occurs while retrieving the subscriptions.
+     */
     public Set<SubscribedAPI> getSubscribedAPIsAndAPIProductsByApplication(Application application)
             throws APIManagementException {
         Set<SubscribedAPI> subscribedAPIs = new LinkedHashSet<>();
