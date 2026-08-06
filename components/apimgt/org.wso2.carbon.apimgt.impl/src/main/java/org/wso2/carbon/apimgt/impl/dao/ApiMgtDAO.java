@@ -23006,6 +23006,44 @@ public class ApiMgtDAO {
         return subscribedAPIs;
     }
 
+    public Set<SubscribedAPI> getSubscribedAPIsAndAPIProductsByApplication(Application application)
+            throws APIManagementException {
+        Set<SubscribedAPI> subscribedAPIs = new LinkedHashSet<>();
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps =
+                     connection.prepareStatement(SQLConstants.GET_SUBSCRIBED_APIS_BY_APP_ID_SQL)) {
+            ps.setInt(1, application.getId());
+            try (ResultSet result = ps.executeQuery()) {
+                while (result.next()) {
+                    String apiType = result.getString("TYPE");
+                    SubscribedAPI subscribedAPI;
+                    if (APIConstants.API_PRODUCT.equalsIgnoreCase(apiType)) {
+                        APIProductIdentifier identifier = new APIProductIdentifier(
+                                APIUtil.replaceEmailDomain(result.getString("API_PROVIDER")),
+                                result.getString("API_NAME"), result.getString("API_VERSION"));
+                        identifier.setUuid(result.getString("API_UUID"));
+                        subscribedAPI = new SubscribedAPI(application.getSubscriber(), identifier);
+                    } else {
+                        APIIdentifier identifier = new APIIdentifier(APIUtil.replaceEmailDomain(result.getString
+                                ("API_PROVIDER")), result.getString("API_NAME"),
+                                result.getString("API_VERSION"));
+                        identifier.setUuid(result.getString("API_UUID"));
+                        subscribedAPI = new SubscribedAPI(application.getSubscriber(), identifier);
+                    }
+                    subscribedAPI.setApplication(application);
+                    subscribedAPI.setOrganization(result.getString("ORGANIZATION"));
+                    initSubscribedAPI(subscribedAPI, result);
+                    subscribedAPIs.add(subscribedAPI);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get SubscribedAPIs and API Products of application :"
+                    + application.getName(), e);
+        }
+        return subscribedAPIs;
+    }
+
     public Set<SubscribedAPI> getPaginatedSubscribedAPIsByApplication(Application application, Integer offset,
                                                                       Integer limit, String organization)
             throws APIManagementException {

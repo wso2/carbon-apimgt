@@ -2610,7 +2610,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             application = apiMgtDAO.getApplicationByUUID(uuid);
         }
         Set<APIKey> keyMappingsFromApplicationId = apiMgtDAO.getKeyMappingsFromApplicationId(application.getId());
-        Set<SubscribedAPI> subscribedAPIsByApplication = apiMgtDAO.getSubscribedAPIsByApplication(application);
+        Set<SubscribedAPI> subscribedAPIsByApplication =
+                apiMgtDAO.getSubscribedAPIsAndAPIProductsByApplication(application);
         boolean isTenantFlowStarted = false;
         int applicationId = application.getId();
 
@@ -2762,8 +2763,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                 subscribedAPI.getUUID(), subscribedAPI.getApiId(), subscribedAPI.getAPIUUId(),
                                 subscribedAPI.getApplication().getId(), subscribedAPI.getApplication().getUUID(),
                                 subscribedAPI.getTier().getName(), subscribedAPI.getSubCreatedStatus(),
-                                subscribedAPI.getAPIIdentifier().getApiName(),
-                                subscribedAPI.getAPIIdentifier().getVersion());
+                                subscribedAPI.getIdentifier().getName(),
+                                subscribedAPI.getIdentifier().getVersion());
                 APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
             }
         }
