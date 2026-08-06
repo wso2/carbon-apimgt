@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.throttling;
 
+import io.opentelemetry.api.trace.SpanKind;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
@@ -172,7 +173,7 @@ public class APIThrottleHandler extends AbstractHandler {
                     (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
             TelemetryTracer tracer = ServiceReferenceHolder.getInstance().getTelemetryTracer();
             throttlingLatencySpan = TelemetryUtil.startSpan(APIMgtGatewayConstants.THROTTLE_LATENCY,
-                    responseLatencySpan, tracer);
+                    responseLatencySpan, tracer, SpanKind.INTERNAL);
         } else if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =
                     (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
@@ -197,6 +198,8 @@ public class APIThrottleHandler extends AbstractHandler {
                     TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - executionStartTime));
             context.stop();
             if (TelemetryUtil.telemetryEnabled()) {
+                // set Http attributes right before finishing the span, so http.status.code is captured
+                GatewayUtils.setCommonHTTPAttributes(throttlingLatencySpan, messageContext);
                 TelemetryUtil.finishSpan(throttlingLatencySpan);
             } else if (Util.tracingEnabled()) {
                 Util.finishSpan(throttlingLatencyTracingSpan);
