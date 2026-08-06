@@ -498,10 +498,14 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
                     }
                 }
 
-                // Response headers via Axis2 transport property
+                // Response headers via Axis2 transport property. Strip credential/session headers
+                // first: on a fault path this map can still be the inbound request map, so publishing
+                // it raw would leak Authorization/ApiKey/Cookie. Copy before stripping so the live
+                // transport map is left untouched.
                 Object respHeadersObj = axis2.getAxis2MessageContext().getProperty(TRANSPORT_HEADERS);
                 if (respHeadersObj instanceof Map) {
-                    Map<String, Object> respHeaders = (Map<String, Object>) respHeadersObj;
+                    Map<String, Object> respHeaders = new LinkedHashMap<>((Map<String, Object>) respHeadersObj);
+                    respHeaders.keySet().removeIf(AnalyticsPayloadUtil::isSensitiveHeader);
                     Map<String, Object> maskedResp =
                             applyMask(respHeaders, parseMaskSet(getMaskProperties().get(RESPONSE_HEADER_MASK)));
                     if (!maskedResp.isEmpty()) {
@@ -1001,7 +1005,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         }
         for (Map.Entry<String, Object> e : headers.entrySet()) {
             String key = String.valueOf(e.getKey());
-            boolean masked =maskSet.contains(key.toLowerCase(java.util.Locale.ROOT));
+            boolean masked = maskSet.contains(key.toLowerCase(java.util.Locale.ROOT));
             out.put(key, masked ? MASK_VALUE : e.getValue());
         }
         return out;
