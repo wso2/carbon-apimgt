@@ -4996,7 +4996,12 @@ public class APIMappingUtil {
             }
             String awsSecretKeyValue =
                     (String) deploymentStage.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY);
-            if (StringUtils.isNotEmpty(awsSecretKeyValue)) {
+            // Only decrypt when the stored value is actually self-contained cipher text. In
+            // environment-credentials mode no secret is encrypted on the save path, so a stray
+            // non-empty value (e.g. a masked placeholder) would otherwise reach base64DecodeAndDecrypt
+            // and fail with a CryptoException. Mirrors the apiKeyValue handling above.
+            if (StringUtils.isNotEmpty(awsSecretKeyValue)
+                    && cryptoUtil.base64DecodeAndIsSelfContainedCipherText(awsSecretKeyValue)) {
                 deploymentStage.put(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY,
                         new String(cryptoUtil.base64DecodeAndDecrypt(awsSecretKeyValue)));
             }
