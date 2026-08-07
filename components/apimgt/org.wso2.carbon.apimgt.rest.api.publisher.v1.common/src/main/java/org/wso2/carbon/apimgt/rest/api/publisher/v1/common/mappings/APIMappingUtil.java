@@ -160,6 +160,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -1762,6 +1763,19 @@ public class APIMappingUtil {
                                         new String(cryptoUtil.base64DecodeAndDecrypt(awsSecretKey)));
                             }
                         }
+                        if (APIConstants.ENDPOINT_SECURITY_TYPE_GCP.equals(productionEndpointType)) {
+                            String serviceAccountKey = (String) productionEndpointSecurity.get(
+                                    APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY);
+                            // Only decrypt genuine ciphertext; a plaintext/already-decrypted key passes through
+                            // so API->DTO mapping never fails on a non-ciphertext value.
+                            if (StringUtils.isNotEmpty(serviceAccountKey)
+                                    && (cryptoUtil.isChunkedCipherText(serviceAccountKey)
+                                    || cryptoUtil.base64DecodeAndIsSelfContainedCipherText(serviceAccountKey))) {
+                                productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY,
+                                        new String(cryptoUtil.base64DecodeAndDecryptLargeData(serviceAccountKey),
+                                                StandardCharsets.UTF_8));
+                            }
+                        }
                         endpointSecurity.put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION,
                                 productionEndpointSecurity);
                         endpointConfigJson.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
@@ -1808,6 +1822,19 @@ public class APIMappingUtil {
                             if (StringUtils.isNotEmpty(awsSecretKey)) {
                                 sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY,
                                         new String(cryptoUtil.base64DecodeAndDecrypt(awsSecretKey)));
+                            }
+                        }
+                        if (APIConstants.ENDPOINT_SECURITY_TYPE_GCP.equals(sandboxEndpointType)) {
+                            String serviceAccountKey = (String) sandboxEndpointSecurity
+                                    .get(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY);
+                            // Only decrypt genuine ciphertext; a plaintext/already-decrypted key passes through
+                            // so API->DTO mapping never fails on a non-ciphertext value.
+                            if (StringUtils.isNotEmpty(serviceAccountKey)
+                                    && (cryptoUtil.isChunkedCipherText(serviceAccountKey)
+                                    || cryptoUtil.base64DecodeAndIsSelfContainedCipherText(serviceAccountKey))) {
+                                sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY,
+                                        new String(cryptoUtil.base64DecodeAndDecryptLargeData(serviceAccountKey),
+                                                StandardCharsets.UTF_8));
                             }
                         }
                         endpointSecurity.put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX,
@@ -4866,6 +4893,10 @@ public class APIMappingUtil {
                 if (sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY) != null) {
                     sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY, StringUtils.EMPTY);
                 }
+                if (sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY) != null) {
+                    sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY,
+                            StringUtils.EMPTY);
+                }
                 Object customParamsObj =
                         sandboxEndpointSecurity.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
                 if (customParamsObj != null) {
@@ -4895,6 +4926,10 @@ public class APIMappingUtil {
                 }
                 if (productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY) != null) {
                     productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY, StringUtils.EMPTY);
+                }
+                if (productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY) != null) {
+                    productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY,
+                            StringUtils.EMPTY);
                 }
                 Object customParamsObj =
                         productionEndpointSecurity.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
@@ -4999,6 +5034,18 @@ public class APIMappingUtil {
             if (StringUtils.isNotEmpty(awsSecretKeyValue)) {
                 deploymentStage.put(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY,
                         new String(cryptoUtil.base64DecodeAndDecrypt(awsSecretKeyValue)));
+            }
+            String gcpServiceAccountKeyValue =
+                    (String) deploymentStage.get(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY);
+            if (StringUtils.isNotEmpty(gcpServiceAccountKeyValue)) {
+                // Guard against plaintext / already-decrypted keys (which can occur for this field): only
+                // decrypt genuine ciphertext, otherwise pass the value through unchanged.
+                if (cryptoUtil.isChunkedCipherText(gcpServiceAccountKeyValue)
+                        || cryptoUtil.base64DecodeAndIsSelfContainedCipherText(gcpServiceAccountKeyValue)) {
+                    deploymentStage.put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY,
+                            new String(cryptoUtil.base64DecodeAndDecryptLargeData(gcpServiceAccountKeyValue),
+                                    StandardCharsets.UTF_8));
+                }
             }
 
             // In the API/MCP retrieval path, custom parameters are stored as a String.

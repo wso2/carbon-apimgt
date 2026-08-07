@@ -3182,6 +3182,7 @@ public final class APIUtil {
                     APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH,
                     APIConstants.ENDPOINT_SECURITY_TYPE_API_KEY,
                     APIConstants.ENDPOINT_SECURITY_TYPE_AWS,
+                    APIConstants.ENDPOINT_SECURITY_TYPE_GCP,
                     APIConstants.ENDPOINT_SECURITY_TYPE_UMI
             );
             if (validTypes.stream().noneMatch(type::equalsIgnoreCase)) {

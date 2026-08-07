@@ -74,10 +74,13 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
 import org.wso2.carbon.apimgt.spec.parser.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
+import org.wso2.carbon.core.util.CryptoException;
+import org.wso2.carbon.core.util.CryptoUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -1087,7 +1090,17 @@ public class TemplateBuilderUtil {
             String apiConfig = null;
             if (APIConstants.API_SUBTYPE_AI_API.equals(api.getSubtype())) {
 
-                Map<String, List<SimplifiedEndpoint>> groupedEndpoints = simplifyEndpoints(endpointList).stream()
+                List<SimplifiedEndpoint> simplifiedEndpointList;
+                try {
+                    simplifiedEndpointList = simplifyEndpoints(endpointList);
+                } catch (RuntimeException e) {
+                    // simplifyEndpoints surfaces a GCP service-account key decryption failure (corrupted
+                    // ciphertext) as an unchecked exception. Map it to APIManagementException here so it flows
+                    // through the standard API error path instead of bypassing it as a generic server error.
+                    throw new APIManagementException("Error while decrypting endpoint security for AI API: "
+                            + api.getUuid(), e);
+                }
+                Map<String, List<SimplifiedEndpoint>> groupedEndpoints = simplifiedEndpointList.stream()
                         .collect(Collectors.groupingBy(SimplifiedEndpoint::getDeploymentStage));
 
                 List<SimplifiedEndpoint> productionEndpoints = new ArrayList<>(
@@ -1203,9 +1216,33 @@ public class TemplateBuilderUtil {
         if (endpoints == null || endpoints.isEmpty()) {
             return new ArrayList<>();
         }
-        return endpoints.stream()
+        List<SimplifiedEndpoint> simplifiedEndpoints = endpoints.stream()
                 .map(SimplifiedEndpoint::new)
                 .collect(Collectors.toList());
+        // Last-mile decrypt for the gateway: the GCP service-account key is encrypted at rest, so decrypt it here
+        // so GCPOAuth2TokenInjector receives usable service-account JSON. base64DecodeAndDecryptLargeData routes
+        // on the storage format (single-shot or chunked); the guard lets plaintext/already-decrypted values pass
+        // through unchanged.
+        CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+        for (SimplifiedEndpoint simplifiedEndpoint : simplifiedEndpoints) {
+            String serviceAccountKey = simplifiedEndpoint.getServiceAccountKey();
+            if (StringUtils.isNotEmpty(serviceAccountKey)) {
+                try {
+                    if (cryptoUtil.isChunkedCipherText(serviceAccountKey)
+                            || cryptoUtil.base64DecodeAndIsSelfContainedCipherText(serviceAccountKey)) {
+                        simplifiedEndpoint.setServiceAccountKey(
+                                new String(cryptoUtil.base64DecodeAndDecryptLargeData(serviceAccountKey),
+                                        StandardCharsets.UTF_8));
+                    }
+                } catch (CryptoException e) {
+                    // Keep this public method free of checked exceptions (avoids a source/binary break for
+                    // callers). A decryption failure here is deploy-blocking, so surface it as unchecked.
+                    throw new RuntimeException("Error while decrypting the GCP service-account key for endpoint "
+                            + simplifiedEndpoint.getEndpointName(), e);
+                }
+            }
+        }
+        return simplifiedEndpoints;
     }
 
     private static void addWebsocketTopicMappings(API api, APIDTO apidto) {

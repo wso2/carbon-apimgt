@@ -53,6 +53,7 @@ public class EndpointSecurity {
     private String secretKey = null;
     private String region = null;
     private String service = null;
+    private String serviceAccountKey = null;
 
     private String customParameters = null;
 
@@ -89,6 +90,7 @@ public class EndpointSecurity {
         this.proxyConfigs = endpointSecurity.proxyConfigs;
         this.connectionTimeoutConfigType = endpointSecurity.connectionTimeoutConfigType;
         this.proxyConfigType = endpointSecurity.proxyConfigType;
+        this.serviceAccountKey = endpointSecurity.serviceAccountKey;
     }
 
     public EndpointSecurity() {
@@ -311,6 +313,14 @@ public class EndpointSecurity {
 
     public void setService(String service) {
         this.service = service;
+    }
+
+    public String getServiceAccountKey() {
+        return serviceAccountKey;
+    }
+
+    public void setServiceAccountKey(String serviceAccountKey) {
+        this.serviceAccountKey = serviceAccountKey;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

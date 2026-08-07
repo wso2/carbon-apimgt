@@ -621,6 +621,8 @@ public class PublisherCommonUtils {
         String oldSandboxApiKeyValue = null;
         String oldProductionAWSSecretKey = null;
         String oldSandboxAWSSecretKey = null;
+        String oldProductionGCPKey = null;
+        String oldSandboxGCPKey = null;
         Object oldProductionCustomParams = null;
         Object oldSandboxCustomParams = null;
 
@@ -650,6 +652,12 @@ public class PublisherCommonUtils {
                         oldProductionAWSSecretKey =
                                 (String) oldEndpointSecurityProduction.get(
                                         APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY);
+                    } else if (oldEndpointSecurityProduction.get(ENDPOINT_SECURITY_TYPE) != null &&
+                            APIConstants.ENDPOINT_SECURITY_TYPE_GCP.equals(
+                                    oldEndpointSecurityProduction.get(ENDPOINT_SECURITY_TYPE).toString())) {
+                        oldProductionGCPKey =
+                                (String) oldEndpointSecurityProduction.get(
+                                        APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY);
                     }
 
                     // Keep old custom parameters data for future usage
@@ -682,6 +690,12 @@ public class PublisherCommonUtils {
                                     oldEndpointSecuritySandbox.get(ENDPOINT_SECURITY_TYPE).toString())) {
                         oldSandboxAWSSecretKey =
                                 (String) oldEndpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY);
+                    } else if (oldEndpointSecuritySandbox.get(ENDPOINT_SECURITY_TYPE) != null &&
+                            APIConstants.ENDPOINT_SECURITY_TYPE_GCP.equals(
+                                    oldEndpointSecuritySandbox.get(ENDPOINT_SECURITY_TYPE).toString())) {
+                        oldSandboxGCPKey =
+                                (String) oldEndpointSecuritySandbox.get(
+                                        APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY);
                     }
 
                     // Keep old custom parameters data for future usage
@@ -708,6 +722,9 @@ public class PublisherCommonUtils {
 
         encryptEndpointSecurityAWSSecretKey(endpointConfig, cryptoUtil, oldProductionAWSSecretKey,
                 oldSandboxAWSSecretKey, apiDtoToUpdate);
+
+        encryptEndpointSecurityGCPServiceAccountKey(endpointConfig, cryptoUtil, oldProductionGCPKey,
+                oldSandboxGCPKey, apiDtoToUpdate);
 
         // AWS Lambda: secret key encryption while updating the API
         if (apiDtoToUpdate.getEndpointConfig() != null) {
@@ -1434,6 +1451,102 @@ public class PublisherCommonUtils {
             }
         }
     }
+
+    /**
+     * Encrypts the GCP service-account key in the endpoint security configuration of an API. Mirrors the AWS
+     * secret-key handling: a newly supplied key is encrypted with the internal crypto provider (AES on 4.7.0+),
+     * while an empty (masked) / unchanged value preserves the previously stored (encrypted) key so the UI mask
+     * never clobbers it.
+     *
+     * @param endpointConfig       Endpoint configuration of the API
+     * @param cryptoUtil           Cryptography utility
+     * @param oldProductionGCPKey  Existing (encrypted) production service-account key
+     * @param oldSandboxGCPKey     Existing (encrypted) sandbox service-account key
+     * @param apidto               API DTO
+     * @throws CryptoException        If an error occurs while encrypting
+     * @throws APIManagementException If no key is provided for a GCP-secured endpoint
+     */
+    public static void encryptEndpointSecurityGCPServiceAccountKey(Map endpointConfig,
+                                                                   CryptoUtil cryptoUtil,
+                                                                   String oldProductionGCPKey,
+                                                                   String oldSandboxGCPKey, APIDTO apidto)
+            throws CryptoException, APIManagementException {
+
+        if (endpointConfig != null) {
+            if ((endpointConfig.get(APIConstants.ENDPOINT_SECURITY) != null)) {
+                Map endpointSecurity = (Map) endpointConfig.get(APIConstants.ENDPOINT_SECURITY);
+                if (endpointSecurity.get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
+                    Map endpointSecurityProduction = (Map) endpointSecurity
+                            .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION);
+                    String productionEndpointType = (String) endpointSecurityProduction
+                            .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
+
+                    if (APIConstants.ENDPOINT_SECURITY_TYPE_GCP.equals(productionEndpointType)) {
+                        if (endpointSecurityProduction.get(
+                                APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY) != null &&
+                                StringUtils.isNotEmpty(endpointSecurityProduction.get(
+                                        APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY).toString()) &&
+                                !endpointSecurityProduction.get(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY)
+                                        .equals(oldProductionGCPKey)) {
+                            String keyValue = endpointSecurityProduction
+                                    .get(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY).toString();
+                            String encryptedKeyValue = cryptoUtil.encryptAndBase64EncodeLargeData(
+                                    keyValue.getBytes(StandardCharsets.UTF_8));
+                            endpointSecurityProduction
+                                    .put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY, encryptedKeyValue);
+                        } else if (StringUtils.isNotBlank(oldProductionGCPKey)) {
+                            endpointSecurityProduction
+                                    .put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY, oldProductionGCPKey);
+                        } else {
+                            String errorMessage = "GCP service-account key is not provided for production endpoint "
+                                    + "security";
+                            throw new APIManagementException(
+                                    ExceptionCodes.from(ExceptionCodes.INVALID_ENDPOINT_CREDENTIALS, errorMessage));
+                        }
+                    }
+                    endpointSecurity
+                            .put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION, endpointSecurityProduction);
+                    endpointConfig.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
+                    apidto.setEndpointConfig(endpointConfig);
+                }
+                if (endpointSecurity.get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
+                    Map endpointSecuritySandbox = (Map) endpointSecurity
+                            .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX);
+                    String sandboxEndpointType = (String) endpointSecuritySandbox
+                            .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
+
+                    if (APIConstants.ENDPOINT_SECURITY_TYPE_GCP.equals(sandboxEndpointType)) {
+                        if (endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY) != null
+                                && StringUtils.isNotEmpty(
+                                endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY)
+                                        .toString()) &&
+                                !endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY)
+                                        .equals(oldSandboxGCPKey)) {
+                            String keyValue = endpointSecuritySandbox
+                                    .get(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY).toString();
+                            String encryptedKeyValue = cryptoUtil.encryptAndBase64EncodeLargeData(
+                                    keyValue.getBytes(StandardCharsets.UTF_8));
+                            endpointSecuritySandbox
+                                    .put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY, encryptedKeyValue);
+                        } else if (StringUtils.isNotBlank(oldSandboxGCPKey)) {
+                            endpointSecuritySandbox
+                                    .put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY, oldSandboxGCPKey);
+                        } else {
+                            String errorMessage = "GCP service-account key is not provided for sandbox endpoint "
+                                    + "security";
+                            throw new APIManagementException(
+                                    ExceptionCodes.from(ExceptionCodes.INVALID_ENDPOINT_CREDENTIALS, errorMessage));
+                        }
+                    }
+                    endpointSecurity
+                            .put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX, endpointSecuritySandbox);
+                    endpointConfig.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
+                    apidto.setEndpointConfig(endpointConfig);
+                }
+            }
+        }
+    }
+
     /**
      * This method will encrypt the OAuth credentials in the endpoint security configuration of an API.
      *
@@ -1723,6 +1836,110 @@ public class PublisherCommonUtils {
                                     .put(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY, oldApiSecret);
                         } else {
                             String errorMessage = "AWS secret value is not provided for sandbox endpoint security";
+                            throw new APIManagementException(
+                                    ExceptionCodes.from(ExceptionCodes.INVALID_ENDPOINT_CREDENTIALS, errorMessage));
+                        }
+                    }
+                    endpointSecurity
+                            .put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX, endpointSecuritySandbox);
+                    endpointConfig.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
+                    apiEndpointDTO.setEndpointConfig(endpointConfig);
+                }
+            }
+        }
+    }
+
+    /**
+     * Encrypts the GCP service-account key of an AI API endpoint ({@link APIEndpointDTO} path). Mirrors the AWS
+     * secret-key handling and uses the internal crypto provider (AES on 4.7.0+).
+     *
+     * @param apiEndpointDTO APIEndpointDTO
+     * @param cryptoUtil     cryptography util
+     * @param oldApiSecret   existing (encrypted) service-account key
+     * @param endpointConfig endpoint configuration of the API
+     * @throws CryptoException        if an error occurs while encrypting
+     * @throws APIManagementException if no key is provided for a GCP-secured endpoint
+     */
+    public static void encryptEndpointSecurityGCPServiceAccountKey(APIEndpointDTO apiEndpointDTO,
+                                                                   CryptoUtil cryptoUtil,
+                                                                   String oldApiSecret, Map endpointConfig)
+            throws CryptoException, APIManagementException {
+
+        if (endpointConfig != null) {
+            if ((endpointConfig.get(APIConstants.ENDPOINT_SECURITY) != null)) {
+                Map endpointSecurity = (Map) endpointConfig.get(APIConstants.ENDPOINT_SECURITY);
+                if (APIConstants.APIEndpoint.PRODUCTION.equals(
+                        apiEndpointDTO.getDeploymentStage()) && endpointSecurity.get(
+                        APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
+                    Map endpointSecurityProduction = (Map) endpointSecurity.get(
+                            APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION);
+                    String productionEndpointType = (String) endpointSecurityProduction.get(
+                            APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
+
+                    if (APIConstants.ENDPOINT_SECURITY_TYPE_GCP.equals(productionEndpointType)) {
+                        if (endpointSecurityProduction.get(
+                                APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY) != null
+                                && StringUtils.isNotEmpty(endpointSecurityProduction.get(
+                                        APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY).toString())
+                                && !endpointSecurityProduction.get(
+                                        APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY).equals(oldApiSecret)) {
+                            String keyValue = endpointSecurityProduction.get(
+                                    APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY).toString();
+                            String encryptedKeyValue = cryptoUtil.encryptAndBase64EncodeLargeData(
+                                    keyValue.getBytes(StandardCharsets.UTF_8));
+                            endpointSecurityProduction.put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY,
+                                    encryptedKeyValue);
+                        } else if (StringUtils.isNotBlank(oldApiSecret)) {
+                            // oldApiSecret is the decrypted key (updateAPIEndpoint reads it with decryption),
+                            // so re-encrypt before storing to keep it encrypted at rest and decryptable on read.
+                            String encryptedOldKeyValue = cryptoUtil.encryptAndBase64EncodeLargeData(
+                                    oldApiSecret.getBytes(StandardCharsets.UTF_8));
+                            endpointSecurityProduction.put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY,
+                                    encryptedOldKeyValue);
+                        } else {
+                            String errorMessage = "GCP service-account key is not provided for production endpoint "
+                                    + "security";
+                            throw new APIManagementException(
+                                    ExceptionCodes.from(ExceptionCodes.INVALID_ENDPOINT_CREDENTIALS, errorMessage));
+                        }
+                    }
+                    endpointSecurity.put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION,
+                            endpointSecurityProduction);
+                    endpointConfig.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
+                    apiEndpointDTO.setEndpointConfig(endpointConfig);
+                }
+                if (APIConstants.APIEndpoint.SANDBOX.equals(
+                        apiEndpointDTO.getDeploymentStage()) && endpointSecurity.get(
+                        APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
+                    Map endpointSecuritySandbox = (Map) endpointSecurity
+                            .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX);
+                    String sandboxEndpointType = (String) endpointSecuritySandbox
+                            .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
+
+                    if (APIConstants.ENDPOINT_SECURITY_TYPE_GCP.equals(sandboxEndpointType)) {
+                        if (endpointSecuritySandbox.get(
+                                APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY) != null
+                                && StringUtils.isNotEmpty(
+                                endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY)
+                                        .toString()) &&
+                                !endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY)
+                                        .equals(oldApiSecret)) {
+                            String keyValue = endpointSecuritySandbox
+                                    .get(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY).toString();
+                            String encryptedKeyValue = cryptoUtil.encryptAndBase64EncodeLargeData(
+                                    keyValue.getBytes(StandardCharsets.UTF_8));
+                            endpointSecuritySandbox
+                                    .put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY, encryptedKeyValue);
+                        } else if (StringUtils.isNotBlank(oldApiSecret)) {
+                            // oldApiSecret is the decrypted key (updateAPIEndpoint reads it with decryption),
+                            // so re-encrypt before storing to keep it encrypted at rest and decryptable on read.
+                            String encryptedOldKeyValue = cryptoUtil.encryptAndBase64EncodeLargeData(
+                                    oldApiSecret.getBytes(StandardCharsets.UTF_8));
+                            endpointSecuritySandbox
+                                    .put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY, encryptedOldKeyValue);
+                        } else {
+                            String errorMessage = "GCP service-account key is not provided for sandbox endpoint "
+                                    + "security";
                             throw new APIManagementException(
                                     ExceptionCodes.from(ExceptionCodes.INVALID_ENDPOINT_CREDENTIALS, errorMessage));
                         }
@@ -4499,6 +4716,10 @@ public class PublisherCommonUtils {
                                 null) {
                             oldApiEndpointSecret = oldProductionEndpointSecurity.get(
                                     APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY).toString();
+                        } else if (oldProductionEndpointSecurity.get(
+                                APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY) != null) {
+                            oldApiEndpointSecret = oldProductionEndpointSecurity.get(
+                                    APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY).toString();
                         }
                     }
                 } else if (APIConstants.APIEndpoint.SANDBOX.equals(apiEndpointDTO.getDeploymentStage())) {
@@ -4522,6 +4743,10 @@ public class PublisherCommonUtils {
                                 null) {
                             oldApiEndpointSecret = oldSandboxEndpointSecurity.get(
                                     APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY).toString();
+                        } else if (oldSandboxEndpointSecurity.get(
+                                APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY) != null) {
+                            oldApiEndpointSecret = oldSandboxEndpointSecurity.get(
+                                    APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY).toString();
                         }
                     }
                 }
@@ -4533,6 +4758,7 @@ public class PublisherCommonUtils {
 
         encryptEndpointSecurityApiKeyCredentials(apiEndpointDTO, cryptoUtil, oldApiEndpointSecret, endpointConfig);
         encryptEndpointSecurityAWSSecretKey(apiEndpointDTO, cryptoUtil, oldApiEndpointSecret, endpointConfig);
+        encryptEndpointSecurityGCPServiceAccountKey(apiEndpointDTO, cryptoUtil, oldApiEndpointSecret, endpointConfig);
         APIEndpointInfo apiEndpoint = APIMappingUtil.fromDTOtoAPIEndpoint(apiEndpointDTO, organization);
         if (apiEndpoint.getId() == null) {
             apiEndpoint.setId(endpointId);
@@ -4585,6 +4811,7 @@ public class PublisherCommonUtils {
         CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
         encryptEndpointSecurityApiKeyCredentials(apiEndpointDTO, cryptoUtil, StringUtils.EMPTY, endpointConfig);
         encryptEndpointSecurityAWSSecretKey(apiEndpointDTO, cryptoUtil, StringUtils.EMPTY, endpointConfig);
+        encryptEndpointSecurityGCPServiceAccountKey(apiEndpointDTO, cryptoUtil, StringUtils.EMPTY, endpointConfig);
         APIEndpointInfo apiEndpoint = APIMappingUtil.fromDTOtoAPIEndpoint(apiEndpointDTO, organization);
 
         // extract endpoint URL

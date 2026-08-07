@@ -3361,6 +3361,8 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             PublisherCommonUtils.encryptEndpointSecurityAWSSecretKey(endpointConfig, CryptoUtil.getDefaultCryptoUtil(),
                     StringUtils.EMPTY, StringUtils.EMPTY, apiDTOFromProperties);
+            PublisherCommonUtils.encryptEndpointSecurityGCPServiceAccountKey(endpointConfig,
+                    CryptoUtil.getDefaultCryptoUtil(), StringUtils.EMPTY, StringUtils.EMPTY, apiDTOFromProperties);
             // Import the API and Definition
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIDTO createdApiDTO = RestApiPublisherUtils.importOpenAPIDefinitionForAPIs(fileInputStream, url,
