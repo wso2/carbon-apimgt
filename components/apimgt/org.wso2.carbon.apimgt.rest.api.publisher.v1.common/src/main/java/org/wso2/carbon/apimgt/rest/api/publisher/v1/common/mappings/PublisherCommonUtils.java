@@ -5226,7 +5226,8 @@ public class PublisherCommonUtils {
             serverOperation.setFeature(MCPServerOperationDTO.FeatureEnum.TOOL);
             serverOperation.setTarget(toolName);
             serverOperation.setDescription(toolDescription);
-            serverOperation.setSchemaDefinition(inputSchema);
+            serverOperation.setSchemaDefinition(
+                    MCPInitializerAndToolFetcher.buildToolMetadata(toolJsonObject).toString());
             operationList.add(serverOperation);
         }
         return operationList;
