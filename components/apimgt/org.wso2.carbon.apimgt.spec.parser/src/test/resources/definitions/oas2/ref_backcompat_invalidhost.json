@@ -1,0 +1,17 @@
+{
+  "swagger": "2.0",
+  "info": { "title": "backcompat-ref", "version": "1.0.0" },
+  "basePath": "/backcompat-ref/1.0.0",
+  "paths": {
+    "/x": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "ok",
+            "schema": { "$ref": "http://blocked.invalid/x.json#/X" }
+          }
+        }
+      }
+    }
+  }
+}

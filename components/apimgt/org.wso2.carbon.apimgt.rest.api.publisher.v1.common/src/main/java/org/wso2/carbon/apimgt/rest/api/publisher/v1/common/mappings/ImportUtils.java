@@ -61,6 +61,7 @@ import org.wso2.carbon.apimgt.api.model.Backend;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
+import org.wso2.carbon.apimgt.api.model.OASParserOptions;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
@@ -339,6 +340,25 @@ public class ImportUtils {
             // Get the endpoint config object updated
             APIUtil.validateAPIEndpointConfig(importedApiDTO.getEndpointConfig(), importedApiDTO.getType().toString(),
                     importedApiDTO.getName());
+            if (importedApiDTO.getEndpointConfig() instanceof Map) {
+                org.json.JSONObject endpointConfigObj =
+                        new org.json.JSONObject((Map) importedApiDTO.getEndpointConfig());
+                if (!APIConstants.ENDPOINT_TYPE_DEFAULT.equalsIgnoreCase(
+                        endpointConfigObj.optString(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                    ArrayList<String> endpointURLs = new ArrayList<>();
+                    APIUtil.extractURLsFromEndpointConfig(endpointConfigObj,
+                            APIConstants.API_DATA_PRODUCTION_ENDPOINTS, endpointURLs);
+                    APIUtil.extractURLsFromEndpointConfig(endpointConfigObj,
+                            APIConstants.API_DATA_SANDBOX_ENDPOINTS, endpointURLs);
+                    APIUtil.extractURLsFromEndpointConfig(endpointConfigObj,
+                            APIConstants.ENDPOINT_PRODUCTION_FAILOVERS, endpointURLs);
+                    APIUtil.extractURLsFromEndpointConfig(endpointConfigObj,
+                            APIConstants.ENDPOINT_SANDBOX_FAILOVERS, endpointURLs);
+                    for (String endpointURL : endpointURLs) {
+                        APIUtil.validateRemoteURL(endpointURL, tenantDomain);
+                    }
+                }
+            }
 
             API targetApi = retrieveApiToOverwrite(importedApiDTO.getName(), importedApiDTO.getVersion(),
                     currentTenantDomain, apiProvider, Boolean.TRUE, organization);
@@ -648,7 +668,7 @@ public class ImportUtils {
                 throw new APIManagementException("Error while importing API: " + e.getMessage(),
                         ExceptionCodes.from(ExceptionCodes.API_CONTEXT_MALFORMED_EXCEPTION, e.getMessage()));
             }
-            throw new APIManagementException(errorMessage + StringUtils.SPACE + e.getMessage(), e);
+            throw new APIManagementException(errorMessage + StringUtils.SPACE + e.getMessage(), e, e.getErrorHandler());
         }
     }
 
@@ -821,6 +841,23 @@ public class ImportUtils {
                     }
                     Backend oldBackend = existingBackends.get(0);
                     Backend importedBackend = importedBackends.get(0);
+                    org.json.JSONObject importedConfig =
+                            new org.json.JSONObject(importedBackend.getEndpointConfig());
+                    if (!APIConstants.ENDPOINT_TYPE_DEFAULT.equalsIgnoreCase(
+                            importedConfig.optString(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                        ArrayList<String> endpointURLs = new ArrayList<>();
+                        APIUtil.extractURLsFromEndpointConfig(importedConfig,
+                                APIConstants.API_DATA_PRODUCTION_ENDPOINTS, endpointURLs);
+                        APIUtil.extractURLsFromEndpointConfig(importedConfig,
+                                APIConstants.API_DATA_SANDBOX_ENDPOINTS, endpointURLs);
+                        APIUtil.extractURLsFromEndpointConfig(importedConfig,
+                                APIConstants.ENDPOINT_PRODUCTION_FAILOVERS, endpointURLs);
+                        APIUtil.extractURLsFromEndpointConfig(importedConfig,
+                                APIConstants.ENDPOINT_SANDBOX_FAILOVERS, endpointURLs);
+                        for (String endpointURL : endpointURLs) {
+                            APIUtil.validateRemoteURL(endpointURL, tenantDomain);
+                        }
+                    }
                     Backend backend = new Backend(oldBackend);
                     backend.setEndpointConfig(importedBackend.getEndpointConfig());
                     String importedDefinition = importedBackend.getDefinition();
@@ -881,6 +918,22 @@ public class ImportUtils {
 
                     final JSONObject endpointObject =
                             (JSONObject) new JSONParser().parse(backend.getEndpointConfig());
+                    org.json.JSONObject endpointConfigObj = new org.json.JSONObject((Map) endpointObject);
+                    if (!APIConstants.ENDPOINT_TYPE_DEFAULT.equalsIgnoreCase(
+                            endpointConfigObj.optString(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                        ArrayList<String> endpointURLs = new ArrayList<>();
+                        APIUtil.extractURLsFromEndpointConfig(endpointConfigObj,
+                                APIConstants.API_DATA_PRODUCTION_ENDPOINTS, endpointURLs);
+                        APIUtil.extractURLsFromEndpointConfig(endpointConfigObj,
+                                APIConstants.API_DATA_SANDBOX_ENDPOINTS, endpointURLs);
+                        APIUtil.extractURLsFromEndpointConfig(endpointConfigObj,
+                                APIConstants.ENDPOINT_PRODUCTION_FAILOVERS, endpointURLs);
+                        APIUtil.extractURLsFromEndpointConfig(endpointConfigObj,
+                                APIConstants.ENDPOINT_SANDBOX_FAILOVERS, endpointURLs);
+                        for (String endpointURL : endpointURLs) {
+                            APIUtil.validateRemoteURL(endpointURL, tenantDomain);
+                        }
+                    }
                     final Map<String, Object> endpointConfigMap =
                             (Map<String, Object>) endpointObject;
 
@@ -1025,7 +1078,7 @@ public class ImportUtils {
                 throw new APIManagementException("Error while importing API: " + e.getMessage(),
                         ExceptionCodes.from(ExceptionCodes.API_CONTEXT_MALFORMED_EXCEPTION, e.getMessage()));
             }
-            throw new APIManagementException(errorMessage + StringUtils.SPACE + e.getMessage(), e);
+            throw new APIManagementException(errorMessage + StringUtils.SPACE + e.getMessage(), e, e.getErrorHandler());
         }
     }
 
@@ -2729,9 +2782,12 @@ public class ImportUtils {
     public static APIDefinitionValidationResponse retrieveValidatedSwaggerDefinition(String swaggerContent)
             throws APIManagementException {
 
+        OASParserOptions baseParserOptions = ServiceReferenceHolder.getInstance()
+                .getAPIMDependencyConfigurationService().getAPIMDependencyConfigurations().getOasParserOptions();
+        OASParserOptions parserOptions = APIUtil.buildRefResolutionOptions(baseParserOptions,
+                RestApiCommonUtil.getLoggedInUserTenantDomain());
         APIDefinitionValidationResponse validationResponse = OASParserUtil.validateAPIDefinition(swaggerContent,
-                Boolean.TRUE, ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
-                        .getAPIMDependencyConfigurations().getOasParserOptions());
+                Boolean.TRUE, parserOptions);
         if (!validationResponse.isValid()) {
             String errorDescription = "";
             if (validationResponse.getErrorItems().size() > 0) {

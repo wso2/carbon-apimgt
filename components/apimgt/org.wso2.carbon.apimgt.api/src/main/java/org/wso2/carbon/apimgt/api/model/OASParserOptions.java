@@ -19,6 +19,8 @@ package org.wso2.carbon.apimgt.api.model;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.util.List;
+
 /**
  * Model class to hold OpenAPI Specification parser options.
  */
@@ -28,8 +30,27 @@ public class OASParserOptions {
 
     private boolean explicitStyleAndExplode = true;
     private Integer yamlCodePointLimit = null;
+    private List<String> remoteRefAllowList;
+    private List<String> remoteRefBlockList;
+    private boolean networkAccessControlEnabled = false;
 
     public OASParserOptions() {
+    }
+
+    /**
+     * Copy-constructor. Copies fields directly (no re-conversion) so that already-computed values such as
+     * {@code yamlCodePointLimit} are not re-interpreted through their String setters.
+     *
+     * @param other the instance to copy from; if {@code null}, this instance retains its default values
+     */
+    public OASParserOptions(OASParserOptions other) {
+        if (other != null) {
+            this.explicitStyleAndExplode = other.explicitStyleAndExplode;
+            this.yamlCodePointLimit = other.yamlCodePointLimit;
+            this.remoteRefAllowList = other.remoteRefAllowList;
+            this.remoteRefBlockList = other.remoteRefBlockList;
+            this.networkAccessControlEnabled = other.networkAccessControlEnabled;
+        }
     }
 
     public boolean isExplicitStyleAndExplode() {
@@ -82,6 +103,38 @@ public class OASParserOptions {
         // Consider 4 bytes per character
         double limit = fileSizeInMB * 1024 * 1024 * 4;
         this.yamlCodePointLimit = limit > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) limit;
+    }
+
+    public List<String> getRemoteRefAllowList() {
+        return remoteRefAllowList;
+    }
+
+    public void setRemoteRefAllowList(List<String> remoteRefAllowList) {
+        this.remoteRefAllowList = remoteRefAllowList;
+    }
+
+    public List<String> getRemoteRefBlockList() {
+        return remoteRefBlockList;
+    }
+
+    public void setRemoteRefBlockList(List<String> remoteRefBlockList) {
+        this.remoteRefBlockList = remoteRefBlockList;
+    }
+
+    public boolean isNetworkAccessControlEnabled() {
+        return networkAccessControlEnabled;
+    }
+
+    /**
+     * Configure whether the network access-control policy is in force for remote {@code $ref} resolution. When
+     * {@code false} (the default), the parser retains its historical behaviour and resolves remote refs without any
+     * host validation - preserving backwards compatibility for deployments that have not configured the policy. It
+     * is set to {@code true} only when a platform or tenant network access-control policy is present.
+     *
+     * @param networkAccessControlEnabled whether the network access-control policy is configured
+     */
+    public void setNetworkAccessControlEnabled(boolean networkAccessControlEnabled) {
+        this.networkAccessControlEnabled = networkAccessControlEnabled;
     }
 
 }

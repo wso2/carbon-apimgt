@@ -29,6 +29,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
@@ -179,6 +180,8 @@ public class PublisherCommonUtilsTest {
 
         Mockito.when(apiDto.getEndpointConfig()).thenReturn(endpointConfig);
         Mockito.when(advertiseInfoDto.isAdvertised()).thenReturn(false);
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        PowerMockito.when(RestApiCommonUtil.getLoggedInUserTenantDomain()).thenReturn(ORGANIZATION);
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.when(APIUtil.validateEndpointURLs(endpoints)).thenReturn(true);
         Assert.assertTrue(PublisherCommonUtils.validateEndpoints(new APIDTOTypeWrapper(apiDto)));
@@ -210,6 +213,8 @@ public class PublisherCommonUtilsTest {
 
         Mockito.when(apiDto.getEndpointConfig()).thenReturn(endpointConfig);
         Mockito.when(advertiseInfoDto.isAdvertised()).thenReturn(false);
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        PowerMockito.when(RestApiCommonUtil.getLoggedInUserTenantDomain()).thenReturn(ORGANIZATION);
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.when(APIUtil.validateEndpointURLs(endpoints)).thenReturn(false);
         Assert.assertFalse(PublisherCommonUtils.validateEndpoints(new APIDTOTypeWrapper(apiDto)));
@@ -241,6 +246,8 @@ public class PublisherCommonUtilsTest {
 
         Mockito.when(apiDto.getEndpointConfig()).thenReturn(endpointConfig);
         Mockito.when(advertiseInfoDto.isAdvertised()).thenReturn(false);
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        PowerMockito.when(RestApiCommonUtil.getLoggedInUserTenantDomain()).thenReturn(ORGANIZATION);
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.when(APIUtil.validateEndpointURLs(endpoints)).thenReturn(false);
         Assert.assertFalse(PublisherCommonUtils.validateEndpoints(new APIDTOTypeWrapper(apiDto)));
@@ -282,6 +289,8 @@ public class PublisherCommonUtilsTest {
         Mockito.when(advertiseInfoDto.getApiExternalProductionEndpoint()).thenReturn(externalProductionEndpointString);
         Mockito.when(advertiseInfoDto.getApiExternalSandboxEndpoint()).thenReturn(externalSandboxEndpointString);
         Mockito.when(advertiseInfoDto.getOriginalDevPortalUrl()).thenReturn(originalDevPortalUrl);
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        PowerMockito.when(RestApiCommonUtil.getLoggedInUserTenantDomain()).thenReturn(ORGANIZATION);
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.when(APIUtil.validateEndpointURLs(endpoints)).thenReturn(true);
         Assert.assertTrue(PublisherCommonUtils.validateEndpoints(new APIDTOTypeWrapper(apiDto)));
@@ -323,6 +332,8 @@ public class PublisherCommonUtilsTest {
         Mockito.when(advertiseInfoDto.getApiExternalProductionEndpoint()).thenReturn(externalProductionEndpointString);
         Mockito.when(advertiseInfoDto.getApiExternalSandboxEndpoint()).thenReturn(externalSandboxEndpointString);
         Mockito.when(advertiseInfoDto.getOriginalDevPortalUrl()).thenReturn(originalDevPortalUrl);
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        PowerMockito.when(RestApiCommonUtil.getLoggedInUserTenantDomain()).thenReturn(ORGANIZATION);
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.when(APIUtil.validateEndpointURLs(endpoints)).thenReturn(false);
         Assert.assertFalse(PublisherCommonUtils.validateEndpoints(new APIDTOTypeWrapper(apiDto)));
@@ -373,6 +384,8 @@ public class PublisherCommonUtilsTest {
 
         Mockito.when(apiDto.getEndpointConfig()).thenReturn(endpointConfig);
         Mockito.when(apiDto.getAdvertiseInfo()).thenReturn(null);
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        PowerMockito.when(RestApiCommonUtil.getLoggedInUserTenantDomain()).thenReturn(ORGANIZATION);
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.when(APIUtil.validateEndpointURLs(endpoints)).thenReturn(true);
         Assert.assertTrue(PublisherCommonUtils.validateEndpoints(new APIDTOTypeWrapper(apiDto)));
@@ -412,6 +425,8 @@ public class PublisherCommonUtilsTest {
         Mockito.when(advertiseInfoDto.getApiExternalProductionEndpoint()).thenReturn(null);
         Mockito.when(advertiseInfoDto.getApiExternalSandboxEndpoint()).thenReturn(externalSandboxEndpointString);
         Mockito.when(advertiseInfoDto.getOriginalDevPortalUrl()).thenReturn(originalDevPortalUrl);
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        PowerMockito.when(RestApiCommonUtil.getLoggedInUserTenantDomain()).thenReturn(ORGANIZATION);
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.when(APIUtil.validateEndpointURLs(endpoints)).thenReturn(true);
         Assert.assertTrue(PublisherCommonUtils.validateEndpoints(new APIDTOTypeWrapper(apiDto)));
@@ -653,6 +668,50 @@ public class PublisherCommonUtilsTest {
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("Document name cannot contain illegal characters  "));
         }
+    }
+
+    @Test
+    public void testValidateEndpointsRejectsArrayWithNoUsableUrl() throws APIManagementException {
+        // A populated endpoint array whose entries carry no usable URL must raise the endpoint-specific error,
+        // not silently produce an empty endpoint list.
+        APIDTO apiDto = Mockito.mock(APIDTO.class);
+        HashMap<String, Object> endpointConfig = new HashMap<>();
+        endpointConfig.put(API_ENDPOINT_CONFIG_PROTOCOL_TYPE, "http");
+        List<Object> productionEndpoints = new ArrayList<>();
+        productionEndpoints.add("not-an-object");                // non-object entry
+        productionEndpoints.add(new HashMap<String, Object>());  // object without a url
+        endpointConfig.put(API_DATA_PRODUCTION_ENDPOINTS, productionEndpoints);
+        Mockito.when(apiDto.getEndpointConfig()).thenReturn(endpointConfig);
+
+        try {
+            PublisherCommonUtils.validateEndpoints(new APIDTOTypeWrapper(apiDto));
+            fail("Expected ENDPOINT_URL_NOT_PROVIDED for an endpoint array with no usable URL");
+        } catch (APIManagementException e) {
+            Assert.assertEquals(ExceptionCodes.ENDPOINT_URL_NOT_PROVIDED.getErrorCode(),
+                    e.getErrorHandler().getErrorCode());
+        }
+    }
+
+    @Test
+    public void testValidateEndpointsAcceptsMixedArrayWithOneUsableUrl() throws APIManagementException {
+        // A mixed array must still validate: the usable URL is kept and the malformed entry is skipped.
+        APIDTO apiDto = Mockito.mock(APIDTO.class);
+        HashMap<String, Object> endpointConfig = new HashMap<>();
+        endpointConfig.put(API_ENDPOINT_CONFIG_PROTOCOL_TYPE, "http");
+        List<Object> productionEndpoints = new ArrayList<>();
+        productionEndpoints.add("not-an-object");                // skipped
+        HashMap<String, Object> valid = new HashMap<>();
+        valid.put("url", "https://valid.test");
+        productionEndpoints.add(valid);                          // usable
+        endpointConfig.put(API_DATA_PRODUCTION_ENDPOINTS, productionEndpoints);
+        Mockito.when(apiDto.getEndpointConfig()).thenReturn(endpointConfig);
+
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        PowerMockito.when(RestApiCommonUtil.getLoggedInUserTenantDomain()).thenReturn(ORGANIZATION);
+        PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.when(APIUtil.validateEndpointURLs(Mockito.any())).thenReturn(true);
+
+        Assert.assertTrue(PublisherCommonUtils.validateEndpoints(new APIDTOTypeWrapper(apiDto)));
     }
 
 }
