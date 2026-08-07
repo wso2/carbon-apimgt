@@ -3861,7 +3861,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response exportAPI(String apiId, String name, String version, String revisionNum,
                               String providerName, String format, Boolean preserveStatus,
                               Boolean exportLatestRevision, String gatewayEnvironment, Boolean preserveCredentials,
-                              MessageContext messageContext)
+                              Boolean all, Boolean allRevisions, String xWSO2Tenant, MessageContext messageContext)
             throws APIManagementException {
 
         if (StringUtils.isEmpty(gatewayEnvironment)) {
@@ -3875,8 +3875,15 @@ public class ApisApiServiceImpl implements ApisApiService {
             ExportFormat exportFormat = StringUtils.isNotEmpty(format) ?
                     ExportFormat.valueOf(format.toUpperCase()) :
                     ExportFormat.YAML;
+            if (Boolean.TRUE.equals(all)) {
+                String organization = RestApiCommonUtil.validateTenantDomain(xWSO2Tenant);
+                ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
+                File file = importExportAPI.exportAPIs(organization, Boolean.TRUE.equals(allRevisions), exportFormat);
+                return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + file.getName() + "\"").build();
+            }
             try {
-                String organization = RestApiUtil.getValidatedOrganization(messageContext);
+                String organization = RestApiCommonUtil.validateTenantDomain(xWSO2Tenant);
                 ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
                 File file = importExportAPI
                         .exportAPI(apiId, name, version, revisionNum, providerName, preserveStatus, exportFormat,
@@ -3887,7 +3894,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 throw new APIManagementException("Error while exporting " + RestApiConstants.RESOURCE_API, e);
             }
         } else {
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            String organization = RestApiCommonUtil.validateTenantDomain(xWSO2Tenant);
             if (StringUtils.isEmpty(apiId) && (StringUtils.isNotEmpty(name) && StringUtils.isNotEmpty(version))) {
                 APIIdentifier apiIdentifier = new APIIdentifier(providerName, name, version);
                 apiId = APIUtil.getUUIDFromIdentifier(apiIdentifier, organization);
