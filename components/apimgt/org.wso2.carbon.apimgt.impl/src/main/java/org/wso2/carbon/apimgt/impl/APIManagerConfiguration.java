@@ -145,6 +145,7 @@ public class APIManagerConfiguration {
     private static DesignAssistantConfigurationDTO designAssistantConfigurationDto = new DesignAssistantConfigurationDTO();
     private static AIAPIConfigurationsDTO aiapiConfigurationsDTO = new AIAPIConfigurationsDTO();
     private static final APIMGovernanceConfigDTO apimGovConfigurationDto = new APIMGovernanceConfigDTO();
+    private String aiRequestPropertyEnricherImpl;
 
     private WorkflowProperties workflowProperties = new WorkflowProperties();
     private Map<String, Environment> apiGatewayEnvironments = new LinkedHashMap<String, Environment>();
@@ -231,6 +232,18 @@ public class APIManagerConfiguration {
     public static boolean isTokenRevocationEnabled() {
 
         return !tokenRevocationClassName.isEmpty();
+    }
+
+    /**
+     * Returns the fully qualified class name of the configured
+     * {@link org.wso2.carbon.apimgt.api.AIRequestPropertyEnricher} implementation, used to attach
+     * additional properties to outbound AI service request payloads.
+     *
+     * @return the configured class name, or {@code null} when none is configured
+     */
+    public String getAIRequestPropertyEnricherImpl() {
+
+        return aiRequestPropertyEnricherImpl;
     }
 
     public MarketplaceAssistantConfigurationDTO getMarketplaceAssistantConfigurationDto() {
@@ -1035,6 +1048,12 @@ public class APIManagerConfiguration {
 
                         this.llmProviderConfigurationDTO.setType(type);
                         this.llmProviderConfigurationDTO.setProperties(propertiesMap);
+                    }
+                    if (APIConstants.AI.PROPERTY_ENRICHER_IMPL.equals(aiChildElement.getLocalName())) {
+                        String enricherImpl = aiChildElement.getText();
+                        if (StringUtils.isNotBlank(enricherImpl)) {
+                            this.aiRequestPropertyEnricherImpl = enricherImpl.trim();
+                        }
                     }
                     if (APIConstants.AI.VECTOR_DB_PROVIDER.equals(aiChildElement.getLocalName())) {
                         String type = aiChildElement.getAttributeValue(
