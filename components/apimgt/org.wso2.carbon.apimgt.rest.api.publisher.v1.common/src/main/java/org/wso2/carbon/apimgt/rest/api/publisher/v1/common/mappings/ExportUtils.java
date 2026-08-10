@@ -178,7 +178,7 @@ public class ExportUtils {
             throws APIManagementException, APIImportExportException {
 
         return exportAPI(apiProvider, apiIdentifier, new APIDTOTypeWrapper(apiDtoToReturn), api, userName, exportFormat,
-                preserveStatus, preserveDocs, originalDevPortalUrl, organization, preserveCredentials);
+                preserveStatus, preserveDocs, originalDevPortalUrl, organization, preserveCredentials, false);
     }
 
     /**
@@ -197,13 +197,15 @@ public class ExportUtils {
      *                             (This is used for advertise only APIs).
      * @param organization         Organization
      * @param preserveCredentials  Preserve credentials on export
+     * @param exploded             Return an exploded (unarchived) export directory instead of a zip.
      * @return File containing the exported API artifact.
      * @throws APIManagementException If an error occurs while getting governance registry
      */
     public static File exportAPI(APIProvider apiProvider, APIIdentifier apiIdentifier, APIDTOTypeWrapper apiDtoToReturn,
                                  API api, String userName, ExportFormat exportFormat, boolean preserveStatus,
                                  boolean preserveDocs, String originalDevPortalUrl, String organization,
-                                 boolean preserveCredentials) throws APIManagementException, APIImportExportException {
+                                 boolean preserveCredentials, boolean exploded)
+            throws APIManagementException, APIImportExportException {
 
         int tenantId;
         String currentApiUuid;
@@ -305,6 +307,9 @@ public class ExportUtils {
         addAPIMetaInformationToArchive(archivePath, apiDtoToReturn, exportFormat, apiProvider, apiIdentifier,
                 organization, currentApiUuid);
 
+        if (exploded) {
+            return new File(exportAPIBasePath);
+        }
         CommonUtil.archiveDirectory(exportAPIBasePath);
         FileUtils.deleteQuietly(new File(exportAPIBasePath));
         return new File(exportAPIBasePath + APIConstants.ZIP_FILE_EXTENSION);
@@ -1488,7 +1493,7 @@ public class ExportUtils {
             APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, null);
             File dependentAPI = exportAPI(provider, api.getId(), new APIDTOTypeWrapper(apiDtoToReturn), api, userName,
                     exportFormat, isStatusPreserved, preserveDocs, StringUtils.EMPTY, organization,
-                    preserveCredentials);
+                    preserveCredentials, false);
             CommonUtil.extractArchive(dependentAPI, apisDirectoryPath);
         }
     }
