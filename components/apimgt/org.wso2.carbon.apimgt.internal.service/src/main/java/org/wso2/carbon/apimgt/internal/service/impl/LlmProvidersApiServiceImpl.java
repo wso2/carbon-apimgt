@@ -18,15 +18,18 @@
 
 package org.wso2.carbon.apimgt.internal.service.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.internal.service.LlmProvidersApiService;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.internal.service.dto.LLMProviderDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.LLMProviderListDTO;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.ArrayList;
@@ -50,7 +53,7 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
             throws APIManagementException {
 
         APIAdmin admin = new APIAdminImpl();
-        String organization = getOrganizationXWSO2Tenant(xWSO2Tenant);
+        String organization = getOrganizationXWSO2Tenant(xWSO2Tenant, RestApiCommonUtil.getLoggedInUserTenantDomain());
         LLMProvider llmProvider = admin.getLLMProvider(organization, llmProviderId);
         LLMProviderDTO llmProviderDto = convertToDTO(llmProvider);
         return Response.ok().entity(llmProviderDto).build();
@@ -68,7 +71,7 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
                                     MessageContext messageContext) throws APIManagementException {
 
         APIAdmin admin = new APIAdminImpl();
-        String organization = getOrganizationXWSO2Tenant(xWSO2Tenant);
+        String organization = getOrganizationXWSO2Tenant(xWSO2Tenant, RestApiCommonUtil.getLoggedInUserTenantDomain());
         List<LLMProvider> llmProviderList = admin.getLLMProviders(organization, name,
                 apiVersion, null);
 
@@ -96,7 +99,31 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
         return llmProviderDto;
     }
 
-    private String getOrganizationXWSO2Tenant(String xWSO2Tenant) {
+    /**
+     * Resolves the organization whose LLM providers should be returned.
+     * <p>
+     * The requested tenant is honoured only for the super tenant. Any other caller is confined to
+     * its own organization, so a requested tenant cannot widen the result set. The organization
+     * must never be resolved from {@code RestApiUtil.getOrganization(messageContext)} here,
+     * because this web application does not pin the organization header and that value is
+     * therefore supplied by the caller.
+     *
+     * @param xWSO2Tenant              requested tenant, may be null or the all-tenants literal
+     * @param authenticatedOrganization organization of the authenticated caller
+     * @return organization to filter on, or null for an unfiltered super tenant lookup
+     * @throws APIManagementException if the caller's organization cannot be resolved
+     */
+    static String getOrganizationXWSO2Tenant(String xWSO2Tenant, String authenticatedOrganization)
+            throws APIManagementException {
+
+        if (StringUtils.isEmpty(authenticatedOrganization)) {
+            throw new APIManagementException("Unable to resolve the organization of the authenticated user",
+                    ExceptionCodes.ORGANIZATION_NOT_FOUND);
+        }
+
+        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(authenticatedOrganization)) {
+            return authenticatedOrganization;
+        }
 
         return (xWSO2Tenant == null)
                 ? MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
