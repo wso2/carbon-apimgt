@@ -23,6 +23,8 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.rest.api.common.RestAPIAuthenticator;
 
+import org.wso2.carbon.user.core.service.RealmService;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +44,8 @@ public class ServiceReferenceHolder {
     private Map<String, JWTValidator> jwtValidatorMap;
 
     private List<RestAPIAuthenticator> authenticators = new ArrayList<>();
+
+    private RealmService realmService;
 
     private byte[] urlSigningKey;
 
@@ -98,5 +102,13 @@ public class ServiceReferenceHolder {
 
     public void setUrlSigningKey(byte[] urlSigningKey) {
         this.urlSigningKey = urlSigningKey;
+    }
+
+    public RealmService getRealmService() {
+        return realmService;
+    }
+
+    public void setRealmService(RealmService realmService) {
+        this.realmService = realmService;
     }
 }
