@@ -77,6 +77,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.apimgt.api.AIRequestContext;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
@@ -3180,7 +3181,8 @@ public final class APIUtil {
                     APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST,
                     APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH,
                     APIConstants.ENDPOINT_SECURITY_TYPE_API_KEY,
-                    APIConstants.ENDPOINT_SECURITY_TYPE_AWS
+                    APIConstants.ENDPOINT_SECURITY_TYPE_AWS,
+                    APIConstants.ENDPOINT_SECURITY_TYPE_UMI
             );
             if (validTypes.stream().noneMatch(type::equalsIgnoreCase)) {
                 ErrorHandler errorHandler = ExceptionCodes.from(ExceptionCodes.INVALID_ENDPOINT_SECURITY_CONFIG,
@@ -11869,6 +11871,82 @@ public final class APIUtil {
         } catch (IOException e) {
             throw new APIManagementException("Error encountered while connecting to service", e);
         }
+    }
+
+    /**
+     * Builds the context handed to the configured {@link org.wso2.carbon.apimgt.api.AIRequestPropertyEnricher} for an
+     * outbound AI service request. The invoking user is resolved from the carbon context.
+     * <p>
+     * User roles are deliberately not resolved here, since that would add a user store call to every AI request. A
+     * caller that has already resolved them should set them on the returned context with
+     * {@link AIRequestContext#setUserRoles(java.util.List)}.
+     *
+     * @param organization organization, that is the tenant domain, the request belongs to
+     * @param resource     AI service resource the request is dispatched to
+     * @param requestId    correlation id of the request, or null when the feature does not use one
+     * @return the request context
+     */
+    public static AIRequestContext buildAIRequestContext(String organization, String resource, String requestId) {
+        AIRequestContext context = new AIRequestContext();
+        context.setOrganization(organization);
+        context.setResource(resource);
+        context.setRequestId(requestId);
+        String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
+        context.setUsername(StringUtils.isEmpty(username) ? null : username);
+        return context;
+    }
+
+    /**
+     * Adds the given properties, resolved from the configured
+     * {@link org.wso2.carbon.apimgt.api.AIRequestPropertyEnricher}, to an AI service request payload.
+     * <p>
+     * This is purely additive. Attributes the product already placed in the payload are kept as they are and are never
+     * overridden, so an enricher can only contribute new attributes. It is also best effort: if the payload is not a
+     * JSON object, the original payload is returned unchanged rather than failing the request.
+     * <p>
+     * Property keys are trimmed and blank keys are skipped, so a key returned with surrounding whitespace resolves to
+     * the same attribute as its trimmed form rather than becoming a second, near identical attribute.
+     *
+     * @param payload              the payload built by the calling feature
+     * @param additionalProperties properties to add, typically obtained from
+     *                             {@code AIRequestPropertyEnricherHolder}. Null or empty leaves the payload untouched
+     * @return the payload to dispatch
+     */
+    public static String addAdditionalPropertiesToPayload(String payload, Map<String, Object> additionalProperties) {
+
+        if (additionalProperties == null || additionalProperties.isEmpty() || StringUtils.isBlank(payload)) {
+            return payload;
+        }
+
+        org.json.JSONObject payloadJson;
+        try {
+            payloadJson = new org.json.JSONObject(payload);
+        } catch (JSONException e) {
+            log.warn("AI service request payload is not a JSON object. Skipping the additional properties.", e);
+            return payload;
+        }
+
+        boolean propertiesAdded = false;
+        for (Map.Entry<String, Object> property : additionalProperties.entrySet()) {
+            String key = property.getKey();
+            if (StringUtils.isBlank(key)) {
+                continue;
+            }
+            key = key.trim();
+            if (payloadJson.has(key)) {
+                log.warn("Property '" + key + "' returned by the AI request property enricher is already present in "
+                        + "the AI service request payload. Retaining the existing value.");
+                continue;
+            }
+            try {
+                payloadJson.put(key, property.getValue());
+                propertiesAdded = true;
+            } catch (JSONException e) {
+                log.warn("Property '" + key + "' returned by the AI request property enricher could not be added to "
+                        + "the AI service request payload. Skipping the property.", e);
+            }
+        }
+        return propertiesAdded ? payloadJson.toString() : payload;
     }
 
     /**

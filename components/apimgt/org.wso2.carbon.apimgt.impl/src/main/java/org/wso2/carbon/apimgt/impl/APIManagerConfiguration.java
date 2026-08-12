@@ -145,6 +145,7 @@ public class APIManagerConfiguration {
     private static DesignAssistantConfigurationDTO designAssistantConfigurationDto = new DesignAssistantConfigurationDTO();
     private static AIAPIConfigurationsDTO aiapiConfigurationsDTO = new AIAPIConfigurationsDTO();
     private static final APIMGovernanceConfigDTO apimGovConfigurationDto = new APIMGovernanceConfigDTO();
+    private String aiRequestPropertyEnricherImpl;
 
     private WorkflowProperties workflowProperties = new WorkflowProperties();
     private Map<String, Environment> apiGatewayEnvironments = new LinkedHashMap<String, Environment>();
@@ -231,6 +232,18 @@ public class APIManagerConfiguration {
     public static boolean isTokenRevocationEnabled() {
 
         return !tokenRevocationClassName.isEmpty();
+    }
+
+    /**
+     * Returns the fully qualified class name of the configured
+     * {@link org.wso2.carbon.apimgt.api.AIRequestPropertyEnricher} implementation, used to attach
+     * additional properties to outbound AI service request payloads.
+     *
+     * @return the configured class name, or {@code null} when none is configured
+     */
+    public String getAIRequestPropertyEnricherImpl() {
+
+        return aiRequestPropertyEnricherImpl;
     }
 
     public MarketplaceAssistantConfigurationDTO getMarketplaceAssistantConfigurationDto() {
@@ -618,6 +631,7 @@ public class APIManagerConfiguration {
                     OMElement password = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_PASSWORD));
                     OMElement databaseId = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_DATABASE_ID));
                     OMElement connectionTimeout = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_CONNECTION_TIMEOUT));
+                    OMElement socketTimeout = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_SOCKET_TIMEOUT));
                     OMElement isSslEnabled = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_IS_SSL_ENABLED));
 
                     if (host != null && StringUtils.isNotBlank(host.getText())) {
@@ -654,7 +668,15 @@ public class APIManagerConfiguration {
                             distributedThrottleConfig.setConnectionTimeout(Integer.parseInt(connectionTimeout.getText().trim()));
                         } catch (NumberFormatException e) {
                             log.warn("Invalid connectionTimeout value: " + connectionTimeout.getText(), e);
-                        }                    }
+                        }
+                    }
+                    if (socketTimeout != null) {
+                        try {
+                            distributedThrottleConfig.setSocketTimeout(Integer.parseInt(socketTimeout.getText().trim()));
+                        } catch (NumberFormatException e) {
+                            log.warn("Invalid socketTimeout value: " + socketTimeout.getText(), e);
+                        }
+                    }
                     if (isSslEnabled != null) {
                         distributedThrottleConfig.setSslEnabled(Boolean.parseBoolean(isSslEnabled.getText().trim()));
                     }
@@ -683,6 +705,8 @@ public class APIManagerConfiguration {
                                 distributedThrottleConfig.setTimeBetweenEvictionRunsMillis(Long.parseLong(propertyNode.getText()));
                             } else if (APIConstants.DISTRIBUTED_THROTTLE_NUM_TESTS_PER_EVICTION_RUNS.equals(propertyNode.getLocalName())) {
                                 distributedThrottleConfig.setNumTestsPerEvictionRun(Integer.parseInt(propertyNode.getText()));
+                            } else if (APIConstants.DISTRIBUTED_THROTTLE_MAX_WAIT_MILLIS.equals(propertyNode.getLocalName())) {
+                                distributedThrottleConfig.setMaxWaitMillis(Long.parseLong(propertyNode.getText()));
                             }
                         }
                     }
@@ -1024,6 +1048,12 @@ public class APIManagerConfiguration {
 
                         this.llmProviderConfigurationDTO.setType(type);
                         this.llmProviderConfigurationDTO.setProperties(propertiesMap);
+                    }
+                    if (APIConstants.AI.PROPERTY_ENRICHER_IMPL.equals(aiChildElement.getLocalName())) {
+                        String enricherImpl = aiChildElement.getText();
+                        if (StringUtils.isNotBlank(enricherImpl)) {
+                            this.aiRequestPropertyEnricherImpl = enricherImpl.trim();
+                        }
                     }
                     if (APIConstants.AI.VECTOR_DB_PROVIDER.equals(aiChildElement.getLocalName())) {
                         String type = aiChildElement.getAttributeValue(

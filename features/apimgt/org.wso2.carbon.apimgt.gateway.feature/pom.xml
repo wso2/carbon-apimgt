@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>9.33.162-SNAPSHOT</version>
+        <version>9.33.168-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -318,6 +318,11 @@
                                 <bundleDef>org.wso2.orbit.com.nimbusds:nimbus-jose-jwt:${com.nimbusds.wso2.version}</bundleDef>
                                 <bundleDef>commons-validator:commons-validator:${commons-validator.version}</bundleDef>
                                 <bundleDef>org.wso2.carbon.mcp.transformer:mcp-transformer-java:${mcp.transformer.version}</bundleDef>
+                                <bundleDef>io.netty:netty-resolver-dns:${netty.version}</bundleDef>
+                                <bundleDef>io.netty:netty-codec-dns:${netty.version}</bundleDef>
+                                <bundleDef>
+                                    org.wso2.orbit.com.azure.resourcemanager:azure-resourcemanager-apimanagement:${org.wso2.orbit.azure.resourcemanager.apimanagement.version}
+                                </bundleDef>
                             </bundles>
                             <importBundles>
                                 <importBundleDef>

@@ -18,12 +18,14 @@
 package org.wso2.carbon.apimgt.throttling.siddhi.extension;
 
 import java.util.AbstractMap;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,7 +44,7 @@ import org.wso2.siddhi.query.api.definition.Attribute;
 public class DistributedCountAttributeAggregator extends AttributeAggregator {
 
     private static final Log log = LogFactory.getLog(DistributedCountAttributeAggregator.class);
-    private static Attribute.Type type = Attribute.Type.LONG;
+    private static final Attribute.Type type = Attribute.Type.LONG;
     private KeyValueStoreClient kvStoreClient;
     private String key;
     private final AtomicLong localCounter = new AtomicLong(0L);
@@ -68,8 +70,11 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
 
     // Static shared scheduler for all aggregators
     private static ScheduledExecutorService kvStoreSyncScheduler = null;
-    private static final ScheduledExecutorService masterScheduler =
-            Executors.newSingleThreadScheduledExecutor(r -> new Thread(r, Thread.currentThread().getName()));
+    private static ScheduledFuture<?> masterSyncTask = null;
+    private static ScheduledExecutorService masterScheduler = null;
+    private volatile boolean pendingReset = false;
+    private volatile long storedWindowExpiry = 0L;
+    private volatile boolean keyHasTTL = false;
 
 
     /**
@@ -83,13 +88,16 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
         if (DISTRIBUTED_THROTTLE_CONFIG == null) {
             synchronized (DistributedCountAttributeAggregator.class) {
                 if (DISTRIBUTED_THROTTLE_CONFIG == null) {
-                    DISTRIBUTED_THROTTLE_CONFIG = getDistributedThrottleConfig();
+                    DistributedThrottleConfig config = getDistributedThrottleConfig();
+                    if (config != null) {
+                        // Plain writes BEFORE the volatile store — any thread that later reads
+                        // DISTRIBUTED_THROTTLE_CONFIG as non-null sees these via JMM happens-before.
+                        distributedThrottlingEnabled = config.isEnabled();
+                        corePoolSize = config.getCorePoolSize();
+                        kvStoreSyncIntervalMilliseconds = config.getSyncInterval();
+                        DISTRIBUTED_THROTTLE_CONFIG = config; // volatile write last
+                    }
                 }
-            }
-            if (DISTRIBUTED_THROTTLE_CONFIG != null) {
-                distributedThrottlingEnabled = DISTRIBUTED_THROTTLE_CONFIG.isEnabled();
-                corePoolSize = DISTRIBUTED_THROTTLE_CONFIG.getCorePoolSize();
-                kvStoreSyncIntervalMilliseconds = DISTRIBUTED_THROTTLE_CONFIG.getSyncInterval();
             }
         }
         String throttleKey = QuerySelector.getThreadLocalGroupByKey();
@@ -98,6 +106,10 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
         }
         if (distributedThrottlingEnabled && throttleKey != null) {
             this.key = "wso2_throttler:" + throttleKey;
+            Long windowExpiry = ThrottleStreamProcessor.getThreadLocalWindowExpiry();
+            if (windowExpiry != null) {
+                this.storedWindowExpiry = windowExpiry;
+            }
             try {
                 this.kvStoreClient = KeyValueStoreManager.getClient();
                 if (this.kvStoreClient != null) {
@@ -125,7 +137,7 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
                 long initialValue = Long.parseLong(kvStoreValue);
                 localCounter.set(initialValue);
             } else {
-                kvStoreClient.set(key, "0");
+                writeCounterValue("0");
             }
         } catch (Exception e) {
             log.error("Error initializing from key-value store for key " + key, e);
@@ -134,30 +146,111 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
     }
 
     /**
+     * Writes the given value to the key-value store with the remaining TTL of the current window.
+     * Does nothing when {@code storedWindowExpiry} is not yet known or has already passed —
+     * callers must check the return value rather than assume the write happened.
+     *
+     * @param value the value to store for this aggregator's key.
+     * @return true if the value was actually written to the key-value store, false if the write
+     *         was skipped because the window expiry was unknown or already in the past.
+     */
+    private boolean writeCounterValue(String value) {
+        long windowExpiry = storedWindowExpiry;
+        if (windowExpiry <= 0) {
+            return false;
+        }
+        long remainingMillis = windowExpiry - System.currentTimeMillis();
+        if (remainingMillis <= 0) {
+            return false;
+        }
+        kvStoreClient.setWithExpiry(key, value, remainingMillis);
+        return true;
+    }
+
+    /**
      * Synchronize the local counter with the key-value store.
-     * Update the key-value store with the unsynced counter value.
+     * Pending resets (PSETEX "0") are flushed first and retried on failure; then any
+     * accumulated delta is pushed via INCRBY/DECRBY, or the current Redis value is pulled
+     * when there is no local change.
      */
     private void syncWithKVStore() {
         synchronized (kvStoreLock) {
             if (kvStoreClient == null || key == null) {
                 return;
             }
+            if (pendingReset) {
+                try {
+                    // Do NOT reset localCounter here — reset() already zeroed it at window boundary.
+                    // Any increments to localCounter since then belong to the new window and are valid.
+                    if (writeCounterValue("0")) {
+                        pendingReset = false; // cleared only on a confirmed write — retried next tick otherwise
+                        keyHasTTL = true;
+                    } else {
+                        keyHasTTL = false;
+                    }
+                } catch (KeyValueStoreException e) {
+                    long currentTimeMillis = System.currentTimeMillis();
+                    if (currentTimeMillis - lastErrorLogTimestamp.get() > ERROR_LOG_INTERVAL_MS) {
+                        log.error("Error resetting counter in key-value store for key " + key, e);
+                        lastErrorLogTimestamp.set(currentTimeMillis);
+                    }
+                }
+                return;
+            }
             long currentUnsyncedCount = unsyncedCounter.getAndSet(0L);
             try {
                 if (currentUnsyncedCount == 0) {
-                    localCounter.set(Long.parseLong(kvStoreClient.get(key)));
-                } else if (currentUnsyncedCount > 0) {
-                    localCounter.set(kvStoreClient.incrementBy(key, currentUnsyncedCount));
+                    String kvStoreValue = kvStoreClient.get(key);
+                    if (kvStoreValue == null) {
+                        writeCounterValue("0");
+                        localCounter.set(0L);
+                    } else if (!pendingReset) {
+                        // skip if reset() fired while waiting for the GET response —
+                        // the returned value is the old-window total and must not overwrite localCounter=0.
+                        localCounter.set(Long.parseLong(kvStoreValue));
+                    }
                 } else {
-                    localCounter.set(kvStoreClient.decrementBy(key, Math.abs(currentUnsyncedCount)));
+                    long kvStoreValue;
+                    if (currentUnsyncedCount > 0) {
+                        kvStoreValue = kvStoreClient.incrementBy(key, currentUnsyncedCount);
+                    } else {
+                        kvStoreValue = kvStoreClient.decrementBy(key, Math.abs(currentUnsyncedCount));
+                    }
+                    // INCRBY/DECRBY never sets a TTL. Stamp one the first time after a gap
+                    // (empty windows) where the key was recreated without a TTL.
+                    if (!keyHasTTL) {
+                        long expiry = storedWindowExpiry;
+                        long remainingMillis = expiry - System.currentTimeMillis();
+                        if (remainingMillis > 0) {
+                            try {
+                                kvStoreClient.expireMillis(key, remainingMillis);
+                                keyHasTTL = true;
+                            } catch (KeyValueStoreException e) {
+                                // Non-fatal: retried on the next sync tick while keyHasTTL is false.
+                                long now = System.currentTimeMillis();
+                                if (now - lastErrorLogTimestamp.get() > ERROR_LOG_INTERVAL_MS) {
+                                    log.warn("Could not set TTL via PEXPIRE for key " + key, e);
+                                    lastErrorLogTimestamp.set(now);
+                                }
+                            }
+                        }
+                    }
+                    if (!pendingReset) {
+                        // guard: reset() can fire while the INCRBY/DECRBY is in flight;
+                        // discard the result to avoid reinstating old-window counts in localCounter.
+                        localCounter.set(kvStoreValue);
+                    }
                 }
-            } catch (KeyValueStoreException e) {
+            } catch (KeyValueStoreException | NumberFormatException e) {
                 long currentTimeMillis = System.currentTimeMillis();
                 if (currentTimeMillis - lastErrorLogTimestamp.get() > ERROR_LOG_INTERVAL_MS) {
                     log.error("Error syncing with key-value store for the key " + key, e);
                     lastErrorLogTimestamp.set(currentTimeMillis);
                 }
-                unsyncedCounter.addAndGet(currentUnsyncedCount);
+                // skip restore if reset() fired after the snapshot — old-window delta must be discarded
+                if (!pendingReset) {
+                    unsyncedCounter.addAndGet(currentUnsyncedCount);
+                }
             }
         }
     }
@@ -177,11 +270,20 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
     @Override
     public Object processAdd(Object data) {
         try {
-            localCounter.incrementAndGet();
+            long newCount = localCounter.incrementAndGet();
             if (distributedThrottlingEnabled && kvStoreClient != null && key != null) {
                 unsyncedCounter.incrementAndGet();
+                // Refresh storedWindowExpiry when stale — this happens after one or more empty
+                // windows where reset() was never called (no RESET event → no reset()).
+                if (storedWindowExpiry <= System.currentTimeMillis()) {
+                    Long expiry = ThrottleStreamProcessor.getThreadLocalWindowExpiry();
+                    if (expiry != null && expiry > storedWindowExpiry) {
+                        storedWindowExpiry = expiry;
+                        keyHasTTL = false; // key was created by INCRBY after gap — needs PEXPIRE
+                    }
+                }
             }
-            return localCounter.get();
+            return newCount;
         } catch (Exception e) {
             log.error("Error in processAdd for key " + key, e);
             return localCounter.get();
@@ -190,7 +292,14 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
 
     @Override
     public Object processAdd(Object[] data) {
-        return processAdd((Object) data);
+        if (log.isDebugEnabled()) {
+            log.debug("DistributedCountAggregator: processAdd called with data: "
+                    + (data != null && data.length > 0 ? data[0] : null));
+        }
+        if (isResetRequested(data)) {
+            return reset();
+        }
+        return processAdd(data != null && data.length > 0 ? data[0] : null);
     }
 
 
@@ -201,9 +310,14 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
      *
      * @param data The event data to be removed.
      * @return The updated value of the local counter after decrement.
+     * Note: not invoked in practice for throttle plans, since {@link ThrottleStreamProcessor}
+     * never emits EXPIRED events to this selector.
      */
     @Override
     public Object processRemove(Object data) {
+        if (log.isDebugEnabled()) {
+            log.debug("DistributedCountAggregator: processRemove called with data: " + data);
+        }
         try {
             localCounter.decrementAndGet();
             if (distributedThrottlingEnabled && kvStoreClient != null && key != null) {
@@ -219,31 +333,32 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
 
     @Override
     public Object processRemove(Object[] data) {
-        return processRemove((Object) data);
+        return processRemove(data != null && data.length > 0 ? data[0] : null);
     }
 
 
     /**
-     * Resets the local counter to zero.
-     * If distributed throttling is enabled, also resets the value in the distributed key-value store
-     * and clears any pending unsynced changes.
+     * Resets the local counter to zero and signals the background sync thread to PSETEX "0"
+     * on its next tick. Never blocks on a Redis network call. Transient failures are retried
+     * automatically.
      *
      * @return 0L after reset.
      */
     @Override
     public Object reset() {
-        try {
-            localCounter.set(0L);
-            if (distributedThrottlingEnabled && kvStoreClient != null && key != null) {
-                kvStoreClient.set(key, "0");
-                unsyncedCounter.set(0L); // Clear pending changes
-            }
-            return 0L;
-
-        } catch (KeyValueStoreException e) {
-            log.error("Error resetting counter for key " + key, e);
-            return 0L;
+        if (log.isDebugEnabled()) {
+            log.debug("DistributedCountAggregator: reset called");
         }
+        localCounter.set(0L);
+        if (distributedThrottlingEnabled && kvStoreClient != null && key != null) {
+            Long expiry = ThrottleStreamProcessor.getThreadLocalWindowExpiry();
+            if (expiry != null) {
+                storedWindowExpiry = expiry;
+            }
+            unsyncedCounter.set(0L);
+            pendingReset = true;
+        }
+        return 0L;
     }
 
     @Override
@@ -259,12 +374,18 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
      */
     @Override
     public void stop() {
+        if (log.isDebugEnabled()) {
+            log.debug("DistributedCountAggregator: stop called");
+        }
         try {
             // Only remove if key is not null and distributed throttling is enabled
             if (distributedThrottlingEnabled && key != null) {
                 ACTIVE_AGGREGATORS.remove(key);
                 if (kvStoreClient != null) {
-                    syncWithKVStore();
+                    syncWithKVStore(); // best-effort: flush pendingReset (PSETEX 0) if pending
+                    if (!pendingReset) {
+                        syncWithKVStore(); // best-effort: push new-window delta; both may be no-ops if Redis is down
+                    }
                 }
                 // Shutdown scheduler if no active aggregators exist
                 if (ACTIVE_AGGREGATORS.isEmpty()) {
@@ -278,6 +399,9 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
 
     @Override
     public Object[] currentState() {
+        if (log.isDebugEnabled()) {
+            log.debug("DistributedCountAggregator: currentState called");
+        }
         if (distributedThrottlingEnabled && kvStoreClient != null && key != null) {
             try {
                 syncWithKVStore();
@@ -290,21 +414,63 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
 
     @Override
     public void restoreState(Object[] state) {
+        if (log.isDebugEnabled()) {
+            log.debug("DistributedCountAggregator: restoreState called with state: " + Arrays.toString(state));
+        }
         Map.Entry<String, Object> stateEntry = (Map.Entry<String, Object>) state[0];
         long restoredValue = (Long) stateEntry.getValue();
 
-        localCounter.set(restoredValue);
-        unsyncedCounter.set(0L);
-
+        // In distributed mode, Redis is authoritative — ignore the stale single-node Siddhi snapshot.
+        // Fall back to 0 on key-absent or Redis error; the sync scheduler recovers the real value once Redis is up.
+        // In non-distributed mode, the Siddhi snapshot is the only state.
+        // Redis GET runs outside the lock to avoid blocking the sync thread during network I/O.
+        long counterToRestore = distributedThrottlingEnabled ? 0L : restoredValue;
+        boolean seedRedis = false;
         if (distributedThrottlingEnabled && kvStoreClient != null && key != null) {
             try {
-                kvStoreClient.set(key, String.valueOf(restoredValue));
+                String kvStoreValue = kvStoreClient.get(key);
+                if (kvStoreValue != null) {
+                    counterToRestore = Long.parseLong(kvStoreValue);
+                } else {
+                    seedRedis = true;
+                }
+            } catch (KeyValueStoreException | NumberFormatException e) {
+                log.error("Error reading from key-value store during restoreState for key "
+                        + key + ". Starting fresh at 0.", e);
+            }
+        }
+
+        // Lock only for the fast in-memory writes — no Redis call inside.
+        synchronized (kvStoreLock) {
+            unsyncedCounter.set(0L);
+            // Do NOT clear pendingReset here. If a reset() flagged an unflushed PSETEX 0 and this
+            // restore landed before the sync thread flushed it, dropping the flag would leave the
+            // previous window's total in Redis. Keep it pending (the next sync tick still flushes
+            // it) and seed localCounter to 0 to match what reset() already intended.
+            if (pendingReset) {
+                localCounter.set(0L);
+            } else {
+                localCounter.set(counterToRestore);
+            }
+        }
+
+        // Key absent in Redis — attempt to seed with 0; no-op if storedWindowExpiry is not yet known.
+        if (seedRedis) {
+            try {
+                writeCounterValue("0");
             } catch (KeyValueStoreException e) {
-                log.error("Error restoring state to key-value store for key "+ key, e);
+                log.error("Error seeding key-value store with 0 during restoreState for key " + key, e);
             }
         }
     }
 
+    /**
+     * Retrieves the distributed throttle configuration for the API Manager.
+     * Attempts to fetch the configuration from the service reference holder.
+     * If fetching the configuration fails, logs a warning message and returns null.
+     *
+     * @return the {@link DistributedThrottleConfig} instance if successfully loaded, or null if loading fails.
+     */
     private static DistributedThrottleConfig getDistributedThrottleConfig() {
         try {
             return ServiceReferenceHolder.getInstance()
@@ -334,13 +500,17 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
             }
             if (kvStoreSyncScheduler == null) {
                 kvStoreSyncScheduler = Executors.newScheduledThreadPool(corePoolSize, r ->
-                        new Thread(r, Thread.currentThread().getName()));
+                        new Thread(r, "apim-distributed-throttle-sync"));
+            }
+            if (masterScheduler == null) {
+                masterScheduler = Executors.newSingleThreadScheduledExecutor(r ->
+                        new Thread(r, "apim-distributed-throttle-master-sync"));
             }
 
             log.debug("Starting key-value store sync scheduler with interval: "
                     + kvStoreSyncIntervalMilliseconds + " ms, pool size: " + corePoolSize);
 
-            masterScheduler.scheduleAtFixedRate(() -> {
+            masterSyncTask = masterScheduler.scheduleAtFixedRate(() -> {
                 try {
                     CompletableFuture<?>[] futures = ACTIVE_AGGREGATORS.values().stream()
                             .map(aggregator -> CompletableFuture.runAsync(() -> {
@@ -373,21 +543,14 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
      */
     public static void shutdownScheduler() {
         synchronized (schedulerLock) {
-            if (kvStoreSyncScheduler != null && !kvStoreSyncScheduler.isShutdown()) {
-                log.debug("Shutting down key-value store sync scheduler...");
-                kvStoreSyncScheduler.shutdown();
-                try {
-                    if (!kvStoreSyncScheduler.awaitTermination(5, TimeUnit.SECONDS)) {
-                        log.warn("The key-value store sync scheduler did not terminate in time. Forcing shutdown...");
-                        kvStoreSyncScheduler.shutdownNow();
-                    }
-                } catch (InterruptedException e) {
-                    log.warn("Interrupted while shutting down key-value store sync scheduler. Forcing shutdown...");
-                    kvStoreSyncScheduler.shutdownNow();
-                    Thread.currentThread().interrupt();
-                }
+            if (masterSyncTask != null) {
+                masterSyncTask.cancel(false);
+                masterSyncTask = null;
             }
+            shutdownExecutor(kvStoreSyncScheduler, "key-value store sync scheduler");
             kvStoreSyncScheduler = null;
+            shutdownExecutor(masterScheduler, "master sync scheduler");
+            masterScheduler = null;
             schedulerStarted = false;
 
             // Shutdown the KeyValueStoreManager to close JedisPool
@@ -397,6 +560,34 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
                 log.error("Error shutting down KeyValueStoreManager", e);
             }
         }
+    }
+
+    /**
+     * Shuts down the given executor service gracefully, forcing shutdown if it does not
+     * terminate within the timeout.
+     *
+     * @param executor The executor to shut down.
+     * @param name     Name of the executor for logging.
+     */
+    private static void shutdownExecutor(ScheduledExecutorService executor, String name) {
+        if (executor != null && !executor.isShutdown()) {
+            log.debug("Shutting down " + name + "...");
+            executor.shutdown();
+            try {
+                if (!executor.awaitTermination(5, TimeUnit.SECONDS)) {
+                    log.warn("The " + name + " did not terminate in time. Forcing shutdown...");
+                    executor.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                log.warn("Interrupted while shutting down " + name + ". Forcing shutdown...");
+                executor.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    private static boolean isResetRequested(Object[] data) {
+        return data != null && data.length > 1 && Boolean.TRUE.equals(data[1]);
     }
 
 }
