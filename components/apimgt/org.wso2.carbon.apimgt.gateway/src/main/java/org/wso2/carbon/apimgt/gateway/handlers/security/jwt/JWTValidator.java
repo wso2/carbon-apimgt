@@ -43,7 +43,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTDataHolder;
+import org.wso2.carbon.apimgt.impl.jwt.RevokedJWTDataHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -313,8 +313,13 @@ public class JWTValidator {
 
                 }
                 // Validate scopes
-                validateScopes(apiContext, apiVersion, matchingResource, httpMethod, jwtValidationInfo, signedJWTInfo,
-                        synCtx, includeTokenInfoInMsgCtx);
+                String mcpMethod = (String) synCtx.getProperty(APIMgtGatewayConstants.MCP_METHOD);
+
+                // For MCP requests, skip scope validation for methods other than tools/call method
+                if (!APIConstants.API_TYPE_MCP.equals(apiType) || APIConstants.MCP.METHOD_TOOL_CALL.equals(mcpMethod)) {
+                    validateScopes(apiContext, apiVersion, matchingResource, httpMethod, jwtValidationInfo, signedJWTInfo,
+                            synCtx, includeTokenInfoInMsgCtx);
+                }
                 validateAudiences(signedJWTInfo);
                 synCtx.setProperty(APIMgtGatewayConstants.SCOPES, jwtValidationInfo.getScopes().toString());
                 synCtx.setProperty(APIMgtGatewayConstants.JWT_CLAIMS, jwtValidationInfo.getClaims());

@@ -301,6 +301,45 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /apis/api-keys:
+    get:
+      tags:
+        - Platform Gateway
+      summary: Get all REST API keys for platform gateway bulk sync
+      description: |
+        Returns all active API-scoped keys for the APIs currently deployed on the
+        authenticated platform gateway. Intended for on-connect backfill by the
+        gateway controller. Authenticated via api-key header (platform gateway
+        registration token).
+      operationId: apisApiKeysGet
+      parameters:
+        - name: api-key
+          in: header
+          required: true
+          description: Platform gateway registration token.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Array of active API keys.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PlatformGatewayAPIKey'
+        '401':
+          description: Invalid or missing api-key.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /deployments:
     get:
       tags:
@@ -1670,12 +1709,15 @@ components:
           description: Artifact identifier (API UUID on-prem).
         kind:
           type: string
-          description: Artifact type (e.g. RestAPI).
-          enum:
-            - RestAPI
-        updatedAt:
+          description: Artifact type (e.g. RestApi).
+        state:
           type: string
-          description: When the deployment was last updated (ISO-8601 date-time string).
+          description: >-
+            Desired deployment state of the artifact on the gateway. Every entry returned by
+            this endpoint is currently deployed; absence from the list means undeployed/orphaned.
+        deployedAt:
+          type: string
+          description: When the deployment was last (un)deployed (ISO-8601 date-time string).
     GatewayDeploymentsResponse:
       description: Response for GET /deployments (platform contract).
       type: object
@@ -2662,6 +2704,54 @@ components:
         errorMessage:
           type: string
           description: A descriptive error message, present only if deploymentStatus is 'FAILURE'.
+    PlatformGatewayAPIKey:
+      description: An active API-scoped key for a platform gateway, returned during bulk sync.
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: Unique identifier of the API key.
+        name:
+          type: string
+          description: Human-readable name of the API key.
+        maskedApiKey:
+          type: string
+          description: Masked representation of the API key (plaintext is not stored).
+        apiKeyHashes:
+          type: object
+          additionalProperties:
+            type: string
+          description: Map of hash algorithm to hash value, e.g. {"sha256":"<hex>"}.
+        artifactUuid:
+          type: string
+          description: UUID of the API this key is scoped to.
+        status:
+          type: string
+          description: Key status, e.g. ACTIVE.
+        createdAt:
+          type: string
+          description: ISO-8601 creation timestamp.
+        createdBy:
+          type: string
+          description: Username that created this key.
+        updatedAt:
+          type: string
+          description: ISO-8601 last-updated timestamp.
+        expiresAt:
+          type: string
+          description: ISO-8601 expiry timestamp. Absent if the key never expires.
+        etag:
+          type: string
+          description: Opaque version tag for cache validation.
+        source:
+          type: string
+          description: Origin of the key, e.g. 'external'.
+        externalRefId:
+          type: string
+          description: External reference identifier.
+        issuer:
+          type: string
+          description: Issuer identifier.
     PlatformGatewayDeploymentNotification:
       description: API Platform gateway deployment notification (sent by gateway after deploy).
       type: object

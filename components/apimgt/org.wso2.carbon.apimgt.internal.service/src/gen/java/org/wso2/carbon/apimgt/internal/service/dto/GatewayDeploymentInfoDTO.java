@@ -27,38 +27,9 @@ public class GatewayDeploymentInfoDTO   {
   
     private String deploymentId = null;
     private String artifactId = null;
-
-    @XmlType(name="KindEnum")
-    @XmlEnum(String.class)
-    public enum KindEnum {
-        RESTAPI("RestAPI");
-        private String value;
-
-        KindEnum (String v) {
-            value = v;
-        }
-
-        public String value() {
-            return value;
-        }
-
-        @Override
-        public String toString() {
-            return String.valueOf(value);
-        }
-
-        @JsonCreator
-        public static KindEnum fromValue(String v) {
-            for (KindEnum b : KindEnum.values()) {
-                if (String.valueOf(b.value).equals(v)) {
-                    return b;
-                }
-            }
-return null;
-        }
-    }
-    private KindEnum kind = null;
-    private String updatedAt = null;
+    private String kind = null;
+    private String state = null;
+    private String deployedAt = null;
 
   /**
    * Deployment/revision identifier (revision UUID on-prem).
@@ -97,39 +68,57 @@ return null;
   }
 
   /**
-   * Artifact type (e.g. RestAPI).
+   * Artifact type (e.g. RestApi).
    **/
-  public GatewayDeploymentInfoDTO kind(KindEnum kind) {
+  public GatewayDeploymentInfoDTO kind(String kind) {
     this.kind = kind;
     return this;
   }
 
   
-  @ApiModelProperty(value = "Artifact type (e.g. RestAPI).")
+  @ApiModelProperty(value = "Artifact type (e.g. RestApi).")
   @JsonProperty("kind")
-  public KindEnum getKind() {
+  public String getKind() {
     return kind;
   }
-  public void setKind(KindEnum kind) {
+  public void setKind(String kind) {
     this.kind = kind;
   }
 
   /**
-   * When the deployment was last updated (ISO-8601 date-time string).
+   * Desired deployment state of the artifact on the gateway. Every entry returned by this endpoint is currently deployed; absence from the list means undeployed/orphaned.
    **/
-  public GatewayDeploymentInfoDTO updatedAt(String updatedAt) {
-    this.updatedAt = updatedAt;
+  public GatewayDeploymentInfoDTO state(String state) {
+    this.state = state;
     return this;
   }
 
   
-  @ApiModelProperty(value = "When the deployment was last updated (ISO-8601 date-time string).")
-  @JsonProperty("updatedAt")
-  public String getUpdatedAt() {
-    return updatedAt;
+  @ApiModelProperty(value = "Desired deployment state of the artifact on the gateway. Every entry returned by this endpoint is currently deployed; absence from the list means undeployed/orphaned.")
+  @JsonProperty("state")
+  public String getState() {
+    return state;
   }
-  public void setUpdatedAt(String updatedAt) {
-    this.updatedAt = updatedAt;
+  public void setState(String state) {
+    this.state = state;
+  }
+
+  /**
+   * When the deployment was last (un)deployed (ISO-8601 date-time string).
+   **/
+  public GatewayDeploymentInfoDTO deployedAt(String deployedAt) {
+    this.deployedAt = deployedAt;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "When the deployment was last (un)deployed (ISO-8601 date-time string).")
+  @JsonProperty("deployedAt")
+  public String getDeployedAt() {
+    return deployedAt;
+  }
+  public void setDeployedAt(String deployedAt) {
+    this.deployedAt = deployedAt;
   }
 
 
@@ -145,12 +134,13 @@ return null;
     return Objects.equals(deploymentId, gatewayDeploymentInfo.deploymentId) &&
         Objects.equals(artifactId, gatewayDeploymentInfo.artifactId) &&
         Objects.equals(kind, gatewayDeploymentInfo.kind) &&
-        Objects.equals(updatedAt, gatewayDeploymentInfo.updatedAt);
+        Objects.equals(state, gatewayDeploymentInfo.state) &&
+        Objects.equals(deployedAt, gatewayDeploymentInfo.deployedAt);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(deploymentId, artifactId, kind, updatedAt);
+    return Objects.hash(deploymentId, artifactId, kind, state, deployedAt);
   }
 
   @Override
@@ -161,7 +151,8 @@ return null;
     sb.append("    deploymentId: ").append(toIndentedString(deploymentId)).append("\n");
     sb.append("    artifactId: ").append(toIndentedString(artifactId)).append("\n");
     sb.append("    kind: ").append(toIndentedString(kind)).append("\n");
-    sb.append("    updatedAt: ").append(toIndentedString(updatedAt)).append("\n");
+    sb.append("    state: ").append(toIndentedString(state)).append("\n");
+    sb.append("    deployedAt: ").append(toIndentedString(deployedAt)).append("\n");
     sb.append("}");
     return sb.toString();
   }

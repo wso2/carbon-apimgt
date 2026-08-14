@@ -102,6 +102,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -1589,19 +1591,26 @@ public class OAS2Parser extends APIDefinition {
         if (api != null && api.isAdvertiseOnly()) {
             String externalProductionEndpoint = api.getApiExternalProductionEndpoint();
             if (externalProductionEndpoint != null) {
-                if (externalProductionEndpoint.split("://")[0].contains("https")) {
-                    schemes.add(Scheme.HTTPS);
-                } else {
-                    schemes.add(Scheme.HTTP);
+                try {
+                    URL parsedUrl = new URL(externalProductionEndpoint);
+                    if ("https".equalsIgnoreCase(parsedUrl.getProtocol())) {
+                        schemes.add(Scheme.HTTPS);
+                    } else {
+                        schemes.add(Scheme.HTTP);
+                    }
+                    String host = parsedUrl.getPort() != -1
+                            ? parsedUrl.getHost() + ":" + parsedUrl.getPort()
+                            : parsedUrl.getHost();
+                    String path = parsedUrl.getPath();
+                    if (path != null && !path.isEmpty() && !"/".equals(path)) {
+                        swagger.setBasePath(path);
+                    }
+                    swagger.setHost(host);
+                    swagger.setSchemes(schemes);
+                } catch (MalformedURLException e) {
+                    log.error("Error parsing external production endpoint URL: "
+                            + externalProductionEndpoint, e);
                 }
-                String host = externalProductionEndpoint.split("://")[1].split("/")[0];
-                if (externalProductionEndpoint.split("://")[1].split("/").length > 1) {
-                    swagger.setBasePath(externalProductionEndpoint.split("://")[1].split(host)[1]);
-                } else {
-                    swagger.setBasePath("");
-                }
-                swagger.setHost(host);
-                swagger.setSchemes(schemes);
             }
         } else {
             String host = StringUtils.EMPTY;
@@ -2259,7 +2268,7 @@ public class OAS2Parser extends APIDefinition {
             return new HashSet<>();
         }
         Set<String> tools = new LinkedHashSet<>();
-        Set<URITemplate> generatedTools = new HashSet<>();
+        Set<URITemplate> generatedTools = new LinkedHashSet<>();
         for (URITemplate template : uriTemplates) {
             BackendOperation backendOperation = null;
             if (APISpecParserConstants.API_SUBTYPE_DIRECT_BACKEND.equals(mcpSubtype)) {
@@ -2305,10 +2314,10 @@ public class OAS2Parser extends APIDefinition {
         mergePathParametersIntoOperations(backendDefinition);
         if (backendDefinition.getPaths() == null || backendDefinition.getPaths().isEmpty()) {
             log.warn("Backend API definition has no paths defined");
-            return new HashSet<>();
+            return new LinkedHashSet<>();
         }
         Set<String> tools = new LinkedHashSet<>();
-        Set<URITemplate> updatedTools = new HashSet<>();
+        Set<URITemplate> updatedTools = new LinkedHashSet<>();
         for (URITemplate template : uriTemplates) {
             BackendOperation backendOperation = null;
             if (APISpecParserConstants.API_SUBTYPE_DIRECT_BACKEND.equals(mcpSubtype)) {

@@ -23,9 +23,11 @@ import org.junit.Test;
 import org.testng.Assert;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.impl.dto.PlatformGatewayConnectConfig;
 
 import javax.xml.stream.XMLStreamException;
 
+import java.lang.reflect.Method;
 import java.util.Map;
 
 public class APIManagerConfigurationTest {
@@ -128,5 +130,32 @@ public class APIManagerConfigurationTest {
         Assert.assertFalse(environmentsList.isEmpty());
         Environment defaultEnv = environmentsList.get("Default");
         Assert.assertFalse(defaultEnv.getAdditionalProperties().isEmpty());
+    }
+
+    @Test
+    public void testPlatformGatewayConnectParsesEntryWithoutRegistrationToken() throws Exception {
+        String gatewayNotificationConfig = "<GatewayNotificationConfiguration>"
+                + "<Enabled>true</Enabled>"
+                + "<PlatformGatewayConnectConfiguration>"
+                + "<ConnectGateways>"
+                + "<Connect>"
+                + "<RegistrationToken></RegistrationToken>"
+                + "<Url>https://gw.example.com:8243</Url>"
+                + "</Connect>"
+                + "</ConnectGateways>"
+                + "</PlatformGatewayConnectConfiguration>"
+                + "</GatewayNotificationConfiguration>";
+        OMElement element = AXIOMUtil.stringToOM(gatewayNotificationConfig);
+        APIManagerConfiguration config = new APIManagerConfiguration();
+        Method method = APIManagerConfiguration.class.getDeclaredMethod(
+                "setGatewayNotificationConfiguration", OMElement.class);
+        method.setAccessible(true);
+        method.invoke(config, element);
+
+        PlatformGatewayConnectConfig connectConfig = config.getPlatformGatewayConnectConfig();
+        Assert.assertEquals(1, connectConfig.getDeclaredConnectEntryCount());
+        Assert.assertEquals(1, connectConfig.getConnectGateways().size());
+        Assert.assertTrue(connectConfig.getConnectGateways().get(0).getRegistrationToken().isEmpty());
+        Assert.assertEquals("https://gw.example.com:8243", connectConfig.getConnectGateways().get(0).getUrl());
     }
 }

@@ -26,6 +26,7 @@ import io.swagger.v3.oas.models.parameters.HeaderParameter;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import org.apache.axis2.Constants;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
@@ -35,6 +36,8 @@ import org.apache.synapse.rest.AbstractHandler;
 import org.jetbrains.annotations.NotNull;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
@@ -53,6 +56,7 @@ public class APIMgtLatencyStatsHandler extends AbstractHandler {
     private OpenAPI openAPI;
     private String apiUUID;
     private String swagger;
+    private String subType;
 
     public String getApiUUID() {
         return apiUUID;
@@ -60,6 +64,22 @@ public class APIMgtLatencyStatsHandler extends AbstractHandler {
 
     public void setApiUUID(String apiUUID) {
         this.apiUUID = apiUUID;
+    }
+
+    /**
+     * Get subtype of the API
+     * @return API Subtype
+     */
+    public String getSubType() {
+        return subType;
+    }
+
+    /**
+     * Set subtype of the API
+     * @param subType API Subtype
+     */
+    public void setSubType(String subType) {
+        this.subType = subType;
     }
 
     public boolean handleRequest(MessageContext messageContext) {
@@ -79,6 +99,10 @@ public class APIMgtLatencyStatsHandler extends AbstractHandler {
             messageContext.setProperty(APIMgtGatewayConstants.RESOURCE_SPAN, span);
         }
         messageContext.setProperty(APIMgtGatewayConstants.API_UUID_PROPERTY, apiUUID);
+        messageContext.setProperty(APIMgtGatewayConstants.SUB_TYPE, subType);
+        if (APIConstants.API_SUBTYPE_AI_API.equals(subType)) {
+            publishCustomErrorResponseSequence(messageContext);
+        }
         org.apache.axis2.context.MessageContext axis2MsgContext =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
 
@@ -206,4 +230,23 @@ public class APIMgtLatencyStatsHandler extends AbstractHandler {
         return parameter;
     }
 
+    /**
+     * Publishes the configured AI custom error response sequence to the message context
+     * when it is available in the Gateway. Downstream error-handling sequences
+     * (e.g., `guardrail_fault.xml` and `_sandbox_key_error_.xml`) use this property to
+     * delegate AI API error response generation to the configured formatter.
+     *
+     * @param messageContext the Synapse message context
+     */
+    private void publishCustomErrorResponseSequence(MessageContext messageContext) {
+
+        String customErrorResponseSequence = APIManagerConfiguration.getAiApiConfigurationsDTO()
+                .getCustomErrorResponseSequence();
+        if (StringUtils.isNotEmpty(customErrorResponseSequence)) {
+            if (messageContext.getSequence(customErrorResponseSequence) != null) {
+                messageContext.setProperty(APIMgtGatewayConstants.AI_CUSTOM_ERROR_FORMAT_SEQUENCE,
+                        customErrorResponseSequence);
+            }
+        }
+    }
 }

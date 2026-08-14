@@ -22,8 +22,8 @@ import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import javax.cache.Cache;
@@ -67,7 +67,7 @@ public class APIMConfigServiceImpl implements APIMConfigService {
     private static final String PUBLISHER_ORG_READ = "apim:publisher_organization_read";
     private static final String ADMIN_ORG_READ = "apim:organization_read";
     private static final String ADMIN_ORG_MANAGE = "apim:organization_manage";
-    
+
     protected SystemConfigurationsDAO systemConfigurationsDAO;
 
     public APIMConfigServiceImpl() {
@@ -198,7 +198,7 @@ public class APIMConfigServiceImpl implements APIMConfigService {
     /*
      *  This method facilitates the on-the-fly migration of the scope section in the tenant-config.json. This
      *  checks whether RESTAPIScopes section has newly introduced scopes and add them to the json String if it
-     *  is not available. 
+     *  is not available.
      */
     private String addMissingScopes(String systemConfig) {
         if (systemConfig == null) {
@@ -238,7 +238,7 @@ public class APIMConfigServiceImpl implements APIMConfigService {
         scopesToCheck.put(PUBLISHER_ORG_READ, "admin,Internal/creator");
         scopesToCheck.put(ADMIN_ORG_MANAGE, "admin");
         scopesToCheck.put(ADMIN_ORG_READ, "admin");
-        
+
         ArrayList<String> missingScopesList = new ArrayList<>(scopesToCheck.keySet());
         
         JsonParser jsonParser = new JsonParser();

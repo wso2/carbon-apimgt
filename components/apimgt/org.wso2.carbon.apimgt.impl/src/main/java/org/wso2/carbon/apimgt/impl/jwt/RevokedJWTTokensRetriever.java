@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.gateway.jwt;
+package org.wso2.carbon.apimgt.impl.jwt;
 
 import com.google.gson.Gson;
 import org.apache.commons.codec.binary.Base64;
@@ -27,14 +27,14 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.gateway.dto.RevokedEventsDTO;
-import org.wso2.carbon.apimgt.gateway.dto.RevokedJWTConsumerKeyDTO;
-import org.wso2.carbon.apimgt.gateway.dto.RevokedJWTSubjectEntityDTO;
-import org.wso2.carbon.apimgt.gateway.dto.RevokedJWTTokenDTO;
-import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
+import org.wso2.carbon.apimgt.impl.dto.RevokedEventsDTO;
+import org.wso2.carbon.apimgt.impl.dto.RevokedJWTConsumerKeyDTO;
+import org.wso2.carbon.apimgt.impl.dto.RevokedJWTSubjectEntityDTO;
+import org.wso2.carbon.apimgt.impl.dto.RevokedJWTTokenDTO;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.DataLoadingException;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.IOException;
@@ -175,7 +175,9 @@ public class RevokedJWTTokensRetriever extends TimerTask {
     }
 
     protected EventHubConfigurationDto getEventHubConfiguration() {
-        return ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getEventHubConfigurationDto();
+
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getEventHubConfigurationDto();
     }
 
 }

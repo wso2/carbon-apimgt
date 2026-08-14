@@ -26,9 +26,11 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.api.AIRequestContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.ai.AIRequestPropertyEnricherHolder;
 import org.wso2.carbon.apimgt.impl.dto.ai.MarketplaceAssistantConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -41,9 +43,6 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.MarketplaceAssistantRequestD
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.MarketplaceAssistantResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
-import org.wso2.carbon.identity.oauth.OAuthUtil;
-import org.wso2.carbon.identity.oauth2.authz.OAuthAuthzReqMessageContext;
 
 import java.io.IOException;
 
@@ -91,13 +90,19 @@ public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantA
                 payload.put(APIConstants.USERROLES, userRoles.toLowerCase());
                 payload.put(APIConstants.APIM_VERSION, APIUtil.getAPIMVersion());
 
+                AIRequestContext context = APIUtil.buildAIRequestContext(organization,
+                        configDto.getChatResource(), null);
+                String finalPayload = APIUtil.addAdditionalPropertiesToPayload(payload.toString(),
+                        AIRequestPropertyEnricherHolder.getInstance().resolveProperties(context,
+                                enricher -> enricher.enrichMarketplaceAssistantChatProperties(context)));
+
                 String response;
                 if (configDto.isKeyProvided()) {
                     response = APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(),
-                            configDto.getKey(), configDto.getChatResource(), payload.toString(), null);
+                            configDto.getKey(), configDto.getChatResource(), finalPayload, null);
                 } else {
                     response = APIUtil.invokeAIService(configDto.getEndpoint(), null,
-                            configDto.getAccessToken(), configDto.getChatResource(), payload.toString(), null);
+                            configDto.getAccessToken(), configDto.getChatResource(), finalPayload, null);
                 }
                 ObjectMapper objectMapper = new ObjectMapper();
                 MarketplaceAssistantResponseDTO executeResponseDTO = objectMapper.readValue(response,

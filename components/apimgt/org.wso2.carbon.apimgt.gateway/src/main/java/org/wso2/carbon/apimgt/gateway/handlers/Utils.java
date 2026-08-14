@@ -522,7 +522,7 @@ public class Utils {
                 bytes = certificate.getBytes();
             } else {
                 try {
-                    certificate = URLDecoder.decode(certificate, "UTF-8");
+                    certificate = URLDecoder.decode(certificate.replace("+", "%2B"), "UTF-8");
                 } catch (UnsupportedEncodingException e) {
                     String msg = "Error while URL decoding certificate";
                     throw new APIManagementException(msg, e);
@@ -744,6 +744,26 @@ public class Utils {
         }
 
         return selectedAPIMap;
+    }
+
+    /**
+     * Returns the updated API from the tenant subscription store using its context and version.
+     *
+     * @param tenantDomain the tenant domain
+     * @param electedAPI the API to look up
+     * @return the matching API if found; otherwise, the provided API
+     */
+    public static org.wso2.carbon.apimgt.keymgt.model.entity.API getAPI(
+            String tenantDomain,
+            org.wso2.carbon.apimgt.keymgt.model.entity.API electedAPI) {
+        SubscriptionDataStore tenantSubscriptionStore =
+                SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
+        if (tenantSubscriptionStore != null) {
+            org.wso2.carbon.apimgt.keymgt.model.entity.API updatedApi =
+                    tenantSubscriptionStore.getApiByContextAndVersion(electedAPI.getContext(), electedAPI.getVersion());
+            return updatedApi != null ? updatedApi : electedAPI;
+        }
+        return electedAPI;
     }
 
     /**

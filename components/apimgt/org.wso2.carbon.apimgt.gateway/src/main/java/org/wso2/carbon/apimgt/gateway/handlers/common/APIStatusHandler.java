@@ -67,7 +67,11 @@ public class APIStatusHandler extends AbstractHandler {
             log.debug("Mediate from " + APISecurityConstants.API_BLOCKED_SEQUENCE);
         }
 
-        Mediator sequence = messageContext.getSequence(APISecurityConstants.API_BLOCKED_SEQUENCE);
+        // Publish the error flow type such that any error sequence can branch on it.
+        messageContext.setProperty(APIMgtGatewayConstants.API_ERROR_TYPE,
+                APIMgtGatewayConstants.API_ERROR_TYPE_BLOCKED);
+        Mediator sequence = GatewayUtils.getErrorResponseFormatterSequence(
+                messageContext, APISecurityConstants.API_BLOCKED_SEQUENCE);
         if (sequence != null) {
             sequence.mediate(messageContext);
         } else {

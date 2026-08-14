@@ -194,7 +194,8 @@ public class SystemScopeUtils {
             for (Object scopeObj : scopesArray) {
                 JSONObject scope = (JSONObject) scopeObj;
                 String scopeName = scope.get(APIConstants.SystemScopeConstants.REST_API_SCOPE_NAME).toString();
-                String scopeRoles = scope.get(APIConstants.SystemScopeConstants.REST_API_SCOPE_ROLE).toString();
+                Object scopeRolesObj = scope.get(APIConstants.SystemScopeConstants.REST_API_SCOPE_ROLE);
+                String scopeRoles = scopeRolesObj != null ? scopeRolesObj.toString() : "";
                 if (roleMappings != null) {
                     if (log.isDebugEnabled()) {
                         log.debug("REST API scope role mappings exist. Hence proceeding to swap original scope roles "

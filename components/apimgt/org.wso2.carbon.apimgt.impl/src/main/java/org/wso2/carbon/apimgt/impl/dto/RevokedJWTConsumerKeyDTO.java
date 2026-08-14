@@ -16,46 +16,36 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.gateway.dto;
+package org.wso2.carbon.apimgt.impl.dto;
 
 import com.google.gson.annotations.SerializedName;
 
 /**
- * DTO of revoked JWT Subject Entity.
+ * DTO of revoked JWT Consumer key.
  */
-public class RevokedJWTSubjectEntityDTO {
+public class RevokedJWTConsumerKeyDTO {
 
-    @SerializedName("entity_id")
-    private String entityId;
-    @SerializedName("entity_type")
-    private String entityType;
+    @SerializedName("consumer_key")
+    private String consumerKey;
     @SerializedName("revocation_time")
     private Long revocationTime;
     @SerializedName("organization")
     private String organization;
 
-    public String getEntityId() {
-        return entityId;
-    }
-
-    public void setEntityId(String entityId) {
-        this.entityId = entityId;
-    }
-
-    public String getEntityType() {
-        return entityType;
-    }
-
-    public void setEntityType(String entityType) {
-        this.entityType = entityType;
+    public void setRevocationTime(Long revocationTime) {
+        this.revocationTime = revocationTime;
     }
 
     public Long getRevocationTime() {
         return revocationTime;
     }
 
-    public void setRevocationTime(Long revocationTime) {
-        this.revocationTime = revocationTime;
+    public String getConsumerKey() {
+        return consumerKey;
+    }
+
+    public void setConsumerKey(String consumerKey) {
+        this.consumerKey = consumerKey;
     }
 
     public String getOrganization() {

@@ -393,8 +393,12 @@
         This enables the API Chat feature which leverages AI for API testing within Developer Portal.
     -->
     <APIChat>
-        <!-- Enable API Chat for API Manager -->
-        <Enabled>{{apim.ai.enable}}</Enabled>
+        <!--
+            Enable API Chat for API Manager. Enabled by default.
+            Set [apim.ai] api_chat_enable = false in deployment.toml to turn off this
+            feature alone, or enable = false to turn off every AI feature.
+        -->
+        <Enabled>{% if apim.ai.enable and apim.ai.api_chat_enable %}true{% else %}false{% endif %}</Enabled>
 
         <AuthToken>{{apim.ai.token}}</AuthToken>
 
@@ -419,10 +423,14 @@
             <DefaultRequestTimout>{{apim.ai.failover_configurations.default_request_timeout}}</DefaultRequestTimout>
         </FailoverConfigurations>
         <DefaultRequestTimout>{{apim.ai.default_request_timeout}}</DefaultRequestTimout>
+        {% if apim.ai.custom_error_response_sequence is defined %}
+        <CustomErrorResponseSequence>{{apim.ai.custom_error_response_sequence}}</CustomErrorResponseSequence>
+        {% endif %}
     </AiConfiguration>
 
     <MCP>
         <Enabled>{{apim.mcp.enable}}</Enabled>
+        <EnforceAuthForAllMCPMethods>{{apim.mcp.enforce_auth_for_all_mcp_methods}}</EnforceAuthForAllMCPMethods>
     </MCP>
 
     <!--
@@ -438,8 +446,12 @@
         This enables the Marketplace Assistant feature which leverages AI for API searching within Developer Portal.
     -->
     <MarketplaceAssistant>
-        <!-- Enable Marketplace Assistant for API Manager -->
-        <Enabled>{{apim.ai.enable}}</Enabled>
+        <!--
+            Enable Marketplace Assistant for API Manager. Enabled by default.
+            Set [apim.ai] marketplace_assistant_enable = false in deployment.toml to
+            turn off this feature alone, or enable = false to turn off every AI feature.
+        -->
+        <Enabled>{% if apim.ai.enable and apim.ai.marketplace_assistant_enable %}true{% else %}false{% endif %}</Enabled>
 
         <AuthToken>{{apim.ai.token}}</AuthToken>
 
@@ -458,8 +470,12 @@
     </MarketplaceAssistant>
 
     <DesignAssistant>
-        <!-- Enable Design Assistant for API Manager -->
-        <Enabled>{{apim.ai.enable}}</Enabled>
+        <!--
+            Enable Design Assistant for API Manager. Enabled by default.
+            Set [apim.ai] design_assistant_enable = false in deployment.toml to turn off
+            this feature alone, or enable = false to turn off every AI feature.
+        -->
+        <Enabled>{% if apim.ai.enable and apim.ai.design_assistant_enable %}true{% else %}false{% endif %}</Enabled>
 
         <AuthToken>{{apim.ai.token}}</AuthToken>
 
@@ -1362,6 +1378,9 @@
                 {% if apim.distributed_throttling.keyvalue_store.connection_timeout is defined %}
                 <ConnectionTimeout>{{apim.distributed_throttling.keyvalue_store.connection_timeout}}</ConnectionTimeout>
                 {% endif %}
+                {% if apim.distributed_throttling.keyvalue_store.socket_timeout is defined %}
+                <SocketTimeout>{{apim.distributed_throttling.keyvalue_store.socket_timeout}}</SocketTimeout>
+                {% endif %}
                 {% if apim.distributed_throttling.keyvalue_store.ssl is defined %}
                 <IsSslEnabled>{{apim.distributed_throttling.keyvalue_store.ssl}}</IsSslEnabled>
                 {% endif %}
@@ -1385,6 +1404,9 @@
                 {% endif %}
                 {% if apim.distributed_throttling.keyvalue_store.time_between_eviction_runs_millis is defined %}
                 <TimeBetweenEvictionRunsMillis>{{apim.distributed_throttling.keyvalue_store.time_between_eviction_runs_millis}}</TimeBetweenEvictionRunsMillis>
+                {% endif %}
+                {% if apim.distributed_throttling.keyvalue_store.max_wait_millis is defined %}
+                <MaxWaitMillis>{{apim.distributed_throttling.keyvalue_store.max_wait_millis}}</MaxWaitMillis>
                 {% endif %}
             </KeyValueStoreOptions>
             {% endif %}
@@ -1510,6 +1532,9 @@
             <Url>{{apim.open_telemetry.remote_tracer.url}}</Url>
             <HostName>{{apim.open_telemetry.remote_tracer.hostname}}</HostName>
             <Port>{{apim.open_telemetry.remote_tracer.port}}</Port>
+            {% if apim.open_telemetry.remote_tracer.sampler_mode is defined %}
+            <SamplerMode>{{apim.open_telemetry.remote_tracer.sampler_mode}}</SamplerMode>
+            {% endif %}
             <Properties>
                 {% for property in apim.open_telemetry.remote_tracer.properties %}
                 <{{property.name}}>{{property.value}}</{{property.name}}>
@@ -1964,6 +1989,7 @@
             <Sequence>_mcp_failure_handler_.xml</Sequence>
             <Sequence>main.xml</Sequence>
             <Sequence>outDispatchSeq.xml</Sequence>
+            <Sequence>openai_error_response_formatter.xml</Sequence>
             <Sequence>_production_key_error_.xml</Sequence>
             <Sequence>_resource_mismatch_handler_.xml</Sequence>
             <Sequence>_sandbox_key_error_.xml</Sequence>
@@ -2117,6 +2143,14 @@
                 <Property name="{{key}}">{{value}}</Property>
                 {% endfor %}
           </VectorDBProvider>
+          {% if apim.ai.property_enricher_impl is defined %}
+          <PropertyEnricherImpl>{{apim.ai.property_enricher_impl}}</PropertyEnricherImpl>
+          {% endif %}
+
+          <!-- Azure User-Managed Identity (UMI) Token Provider Configuration -->
+          <AzureUMI>
+              <Scope>{{apim.ai.azure_umi.scope}}</Scope>
+          </AzureUMI>
       </AI>
 
       <GatewayNotificationConfiguration>
@@ -2145,13 +2179,41 @@
               <ExpireTimeSeconds>{{apim.gateway_notification.cleanup.expiry_time}}</ExpireTimeSeconds>
               <DataRetentionPeriodSeconds>{{apim.gateway_notification.cleanup.data_retention_period}}</DataRetentionPeriodSeconds>
           </GatewayCleanup>
-          {% if apim.platform_gateway.versions is defined and apim.platform_gateway.versions | length > 0 %}
+          {% if (apim.platform_gateway.versions is defined and apim.platform_gateway.versions | length > 0) or (apim.platform_gateway.connect is defined and apim.platform_gateway.connect | length > 0) %}
           <PlatformGatewayConnectConfiguration>
+              {% if apim.platform_gateway.versions is defined and apim.platform_gateway.versions | length > 0 %}
               <PlatformGatewayVersions>
               {% for version in apim.platform_gateway.versions %}
                   <Version>{{ version }}</Version>
               {% endfor %}
               </PlatformGatewayVersions>
+              {% endif %}
+              {% if apim.platform_gateway.connect is defined and apim.platform_gateway.connect | length > 0 %}
+              <ConnectGateways>
+              {% for c in apim.platform_gateway.connect %}
+                <Connect>
+                    {% if c.registration_token is defined and c.registration_token %}
+                    <RegistrationToken>{{ c.registration_token }}</RegistrationToken>
+                    {% endif %}
+                    {% if c.name is defined and c.name %}
+                    <Name>{{ c.name }}</Name>
+                    {% endif %}
+                    {% if c.display_name is defined and c.display_name %}
+                    <DisplayName>{{ c.display_name }}</DisplayName>
+                    {% endif %}
+                    {% if c.description is defined and c.description %}
+                    <Description>{{ c.description }}</Description>
+                    {% endif %}
+                    {% if c.url is defined and c.url %}
+                    <Url>{{ c.url }}</Url>
+                    {% endif %}
+                    {% if c.organization is defined and c.organization %}
+                    <Organization>{{ c.organization }}</Organization>
+                    {% endif %}
+                </Connect>
+              {% endfor %}
+              </ConnectGateways>
+              {% endif %}
           </PlatformGatewayConnectConfiguration>
           {% endif %}
           <APIKeyNotification>

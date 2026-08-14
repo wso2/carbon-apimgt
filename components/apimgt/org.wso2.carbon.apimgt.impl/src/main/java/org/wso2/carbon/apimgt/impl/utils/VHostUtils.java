@@ -23,6 +23,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.impl.service.PlatformGatewayServiceImpl;
 
 public class VHostUtils {
 
@@ -54,6 +55,37 @@ public class VHostUtils {
                 .filter(v -> StringUtils.equals(v.getHost(), host))
                 .findAny()
                 .orElse(defaultVhost);
+    }
+
+    /**
+     * VHost for try-out / endpoint URL construction. Platform gateways use the configured base URL
+     * ({@code gatewayBaseUrl} or reconstructed VHost) instead of default https port 443.
+     */
+    public static VHost getInvocationVhostFromEnvironment(Environment environment, String host) {
+        if (environment == null) {
+            VHost defaultVhost = new VHost();
+            defaultVhost.setHost(host);
+            defaultVhost.setHttpContext("");
+            defaultVhost.setHttpsPort(APIConstants.HTTPS_PROTOCOL_PORT);
+            defaultVhost.setHttpPort(APIConstants.HTTP_PROTOCOL_PORT);
+            defaultVhost.setWsPort(APIConstants.WS_PROTOCOL_PORT);
+            defaultVhost.setWsHost(host);
+            defaultVhost.setWssPort(APIConstants.WSS_PROTOCOL_PORT);
+            defaultVhost.setWssHost(host);
+            return defaultVhost;
+        }
+        if (!APIConstants.WSO2_API_PLATFORM_GATEWAY.equals(environment.getGatewayType())) {
+            return getVhostFromEnvironment(environment, host);
+        }
+        String baseUrl = PlatformGatewayServiceImpl.resolveGatewayBaseUrl(environment);
+        if (StringUtils.isBlank(baseUrl) || !baseUrl.contains("://")) {
+            return getVhostFromEnvironment(environment, host);
+        }
+        try {
+            return VHost.fromEndpointUrls(new String[]{baseUrl.trim()});
+        } catch (APIManagementException e) {
+            return getVhostFromEnvironment(environment, host);
+        }
     }
 
     /**

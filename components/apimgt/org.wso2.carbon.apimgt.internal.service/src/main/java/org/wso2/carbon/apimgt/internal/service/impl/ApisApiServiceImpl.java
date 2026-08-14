@@ -20,7 +20,9 @@ package org.wso2.carbon.apimgt.internal.service.impl;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
@@ -34,6 +36,7 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.APIInfo;
+import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
 import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
@@ -41,6 +44,7 @@ import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.subscription.API;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
+import org.wso2.carbon.apimgt.impl.dao.ApiKeyMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.SubscriptionValidationDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.internal.service.ApisApiService;
@@ -48,6 +52,7 @@ import org.wso2.carbon.apimgt.internal.service.dto.APIListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.DeployedAPIRevisionDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.DeployedEnvInfoDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.DeploymentAcknowledgmentResponseDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.PlatformGatewayAPIKeyDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.UnDeployedAPIRevisionDTO;
 import org.apache.cxf.message.Message;
 import org.wso2.carbon.apimgt.api.PlatformGatewayArtifactService;
@@ -537,5 +542,80 @@ public class ApisApiServiceImpl implements ApisApiService {
         apiProvider.removeUnDeployedAPIRevision(unDeployedAPIRevisionDTO.getApiUUID(), unDeployedAPIRevisionDTO.getRevisionUUID(),
                 unDeployedAPIRevisionDTO.getEnvironment());
         return Response.ok().build();
+    }
+
+    @Override
+    public Response apisApiKeysGet(String apiKey, MessageContext messageContext) throws APIManagementException {
+        if (StringUtils.isBlank(apiKey)) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Missing api-key header").build();
+        }
+        PlatformGatewayDAO.PlatformGateway gateway;
+        try {
+            gateway = PlatformGatewayTokenUtil.verifyToken(apiKey);
+        } catch (Exception e) {
+            log.error("Platform gateway token verification failed", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Server error").build();
+        }
+        if (gateway == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Invalid api-key").build();
+        }
+        if (StringUtils.isBlank(gateway.id)) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Gateway id not resolved").build();
+        }
+        List<APIKeyInfo> keyInfoList =
+                ApiKeyMgtDAO.getInstance().getPlatformGatewayAPIKeysByGateway(gateway.id);
+        List<PlatformGatewayAPIKeyDTO> dtos = new ArrayList<>(keyInfoList.size());
+        for (APIKeyInfo info : keyInfoList) {
+            dtos.add(toPlatformGatewayAPIKeyDTO(info));
+        }
+        return Response.ok().entity(dtos).build();
+    }
+
+    private static PlatformGatewayAPIKeyDTO toPlatformGatewayAPIKeyDTO(APIKeyInfo info) {
+        PlatformGatewayAPIKeyDTO dto = new PlatformGatewayAPIKeyDTO();
+        dto.setUuid(info.getKeyUUID());
+        dto.setName(info.getKeyName().toLowerCase());
+        dto.setArtifactUuid(info.getApiUUId());
+        dto.setStatus(info.getStatus().toLowerCase());
+        dto.setCreatedBy(info.getAuthUser());
+        dto.setSource("external");
+        dto.setMaskedApiKey("");
+        dto.setExternalRefId(null);
+        dto.setIssuer(null);
+
+        Map<String, String> hashes = new HashMap<>(2);
+        hashes.put("sha256", stripHashPrefix(info.getApiKeyHash()));
+        dto.setApiKeyHashes(hashes);
+
+        String createdAtIso = epochMillisToIso(info.getCreatedTime());
+        dto.setCreatedAt(createdAtIso);
+        dto.setUpdatedAt(createdAtIso);
+
+        long expiresAtMillis = info.getExpiresAt();
+        if (expiresAtMillis != Long.MAX_VALUE) {
+            dto.setExpiresAt(epochMillisToIso(expiresAtMillis));
+        }
+        return dto;
+    }
+
+    private static String epochMillisToIso(long epochMillis) {
+        if (epochMillis <= 0) {
+            return null;
+        }
+        return Instant.ofEpochMilli(epochMillis).toString();
+    }
+
+    // The DB stores API_KEY_HASH with a "$sha256$" prefix (e.g. "$sha256$d3e8fcc2...").
+    // The WebSocket event broadcaster computes the hash fresh and returns raw hex without
+    // any prefix. Strip the prefix here so both sync paths deliver the same hash format
+    // to the gateway controller.
+    private static String stripHashPrefix(String hash) {
+        if (hash == null) {
+            return null;
+        }
+        if (hash.startsWith("$sha256$")) {
+            return hash.substring("$sha256$".length());
+        }
+        return hash;
     }
 }

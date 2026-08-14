@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.gateway.jwt;
+package org.wso2.carbon.apimgt.impl.jwt;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -66,7 +66,7 @@ public class RevokedJWTDataHolder {
      * Fetches the revoke map.
      * @return
      */
-    Map<String, Long> getRevokedJWTMap() {
+    public Map<String, Long> getRevokedJWTMap() {
         return revokedJWTMap;
     }
 

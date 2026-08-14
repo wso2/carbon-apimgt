@@ -97,7 +97,8 @@ SystemScopesApiService delegate = new SystemScopesApiServiceImpl();
     @ApiOperation(value = "Retrieve Scopes for a Particular User", notes = "This operation will return the scope list of particular user In order to get it, we need to pass the userId as a query parameter ", response = ScopeSettingsDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:scope_manage", description = "Manage system scopes")
+            @AuthorizationScope(scope = "apim:scope_manage", description = "Manage system scopes"),
+            @AuthorizationScope(scope = "apim:app_owner_change", description = "Retrieve and manage applications")
         })
     }, tags={ "System Scopes",  })
     @ApiResponses(value = { 

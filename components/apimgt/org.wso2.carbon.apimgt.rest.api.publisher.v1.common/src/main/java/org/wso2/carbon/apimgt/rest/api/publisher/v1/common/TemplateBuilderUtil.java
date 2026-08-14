@@ -114,10 +114,12 @@ public class TemplateBuilderUtil {
             throws APIManagementException {
 
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        String apiSubType = api.getSubtype() != null ? api.getSubtype() : APIConstants.API_SUBTYPE_DEFAULT;
         APITemplateBuilderImpl vtb = new APITemplateBuilderImpl(api, soapToRestInMediationDtos,
                 soapToRestMediationDtos);
         Map<String, String> latencyStatsProperties = new HashMap<String, String>();
         latencyStatsProperties.put(APIConstants.API_UUID, api.getUUID());
+        latencyStatsProperties.put(APIConstants.SUB_TYPE, apiSubType);
         if (!APIUtil.isStreamingApi(api)) {
             vtb.addHandler(
                     "org.wso2.carbon.apimgt.gateway.handlers.common.APIMgtLatencyStatsHandler",

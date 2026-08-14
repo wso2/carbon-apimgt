@@ -84,6 +84,7 @@ public class WSO2APIPublisherTestCase {
     private StatusLine statusLine;
     private ImportExportAPI importExportAPI;
     private CloseableHttpClient defaultHttpClient;
+    private APIManagerConfiguration apiManagerConfiguration;
 
     @Before
     public void init() throws Exception {
@@ -109,7 +110,7 @@ public class WSO2APIPublisherTestCase {
         PowerMockito.mockStatic(EntityUtils.class);
         APIManagerConfigurationService apiManagerConfigurationService = Mockito.mock(APIManagerConfigurationService.class);
         Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
-        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
         Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.EXTERNAL_API_STORES + "."
                 + APIConstants.EXTERNAL_API_STORES_STORE_URL)).thenReturn(storeRedirectURL);
@@ -144,6 +145,37 @@ public class WSO2APIPublisherTestCase {
                     "Cannot proceed with publishing API to the APIStore - " + nullStore.getDisplayName();
             Assert.assertEquals(msg, e.getMessage());
         }
+    }
+
+    @Test
+    public void testGetExternalStoreRedirectURLForAPI() throws Exception {
+
+        String apiUUID = "0b1e4a5b-4d1d-4b53-9c9f-4f7a9d8e1a2b";
+        //Store URL configured as the Developer Portal context of the super tenant
+        Assert.assertEquals("https://localhost:9443/devportal/apis/" + apiUUID,
+                getRedirectURLForStoreURL("https://localhost:9443/devportal", apiUUID));
+        //Store URL configured with a trailing slash
+        Assert.assertEquals("https://localhost:9443/devportal/apis/" + apiUUID,
+                getRedirectURLForStoreURL("https://localhost:9443/devportal/", apiUUID));
+        //Store URL configured as the API listing page as documented. The tenant query parameter has to be preserved
+        Assert.assertEquals("https://localhost:9443/devportal/apis/" + apiUUID + "?tenant=tenant1.com",
+                getRedirectURLForStoreURL("https://localhost:9443/devportal/apis?tenant=tenant1.com", apiUUID));
+        //Store URL configured as the Developer Portal context of a tenant
+        Assert.assertEquals("https://localhost:9443/devportal/apis/" + apiUUID + "?tenant=tenant1.com",
+                getRedirectURLForStoreURL("https://localhost:9443/devportal?tenant=tenant1.com", apiUUID));
+        //Store URL configured as the API listing page of a Developer Portal hosted in a custom domain
+        Assert.assertEquals("https://developer.wso2.com/apis/" + apiUUID,
+                getRedirectURLForStoreURL("https://developer.wso2.com/apis", apiUUID));
+        //Store URL configured as a custom domain without a path, where the Developer Portal is hosted in the root
+        Assert.assertEquals("https://developer.wso2.com/apis/" + apiUUID,
+                getRedirectURLForStoreURL("https://developer.wso2.com", apiUUID));
+    }
+
+    private String getRedirectURLForStoreURL(String configuredStoreURL, String apiUUID) throws Exception {
+
+        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.EXTERNAL_API_STORES + "."
+                + APIConstants.EXTERNAL_API_STORES_STORE_URL)).thenReturn(configuredStoreURL);
+        return wso2APIPublisher.getExternalStoreRedirectURLForAPI(tenantID, apiUUID);
     }
 
     @Test

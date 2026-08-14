@@ -44,7 +44,8 @@ OperationPoliciesApiService delegate = new OperationPoliciesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Add a new common operation policy", notes = "This operation can be used to add a new common operation policy. ", response = OperationPolicyDataDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:common_operation_policy_manage", description = "Add, Update and Delete common operation policies")
+            @AuthorizationScope(scope = "apim:common_operation_policy_manage", description = "Add, Update and Delete common operation policies"),
+            @AuthorizationScope(scope = "apim:common_operation_policy_create", description = "Create common operation policies")
         })
     }, tags={ "Operation Policies",  })
     @ApiResponses(value = { 
@@ -63,7 +64,8 @@ OperationPoliciesApiService delegate = new OperationPoliciesApiServiceImpl();
     @ApiOperation(value = "Delete a common operation policy", notes = "This operation can be used to delete an existing common opreation policy by providing the Id of the policy. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:common_operation_policy_manage", description = "Add, Update and Delete common operation policies"),
-            @AuthorizationScope(scope = "apim:policies_import_export", description = "Export and import policies related operations")
+            @AuthorizationScope(scope = "apim:policies_import_export", description = "Export and import policies related operations"),
+            @AuthorizationScope(scope = "apim:common_operation_policy_delete", description = "Delete common operation policies")
         })
     }, tags={ "Operation Policies",  })
     @ApiResponses(value = { 

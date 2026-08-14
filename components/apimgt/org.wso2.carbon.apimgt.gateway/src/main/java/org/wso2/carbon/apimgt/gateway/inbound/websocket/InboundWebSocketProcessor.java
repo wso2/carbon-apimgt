@@ -96,11 +96,12 @@ public class InboundWebSocketProcessor implements WebSocketProcessor {
      * @param ctx                   Channel pipeline context
      * @param inboundMessageContext InboundMessageContext
      * @return InboundProcessorResponseDTO with handshake processing response
+     * @implNote Tenancy: establishes and balances its own carbon tenant flow (the WS handshake runs on a raw netty
+     *           thread, not through Synapse dispatch); see the startTenantFlow/finally endTenantFlow pair below.
      */
     @Override
     public InboundProcessorResponseDTO handleHandshake(FullHttpRequest req, ChannelHandlerContext ctx,
                                                        InboundMessageContext inboundMessageContext) {
-
         InboundProcessorResponseDTO inboundProcessorResponseDTO;
         try {
             HandshakeProcessor handshakeProcessor = new HandshakeProcessor();
@@ -119,39 +120,46 @@ public class InboundWebSocketProcessor implements WebSocketProcessor {
             inboundMessageContext.getRequestHeaders().put(HttpHeaders.USER_AGENT, userAgent);
 
             PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(
-                    inboundMessageContext.getTenantDomain(), true);
-            if (isNoAuthentication(inboundMessageContext)) {
-                inboundMessageContext.setAuthenticator(new NoAuthAuthenticator());
-                setRequestHeaders(req, inboundMessageContext);
-                inboundProcessorResponseDTO = 
-                    handshakeProcessor.processHandshake(inboundMessageContext);
-            } else if (isOauthAuthentication(req, inboundMessageContext)) {
-                inboundMessageContext.setAuthenticator(new OAuthAuthenticator());
-                setRequestHeaders(req, inboundMessageContext);
-                setOrReplaceRequestHeaderIgnoreCase(WebsocketUtil.authorizationHeader, req, inboundMessageContext);
-                inboundProcessorResponseDTO =
+            try {
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(
+                        inboundMessageContext.getTenantDomain(), true);
+                if (isNoAuthentication(inboundMessageContext)) {
+                    inboundMessageContext.setAuthenticator(new NoAuthAuthenticator());
+                    setRequestHeaders(req, inboundMessageContext);
+                    inboundProcessorResponseDTO =
                         handshakeProcessor.processHandshake(inboundMessageContext);
-                setRequestHeaders(req, inboundMessageContext);
-            } else if (isAPIKeyAuthentication(req, inboundMessageContext)) {
-                inboundMessageContext.setAuthenticator(new ApiKeyAuthenticator());
-                setRequestHeaders(req, inboundMessageContext);
-                setOrReplaceRequestHeaderIgnoreCase(APIConstants.API_KEY_HEADER_QUERY_PARAM, req, inboundMessageContext);
-                inboundProcessorResponseDTO =
-                        handshakeProcessor.processHandshake(inboundMessageContext);
-                setRequestHeaders(req, inboundMessageContext);
-            } else {
-                String errorMessage = "No Authorization header, access_token query parameter, apikey header or query " +
-                        "parameter present";
-                log.error(errorMessage + " in request for the websocket context "
-                        + inboundMessageContext.getApiContext());
-                inboundProcessorResponseDTO = InboundWebsocketProcessorUtil.getHandshakeErrorDTO(
-                        WebSocketApiConstants.HandshakeErrorConstants.API_AUTH_ERROR, errorMessage);
+                } else if (isOauthAuthentication(req, inboundMessageContext)) {
+                    inboundMessageContext.setAuthenticator(new OAuthAuthenticator());
+                    setRequestHeaders(req, inboundMessageContext);
+                    setOrReplaceRequestHeaderIgnoreCase(WebsocketUtil.authorizationHeader, req, inboundMessageContext);
+                    inboundProcessorResponseDTO =
+                            handshakeProcessor.processHandshake(inboundMessageContext);
+                    setRequestHeaders(req, inboundMessageContext);
+                } else if (isAPIKeyAuthentication(req, inboundMessageContext)) {
+                    inboundMessageContext.setAuthenticator(new ApiKeyAuthenticator());
+                    setRequestHeaders(req, inboundMessageContext);
+                    setOrReplaceRequestHeaderIgnoreCase(APIConstants.API_KEY_HEADER_QUERY_PARAM, req, inboundMessageContext);
+                    inboundProcessorResponseDTO =
+                            handshakeProcessor.processHandshake(inboundMessageContext);
+                    setRequestHeaders(req, inboundMessageContext);
+                } else {
+                    String errorMessage = "No Authorization header, access_token query parameter, apikey header or query " +
+                            "parameter present";
+                    log.error(errorMessage + " in request for the websocket context "
+                            + inboundMessageContext.getApiContext());
+                    inboundProcessorResponseDTO = InboundWebsocketProcessorUtil.getHandshakeErrorDTO(
+                            WebSocketApiConstants.HandshakeErrorConstants.API_AUTH_ERROR, errorMessage);
+                }
+                if (inboundProcessorResponseDTO.isError()) {
+                    publishHandshakeAuthErrorEvent(ctx, inboundProcessorResponseDTO.getErrorMessage());
+                }
+                return inboundProcessorResponseDTO;
+            } finally {
+                // Balance the startTenantFlow() above. Without this, the tenant domain set on the shared netty
+                // event-loop thread can leak to later requests handled on the same thread, causing cross-tenant
+                // lookups (e.g., resolving the wrong key manager) and rejecting valid tokens (900901).
+                PrivilegedCarbonContext.endTenantFlow();
             }
-            if (inboundProcessorResponseDTO.isError()) {
-                publishHandshakeAuthErrorEvent(ctx, inboundProcessorResponseDTO.getErrorMessage());
-            }
-            return inboundProcessorResponseDTO;
         } catch (APISecurityException e) {
             log.error("Authentication Failure for the websocket context: " + inboundMessageContext.getApiContext()
                     + e.getMessage());

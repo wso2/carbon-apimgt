@@ -43,6 +43,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.exception.ForbiddenException;
+import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -508,5 +509,20 @@ public class RestApiAdminUtils {
                     new APIManagementException("Tenant " + tenantDomain + " is not allowed to access " +
                             resourceDescription + ". Only super tenant is allowed"), log);
         }
+    }
+
+    /**
+     * Handles an internal server error by throwing an InternalServerErrorException
+     * with the given message. The message is logged at error level but the stack
+     * trace is not printed.
+     *
+     * @param msg error message to return to the client
+     * @param log logger instance
+     * @throws InternalServerErrorException always thrown
+     */
+    public static void handleInternalServerError(String msg, Log log) throws InternalServerErrorException {
+        InternalServerErrorException exception = RestApiUtil.buildInternalServerErrorException(msg);
+        log.error(msg);
+        throw exception;
     }
 }

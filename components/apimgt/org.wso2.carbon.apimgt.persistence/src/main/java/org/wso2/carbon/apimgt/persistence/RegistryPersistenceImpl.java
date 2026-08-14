@@ -1029,7 +1029,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
             // Use full "/{name}/{version}" to unambiguously locate the API segment in the path.
             String nameVersionSegment = RegistryConstants.PATH_SEPARATOR + identifier.getApiName()
                     + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
-            int nameVersionSegmentIndex = apiSourcePath.lastIndexOf(nameVersionSegment);
+            int nameVersionSegmentIndex =
+                    StringUtils.lastIndexOfIgnoreCase(apiSourcePath, nameVersionSegment);
             if (nameVersionSegmentIndex < 0) {
                 throw new APIPersistenceException(
                         "Failed to derive API provider path from apiSourcePath: " + apiSourcePath);
@@ -3919,7 +3920,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
             // Use full "/{name}/{version}" to unambiguously locate the product segment in the path.
             String nameVersionSegment = RegistryConstants.PATH_SEPARATOR + identifier.getName()
                     + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
-            int nameVersionSegmentIndex = apiSourcePath.lastIndexOf(nameVersionSegment);
+            int nameVersionSegmentIndex =
+                    StringUtils.lastIndexOfIgnoreCase(apiSourcePath, nameVersionSegment);
             if (nameVersionSegmentIndex < 0) {
                 throw new APIPersistenceException("Failed to clean up API Product registry paths. Expected " +
                         "segment '" + nameVersionSegment + "' was not found in source path: " + apiSourcePath);

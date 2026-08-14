@@ -25,6 +25,7 @@ import org.apache.axis2.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpStatus;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
@@ -39,11 +40,15 @@ import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.exception.McpException;
 import org.wso2.carbon.apimgt.gateway.exception.McpExceptionWithId;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APIKeyValidator;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.mcp.request.McpRequest;
 import org.wso2.carbon.apimgt.gateway.mcp.request.Params;
 import org.wso2.carbon.apimgt.gateway.mcp.response.McpResponseDto;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.mcp.transformer.exception.MCPRequestResolverException;
 import org.wso2.carbon.mcp.transformer.impl.PrefixBasedSchemaMappingParser;
@@ -525,7 +530,30 @@ public class MCPUtils {
         } catch (AxisFault e) {
             log.warn("Failed to set MCP error JSON payload", e);
         }
-        Utils.sendFault(messageContext, responseDto.getStatusCode());
+        Utils.sendFault(messageContext, toHttpStatusCode(responseDto.getStatusCode()));
+    }
+
+    /**
+     * Maps a JSON-RPC error code to a valid HTTP status code, leaving real HTTP codes unchanged.
+     *
+     * @param errorCode the status code from the {@link McpResponseDto}
+     * @return a valid HTTP status code
+     */
+    private static int toHttpStatusCode(int errorCode) {
+        if (errorCode >= 100 && errorCode <= 599) {
+            // Already a valid HTTP status code (e.g., 405, 500 set explicitly by McpMediator)
+            return errorCode;
+        }
+
+        // JSON-RPC server errors -> HTTP 500
+        if (errorCode == APIConstants.MCP.RpcConstants.INTERNAL_ERROR_CODE
+                || errorCode == APIConstants.MCP.RpcConstants.CONNECTION_CLOSED) {
+            return HttpStatus.SC_INTERNAL_SERVER_ERROR;
+        }
+
+        // JSON-RPC client errors (parse error, invalid request, method not found,
+        // invalid params) -> HTTP 400
+        return HttpStatus.SC_BAD_REQUEST;
     }
 
     /**
@@ -575,5 +603,48 @@ public class MCPUtils {
         }
         return serverURL;
     }
+
+    /**
+     * Determines the appropriate authentication scheme for an MCP request based on the MCP method and other request properties.
+     *
+     * @param messageContext the message context of the incoming request
+     * @param keyValidator   the APIKeyValidator instance to retrieve resource-level authentication scheme if needed
+     * @return the determined authentication scheme as a String
+     * @throws APISecurityException if an error occurs while determining the authentication scheme
+     */
+    public static String getResourceAuthenticationSchemeForMCP(MessageContext messageContext,
+                                                               APIKeyValidator keyValidator) throws APISecurityException {
+        String authenticationScheme;
+        String mcpMethod = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD);
+
+        boolean isMCPNoAuthRequest = false;
+        if (messageContext.getProperty(APIMgtGatewayConstants.MCP_NO_AUTH_REQUEST) != null) {
+            isMCPNoAuthRequest = (boolean) messageContext.getProperty(APIMgtGatewayConstants.MCP_NO_AUTH_REQUEST);
+        }
+
+        if (isMCPGetRequest(messageContext) || isMCPNoAuthRequest) {
+            authenticationScheme = APIConstants.AUTH_NO_AUTHENTICATION;
+        } else if (APIConstants.MCP.METHOD_TOOL_CALL.equals(mcpMethod)) {
+            // tools/call: use resource-level authentication scheme
+            authenticationScheme = keyValidator.getResourceAuthenticationScheme(messageContext);
+        } else {
+            // other MCP methods: enforce application or user level token
+            authenticationScheme = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
+        }
+        return authenticationScheme;
+    }
+
+    /**
+     * Checks if the incoming MCP request is a GET request
+     *
+     * @param messageContext the message context of the incoming request
+     * @return true if it's a GET request for fetching resource details, false otherwise
+     */
+    public static boolean isMCPGetRequest(MessageContext messageContext) {
+        String path = (String) messageContext.getProperty(APIMgtGatewayConstants.API_ELECTED_RESOURCE);
+        String httpMethod = (String) messageContext.getProperty(APIMgtGatewayConstants.HTTP_METHOD);
+        return (APIConstants.MCP.MCP_RESOURCES_MCP.equals(path) && APIConstants.HTTP_GET.equalsIgnoreCase(httpMethod));
+    }
+
 
 }

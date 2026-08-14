@@ -165,6 +165,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -445,7 +446,7 @@ public class PublisherCommonUtils {
         }
         Backend backend = backends.get(0);
 
-        Set<URITemplate> updatedTemplates = new HashSet<>();
+        Set<URITemplate> updatedTemplates = new LinkedHashSet<>();
         if (APIConstants.API_SUBTYPE_DIRECT_BACKEND.equals(originalAPI.getSubtype())) {
             updatedTemplates = updateTemplatesFromDefinition(backend.getDefinition(), null,
                     backend.getId(), originalAPI.getSubtype(), apiToUpdate.getUriTemplates()
@@ -472,8 +473,14 @@ public class PublisherCommonUtils {
     private static void handleExistingApiSubtype(API apiToUpdate, API originalAPI, APIProvider apiProvider)
             throws APIManagementException {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Handling existing API subtype for API: " + apiToUpdate.getId().getApiName());
+        }
+        populateExistingSchemaDefinitions(apiToUpdate, originalAPI.getUriTemplates());
+
         Set<URITemplate> uriTemplates = apiToUpdate.getUriTemplates();
         if (uriTemplates.isEmpty()) {
+            log.error("No URI templates defined for API: " + apiToUpdate.getId().getApiName());
             throw new APIManagementException("No URI templates defined for existing API subtype.");
         }
 
@@ -899,13 +906,30 @@ public class PublisherCommonUtils {
             if (!isGraphql) {
                 Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(newDefinition);
 
-                //set operation policies from the original API Payload
+                // Set operation policies from the original API payload.
+                if (log.isDebugEnabled()) {
+                    log.debug("Setting operation policies and hub policies from original API payload for API update: "
+                            + apiToUpdate.getUuid());
+                }
                 Set<URITemplate> uriTemplatesFromPayload = apiToUpdate.getUriTemplates();
                 Map<String, List<OperationPolicy>> operationPoliciesPerURITemplate = new HashMap<>();
+                Map<String, List<OperationPolicy>> operationHubPoliciesPerURITemplate = new HashMap<>();
                 for (URITemplate uriTemplate : uriTemplatesFromPayload) {
                     if (!uriTemplate.getOperationPolicies().isEmpty()) {
                         String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
                         operationPoliciesPerURITemplate.put(key, uriTemplate.getOperationPolicies());
+                    }
+                    if (uriTemplate.getHubPolicies() != null && !uriTemplate.getHubPolicies().isEmpty()) {
+                        List<OperationPolicy> filteredHubPolicies = new ArrayList<>();
+                        for (OperationPolicy hubPolicy : uriTemplate.getHubPolicies()) {
+                            if (hubPolicy != null) {
+                                filteredHubPolicies.add(hubPolicy);
+                            }
+                        }
+                        if (!filteredHubPolicies.isEmpty()) {
+                            String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
+                            operationHubPoliciesPerURITemplate.put(key, filteredHubPolicies);
+                        }
                     }
                 }
 
@@ -913,6 +937,9 @@ public class PublisherCommonUtils {
                     String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
                     if (operationPoliciesPerURITemplate.containsKey(key)) {
                         uriTemplate.setOperationPolicies(operationPoliciesPerURITemplate.get(key));
+                    }
+                    if (operationHubPoliciesPerURITemplate.containsKey(key)) {
+                        uriTemplate.setHubPolicies(operationHubPoliciesPerURITemplate.get(key));
                     }
                 }
 
@@ -1346,9 +1373,17 @@ public class PublisherCommonUtils {
                             .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION);
                     String productionEndpointType = (String) endpointSecurityProduction
                             .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
+                    String productionAuthType = (String) endpointSecurityProduction
+                            .get(APIConstants.ENDPOINT_SECURITY_AWS_AUTH_TYPE);
 
                     if (APIConstants.ENDPOINT_SECURITY_TYPE_AWS.equals(productionEndpointType)) {
-                        if (endpointSecurityProduction.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY) != null &&
+                        if (APIConstants.ENDPOINT_SECURITY_AWS_AUTH_TYPE_ENVIRONMENT.equalsIgnoreCase(
+                                productionAuthType)) {
+                            // Environment-credentials mode uses no static keys. Remove any secret key from
+                            // the payload so a plaintext secret can never be persisted.
+                            endpointSecurityProduction.remove(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY);
+                        } else if (endpointSecurityProduction.get(
+                                APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY) != null &&
                                 StringUtils.isNotEmpty(endpointSecurityProduction.get(
                                         APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY).toString()) &&
                                 !endpointSecurityProduction.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY)
@@ -1377,9 +1412,16 @@ public class PublisherCommonUtils {
                             .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX);
                     String sandboxEndpointType = (String) endpointSecuritySandbox
                             .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
+                    String sandboxAuthType = (String) endpointSecuritySandbox
+                            .get(APIConstants.ENDPOINT_SECURITY_AWS_AUTH_TYPE);
 
                     if (APIConstants.ENDPOINT_SECURITY_TYPE_AWS.equals(sandboxEndpointType)) {
-                        if (endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY) != null
+                        if (APIConstants.ENDPOINT_SECURITY_AWS_AUTH_TYPE_ENVIRONMENT.equalsIgnoreCase(
+                                sandboxAuthType)) {
+                            // Environment-credentials mode uses no static keys. Remove any secret key from
+                            // the payload so a plaintext secret can never be persisted.
+                            endpointSecuritySandbox.remove(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY);
+                        } else if (endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY) != null
                                 && StringUtils.isNotEmpty(
                                 endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY)
                                         .toString()) &&
@@ -1644,9 +1686,16 @@ public class PublisherCommonUtils {
                             APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION);
                     String productionEndpointType = (String) endpointSecurityProduction.get(
                             APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
+                    String productionAuthType = (String) endpointSecurityProduction.get(
+                            APIConstants.ENDPOINT_SECURITY_AWS_AUTH_TYPE);
 
                     if (APIConstants.ENDPOINT_SECURITY_TYPE_AWS.equals(productionEndpointType)) {
-                        if (endpointSecurityProduction.get(
+                        if (APIConstants.ENDPOINT_SECURITY_AWS_AUTH_TYPE_ENVIRONMENT.equalsIgnoreCase(
+                                productionAuthType)) {
+                            // Environment-credentials mode uses no static keys. Remove any secret key from
+                            // the payload so a plaintext secret can never be persisted.
+                            endpointSecurityProduction.remove(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY);
+                        } else if (endpointSecurityProduction.get(
                                 APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY) != null && StringUtils.isNotEmpty(
                                 endpointSecurityProduction.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY)
                                         .toString()) && !endpointSecurityProduction.get(
@@ -1678,9 +1727,16 @@ public class PublisherCommonUtils {
                             .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX);
                     String sandboxEndpointType = (String) endpointSecuritySandbox
                             .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
+                    String sandboxAuthType = (String) endpointSecuritySandbox
+                            .get(APIConstants.ENDPOINT_SECURITY_AWS_AUTH_TYPE);
 
                     if (APIConstants.ENDPOINT_SECURITY_TYPE_AWS.equals(sandboxEndpointType)) {
-                        if (endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY) != null
+                        if (APIConstants.ENDPOINT_SECURITY_AWS_AUTH_TYPE_ENVIRONMENT.equalsIgnoreCase(
+                                sandboxAuthType)) {
+                            // Environment-credentials mode uses no static keys. Remove any secret key from
+                            // the payload so a plaintext secret can never be persisted.
+                            endpointSecuritySandbox.remove(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY);
+                        } else if (endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY) != null
                                 && StringUtils.isNotEmpty(
                                 endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY)
                                         .toString()) &&
@@ -2411,7 +2467,7 @@ public class PublisherCommonUtils {
                 if (APIConstants.API_SUBTYPE_EXISTING_API.equals(apiToAdd.getSubtype())
                         && !apiToAdd.getUriTemplates().isEmpty()) {
                     Set<URITemplate> updatedTemplates = resolveExistingMCPBackendAPI(apiToAdd, apiProvider,
-                            organization, oasParser);
+                            organization);
                     apiToAdd.setUriTemplates(updatedTemplates);
                 }
                 apiDefinition = new OAS3Parser().generateAPIDefinition(swaggerData);
@@ -2478,12 +2534,11 @@ public class PublisherCommonUtils {
      * @param apiToAdd     API being added
      * @param apiProvider  APIProvider instance
      * @param organization Tenant domain
-     * @param oasParser    OpenAPI parser
      * @return updated set of URI templates
      * @throws APIManagementException if reference API not found or other processing errors occur
      */
     private static Set<URITemplate> resolveExistingMCPBackendAPI(API apiToAdd, APIProvider apiProvider,
-                                                                 String organization, APIDefinition oasParser)
+                                                                 String organization)
             throws APIManagementException {
 
         URITemplate template = apiToAdd.getUriTemplates().iterator().next();
@@ -2515,6 +2570,7 @@ public class PublisherCommonUtils {
             log.error(error);
             throw new APIManagementException(error, ExceptionCodes.INVALID_REFERENCE_API);
         }
+        APIDefinition oasParser = OASParserUtil.getOASParser(refApi.getSwaggerDefinition());
         return generateMCPFeatures(apiToAdd.getSubtype(), refApi.getSwaggerDefinition(),
                 apiToAdd.getUriTemplates(), refApi.getId(), oasParser);
     }
@@ -2865,7 +2921,16 @@ public class PublisherCommonUtils {
                             apiDtoTypeWrapper.getVersion()));
         }
 
-        if (apiProvider.isApiNameWithDifferentCaseExist(apiDtoTypeWrapper.getName(), organization)) {
+        // Block only when this create would INTRODUCE a new case-variant. If an exact-case
+        // name already exists in the tenant, the request is either a duplicate (caught later
+        // in this same method by the version-uniqueness check via
+        // getApiVersionsMatchingApiNameAndOrganization, then by the duplicate-context check,
+        // and ultimately by the AM_API (API_PROVIDER, API_NAME, API_VERSION, ORGANIZATION)
+        // unique constraint) or a legitimate new-version path -- either way, the existing
+        // case-variant sibling (if any) is a pre-existing legacy state that predates this
+        // check, so blocking here would be over-strict.
+        if (apiProvider.isApiNameWithDifferentCaseExist(apiDtoTypeWrapper.getName(), organization)
+                && !apiProvider.isApiNameExistExactCase(apiDtoTypeWrapper.getName(), organization)) {
             throw new APIManagementException(
                     "API with name " + apiDtoTypeWrapper.getName() + " already exists.",
                     ExceptionCodes.from(ExceptionCodes.API_NAME_ALREADY_EXISTS, apiDtoTypeWrapper.getName()));
@@ -2896,6 +2961,11 @@ public class PublisherCommonUtils {
 
         List<String> apiVersions = apiProvider.getApiVersionsMatchingApiNameAndOrganization(apiDtoTypeWrapper.getName(),
                 username, organization);
+
+        //Remove the {version} placeholder from the context template if it is present at end
+        if (context.endsWith("/" + APIConstants.VERSION_PLACEHOLDER)) {
+            context = context.split(Pattern.quote("/" + APIConstants.VERSION_PLACEHOLDER))[0];
+        }
 
         if (!apiVersions.isEmpty()) {
             for (String version : apiVersions) {
@@ -2991,6 +3061,11 @@ public class PublisherCommonUtils {
             api.getMetadata().put(APIConstants.MCP.PROTOCOL_VERSION_KEY,
                     (protocolVersion != null && !protocolVersion.isEmpty()) ? protocolVersion
                             : APIConstants.MCP.PROTOCOL_VERSION_2025_JUNE);
+            String existing = api.getMetadata().get(APIConstants.MCP.MCP_PATH_APPENDED_METADATA_KEY);
+            if (existing == null) {
+                api.getMetadata().put(APIConstants.MCP.MCP_PATH_APPENDED_METADATA_KEY,
+                        Boolean.FALSE.toString());
+            }
         }
         return api;
     }
@@ -5071,7 +5146,8 @@ public class PublisherCommonUtils {
      * @throws APIManagementException On unexpected internal errors
      */
     public static MCPServerValidationResponseDTO validateMCPServer(String serverUrl, SecurityInfoDTO securityInfo,
-                                                                   boolean returnTools, String organization)
+                                                                   boolean returnTools,
+                                                                   String organization)
             throws APIManagementException {
 
         MCPServerValidationResponseDTO response =

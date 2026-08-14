@@ -136,7 +136,6 @@ public class GatewayUtils {
     private static final String HTTP_SC_DESC = "HTTP_SC_DESC";
     private static final Gson gson = new Gson();
     private static String apiUUID;
-    private static final String apiType = String.valueOf(APIConstants.ApiTypes.API);
     private static final Pattern validHostHeaderPattern =
             Pattern.compile("^[A-Za-z0-9][A-Za-z0-9.-]*(:\\d{1,5})?$");
 
@@ -438,7 +437,11 @@ public class GatewayUtils {
         }
         messageContext.setProperty(APIMgtGatewayConstants.THREAT_DESC, desc);
         messageContext.setProperty(SynapseConstants.ERROR_DETAIL, desc);
-        Mediator sequence = messageContext.getSequence(APIMgtGatewayConstants.THREAT_FAULT);
+        // Publish the error flow type so any error sequence can branch on it.
+        messageContext.setProperty(APIMgtGatewayConstants.API_ERROR_TYPE,
+                APIMgtGatewayConstants.API_ERROR_TYPE_THREAT);
+        Mediator sequence = getErrorResponseFormatterSequence(messageContext,
+                APIMgtGatewayConstants.THREAT_FAULT);
         // Invoke the custom error handler specified by the user
         if (sequence != null && !sequence.mediate(messageContext)) {
             // If needed user should be able to prevent the rest of the fault handling
@@ -1913,14 +1916,43 @@ public class GatewayUtils {
         return false;
     }
 
+    /**
+     * Resolves the error response formatter sequence for the current request.
+     * For AI APIs, if the {@code [apim.ai].custom_error_response_sequence} configuration is set
+     * and the configured sequence is deployed on the gateway,that sequence is used.
+     * Otherwise, the provided default handler sequence is used.
+     *
+     * @param messageContext the Synapse message context
+     * @param defaultHandlerSequence the default error handler sequence to use
+     * @return the resolved sequence mediator, or {@code null} if the resolved
+     *         sequence is not available
+     */
+    public static Mediator getErrorResponseFormatterSequence(org.apache.synapse.MessageContext messageContext,
+                                                             String defaultHandlerSequence) {
+
+        if (APIConstants.API_SUBTYPE_AI_API.equals(messageContext.getProperty(APIMgtGatewayConstants.SUB_TYPE))) {
+            // Get the custom error response sequence for AI APIs if configured
+            String customErrorResponseSequence = APIManagerConfiguration.getAiApiConfigurationsDTO()
+                    .getCustomErrorResponseSequence();
+            if (StringUtils.isNotEmpty(customErrorResponseSequence)
+                    && messageContext.getSequence(customErrorResponseSequence) != null) {
+                return messageContext.getSequence(customErrorResponseSequence);
+            }
+        }
+        return messageContext.getSequence(defaultHandlerSequence);
+    }
+
     public static void handleAuthFailure(org.apache.synapse.MessageContext messageContext, APISecurityException e,
             String authorizationHeader, String apiKeyHeader, String authenticatorsChallengeString, String apiType) {
         messageContext.setProperty(SynapseConstants.ERROR_CODE, e.getErrorCode());
         messageContext.setProperty(SynapseConstants.ERROR_MESSAGE,
                 APISecurityConstants.getAuthenticationFailureMessage(e.getErrorCode()));
         messageContext.setProperty(SynapseConstants.ERROR_EXCEPTION, e);
-
-        Mediator sequence = messageContext.getSequence(APISecurityConstants.API_AUTH_FAILURE_HANDLER);
+        // Publish the error flow type such that any error sequence can branch on it.
+        messageContext.setProperty(APIMgtGatewayConstants.API_ERROR_TYPE,
+                APIMgtGatewayConstants.API_ERROR_TYPE_AUTH);
+        Mediator sequence = getErrorResponseFormatterSequence(messageContext,
+                APISecurityConstants.API_AUTH_FAILURE_HANDLER);
 
         //Setting error description which will be available to the handler
         String errorDetail = APISecurityConstants.getFailureMessageDetailDescription(e.getErrorCode(), e.getMessage());
@@ -2003,6 +2035,43 @@ public class GatewayUtils {
         }
 
         sendFault(messageContext, status);
+    }
+
+    /**
+     * Sends a fault response when the gateway itself cannot authenticate to an AWS backend - the
+     * credentials could not be resolved, or the configured role could not be assumed.
+     *
+     * <p>This is a gateway-to-backend failure, not a client authentication failure, so it is reported as
+     * {@code 500} with {@link APIMgtGatewayConstants#API_ERROR_TYPE_BACKEND} rather than a 401 with an
+     * authentication challenge - the caller's credentials were never the problem.</p>
+     *
+     * <p>The supplied {@code errorDetail} is returned to the client and must stay generic. The
+     * underlying AWS failure quotes role ARNs, account ids and STS messages, and is logged by the
+     * caller instead of being surfaced outward.</p>
+     *
+     * @param messageContext the message context of the current request.
+     * @param errorDetail    a generic, client-safe description of the failure.
+     * @return {@code false} always, so a mediator can {@code return} this directly to halt mediation.
+     */
+    public static boolean handleAWSAuthFailure(org.apache.synapse.MessageContext messageContext,
+                                               String errorDetail) {
+
+        messageContext.setProperty(SynapseConstants.ERROR_CODE,
+                APISecurityConstants.AWS_CREDENTIAL_RESOLUTION_ERROR);
+        messageContext.setProperty(SynapseConstants.ERROR_MESSAGE,
+                APISecurityConstants.AWS_CREDENTIAL_RESOLUTION_ERROR_MESSAGE);
+        messageContext.setProperty(SynapseConstants.ERROR_DETAIL, errorDetail);
+        // Publish the error flow type such that any error sequence can branch on it.
+        messageContext.setProperty(APIMgtGatewayConstants.API_ERROR_TYPE,
+                APIMgtGatewayConstants.API_ERROR_TYPE_BACKEND);
+        Mediator sequence = getErrorResponseFormatterSequence(messageContext,
+                APISecurityConstants.BACKEND_AUTH_FAILURE_HANDLER);
+        // Invoke the custom error handler specified by the user. If it handles the response itself, the
+        // rest of the fault handling is skipped.
+        if (sequence == null || sequence.mediate(messageContext)) {
+            sendFault(messageContext, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        }
+        return false;
     }
 
     protected static void sendFault(org.apache.synapse.MessageContext messageContext, int status) {

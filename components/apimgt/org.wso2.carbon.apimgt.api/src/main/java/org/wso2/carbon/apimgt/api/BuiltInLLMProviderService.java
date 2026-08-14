@@ -81,10 +81,8 @@ public abstract class BuiltInLLMProviderService implements LLMProviderService {
                     log.debug("Unsupported input source: " + inputSource + " for attribute: " + attributeName);
                 }
             }
-        } catch (PathNotFoundException e) {
-            throw new APIManagementException("Error extracting metadata: Attribute not found in payload", e);
         } catch (Exception e) {
-            throw new APIManagementException("Error extracting metadata from the payload", e);
+            log.warn("Error extracting response metadata, skipping metadata collection.", e);
         }
         return metadataMap;
     }

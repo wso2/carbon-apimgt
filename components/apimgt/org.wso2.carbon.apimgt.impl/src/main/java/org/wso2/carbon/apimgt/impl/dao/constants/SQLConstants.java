@@ -32,7 +32,7 @@ public class SQLConstants {
             "   API.CONTEXT_TEMPLATE = ? ";
 
     public static final String GET_VERSIONS_MATCHES_API_NAME_AND_ORGANIZATION_SQL=
-            "SELECT API_VERSION FROM AM_API WHERE API_NAME = ? AND API_PROVIDER = ? AND ORGANIZATION = ?";
+            "SELECT API_VERSION FROM AM_API WHERE API_NAME = ? AND ORGANIZATION = ?";
 
     public static final String GET_API_PROVIDER_MATCHES_API_NAME_AND_ORGANIZATION_SQL =
             "SELECT API_PROVIDER FROM AM_API WHERE API_NAME = ? AND ORGANIZATION = ?";
@@ -177,6 +177,18 @@ public class SQLConstants {
             "   WHERE API_ID = ?";
 
     public static final String UPDATE_API_PROVIDER_SQL = "UPDATE AM_API SET API_PROVIDER = ? WHERE API_UUID = ?";
+
+    // Used by the deprecated updateApiProvider(String, String) — subquery reads old provider from AM_API.
+    // MUST execute before UPDATE_API_PROVIDER_SQL so the subquery still sees the old value in AM_API.
+    public static final String UPDATE_DEFAULT_VERSION_PROVIDER_SQL =
+            "UPDATE AM_API_DEFAULT_VERSION SET API_PROVIDER = ? " +
+            "WHERE API_NAME = (SELECT API_NAME FROM AM_API WHERE API_UUID = ?) " +
+            "AND API_PROVIDER = (SELECT API_PROVIDER FROM AM_API WHERE API_UUID = ?)";
+
+    // Used by updateApiProvider(String, String, String, String) — explicit params, no subquery,
+    // no execution-order dependency.
+    public static final String UPDATE_DEFAULT_VERSION_PROVIDER_BY_NAME_SQL =
+            "UPDATE AM_API_DEFAULT_VERSION SET API_PROVIDER = ? WHERE API_NAME = ? AND API_PROVIDER = ?";
 
     public static final String GET_MD5_VALUE_OF_SERVICE_BY_API_ID_SQL = "SELECT " +
             "   AM_SERVICE_CATALOG.MD5 AS SERVICE_MD5, " +
@@ -1002,7 +1014,7 @@ public class SQLConstants {
 
     public static final String GET_API_AVERAGE_RATING_SQL =
             " SELECT " +
-            "   CAST( SUM(RATING) AS DECIMAL)/COUNT(RATING) AS RATING " +
+            "   AVG(CAST(RATING AS DECIMAL(10,3))) AS RATING " +
             " FROM " +
             "   AM_API_RATINGS " +
             " WHERE " +
@@ -1149,15 +1161,16 @@ public class SQLConstants {
 
     public static final String GET_SIMPLE_APPLICATIONS =
             " SELECT " +
-            "   APPLICATION_ID, " +
-            "   NAME," +
-            "   USER_ID, " +
+            "   APP.UUID, " +
+            "   APP.APPLICATION_ID, " +
+            "   APP.NAME," +
+            "   SUB.USER_ID, " +
             "   APP.CREATED_BY " +
             " FROM" +
             "   AM_APPLICATION APP, " +
             "   AM_SUBSCRIBER SUB  " +
             " WHERE " +
-            "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID ";
+            "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID AND SUB.TENANT_ID = ?";
 
     public static final String GET_APPLICATIONS_BY_OWNER =
             "SELECT " +
@@ -2290,12 +2303,12 @@ public class SQLConstants {
                     + "CONTEXT LIKE ?";
 
     public static final String GET_API_NAME_DIFF_CASE_NOT_MATCHING_CONTEXT_SQL =
-            "SELECT COUNT(API_ID) AS API_COUNT FROM AM_API WHERE LOWER(API_NAME) = LOWER(?) AND CONTEXT NOT LIKE ? "
-        + "AND NOT (API_NAME = ?) AND ORGANIZATION = ?";
+            "SELECT API_NAME FROM AM_API WHERE LOWER(API_NAME) = LOWER(?) AND CONTEXT NOT LIKE ? "
+                    + "AND ORGANIZATION = ?";
 
     public static final String GET_API_NAME_DIFF_CASE_MATCHING_CONTEXT_SQL =
-            "SELECT COUNT(API_ID) AS API_COUNT FROM AM_API WHERE LOWER(API_NAME) = LOWER(?) AND CONTEXT LIKE ? " +
-                    "AND NOT (API_NAME = ?) AND ORGANIZATION = ?";
+            "SELECT API_NAME FROM AM_API WHERE LOWER(API_NAME) = LOWER(?) AND CONTEXT LIKE ? "
+                    + "AND ORGANIZATION = ?";
 
     public static final String GET_CONTEXT_TEMPLATE_COUNT_SQL_MATCHES_ORGANIZATION =
             "SELECT COUNT(CONTEXT_TEMPLATE) AS CTX_COUNT FROM AM_API WHERE LOWER(CONTEXT_TEMPLATE) = ? " +
@@ -2962,11 +2975,13 @@ public class SQLConstants {
     public static final String GET_URL_TEMPLATES_FOR_API =
             "SELECT URL_PATTERN , URL_MAPPING_ID, HTTP_METHOD FROM AM_API API , AM_API_URL_MAPPING URL "
             + "WHERE API.API_ID = URL.API_ID AND API.API_NAME =? "
-            + "AND API.API_VERSION=? AND API.API_PROVIDER=? AND URL.REVISION_UUID IS NULL";
+            + "AND API.API_VERSION=? AND API.API_PROVIDER=? AND URL.REVISION_UUID IS NULL "
+            + "ORDER BY URL.URL_MAPPING_ID ASC";
 
     public static final String GET_URL_TEMPLATES_FOR_API_WITH_UUID =
             "SELECT URL_PATTERN , URL_MAPPING_ID, HTTP_METHOD FROM AM_API API , AM_API_URL_MAPPING URL "
-                    + "WHERE API.API_ID = URL.API_ID AND API.API_UUID =? AND URL.REVISION_UUID IS NULL";
+                    + "WHERE API.API_ID = URL.API_ID AND API.API_UUID =? AND URL.REVISION_UUID IS NULL "
+                    + "ORDER BY URL.URL_MAPPING_ID ASC";
 
     public static final String ADD_API_PRODUCT = "INSERT INTO " + "AM_API(API_PROVIDER, API_NAME, API_VERSION, " +
             "CONTEXT, CONTEXT_TEMPLATE, API_TIER, CREATED_BY, CREATED_TIME, API_TYPE, API_UUID, STATUS, " +
@@ -4081,6 +4096,18 @@ public class SQLConstants {
             "DELETE FROM AM_API_KEY_APPLICATION_MAPPING WHERE APPLICATION_UUID = ? AND API_KEY_UUID = ? " +
                     "AND EXISTS (SELECT 1 FROM AM_APPLICATION A WHERE A.UUID = AM_API_KEY_APPLICATION_MAPPING" +
                     ".APPLICATION_UUID AND A.ORGANIZATION = ?)";
+    // Returns all active API-scoped keys for APIs currently deployed on a specific platform gateway.
+    // AM_GW_PLATFORM_API_ARTIFACTS scopes results to only the APIs this gateway serves.
+    // AM_API is not needed: KM.API_UUID gives the artifactUuid directly, and GATEWAY_ENV_UUID
+    // already constrains to a single gateway (and therefore a single organization).
+    public static final String GET_PLATFORM_GATEWAY_API_KEYS_BY_GATEWAY_SQL =
+            "SELECT K.API_KEY_UUID, K.NAME, K.API_KEY_HASH, K.AUTHZ_USER, K.STATUS, " +
+                    "K.TIME_CREATED, K.VALIDITY_PERIOD, KM.API_UUID " +
+                    "FROM AM_API_KEY K " +
+                    "JOIN AM_API_KEY_API_MAPPING KM ON K.API_KEY_UUID = KM.API_KEY_UUID " +
+                    "JOIN AM_GW_PLATFORM_API_ARTIFACTS GWA " +
+                    "    ON KM.API_UUID = GWA.API_ID AND GWA.GATEWAY_ENV_UUID = ? " +
+                    "WHERE K.STATUS = 'ACTIVE'";
     public static final String GET_API_KEY_ASSOCIATIONS_SQL =
             "SELECT K.API_KEY_UUID, K.NAME, A.API_NAME, K.TIME_CREATED, K.AUTHZ_USER, K.VALIDITY_PERIOD, K.LAST_USED, KM.API_UUID " +
                     "FROM AM_API_KEY K " +
@@ -4352,7 +4379,7 @@ public class SQLConstants {
                         "LEFT JOIN AM_API_PRODUCT_MAPPING PROD_MAP ON AUM.URL_MAPPING_ID = PROD_MAP.URL_MAPPING_ID " +
                         "LEFT JOIN AM_BACKEND_OPERATION_MAPPING BACK_MAP ON AUM.URL_MAPPING_ID = BACK_MAP.URL_MAPPING_ID " +
                         "LEFT JOIN AM_API_OPERATION_MAPPING API_MAP ON AUM.URL_MAPPING_ID = API_MAP.URL_MAPPING_ID " +
-                        "WHERE AUM.API_ID = ? AND AUM.REVISION_UUID IS NULL";
+                        "WHERE AUM.API_ID = ? AND AUM.REVISION_UUID IS NULL ORDER BY AUM.URL_MAPPING_ID ASC";
 
         public static final String GET_REVISIONED_URL_MAPPINGS_ID = "SELECT URL_MAPPING_ID FROM AM_API_URL_MAPPING " +
                 "WHERE API_ID = ? AND REVISION_UUID = ? AND HTTP_METHOD = ? AND AUTH_SCHEME = ? AND URL_PATTERN = ? " +
@@ -4507,7 +4534,7 @@ public class SQLConstants {
                 "LEFT JOIN AM_API_PRODUCT_MAPPING PROD_MAP ON AUM.URL_MAPPING_ID = PROD_MAP.URL_MAPPING_ID " +
                 "LEFT JOIN AM_BACKEND_OPERATION_MAPPING BACK_MAP ON AUM.URL_MAPPING_ID = BACK_MAP.URL_MAPPING_ID " +
                 "LEFT JOIN AM_API_OPERATION_MAPPING API_MAP ON AUM.URL_MAPPING_ID = API_MAP.URL_MAPPING_ID " +
-                "WHERE AUM.API_ID = ? AND AUM.REVISION_UUID = ?";
+                "WHERE AUM.API_ID = ? AND AUM.REVISION_UUID = ? ORDER BY AUM.URL_MAPPING_ID ASC";
         public static final String INSERT_URL_MAPPINGS_CURRENT_API = "INSERT INTO AM_API_URL_MAPPING(API_ID, HTTP_METHOD," +
                 " AUTH_SCHEME, URL_PATTERN, THROTTLING_TIER, DESCRIPTION, SCHEMA_DEFINITION) VALUES(?,?,?,?,?,?,?)";
         public static final String GET_CURRENT_API_URL_MAPPINGS_ID = "SELECT URL_MAPPING_ID FROM AM_API_URL_MAPPING " +
@@ -4539,11 +4566,11 @@ public class SQLConstants {
                 "AUM.URL_PATTERN, AUM.THROTTLING_TIER, AUM.MEDIATION_SCRIPT, ARSM.SCOPE_NAME, AUM.API_ID " +
                 "FROM AM_API_URL_MAPPING AUM LEFT JOIN AM_API_RESOURCE_SCOPE_MAPPING ARSM ON AUM.URL_MAPPING_ID = ARSM.URL_MAPPING_ID " +
                 "LEFT JOIN AM_API_PRODUCT_MAPPING PROD_MAP ON AUM.URL_MAPPING_ID = PROD_MAP.URL_MAPPING_ID " +
-                "WHERE PROD_MAP.API_ID = ? AND PROD_MAP.REVISION_UUID = 'Current API'";
+                "WHERE PROD_MAP.API_ID = ? AND PROD_MAP.REVISION_UUID = 'Current API' ORDER BY AUM.URL_MAPPING_ID ASC";
         public static final String GET_URL_MAPPINGS_WITH_SCOPE_BY_URL_MAPPING_ID = "SELECT AUM.HTTP_METHOD, AUM.AUTH_SCHEME, " +
                 "AUM.URL_PATTERN, AUM.THROTTLING_TIER, AUM.MEDIATION_SCRIPT, ARSM.SCOPE_NAME, AUM.API_ID " +
                 "FROM AM_API_URL_MAPPING AUM LEFT JOIN AM_API_RESOURCE_SCOPE_MAPPING ARSM ON AUM.URL_MAPPING_ID = ARSM.URL_MAPPING_ID " +
-                "WHERE AUM.URL_MAPPING_ID = ?";
+                "WHERE AUM.URL_MAPPING_ID = ? ORDER BY AUM.URL_MAPPING_ID ASC";
         public static final String GET_CUURENT_API_PRODUCT_RESOURCES = "SELECT URL_MAPPING_ID " +
                 "FROM AM_API_PRODUCT_MAPPING WHERE API_ID = ? AND REVISION_UUID = 'Current API'";
         public static final String REMOVE_PRODUCT_ENTRIES_IN_AM_API_URL_MAPPING_BY_URL_MAPPING_ID =
@@ -4555,7 +4582,7 @@ public class SQLConstants {
                 "SELECT AUM.HTTP_METHOD, AUM.AUTH_SCHEME, " +
                 "AUM.URL_PATTERN, AUM.THROTTLING_TIER, AUM.MEDIATION_SCRIPT, AUM.API_ID " +
                 "FROM AM_API_URL_MAPPING AUM " +
-                "WHERE AUM.REVISION_UUID = ? ";
+                "WHERE AUM.REVISION_UUID = ? ORDER BY AUM.URL_MAPPING_ID ASC";
 
         public static final String GET_API_PRODUCT_REVISION_SCOPE_MAPPINGS_BY_REVISION_UUID =
                 "SELECT AUM.HTTP_METHOD, AUM.URL_PATTERN, ARSM.SCOPE_NAME, ARSM.URL_MAPPING_ID " +

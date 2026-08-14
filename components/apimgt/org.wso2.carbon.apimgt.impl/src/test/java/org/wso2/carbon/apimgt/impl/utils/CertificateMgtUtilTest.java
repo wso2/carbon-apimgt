@@ -30,6 +30,7 @@ import org.wso2.carbon.base.MultitenantConstants;
 import java.io.ByteArrayInputStream;
 import java.lang.reflect.Field;
 import java.net.URL;
+import java.util.Set;
 
 /**
  * This class contains the unit tests for CertificateMgtUtil class.
@@ -236,5 +237,99 @@ public class CertificateMgtUtilTest {
     public void testGetCertificateInfo() {
         Assert.assertNotNull("A valid certificate info retrieval failed",
                 certificateMgtUtils.getCertificateInfo(BASE64_ENCODED_CERT_STRING));
+    }
+
+    // Certificate with wildcard SAN *.example.com and exact SANs api1.hello.com, api2.hello.com
+    // CN: simple.example.com (should be ignored because SANs are present)
+    private static final String CERT_WITH_DNS_SANS =
+            "MIIDdTCCAl2gAwIBAgIUQmUApCllap+dKaaXsTk7dR0gDsQwDQYJKoZIhvcNAQELBQAwLDEbMBkG" +
+            "A1UEAwwSc2ltcGxlLmV4YW1wbGUuY29tMQ0wCwYDVQQKDARUZXN0MB4XDTI2MDYwNTA1NTcxMloX" +
+            "DTM2MDYwMjA1NTcxMlowLDEbMBkGA1UEAwwSc2ltcGxlLmV4YW1wbGUuY29tMQ0wCwYDVQQKDARU" +
+            "ZXN0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA8ur/uoiIoZ8yW4D0FZOAwaPmH8sk" +
+            "MZje4vW3ILxkLtgD8PjjiA4XQihrYuxrMBBS5Jlna8EmEjnP4ygg1mZ2AfHFQCMwJ4RlInxKEfr3" +
+            "ElFLLpPtBzFYjrlUzA7ZRxWrX9upeDOrsTytIxAvpdPbWrUsFKcYL3tq1GB4hE6GICs9VCkBTF58" +
+            "9loYZ3bH6T6epijAP0vRrSMIMD1CZrrvFilV0W6IohY56CF84mQWn3JqZbj2/FqkpMJ/VO0bJ6fK" +
+            "sup6nn0GqY7DNG6MglrvS+pkturYAXA26f5uh34YEuRnAzAdVLFtogJYrUWgk4yVB+7b0H4FEGTF" +
+            "DKQlBvErJQIDAQABo4GOMIGLMB0GA1UdDgQWBBTAXsL6ojyS6e42f69OIXTOzKt0ijAfBgNVHSME" +
+            "GDAWgBTAXsL6ojyS6e42f69OIXTOzKt0ijAPBgNVHRMBAf8EBTADAQH/MDgGA1UdEQQxMC+CDSou" +
+            "ZXhhbXBsZS5jb22CDmFwaTEuaGVsbG8uY29tgg5hcGkyLmhlbGxvLmNvbTANBgkqhkiG9w0BAQsF" +
+            "AAOCAQEATjPCm++GvSkY5IoBeZqAN3pIpjtZqTGj+tAHy2X+veRpUda9PEajV1kKpfB34ZoOcHrS" +
+            "Gb5y5VYojaAZotOZp+2ilmLqujfT2Q8+XQ0EHjpEPzuDq9koUeSJPY0w8m/TToldd1MtdDWXk0V9" +
+            "vdV41Gi/+VyOajdOtzdGKbEciJsq5sd5gyFRBxjo5gSPqqJi+L09Ig3g+c6faUJ/JI5e2Fbv53cc" +
+            "rBTc2XgsY2eKQLbIcgiEu/LjXyZ1mUvFv7LyzXRnWj3+w+ek3EPiRggQcbBPOHuPGaNrTzkwLIll" +
+            "chF2eAlffVjpWA3NzL/Q5tRXTFitbBozfHGl7nzN8QxtKQ==";
+
+    // Certificate with no SANs, CN=backend.example.com
+    private static final String CERT_CN_ONLY =
+            "MIIDOzCCAiOgAwIBAgIUFB8gC/GSC04yMpVppR2GSbQuEd8wDQYJKoZIhvcNAQELBQAwLTEcMBoG" +
+            "A1UEAwwTYmFja2VuZC5leGFtcGxlLmNvbTENMAsGA1UECgwEVGVzdDAeFw0yNjA2MDUwNTU3MjBa" +
+            "Fw0zNjA2MDIwNTU3MjBaMC0xHDAaBgNVBAMME2JhY2tlbmQuZXhhbXBsZS5jb20xDTALBgNVBAoM" +
+            "BFRlc3QwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCjfoX3PHePUrDlEQ78szKEhw8l" +
+            "8PHk1JgNPm/u1CtNz+JT/8zrfBw/+xZWCeNZ2fxgVN1wnl0h4LJogmSsQwYQe7naURxhomwQ+6Y" +
+            "rOXpCUSUYVvAI0ZsKUzDWFmssvo7QQ3lGpCC/nvjGtUBoE9Gjwbv45SYbzCWmCl1yRs4RxUMd5UC" +
+            "WF9GmrhiWnfAYpu825NEiT/yVlQBuHu/KoL7054WewQjsAX86HdNFS0r35wXp/qdk5pqauD0Jnff" +
+            "f8PZf/asrBoMA3Lx0bIlHX2KfgAN+PyXzDksK/y2CqiDdA0h5x/+FBSuh9d0rlK/v3nfPzF7VYfr" +
+            "xbLfkuRSf+ZY1AgMBAAGjUzBRMB0GA1UdDgQWBBTDJjRTndFSqtc0ydL5tdDexBqe4zAfBgNVHSME" +
+            "GDAWgBTDJjRTndFSqtc0ydL5tdDexBqe4zAPBgNVHRMBAf8EBTADAQH/MA0GCSqGSIb3DQEBCwUA" +
+            "A4IBAQCJAX2GciKCBtq8turwKXPxFuzlwwq44aqXMzQ2SxbQ/Z9hoLlpyGgQXeCQsL1KT4XWAvqf" +
+            "DrDuN+HyX6lnLfjnx/pU5z62fOg54UbpX++8Qz0/buYbMzh/BlvqW8B1HQ2OhUVaj1FMTCF984Rs" +
+            "AQgu1iP2xtatHbdVzjt7KmLot9CQzxTIIo0z75MqcqM+0az8VW+e2TDAEtzfSay3rh5X+YBJipk5" +
+            "V2+DWlF7yc8U3QSF/1rRmbefnIdfzaAoFkH6G5u8TUjYE/Tt3cSQiylPlhUiIwPgG1XyaVu9i2YM" +
+            "gv+Kp/g3ROxKCpqMv98hRw6MhzITCI5WUsd4dSfv5atg";
+
+    // Certificate with IP SAN 10.0.0.1 and DNS SAN api.internal.com
+    private static final String CERT_WITH_IP_SAN =
+            "MIIDSDCCAjCgAwIBAgIUKXzufasLHJEeGvHARI9PRFf4gTcwDQYJKoZIhvcNAQELBQAwIjERMA8G" +
+            "A1UEAwwIMTAuMC4wLjExDTALBgNVBAoMBFRlc3QwHhcNMjYwNjA1MDU1NzIwWhcNMzYwNjAyMDU1" +
+            "NzIwWjAiMREwDwYDVQQDDAgxMC4wLjAuMTENMAsGA1UECgwEVGVzdDCCASIwDQYJKoZIhvcNAQEB" +
+            "BQADggEPADCCAQoCggEBAMuZ37+mcpa7r1223kp8wVXswdIJ0sjYA+LHPeTfHeytiFKvz1m0a2UD" +
+            "AUyhbVM2PVH0Z9elolCG1FjxUqKw/FVcYT8c4OCPqe/TaFbTc4dNrIcq7a4IfuFpQmp1pTL9pVzA" +
+            "oUfGkO2SbJD4xHgD35QL2Viq9TS6mAgZQjReLEcdrYvfaZLs1T6q73zeA5zJaqR7xSRevtJe/bXc" +
+            "OLeYVl7X+fzpI7QtjnAb59Aykbqbm6eYfLuXoTi1XE9NE3aL8nRtOgZX8MOblTYx79s7ubCyD5qL" +
+            "2ktBubcTa1WF4NE30aRw5tyALam/t5bea6Mu/oVIUtkzNfISHdoOz5PQPdsCAwEAAaN2MHQwHQYD" +
+            "VR0OBBYEFGrE3X8QzQRS+f8jg5MwMQyAF3tiMB8GA1UdIwQYMBaAFGrE3X8QzQRS+f8jg5MwMQyA" +
+            "F3tiMA8GA1UdEwEB/wQFMAMBAf8wIQYDVR0RBBowGIcECgAAAYIQYXBpLmludGVybmFsLmNvbTAN" +
+            "BgkqhkiG9w0BAQsFAAOCAQEAnvXK1z3IxCBKyaPsmYrEGKeZq9ajyrC1sJZwa8DcbX0KVmbMDwLs" +
+            "kLdXWlUyN/mzUiz62y0ow+ocK+3GLM5cfz3g3Fihm4RyllHFleMo70VfYolKAfDT2DopRjExWAnR" +
+            "0C35VkcNO+Waj4Vwp7lN6DhEzgeMvkmRIDpygpVfl70AECIj1Py8n2PbXP+QbxOFPcmm0smY4MyC" +
+            "PlRtXJCPz7D3GmLexVfrFcx+ofSvBx7OJZIwGzB7Mb4f9AP9YjVtV112T5RkGANn8+VCHhj9WSqy" +
+            "hl20UJWJVSqrPqUYD45oSAq4bVC3lSNzGkaLc5dRRMTmEQ9SkeNwve0ZRGPHVA==";
+
+    @Test
+    public void testGetEndpointSearchTermsWithDNSSANs() {
+        Set<String> terms = CertificateMgtUtils.getEndpointSearchTermsFromCertificate(CERT_WITH_DNS_SANS);
+        Assert.assertEquals("Wildcard SAN *.example.com should contribute one term stripped of *", 3, terms.size());
+        Assert.assertTrue("Wildcard SAN *.example.com should produce .example.com", terms.contains(".example.com"));
+        Assert.assertTrue("Exact SAN api1.hello.com should be included as-is", terms.contains("api1.hello.com"));
+        Assert.assertTrue("Exact SAN api2.hello.com should be included as-is", terms.contains("api2.hello.com"));
+        Assert.assertFalse("Original wildcard form *.example.com must not appear", terms.contains("*.example.com"));
+        Assert.assertFalse("CN should be ignored when SANs are present", terms.contains("simple.example.com"));
+    }
+
+    @Test
+    public void testGetEndpointSearchTermsWithCNFallback() {
+        Set<String> terms = CertificateMgtUtils.getEndpointSearchTermsFromCertificate(CERT_CN_ONLY);
+        Assert.assertEquals("CN should be the only term when no SANs are present", 1, terms.size());
+        Assert.assertTrue("CN backend.example.com should be used as fallback", terms.contains("backend.example.com"));
+    }
+
+    @Test
+    public void testGetEndpointSearchTermsWithIPSAN() {
+        Set<String> terms = CertificateMgtUtils.getEndpointSearchTermsFromCertificate(CERT_WITH_IP_SAN);
+        Assert.assertEquals("IP SAN and DNS SAN should each contribute one term", 2, terms.size());
+        Assert.assertTrue("IP SAN 10.0.0.1 should be included", terms.contains("10.0.0.1"));
+        Assert.assertTrue("DNS SAN api.internal.com should be included", terms.contains("api.internal.com"));
+    }
+
+    @Test
+    public void testGetEndpointSearchTermsWithInvalidCert() {
+        Set<String> terms = CertificateMgtUtils.getEndpointSearchTermsFromCertificate("not-a-valid-cert");
+        Assert.assertTrue("Invalid cert should yield empty set without throwing", terms.isEmpty());
+    }
+
+    @Test
+    public void testGetEndpointSearchTermsWithNullCert() {
+        Set<String> terms = CertificateMgtUtils.getEndpointSearchTermsFromCertificate(null);
+        Assert.assertTrue("Null cert should yield empty set without throwing", terms.isEmpty());
     }
 }
