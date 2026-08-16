@@ -352,14 +352,28 @@ public class SQLConstants {
             "JOIN GOV_ARTIFACT GA ON GRR.ARTIFACT_KEY = GA.ARTIFACT_KEY " +
             "WHERE GA.ARTIFACT_REF_ID = ? AND GA.ARTIFACT_TYPE = ? AND GA.ORGANIZATION = ? AND GRR.RULESET_ID = ?";
 
-    public static final String GET_FAILED_RULESET_RUNS = "SELECT DISTINCT RULESET_ID FROM GOV_RULESET_RUN GRR " +
-            "JOIN GOV_ARTIFACT GA ON GRR.ARTIFACT_KEY = GA.ARTIFACT_KEY " +
-            "WHERE GA.ORGANIZATION = ? AND GRR.RESULT = 0";
+    /**
+     * Matches a ruleset run that holds at least one violation of a compliance affecting severity. GOV_RULESET_RUN
+     * carries a RESULT flag, but that flag only records whether the run was completely clean and therefore cannot
+     * tell a blocking violation apart from an informational one. Severity is resolved here instead, so that a change
+     * to the configured severities applies to already stored results without a re-evaluation.
+     */
+    private static final String COMPLIANCE_AFFECTING_VIOLATION_EXISTS = "EXISTS (SELECT 1 " +
+            "FROM GOV_RULE_VIOLATION GV " +
+            "JOIN GOV_RULESET_RULE GRULE ON GV.RULESET_ID = GRULE.RULESET_ID AND GV.RULE_NAME = GRULE.RULE_NAME " +
+            "WHERE GV.RULESET_RUN_ID = GRR.RULESET_RUN_ID AND GRULE.SEVERITY IN (?, ?, ?))";
 
-    public static final String GET_FAILED_RULESET_RUNS_FOR_ARTIFACT = "SELECT DISTINCT RULESET_ID " +
+    public static final String GET_FAILED_RULESET_RUNS = "SELECT DISTINCT GRR.RULESET_ID " +
             "FROM GOV_RULESET_RUN GRR " +
             "JOIN GOV_ARTIFACT GA ON GRR.ARTIFACT_KEY = GA.ARTIFACT_KEY " +
-            "WHERE GA.ARTIFACT_REF_ID = ? AND GA.ARTIFACT_TYPE = ? AND GA.ORGANIZATION = ? AND GRR.RESULT = 0";
+            "WHERE GA.ORGANIZATION = ? AND " + COMPLIANCE_AFFECTING_VIOLATION_EXISTS;
+
+    public static final String GET_FAILED_RULESET_RUNS_FOR_ARTIFACT = "SELECT DISTINCT GRR.RULESET_ID " +
+            "FROM GOV_RULESET_RUN GRR " +
+            "JOIN GOV_ARTIFACT GA ON GRR.ARTIFACT_KEY = GA.ARTIFACT_KEY " +
+            "WHERE GA.ARTIFACT_REF_ID = ? AND GA.ARTIFACT_TYPE = ? AND GA.ORGANIZATION = ? AND "
+            + COMPLIANCE_AFFECTING_VIOLATION_EXISTS;
+
     public static final String DELETE_RULESET_RUNS_FOR_ARTIFACT = "DELETE FROM GOV_RULESET_RUN " +
             "WHERE ARTIFACT_KEY IN (SELECT ARTIFACT_KEY FROM GOV_ARTIFACT WHERE ARTIFACT_REF_ID = ? " +
             "AND ARTIFACT_TYPE = ? AND ORGANIZATION = ?)";
@@ -414,8 +428,9 @@ public class SQLConstants {
             "FROM GOV_ARTIFACT GA " +
             "JOIN GOV_POLICY_RUN GPR ON GA.ARTIFACT_KEY = GPR.ARTIFACT_KEY " +
             "JOIN GOV_POLICY_RULESET GPRR ON GPR.POLICY_ID = GPRR.POLICY_ID " +
-            "JOIN GOV_RULESET_RUN GRR ON GA.ARTIFACT_KEY = GRR.ARTIFACT_KEY AND GRR.RULESET_ID = GPRR.RULESET_ID " +
-            "WHERE GA.ARTIFACT_TYPE = ? AND GA.ORGANIZATION = ? AND GRR.RESULT = 0";
+            "JOIN GOV_RULESET_RUN GRR ON GA.ARTIFACT_KEY = GRR.ARTIFACT_KEY " +
+            "AND GRR.RULESET_ID = GPRR.RULESET_ID " +
+            "WHERE GA.ARTIFACT_TYPE = ? AND GA.ORGANIZATION = ? AND " + COMPLIANCE_AFFECTING_VIOLATION_EXISTS;
 
     public static final String GET_ARITFCATS_FOR_POLICY_RUN = "SELECT DISTINCT GA.ARTIFACT_REF_ID, GA.ARTIFACT_TYPE " +
             "FROM GOV_ARTIFACT GA " +

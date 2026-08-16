@@ -784,6 +784,10 @@
     <!-- This property is to configure the API Manager Governance capabilities -->
     <APIMGovernance>
         <DataSource>{{apim.governance.datasource.name}}</DataSource>
+        <!-- Rule severities that make a ruleset fail, and in turn the policy violated and the artifact
+             non-compliant. Violations of any other severity are still evaluated, stored and shown to the user,
+             but they do not affect the compliance status. Accepts ERROR, WARN and INFO. -->
+        <ComplianceAffectingSeverities>{{apim.governance.compliance_affecting_severities.toList()|join(',')}}</ComplianceAffectingSeverities>
         <SchedulerConfigurations>
             <ThreadPoolSize>{{apim.governance.scheduler.thread_pool_size}}</ThreadPoolSize>
             <QueueSize>{{apim.governance.scheduler.queue_size}}</QueueSize>

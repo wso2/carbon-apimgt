@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.governance.impl.util;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.OASParserOptions;
@@ -35,7 +36,9 @@ import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.DefaultRuleset;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.RuleCategory;
+import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
+import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetContent;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
@@ -47,6 +50,8 @@ import org.wso2.carbon.apimgt.governance.impl.PolicyManager;
 import org.wso2.carbon.apimgt.governance.impl.RulesetManager;
 import org.wso2.carbon.apimgt.governance.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIMDependencyConfigurationService;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.dto.APIMGovernanceConfigDTO;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
@@ -57,6 +62,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -70,6 +76,12 @@ import java.util.stream.Collectors;
  */
 public class APIMGovernanceUtil {
     private static final Log log = LogFactory.getLog(APIMGovernanceUtil.class);
+
+    private static final Set<RuleSeverity> ALL_SEVERITIES =
+            Collections.unmodifiableSet(EnumSet.allOf(RuleSeverity.class));
+
+    private static volatile String resolvedSeverityConfig;
+    private static volatile Set<RuleSeverity> resolvedComplianceAffectingSeverities;
 
     /**
      * Generates a UUID
@@ -678,6 +690,109 @@ public class APIMGovernanceUtil {
             governanceOptions.setYamlCodePointLimit(parserOptions.getYamlCodePointLimit());
         }
         return governanceOptions;
+    }
+
+    /**
+     * Resolve the set of rule severities that affect compliance results.
+     * <p>
+     * Violations of a severity outside this set are still evaluated, persisted and returned to the user, but they do
+     * not mark a ruleset as failed, a policy as violated or an artifact as non-compliant. When the configuration is
+     * absent, blank, or contains no recognizable severity, every severity affects compliance. That keeps the
+     * behaviour of deployments which have not opted in unchanged.
+     *
+     * @return Immutable, never empty set of severities that affect compliance
+     */
+    private static Set<RuleSeverity> resolveComplianceAffectingSeverities() {
+
+        String configuredSeverities = null;
+        APIManagerConfigurationService configurationService = ServiceReferenceHolder.getInstance()
+                .getAPIMConfigurationService();
+        if (configurationService != null && configurationService.getAPIManagerConfiguration() != null) {
+            APIMGovernanceConfigDTO governanceConfig = configurationService.getAPIManagerConfiguration()
+                    .getAPIMGovernanceConfigurationDto();
+            if (governanceConfig != null) {
+                configuredSeverities = governanceConfig.getComplianceAffectingSeverities();
+            }
+        }
+
+        if (StringUtils.isBlank(configuredSeverities)) {
+            return ALL_SEVERITIES;
+        }
+
+        // The configuration is loaded once at server startup, so caching against the raw value is sufficient and
+        // avoids re-parsing it for every artifact while listing compliance results.
+        if (configuredSeverities.equals(resolvedSeverityConfig) && resolvedComplianceAffectingSeverities != null) {
+            return resolvedComplianceAffectingSeverities;
+        }
+
+        Set<RuleSeverity> severities = EnumSet.noneOf(RuleSeverity.class);
+        for (String severityToken : configuredSeverities.split(",")) {
+            String trimmedSeverity = severityToken.trim();
+            if (StringUtils.isEmpty(trimmedSeverity)) {
+                continue;
+            }
+            RuleSeverity severity = RuleSeverity.fromString(trimmedSeverity);
+            if (severity == null) {
+                log.warn("Ignoring unknown rule severity '" + trimmedSeverity
+                        + "' configured as a compliance affecting severity");
+                continue;
+            }
+            severities.add(severity);
+        }
+
+        if (severities.isEmpty()) {
+            log.warn("No valid compliance affecting rule severity is configured. Treating every severity as "
+                    + "compliance affecting");
+            return ALL_SEVERITIES;
+        }
+
+        Set<RuleSeverity> complianceAffectingSeverities = Collections.unmodifiableSet(severities);
+        resolvedComplianceAffectingSeverities = complianceAffectingSeverities;
+        resolvedSeverityConfig = configuredSeverities;
+        return complianceAffectingSeverities;
+    }
+
+    /**
+     * Get the rule severities that affect compliance results, as a list whose order is stable within a call so that
+     * it can be used to bind the parameters of a severity filtered query
+     *
+     * @return Mutable copy of the compliance affecting severities, never empty
+     */
+    public static List<RuleSeverity> getComplianceAffectingSeverityList() {
+
+        return new ArrayList<>(resolveComplianceAffectingSeverities());
+    }
+
+    /**
+     * Check whether a violation of the given severity should affect compliance results
+     *
+     * @param severity Rule severity, may be null when the severity of a violation could not be resolved
+     * @return True if a violation of this severity should mark a ruleset as failed
+     */
+    public static boolean isComplianceAffectingSeverity(RuleSeverity severity) {
+
+        // An unresolved severity is treated as compliance affecting so that a malformed severity in a ruleset can
+        // never silently stop a rule from being enforced.
+        return severity == null || resolveComplianceAffectingSeverities().contains(severity);
+    }
+
+    /**
+     * Filter out the rule violations that should not affect compliance results.
+     * <p>
+     * The given list is never modified. Callers keep using the original list for anything that is shown to the user
+     * and use the returned list only to decide whether a ruleset passed or failed.
+     *
+     * @param ruleViolations List of rule violations
+     * @return List holding only the violations that affect compliance
+     */
+    public static List<RuleViolation> filterComplianceAffectingViolations(List<RuleViolation> ruleViolations) {
+
+        if (ruleViolations == null || ruleViolations.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return ruleViolations.stream()
+                .filter(ruleViolation -> isComplianceAffectingSeverity(ruleViolation.getSeverity()))
+                .collect(Collectors.toList());
     }
 
 }

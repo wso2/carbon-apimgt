@@ -54,6 +54,9 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     private static final Log log = LogFactory.getLog(ComplianceMgtDAOImpl.class);
     private static final Lock resultWrtiteDelLock = new ReentrantLock();
 
+    /** Number of severity bind parameters declared by the compliance affecting violation predicate */
+    private static final int SEVERITY_BIND_PARAM_COUNT = RuleSeverity.values().length;
+
     private ComplianceMgtDAOImpl() {
 
     }
@@ -921,6 +924,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
              PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
             prepStmnt.setString(1, String.valueOf(artifactType));
             prepStmnt.setString(2, organization);
+            setComplianceAffectingSeverities(prepStmnt, 3);
             try (ResultSet resultSet = prepStmnt.executeQuery()) {
                 while (resultSet.next()) {
                     artifactRefIds.add(resultSet.getString("ARTIFACT_REF_ID"));
@@ -973,6 +977,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
             prepStmnt.setString(1, organization);
+            setComplianceAffectingSeverities(prepStmnt, 2);
             try (ResultSet resultSet = prepStmnt.executeQuery()) {
                 while (resultSet.next()) {
                     rulesetIds.add(resultSet.getString("RULESET_ID"));
@@ -1004,6 +1009,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
             prepStmnt.setString(1, artifactRefId);
             prepStmnt.setString(2, String.valueOf(artifactType));
             prepStmnt.setString(3, organization);
+            setComplianceAffectingSeverities(prepStmnt, 4);
             try (ResultSet resultSet = prepStmnt.executeQuery()) {
                 while (resultSet.next()) {
                     rulesetIds.add(resultSet.getString("RULESET_ID"));
@@ -1156,6 +1162,26 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                     .ERROR_WHILE_DELETING_GOVERNANCE_DATA, e, artifactRefId);
         } finally {
             resultWrtiteDelLock.unlock();
+        }
+    }
+
+    /**
+     * Bind the compliance affecting severities of a query that filters violations by severity.
+     * <p>
+     * The predicate always declares one bind parameter per severity {@link RuleSeverity} defines, so that the queries
+     * stay constant strings. When fewer severities are configured the last one is repeated, which does not change the
+     * outcome of the IN check. The configured set is never empty, so there is always at least one severity to repeat.
+     *
+     * @param prepStmnt  Prepared statement to bind the severities to
+     * @param startIndex Index of the first severity bind parameter
+     * @throws SQLException If an error occurs while setting the severities
+     */
+    private void setComplianceAffectingSeverities(PreparedStatement prepStmnt, int startIndex) throws SQLException {
+
+        List<RuleSeverity> severities = APIMGovernanceUtil.getComplianceAffectingSeverityList();
+        for (int i = 0; i < SEVERITY_BIND_PARAM_COUNT; i++) {
+            RuleSeverity severity = severities.get(Math.min(i, severities.size() - 1));
+            prepStmnt.setString(startIndex + i, String.valueOf(severity));
         }
     }
 }

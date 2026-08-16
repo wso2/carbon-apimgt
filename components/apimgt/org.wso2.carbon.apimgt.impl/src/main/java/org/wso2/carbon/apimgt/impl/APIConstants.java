@@ -3832,6 +3832,7 @@ public final class APIConstants {
         public static final String SCHEDULER_QUEUE_SIZE = "QueueSize";
         public static final String SCHEDULER_TASK_CHECK_INTERVAL = "TaskCheckIntervalMinutes";
         public static final String SCHEDULER_TASK_CLEANUP_INTERVAL = "TaskCleanupIntervalMinutes";
+        public static final String COMPLIANCE_AFFECTING_SEVERITIES = "ComplianceAffectingSeverities";
     }
 
     public static class MCP {

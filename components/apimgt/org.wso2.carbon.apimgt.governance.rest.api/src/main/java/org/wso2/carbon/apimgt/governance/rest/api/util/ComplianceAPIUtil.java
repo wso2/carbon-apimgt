@@ -160,9 +160,6 @@ public class ComplianceAPIUtil {
         } else if (policyAdherenceDetails.stream().anyMatch(dto -> dto.getStatus()
                 == PolicyAdherenceWithRulesetsDTO.StatusEnum.VIOLATED)) {
             status = ArtifactComplianceDetailsDTO.StatusEnum.NON_COMPLIANT;
-        } else if (policyAdherenceDetails.stream().anyMatch(dto -> dto.getStatus()
-                == PolicyAdherenceWithRulesetsDTO.StatusEnum.VIOLATED)) {
-            status = ArtifactComplianceDetailsDTO.StatusEnum.NON_COMPLIANT;
         } else {
             status = ArtifactComplianceDetailsDTO.StatusEnum.COMPLIANT;
         }
@@ -289,7 +286,8 @@ public class ComplianceAPIUtil {
                 ruleset.getId(), organization);
 
 
-        rulesetDTO.setStatus(ruleViolations.isEmpty() ?
+        // Violations of a non compliance affecting severity are still reported, but they do not fail the ruleset
+        rulesetDTO.setStatus(APIMGovernanceUtil.filterComplianceAffectingViolations(ruleViolations).isEmpty() ?
                 RulesetValidationResultWithoutRulesDTO.StatusEnum.PASSED :
                 RulesetValidationResultWithoutRulesDTO.StatusEnum.FAILED);
 
@@ -434,6 +432,12 @@ public class ComplianceAPIUtil {
 
             ruleViolationCounts.add(violationCountDTO);
 
+            // Violations of a non compliance affecting severity are still counted above, but they do not make the
+            // ruleset, and in turn the policy and the artifact, non-compliant
+            if (!APIMGovernanceUtil.isComplianceAffectingSeverity(severity)) {
+                continue;
+            }
+
             // Track the IDs of violated rulesets
             for (RuleViolation ruleViolation : ruleViolations) {
                 violatedRulesets.add(ruleViolation.getRulesetId());
@@ -574,11 +578,14 @@ public class ComplianceAPIUtil {
             }
         }
 
+        // Every violation is reported to the user, including the ones of a non compliance affecting severity, but
+        // only the compliance affecting ones decide whether the ruleset passed
         rulesetValidationResultDTO.setViolatedRules(violatedRules);
         rulesetValidationResultDTO.setFollowedRules(followedRules);
-        rulesetValidationResultDTO.setStatus(violatedRules.isEmpty() ?
-                RulesetValidationResultDTO.StatusEnum.PASSED :
-                RulesetValidationResultDTO.StatusEnum.FAILED);
+        rulesetValidationResultDTO.setStatus(
+                APIMGovernanceUtil.filterComplianceAffectingViolations(ruleViolations).isEmpty() ?
+                        RulesetValidationResultDTO.StatusEnum.PASSED :
+                        RulesetValidationResultDTO.StatusEnum.FAILED);
 
         return rulesetValidationResultDTO;
     }

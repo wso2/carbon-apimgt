@@ -29,6 +29,13 @@ public class APIMGovernanceConfigDTO {
     private int schedulerTaskCheckInterval;
     private int schedulerTaskCleanupInterval;
 
+    /**
+     * Comma separated list of rule severities that make a ruleset/policy/artifact non-compliant.
+     * Kept as a raw string here so that this module does not depend on the governance component. An empty or null
+     * value means "not configured", in which case every severity affects compliance (the historical behaviour).
+     */
+    private String complianceAffectingSeverities;
+
     public String getDataSourceName() {
         return dataSourceName;
     }
@@ -67,5 +74,13 @@ public class APIMGovernanceConfigDTO {
 
     public void setSchedulerTaskCleanupInterval(int schedulerTaskCleanupInterval) {
         this.schedulerTaskCleanupInterval = schedulerTaskCleanupInterval;
+    }
+
+    public String getComplianceAffectingSeverities() {
+        return complianceAffectingSeverities;
+    }
+
+    public void setComplianceAffectingSeverities(String complianceAffectingSeverities) {
+        this.complianceAffectingSeverities = complianceAffectingSeverities;
     }
 }
