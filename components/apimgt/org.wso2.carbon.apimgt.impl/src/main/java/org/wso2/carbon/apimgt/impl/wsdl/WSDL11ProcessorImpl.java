@@ -130,7 +130,7 @@ public class WSDL11ProcessorImpl extends AbstractWSDLProcessor {
         } catch (SchemaResolutionRuntimeException e) {
             // Genuine (non-policy) resolution failure (policy blocks are reported separately). The cause may carry
             // a URL or local path, so log it server-side only and keep the client ErrorItem generic.
-            log.warn("Genuine failure while resolving a nested WSDL schema reference", e.getCause());
+            log.warn("Failed to resolve a nested WSDL schema reference", e.getCause());
             setError(new ErrorItem(ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getErrorMessage(),
                     ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getErrorDescription(),
                     ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getErrorCode(),
@@ -200,7 +200,7 @@ public class WSDL11ProcessorImpl extends AbstractWSDLProcessor {
             if (log.isDebugEnabled()) {
                 log.debug("Cannot process the WSDL by " + this.getClass().getName(), e);
             }
-            log.warn("Genuine failure while resolving a nested WSDL schema reference", e.getCause());
+            log.warn("Failed to resolve a nested WSDL schema reference", e.getCause());
             setError(new ErrorItem(ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getErrorMessage(),
                     ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getErrorDescription(),
                     ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getErrorCode(),
@@ -263,7 +263,7 @@ public class WSDL11ProcessorImpl extends AbstractWSDLProcessor {
             // Genuine (non-policy) failure (see init(byte[]) above). The cause may carry a local path or URL, so
             // log it server-side only; the debug path below is the caller's own archive path, not the offending ref.
             log.debug(this.getClass().getName() + " was unable to process the WSDL Files for the path: " + path, e);
-            log.warn("Genuine failure while resolving a nested WSDL schema reference", e.getCause());
+            log.warn("Failed to resolve a nested WSDL schema reference", e.getCause());
             setError(new ErrorItem(ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getErrorMessage(),
                     ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getErrorDescription(),
                     ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getErrorCode(),
