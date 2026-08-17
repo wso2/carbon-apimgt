@@ -1050,9 +1050,9 @@ public class TemplateBuilderUtil {
                     gatewayAPIDTO.getLocalEntriesToBeAdd()));
         }
 
-        // An AI API holds its endpoints outside endpoint_config, so resolve them once here. Both the gate below
-        // and the AI API branch further down need exactly these values, and resolving them in a single place
-        // keeps the two from ever disagreeing about which endpoint is primary.
+        // An AI API holds its endpoints outside endpoint_config, so resolve them once here. The AI API gate, the
+        // endpoint entries and the AI API branch further down all need exactly these values, and resolving them
+        // in a single place keeps them from ever disagreeing about which endpoint is primary.
         boolean isAiApi = APIConstants.API_SUBTYPE_AI_API.equals(api.getSubtype());
         List<SimplifiedEndpoint> productionEndpoints = Collections.emptyList();
         List<SimplifiedEndpoint> sandboxEndpoints = Collections.emptyList();
@@ -1070,17 +1070,34 @@ public class TemplateBuilderUtil {
             defaultSandboxEndpoint = resolvePrimaryEndpoint(sandboxEndpoints, api.getPrimarySandboxEndpointId());
         }
 
+        // If the Gateway type is 'production' and no production endpoint could be resolved for the AI API, or the
+        // Gateway type is 'sandbox' and no sandbox endpoint could be resolved.
+        //
+        // AI APIs get their own gate because they record their endpoints outside endpoint_config: that config may
+        // be minimal, or absent altogether, while a perfectly valid endpoint exists in the API's endpoint list.
+        // The endpoint_config gate below therefore cannot answer this question for them, and is skipped for AI
+        // APIs the way it is already skipped for AWS Lambda APIs. The values tested here are the same ones used
+        // to build the artifact further down, so the gate and the artifact can never disagree.
+        if (isAiApi && ((APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType())
+                && defaultProductionEndpoint == null)
+                || (APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environment.getType())
+                && defaultSandboxEndpoint == null))) {
+            if (log.isDebugEnabled()) {
+                log.debug("Not adding AI API to environment " + environment.getName() + " since no "
+                        + environment.getType() + " endpoint could be resolved for it");
+            }
+            return null;
+        }
+
         // If the API exists in the Gateway and If the Gateway type is 'production' and a production url has not been
         // specified Or if the Gateway type is 'sandbox' and a sandbox url has not been specified
 
-        if (endpointConfig != null && !APIConstants.ENDPOINT_TYPE_AWSLAMBDA.equalsIgnoreCase(
+        if (endpointConfig != null && !isAiApi && !APIConstants.ENDPOINT_TYPE_AWSLAMBDA.equalsIgnoreCase(
                 (String) endpointConfig.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE)) && (
                 (APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType())
-                        && !endpointExistsForStage(api, isAiApi, defaultProductionEndpoint,
-                        APIConstants.APIEndpoint.PRODUCTION)) || (
+                        && !APIUtil.isProductionEndpointsExists(api.getEndpointConfig())) || (
                         APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environment.getType())
-                                && !endpointExistsForStage(api, isAiApi, defaultSandboxEndpoint,
-                                APIConstants.APIEndpoint.SANDBOX)))) {
+                                && !APIUtil.isSandboxEndpointsExists(api.getEndpointConfig())))) {
             if (log.isDebugEnabled()) {
                 log.debug("Not adding API to environment " + environment.getName() + " since its endpoint URL "
                         + "cannot be found");
@@ -1125,7 +1142,13 @@ public class TemplateBuilderUtil {
                 apiConfig = builder.getConfigStringForTemplate(environment);
             }
             gatewayAPIDTO.setApiDefinition(apiConfig);
-            if (endpointConfig != null && !APIConstants.ENDPOINT_TYPE_AWSLAMBDA.equalsIgnoreCase(
+            if (isAiApi) {
+                // The endpoint sequence added above refers to these entries by key, so they have to be added
+                // whatever endpoint_config holds -- an AI API can carry a valid endpoint list alongside a minimal
+                // or absent endpoint_config, and gating on it would leave the sequence pointing at endpoints that
+                // were never created.
+                addEndpoints(api, builder, gatewayAPIDTO, endpointList);
+            } else if (endpointConfig != null && !APIConstants.ENDPOINT_TYPE_AWSLAMBDA.equalsIgnoreCase(
                     (String) endpointConfig.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE)) &&
                     !APIConstants.ENDPOINT_TYPE_SEQUENCE.equalsIgnoreCase((String) endpointConfig
                             .get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
@@ -1180,34 +1203,6 @@ public class TemplateBuilderUtil {
             gatewayAPIDTO.setSequenceToBeAdd(
                     addGatewayContentToList(endpointSequence, gatewayAPIDTO.getSequenceToBeAdd()));
         }
-    }
-
-    /**
-     * Checks whether the API has an endpoint that can serve the given deployment stage.
-     * <p>
-     * For a regular API the endpoints are always inlined in endpoint_config, so the legacy
-     * production_endpoints/sandbox_endpoints keys answer this directly. An AI API is different: its primary
-     * endpoint may be a named endpoint held separately and referenced through
-     * primaryProductionEndpointId/primarySandboxEndpointId, in which case those keys are absent even though a
-     * perfectly valid endpoint exists. Consulting endpoint_config for such an API would report a missing
-     * endpoint and suppress the whole gateway artifact, so this check instead trusts the endpoint already
-     * resolved from {@code endpointList} by the caller, which is the very value used to build the artifact.
-     *
-     * @param api             The API being published
-     * @param isAiApi         Whether the API is an AI API
-     * @param resolvedPrimary The primary endpoint already resolved for this stage, null for a non-AI API
-     * @param stage           The deployment stage to check, PRODUCTION or SANDBOX
-     * @return true if an endpoint is available for the given stage
-     */
-    private static boolean endpointExistsForStage(API api, boolean isAiApi, SimplifiedEndpoint resolvedPrimary,
-                                                  String stage) {
-
-        if (isAiApi) {
-            return resolvedPrimary != null;
-        }
-        return APIConstants.APIEndpoint.PRODUCTION.equals(stage)
-                ? APIUtil.isProductionEndpointsExists(api.getEndpointConfig())
-                : APIUtil.isSandboxEndpointsExists(api.getEndpointConfig());
     }
 
     /**
