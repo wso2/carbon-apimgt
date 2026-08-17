@@ -90,6 +90,7 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.spec.parser.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import software.amazon.awssdk.core.exception.SdkClientException;
@@ -3861,7 +3862,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response exportAPI(String apiId, String name, String version, String revisionNum,
                               String providerName, String format, Boolean preserveStatus,
                               Boolean exportLatestRevision, String gatewayEnvironment, Boolean preserveCredentials,
-                              MessageContext messageContext)
+                              Boolean all, Boolean allRevisions, String xWSO2Tenant, MessageContext messageContext)
             throws APIManagementException {
 
         if (StringUtils.isEmpty(gatewayEnvironment)) {
@@ -3875,19 +3876,43 @@ public class ApisApiServiceImpl implements ApisApiService {
             ExportFormat exportFormat = StringUtils.isNotEmpty(format) ?
                     ExportFormat.valueOf(format.toUpperCase()) :
                     ExportFormat.YAML;
-            try {
-                String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            if (Boolean.TRUE.equals(all)) {
+                String organization = RestApiCommonUtil.validateTenantDomain(xWSO2Tenant);
                 ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
-                File file = importExportAPI
-                        .exportAPI(apiId, name, version, revisionNum, providerName, preserveStatus, exportFormat,
-                                Boolean.TRUE, preserveCredentials, exportLatestRevision, StringUtils.EMPTY, organization);
+                File file = importExportAPI.exportAPIs(organization, Boolean.TRUE.equals(allRevisions), exportFormat);
                 return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
                         "attachment; filename=\"" + file.getName() + "\"").build();
+            }
+            try {
+                String organization = RestApiCommonUtil.validateTenantDomain(xWSO2Tenant);
+                // Cross-tenant requests (organization differs from the caller's own tenant, which
+                // validateTenantDomain() only allows for callers holding the super-admin protected
+                // permission) must run under the target tenant's carbon context - otherwise the
+                // registry/governance lookups inside exportAPI() below resolve against the caller's
+                // own tenant and fail with a NullPointerException on the target API's artifact.
+                boolean tenantFlowStarted = false;
+                if (!RestApiCommonUtil.getLoggedInUserTenantDomain().equals(organization)) {
+                    RestApiCommonUtil.startTenantFlowWithTenantAdmin(organization);
+                    tenantFlowStarted = true;
+                }
+                try {
+                    ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
+                    File file = importExportAPI
+                            .exportAPI(apiId, name, version, revisionNum, providerName, preserveStatus, exportFormat,
+                                    Boolean.TRUE, preserveCredentials, exportLatestRevision, StringUtils.EMPTY,
+                                    organization);
+                    return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
+                            "attachment; filename=\"" + file.getName() + "\"").build();
+                } finally {
+                    if (tenantFlowStarted) {
+                        PrivilegedCarbonContext.endTenantFlow();
+                    }
+                }
             } catch (APIImportExportException e) {
                 throw new APIManagementException("Error while exporting " + RestApiConstants.RESOURCE_API, e);
             }
         } else {
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            String organization = RestApiCommonUtil.validateTenantDomain(xWSO2Tenant);
             if (StringUtils.isEmpty(apiId) && (StringUtils.isNotEmpty(name) && StringUtils.isNotEmpty(version))) {
                 APIIdentifier apiIdentifier = new APIIdentifier(providerName, name, version);
                 apiId = APIUtil.getUUIDFromIdentifier(apiIdentifier, organization);

@@ -7282,6 +7282,21 @@ paths:
           schema:
             type: boolean
             default: false
+        - name: all
+          in: query
+          description: |
+            Export all APIs and their revisions
+          schema:
+            type: boolean
+            default: false
+        - name: allRevisions
+          in: query
+          description: |
+            Export all revisions of the specified API.
+          schema:
+            type: boolean
+            default: false
+        - $ref: '#/components/parameters/requestedTenant'
       responses:
         200:
           description: |
