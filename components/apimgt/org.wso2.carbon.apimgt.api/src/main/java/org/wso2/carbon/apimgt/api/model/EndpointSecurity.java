@@ -55,7 +55,7 @@ public class EndpointSecurity {
     private String region = null;
     private String service = null;
 
-    // Serialized only when set. API.setEndpointConfig() migrates legacy endpoint configs by
+    // Serialized only when set. API#getEndpointConfig() migrates legacy endpoint configs by
     // constructing a bare EndpointSecurity and serializing it into endpoint_security; without
     // NON_NULL these AWS-only fields would be written into every migrated basic/digest endpoint,
     // changing the stored config of APIs that have nothing to do with AWS. The fields above predate
