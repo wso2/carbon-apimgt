@@ -3279,12 +3279,21 @@ public class ImportUtils {
             Identifier apiIdentifier = apiTypeWrapper.getId();
             List<ClientCertificateDTO> certificateMetadataDTOS = retrieveClientCertificates(pathToArchive, keyType);
             for (ClientCertificateDTO certDTO : certificateMetadataDTOS) {
-                if (ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE.getResponseCode() == (apiProvider.addClientCertificate(
+                int certResponseCode = apiProvider.addClientCertificate(
                         APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()), apiTypeWrapper,
-                        certDTO.getCertificate(), certDTO.getAlias(), certDTO.getTierName(), keyType,
-                        organization)) && isOverwrite) {
-                    apiProvider.updateClientCertificate(certDTO.getCertificate(), certDTO.getAlias(), apiTypeWrapper,
-                            certDTO.getTierName(), keyType, tenantId, organization);
+                        certDTO.getCertificate(), certDTO.getAlias(), certDTO.getTierName(), keyType, organization);
+                if (ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE.getResponseCode() == certResponseCode) {
+                    if (isOverwrite) {
+                        apiProvider.updateClientCertificate(certDTO.getCertificate(), certDTO.getAlias(),
+                                apiTypeWrapper, certDTO.getTierName(), keyType, tenantId, organization);
+                    }
+                } else if (ResponseCode.ALIAS_EXISTS_IN_API_REVISION.getResponseCode() == certResponseCode) {
+                    /* The alias is reserved by a revision of a different API. There is no current API entry to
+                       update, so the certificate cannot be imported for this API. Log it rather than failing the
+                       whole import, but never drop it silently. */
+                    log.warn("The client certificate with alias " + certDTO.getAlias() + " was not imported for "
+                            + apiIdentifier + " because the alias is held by a revision of another API or API "
+                            + "Product in this tenant. The API is imported without this client certificate.");
                 }
             }
         } catch (APIManagementException e) {

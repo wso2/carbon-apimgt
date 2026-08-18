@@ -362,7 +362,10 @@ public class CertificateMgtDaoTest {
     }
 
     /**
-     * To test the behaviour of the getDeletedClientCertificateAlias method.
+     * To test the behaviour of the getDeletedClientCertificateAlias method. Client certificates are hard deleted,
+     * so a delete leaves no REMOVED = 1 entry behind and this method never returns an alias. The final assertion
+     * guards that invariant - a non zero count would mean the soft delete has come back, which is what collides
+     * with the primary key (ALIAS, TENANT_ID, KEY_TYPE, REMOVED, REVISION_UUID) across APIs.
      *
      * @throws CertificateManagementException Certificate Management Exception.
      */
@@ -379,7 +382,8 @@ public class CertificateMgtDaoTest {
         deleteClientCertificate();
         aliasList = certificateMgtDAO.getDeletedClientCertificateAliasOfGivenKeyType(apiIdentifier,
                 APIConstants.API_KEY_TYPE_PRODUCTION, TENANT_ID);
-        Assert.assertEquals("The number of deleted certificates retrieved was wrong", 1, aliasList.size());
+        Assert.assertEquals("Client certificates are hard deleted, so no removed entry should remain", 0,
+                aliasList.size());
     }
 
     /**
