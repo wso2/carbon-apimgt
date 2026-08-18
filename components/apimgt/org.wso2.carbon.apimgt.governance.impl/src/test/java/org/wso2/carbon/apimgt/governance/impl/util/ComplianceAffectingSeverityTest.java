@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dto.APIMGovernanceConfigDTO;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -82,9 +83,36 @@ public class ComplianceAffectingSeverityTest {
     }
 
     @After
-    public void resetConfiguration() {
+    public void resetConfiguration() throws Exception {
 
         ServiceReferenceHolder.getInstance().setAPIMConfigurationService(null);
+        setCachedConfig(null);
+    }
+
+    /**
+     * Overwrite the cached raw configuration value so each test resolves the configuration from scratch
+     *
+     * @param value Raw configuration value to seed the cache with, may be null to clear it
+     * @throws Exception If the field cannot be accessed
+     */
+    private void setCachedConfig(String value) throws Exception {
+
+        Field cachedConfig = APIMGovernanceUtil.class.getDeclaredField("resolvedSeverityConfig");
+        cachedConfig.setAccessible(true);
+        cachedConfig.set(null, value);
+    }
+
+    /**
+     * Read the cached raw configuration value
+     *
+     * @return Cached configuration value, null when nothing has been cached
+     * @throws Exception If the field cannot be accessed
+     */
+    private String getCachedConfig() throws Exception {
+
+        Field cachedConfig = APIMGovernanceUtil.class.getDeclaredField("resolvedSeverityConfig");
+        cachedConfig.setAccessible(true);
+        return (String) cachedConfig.get(null);
     }
 
     // Configuration resolution
@@ -274,5 +302,30 @@ public class ComplianceAffectingSeverityTest {
                 Collections.singletonList(violation("malformed-severity-rule", null));
 
         Assert.assertEquals(1, APIMGovernanceUtil.filterComplianceAffectingViolations(ruleViolations).size());
+    }
+
+    @Test
+    public void testFallbackForAnEntirelyInvalidConfigurationIsCached() throws Exception {
+
+        configureSeverities("NOPE,ALSO_NOPE");
+        Assert.assertEquals(ALL_SEVERITIES,
+                EnumSet.copyOf(APIMGovernanceUtil.getComplianceAffectingSeverityList()));
+
+        Assert.assertEquals("The fallback must be cached, otherwise the invalid value is re-parsed and the warning "
+                        + "re-logged on every call",
+                "NOPE,ALSO_NOPE", getCachedConfig());
+    }
+
+    @Test
+    public void testCacheIsInvalidatedWhenTheConfigurationChanges() throws Exception {
+
+        configureSeverities("ERROR,WARN");
+        Assert.assertEquals(EnumSet.of(RuleSeverity.ERROR, RuleSeverity.WARN),
+                EnumSet.copyOf(APIMGovernanceUtil.getComplianceAffectingSeverityList()));
+
+        configureSeverities("ERROR");
+        Assert.assertEquals("A changed configuration must not keep serving the previously cached value",
+                EnumSet.of(RuleSeverity.ERROR),
+                EnumSet.copyOf(APIMGovernanceUtil.getComplianceAffectingSeverityList()));
     }
 }

@@ -18,6 +18,10 @@
 
 package org.wso2.carbon.apimgt.governance.impl.dao.constants;
 
+import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
+
+import java.util.Collections;
+
 /**
  * This class represents the SQL Constants
  */
@@ -358,10 +362,14 @@ public class SQLConstants {
      * tell a blocking violation apart from an informational one. Severity is resolved here instead, so that a change
      * to the configured severities applies to already stored results without a re-evaluation.
      */
+    private static final String COMPLIANCE_AFFECTING_SEVERITY_PLACEHOLDERS =
+            String.join(", ", Collections.nCopies(RuleSeverity.values().length, "?"));
+
     private static final String COMPLIANCE_AFFECTING_VIOLATION_EXISTS = "EXISTS (SELECT 1 " +
             "FROM GOV_RULE_VIOLATION GV " +
             "JOIN GOV_RULESET_RULE GRULE ON GV.RULESET_ID = GRULE.RULESET_ID AND GV.RULE_NAME = GRULE.RULE_NAME " +
-            "WHERE GV.RULESET_RUN_ID = GRR.RULESET_RUN_ID AND GRULE.SEVERITY IN (?, ?, ?))";
+            "WHERE GV.RULESET_RUN_ID = GRR.RULESET_RUN_ID AND GRULE.SEVERITY IN ("
+            + COMPLIANCE_AFFECTING_SEVERITY_PLACEHOLDERS + "))";
 
     public static final String GET_FAILED_RULESET_RUNS = "SELECT DISTINCT GRR.RULESET_ID " +
             "FROM GOV_RULESET_RUN GRR " +

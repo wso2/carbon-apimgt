@@ -743,6 +743,9 @@ public class APIMGovernanceUtil {
         if (severities.isEmpty()) {
             log.warn("No valid compliance affecting rule severity is configured. Treating every severity as "
                     + "compliance affecting");
+            // Cache the fallback too, otherwise the same invalid value is re-parsed and re-logged on every call
+            resolvedComplianceAffectingSeverities = ALL_SEVERITIES;
+            resolvedSeverityConfig = configuredSeverities;
             return ALL_SEVERITIES;
         }
 
