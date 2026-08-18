@@ -927,6 +927,9 @@ public enum ExceptionCodes implements ErrorHandler {
             "One or more MCP tools are duplicated."),
     INVALID_MCP_BACKEND_OPERATION(904014, "Invalid MCP backend operation", 400,
             "The backend operation '%s %s' does not match any resource in the referenced API '%s'."),
+    REFERENCE_API_NOT_FOUND(904015, "Reference API not found", 400,
+            "The API this MCP Server is built on (name '%s', version '%s', id '%s') does not exist in this "
+                    + "environment. Create that API here before importing the MCP Server."),
 
     // gateway notification related codes
     GATEWAY_NOTIFICATION_BAD_REQUEST(902052, "Invalid request for gateway notification", 400,
