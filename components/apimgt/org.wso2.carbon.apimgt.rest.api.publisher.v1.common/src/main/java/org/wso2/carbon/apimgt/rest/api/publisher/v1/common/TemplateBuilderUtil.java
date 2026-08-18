@@ -1176,6 +1176,18 @@ public class TemplateBuilderUtil {
         }
     }
 
+    /**
+     * Checks whether the API has an endpoint for the given deployment stage.
+     * An AI API holds its endpoints as named endpoints outside the endpoint configuration, so it is checked
+     * against the endpoint collection of that stage. Every other API is checked against its endpoint
+     * configuration as before.
+     *
+     * @param api          The API being deployed
+     * @param endpointType The deployment stage to check, either
+     *                     {@link APIConstants.APIEndpoint#PRODUCTION} or {@link APIConstants.APIEndpoint#SANDBOX}
+     * @param endpoints    The endpoints of that deployment stage, considered only for AI APIs
+     * @return True if an endpoint exists for the given deployment stage, otherwise false
+     */
     private static boolean hasEndpoint(API api, String endpointType, List<SimplifiedEndpoint> endpoints) {
 
         if (APIConstants.API_SUBTYPE_AI_API.equals(api.getSubtype())) {
