@@ -2987,16 +2987,15 @@ public class RegistryPersistenceImpl implements APIPersistence {
         } catch (RegistryException | APIPersistenceException e) {
             throw new DocumentationPersistenceException("Failed to delete documentation", e);
         } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
             try {
                 if (registry != null && !transactionCommitted) {
                     registry.rollbackTransaction();
                 }
             } catch (RegistryException ex) {
                 log.error("Error while rolling back the transaction for documentation delete of API: " + apiId, ex);
-            } finally {
-                if (isTenantFlowStarted) {
-                    PrivilegedCarbonContext.endTenantFlow();
-                }
             }
         }
     }
