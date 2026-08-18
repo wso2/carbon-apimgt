@@ -531,6 +531,11 @@ public final class APIConstants {
     public static final String HASHING = "Hashing";
     public static final String HASGING_ALGORITHM= "HashingAlgorithm";
     public static final String ENDPOINT_SECURITY_AWS_SECRET_KEY = "secretKey";
+    // AWS Bedrock endpoint credential source: "stored" (static keys) or "environment"
+    // (resolved from the runtime via the AWS SDK default provider chain - EC2 instance profile / EKS IRSA).
+    public static final String ENDPOINT_SECURITY_AWS_AUTH_TYPE = "authType";
+    public static final String ENDPOINT_SECURITY_AWS_AUTH_TYPE_STORED = "stored";
+    public static final String ENDPOINT_SECURITY_AWS_AUTH_TYPE_ENVIRONMENT = "environment";
     public static final String DEVPORTAL_MODE_HYBRID = "HYBRID";
     public static final String DEVPORTAL_MODE_MCP_ONLY = "MCP_ONLY";
     public static final String DEVPORTAL_MODE_API_ONLY = "API_ONLY";
@@ -601,6 +606,13 @@ public final class APIConstants {
         public static final String MARKETPLACE_ASSISTANT_DELETE_API_RESOURCE = "ApiDeleteResource";
         public static final String MARKETPLACE_ASSISTANT_API_COUNT_RESOURCE = "ApiCountResource";
         public static final String AI_CONFIGURATION = "AiConfiguration";
+
+        /**
+         * Fully qualified class name of the AIRequestPropertyEnricher implementation used to attach
+         * additional properties to outbound AI service request payloads. Configured with
+         * [apim.ai] propertyEnricherImpl in deployment.toml.
+         */
+        public static final String PROPERTY_ENRICHER_IMPL = "PropertyEnricherImpl";
         public static final String MCP = "MCP";
         public static final String MCP_SUPPORT_ENABLED = "Enabled";
         public static final String MCP_ENFORCE_AUTH_FOR_ALL = "EnforceAuthForAllMCPMethods";

@@ -34,6 +34,11 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.user.api.Tenant;
+import org.wso2.carbon.user.api.TenantManager;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.uri.template.URITemplateException;
@@ -456,6 +461,96 @@ public class RestApiCommonUtil {
     public static String getLoggedInUserTenantDomain() {
 
         return CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+    }
+
+    /**
+     * This method will validate the tenant domain provided in the header with the tenant domain of the logged in
+     * user. Cross-tenant access is only permitted for users holding the super-admin protected permission, verified
+     * within the CALLING user's own tenant realm - this is intentionally NOT APIConstants.Permissions.APIM_ADMIN,
+     * since that permission is granted to every tenant's own administrator and would let any tenant admin pivot into
+     * an arbitrary target tenant by name.
+     *
+     * @param tenantDomainHeader tenant domain provided in the header.
+     * @return tenant domain to be used for the request processing.
+     * @throws APIManagementException if error occurs while validating the tenant domain.
+     */
+    public static String validateTenantDomain(String tenantDomainHeader)
+            throws APIManagementException {
+        String SUPER_ADMIN_PERMISSION = "/permission/protected";
+
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        if (tenantDomainHeader == null) {
+            return tenantDomain;
+        } else if (!tenantDomain.equals(tenantDomainHeader)) {
+            if (APIUtil.hasPermission(RestApiCommonUtil.getLoggedInUsername(), SUPER_ADMIN_PERMISSION)) {
+                return tenantDomainHeader;
+            } else {
+                return tenantDomain;
+            }
+        } else {
+            return tenantDomain;
+        }
+    }
+
+    /**
+     * Starts a tenant flow and sets the tenant domain and tenant admin username in the carbon context, so that
+     * downstream registry/governance access resolves against the TARGET tenant instead of the caller's own tenant.
+     * Must be paired with PrivilegedCarbonContext.endTenantFlow() in a finally block by the caller.
+     *
+     * @param tenantDomain Tenant domain to be set in the carbon context
+     * @throws APIManagementException If an error occurs while retrieving tenant information or starting the tenant
+     * flow.
+     */
+    public static void startTenantFlowWithTenantAdmin(String tenantDomain)
+            throws APIManagementException {
+        RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+        TenantManager tenantManager = realmService.getTenantManager();
+        int tenantId;
+        String tenantAdmin;
+        if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            tenantId = MultitenantConstants.SUPER_TENANT_ID;
+            try {
+                tenantAdmin = realmService.getBootstrapRealm().getRealmConfiguration().getAdminUserName();
+            } catch (UserStoreException e) {
+                throw new APIManagementException("Error while retrieving super tenant admin username.", e);
+            }
+        } else {
+            try {
+                tenantId = tenantManager.getTenantId(tenantDomain);
+                if (tenantId != -1) {
+                    Tenant tenant = tenantManager.getTenant(tenantId);
+                    if (!tenant.isActive()) {
+                        throw new APIManagementException("Tenant " + tenantDomain + " is not active.");
+                    }
+                    tenantAdmin = tenant.getAdminName();
+                } else {
+                    throw new APIManagementException("Tenant not found for domain: " + tenantDomain);
+                }
+            } catch (UserStoreException e) {
+                throw new APIManagementException(
+                        "Error while retrieving tenant id for tenant domain: " + tenantDomain, e);
+            }
+        }
+        PrivilegedCarbonContext.startTenantFlow();
+        // On success, the flow is left open for the caller to end (per this method's contract, documented above).
+        // Only end it here if setup fails before returning, so a failure never leaks an unbalanced tenant flow.
+        boolean setupSuccessful = false;
+        try {
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
+            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                        .setUsername(tenantAdmin.concat("@").concat(tenantDomain));
+                APIUtil.loadTenantConfigBlockingMode(tenantDomain);
+            } else {
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(tenantAdmin);
+            }
+            setupSuccessful = true;
+        } finally {
+            if (!setupSuccessful) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
     }
 
     /**

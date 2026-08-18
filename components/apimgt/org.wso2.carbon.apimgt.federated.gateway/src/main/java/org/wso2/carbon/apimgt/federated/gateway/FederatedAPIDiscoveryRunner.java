@@ -136,7 +136,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                                 if (acquired) {
                                     try {
                                         List<DiscoveredAPI> discoveredAPIs = federatedAPIDiscovery.discoverAPI();
-                                        if (discoveredAPIs != null && !discoveredAPIs.isEmpty()) {
+                                        if (discoveredAPIs != null) {
                                             if (log.isDebugEnabled()) {
                                                 log.debug("Discovered " + discoveredAPIs.size() +
                                                         " APIs for environment: " + environment.getName() +
