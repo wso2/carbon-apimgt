@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.gateway.utils.redis;
 
-import org.wso2.carbon.apimgt.impl.APIConstants;
 import redis.clients.jedis.commands.ProtocolCommand;
 import redis.clients.jedis.util.SafeEncoder;
 
@@ -28,9 +27,9 @@ import redis.clients.jedis.util.SafeEncoder;
  */
 public enum RediSearchCommand implements ProtocolCommand {
 
-    FT_CREATE(APIConstants.AI.VECTOR_DB_PROVIDER_ELASTICACHE_FT_CREATE),
-    FT_SEARCH(APIConstants.AI.VECTOR_DB_PROVIDER_ELASTICACHE_FT_SEARCH),
-    FT_INFO(APIConstants.AI.VECTOR_DB_PROVIDER_ELASTICACHE_FT_INFO);
+    FT_CREATE("FT.CREATE"),
+    FT_SEARCH("FT.SEARCH"),
+    FT_INFO("FT.INFO");
 
     private final byte[] raw;
 

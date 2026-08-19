@@ -290,7 +290,7 @@ public class APIHandlerServiceComponent {
                     case APIConstants.AI.VECTOR_DB_PROVIDER_ZILLIZ_TYPE:
                         vectorDBProviderService = new ZillizVectorDBProviderServiceImpl();
                         break;
-                    case APIConstants.AI.VECTOR_DB_PROVIDER_ELASTICACHE_TYPE:
+                    case ElastiCacheVectorDBProviderServiceImpl.VECTOR_DB_PROVIDER_ELASTICACHE_TYPE:
                         vectorDBProviderService = new ElastiCacheVectorDBProviderServiceImpl();
                         break;
                     default:

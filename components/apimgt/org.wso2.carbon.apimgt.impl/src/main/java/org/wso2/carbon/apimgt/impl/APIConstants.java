@@ -726,44 +726,6 @@ public final class APIConstants {
         public static final String VECTOR_DB_PROVIDER_ZILLIZ_INSERT_ENDPOINT = "/v2/vectordb/entities/insert";
         public static final String VECTOR_DB_PROVIDER_ZILLIZ_SEARCH_ENDPOINT = "/v2/vectordb/entities/search";
 
-        public static final String VECTOR_DB_PROVIDER_ELASTICACHE_TYPE = "elasticache";
-        public static final String VECTOR_DB_PROVIDER_ELASTICACHE_HOST = "host";
-        public static final String VECTOR_DB_PROVIDER_ELASTICACHE_PORT = "port";
-        public static final String VECTOR_DB_PROVIDER_ELASTICACHE_USERNAME = "username";
-        public static final String VECTOR_DB_PROVIDER_ELASTICACHE_PASSWORD = "password";
-        public static final String VECTOR_DB_PROVIDER_ELASTICACHE_SSL_ENABLED = "ssl_enabled";
-        public static final String VECTOR_DB_PROVIDER_ELASTICACHE_CLUSTER_MODE_ENABLED = "cluster_mode_enabled";
-        public static final String VECTOR_DB_PROVIDER_ELASTICACHE_INDEX_SUFFIX = "_idx";
-        public static final String VECTOR_DB_PROVIDER_ELASTICACHE_KEY_PREFIX_SUFFIX = ":";
-        public static final int VECTOR_DB_PROVIDER_ELASTICACHE_HNSW_M = 64;
-        public static final int VECTOR_DB_PROVIDER_ELASTICACHE_HNSW_EF_CONSTRUCTION = 100;
-
-        // RediSearch (FT.*) command names
-        public static final String VECTOR_DB_PROVIDER_ELASTICACHE_FT_CREATE = "FT.CREATE";
-        public static final String VECTOR_DB_PROVIDER_ELASTICACHE_FT_SEARCH = "FT.SEARCH";
-        public static final String VECTOR_DB_PROVIDER_ELASTICACHE_FT_INFO = "FT.INFO";
-
-        // RediSearch schema/query keywords
-        public static final String VECTOR_DB_PROVIDER_ELASTICACHE_ON = "ON";
-        public static final String VECTOR_DB_PROVIDER_ELASTICACHE_HASH = "HASH";
-        public static final String VECTOR_DB_PROVIDER_ELASTICACHE_PREFIX = "PREFIX";
-        public static final String VECTOR_DB_PROVIDER_ELASTICACHE_SCHEMA = "SCHEMA";
-        public static final String VECTOR_DB_PROVIDER_ELASTICACHE_TAG = "TAG";
-        public static final String VECTOR_DB_PROVIDER_ELASTICACHE_NUMERIC = "NUMERIC";
-        public static final String VECTOR_DB_PROVIDER_ELASTICACHE_VECTOR = "VECTOR";
-        public static final String VECTOR_DB_PROVIDER_ELASTICACHE_HNSW = "HNSW";
-        public static final String VECTOR_DB_PROVIDER_ELASTICACHE_TYPE_KEYWORD = "TYPE";
-        public static final String VECTOR_DB_PROVIDER_ELASTICACHE_FLOAT32 = "FLOAT32";
-        public static final String VECTOR_DB_PROVIDER_ELASTICACHE_DIM = "DIM";
-        public static final String VECTOR_DB_PROVIDER_ELASTICACHE_DISTANCE_METRIC = "DISTANCE_METRIC";
-        public static final String VECTOR_DB_PROVIDER_ELASTICACHE_L2 = "L2";
-        public static final String VECTOR_DB_PROVIDER_ELASTICACHE_M = "M";
-        public static final String VECTOR_DB_PROVIDER_ELASTICACHE_EF_CONSTRUCTION = "EF_CONSTRUCTION";
-        public static final String VECTOR_DB_PROVIDER_ELASTICACHE_PARAMS = "PARAMS";
-        public static final String VECTOR_DB_PROVIDER_ELASTICACHE_DIALECT = "DIALECT";
-        public static final String VECTOR_DB_PROVIDER_ELASTICACHE_SCORE_ALIAS = "score";
-        public static final String VECTOR_DB_PROVIDER_ELASTICACHE_VECTOR_PARAM_NAME = "vec";
-
         public static final String GUARDRAIL_PROVIDERS = "GuardrailProviders";
         public static final String GUARDRAIL_PROVIDER = "GuardrailProvider";
         public static final String GUARDRAIL_PROVIDER_TYPE = "type";

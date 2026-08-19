@@ -62,6 +62,39 @@ public class ElastiCacheVectorDBProviderServiceImpl implements VectorDBProviderS
     private static final int DEFAULT_CLUSTER_MAX_ATTEMPTS = 5;
     private static final String TAG_QUERY_SPECIAL_CHARS = ",.<>{}\"':;!@#$%^&*()-+=~[]";
 
+    public static final String VECTOR_DB_PROVIDER_ELASTICACHE_TYPE = "elasticache";
+    private static final String VECTOR_DB_PROVIDER_ELASTICACHE_HOST = "host";
+    private static final String VECTOR_DB_PROVIDER_ELASTICACHE_PORT = "port";
+    private static final String VECTOR_DB_PROVIDER_ELASTICACHE_USERNAME = "username";
+    private static final String VECTOR_DB_PROVIDER_ELASTICACHE_PASSWORD = "password";
+    private static final String VECTOR_DB_PROVIDER_ELASTICACHE_SSL_ENABLED = "ssl_enabled";
+    private static final String VECTOR_DB_PROVIDER_ELASTICACHE_CLUSTER_MODE_ENABLED = "cluster_mode_enabled";
+    private static final String VECTOR_DB_PROVIDER_ELASTICACHE_INDEX_SUFFIX = "_idx";
+    private static final String VECTOR_DB_PROVIDER_ELASTICACHE_KEY_PREFIX_SUFFIX = ":";
+    private static final int VECTOR_DB_PROVIDER_ELASTICACHE_HNSW_M = 64;
+    private static final int VECTOR_DB_PROVIDER_ELASTICACHE_HNSW_EF_CONSTRUCTION = 100;
+
+    // RediSearch schema/query keywords
+    private static final String VECTOR_DB_PROVIDER_ELASTICACHE_ON = "ON";
+    private static final String VECTOR_DB_PROVIDER_ELASTICACHE_HASH = "HASH";
+    private static final String VECTOR_DB_PROVIDER_ELASTICACHE_PREFIX = "PREFIX";
+    private static final String VECTOR_DB_PROVIDER_ELASTICACHE_SCHEMA = "SCHEMA";
+    private static final String VECTOR_DB_PROVIDER_ELASTICACHE_TAG = "TAG";
+    private static final String VECTOR_DB_PROVIDER_ELASTICACHE_NUMERIC = "NUMERIC";
+    private static final String VECTOR_DB_PROVIDER_ELASTICACHE_VECTOR = "VECTOR";
+    private static final String VECTOR_DB_PROVIDER_ELASTICACHE_HNSW = "HNSW";
+    private static final String VECTOR_DB_PROVIDER_ELASTICACHE_TYPE_KEYWORD = "TYPE";
+    private static final String VECTOR_DB_PROVIDER_ELASTICACHE_FLOAT32 = "FLOAT32";
+    private static final String VECTOR_DB_PROVIDER_ELASTICACHE_DIM = "DIM";
+    private static final String VECTOR_DB_PROVIDER_ELASTICACHE_DISTANCE_METRIC = "DISTANCE_METRIC";
+    private static final String VECTOR_DB_PROVIDER_ELASTICACHE_L2 = "L2";
+    private static final String VECTOR_DB_PROVIDER_ELASTICACHE_M = "M";
+    private static final String VECTOR_DB_PROVIDER_ELASTICACHE_EF_CONSTRUCTION = "EF_CONSTRUCTION";
+    private static final String VECTOR_DB_PROVIDER_ELASTICACHE_PARAMS = "PARAMS";
+    private static final String VECTOR_DB_PROVIDER_ELASTICACHE_DIALECT = "DIALECT";
+    private static final String VECTOR_DB_PROVIDER_ELASTICACHE_SCORE_ALIAS = "score";
+    private static final String VECTOR_DB_PROVIDER_ELASTICACHE_VECTOR_PARAM_NAME = "vec";
+
     // Jedis pool tuning properties under [apim.ai.vector_db_provider.properties]. Defaults match
     // JedisPoolConfig's own out-of-the-box values so behavior is unchanged unless explicitly set.
     private static final String JEDIS_POOL_MAX_TOTAL = "jedis.pool.max_total";
@@ -101,14 +134,14 @@ public class ElastiCacheVectorDBProviderServiceImpl implements VectorDBProviderS
     public void init(VectorDBProviderConfigurationDTO providerConfig) throws APIManagementException {
         log.debug("Initializing AWS ElastiCache Vector DB provider");
         Map<String, String> properties = providerConfig.getProperties();
-        String host = properties.get(APIConstants.AI.VECTOR_DB_PROVIDER_ELASTICACHE_HOST);
-        String portStr = properties.get(APIConstants.AI.VECTOR_DB_PROVIDER_ELASTICACHE_PORT);
-        String username = properties.get(APIConstants.AI.VECTOR_DB_PROVIDER_ELASTICACHE_USERNAME);
-        String password = properties.get(APIConstants.AI.VECTOR_DB_PROVIDER_ELASTICACHE_PASSWORD);
+        String host = properties.get(VECTOR_DB_PROVIDER_ELASTICACHE_HOST);
+        String portStr = properties.get(VECTOR_DB_PROVIDER_ELASTICACHE_PORT);
+        String username = properties.get(VECTOR_DB_PROVIDER_ELASTICACHE_USERNAME);
+        String password = properties.get(VECTOR_DB_PROVIDER_ELASTICACHE_PASSWORD);
         boolean sslEnabled = Boolean.parseBoolean(
-                properties.get(APIConstants.AI.VECTOR_DB_PROVIDER_ELASTICACHE_SSL_ENABLED));
+                properties.get(VECTOR_DB_PROVIDER_ELASTICACHE_SSL_ENABLED));
         boolean clusterModeEnabled = Boolean.parseBoolean(
-                properties.get(APIConstants.AI.VECTOR_DB_PROVIDER_ELASTICACHE_CLUSTER_MODE_ENABLED));
+                properties.get(VECTOR_DB_PROVIDER_ELASTICACHE_CLUSTER_MODE_ENABLED));
 
         List<String> missingParams = new ArrayList<>();
         if (host == null) {
@@ -151,7 +184,7 @@ public class ElastiCacheVectorDBProviderServiceImpl implements VectorDBProviderS
 
     @Override
     public String getType() {
-        return APIConstants.AI.VECTOR_DB_PROVIDER_ELASTICACHE_TYPE;
+        return VECTOR_DB_PROVIDER_ELASTICACHE_TYPE;
     }
 
     @Override
@@ -186,9 +219,9 @@ public class ElastiCacheVectorDBProviderServiceImpl implements VectorDBProviderS
         // into the index/key-prefix name - switching providers safely gets its own index instead of
         // colliding with one sized for a different model.
         indexName = APIConstants.AI.VECTOR_INDEX_PREFIX + dimension +
-                APIConstants.AI.VECTOR_DB_PROVIDER_ELASTICACHE_INDEX_SUFFIX;
+                VECTOR_DB_PROVIDER_ELASTICACHE_INDEX_SUFFIX;
         keyPrefix = APIConstants.AI.VECTOR_INDEX_PREFIX + dimension +
-                APIConstants.AI.VECTOR_DB_PROVIDER_ELASTICACHE_KEY_PREFIX_SUFFIX;
+                VECTOR_DB_PROVIDER_ELASTICACHE_KEY_PREFIX_SUFFIX;
 
         if (indexExists(indexName)) {
             log.info("Index already exists: " + indexName);
@@ -196,29 +229,29 @@ public class ElastiCacheVectorDBProviderServiceImpl implements VectorDBProviderS
         }
 
         List<String> vectorAttributes = Arrays.asList(
-                APIConstants.AI.VECTOR_DB_PROVIDER_ELASTICACHE_TYPE_KEYWORD,
-                APIConstants.AI.VECTOR_DB_PROVIDER_ELASTICACHE_FLOAT32,
-                APIConstants.AI.VECTOR_DB_PROVIDER_ELASTICACHE_DIM, String.valueOf(dimension),
-                APIConstants.AI.VECTOR_DB_PROVIDER_ELASTICACHE_DISTANCE_METRIC,
-                APIConstants.AI.VECTOR_DB_PROVIDER_ELASTICACHE_L2,
-                APIConstants.AI.VECTOR_DB_PROVIDER_ELASTICACHE_M,
-                String.valueOf(APIConstants.AI.VECTOR_DB_PROVIDER_ELASTICACHE_HNSW_M),
-                APIConstants.AI.VECTOR_DB_PROVIDER_ELASTICACHE_EF_CONSTRUCTION,
-                String.valueOf(APIConstants.AI.VECTOR_DB_PROVIDER_ELASTICACHE_HNSW_EF_CONSTRUCTION));
+                VECTOR_DB_PROVIDER_ELASTICACHE_TYPE_KEYWORD,
+                VECTOR_DB_PROVIDER_ELASTICACHE_FLOAT32,
+                VECTOR_DB_PROVIDER_ELASTICACHE_DIM, String.valueOf(dimension),
+                VECTOR_DB_PROVIDER_ELASTICACHE_DISTANCE_METRIC,
+                VECTOR_DB_PROVIDER_ELASTICACHE_L2,
+                VECTOR_DB_PROVIDER_ELASTICACHE_M,
+                String.valueOf(VECTOR_DB_PROVIDER_ELASTICACHE_HNSW_M),
+                VECTOR_DB_PROVIDER_ELASTICACHE_EF_CONSTRUCTION,
+                String.valueOf(VECTOR_DB_PROVIDER_ELASTICACHE_HNSW_EF_CONSTRUCTION));
 
         List<String> args = new ArrayList<>(Arrays.asList(
                 indexName,
-                APIConstants.AI.VECTOR_DB_PROVIDER_ELASTICACHE_ON,
-                APIConstants.AI.VECTOR_DB_PROVIDER_ELASTICACHE_HASH,
-                APIConstants.AI.VECTOR_DB_PROVIDER_ELASTICACHE_PREFIX, "1", keyPrefix,
-                APIConstants.AI.VECTOR_DB_PROVIDER_ELASTICACHE_SCHEMA,
+                VECTOR_DB_PROVIDER_ELASTICACHE_ON,
+                VECTOR_DB_PROVIDER_ELASTICACHE_HASH,
+                VECTOR_DB_PROVIDER_ELASTICACHE_PREFIX, "1", keyPrefix,
+                VECTOR_DB_PROVIDER_ELASTICACHE_SCHEMA,
                 APIConstants.AI.VECTOR_DB_PROVIDER_API_ID,
-                APIConstants.AI.VECTOR_DB_PROVIDER_ELASTICACHE_TAG,
+                VECTOR_DB_PROVIDER_ELASTICACHE_TAG,
                 APIConstants.AI.VECTOR_DB_PROVIDER_CREATED_AT,
-                APIConstants.AI.VECTOR_DB_PROVIDER_ELASTICACHE_NUMERIC,
+                VECTOR_DB_PROVIDER_ELASTICACHE_NUMERIC,
                 APIConstants.AI.VECTOR_DB_PROVIDER_EMBEDDING,
-                APIConstants.AI.VECTOR_DB_PROVIDER_ELASTICACHE_VECTOR,
-                APIConstants.AI.VECTOR_DB_PROVIDER_ELASTICACHE_HNSW, String.valueOf(vectorAttributes.size())));
+                VECTOR_DB_PROVIDER_ELASTICACHE_VECTOR,
+                VECTOR_DB_PROVIDER_ELASTICACHE_HNSW, String.valueOf(vectorAttributes.size())));
         args.addAll(vectorAttributes);
 
         executor.executeSearchCommand(RediSearchCommand.FT_CREATE, args.toArray(new String[0]));
@@ -306,19 +339,19 @@ public class ElastiCacheVectorDBProviderServiceImpl implements VectorDBProviderS
         // threshold (mirroring Zilliz's "radius" semantics) is applied client-side on the score.
         String queryExpr = "(@" + APIConstants.AI.VECTOR_DB_PROVIDER_API_ID + ":{" + escapeTagValue(apiId) +
                 "})=>[KNN 1 @" + APIConstants.AI.VECTOR_DB_PROVIDER_EMBEDDING + " $" +
-                APIConstants.AI.VECTOR_DB_PROVIDER_ELASTICACHE_VECTOR_PARAM_NAME + " AS " +
-                APIConstants.AI.VECTOR_DB_PROVIDER_ELASTICACHE_SCORE_ALIAS + "]";
+                VECTOR_DB_PROVIDER_ELASTICACHE_VECTOR_PARAM_NAME + " AS " +
+                VECTOR_DB_PROVIDER_ELASTICACHE_SCORE_ALIAS + "]";
 
         // No SORTBY: it only accepts indexed schema fields, not the ad-hoc KNN "AS score" alias,
         // and KNN results are already returned in ascending vector-distance order by default.
         byte[][] args = {
                 SafeEncoder.encode(indexName),
                 SafeEncoder.encode(queryExpr),
-                SafeEncoder.encode(APIConstants.AI.VECTOR_DB_PROVIDER_ELASTICACHE_PARAMS),
+                SafeEncoder.encode(VECTOR_DB_PROVIDER_ELASTICACHE_PARAMS),
                 SafeEncoder.encode("2"),
-                SafeEncoder.encode(APIConstants.AI.VECTOR_DB_PROVIDER_ELASTICACHE_VECTOR_PARAM_NAME),
+                SafeEncoder.encode(VECTOR_DB_PROVIDER_ELASTICACHE_VECTOR_PARAM_NAME),
                 toVectorBytes(embeddings),
-                SafeEncoder.encode(APIConstants.AI.VECTOR_DB_PROVIDER_ELASTICACHE_DIALECT),
+                SafeEncoder.encode(VECTOR_DB_PROVIDER_ELASTICACHE_DIALECT),
                 SafeEncoder.encode("2")
         };
 
@@ -354,7 +387,7 @@ public class ElastiCacheVectorDBProviderServiceImpl implements VectorDBProviderS
             String fieldName = SafeEncoder.encode((byte[]) fields.get(i));
             if (APIConstants.AI.VECTOR_DB_PROVIDER_RESPONSE.equals(fieldName)) {
                 response = SafeEncoder.encode((byte[]) fields.get(i + 1));
-            } else if (APIConstants.AI.VECTOR_DB_PROVIDER_ELASTICACHE_SCORE_ALIAS.equals(fieldName)) {
+            } else if (VECTOR_DB_PROVIDER_ELASTICACHE_SCORE_ALIAS.equals(fieldName)) {
                 score = Double.parseDouble(SafeEncoder.encode((byte[]) fields.get(i + 1)));
             }
         }
