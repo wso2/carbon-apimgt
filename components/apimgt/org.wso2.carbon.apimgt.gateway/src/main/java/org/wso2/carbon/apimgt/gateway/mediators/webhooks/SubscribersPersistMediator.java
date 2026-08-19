@@ -128,6 +128,7 @@ public class SubscribersPersistMediator extends AbstractMediator {
             String response = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
             if (response.contains("Throttle")) {
                 WebhooksUtils.handleThrottleOutMessage(messageContext);
+                return;
             }
             messageContext.setProperty(SynapseConstants.ERROR_CODE, statusCode);
             messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, response);

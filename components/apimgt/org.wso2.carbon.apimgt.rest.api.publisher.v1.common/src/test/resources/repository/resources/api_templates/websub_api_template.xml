@@ -102,7 +102,7 @@
                                                             <duration>60000</duration>
                                                         </timeout>
                                                         <markForSuspension>
-                                                            <errorCodes>101504, 101505, 101500</errorCodes>
+                                                            <errorCodes>-1</errorCodes>
                                                             <retriesBeforeSuspension>3</retriesBeforeSuspension>
                                                             <retryDelay>1</retryDelay>
                                                         </markForSuspension>

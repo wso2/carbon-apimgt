@@ -2,7 +2,6 @@
 <sequence xmlns="http://ws.apache.org/ns/synapse" name="externalWebSubHubCaller">
     <in>
         <property name="uri.var.external.websub.hub.endpoint" expression="get-property('external.websub.hub.endpoint')"/>
-        <property name="GIVEN_HUB_SECRET" expression="//xformValues//hub.secret"/>
 
         <!-- Build effective prefix with separator; skip computation entirely if context prefixing is disabled. -->
         <filter source="$ctx:disable.topic.context.prefix" regex="true">
@@ -11,7 +10,8 @@
             </then>
             <else>
                 <!-- Prefix external hub topics with API context (sanitized: '/' -> '_') to avoid collisions across APIs.
-                     Note: Synapse uses Jaxen (XPath 1.0), so we use translate() instead of replace(). -->
+                     Note: Synapse uses Jaxen (XPath 1.0), so we use translate() instead of replace().
+                     Caution: '_' is the separator; API contexts and topics should avoid embedded '_' to prevent ambiguity. -->
                 <property name="WEBSUB_TOPIC_PREFIX" expression="fn:translate(fn:substring-after(get-property('REST_API_CONTEXT'), '/'), '/', '_')" scope="default" type="STRING"/>
                 <property name="TOPIC_PREFIX" expression="fn:concat(get-property('WEBSUB_TOPIC_PREFIX'), '_')" scope="default" type="STRING"/>
             </else>
@@ -74,8 +74,9 @@
                 <!-- Unless the status code is as a string, comparison in the below filter doesn't work -->
                 <property name="external.websub.hub.response.status.code" expression="get-property('external.websub.hub.response.status.code')"/>
 
-                <!-- HTTP 409 means topic already exists. We can safely ignore that. -->
-                <filter xpath="$ctx:external.websub.hub.response.status.code != 409 and ($ctx:external.websub.hub.response.status.code &gt; 299 or 200 &gt; $ctx:external.websub.hub.response.status.code)">
+                <!-- HTTP 409 means topic already exists. We can safely ignore that.
+                     Treat null/empty status (connection failure) as an error. -->
+                <filter xpath="not(string($ctx:external.websub.hub.response.status.code)) or ($ctx:external.websub.hub.response.status.code != 409 and ($ctx:external.websub.hub.response.status.code &gt; 299 or 200 &gt; $ctx:external.websub.hub.response.status.code))">
                     <then>
                         <property name="is.external.websub.hub.error" value="true" scope="default" type="BOOLEAN" />
                     </then>
@@ -131,7 +132,6 @@
                                     <hub.callback>$2</hub.callback>
                                     <hub.mode>$3</hub.mode>
                                     <hub.secret>$4</hub.secret>
-                                    <hub.lease_seconds>$5</hub.lease_seconds>
                                 </root>
                             </soapenv:Body>
                         </soapenv:Envelope>
@@ -141,7 +141,6 @@
                         <arg expression="get-property('SUBSCRIBER_CALLBACK')"/>
                         <arg expression="get-property('SUBSCRIBER_MODE')" />
                         <arg expression="get-property('GIVEN_HUB_SECRET')"/>
-                        <arg expression="get-property('SUBSCRIBER_LEASE_SECONDS')"/>
                     </args>
                 </payloadFactory>
                 <property name="messageType" value="application/x-www-form-urlencoded" scope="axis2"/>
@@ -152,18 +151,12 @@
                 <filter source="fn:starts-with($ctx:TOPIC, '/')" regex="true">
                     <then>
                         <property name="TOPIC_NORMALIZED" expression="fn:substring-after($ctx:TOPIC, '/')" scope="default" type="STRING"/>
-                    </then>
-                    <else>
-                        <property name="TOPIC_NORMALIZED" expression="$ctx:TOPIC" scope="default" type="STRING"/>
-                    </else>
-                </filter>
-                <filter source="fn:starts-with($ctx:TOPIC, '/')" regex="true">
-                    <then>
                         <property name="EXTERNAL_HUB_TOPIC"
                                   expression="fn:concat('/', get-property('TOPIC_PREFIX'), get-property('TOPIC_NORMALIZED'))"
                                   scope="default" type="STRING"/>
                     </then>
                     <else>
+                        <property name="TOPIC_NORMALIZED" expression="$ctx:TOPIC" scope="default" type="STRING"/>
                         <property name="EXTERNAL_HUB_TOPIC"
                                   expression="fn:concat(get-property('TOPIC_PREFIX'), get-property('TOPIC_NORMALIZED'))"
                                   scope="default" type="STRING"/>
@@ -183,7 +176,11 @@
                 </payloadFactory>
                 <property name="messageType" value="application/json" scope="axis2"/>
             </case>
-            <default/>
+            <default>
+                <property name="is.external.websub.hub.error" value="true" scope="default" type="BOOLEAN"/>
+                <property name="external.websub.hub.response.status.code" value="400" scope="default"/>
+                <property name="external.websub.hub.response.status.body" value='{"error":"Unsupported hub.mode"}' scope="default"/>
+            </default>
         </switch>
 
         <filter xpath="not($ctx:is.external.websub.hub.error)">
@@ -196,9 +193,12 @@
              <!-- Capture HTTP Status and response body -->
             <property name="external.websub.hub.response.status.code" expression="$axis2:HTTP_SC" scope="default"/>
             <property name="external.websub.hub.response.status.body" expression="json-eval($)" scope="default"/>
+            <!-- Unless the status code is as a string, comparison in the below filter doesn't work -->
             <property name="external.websub.hub.response.status.code" expression="get-property('external.websub.hub.response.status.code')"/>
 
-            <filter xpath="$ctx:external.websub.hub.response.status.code &gt; 299 or 200 &gt; $ctx:external.websub.hub.response.status.code ">
+            <!-- Treat null/empty status (connection failure) as an error.
+                 HTTP 409 (topic already exists / duplicate subscription) is acceptable. -->
+            <filter xpath="not(string($ctx:external.websub.hub.response.status.code)) or ($ctx:external.websub.hub.response.status.code != 409 and ($ctx:external.websub.hub.response.status.code &gt; 299 or 200 &gt; $ctx:external.websub.hub.response.status.code))">
                 <then>
                     <property name="is.external.websub.hub.error" value="true" scope="default" type="BOOLEAN" />
                 </then>

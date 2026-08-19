@@ -80,8 +80,6 @@ public class WebhookApiHandler extends APIAuthenticationHandler {
     private static final Log log = LogFactory.getLog(WebhookApiHandler.class);
     private static final String EMPTY_STRING = "";
     private static final String TEXT_CONTENT_TYPE = "text/plain";
-    private static final String REST_API_CONTEXT_PROPERTY_KEY = "REST_API_CONTEXT";
-    private static final String SANITIZED_REST_API_CONTEXT_PROPERTY_KEY = "SANITIZED_API_CONTEXT";
     private static final String WEBSUB_MATCHED_TOPIC = "WEBSUB_MATCHED_TOPIC";
     private static final String WEBSUB_REQUESTED_TOPIC = "WEBSUB_REQUESTED_TOPIC";
     private static final String WEBSUB_URL_PATTERNS = "WEBSUB_URL_PATTERNS";
@@ -94,11 +92,6 @@ public class WebhookApiHandler extends APIAuthenticationHandler {
     public boolean handleRequest(MessageContext synCtx) {
 
         String requestSubPath = getRequestSubPath(synCtx);
-        String apiContext = (String) synCtx.getProperty(REST_API_CONTEXT_PROPERTY_KEY);
-        if (apiContext != null) {
-            String sanitizedApiContext = apiContext.replace("/", "__");
-            synCtx.setProperty(SANITIZED_REST_API_CONTEXT_PROPERTY_KEY, sanitizedApiContext);
-        }
 
         // all other requests are assumed to be for subscription as there will be only 2 resources for web hook api
         if (!requestSubPath.startsWith(eventReceiverResourcePath)) {
@@ -120,7 +113,7 @@ public class WebhookApiHandler extends APIAuthenticationHandler {
             synCtx.setProperty(APIConstants.Webhooks.SUBSCRIPTION_PARAMETER_PROPERTY, hubParameters);
             synCtx.setProperty(APIConstants.API_TYPE, APIConstants.API_TYPE_WEBSUB);
 
-            String providedTopic = hubParameters.get(APIConstants.WebHookProperties.DEFAULT_TOPIC_QUERY_PARAM_NAME);
+            String providedTopic = hubParameters.get(topicQueryParamName);
             String electedResource = resolveElectedResource(synCtx, providedTopic);
             if (electedResource == null) {
                 return false;
@@ -142,7 +135,7 @@ public class WebhookApiHandler extends APIAuthenticationHandler {
             }
 
             String matchedTopic = invokeExtensionListenerForTopicMatching(synCtx, providedTopic);
-            if (matchedTopic == null && isExtensionListenerAborted(synCtx)) {
+            if (isExtensionListenerAborted(synCtx)) {
                 return false;
             }
 
@@ -334,7 +327,7 @@ public class WebhookApiHandler extends APIAuthenticationHandler {
         }
 
         String matchedTopic = invokeExtensionListenerForTopicMatching(synCtx, providedTopic, urlPatterns);
-        if (matchedTopic == null && isExtensionListenerAborted(synCtx)) {
+        if (isExtensionListenerAborted(synCtx)) {
             return null;
         }
         if (matchedTopic != null) {
@@ -425,10 +418,14 @@ public class WebhookApiHandler extends APIAuthenticationHandler {
 
         // Check for URI template match (wildcard support)
         for (String urlPattern : urlPatterns) {
-            URITemplateHelper uriTemplateHelper = new URITemplateHelper(urlPattern);
-            Map<String, String> variables = new HashMap<>();
-            if (uriTemplateHelper.getUriTemplate().matches(providedTopic, variables)) {
-                return urlPattern;
+            try {
+                URITemplateHelper uriTemplateHelper = new URITemplateHelper(urlPattern);
+                Map<String, String> variables = new HashMap<>();
+                if (uriTemplateHelper.getUriTemplate().matches(providedTopic, variables)) {
+                    return urlPattern;
+                }
+            } catch (Exception e) {
+                log.warn("Skipping malformed URL pattern: " + urlPattern, e);
             }
         }
 

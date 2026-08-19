@@ -605,7 +605,8 @@ public class APIManagerConfiguration {
                 OMElement disableTopicContextPrefix = element.getFirstChildWithName(
                         new QName("disable_topic_context_prefix"));
                 OMElement hubProperties = element.getFirstChildWithName(new QName("WebSubHubProperties"));
-                webSubHubConfig.setUrl(url != null ? url.getText() : null);
+                String hubUrl = url != null ? url.getText().trim() : null;
+                webSubHubConfig.setUrl(hubUrl);
                 webSubHubConfig.setType(type != null ? type.getText() : null);
                 if (disableTopicContextPrefix != null) {
                     webSubHubConfig.setTopicContextPrefixDisabled(
@@ -615,10 +616,11 @@ public class APIManagerConfiguration {
                     Iterator<OMElement> properties = hubProperties.getChildElements();
                     while (properties.hasNext()) {
                         OMElement propertyNode = properties.next();
-                        webSubHubConfig.addHubProperty(propertyNode.getLocalName(), propertyNode.getText());
+                        webSubHubConfig.addHubProperty(propertyNode.getLocalName(),
+                                MiscellaneousUtil.resolve(propertyNode, secretResolver));
                     }
                 }
-                webSubHubConfig.setEnabled(true);
+                webSubHubConfig.setEnabled(hubUrl != null && !hubUrl.isEmpty());
             } else if (APIConstants.DISTRIBUTED_THROTTLE_CONFIG.equals(localName)) {
                 OMElement enabledElement = element.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_ENABLED));
                 OMElement typeElement = element.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_TYPE));
