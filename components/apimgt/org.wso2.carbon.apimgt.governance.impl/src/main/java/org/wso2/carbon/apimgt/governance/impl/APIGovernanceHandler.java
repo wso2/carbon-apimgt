@@ -531,8 +531,9 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
                 validateEntryCount(++entryCount);
-                boolean isMetadataEntry = entry.getName().contains("/" + APIMGovernanceConstants.API_FILE_NAME) ||
-                        entry.getName().contains("/" + APIMGovernanceConstants.MCP_FILE_NAME);
+                String pathWithinProject = getPathWithinProject(entry.getName());
+                boolean isMetadataEntry = APIMGovernanceConstants.API_FILE_NAME.equals(pathWithinProject)
+                        || APIMGovernanceConstants.MCP_FILE_NAME.equals(pathWithinProject);
                 ByteArrayOutputStream outputStream = isMetadataEntry ? new ByteArrayOutputStream() : null;
                 remainingBytes -= readZipEntry(zipInputStream, outputStream, remainingBytes);
                 if (isMetadataEntry) {
@@ -548,14 +549,15 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
     /**
      * Reads the current entry of the given ZIP stream, bounding the amount of data inflated from the archive.
      * <p>
-     * Every entry is passed through this method, including the ones that are not of interest, because
-     * {@link ZipInputStream#getNextEntry()} inflates and discards the remainder of the current entry without
-     * accounting for its size. Draining unwanted entries here keeps the total inflated size of a single archive
-     * within {@link #UNZIP_SIZE_LIMIT} regardless of which entry holds the oversized data.
+     * Every entry the caller reads is passed through this method, including the ones that are not of interest,
+     * because {@link ZipInputStream#getNextEntry()} inflates and discards the remainder of the current entry without
+     * accounting for its size. Draining unwanted entries here keeps a single extraction from inflating more than
+     * {@link #UNZIP_SIZE_LIMIT} bytes, no matter which of the entries it reads holds the oversized data. Entries
+     * beyond the one the caller is looking for are never inflated, so they need no accounting.
      *
      * @param zipInputStream Stream positioned at the entry to read.
      * @param sink           Stream the inflated bytes are written to, or null to drain the entry without keeping it.
-     * @param remainingBytes Number of inflated bytes still allowed for this archive.
+     * @param remainingBytes Number of inflated bytes still allowed for this extraction.
      * @return The number of bytes inflated from the entry.
      * @throws IOException if the entry does not fit within the remaining budget, or the stream cannot be read.
      */
@@ -574,6 +576,43 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
             }
         }
         return entrySize;
+    }
+
+    /**
+     * Resolves the path of a ZIP entry relative to the project folder the archive wraps its content in.
+     * <p>
+     * The files of interest sit at known locations below that folder, so they are matched on this path rather than
+     * with a substring check on the whole entry name. A substring check would also accept lookalike entries such as
+     * {@code Docs/MyDoc/api.yaml} or {@code Definitions/swagger.yaml.bak}, which would let an unrelated file, whose
+     * name a user controls through a document name or an uploaded file name, decide what governance evaluates.
+     *
+     * @param entryName Name of the ZIP entry.
+     * @return The path below the project folder, or null if the entry does not sit inside one.
+     */
+    private static String getPathWithinProject(String entryName) {
+        int projectFolderEnd = entryName.indexOf('/');
+        if (projectFolderEnd < 0) {
+            return null;
+        }
+        return entryName.substring(projectFolderEnd + 1);
+    }
+
+    /**
+     * Checks whether the given path is the metadata file of a document, which lives one folder below the docs folder.
+     *
+     * @param pathWithinProject Path of the entry relative to the project folder, or null.
+     * @param docsFolder        Docs folder prefix, ending with a path separator.
+     * @param docMetadataFile   Document metadata file name, starting with a path separator.
+     * @return true if the path is {@code <docsFolder><document>/<docMetadataFile>}.
+     */
+    private static boolean isDocumentMetadata(String pathWithinProject, String docsFolder, String docMetadataFile) {
+        if (pathWithinProject == null || !pathWithinProject.startsWith(docsFolder)
+                || !pathWithinProject.endsWith(docMetadataFile)) {
+            return false;
+        }
+        // Reject nested paths: the only separator after the docs folder must be the one before the metadata file
+        return pathWithinProject.indexOf('/', docsFolder.length())
+                == pathWithinProject.length() - docMetadataFile.length();
     }
 
     /**
@@ -644,11 +683,12 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
                 validateEntryCount(++entryCount);
-                boolean isDefinitionEntry = (entry.getName().contains(swaggerPath)
+                String pathWithinProject = getPathWithinProject(entry.getName());
+                boolean isDefinitionEntry = (swaggerPath.equals(pathWithinProject)
                         && ExtendedArtifactType.REST_API.equals(extendedArtifactType))
-                        || (entry.getName().contains(asyncAPIPath) &&
+                        || (asyncAPIPath.equals(pathWithinProject) &&
                         ExtendedArtifactType.ASYNC_API.equals(extendedArtifactType))
-                        || (entry.getName().contains("/" + APIMGovernanceConstants.MCP_FILE_NAME) &&
+                        || (APIMGovernanceConstants.MCP_FILE_NAME.equals(pathWithinProject) &&
                         ExtendedArtifactType.MCP.equals(extendedArtifactType));
                 ByteArrayOutputStream outputStream = isDefinitionEntry ? new ByteArrayOutputStream() : null;
                 remainingBytes -= readZipEntry(zipInputStream, outputStream, remainingBytes);
@@ -673,8 +713,8 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
     public static String extractDocData(byte[] apiProjectZip) throws APIMGovernanceException {
         ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
 
-        String rootFolder = APIMGovernanceConstants.DOCS_FOLDER + "/";
-        String docMetadataFile = APIMGovernanceConstants.DOC_META_DATA_FILE_NAME;
+        String docsFolder = APIMGovernanceConstants.DOCS_FOLDER + "/";
+        String docMetadataFile = "/" + APIMGovernanceConstants.DOC_META_DATA_FILE_NAME;
         List<Object> docsList = new ArrayList<>();
         int count = 0;
 
@@ -684,8 +724,8 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
                 validateEntryCount(++entryCount);
-                boolean isDocMetadataEntry = entry.getName().contains(rootFolder)
-                        && entry.getName().endsWith(docMetadataFile);
+                String pathWithinProject = getPathWithinProject(entry.getName());
+                boolean isDocMetadataEntry = isDocumentMetadata(pathWithinProject, docsFolder, docMetadataFile);
                 ByteArrayOutputStream outputStream = isDocMetadataEntry ? new ByteArrayOutputStream() : null;
                 remainingBytes -= readZipEntry(zipInputStream, outputStream, remainingBytes);
                 if (isDocMetadataEntry) {
