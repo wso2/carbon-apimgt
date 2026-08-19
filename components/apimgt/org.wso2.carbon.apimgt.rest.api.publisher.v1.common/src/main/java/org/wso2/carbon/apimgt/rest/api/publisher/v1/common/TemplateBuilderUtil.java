@@ -1050,15 +1050,23 @@ public class TemplateBuilderUtil {
                     gatewayAPIDTO.getLocalEntriesToBeAdd()));
         }
 
+        boolean isAiApi = APIConstants.API_SUBTYPE_AI_API.equals(api.getSubtype());
+        Map<String, List<SimplifiedEndpoint>> groupedEndpoints = simplifyEndpoints(endpointList).stream()
+                .collect(Collectors.groupingBy(SimplifiedEndpoint::getDeploymentStage));
+        List<SimplifiedEndpoint> productionEndpoints = new ArrayList<>(
+                groupedEndpoints.getOrDefault(APIConstants.APIEndpoint.PRODUCTION, Collections.emptyList()));
+        List<SimplifiedEndpoint> sandboxEndpoints = new ArrayList<>(
+                groupedEndpoints.getOrDefault(APIConstants.APIEndpoint.SANDBOX, Collections.emptyList()));
+
         // If the API exists in the Gateway and If the Gateway type is 'production' and a production url has not been
         // specified Or if the Gateway type is 'sandbox' and a sandbox url has not been specified
 
         if (endpointConfig != null && !APIConstants.ENDPOINT_TYPE_AWSLAMBDA.equalsIgnoreCase(
                 (String) endpointConfig.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE)) && (
                 (APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType())
-                        && !APIUtil.isProductionEndpointsExists(api.getEndpointConfig())) || (
+                        && !hasEndpoint(api, APIConstants.APIEndpoint.PRODUCTION, productionEndpoints)) || (
                         APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environment.getType())
-                                && !APIUtil.isSandboxEndpointsExists(api.getEndpointConfig())))) {
+                                && !hasEndpoint(api, APIConstants.APIEndpoint.SANDBOX, sandboxEndpoints)))) {
             if (log.isDebugEnabled()) {
                 log.debug("Not adding API to environment " + environment.getName() + " since its endpoint URL "
                         + "cannot be found");
@@ -1085,15 +1093,7 @@ public class TemplateBuilderUtil {
             gatewayAPIDTO.setApiDefinition(prototypeScriptAPI);
         } else if (APIConstants.IMPLEMENTATION_TYPE_ENDPOINT.equalsIgnoreCase(api.getImplementation())) {
             String apiConfig = null;
-            if (APIConstants.API_SUBTYPE_AI_API.equals(api.getSubtype())) {
-
-                Map<String, List<SimplifiedEndpoint>> groupedEndpoints = simplifyEndpoints(endpointList).stream()
-                        .collect(Collectors.groupingBy(SimplifiedEndpoint::getDeploymentStage));
-
-                List<SimplifiedEndpoint> productionEndpoints = new ArrayList<>(
-                        groupedEndpoints.getOrDefault(APIConstants.APIEndpoint.PRODUCTION, Collections.emptyList()));
-                List<SimplifiedEndpoint> sandboxEndpoints = new ArrayList<>(
-                        groupedEndpoints.getOrDefault(APIConstants.APIEndpoint.SANDBOX, Collections.emptyList()));
+            if (isAiApi) {
 
                 SimplifiedEndpoint defaultProductionEndpoint = Optional.ofNullable(api.getPrimaryProductionEndpointId())
                         .map(id -> findEndpointByUuid(productionEndpoints, id))
@@ -1174,6 +1174,29 @@ public class TemplateBuilderUtil {
             gatewayAPIDTO.setSequenceToBeAdd(
                     addGatewayContentToList(endpointSequence, gatewayAPIDTO.getSequenceToBeAdd()));
         }
+    }
+
+    /**
+     * Checks whether the API has an endpoint for the given deployment stage.
+     * An AI API holds its endpoints as named endpoints outside the endpoint configuration, so it is checked
+     * against the endpoint collection of that stage. Every other API is checked against its endpoint
+     * configuration as before.
+     *
+     * @param api          The API being deployed
+     * @param endpointType The deployment stage to check, either
+     *                     {@link APIConstants.APIEndpoint#PRODUCTION} or {@link APIConstants.APIEndpoint#SANDBOX}
+     * @param endpoints    The endpoints of that deployment stage, considered only for AI APIs
+     * @return True if an endpoint exists for the given deployment stage, otherwise false
+     */
+    private static boolean hasEndpoint(API api, String endpointType, List<SimplifiedEndpoint> endpoints) {
+
+        if (APIConstants.API_SUBTYPE_AI_API.equals(api.getSubtype())) {
+            return !endpoints.isEmpty();
+        }
+        if (APIConstants.APIEndpoint.PRODUCTION.equals(endpointType)) {
+            return APIUtil.isProductionEndpointsExists(api.getEndpointConfig());
+        }
+        return APIUtil.isSandboxEndpointsExists(api.getEndpointConfig());
     }
 
     /**
