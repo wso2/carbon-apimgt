@@ -927,7 +927,8 @@ public class ApisApiServiceImplUtils {
                         ExceptionCodes.PARAMETER_NOT_PROVIDED);
             }
 
-            schemaByToolName.put(toolName, inputSchema);
+            schemaByToolName.put(toolName,
+                    MCPInitializerAndToolFetcher.buildToolMetadata(toolJson).toString());
             descriptionByToolName.put(toolName, toolDescription);
         }
     }
