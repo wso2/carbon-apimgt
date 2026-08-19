@@ -56,6 +56,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -72,6 +73,10 @@ import java.util.zip.ZipInputStream;
 public class APIGovernanceHandler implements ArtifactGovernanceHandler {
 
     private static final Log log = LogFactory.getLog(APIGovernanceHandler.class);
+    private static final int UNZIP_BUFFER_SIZE = 1024;
+    private static final long UNZIP_SIZE_LIMIT = 0x6400000; // Max size of inflated data per archive, 100MB
+    private static final int UNZIP_MAX_ENTRY_COUNT = 1024;
+
     /**
      * This method is used to get all the apis of a given type in a given organization
      *
@@ -512,33 +517,75 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
     }
 
     /**
-     * Extracts API metadata from the project ZIP file.
+     * Extracts API metadata from the project ZIP file, guarding against zip bombs.
      *
      * @param apiProjectZip Byte array representing the API project ZIP file.
      * @return The extracted API metadata as a string.
-     * @throws APIMGovernanceException if an error occurs while extracting metadata content.
+     * @throws APIMGovernanceException if an error occurs while extracting metadata content, or if the archive
+     *                                 exceeds the unzip limits.
      */
     public static String extractAPIMetadata(byte[] apiProjectZip) throws APIMGovernanceException {
-        String apiMetadata;
         try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(apiProjectZip))) {
+            long remainingBytes = UNZIP_SIZE_LIMIT;
+            int entryCount = 0;
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
-                if (entry.getName().contains("/" + APIMGovernanceConstants.API_FILE_NAME) ||
-                        entry.getName().contains("/" + APIMGovernanceConstants.MCP_FILE_NAME)) {
-                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                    byte[] buffer = new byte[1024];
-                    int length;
-                    while ((length = zipInputStream.read(buffer)) != -1) {
-                        outputStream.write(buffer, 0, length);
-                    }
-                    apiMetadata = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
-                    return apiMetadata;
+                validateEntryCount(++entryCount);
+                boolean isMetadataEntry = entry.getName().contains("/" + APIMGovernanceConstants.API_FILE_NAME) ||
+                        entry.getName().contains("/" + APIMGovernanceConstants.MCP_FILE_NAME);
+                ByteArrayOutputStream outputStream = isMetadataEntry ? new ByteArrayOutputStream() : null;
+                remainingBytes -= readZipEntry(zipInputStream, outputStream, remainingBytes);
+                if (isMetadataEntry) {
+                    return new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
                 }
             }
         } catch (IOException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_EXTRACTING_API_METADATA, e);
         }
         return null; // Return null if no matching metadata is found
+    }
+
+    /**
+     * Reads the current entry of the given ZIP stream, bounding the amount of data inflated from the archive.
+     * <p>
+     * Every entry is passed through this method, including the ones that are not of interest, because
+     * {@link ZipInputStream#getNextEntry()} inflates and discards the remainder of the current entry without
+     * accounting for its size. Draining unwanted entries here keeps the total inflated size of a single archive
+     * within {@link #UNZIP_SIZE_LIMIT} regardless of which entry holds the oversized data.
+     *
+     * @param zipInputStream Stream positioned at the entry to read.
+     * @param sink           Stream the inflated bytes are written to, or null to drain the entry without keeping it.
+     * @param remainingBytes Number of inflated bytes still allowed for this archive.
+     * @return The number of bytes inflated from the entry.
+     * @throws IOException if the entry does not fit within the remaining budget, or the stream cannot be read.
+     */
+    private static long readZipEntry(ZipInputStream zipInputStream, OutputStream sink, long remainingBytes)
+            throws IOException {
+        byte[] buffer = new byte[UNZIP_BUFFER_SIZE];
+        long entrySize = 0;
+        int length;
+        while ((length = zipInputStream.read(buffer)) != -1) {
+            if (entrySize + length > remainingBytes) {
+                throw new IOException("File being unzipped is too big.");
+            }
+            entrySize += length;
+            if (sink != null) {
+                sink.write(buffer, 0, length);
+            }
+        }
+        return entrySize;
+    }
+
+    /**
+     * Guards against archives holding an excessive number of entries.
+     *
+     * @param entryCount Number of entries read from the archive so far.
+     * @throws IOException if the archive holds more entries than {@link #UNZIP_MAX_ENTRY_COUNT}.
+     */
+    private static void validateEntryCount(int entryCount) throws IOException {
+        if (entryCount > UNZIP_MAX_ENTRY_COUNT) {
+            throw new IOException("Too many files to unzip.");
+        }
     }
 
     /**
@@ -577,37 +624,36 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
 
 
     /**
-     * Extracts API definition from the project ZIP file.
+     * Extracts API definition from the project ZIP file, guarding against zip bombs.
      *
      * @param apiProjectZip        Byte array representing the API project ZIP file.
      * @param extendedArtifactType Extended artifact type of the API
      * @return The extracted API definition as a string.
-     * @throws APIMGovernanceException if an error occurs while extracting swagger content.
+     * @throws APIMGovernanceException if an error occurs while extracting swagger content, or if the archive
+     *                                 exceeds the unzip limits.
      */
     public static String extractAPIDefinition(byte[] apiProjectZip, ExtendedArtifactType extendedArtifactType)
             throws APIMGovernanceException {
         String rootFolder = APIMGovernanceConstants.DEFINITIONS_FOLDER;
         String swaggerPath = rootFolder + APIMGovernanceConstants.SWAGGER_FILE_NAME;
         String asyncAPIPath = rootFolder + APIMGovernanceConstants.ASYNC_API_FILE_NAME;
-        String defContent;
 
         try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(apiProjectZip))) {
+            long remainingBytes = UNZIP_SIZE_LIMIT;
+            int entryCount = 0;
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
-                if ((entry.getName().contains(swaggerPath)
+                validateEntryCount(++entryCount);
+                boolean isDefinitionEntry = (entry.getName().contains(swaggerPath)
                         && ExtendedArtifactType.REST_API.equals(extendedArtifactType))
                         || (entry.getName().contains(asyncAPIPath) &&
                         ExtendedArtifactType.ASYNC_API.equals(extendedArtifactType))
                         || (entry.getName().contains("/" + APIMGovernanceConstants.MCP_FILE_NAME) &&
-                        ExtendedArtifactType.MCP.equals(extendedArtifactType))) {
-                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                    byte[] buffer = new byte[1024];
-                    int length;
-                    while ((length = zipInputStream.read(buffer)) != -1) {
-                        outputStream.write(buffer, 0, length);
-                    }
-                    defContent = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
-                    return defContent;
+                        ExtendedArtifactType.MCP.equals(extendedArtifactType));
+                ByteArrayOutputStream outputStream = isDefinitionEntry ? new ByteArrayOutputStream() : null;
+                remainingBytes -= readZipEntry(zipInputStream, outputStream, remainingBytes);
+                if (isDefinitionEntry) {
+                    return new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
                 }
             }
         } catch (IOException e) {
@@ -617,11 +663,12 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
     }
 
     /**
-     * Extracts the document data from the API project ZIP file.
+     * Extracts the document data from the API project ZIP file, guarding against zip bombs.
      *
      * @param apiProjectZip API project ZIP file as a byte array
      * @return Document data as a YAML string
-     * @throws APIMGovernanceException If an error occurs while extracting the document data
+     * @throws APIMGovernanceException If an error occurs while extracting the document data, or if the archive
+     *                                exceeds the unzip limits
      */
     public static String extractDocData(byte[] apiProjectZip) throws APIMGovernanceException {
         ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
@@ -632,15 +679,16 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
         int count = 0;
 
         try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(apiProjectZip))) {
+            long remainingBytes = UNZIP_SIZE_LIMIT;
+            int entryCount = 0;
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
-                if (entry.getName().contains(rootFolder) && entry.getName().endsWith(docMetadataFile)) {
-                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                    byte[] buffer = new byte[1024];
-                    int length;
-                    while ((length = zipInputStream.read(buffer)) != -1) {
-                        outputStream.write(buffer, 0, length);
-                    }
+                validateEntryCount(++entryCount);
+                boolean isDocMetadataEntry = entry.getName().contains(rootFolder)
+                        && entry.getName().endsWith(docMetadataFile);
+                ByteArrayOutputStream outputStream = isDocMetadataEntry ? new ByteArrayOutputStream() : null;
+                remainingBytes -= readZipEntry(zipInputStream, outputStream, remainingBytes);
+                if (isDocMetadataEntry) {
                     String yamlContent = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
                     Object parsedYamlContent = yamlMapper.readTree(yamlContent);
                     if (parsedYamlContent != null) {
