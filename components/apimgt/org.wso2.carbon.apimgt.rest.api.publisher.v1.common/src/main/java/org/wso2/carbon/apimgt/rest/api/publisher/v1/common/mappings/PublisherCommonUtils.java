@@ -41,6 +41,7 @@ import io.swagger.v3.parser.ObjectMapperFactory;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
@@ -57,6 +58,7 @@ import org.wso2.carbon.apimgt.api.APIComplianceException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
@@ -193,6 +195,7 @@ import static org.wso2.carbon.apimgt.impl.APIConstants.REPUBLISH;
 public class PublisherCommonUtils {
 
     private static final Log log = LogFactory.getLog(PublisherCommonUtils.class);
+    private static final String UNKNOWN_REFERENCE = "UNKNOWN";
     public static final String SESSION_TIMEOUT_CONFIG_KEY = "sessionTimeOut";
     static APIMGovernanceService apimGovernanceService = ServiceReferenceHolder.getInstance()
             .getAPIMGovernanceService();
@@ -2547,15 +2550,37 @@ public class PublisherCommonUtils {
             return apiToAdd.getUriTemplates();
         }
 
-        String backendApiUuid = template.getAPIOperationMapping().getApiUuid();
+        APIOperationMapping apiOperationMapping = template.getAPIOperationMapping();
+        String backendApiUuid = apiOperationMapping.getApiUuid();
 
-        API refApi = StringUtils.isNotEmpty(backendApiUuid)
-                ? apiProvider.getAPIbyUUID(backendApiUuid, organization)
-                : null;
+        API refApi = null;
+        if (StringUtils.isNotEmpty(backendApiUuid)) {
+            try {
+                refApi = apiProvider.getAPIbyUUID(backendApiUuid, organization);
+            } catch (APIManagementException e) {
+                // A referenced API that does not exist in this environment surfaces as a retrieval failure caused by
+                // an APIMgtResourceNotFoundException. It is reported below against the API the artifact names, which
+                // is more useful than the UUID alone since the UUID is environment specific. Any other failure is a
+                // genuine retrieval error and is left untouched.
+                Throwable cause = ExceptionUtils.getRootCause(e);
+                cause = cause == null ? e : cause;
+                if (!(cause instanceof APIMgtResourceNotFoundException)) {
+                    throw e;
+                }
+                if (log.isDebugEnabled()) {
+                    log.debug("Referenced API not found for UUID: " + backendApiUuid, e);
+                }
+            }
+        }
         if (refApi == null) {
-            String error = "Referenced API not found. UUID: " + backendApiUuid;
+            String refApiName = StringUtils.defaultIfBlank(apiOperationMapping.getApiName(), UNKNOWN_REFERENCE);
+            String refApiVersion = StringUtils.defaultIfBlank(apiOperationMapping.getApiVersion(), UNKNOWN_REFERENCE);
+            String refApiUuid = StringUtils.defaultIfBlank(backendApiUuid, UNKNOWN_REFERENCE);
+            String error = "Referenced API not found. Name: " + refApiName + ", version: " + refApiVersion
+                    + ", UUID: " + refApiUuid;
             log.error(error);
-            throw new APIManagementException(error, ExceptionCodes.API_NOT_FOUND);
+            throw new APIManagementException(error, ExceptionCodes.from(ExceptionCodes.REFERENCE_API_NOT_FOUND,
+                    refApiName, refApiVersion, refApiUuid));
         }
         if (!APIConstants.API_TYPE_HTTP.equalsIgnoreCase(refApi.getType())
                 || APIConstants.API_SUBTYPE_AI_API.equalsIgnoreCase(refApi.getSubtype())) {
@@ -5255,7 +5280,8 @@ public class PublisherCommonUtils {
             serverOperation.setFeature(MCPServerOperationDTO.FeatureEnum.TOOL);
             serverOperation.setTarget(toolName);
             serverOperation.setDescription(toolDescription);
-            serverOperation.setSchemaDefinition(inputSchema);
+            serverOperation.setSchemaDefinition(
+                    MCPInitializerAndToolFetcher.buildToolMetadata(toolJsonObject).toString());
             operationList.add(serverOperation);
         }
         return operationList;
