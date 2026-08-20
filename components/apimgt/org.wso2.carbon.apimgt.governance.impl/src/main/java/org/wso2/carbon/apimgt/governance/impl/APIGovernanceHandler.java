@@ -45,6 +45,7 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.LabelsDAO;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
+import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIDTOTypeWrapper;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
@@ -586,15 +587,20 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
      * {@code Docs/MyDoc/api.yaml} or {@code Definitions/swagger.yaml.bak}, which would let an unrelated file, whose
      * name a user controls through a document name or an uploaded file name, decide what governance evaluates.
      *
+     * Both separators are accepted, as {@link org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil} does when
+     * it resolves the project folder of an archive it extracts.
+     *
      * @param entryName Name of the ZIP entry.
      * @return The path below the project folder, or null if the entry does not sit inside one.
      */
     private static String getPathWithinProject(String entryName) {
-        int projectFolderEnd = entryName.indexOf('/');
+        String normalizedName = entryName.replace(ImportExportConstants.WIN_ZIP_FILE_SEPARATOR,
+                ImportExportConstants.ZIP_FILE_SEPARATOR);
+        int projectFolderEnd = normalizedName.indexOf(ImportExportConstants.ZIP_FILE_SEPARATOR);
         if (projectFolderEnd < 0) {
             return null;
         }
-        return entryName.substring(projectFolderEnd + 1);
+        return normalizedName.substring(projectFolderEnd + 1);
     }
 
     /**
@@ -611,7 +617,7 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
             return false;
         }
         // Reject nested paths: the only separator after the docs folder must be the one before the metadata file
-        return pathWithinProject.indexOf('/', docsFolder.length())
+        return pathWithinProject.indexOf(ImportExportConstants.ZIP_FILE_SEPARATOR, docsFolder.length())
                 == pathWithinProject.length() - docMetadataFile.length();
     }
 
@@ -713,8 +719,9 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
     public static String extractDocData(byte[] apiProjectZip) throws APIMGovernanceException {
         ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
 
-        String docsFolder = APIMGovernanceConstants.DOCS_FOLDER + "/";
-        String docMetadataFile = "/" + APIMGovernanceConstants.DOC_META_DATA_FILE_NAME;
+        String docsFolder = APIMGovernanceConstants.DOCS_FOLDER + ImportExportConstants.ZIP_FILE_SEPARATOR;
+        String docMetadataFile = ImportExportConstants.ZIP_FILE_SEPARATOR
+                + APIMGovernanceConstants.DOC_META_DATA_FILE_NAME;
         List<Object> docsList = new ArrayList<>();
         int count = 0;
 
