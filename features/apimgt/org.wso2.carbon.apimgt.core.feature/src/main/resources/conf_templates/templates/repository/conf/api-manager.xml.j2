@@ -1292,7 +1292,7 @@
                 {% elif apim.throttling.jms.job_queue_size is defined %}
                 <JobQueueSize>{{apim.throttling.jms.job_queue_size}}</JobQueueSize>
                 {% endif %}
-            <JMSTaskManager>
+            </JMSTaskManager>
             {% endif %}
             <JMSConnectionParameters>
                 <transport.jms.ConnectionFactoryJNDIName>{{apim.throttling.jms.conn_jndi_name}}</transport.jms.ConnectionFactoryJNDIName>
