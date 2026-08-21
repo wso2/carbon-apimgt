@@ -6275,9 +6275,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     String updatedVerb = updatedUriTemplate.getHTTPVerb();
                     String updatedPath = updatedUriTemplate.getUriTemplate();
 
-                    //Check if existing reused resource is among updated resources
+                    //Check if existing reused resource is among updated resources.
+                    //Resource paths are case-sensitive, hence a change which only alters the letter case of the
+                    //path removes the existing resource. The HTTP verb, however, is case-insensitive.
                     if (existingVerb.equalsIgnoreCase(updatedVerb) &&
-                            existingPath.equalsIgnoreCase(updatedPath)) {
+                            existingPath.equals(updatedPath)) {
                         isReusedResourceRemoved = false;
                         break;
                     }

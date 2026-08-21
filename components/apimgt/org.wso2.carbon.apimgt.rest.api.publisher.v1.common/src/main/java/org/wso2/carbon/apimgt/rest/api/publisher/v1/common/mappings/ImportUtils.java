@@ -94,12 +94,14 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationMappingDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerOperationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubtypeConfigurationDTO;
@@ -767,6 +769,8 @@ public class ImportUtils {
             final String currentTenantDomain =
                     MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(userName));
 
+            updateReferencedApiUuids(importedApiDTO, apiProvider, currentTenantDomain, organization);
+
             targetStatus = importedApiDTO.getLifeCycleStatus();
             APIUtil.validateAPIContext(importedApiDTO.getContext(), importedApiDTO.getName());
 
@@ -1025,7 +1029,46 @@ public class ImportUtils {
                 throw new APIManagementException("Error while importing API: " + e.getMessage(),
                         ExceptionCodes.from(ExceptionCodes.API_CONTEXT_MALFORMED_EXCEPTION, e.getMessage()));
             }
-            throw new APIManagementException(errorMessage + StringUtils.SPACE + e.getMessage(), e);
+            // Carry the original error handler forward. Otherwise every import failure is reported as a generic
+            // server error, hiding the actual reason (for example a referenced API missing in this environment).
+            ErrorHandler errorHandler = e.getErrorHandler() != null
+                    ? e.getErrorHandler()
+                    : ExceptionCodes.INTERNAL_ERROR;
+            throw new APIManagementException(errorMessage + StringUtils.SPACE + e.getMessage(), e, errorHandler);
+        }
+    }
+
+    /**
+     * This method updates the UUIDs of the APIs referenced by an MCP Server, when the referenced APIs are already
+     * inside APIM. The exported artifact carries the UUID of the source environment, which does not resolve in
+     * another environment, hence the referenced API is looked up by its name and version.
+     *
+     * @param importedMCPServerDTO MCP Server DTO
+     * @param apiProvider          API Provider
+     * @param currentTenantDomain  Current tenant domain
+     * @param organization         Identifier of the organization
+     * @throws APIManagementException If failed when checking the existence of an API
+     */
+    private static void updateReferencedApiUuids(MCPServerDTO importedMCPServerDTO, APIProvider apiProvider,
+                                                 String currentTenantDomain, String organization)
+            throws APIManagementException {
+
+        if (importedMCPServerDTO.getOperations() == null) {
+            return;
+        }
+        for (MCPServerOperationDTO operation : importedMCPServerDTO.getOperations()) {
+            APIOperationMappingDTO apiOperationMapping = operation.getApiOperationMapping();
+            // The name and the version are the key the referenced API is looked up by. When they are not available,
+            // the UUID carried by the artifact is left untouched and resolved as before.
+            if (apiOperationMapping == null || StringUtils.isBlank(apiOperationMapping.getApiName())
+                    || StringUtils.isBlank(apiOperationMapping.getApiVersion())) {
+                continue;
+            }
+            API referencedApi = retrieveApiToOverwrite(apiOperationMapping.getApiName(),
+                    apiOperationMapping.getApiVersion(), currentTenantDomain, apiProvider, Boolean.TRUE, organization);
+            if (referencedApi != null) {
+                apiOperationMapping.setApiId(referencedApi.getUuid());
+            }
         }
     }
 
