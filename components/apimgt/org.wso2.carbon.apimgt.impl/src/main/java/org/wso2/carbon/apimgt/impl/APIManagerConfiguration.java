@@ -231,7 +231,7 @@ public class APIManagerConfiguration {
 
     public static boolean isTokenRevocationEnabled() {
 
-        return !tokenRevocationClassName.isEmpty();
+    return !tokenRevocationClassName.isEmpty();
     }
 
     /**
@@ -3433,6 +3433,14 @@ public class APIManagerConfiguration {
             String dataSourceName = dataSource.getText();
             apimGovConfigurationDto.setDataSourceName(dataSourceName);
         }
+
+        // The governance configuration DTO is shared statically, so an absent element is set to false rather than
+        // left alone. Parsing then always reflects the file that was read, instead of whatever a previous parse
+        // happened to leave behind, and the feature stays off unless a deployment asks for it.
+        OMElement perPolicySeverityFiltering = omElement.getFirstChildWithName(
+                new QName(APIConstants.APIMGovernance.PER_POLICY_SEVERITY_FILTERING_ENABLED));
+        apimGovConfigurationDto.setPerPolicySeverityFilteringEnabled(perPolicySeverityFiltering != null
+                && Boolean.parseBoolean(perPolicySeverityFiltering.getText()));
 
         OMElement schedulerConfig = omElement
                 .getFirstChildWithName(new QName(APIConstants.APIMGovernance.SCHEDULER_CONFIG));

@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.governance.impl.util;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.OASParserOptions;
@@ -35,7 +36,9 @@ import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.DefaultRuleset;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.RuleCategory;
+import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
+import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetContent;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
@@ -57,6 +60,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -70,6 +74,7 @@ import java.util.stream.Collectors;
  */
 public class APIMGovernanceUtil {
     private static final Log log = LogFactory.getLog(APIMGovernanceUtil.class);
+
 
     /**
      * Generates a UUID
@@ -680,4 +685,77 @@ public class APIMGovernanceUtil {
         return governanceOptions;
     }
 
+    /**
+     * Every severity, as a fresh immutable set. A new set is returned on each call so that callers can never reach a
+     * shared instance.
+     *
+     * @return Immutable set holding every rule severity
+     */
+    private static Set<RuleSeverity> allSeverities() {
+
+        return Collections.unmodifiableSet(EnumSet.allOf(RuleSeverity.class));
+    }
+
+    public static Set<RuleSeverity> resolveComplianceAffectingSeverities(String configuredSeverities) {
+
+        if (StringUtils.isBlank(configuredSeverities)) {
+            return allSeverities();
+        }
+
+        Set<RuleSeverity> severities = EnumSet.noneOf(RuleSeverity.class);
+        for (String severityToken : configuredSeverities.split(",")) {
+            String trimmedSeverity = severityToken.trim();
+            if (StringUtils.isEmpty(trimmedSeverity)) {
+                continue;
+            }
+            RuleSeverity severity = RuleSeverity.fromString(trimmedSeverity);
+            if (severity == null) {
+                log.warn("Ignoring unknown compliance affecting rule severity '" + trimmedSeverity + "'");
+                continue;
+            }
+            severities.add(severity);
+        }
+
+        if (severities.isEmpty()) {
+            log.warn("No valid compliance affecting rule severity found in '" + configuredSeverities
+                    + "'. Treating every severity as compliance affecting");
+            return allSeverities();
+        }
+        return Collections.unmodifiableSet(severities);
+    }
+
+    /**
+     * Check whether a violation of the given severity should affect compliance results
+     *
+     * @param severity  Rule severity, may be null when the severity of a violation could not be resolved
+     * @param affecting Severities that affect compliance, as resolved for the ruleset
+     * @return True if a violation of this severity should mark a ruleset as failed
+     */
+    public static boolean isComplianceAffectingSeverity(RuleSeverity severity, Set<RuleSeverity> affecting) {
+
+        // An unresolved severity is treated as compliance affecting so that a malformed severity in a ruleset can
+        // never silently stop a rule from being enforced.
+        return severity == null || affecting == null || affecting.contains(severity);
+    }
+
+    /**
+     * Filter out the rule violations that should not affect compliance results.
+     * <p>
+     * The given list is never modified. Callers keep using the original list for anything shown to the user and use
+     * the returned list only to decide whether a ruleset passed or failed.
+     *
+     * @param ruleViolations List of rule violations
+     * @param affecting      Severities that affect compliance, as resolved for the ruleset
+     * @return List holding only the violations that affect compliance
+     */
+    public static List<RuleViolation> filterComplianceAffectingViolations(List<RuleViolation> ruleViolations,
+                                                                         Set<RuleSeverity> affecting) {
+
+        if (ruleViolations == null || ruleViolations.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return ruleViolations.stream()
+                .filter(ruleViolation -> isComplianceAffectingSeverity(ruleViolation.getSeverity(), affecting))
+                .collect(Collectors.toList());
+    }
 }

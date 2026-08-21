@@ -784,6 +784,13 @@
     <!-- This property is to configure the API Manager Governance capabilities -->
     <APIMGovernance>
         <DataSource>{{apim.governance.datasource.name}}</DataSource>
+        {% if apim.governance.per_policy_severity_filtering_enabled is defined %}
+        <!-- Allows a policy to declare which rule severities affect compliance. Violations of other severities
+             are still evaluated and reported, but do not violate the policy. Enabling this alone is not enough:
+             the optional COMPLIANCE_AFFECTING_SEVERITIES column must also be added to GOV_POLICY. When either is
+             missing, every severity affects compliance. -->
+        <PerPolicySeverityFilteringEnabled>{{apim.governance.per_policy_severity_filtering_enabled}}</PerPolicySeverityFilteringEnabled>
+        {% endif %}
         <SchedulerConfigurations>
             <ThreadPoolSize>{{apim.governance.scheduler.thread_pool_size}}</ThreadPoolSize>
             <QueueSize>{{apim.governance.scheduler.queue_size}}</QueueSize>
