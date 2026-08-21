@@ -2075,8 +2075,10 @@ public class PublisherCommonUtils {
                     String updatedVerb = updatedOperation.getVerb();
                     String updatedPath = updatedOperation.getTarget();
 
-                    //Check if existing reused resource is among updated resources
-                    if (existingVerb.equalsIgnoreCase(updatedVerb) && existingPath.equalsIgnoreCase(updatedPath)) {
+                    //Check if existing reused resource is among updated resources.
+                    //Resource paths are case-sensitive, hence a change which only alters the letter case of the
+                    //path removes the existing resource. The HTTP verb, however, is case-insensitive.
+                    if (existingVerb.equalsIgnoreCase(updatedVerb) && existingPath.equals(updatedPath)) {
                         isReusedResourceRemoved = false;
                         break;
                     }
