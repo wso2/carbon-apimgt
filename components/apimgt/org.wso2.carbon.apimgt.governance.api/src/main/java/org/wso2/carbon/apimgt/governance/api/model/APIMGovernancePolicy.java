@@ -39,6 +39,12 @@ public class APIMGovernancePolicy {
     private String updatedTime;
     private boolean isGlobal = false;
 
+    /**
+     * Comma separated rule severities that make this policy fail. Null means every severity affects compliance,
+     * which is also the behaviour when the feature is not enabled on the deployment.
+     */
+    private String complianceAffectingSeverities;
+
     public String getId() {
         return id;
     }
@@ -141,5 +147,13 @@ public class APIMGovernancePolicy {
 
     public void setGlobal(boolean global) {
         isGlobal = global;
+    }
+
+    public String getComplianceAffectingSeverities() {
+        return complianceAffectingSeverities;
+    }
+
+    public void setComplianceAffectingSeverities(String complianceAffectingSeverities) {
+        this.complianceAffectingSeverities = complianceAffectingSeverities;
     }
 }

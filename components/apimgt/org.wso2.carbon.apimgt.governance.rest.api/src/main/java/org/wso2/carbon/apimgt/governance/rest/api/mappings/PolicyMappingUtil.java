@@ -89,6 +89,7 @@ public class PolicyMappingUtil {
         governancePolicyDTO.setCreatedTime(governancePolicy.getCreatedTime());
         governancePolicyDTO.setUpdatedBy(governancePolicy.getUpdatedBy());
         governancePolicyDTO.setUpdatedTime(governancePolicy.getUpdatedTime());
+        governancePolicyDTO.setComplianceAffectingSeverities(governancePolicy.getComplianceAffectingSeverities());
         governancePolicyDTO.setLabels(governancePolicy.getLabels());
         governancePolicyDTO.setRulesets(governancePolicy.getRulesetIds());
         governancePolicyDTO.setActions(
