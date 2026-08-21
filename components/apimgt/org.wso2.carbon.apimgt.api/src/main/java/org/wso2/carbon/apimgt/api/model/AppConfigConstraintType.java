@@ -30,6 +30,7 @@ public enum AppConfigConstraintType {
     ENUM("ENUM");
 
     private final String value;
+
     AppConfigConstraintType(String value) {
 
         this.value = value;
