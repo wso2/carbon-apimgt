@@ -352,6 +352,67 @@ public class SQLConstants {
             "JOIN GOV_ARTIFACT GA ON GRR.ARTIFACT_KEY = GA.ARTIFACT_KEY " +
             "WHERE GA.ARTIFACT_REF_ID = ? AND GA.ARTIFACT_TYPE = ? AND GA.ORGANIZATION = ? AND GRR.RULESET_ID = ?";
 
+    /**
+     * Name of the optional column holding the severities that affect compliance for a policy. The column is not
+     * created by the product; a deployment opts in to per-policy severity filtering by adding it.
+     */
+    public static final String COMPLIANCE_AFFECTING_SEVERITIES_COLUMN = "COMPLIANCE_AFFECTING_SEVERITIES";
+
+    public static final String GOV_POLICY_TABLE = "GOV_POLICY";
+
+    public static final String GET_POLICY_COMPLIANCE_AFFECTING_SEVERITIES = "SELECT "
+            + "COMPLIANCE_AFFECTING_SEVERITIES FROM GOV_POLICY WHERE POLICY_ID = ? AND ORGANIZATION = ?";
+
+    /**
+     * Reads the severities of every policy in an organization in one statement, so a listing does not issue a
+     * query per row.
+     */
+    public static final String GET_POLICY_COMPLIANCE_AFFECTING_SEVERITIES_BY_ORGANIZATION = "SELECT POLICY_ID, "
+            + "COMPLIANCE_AFFECTING_SEVERITIES FROM GOV_POLICY WHERE ORGANIZATION = ?";
+
+    public static final String UPDATE_POLICY_COMPLIANCE_AFFECTING_SEVERITIES = "UPDATE GOV_POLICY "
+            + "SET COMPLIANCE_AFFECTING_SEVERITIES = ? WHERE POLICY_ID = ? AND ORGANIZATION = ?";
+
+    /**
+     * Policy aware variants of the failing ruleset and non compliant artifact queries, used only when the optional
+     * compliance affecting severity column exists on GOV_POLICY. Each returns the violated severity alongside the
+     * severities configured for the policy the ruleset was run under, so the comparison happens in Java. Matching a
+     * severity against a comma separated column in SQL would need vendor specific string functions, which these
+     * queries deliberately avoid.
+     * <p>
+     * A ruleset shared by several policies produces one row per policy, so it counts as violated when any policy
+     * that governs the artifact is judged on the severity in question.
+     */
+    private static final String POLICY_SEVERITY_JOINS =
+            "JOIN GOV_POLICY_RUN GPR ON GA.ARTIFACT_KEY = GPR.ARTIFACT_KEY "
+                    + "JOIN GOV_POLICY_RULESET GPRR ON GPR.POLICY_ID = GPRR.POLICY_ID "
+                    + "AND GPRR.RULESET_ID = GRR.RULESET_ID "
+                    + "JOIN GOV_POLICY GP ON GPR.POLICY_ID = GP.POLICY_ID "
+                    + "JOIN GOV_RULE_VIOLATION GV ON GV.RULESET_RUN_ID = GRR.RULESET_RUN_ID "
+                    + "JOIN GOV_RULESET_RULE GRULE ON GV.RULESET_ID = GRULE.RULESET_ID "
+                    + "AND GV.RULE_NAME = GRULE.RULE_NAME ";
+
+    public static final String GET_FAILED_RULESET_RUNS_WITH_SEVERITY =
+            "SELECT DISTINCT GRR.RULESET_ID, GRULE.SEVERITY, GP.COMPLIANCE_AFFECTING_SEVERITIES "
+                    + "FROM GOV_RULESET_RUN GRR "
+                    + "JOIN GOV_ARTIFACT GA ON GRR.ARTIFACT_KEY = GA.ARTIFACT_KEY "
+                    + POLICY_SEVERITY_JOINS
+                    + "WHERE GA.ORGANIZATION = ?";
+
+    public static final String GET_FAILED_RULESET_RUNS_FOR_ARTIFACT_WITH_SEVERITY =
+            "SELECT DISTINCT GRR.RULESET_ID, GRULE.SEVERITY, GP.COMPLIANCE_AFFECTING_SEVERITIES "
+                    + "FROM GOV_RULESET_RUN GRR "
+                    + "JOIN GOV_ARTIFACT GA ON GRR.ARTIFACT_KEY = GA.ARTIFACT_KEY "
+                    + POLICY_SEVERITY_JOINS
+                    + "WHERE GA.ARTIFACT_REF_ID = ? AND GA.ARTIFACT_TYPE = ? AND GA.ORGANIZATION = ?";
+
+    public static final String GET_NON_COMPLIANT_ARTIFACTS_WITH_SEVERITY =
+            "SELECT DISTINCT GA.ARTIFACT_REF_ID, GRULE.SEVERITY, GP.COMPLIANCE_AFFECTING_SEVERITIES "
+                    + "FROM GOV_ARTIFACT GA "
+                    + "JOIN GOV_RULESET_RUN GRR ON GA.ARTIFACT_KEY = GRR.ARTIFACT_KEY "
+                    + POLICY_SEVERITY_JOINS
+                    + "WHERE GA.ARTIFACT_TYPE = ? AND GA.ORGANIZATION = ?";
+
     public static final String GET_FAILED_RULESET_RUNS = "SELECT DISTINCT RULESET_ID FROM GOV_RULESET_RUN GRR " +
             "JOIN GOV_ARTIFACT GA ON GRR.ARTIFACT_KEY = GA.ARTIFACT_KEY " +
             "WHERE GA.ORGANIZATION = ? AND GRR.RESULT = 0";
