@@ -70,6 +70,7 @@ return null;
     private String createdTime = null;
     private String updatedBy = null;
     private String updatedTime = null;
+    private String complianceAffectingSeverities = null;
 
   /**
    * UUID of the governance policy.
@@ -275,6 +276,24 @@ return null;
     this.updatedTime = updatedTime;
   }
 
+  /**
+   * Comma separated rule severities that make this policy fail. Violations of other severities are still reported but do not affect the policy adherence status.  Three states are meaningful. Null means per policy severity filtering is not enabled on this deployment, and clients should not offer it. An empty string means it is enabled but nothing has been configured for this policy, so every severity affects compliance. A value lists the severities that do. 
+   **/
+  public APIMGovernancePolicyDTO complianceAffectingSeverities(String complianceAffectingSeverities) {
+    this.complianceAffectingSeverities = complianceAffectingSeverities;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "ERROR,WARN", value = "Comma separated rule severities that make this policy fail. Violations of other severities are still reported but do not affect the policy adherence status.  Three states are meaningful. Null means per policy severity filtering is not enabled on this deployment, and clients should not offer it. An empty string means it is enabled but nothing has been configured for this policy, so every severity affects compliance. A value lists the severities that do. ")
+  @JsonProperty("complianceAffectingSeverities")
+  public String getComplianceAffectingSeverities() {
+    return complianceAffectingSeverities;
+  }
+  public void setComplianceAffectingSeverities(String complianceAffectingSeverities) {
+    this.complianceAffectingSeverities = complianceAffectingSeverities;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -295,12 +314,13 @@ return null;
         Objects.equals(createdBy, apIMGovernancePolicy.createdBy) &&
         Objects.equals(createdTime, apIMGovernancePolicy.createdTime) &&
         Objects.equals(updatedBy, apIMGovernancePolicy.updatedBy) &&
-        Objects.equals(updatedTime, apIMGovernancePolicy.updatedTime);
+        Objects.equals(updatedTime, apIMGovernancePolicy.updatedTime) &&
+        Objects.equals(complianceAffectingSeverities, apIMGovernancePolicy.complianceAffectingSeverities);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, governableStates, actions, rulesets, labels, createdBy, createdTime, updatedBy, updatedTime);
+    return Objects.hash(id, name, description, governableStates, actions, rulesets, labels, createdBy, createdTime, updatedBy, updatedTime, complianceAffectingSeverities);
   }
 
   @Override
@@ -319,6 +339,7 @@ return null;
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    updatedBy: ").append(toIndentedString(updatedBy)).append("\n");
     sb.append("    updatedTime: ").append(toIndentedString(updatedTime)).append("\n");
+    sb.append("    complianceAffectingSeverities: ").append(toIndentedString(complianceAffectingSeverities)).append("\n");
     sb.append("}");
     return sb.toString();
   }

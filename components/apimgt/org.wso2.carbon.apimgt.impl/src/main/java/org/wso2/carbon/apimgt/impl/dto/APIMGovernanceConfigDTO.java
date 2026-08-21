@@ -29,6 +29,12 @@ public class APIMGovernanceConfigDTO {
     private int schedulerTaskCheckInterval;
     private int schedulerTaskCleanupInterval;
 
+    /**
+     * Whether per policy compliance affecting severity filtering may be used. Defaults to false, so a deployment
+     * has to opt in before the optional GOV_RULESET column is even looked for.
+     */
+    private boolean perPolicySeverityFilteringEnabled;
+
     public String getDataSourceName() {
         return dataSourceName;
     }
@@ -67,5 +73,13 @@ public class APIMGovernanceConfigDTO {
 
     public void setSchedulerTaskCleanupInterval(int schedulerTaskCleanupInterval) {
         this.schedulerTaskCleanupInterval = schedulerTaskCleanupInterval;
+    }
+
+    public boolean isPerPolicySeverityFilteringEnabled() {
+        return perPolicySeverityFilteringEnabled;
+    }
+
+    public void setPerPolicySeverityFilteringEnabled(boolean perPolicySeverityFilteringEnabled) {
+        this.perPolicySeverityFilteringEnabled = perPolicySeverityFilteringEnabled;
     }
 }

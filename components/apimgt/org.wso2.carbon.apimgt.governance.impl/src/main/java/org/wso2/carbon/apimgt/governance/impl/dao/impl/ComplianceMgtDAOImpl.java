@@ -915,15 +915,21 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     @Override
     public List<String> getNonCompliantArtifacts(ArtifactType artifactType, String organization)
             throws APIMGovernanceException {
-        String sqlQuery = SQLConstants.GET_NON_COMPLIANT_ARTIFACTS;
         Set<String> artifactRefIds = new HashSet<>();
-        try (Connection connection = APIMGovernanceDBUtil.getConnection();
-             PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
-            prepStmnt.setString(1, String.valueOf(artifactType));
-            prepStmnt.setString(2, organization);
-            try (ResultSet resultSet = prepStmnt.executeQuery()) {
-                while (resultSet.next()) {
-                    artifactRefIds.add(resultSet.getString("ARTIFACT_REF_ID"));
+        try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
+            if (GovernancePolicyMgtDAOImpl.isComplianceAffectingSeverityColumnPresent(connection)) {
+                try (PreparedStatement prepStmnt = connection
+                        .prepareStatement(SQLConstants.GET_NON_COMPLIANT_ARTIFACTS_WITH_SEVERITY)) {
+                    prepStmnt.setString(1, String.valueOf(artifactType));
+                    prepStmnt.setString(2, organization);
+                    collectSeverityAware(prepStmnt, "ARTIFACT_REF_ID", artifactRefIds);
+                }
+            } else {
+                try (PreparedStatement prepStmnt = connection
+                        .prepareStatement(SQLConstants.GET_NON_COMPLIANT_ARTIFACTS)) {
+                    prepStmnt.setString(1, String.valueOf(artifactType));
+                    prepStmnt.setString(2, organization);
+                    collect(prepStmnt, "ARTIFACT_REF_ID", artifactRefIds);
                 }
             }
         } catch (SQLException e) {
@@ -968,20 +974,26 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     @Override
     public List<String> getViolatedRulesets(String organization) throws APIMGovernanceException {
 
-        String sqlQuery = SQLConstants.GET_FAILED_RULESET_RUNS;
-        List<String> rulesetIds = new ArrayList<>();
-        try (Connection connection = APIMGovernanceDBUtil.getConnection();
-             PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
-            prepStmnt.setString(1, organization);
-            try (ResultSet resultSet = prepStmnt.executeQuery()) {
-                while (resultSet.next()) {
-                    rulesetIds.add(resultSet.getString("RULESET_ID"));
+        Set<String> rulesetIds = new HashSet<>();
+        try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
+            // Each branch passes a constant query, so the statements stay compile time constants
+            if (GovernancePolicyMgtDAOImpl.isComplianceAffectingSeverityColumnPresent(connection)) {
+                try (PreparedStatement prepStmnt = connection
+                        .prepareStatement(SQLConstants.GET_FAILED_RULESET_RUNS_WITH_SEVERITY)) {
+                    prepStmnt.setString(1, organization);
+                    collectSeverityAware(prepStmnt, "RULESET_ID", rulesetIds);
+                }
+            } else {
+                try (PreparedStatement prepStmnt = connection
+                        .prepareStatement(SQLConstants.GET_FAILED_RULESET_RUNS)) {
+                    prepStmnt.setString(1, organization);
+                    collect(prepStmnt, "RULESET_ID", rulesetIds);
                 }
             }
         } catch (SQLException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_GOVERNANCE_RESULTS, e);
         }
-        return rulesetIds;
+        return new ArrayList<>(rulesetIds);
     }
 
     /**
@@ -997,22 +1009,29 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     @Override
     public List<String> getViolatedRulesetsForArtifact(String artifactRefId, ArtifactType artifactType,
                                                        String organization) throws APIMGovernanceException {
-        String sqlQuery = SQLConstants.GET_FAILED_RULESET_RUNS_FOR_ARTIFACT;
-        List<String> rulesetIds = new ArrayList<>();
-        try (Connection connection = APIMGovernanceDBUtil.getConnection();
-             PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
-            prepStmnt.setString(1, artifactRefId);
-            prepStmnt.setString(2, String.valueOf(artifactType));
-            prepStmnt.setString(3, organization);
-            try (ResultSet resultSet = prepStmnt.executeQuery()) {
-                while (resultSet.next()) {
-                    rulesetIds.add(resultSet.getString("RULESET_ID"));
+        Set<String> rulesetIds = new HashSet<>();
+        try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
+            if (GovernancePolicyMgtDAOImpl.isComplianceAffectingSeverityColumnPresent(connection)) {
+                try (PreparedStatement prepStmnt = connection
+                        .prepareStatement(SQLConstants.GET_FAILED_RULESET_RUNS_FOR_ARTIFACT_WITH_SEVERITY)) {
+                    prepStmnt.setString(1, artifactRefId);
+                    prepStmnt.setString(2, String.valueOf(artifactType));
+                    prepStmnt.setString(3, organization);
+                    collectSeverityAware(prepStmnt, "RULESET_ID", rulesetIds);
+                }
+            } else {
+                try (PreparedStatement prepStmnt = connection
+                        .prepareStatement(SQLConstants.GET_FAILED_RULESET_RUNS_FOR_ARTIFACT)) {
+                    prepStmnt.setString(1, artifactRefId);
+                    prepStmnt.setString(2, String.valueOf(artifactType));
+                    prepStmnt.setString(3, organization);
+                    collect(prepStmnt, "RULESET_ID", rulesetIds);
                 }
             }
         } catch (SQLException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_GOVERNANCE_RESULTS, e);
         }
-        return rulesetIds;
+        return new ArrayList<>(rulesetIds);
     }
 
     /**
@@ -1157,5 +1176,64 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
         } finally {
             resultWrtiteDelLock.unlock();
         }
+    }
+
+    /**
+     * Collect a column from every row of a query
+     *
+     * @param prepStmnt Prepared statement ready to execute
+     * @param column    Column to collect
+     * @param collected Set the values are added to
+     * @throws SQLException If the query fails
+     */
+    private void collect(PreparedStatement prepStmnt, String column, Set<String> collected) throws SQLException {
+
+        try (ResultSet resultSet = prepStmnt.executeQuery()) {
+            while (resultSet.next()) {
+                collected.add(resultSet.getString(column));
+            }
+        }
+    }
+
+    /**
+     * Collect a column from the rows of a policy aware query whose violation affects compliance
+     *
+     * @param prepStmnt Prepared statement ready to execute
+     * @param column    Column to collect
+     * @param collected Set the values are added to
+     * @throws SQLException If the query fails
+     */
+    private void collectSeverityAware(PreparedStatement prepStmnt, String column, Set<String> collected)
+            throws SQLException {
+
+        try (ResultSet resultSet = prepStmnt.executeQuery()) {
+            while (resultSet.next()) {
+                if (affectsCompliance(resultSet)) {
+                    collected.add(resultSet.getString(column));
+                }
+            }
+        }
+    }
+
+    /**
+     * Decide whether the violation on the current row of a policy aware query affects compliance.
+     * <p>
+     * The row carries the severity of the violated rule together with the severities configured for the policy the
+     * ruleset was run under. The comparison is done here rather than in SQL, because matching a severity against a
+     * comma separated column needs string functions that differ between database vendors.
+     * <p>
+     * A policy with nothing configured resolves to every severity, so it keeps behaving as it did before the
+     * feature existed.
+     *
+     * @param resultSet Result set positioned on a row of a policy aware query
+     * @return True when the violation should mark the ruleset as failed
+     * @throws SQLException If the row cannot be read
+     */
+    private boolean affectsCompliance(ResultSet resultSet) throws SQLException {
+
+        RuleSeverity severity = RuleSeverity.fromString(String.valueOf(resultSet.getString("SEVERITY")));
+        String configured = resultSet.getString(SQLConstants.COMPLIANCE_AFFECTING_SEVERITIES_COLUMN);
+        return APIMGovernanceUtil.isComplianceAffectingSeverity(severity,
+                APIMGovernanceUtil.resolveComplianceAffectingSeverities(configured));
     }
 }
