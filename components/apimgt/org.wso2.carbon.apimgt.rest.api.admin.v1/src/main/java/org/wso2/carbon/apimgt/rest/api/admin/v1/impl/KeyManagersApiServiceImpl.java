@@ -376,7 +376,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
                 && e.getErrorHandler().getErrorCode() == ExceptionCodes.UNTRUSTED_URL.getErrorCode()) {
             return new APIManagementException(
                     "Invalid Key Manager URL configuration. The " + fieldName
-                            + " URL is not trusted. Please contact the system administrator.",
+                            + " URL could not be resolved.",
                     e.getErrorHandler());
         }
         return e;

@@ -74,19 +74,20 @@ public class KeyManagersApiServiceImplUrlValidationTest {
 
         Assert.assertEquals("An untrusted URL must keep the UNTRUSTED_URL code",
                 ExceptionCodes.UNTRUSTED_URL.getErrorCode(), mapped.getErrorHandler().getErrorCode());
-        Assert.assertTrue("An untrusted URL must surface the field-specific 'not trusted' message",
-                mapped.getMessage().contains("token endpoint") && mapped.getMessage().contains("URL is not trusted"));
+        Assert.assertTrue("A blocked URL must surface the field-specific 'could not be resolved' message",
+                mapped.getMessage().contains("token endpoint")
+                        && mapped.getMessage().contains("URL could not be resolved"));
     }
 
     @Test
     public void testMalformedErrorIsPropagatedUnchanged() throws Exception {
-        // A non-untrusted 400 (e.g. MALFORMED_URL) must not be re-labelled as "not trusted".
+        // A non-untrusted 400 (e.g. MALFORMED_URL) must not be re-labelled as "could not be resolved".
         APIManagementException malformed = new APIManagementException("Malformed URL", ExceptionCodes.MALFORMED_URL);
 
         APIManagementException mapped = toKeyManagerUrlError(malformed, "token endpoint");
 
         Assert.assertSame("A non-untrusted error must be propagated unchanged", malformed, mapped);
-        Assert.assertFalse("A malformed URL must not be re-labelled as 'not trusted'",
-                mapped.getMessage().contains("URL is not trusted"));
+        Assert.assertFalse("A malformed URL must not be re-labelled as 'could not be resolved'",
+                mapped.getMessage().contains("could not be resolved"));
     }
 }
