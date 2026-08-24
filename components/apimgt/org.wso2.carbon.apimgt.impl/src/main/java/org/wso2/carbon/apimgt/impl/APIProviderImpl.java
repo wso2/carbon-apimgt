@@ -1251,13 +1251,24 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 log.debug("Checking if scope: " + scope + " exists in Key Manager for tenant: " + tenantDomain);
             }
             if (isScopeKeyExistInKeyManager(scope, tenantDomain)) {
-                if (!isCreateNewVersion) {
+                if (isCreateNewVersion) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Scope: " + scope + " is already registered in Key Manager; skipping validation" +
+                                " because we are creating a new API version.");
+                    }
+                } else if (isScopeKeyExist(scope, tenantId)) {
+                    // The scope is owned by another API or by a shared scope in API Manager, so attaching it here
+                    // would be a genuine conflict.
                     log.error("Scope: " + scope + " is already registered in Key Manager.");
                     throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.SCOPE_ALREADY_REGISTERED,
                             scope));
-                } else if (log.isDebugEnabled()) {
-                   log.debug("Scope: " + scope + " is already registered in Key Manager; skipping validation" +
-                            " because we are creating a new API version.");
+                } else {
+                    // The scope exists in the Key Manager but API Manager holds no record of it, i.e. it is
+                    // orphaned - typically left behind by a failed scope deletion. Adopt it instead of failing:
+                    // registering the scope is idempotent, and the Key Manager reconciles its metadata afterwards.
+                    log.warn("Scope: " + scope + " exists in the Key Manager but is not registered in API Manager. " +
+                            "Treating it as an orphaned scope and adopting it for API: " + api.getId().getApiName() +
+                            ". Its Key Manager metadata will be reconciled with this API's scope definition.");
                 }
             }
         }

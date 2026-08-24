@@ -119,10 +119,17 @@ public class ScopesApiServiceImpl implements ScopesApiService {
                 log.warn("Attempt to create scope with restricted prefix: " + scopeName);
                 throw new APIManagementException(ExceptionCodes.INVALID_SCOPE_NAME);
             }
-            if (apiProvider.isScopeKeyExist(scopeName, APIUtil.getTenantIdFromTenantDomain(tenantDomain)) ||
-                    apiProvider.isScopeKeyExistInKeyManager(scopeName, tenantDomain)) {
+            if (apiProvider.isScopeKeyExist(scopeName, APIUtil.getTenantIdFromTenantDomain(tenantDomain))) {
                 throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.SCOPE_ALREADY_REGISTERED,
                         scopeName));
+            }
+            if (apiProvider.isScopeKeyExistInKeyManager(scopeName, tenantDomain)) {
+                // The scope exists in the Key Manager but API Manager holds no record of it, i.e. it is orphaned -
+                // typically left behind by a failed scope deletion. Adopt it instead of failing: registering the
+                // scope is idempotent, and the Key Manager reconciles its metadata afterwards.
+                log.warn("Scope: " + scopeName + " exists in the Key Manager but is not registered in API Manager. " +
+                        "Treating it as an orphaned scope and adopting it as a shared scope. Its Key Manager " +
+                        "metadata will be reconciled with this shared scope definition.");
             }
             Scope scopeToAdd = SharedScopeMappingUtil.fromDTOToScope(body);
             String sharedScopeId = apiProvider.addSharedScope(scopeToAdd, tenantDomain);
