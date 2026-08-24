@@ -2775,6 +2775,15 @@ public class PublisherCommonUtils {
         if (externalExtractor != null) {
             externalExtractor.accept(endpoints);
         }
+        extractURLsFromEndpointConfig(endpointConfigObj, APIConstants.ENDPOINT_PRODUCTION_FAILOVERS, endpoints);
+        extractURLsFromEndpointConfig(endpointConfigObj, APIConstants.ENDPOINT_SANDBOX_FAILOVERS, endpoints);
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        for (String endpoint : endpoints) {
+            if (!endpoint.startsWith("jms:") && !endpoint.startsWith("consul(")
+                    && !endpoint.contains("{") && !endpoint.contains("}")) {
+                APIUtil.validateRemoteURL(endpoint, tenantDomain);
+            }
+        }
         return APIUtil.validateEndpointURLs(endpoints);
     }
 
@@ -2802,9 +2811,30 @@ public class PublisherCommonUtils {
                             errorHandler);
                 }
             } else {
-                org.json.JSONArray endpointArray = endpointConfigObj.getJSONArray(endpointType);
-                for (int i = 0; i < endpointArray.length(); i++) {
-                    endpoints.add((String) endpointArray.getJSONObject(i).get(APIConstants.API_DATA_URL));
+                org.json.JSONArray endpointArray = endpointConfigObj.optJSONArray(endpointType);
+                if (endpointArray != null && endpointArray.length() > 0) {
+                    boolean urlFound = false;
+                    for (int i = 0; i < endpointArray.length(); i++) {
+                        // Skip malformed (non-object) entries instead of failing the request.
+                        org.json.JSONObject endpointEntry = endpointArray.optJSONObject(i);
+                        if (endpointEntry == null) {
+                            continue;
+                        }
+                        String url = endpointEntry.optString(APIConstants.API_DATA_URL, null);
+                        if (StringUtils.isNotBlank(url)) {
+                            endpoints.add(url);
+                            urlFound = true;
+                        }
+                    }
+                    if (!urlFound) {
+                        // A populated endpoint array with no usable URL is a client error for this endpoint type.
+                        ErrorHandler errorHandler = ExceptionCodes.from(ExceptionCodes.ENDPOINT_URL_NOT_PROVIDED,
+                                endpointType);
+                        throw new APIManagementException(
+                                "Url is not provided for the endpoint type: " + endpointType + " in the endpoint " +
+                                        "config",
+                                errorHandler);
+                    }
                 }
             }
         }
@@ -4613,6 +4643,10 @@ public class PublisherCommonUtils {
             throw new APIManagementException("Invalid/Malformed endpoint URL detected",
                     ExceptionCodes.API_ENDPOINT_URL_INVALID);
         }
+        if (!endpointURL.startsWith("jms:") && !endpointURL.startsWith("consul(")
+                && !endpointURL.contains("{") && !endpointURL.contains("}")) {
+            APIUtil.validateRemoteURL(endpointURL, RestApiCommonUtil.getLoggedInUserTenantDomain());
+        }
 
         APIEndpointInfo apiEndpointUpdated = apiProvider.updateAPIEndpoint(apiId, apiEndpoint, organization);
         if (apiEndpointUpdated == null) {
@@ -4661,6 +4695,10 @@ public class PublisherCommonUtils {
         if (!APIUtil.validateEndpointURL(endpointURL)) {
             throw new APIManagementException("Invalid/Malformed endpoint URL detected",
                     ExceptionCodes.API_ENDPOINT_URL_INVALID);
+        }
+        if (!endpointURL.startsWith("jms:") && !endpointURL.startsWith("consul(")
+                && !endpointURL.contains("{") && !endpointURL.contains("}")) {
+            APIUtil.validateRemoteURL(endpointURL, RestApiCommonUtil.getLoggedInUserTenantDomain());
         }
 
         // validate endpoint name
@@ -5194,6 +5232,7 @@ public class PublisherCommonUtils {
             final String authHeader = securityInfo != null ? securityInfo.getHeader() : null;
             final String authValue = securityInfo != null ? securityInfo.getValue() : null;
 
+            APIUtil.validateRemoteURL(serverUrl, RestApiCommonUtil.getLoggedInUserTenantDomain());
             MCPInitializerAndToolFetcher fetcher =
                     new MCPInitializerAndToolFetcher(serverUrl, authHeader, authValue, secureRequested);
 
