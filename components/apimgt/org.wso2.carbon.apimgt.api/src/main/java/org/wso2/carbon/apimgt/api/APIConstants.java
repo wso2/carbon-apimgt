@@ -206,7 +206,7 @@ public class APIConstants {
                 "[a-zA-Z0-9.@\\-]+(?=:(?:rawPredict|streamRawPredict|generateContent|streamGenerateContent))";
 
         // Google Vertex AI - Gemini (publishers/google, :generateContent, usageMetadata.* token counts)
-        public static final String LLM_PROVIDER_SERVICE_VERTEX_AI_GEMINI_NAME = "VertexAIGemini";
+        public static final String LLM_PROVIDER_SERVICE_VERTEX_AI_GEMINI_NAME = "VertexAI-Gemini";
         public static final String LLM_PROVIDER_SERVICE_VERTEX_AI_GEMINI_CONNECTOR = "vertexAiGemini_1.0.0";
         public static final String LLM_PROVIDER_SERVICE_VERTEX_AI_GEMINI_DESCRIPTION =
                 "Google Vertex AI - Gemini service";
@@ -214,7 +214,7 @@ public class APIConstants {
                 "vertex_ai_gemini_api.yaml";
 
         // Google Vertex AI - Anthropic Claude (publishers/anthropic, :rawPredict, usage.input/output_tokens)
-        public static final String LLM_PROVIDER_SERVICE_VERTEX_AI_ANTHROPIC_NAME = "VertexAIAnthropic";
+        public static final String LLM_PROVIDER_SERVICE_VERTEX_AI_ANTHROPIC_NAME = "VertexAI-Anthropic";
         public static final String LLM_PROVIDER_SERVICE_VERTEX_AI_ANTHROPIC_CONNECTOR = "vertexAiAnthropic_1.0.0";
         public static final String LLM_PROVIDER_SERVICE_VERTEX_AI_ANTHROPIC_DESCRIPTION =
                 "Google Vertex AI - Anthropic Claude service";
