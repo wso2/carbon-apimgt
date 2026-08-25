@@ -74,10 +74,13 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
 import org.wso2.carbon.apimgt.spec.parser.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
+import org.wso2.carbon.core.util.CryptoException;
+import org.wso2.carbon.core.util.CryptoUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -587,6 +590,9 @@ public class TemplateBuilderUtil {
         JSONObject modifiedProperties = getModifiedProperties(originalProperties);
         api.setAdditionalProperties(modifiedProperties);
 
+        // Restore the original additional properties in a finally block, so that if any of the dependent work
+        // below fails, a reused API object is never left carrying the temporary (modified) properties.
+        try {
         String endpointConfigString = api.getEndpointConfig();
         if (StringUtils.isNotBlank(endpointConfigString)) {
             try {
@@ -645,11 +651,13 @@ public class TemplateBuilderUtil {
         GatewayAPIDTO gatewayAPIDto = createAPIGatewayDTOtoPublishAPI(environment, api, apiTemplateBuilder,
                 tenantDomain, extractedFolderPath, apidto, clientCertificatesDTOListProduction,
                 clientCertificatesDTOListSandbox, endpointDTOList);
-        // Reset the additional properties to the original values
-        if (originalProperties != null) {
-            api.setAdditionalProperties(originalProperties);
-        }
         return gatewayAPIDto;
+        } finally {
+            // Reset the additional properties to the original values, even if the work above failed.
+            if (originalProperties != null) {
+                api.setAdditionalProperties(originalProperties);
+            }
+        }
     }
 
     /**
@@ -1051,8 +1059,17 @@ public class TemplateBuilderUtil {
         }
 
         boolean isAiApi = APIConstants.API_SUBTYPE_AI_API.equals(api.getSubtype());
-        Map<String, List<SimplifiedEndpoint>> groupedEndpoints = simplifyEndpoints(endpointList).stream()
-                .collect(Collectors.groupingBy(SimplifiedEndpoint::getDeploymentStage));
+        Map<String, List<SimplifiedEndpoint>> groupedEndpoints;
+        try {
+            // simplifyEndpoints can fail at runtime - notably a GCP service-account key decryption failure on
+            // corrupted ciphertext, surfaced as an unchecked exception. Map any such failure to
+            // APIManagementException here so it flows through the standard API error path instead of
+            // bypassing it as a generic server error.
+            groupedEndpoints = simplifyEndpoints(endpointList).stream()
+                    .collect(Collectors.groupingBy(SimplifiedEndpoint::getDeploymentStage));
+        } catch (RuntimeException e) {
+            throw new APIManagementException("Error while preparing endpoint security: " + api.getUuid(), e);
+        }
         List<SimplifiedEndpoint> productionEndpoints = new ArrayList<>(
                 groupedEndpoints.getOrDefault(APIConstants.APIEndpoint.PRODUCTION, Collections.emptyList()));
         List<SimplifiedEndpoint> sandboxEndpoints = new ArrayList<>(
@@ -1226,9 +1243,33 @@ public class TemplateBuilderUtil {
         if (endpoints == null || endpoints.isEmpty()) {
             return new ArrayList<>();
         }
-        return endpoints.stream()
+        List<SimplifiedEndpoint> simplifiedEndpoints = endpoints.stream()
                 .map(SimplifiedEndpoint::new)
                 .collect(Collectors.toList());
+        // Last-mile decrypt for the gateway: the GCP service-account key is encrypted at rest, so decrypt it here
+        // so GCPOAuth2TokenInjector receives usable service-account JSON. base64DecodeAndDecryptAnySize routes
+        // on the storage format (single-shot or chunked); the guard lets plaintext/already-decrypted values pass
+        // through unchanged.
+        CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+        for (SimplifiedEndpoint simplifiedEndpoint : simplifiedEndpoints) {
+            String serviceAccountKey = simplifiedEndpoint.getServiceAccountKey();
+            if (StringUtils.isNotEmpty(serviceAccountKey)) {
+                try {
+                    if (cryptoUtil.isChunkedCipherText(serviceAccountKey)
+                            || cryptoUtil.base64DecodeAndIsSelfContainedCipherText(serviceAccountKey)) {
+                        simplifiedEndpoint.setServiceAccountKey(
+                                new String(cryptoUtil.base64DecodeAndDecryptAnySize(serviceAccountKey),
+                                        StandardCharsets.UTF_8));
+                    }
+                } catch (CryptoException e) {
+                    // Keep this public method free of checked exceptions (avoids a source/binary break for
+                    // callers). A decryption failure here is deploy-blocking, so surface it as unchecked.
+                    throw new RuntimeException("Error while decrypting the GCP service-account key for endpoint "
+                            + simplifiedEndpoint.getEndpointName(), e);
+                }
+            }
+        }
+        return simplifiedEndpoints;
     }
 
     private static void addWebsocketTopicMappings(API api, APIDTO apidto) {
