@@ -37,6 +37,7 @@ public class SimplifiedEndpoint {
     private String roleRegion;
     private String roleExternalId;
     private String authType;
+    private String serviceAccountKey;
     private String endpoint;
     private String deploymentStage;
     private static final String PRODUCTION = "PRODUCTION";
@@ -93,6 +94,7 @@ public class SimplifiedEndpoint {
             this.roleRegion = endpointSecurity.getRoleRegion();
             this.roleExternalId = endpointSecurity.getRoleExternalId();
             this.authType = endpointSecurity.getAuthType();
+            this.serviceAccountKey = endpointSecurity.getServiceAccountKey();
             this.endpoint = endpointDetails.getUrl();
         }
     }
@@ -222,6 +224,14 @@ public class SimplifiedEndpoint {
 
     public void setAuthType(String authType) {
         this.authType = authType;
+    }
+
+    public String getServiceAccountKey() {
+        return serviceAccountKey;
+    }
+
+    public void setServiceAccountKey(String serviceAccountKey) {
+        this.serviceAccountKey = serviceAccountKey;
     }
 
     public String getEndpoint() {
