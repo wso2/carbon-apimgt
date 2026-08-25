@@ -57,6 +57,7 @@ public class APIConstants {
     public static final String API_PUBLISHER_IMPORT_MCP_FILE_SIZE_LIMIT = API_PUBLISHER_IMPORT_DEFINITION_FILE_SIZE_LIMIT + "MCP";
     public static final String API_PUBLISHER_IMPORT_MCP_FILE_SIZE_LIMIT_DEFAULT_MB = "10";
     public static final String ENDPOINT_SECURITY_TYPE_AWS = "aws";
+    public static final String ENDPOINT_SECURITY_TYPE_GCP = "gcp";
     public static final String ENDPOINT_SECURITY_TYPE_UMI = "umi";
     public static final String LLM_PROVIDER_SERVICE_AWS_BEDROCK_SERVICE_NAME = "bedrock";
 
@@ -190,6 +191,39 @@ public class APIConstants {
                 "$.usageMetadata.totalTokenCount";
         public static final String LLM_PROVIDER_SERVICE_GEMINI_RESPONSE_METADATA_IDENTIFIER_MODEL =
                 "$.modelVersion";
+
+        // Google Vertex AI - shared. Vertex fronts multiple publishers (Google, Anthropic, ...) behind a
+        // single OAuth2 (gcp) auth scheme. The project/location/publisher portion is baked into the backend
+        // endpoint URL (so consumers never see it); the gateway resource path is just "/{model}:{operation}".
+        // This regex extracts the model as the path segment immediately preceding the ":<operation>" custom
+        // method, for every publisher. Token-usage JSONPaths differ per publisher, hence the separate
+        // provider services below.
+        public static final String LLM_PROVIDER_SERVICE_VERTEX_AI_VERSION = "1.0.0";
+        public static final String LLM_PROVIDER_SERVICE_VERTEX_AI_SERVICE_NAME = "aiplatform";
+        public static final String LLM_PROVIDER_SERVICE_VERTEX_AI_SCOPE =
+                "https://www.googleapis.com/auth/cloud-platform";
+        public static final String LLM_PROVIDER_SERVICE_VERTEX_AI_METADATA_IDENTIFIER_MODEL =
+                "[a-zA-Z0-9.@\\-]+(?=:(?:rawPredict|streamRawPredict|generateContent|streamGenerateContent))";
+
+        // Google Vertex AI - Gemini (publishers/google, :generateContent, usageMetadata.* token counts)
+        public static final String LLM_PROVIDER_SERVICE_VERTEX_AI_GEMINI_NAME = "VertexAIGemini";
+        public static final String LLM_PROVIDER_SERVICE_VERTEX_AI_GEMINI_CONNECTOR = "vertexAiGemini_1.0.0";
+        public static final String LLM_PROVIDER_SERVICE_VERTEX_AI_GEMINI_DESCRIPTION =
+                "Google Vertex AI - Gemini service";
+        public static final String LLM_PROVIDER_SERVICE_VERTEX_AI_GEMINI_API_DEFINITION_FILE_NAME =
+                "vertex_ai_gemini_api.yaml";
+
+        // Google Vertex AI - Anthropic Claude (publishers/anthropic, :rawPredict, usage.input/output_tokens)
+        public static final String LLM_PROVIDER_SERVICE_VERTEX_AI_ANTHROPIC_NAME = "VertexAIAnthropic";
+        public static final String LLM_PROVIDER_SERVICE_VERTEX_AI_ANTHROPIC_CONNECTOR = "vertexAiAnthropic_1.0.0";
+        public static final String LLM_PROVIDER_SERVICE_VERTEX_AI_ANTHROPIC_DESCRIPTION =
+                "Google Vertex AI - Anthropic Claude service";
+        public static final String LLM_PROVIDER_SERVICE_VERTEX_AI_ANTHROPIC_API_DEFINITION_FILE_NAME =
+                "vertex_ai_anthropic_api.yaml";
+
+        // GCP endpoint-security parameter keys (service-account key supplied per-API as endpoint security)
+        public static final String GCP_SERVICE_ACCOUNT_KEY = "serviceAccountKey";
+
         public static final String LLM_PROVIDER_SERVICE_DEFAULT = "default";
         public static final String LLM_PROVIDER_DEPRECATED = "deprecated";
         public static final String NULL = "null";
