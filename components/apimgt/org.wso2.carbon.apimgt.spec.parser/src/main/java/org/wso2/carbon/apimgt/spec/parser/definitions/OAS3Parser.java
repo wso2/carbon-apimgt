@@ -3295,16 +3295,26 @@ public class OAS3Parser extends APIDefinition {
 
         String heldRefKey = null;
         if (schema.get$ref() != null) {
+            Schema<?> reference = schema;
             String ref = schema.get$ref();
             String refKey = componentRefKey(ref);
+            // refKey is "<category>:<name>"; the component name alone reads better in the emitted
+            // description than the whole JSON Pointer.
+            String name = refKey == null ? ref : refKey.substring(refKey.indexOf(':') + 1);
             if (refKey != null && visitedRefs.contains(refKey)) {
                 log.warn("Circular reference truncated while resolving schema reference: " + ref);
-                // refKey is "<category>:<name>"; the component name alone reads better in the
-                // emitted description than the whole JSON Pointer.
-                return unexpandedObjectSchema(schema, refKey.substring(refKey.indexOf(':') + 1));
+                return unexpandedObjectSchema(reference, name);
             }
             schema = resolveComponentRef(ref, openAPI, visitedRefs, Schema.class);
             if (schema == null) {
+                // resolveComponentRef returns null both for a component that does not exist and for
+                // a chain of aliases that closes on itself. When the component does exist the chain
+                // was circular, so describe the field as an object rather than dropping it - that
+                // matches how every other cycle is rendered.
+                if (isDeclaredSchema(name, openAPI)) {
+                    log.warn("Circular reference truncated while resolving schema reference: " + ref);
+                    return unexpandedObjectSchema(reference, name);
+                }
                 return null;
             }
             // resolveComponentRef releases the reference as soon as its lookup finishes. Hold it
@@ -3413,6 +3423,21 @@ public class OAS3Parser extends APIDefinition {
                     + "'; nested properties are omitted.");
         }
         return placeholder;
+    }
+
+    /**
+     * Reports whether a schema of this name is declared in the components section. Used to tell a
+     * reference that could not be resolved because it is circular from one that names a component
+     * the definition never declares.
+     *
+     * @param name    component name
+     * @param openAPI OpenAPI definition to look in
+     * @return true if the definition declares a schema of that name
+     */
+    private boolean isDeclaredSchema(String name, OpenAPI openAPI) {
+        return openAPI != null && openAPI.getComponents() != null
+                && openAPI.getComponents().getSchemas() != null
+                && openAPI.getComponents().getSchemas().containsKey(name);
     }
 
     /**

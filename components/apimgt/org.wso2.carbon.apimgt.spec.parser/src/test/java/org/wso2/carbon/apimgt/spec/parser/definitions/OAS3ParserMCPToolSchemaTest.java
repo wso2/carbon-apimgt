@@ -710,4 +710,52 @@ public class OAS3ParserMCPToolSchemaTest {
                 "string", props.path("requestBody").path("properties").path("label").path("type").asText());
         assertNoUnresolvedReference(schema, "");
     }
+
+    /**
+     * A chain of aliases that closes on itself: Alias1 points at Alias2, which points back at
+     * Alias1. The cycle is discovered inside resolveComponentRef rather than at the entry
+     * reference, and it used to come back as null, silently removing the field from the schema.
+     */
+    @Test(timeout = CIRCULAR_TIMEOUT_MS)
+    public void testCircularAliasChainIsDescribedNotDropped() throws Exception {
+        String definition = openApi30("/holders", "Holder",
+                "    \"Alias1\": { \"$ref\": \"#/components/schemas/Alias2\" },\n"
+                + "    \"Alias2\": { \"$ref\": \"#/components/schemas/Alias1\" },\n"
+                + "    \"Holder\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": {\n"
+                + "        \"name\": { \"type\": \"string\" },\n"
+                + "        \"aliased\": { \"$ref\": \"#/components/schemas/Alias1\" }\n"
+                + "      }\n"
+                + "    }");
+
+        JsonNode schema = generateToolSchema(definition, "/holders");
+        JsonNode props = requestBodyProperties(schema);
+
+        Assert.assertEquals("string", props.path("name").path("type").asText());
+        Assert.assertTrue("The aliased field must not disappear from the schema",
+                props.has("aliased"));
+        Assert.assertEquals("A circular alias should be described as a plain object",
+                "object", props.path("aliased").path("type").asText());
+        assertNoUnresolvedReference(schema, "");
+    }
+
+    /** A reference naming a component that does not exist is still dropped, not described. */
+    @Test(timeout = CIRCULAR_TIMEOUT_MS)
+    public void testUnknownComponentReferenceIsStillDropped() throws Exception {
+        String definition = openApi30("/holders", "Holder",
+                "    \"Holder\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": {\n"
+                + "        \"name\": { \"type\": \"string\" },\n"
+                + "        \"missing\": { \"$ref\": \"#/components/schemas/DoesNotExist\" }\n"
+                + "      }\n"
+                + "    }");
+
+        JsonNode props = requestBodyProperties(generateToolSchema(definition, "/holders"));
+
+        Assert.assertEquals("string", props.path("name").path("type").asText());
+        Assert.assertFalse("An undefined reference should not be described as an object",
+                props.has("missing"));
+    }
 }
