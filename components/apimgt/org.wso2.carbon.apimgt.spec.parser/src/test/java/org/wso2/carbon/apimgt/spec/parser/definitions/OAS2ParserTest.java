@@ -33,6 +33,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import io.swagger.models.properties.AbstractProperty;
 import io.swagger.models.properties.ArrayProperty;
+import io.swagger.models.properties.MapProperty;
 import io.swagger.models.properties.ObjectProperty;
 import org.wso2.carbon.apimgt.api.APIConstants;
 import org.wso2.carbon.apimgt.api.APIDefinition;
@@ -632,13 +633,16 @@ public class OAS2ParserTest extends OASTestBase {
                 + "      ]\n"
                 + "    }");
 
-        JsonNode props = requestBodyProperties(generateToolSchema(definition, "/nodes"));
+        JsonNode schema = generateToolSchema(definition, "/nodes");
+        JsonNode props = requestBodyProperties(schema);
 
         Assert.assertTrue("Properties merged from the composed model should be present",
                 props.has("createdBy"));
         Assert.assertTrue("Properties declared inline in the allOf should be present",
                 props.has("label"));
-        Assert.assertTrue("The circular field should still be declared", props.has("child"));
+        Assert.assertEquals("The circular field should be described, not left as a raw $ref",
+                "object", props.path("child").path("type").asText());
+        assertNoUnresolvedReference(schema, "");
     }
 
     @Test(timeout = CIRCULAR_TIMEOUT_MS)
@@ -853,6 +857,7 @@ public class OAS2ParserTest extends OASTestBase {
                 "access", "vendorExtensions", "booleanValue");
         assertDeclaredFields(ArrayProperty.class, "TYPE", "uniqueItems", "items", "maxItems", "minItems");
         assertDeclaredFields(ObjectProperty.class, "TYPE", "properties");
+        assertDeclaredFields(MapProperty.class, "property", "minProperties", "maxProperties");
     }
 
     private void assertDeclaredFields(Class<?> type, String... expected) {
@@ -864,5 +869,76 @@ public class OAS2ParserTest extends OASTestBase {
         Assert.assertEquals("swagger-models has changed the fields of " + type.getSimpleName()
                 + ". Review OAS2Parser.copyCommonPropertyFields before updating this list.",
                 want, actual);
+    }
+
+    /**
+     * A cycle that runs only through allOf, never through a property. Nothing on that path
+     * registers the reference unless resolveModel holds it across the traversal of the resolved
+     * model's body, so this recursed until the stack overflowed.
+     */
+    @Test(timeout = CIRCULAR_TIMEOUT_MS)
+    public void testCircularRefThroughAllOfChainTerminates() throws Exception {
+        String definition = swagger20("/nodes", "Alpha",
+                "    \"Alpha\": { \"allOf\": [ { \"$ref\": \"#/definitions/Beta\" } ] },\n"
+                + "    \"Beta\":  { \"allOf\": [ { \"$ref\": \"#/definitions/Alpha\" } ] }");
+
+        JsonNode schema = generateToolSchema(definition, "/nodes");
+
+        Assert.assertTrue("A requestBody should still be emitted",
+                schema.path("properties").has("requestBody"));
+        assertNoUnresolvedReference(schema, "");
+    }
+
+    /**
+     * The cycle runs through a map's value type. resolveProperty handled Ref, Array and Object
+     * properties but not Map, so additionalProperties was never traversed.
+     */
+    @Test(timeout = CIRCULAR_TIMEOUT_MS)
+    public void testCircularRefThroughMapValueTerminates() throws Exception {
+        String definition = swagger20("/trees", "Tree",
+                "    \"Tree\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": {\n"
+                + "        \"name\": { \"type\": \"string\" },\n"
+                + "        \"children\": {\n"
+                + "          \"type\": \"object\",\n"
+                + "          \"additionalProperties\": { \"$ref\": \"#/definitions/Tree\" }\n"
+                + "        }\n"
+                + "      }\n"
+                + "    }");
+
+        JsonNode schema = generateToolSchema(definition, "/trees");
+        JsonNode props = requestBodyProperties(schema);
+
+        Assert.assertEquals("string", props.path("name").path("type").asText());
+        Assert.assertTrue("The recursive map field should still be declared", props.has("children"));
+        assertNoUnresolvedReference(schema, "");
+    }
+
+    /** A map whose value type is not circular must still be expanded. */
+    @Test(timeout = CIRCULAR_TIMEOUT_MS)
+    public void testNonCircularMapValueIsExpanded() throws Exception {
+        String definition = swagger20("/carts", "Cart",
+                "    \"Item\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": { \"sku\": { \"type\": \"string\" } }\n"
+                + "    },\n"
+                + "    \"Cart\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": {\n"
+                + "        \"entries\": {\n"
+                + "          \"type\": \"object\",\n"
+                + "          \"additionalProperties\": { \"$ref\": \"#/definitions/Item\" }\n"
+                + "        }\n"
+                + "      }\n"
+                + "    }");
+
+        JsonNode schema = generateToolSchema(definition, "/carts");
+        JsonNode props = requestBodyProperties(schema);
+
+        Assert.assertEquals("The map value type should be expanded", "string",
+                props.path("entries").path("additionalProperties").path("properties")
+                        .path("sku").path("type").asText());
+        assertNoUnresolvedReference(schema, "");
     }
 }

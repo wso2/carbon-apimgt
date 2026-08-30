@@ -58,6 +58,7 @@ import io.swagger.models.parameters.PathParameter;
 import io.swagger.models.parameters.RefParameter;
 import io.swagger.models.properties.AbstractProperty;
 import io.swagger.models.properties.ArrayProperty;
+import io.swagger.models.properties.MapProperty;
 import io.swagger.models.properties.ObjectProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
@@ -2907,15 +2908,42 @@ public class OAS2Parser extends APIDefinition {
         }
 
         // resolveComponentRef follows nested RefModels internally and never returns one, so this
-        // resolves the whole reference chain and terminates.
+        // runs at most once and resolves the whole reference chain.
+        String heldRef = null;
         while (model instanceof RefModel) {
             String ref = ((RefModel) model).getSimpleRef();
             model = resolveComponentRef(ref, swagger, visitedRefs, Model.class);
             if (model == null) {
-                // resolveComponentRef has already logged why it could not be resolved.
+                // Either undefined, or already on the path. resolveComponentRef has logged which.
                 return null;
             }
+            // resolveComponentRef releases the reference as soon as its lookup finishes. Hold it
+            // again for the whole traversal of the resolved model's body, otherwise a cycle that
+            // runs through allOf rather than through a property is never detected: nothing else on
+            // that path registers the reference.
+            visitedRefs.add(ref);
+            heldRef = ref;
         }
+        try {
+            return resolveModelBody(model, swagger, visitedRefs);
+        } finally {
+            if (heldRef != null) {
+                visitedRefs.remove(heldRef);
+            }
+        }
+    }
+
+    /**
+     * Resolves the composed parts or the properties of a model that has already been dereferenced.
+     * Split out of {@link #resolveModel(Model, Swagger, Set)} so that the reference the model came
+     * from stays on the visited path for the whole traversal.
+     *
+     * @param model       dereferenced model whose body should be resolved
+     * @param swagger     the Swagger definition containing model references
+     * @param visitedRefs references on the current resolution path
+     * @return the resolved ModelImpl
+     */
+    private Model resolveModelBody(Model model, Swagger swagger, Set<String> visitedRefs) {
 
         if (model instanceof ComposedModel) {
             ComposedModel composed = (ComposedModel) model;
@@ -3012,6 +3040,15 @@ public class OAS2Parser extends APIDefinition {
             resolvedArray.setMaxItems(array.getMaxItems());
             resolvedArray.setItems(resolveProperty(array.getItems(), swagger, visitedRefs));
             return resolvedArray;
+        } else if (property instanceof MapProperty) {
+            MapProperty map = (MapProperty) property;
+            MapProperty resolvedMap = new MapProperty();
+            copyCommonPropertyFields(map, resolvedMap);
+            resolvedMap.setMinProperties(map.getMinProperties());
+            resolvedMap.setMaxProperties(map.getMaxProperties());
+            resolvedMap.setAdditionalProperties(
+                    resolveProperty(map.getAdditionalProperties(), swagger, visitedRefs));
+            return resolvedMap;
         } else if (property instanceof ObjectProperty) {
             ObjectProperty obj = (ObjectProperty) property;
             ObjectProperty resolvedObj = new ObjectProperty();
