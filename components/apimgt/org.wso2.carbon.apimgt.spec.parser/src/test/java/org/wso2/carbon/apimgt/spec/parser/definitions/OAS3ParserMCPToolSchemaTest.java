@@ -659,4 +659,55 @@ public class OAS3ParserMCPToolSchemaTest {
                         + "resolved first", "string",
                 backRef.path("properties").path("tag").path("type").asText());
     }
+
+    /**
+     * A parameter's schema can itself reference a circular component. That is a second entry point
+     * into resolution, separate from the request body, and it recursed just as far before the fix.
+     *
+     * buildUnifiedInputSchema reads only type, format, enum and default off a resolved parameter
+     * schema - never its properties - so a circular object parameter is expected to come through as
+     * a bare object. Asserted here so the shape is not later "fixed" back into recursion.
+     */
+    @Test(timeout = CIRCULAR_TIMEOUT_MS)
+    public void testCircularParameterSchemaTerminates() throws Exception {
+        String definition = "{\n"
+                + "  \"openapi\": \"3.0.1\",\n"
+                + "  \"info\": { \"title\": \"Forum\", \"version\": \"1.0\" },\n"
+                + "  \"paths\": {\n"
+                + "    \"/nodes/{tenant}\": {\n"
+                + "      \"post\": {\n"
+                + "        \"parameters\": [\n"
+                + "          { \"name\": \"tenant\", \"in\": \"path\", \"required\": true,\n"
+                + "            \"schema\": { \"type\": \"string\" } },\n"
+                + "          { \"name\": \"filter\", \"in\": \"query\",\n"
+                + "            \"schema\": { \"$ref\": \"#/components/schemas/Node\" } }\n"
+                + "        ],\n"
+                + "        \"requestBody\": { \"content\": { \"application/json\": {\n"
+                + "          \"schema\": { \"$ref\": \"#/components/schemas/Node\" } } } },\n"
+                + "        \"responses\": { \"200\": { \"description\": \"OK\" } }\n"
+                + "      }\n"
+                + "    }\n"
+                + "  },\n"
+                + "  \"components\": { \"schemas\": {\n"
+                + "    \"Node\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": {\n"
+                + "        \"label\": { \"type\": \"string\" },\n"
+                + "        \"child\": { \"$ref\": \"#/components/schemas/Node\" }\n"
+                + "      }\n"
+                + "    }\n"
+                + "  } }\n"
+                + "}";
+
+        JsonNode schema = generateToolSchema(definition, "/nodes/{tenant}");
+        JsonNode props = schema.path("properties");
+
+        Assert.assertEquals("Parameters should be keyed by their location",
+                "string", props.path("path_tenant").path("type").asText());
+        Assert.assertEquals("A circular parameter schema should resolve to a bare object",
+                "object", props.path("query_filter").path("type").asText());
+        Assert.assertEquals("The body should still expand alongside the parameters",
+                "string", props.path("requestBody").path("properties").path("label").path("type").asText());
+        assertNoUnresolvedReference(schema, "");
+    }
 }

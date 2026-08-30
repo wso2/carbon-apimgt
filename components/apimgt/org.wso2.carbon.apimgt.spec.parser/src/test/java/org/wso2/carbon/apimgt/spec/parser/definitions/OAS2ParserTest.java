@@ -976,4 +976,54 @@ public class OAS2ParserTest extends OASTestBase {
                 "string", left.path("properties").path("leftField").path("type").asText());
         assertNoUnresolvedReference(schema, "");
     }
+
+    /**
+     * Non-body parameters sit alongside the request body in the generated schema, keyed by location
+     * so a query parameter and a header of the same name cannot collide. The $ref parameter is
+     * resolved through resolveComponentRef, which now releases its reference on the way out.
+     */
+    @Test(timeout = CIRCULAR_TIMEOUT_MS)
+    public void testParametersAreKeyedByLocationAlongsideCircularBody() throws Exception {
+        String definition = "{\n"
+                + "  \"swagger\": \"2.0\",\n"
+                + "  \"info\": { \"title\": \"Forum\", \"version\": \"1.0\" },\n"
+                + "  \"paths\": {\n"
+                + "    \"/comments/{tenant}\": {\n"
+                + "      \"post\": {\n"
+                + "        \"parameters\": [\n"
+                + "          { \"$ref\": \"#/parameters/TenantId\" },\n"
+                + "          { \"name\": \"limit\", \"in\": \"query\", \"type\": \"integer\" },\n"
+                + "          { \"name\": \"body\", \"in\": \"body\",\n"
+                + "            \"schema\": { \"$ref\": \"#/definitions/Comment\" } }\n"
+                + "        ],\n"
+                + "        \"responses\": { \"200\": { \"description\": \"OK\" } }\n"
+                + "      }\n"
+                + "    }\n"
+                + "  },\n"
+                + "  \"parameters\": {\n"
+                + "    \"TenantId\": { \"name\": \"tenant\", \"in\": \"path\",\n"
+                + "      \"required\": true, \"type\": \"string\" }\n"
+                + "  },\n"
+                + "  \"definitions\": {\n"
+                + "    \"Comment\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": {\n"
+                + "        \"text\": { \"type\": \"string\" },\n"
+                + "        \"parent\": { \"$ref\": \"#/definitions/Comment\" }\n"
+                + "      }\n"
+                + "    }\n"
+                + "  }\n"
+                + "}";
+
+        JsonNode schema = generateToolSchema(definition, "/comments/{tenant}");
+        JsonNode props = schema.path("properties");
+
+        Assert.assertEquals("A $ref parameter should resolve and be keyed by its location",
+                "string", props.path("path_tenant").path("type").asText());
+        Assert.assertEquals("An inline parameter should be keyed by its location",
+                "integer", props.path("query_limit").path("type").asText());
+        Assert.assertEquals("The circular body should still resolve alongside the parameters",
+                "string", props.path("requestBody").path("properties").path("text").path("type").asText());
+        assertNoUnresolvedReference(schema, "");
+    }
 }
