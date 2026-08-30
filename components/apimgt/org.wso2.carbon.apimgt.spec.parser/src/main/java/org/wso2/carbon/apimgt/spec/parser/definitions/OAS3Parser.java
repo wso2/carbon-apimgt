@@ -3212,7 +3212,7 @@ public class OAS3Parser extends APIDefinition {
 
                 String name = param.getIn() + "_" + param.getName();
                 Map<String, Object> paramSchema = new LinkedHashMap<>();
-                Schema<?> schema = resolveSchema(param.getSchema(), openAPI);
+                Schema<?> schema = resolveSchema(param.getSchema(), openAPI, new HashSet<>());
 
                 if (schema != null) {
                     paramSchema.put(APISpecParserConstants.TYPE, schema.getType());
@@ -3247,7 +3247,7 @@ public class OAS3Parser extends APIDefinition {
                 Schema<?> rawSchema =
                         requestBody.getContent().get(APISpecParserConstants.APPLICATION_JSON_MEDIA_TYPE).getSchema();
 
-                Schema<?> bodySchema = resolveSchema(rawSchema, openAPI);
+                Schema<?> bodySchema = resolveSchema(rawSchema, openAPI, new HashSet<>());
 
                 Map<String, Object> requestBodyNode = new LinkedHashMap<>();
                 requestBodyNode.put(APISpecParserConstants.TYPE, APISpecParserConstants.OBJECT);
@@ -3272,19 +3272,6 @@ public class OAS3Parser extends APIDefinition {
             root.put(APISpecParserConstants.REQUIRED, requiredFields);
         }
         return root;
-    }
-
-    /**
-     * Resolves a schema by recursively resolving $ref, allOf, oneOf, anyOf, and not properties.
-     * Returns the resolved Schema object.
-     *
-     * @param schema   Schema to resolve
-     * @param openAPI  OpenAPI definition to resolve against
-     * @return Resolved Schema object
-     */
-    private Schema<?> resolveSchema(Schema<?> schema, OpenAPI openAPI) {
-
-        return resolveSchema(schema, openAPI, new HashSet<>());
     }
 
     /**

@@ -2828,7 +2828,7 @@ public class OAS2Parser extends APIDefinition {
                     }
                     BodyParameter bodyParam = (BodyParameter) param;
                     Model rawModel = bodyParam.getSchema();
-                    Model resolvedModel = resolveModel(rawModel, swagger);
+                    Model resolvedModel = resolveModel(rawModel, swagger, new HashSet<>());
 
                     Map<String, Object> requestBodyNode = new LinkedHashMap<>();
                     requestBodyNode.put(APISpecParserConstants.TYPE, APISpecParserConstants.OBJECT);
@@ -2873,18 +2873,6 @@ public class OAS2Parser extends APIDefinition {
         }
 
         return root;
-    }
-
-    /**
-     * Resolves a model by following references and composed models in the Swagger definition.
-     * It merges properties from all referenced models and handles composed models.
-     *
-     * @param model   the model to resolve
-     * @param swagger the Swagger definition containing model references
-     * @return the resolved ModelImpl or ComposedModel
-     */
-    private Model resolveModel(Model model, Swagger swagger) {
-        return resolveModel(model, swagger, new HashSet<>());
     }
 
     /**
