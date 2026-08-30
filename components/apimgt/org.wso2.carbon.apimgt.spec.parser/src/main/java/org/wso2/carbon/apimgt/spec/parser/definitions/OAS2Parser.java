@@ -2964,10 +2964,6 @@ public class OAS2Parser extends APIDefinition {
         return model;
     }
 
-    private Property resolveProperty(Property property, Swagger swagger) {
-        return resolveProperty(property, swagger, new HashSet<>());
-    }
-
     /**
      * Resolves a property by following references and handling nested properties.
      * It recursively resolves RefProperties, ArrayProperties, and ObjectProperties.
