@@ -3299,7 +3299,9 @@ public class OAS3Parser extends APIDefinition {
             String refKey = componentRefKey(ref);
             if (refKey != null && visitedRefs.contains(refKey)) {
                 log.warn("Circular reference truncated while resolving schema reference: " + ref);
-                return unexpandedObjectSchema(schema, ref);
+                // refKey is "<category>:<name>"; the component name alone reads better in the
+                // emitted description than the whole JSON Pointer.
+                return unexpandedObjectSchema(schema, refKey.substring(refKey.indexOf(':') + 1));
             }
             schema = resolveComponentRef(ref, openAPI, visitedRefs, Schema.class);
             if (schema == null) {
@@ -3399,15 +3401,15 @@ public class OAS3Parser extends APIDefinition {
      * can follow, because the generated schema carries no components section.
      *
      * @param original the reference that could not be expanded
-     * @param ref      the reference string it points at
+     * @param name     the name of the component it points at
      * @return an object schema standing in for the unexpanded reference
      */
-    private Schema<?> unexpandedObjectSchema(Schema<?> original, String ref) {
+    private Schema<?> unexpandedObjectSchema(Schema<?> original, String name) {
         ObjectSchema placeholder = new ObjectSchema();
         if (original != null && StringUtils.isNotBlank(original.getDescription())) {
             placeholder.setDescription(original.getDescription());
         } else {
-            placeholder.setDescription("Circular reference to '" + ref
+            placeholder.setDescription("Circular reference to '" + name
                     + "'; nested properties are omitted.");
         }
         return placeholder;
