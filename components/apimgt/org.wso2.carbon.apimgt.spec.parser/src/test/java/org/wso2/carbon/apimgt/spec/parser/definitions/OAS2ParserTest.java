@@ -941,4 +941,39 @@ public class OAS2ParserTest extends OASTestBase {
                         .path("sku").path("type").asText());
         assertNoUnresolvedReference(schema, "");
     }
+
+    /**
+     * A property referencing an allOf model. resolveModel merges composed models, but resolveProperty
+     * used to expand a reference only when its target was a plain model, so this came back as an
+     * unresolved $ref pointing at a definitions section the generated schema does not carry.
+     */
+    @Test(timeout = CIRCULAR_TIMEOUT_MS)
+    public void testPropertyReferenceToComposedModelIsExpanded() throws Exception {
+        String definition = swagger20("/records", "Record",
+                "    \"Common\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": { \"id\": { \"type\": \"string\" } }\n"
+                + "    },\n"
+                + "    \"Left\": {\n"
+                + "      \"allOf\": [\n"
+                + "        { \"$ref\": \"#/definitions/Common\" },\n"
+                + "        { \"type\": \"object\", \"properties\": { \"leftField\": { \"type\": \"string\" } } }\n"
+                + "      ]\n"
+                + "    },\n"
+                + "    \"Record\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": { \"left\": { \"$ref\": \"#/definitions/Left\" } }\n"
+                + "    }");
+
+        JsonNode schema = generateToolSchema(definition, "/records");
+        JsonNode left = requestBodyProperties(schema).path("left");
+
+        Assert.assertEquals("The composed model should expand to an object",
+                "object", left.path("type").asText());
+        Assert.assertEquals("Properties inherited through allOf should be present",
+                "string", left.path("properties").path("id").path("type").asText());
+        Assert.assertEquals("Properties declared inline in the allOf should be present",
+                "string", left.path("properties").path("leftField").path("type").asText());
+        assertNoUnresolvedReference(schema, "");
+    }
 }

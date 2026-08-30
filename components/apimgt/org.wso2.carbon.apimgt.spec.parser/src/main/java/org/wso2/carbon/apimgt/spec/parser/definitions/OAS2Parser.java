@@ -3019,7 +3019,11 @@ public class OAS2Parser extends APIDefinition {
             visitedRefs.add(ref);
             try {
                 Model refModel = swagger.getDefinitions().get(ref);
-                if (refModel instanceof ModelImpl) {
+                if (refModel != null) {
+                    // resolveModel merges a composed (allOf) definition into a plain one, so a
+                    // reference to either kind of definition is expanded here. Accepting only
+                    // ModelImpl left a reference to a composed definition unresolved, emitting a
+                    // $ref the generated schema cannot follow: it carries no definitions section.
                     Model resolvedModel = resolveModel(refModel, swagger, visitedRefs);
                     ObjectProperty objProp = new ObjectProperty();
                     copyCommonPropertyFields((RefProperty) property, objProp);
