@@ -3307,11 +3307,11 @@ public class OAS3Parser extends APIDefinition {
             }
             schema = resolveComponentRef(ref, openAPI, visitedRefs, Schema.class);
             if (schema == null) {
-                // resolveComponentRef returns null both for a component that does not exist and for
-                // a chain of aliases that closes on itself. When the component does exist the chain
-                // was circular, so describe the field as an object rather than dropping it - that
-                // matches how every other cycle is rendered.
-                if (isDeclaredSchema(name, openAPI)) {
+                // resolveComponentRef returns null both for a chain of aliases that closes on
+                // itself and for one that ends at a component the definition never declares. Only a
+                // cycle is described as an object, matching how every other cycle is rendered; an
+                // unresolved reference keeps its existing behaviour and its field is dropped.
+                if (closesCycle(ref, openAPI, visitedRefs)) {
                     log.warn("Circular reference truncated while resolving schema reference: " + ref);
                     return unexpandedObjectSchema(reference, name);
                 }
@@ -3426,18 +3426,53 @@ public class OAS3Parser extends APIDefinition {
     }
 
     /**
-     * Reports whether a schema of this name is declared in the components section. Used to tell a
-     * reference that could not be resolved because it is circular from one that names a component
-     * the definition never declares.
+     * Reports whether following this reference revisits a component that is already being resolved.
+     * Used to tell a reference that failed because its chain of aliases closes on itself from one
+     * that simply ends at a component the definition never declares - resolveComponentRef returns
+     * null for both, but only the first should be described rather than dropped.
      *
-     * @param name    component name
-     * @param openAPI OpenAPI definition to look in
-     * @return true if the definition declares a schema of that name
+     * @param ref         the reference to follow
+     * @param openAPI     OpenAPI definition to resolve against
+     * @param visitedRefs references already on the current resolution path
+     * @return true if following the reference closes a cycle
      */
-    private boolean isDeclaredSchema(String name, OpenAPI openAPI) {
-        return openAPI != null && openAPI.getComponents() != null
-                && openAPI.getComponents().getSchemas() != null
-                && openAPI.getComponents().getSchemas().containsKey(name);
+    private boolean closesCycle(String ref, OpenAPI openAPI, Set<String> visitedRefs) {
+        Set<String> chain = new HashSet<>(visitedRefs);
+        String current = ref;
+        while (current != null) {
+            String key = componentRefKey(current);
+            if (key == null) {
+                // Not a component reference this parser follows.
+                return false;
+            }
+            if (!chain.add(key)) {
+                // Already on the chain, so the reference closes a cycle.
+                return true;
+            }
+            Schema<?> target = declaredSchema(key, openAPI);
+            if (target == null) {
+                // The chain ends at a component the definition does not declare.
+                return false;
+            }
+            current = target.get$ref();
+        }
+        return false;
+    }
+
+    /**
+     * Looks up the schema a tracking key names, or null if the definition declares no such schema.
+     *
+     * @param refKey  key produced by {@link #componentRefKey(String)}
+     * @param openAPI OpenAPI definition to look in
+     * @return the declared schema, or null
+     */
+    private Schema<?> declaredSchema(String refKey, OpenAPI openAPI) {
+        if (refKey == null || !refKey.startsWith(APISpecParserConstants.SCHEMAS + ":")
+                || openAPI == null || openAPI.getComponents() == null
+                || openAPI.getComponents().getSchemas() == null) {
+            return null;
+        }
+        return openAPI.getComponents().getSchemas().get(refKey.substring(refKey.indexOf(':') + 1));
     }
 
     /**

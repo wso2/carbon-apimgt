@@ -758,4 +758,28 @@ public class OAS3ParserMCPToolSchemaTest {
         Assert.assertFalse("An undefined reference should not be described as an object",
                 props.has("missing"));
     }
+
+    /**
+     * A declared alias whose chain ends at a component the definition never declares. The reference
+     * fails to resolve exactly as a circular one does, but it is not a cycle: the field is dropped
+     * like any other unresolved reference rather than being described as an object.
+     */
+    @Test(timeout = CIRCULAR_TIMEOUT_MS)
+    public void testAliasToUndeclaredComponentIsDropped() throws Exception {
+        String definition = openApi30("/holders", "Holder",
+                "    \"Alias1\": { \"$ref\": \"#/components/schemas/Missing\" },\n"
+                + "    \"Holder\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": {\n"
+                + "        \"name\": { \"type\": \"string\" },\n"
+                + "        \"aliased\": { \"$ref\": \"#/components/schemas/Alias1\" }\n"
+                + "      }\n"
+                + "    }");
+
+        JsonNode props = requestBodyProperties(generateToolSchema(definition, "/holders"));
+
+        Assert.assertEquals("string", props.path("name").path("type").asText());
+        Assert.assertFalse("An alias whose target does not exist is not a cycle and should not be "
+                + "described as an object", props.has("aliased"));
+    }
 }
