@@ -29,6 +29,8 @@ import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
@@ -341,5 +343,320 @@ public class OAS3ParserMCPToolSchemaTest {
         URITemplate tool = result.iterator().next();
         Assert.assertNull("Unmatched tool should have no schema generated",
                 tool.getSchemaDefinition());
+    }
+
+    // -------------------------------------------------------------------------
+    // Circular $ref handling.
+    //
+    // Each of resolveSchema's recursive branches used to start a fresh visitedRefs set instead of
+    // passing on the one it was given, so a cycle running through a schema's properties lost the
+    // path and recursed until the stack overflowed. A reference that closes a cycle is now replaced
+    // with a plain object, so the field stays declared rather than vanishing.
+    //
+    // Every test carries a timeout so a regression fails rather than hanging the build.
+    // -------------------------------------------------------------------------
+
+    private static final int CIRCULAR_TIMEOUT_MS = 30000;
+
+    private static String openApi30(String path, String bodyRef, String schemas) {
+        return "{\n"
+                + "  \"openapi\": \"3.0.1\",\n"
+                + "  \"info\": { \"title\": \"Forum\", \"version\": \"1.0\" },\n"
+                + "  \"paths\": {\n"
+                + "    \"" + path + "\": {\n"
+                + "      \"post\": {\n"
+                + "        \"requestBody\": { \"content\": { \"application/json\": {\n"
+                + "          \"schema\": { \"$ref\": \"#/components/schemas/" + bodyRef + "\" } } } },\n"
+                + "        \"responses\": { \"200\": { \"description\": \"OK\" } }\n"
+                + "      }\n"
+                + "    }\n"
+                + "  },\n"
+                + "  \"components\": { \"schemas\": {\n" + schemas + "\n  } }\n"
+                + "}";
+    }
+
+    private JsonNode generateToolSchema(String definition, String target) throws Exception {
+        Set<URITemplate> templates = new LinkedHashSet<>();
+        templates.add(createDirectBackendTool("theTool", target, "POST", null));
+        Set<URITemplate> result = parser.generateMCPTools(definition, REF_API_ID, BACKEND_ID,
+                APISpecParserConstants.API_SUBTYPE_DIRECT_BACKEND, templates);
+        Assert.assertEquals("Expected exactly one generated tool", 1, result.size());
+        String schema = result.iterator().next().getSchemaDefinition();
+        Assert.assertNotNull("A schema should have been generated", schema);
+        return objectMapper.readTree(schema);
+    }
+
+    private JsonNode requestBodyProperties(JsonNode schema) {
+        Assert.assertTrue("Schema should carry a requestBody property",
+                schema.path("properties").has("requestBody"));
+        JsonNode requestBody = schema.path("properties").path("requestBody");
+        Assert.assertTrue("requestBody should carry its resolved properties",
+                requestBody.has("properties"));
+        return requestBody.path("properties");
+    }
+
+    private void assertNoUnresolvedReference(JsonNode node, String path) {
+        if (node.isObject()) {
+            Iterator<String> names = node.fieldNames();
+            while (names.hasNext()) {
+                String name = names.next();
+                Assert.assertNotEquals("Unresolved reference left at " + path + "/" + name,
+                        "$ref", name);
+                assertNoUnresolvedReference(node.get(name), path + "/" + name);
+            }
+        } else if (node.isArray()) {
+            for (int i = 0; i < node.size(); i++) {
+                assertNoUnresolvedReference(node.get(i), path + "/" + i);
+            }
+        }
+    }
+
+    @Test(timeout = CIRCULAR_TIMEOUT_MS)
+    public void testCircularRefThroughFieldTerminates() throws Exception {
+        String definition = openApi30("/comments", "Comment",
+                "    \"Comment\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"required\": [\"text\"],\n"
+                + "      \"properties\": {\n"
+                + "        \"text\": { \"type\": \"string\" },\n"
+                + "        \"parent\": { \"$ref\": \"#/components/schemas/Comment\" }\n"
+                + "      }\n"
+                + "    }");
+
+        JsonNode props = requestBodyProperties(generateToolSchema(definition, "/comments"));
+
+        Assert.assertEquals("A non-circular sibling should still resolve",
+                "string", props.path("text").path("type").asText());
+        Assert.assertTrue("The circular field should still be declared", props.has("parent"));
+        Assert.assertEquals("An unexpanded cycle should render as a plain object",
+                "object", props.path("parent").path("type").asText());
+    }
+
+    @Test(timeout = CIRCULAR_TIMEOUT_MS)
+    public void testCircularRefThroughListTerminates() throws Exception {
+        String definition = openApi30("/comments", "Comment",
+                "    \"Comment\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": {\n"
+                + "        \"text\": { \"type\": \"string\" },\n"
+                + "        \"replies\": {\n"
+                + "          \"type\": \"array\",\n"
+                + "          \"items\": { \"$ref\": \"#/components/schemas/Comment\" }\n"
+                + "        }\n"
+                + "      }\n"
+                + "    }");
+
+        JsonNode props = requestBodyProperties(generateToolSchema(definition, "/comments"));
+
+        Assert.assertEquals("array", props.path("replies").path("type").asText());
+        Assert.assertEquals("The recursive item type should still be described",
+                "object", props.path("replies").path("items").path("type").asText());
+    }
+
+    @Test(timeout = CIRCULAR_TIMEOUT_MS)
+    public void testIndirectCircularRefTerminates() throws Exception {
+        String definition = openApi30("/threads", "Thread",
+                "    \"Thread\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": {\n"
+                + "        \"title\": { \"type\": \"string\" },\n"
+                + "        \"author\": { \"$ref\": \"#/components/schemas/User\" }\n"
+                + "      }\n"
+                + "    },\n"
+                + "    \"User\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": {\n"
+                + "        \"name\": { \"type\": \"string\" },\n"
+                + "        \"lastThread\": { \"$ref\": \"#/components/schemas/Thread\" }\n"
+                + "      }\n"
+                + "    }");
+
+        JsonNode props = requestBodyProperties(generateToolSchema(definition, "/threads"));
+        JsonNode author = props.path("author");
+
+        Assert.assertEquals("The intermediate schema should expand",
+                "string", author.path("properties").path("name").path("type").asText());
+        Assert.assertEquals("The back-reference should still be described",
+                "object", author.path("properties").path("lastThread").path("type").asText());
+    }
+
+    @Test(timeout = CIRCULAR_TIMEOUT_MS)
+    public void testCircularRefThroughAllOfTerminates() throws Exception {
+        String definition = openApi30("/nodes", "Node",
+                "    \"Audit\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": { \"createdBy\": { \"type\": \"string\" } }\n"
+                + "    },\n"
+                + "    \"Node\": {\n"
+                + "      \"allOf\": [\n"
+                + "        { \"$ref\": \"#/components/schemas/Audit\" },\n"
+                + "        { \"type\": \"object\",\n"
+                + "          \"properties\": {\n"
+                + "            \"label\": { \"type\": \"string\" },\n"
+                + "            \"child\": { \"$ref\": \"#/components/schemas/Node\" }\n"
+                + "          }\n"
+                + "        }\n"
+                + "      ]\n"
+                + "    }");
+
+        JsonNode props = requestBodyProperties(generateToolSchema(definition, "/nodes"));
+
+        Assert.assertTrue("Properties merged from the composed schema should be present",
+                props.has("createdBy"));
+        Assert.assertTrue("Properties declared inline in the allOf should be present",
+                props.has("label"));
+    }
+
+    /** oneOf has no Swagger 2.0 equivalent, so it is only covered here. */
+    @Test(timeout = CIRCULAR_TIMEOUT_MS)
+    public void testCircularRefThroughOneOfTerminates() throws Exception {
+        String definition = openApi30("/shapes", "Shape",
+                "    \"Shape\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": {\n"
+                + "        \"label\": { \"type\": \"string\" },\n"
+                + "        \"variant\": {\n"
+                + "          \"oneOf\": [\n"
+                + "            { \"type\": \"string\" },\n"
+                + "            { \"$ref\": \"#/components/schemas/Shape\" }\n"
+                + "          ]\n"
+                + "        }\n"
+                + "      }\n"
+                + "    }");
+
+        JsonNode props = requestBodyProperties(generateToolSchema(definition, "/shapes"));
+
+        Assert.assertEquals("string", props.path("label").path("type").asText());
+        Assert.assertTrue("The oneOf field should still be declared", props.has("variant"));
+    }
+
+    /** additionalProperties is a separate recursion branch from properties and items. */
+    @Test(timeout = CIRCULAR_TIMEOUT_MS)
+    public void testCircularRefThroughAdditionalPropertiesTerminates() throws Exception {
+        String definition = openApi30("/trees", "Tree",
+                "    \"Tree\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": {\n"
+                + "        \"name\": { \"type\": \"string\" },\n"
+                + "        \"children\": {\n"
+                + "          \"type\": \"object\",\n"
+                + "          \"additionalProperties\": { \"$ref\": \"#/components/schemas/Tree\" }\n"
+                + "        }\n"
+                + "      }\n"
+                + "    }");
+
+        JsonNode props = requestBodyProperties(generateToolSchema(definition, "/trees"));
+
+        Assert.assertEquals("string", props.path("name").path("type").asText());
+        Assert.assertTrue("The recursive map field should still be declared", props.has("children"));
+    }
+
+    @Test(timeout = CIRCULAR_TIMEOUT_MS)
+    public void testGeneratedToolSchemaHasNoUnresolvedReference() throws Exception {
+        String definition = openApi30("/comments", "Comment",
+                "    \"Comment\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": {\n"
+                + "        \"text\": { \"type\": \"string\" },\n"
+                + "        \"parent\": { \"$ref\": \"#/components/schemas/Comment\" }\n"
+                + "      }\n"
+                + "    }");
+
+        assertNoUnresolvedReference(generateToolSchema(definition, "/comments"), "");
+    }
+
+    /**
+     * No cycle at all. Order refers to Address twice, and both occurrences must stay fully
+     * expanded - the visited set tracks the current path, not everything seen so far.
+     */
+    @Test(timeout = CIRCULAR_TIMEOUT_MS)
+    public void testSharedNonCircularRefExpandedAtEveryOccurrence() throws Exception {
+        String definition = openApi30("/orders", "Order",
+                "    \"Address\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": {\n"
+                + "        \"street\": { \"type\": \"string\" },\n"
+                + "        \"city\": { \"type\": \"string\" }\n"
+                + "      }\n"
+                + "    },\n"
+                + "    \"Order\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": {\n"
+                + "        \"billingAddress\": { \"$ref\": \"#/components/schemas/Address\" },\n"
+                + "        \"shippingAddress\": { \"$ref\": \"#/components/schemas/Address\" }\n"
+                + "      }\n"
+                + "    }");
+
+        JsonNode props = requestBodyProperties(generateToolSchema(definition, "/orders"));
+
+        for (String field : new String[] { "billingAddress", "shippingAddress" }) {
+            Assert.assertEquals(field + " should keep its street field", "string",
+                    props.path(field).path("properties").path("street").path("type").asText());
+            Assert.assertEquals(field + " should keep its city field", "string",
+                    props.path(field).path("properties").path("city").path("type").asText());
+        }
+    }
+
+    /**
+     * Root refers to M twice; M refers back to Root. One tool is generated for a Root body and one
+     * for an M body. Resolving a schema writes its expanded content back onto the components, so
+     * each tool must be resolved against its own parse - otherwise the Root tool's truncation of
+     * M.backRef is what the M tool sees, and which tool is degraded depends on iteration order.
+     */
+    @Test(timeout = CIRCULAR_TIMEOUT_MS)
+    public void testResolvingOneToolDoesNotDegradeAnother() throws Exception {
+        String definition = "{\n"
+                + "  \"openapi\": \"3.0.1\",\n"
+                + "  \"info\": { \"title\": \"Graph\", \"version\": \"1.0\" },\n"
+                + "  \"paths\": {\n"
+                + "    \"/roots\": { \"post\": {\n"
+                + "      \"requestBody\": { \"content\": { \"application/json\": {\n"
+                + "        \"schema\": { \"$ref\": \"#/components/schemas/Root\" } } } },\n"
+                + "      \"responses\": { \"200\": { \"description\": \"OK\" } } } },\n"
+                + "    \"/ms\": { \"post\": {\n"
+                + "      \"requestBody\": { \"content\": { \"application/json\": {\n"
+                + "        \"schema\": { \"$ref\": \"#/components/schemas/M\" } } } },\n"
+                + "      \"responses\": { \"200\": { \"description\": \"OK\" } } } }\n"
+                + "  },\n"
+                + "  \"components\": { \"schemas\": {\n"
+                + "    \"Root\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": {\n"
+                + "        \"tag\": { \"type\": \"string\" },\n"
+                + "        \"first\": { \"$ref\": \"#/components/schemas/M\" },\n"
+                + "        \"second\": { \"$ref\": \"#/components/schemas/M\" }\n"
+                + "      }\n"
+                + "    },\n"
+                + "    \"M\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": {\n"
+                + "        \"label\": { \"type\": \"string\" },\n"
+                + "        \"backRef\": { \"$ref\": \"#/components/schemas/Root\" }\n"
+                + "      }\n"
+                + "    }\n"
+                + "  } }\n"
+                + "}";
+
+        Set<URITemplate> templates = new LinkedHashSet<>();
+        templates.add(createDirectBackendTool("createRoot", "/roots", "POST", null));
+        templates.add(createDirectBackendTool("createM", "/ms", "POST", null));
+
+        Set<URITemplate> result = parser.generateMCPTools(definition, REF_API_ID, BACKEND_ID,
+                APISpecParserConstants.API_SUBTYPE_DIRECT_BACKEND, templates);
+        Assert.assertEquals(2, result.size());
+
+        JsonNode mSchema = null;
+        for (URITemplate template : result) {
+            if ("createM".equals(template.getUriTemplate())) {
+                mSchema = objectMapper.readTree(template.getSchemaDefinition());
+            }
+        }
+        Assert.assertNotNull("The M tool should have been generated", mSchema);
+
+        JsonNode backRef = mSchema.path("properties").path("requestBody").path("properties")
+                .path("backRef");
+        Assert.assertEquals("Root should be expanded inside the M tool regardless of which tool "
+                        + "resolved first", "string",
+                backRef.path("properties").path("tag").path("type").asText());
     }
 }
