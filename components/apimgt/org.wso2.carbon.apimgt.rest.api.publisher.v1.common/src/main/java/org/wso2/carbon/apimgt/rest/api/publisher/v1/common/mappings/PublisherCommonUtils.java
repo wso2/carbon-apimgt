@@ -1482,7 +1482,9 @@ public class PublisherCommonUtils {
      * @param oldSandboxGCPKey     Existing (encrypted) sandbox service-account key
      * @param apidto               API DTO
      * @throws CryptoException        If an error occurs while encrypting
-     * @throws APIManagementException If no key is provided for a GCP-secured endpoint
+     * @throws APIManagementException If an error occurs while processing the endpoint security configuration.
+     *                                A missing key is not an error: it selects keyless GCP auth (ADC /
+     *                                Workload Identity).
      */
     public static void encryptEndpointSecurityGCPServiceAccountKey(Map endpointConfig,
                                                                    CryptoUtil cryptoUtil,
@@ -1916,7 +1918,9 @@ public class PublisherCommonUtils {
      * @param oldApiSecret   existing (encrypted) service-account key
      * @param endpointConfig endpoint configuration of the API
      * @throws CryptoException        if an error occurs while encrypting
-     * @throws APIManagementException if no key is provided for a GCP-secured endpoint
+     * @throws APIManagementException if an error occurs while processing the endpoint security configuration.
+     *                                A missing key is not an error: it selects keyless GCP auth (ADC /
+     *                                Workload Identity).
      */
     public static void encryptEndpointSecurityGCPServiceAccountKey(APIEndpointDTO apiEndpointDTO,
                                                                    CryptoUtil cryptoUtil,
