@@ -20,15 +20,20 @@ package org.wso2.carbon.apimgt.gateway.service;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
+import org.apache.axis2.AxisFault;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.gateway.utils.EndpointAdminServiceProxy;
 import org.wso2.carbon.apimgt.gateway.utils.RESTAPIAdminServiceProxy;
 import org.wso2.carbon.apimgt.gateway.utils.SequenceAdminServiceProxy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.rest.api.APIData;
 import org.wso2.carbon.rest.api.ResourceData;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 public class APIGatewayAdminTest {
     String provider = "admin";
@@ -38,6 +43,23 @@ public class APIGatewayAdminTest {
     String tenantDomain = "carbon.super";
     String apiName = APIConstants.SYNAPSE_API_NAME_PREFIX + "--" + name + ":v" + version;
     String apiDefaultName = APIConstants.SYNAPSE_API_NAME_PREFIX + "--" + name;
+
+    @Before
+    public void setUp() {
+        // Every test below targets "carbon.super" as the tenant to act on; establish the caller
+        // as the super tenant so the tenant-access check added to APIGatewayAdmin's *ForTenant
+        // methods does not affect any of them. The negative (non-super, mismatched-tenant) case
+        // is covered separately below with its own caller context.
+        System.setProperty("carbon.home", APIGatewayAdminTest.class.getResource("/").getFile());
+        PrivilegedCarbonContext.startTenantFlow();
+        PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+    }
+
+    @After
+    public void tearDown() {
+        PrivilegedCarbonContext.endTenantFlow();
+    }
 
     @Test
     public void addApiForTenant() throws Exception {
@@ -366,4 +388,26 @@ public class APIGatewayAdminTest {
         Assert.assertEquals(apiGatewayAdmin.isExistingSequenceForTenant(name, tenantDomain), true);
     }
 
+    // --- tenant-access check: not exercised by any test above, which all act as the super tenant ---
+
+    @Test
+    public void testNonSuperCallerNamingOwnTenantIsAllowed() throws Exception {
+
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain("tenant-a.example");
+        APIGatewayAdmin.assertTenantAccessAllowed("tenant-a.example");
+    }
+
+    @Test(expected = AxisFault.class)
+    public void testNonSuperCallerNamingDifferentTenantIsForbidden() throws Exception {
+
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain("tenant-a.example");
+        APIGatewayAdmin.assertTenantAccessAllowed("tenant-b.example");
+    }
+
+    @Test
+    public void testSuperTenantCallerNamingDifferentTenantIsAllowed() throws Exception {
+
+        // setUp() already establishes the super tenant as caller.
+        APIGatewayAdmin.assertTenantAccessAllowed("tenant-b.example");
+    }
 }
