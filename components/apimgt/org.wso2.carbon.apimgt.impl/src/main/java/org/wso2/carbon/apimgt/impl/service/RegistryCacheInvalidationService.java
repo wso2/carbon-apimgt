@@ -19,7 +19,9 @@ package org.wso2.carbon.apimgt.impl.service;
 
 import javax.cache.Cache;
 
+import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -34,6 +36,7 @@ import org.wso2.carbon.registry.core.config.RemoteConfiguration;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 /**
  * This service contains the methods to invalidate registry cache for a given resource
@@ -49,6 +52,7 @@ public class RegistryCacheInvalidationService extends AbstractAdmin {
      * @throws APIManagementException
      */
     public void invalidateCache(String path, String tenantDomain) throws APIManagementException {
+        assertTenantAccessAllowed(tenantDomain);
         Registry registry;
         boolean isTenantFlowStarted = false;
         try {
@@ -107,4 +111,19 @@ public class RegistryCacheInvalidationService extends AbstractAdmin {
         }
     }
 
+    /**
+     * Rejects the request unless the caller is the super tenant or is naming their own tenant.
+     * This service is reachable by any tenant administrator holding the default admin permission
+     * in their own realm; the tenant to invalidate is otherwise taken from the request unchecked.
+     */
+    private static void assertTenantAccessAllowed(String tenantDomain) throws APIManagementException {
+
+        String callerTenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        boolean callerIsSuperTenant = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(
+                callerTenantDomain);
+        if (!callerIsSuperTenant && !StringUtils.equalsIgnoreCase(tenantDomain, callerTenantDomain)) {
+            throw new APIMgtAuthorizationFailedException("Tenant admin '" + callerTenantDomain
+                    + "' is not permitted to act on tenant '" + tenantDomain + "'");
+        }
+    }
 }

@@ -24,6 +24,7 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -38,6 +39,7 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,6 +80,9 @@ public class RegistryCacheInvalidationServiceTestCase {
         PrivilegedCarbonContext privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
         PowerMockito.mockStatic(PrivilegedCarbonContext.class);
         PowerMockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedCarbonContext);
+        // The caller is acting on its own tenant in every existing test below; this is always
+        // allowed regardless of the tenant-access check added to invalidateCache().
+        Mockito.when(privilegedCarbonContext.getTenantDomain()).thenReturn(tenantDomain);
     }
 
     @Test
@@ -141,5 +146,33 @@ public class RegistryCacheInvalidationServiceTestCase {
         RegistryCacheInvalidationService registryCacheInvalidationService = new RegistryCacheInvalidationService();
         registryCacheInvalidationService.invalidateCache(path,tenantDomain);
         Mockito.verify(cache, Mockito.times(1)).remove(ArgumentMatchers.any());
+    }
+
+    @Test(expected = APIMgtAuthorizationFailedException.class)
+    public void testInvalidateCacheRejectsDifferentTenantForNonSuperCaller() throws Exception {
+
+        PrivilegedCarbonContext privilegedCarbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        Mockito.when(privilegedCarbonContext.getTenantDomain()).thenReturn("attacker.com");
+
+        RegistryCacheInvalidationService registryCacheInvalidationService = new RegistryCacheInvalidationService();
+        registryCacheInvalidationService.invalidateCache(path, tenantDomain);
+    }
+
+    @Test
+    public void testInvalidateCacheAllowsDifferentTenantForSuperTenantCaller() throws Exception {
+
+        List<RemoteConfiguration> remoteConfigurationList = new ArrayList<RemoteConfiguration>();
+        Mockito.when(registryContext.getRemoteInstances()).thenReturn(remoteConfigurationList);
+        DataBaseConfiguration dbConfiguration = Mockito.mock(DataBaseConfiguration.class);
+        Mockito.when(registryContext.getDefaultDataBaseConfiguration()).thenReturn(dbConfiguration);
+        PowerMockito.when(RegistryUtils.getResourceCache(RegistryConstants.REGISTRY_CACHE_BACKED_ID)).thenReturn(cache);
+
+        PrivilegedCarbonContext privilegedCarbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        Mockito.when(privilegedCarbonContext.getTenantDomain())
+                .thenReturn(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+
+        RegistryCacheInvalidationService registryCacheInvalidationService = new RegistryCacheInvalidationService();
+        registryCacheInvalidationService.invalidateCache(path, tenantDomain);
+        Mockito.verify(cache, Mockito.times(0)).remove(ArgumentMatchers.any());
     }
 }
