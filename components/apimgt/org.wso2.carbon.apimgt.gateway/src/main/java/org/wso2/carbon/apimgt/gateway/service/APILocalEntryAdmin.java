@@ -68,6 +68,9 @@ public class APILocalEntryAdmin extends org.wso2.carbon.core.AbstractAdmin {
     static void assertTenantAccessAllowed(String tenantDomain) throws AxisFault {
 
         String callerTenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        if (StringUtils.isBlank(callerTenantDomain)) {
+            throw new AxisFault("Unable to determine the caller's tenant domain");
+        }
         boolean callerIsSuperTenant = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(
                 callerTenantDomain);
         if (!callerIsSuperTenant && !StringUtils.equalsIgnoreCase(tenantDomain, callerTenantDomain)) {

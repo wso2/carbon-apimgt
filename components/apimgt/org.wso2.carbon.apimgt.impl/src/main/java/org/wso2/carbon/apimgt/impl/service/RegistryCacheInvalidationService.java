@@ -119,6 +119,9 @@ public class RegistryCacheInvalidationService extends AbstractAdmin {
     private static void assertTenantAccessAllowed(String tenantDomain) throws APIManagementException {
 
         String callerTenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        if (StringUtils.isBlank(callerTenantDomain)) {
+            throw new APIMgtAuthorizationFailedException("Unable to determine the caller's tenant domain");
+        }
         boolean callerIsSuperTenant = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(
                 callerTenantDomain);
         if (!callerIsSuperTenant && !StringUtils.equalsIgnoreCase(tenantDomain, callerTenantDomain)) {

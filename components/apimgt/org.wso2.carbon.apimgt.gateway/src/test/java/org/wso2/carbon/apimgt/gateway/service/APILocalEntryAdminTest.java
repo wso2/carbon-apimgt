@@ -64,4 +64,11 @@ public class APILocalEntryAdminTest {
         startAsTenant(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         APILocalEntryAdmin.assertTenantAccessAllowed(VICTIM_TENANT);
     }
+
+    @Test(expected = AxisFault.class)
+    public void testBlankCallerTenantIsRejectedEvenWithBlankTargetTenant() throws AxisFault {
+
+        startAsTenant("");
+        APILocalEntryAdmin.assertTenantAccessAllowed("");
+    }
 }

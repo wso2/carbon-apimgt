@@ -73,6 +73,9 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
     static void assertTenantAccessAllowed(String tenantDomain) throws AxisFault {
 
         String callerTenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        if (StringUtils.isBlank(callerTenantDomain)) {
+            throw new AxisFault("Unable to determine the caller's tenant domain");
+        }
         boolean callerIsSuperTenant = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(
                 callerTenantDomain);
         if (!callerIsSuperTenant && !StringUtils.equalsIgnoreCase(tenantDomain, callerTenantDomain)) {
@@ -116,6 +119,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
 
     public boolean addApi(String apiProviderName, String apiName, String version, String apiConfig) throws AxisFault {
 
+        assertTenantAccessAllowed(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         RESTAPIAdminServiceProxy restClient = getRestapiAdminClient(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         return restClient.addApi(apiConfig);
     }
@@ -141,6 +145,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
     public boolean addPrototypeApiScriptImpl(String apiProviderName, String apiName, String version, String apiConfig)
             throws AxisFault {
 
+        assertTenantAccessAllowed(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         RESTAPIAdminServiceProxy restClient = getRestapiAdminClient(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         return restClient.addApi(apiConfig);
     }
@@ -156,6 +161,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
     public boolean addDefaultAPI(String apiProviderName, String apiName, String version, String apiConfig)
             throws AxisFault {
 
+        assertTenantAccessAllowed(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         RESTAPIAdminServiceProxy restClient = getRestapiAdminClient(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         return restClient.addApi(apiConfig);
     }
@@ -181,6 +187,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
     public org.wso2.carbon.apimgt.gateway.dto.APIData getApi(String apiName, String version)
             throws AxisFault {
 
+        assertTenantAccessAllowed(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         RESTAPIAdminServiceProxy restClient = getRestapiAdminClient(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         String qualifiedName = GatewayUtils.getQualifiedApiName(apiName, version);
         APIData apiData = restClient.getApi(qualifiedName);
@@ -201,6 +208,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
     public org.wso2.carbon.apimgt.gateway.dto.APIData getDefaultApi(String apiName,
                                                                     String version) throws AxisFault {
 
+        assertTenantAccessAllowed(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         RESTAPIAdminServiceProxy restClient = getRestapiAdminClient(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         String qualifiedName = GatewayUtils.getQualifiedDefaultApiName(apiName);
         APIData apiData = restClient.getApi(qualifiedName);
@@ -224,6 +232,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
 
     public boolean updateApi(String apiName, String version, String apiConfig) throws AxisFault {
 
+        assertTenantAccessAllowed(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         RESTAPIAdminServiceProxy restClient = getRestapiAdminClient(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         String qualifiedName = GatewayUtils.getQualifiedApiName(apiName, version);
         return restClient.updateApi(qualifiedName, apiConfig);
@@ -247,6 +256,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
     public boolean updateApiForInlineScript(String apiName, String version, String apiConfig)
             throws AxisFault {
 
+        assertTenantAccessAllowed(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         RESTAPIAdminServiceProxy restClient = getRestapiAdminClient(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         String qualifiedName = GatewayUtils.getQualifiedApiName(apiName, version);
         return restClient.updateApi(qualifiedName, apiConfig);
@@ -264,6 +274,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
     public boolean updateDefaultApi(String apiName, String version, String apiConfig)
             throws AxisFault {
 
+        assertTenantAccessAllowed(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         RESTAPIAdminServiceProxy restClient = getRestapiAdminClient(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         String qualifiedName = GatewayUtils.getQualifiedDefaultApiName(apiName);
         return restClient.updateApi(qualifiedName, apiConfig);
@@ -296,6 +307,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
 
     public boolean deleteApi(String apiProviderName, String apiName, String version) throws AxisFault {
 
+        assertTenantAccessAllowed(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         RESTAPIAdminServiceProxy restClient = getRestapiAdminClient(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         // Delete secure vault alias properties if exists
         deleteRegistryProperty(apiProviderName, apiName, version, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
@@ -315,6 +327,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
 
     public boolean deleteDefaultApi(String apiName, String version) throws AxisFault {
 
+        assertTenantAccessAllowed(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         RESTAPIAdminServiceProxy restClient = getRestapiAdminClient(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         String qualifiedName = GatewayUtils.getQualifiedDefaultApiName(apiName);
         return restClient.deleteApi(qualifiedName);
@@ -377,6 +390,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
      */
     public boolean addEndpoint(String endpointData) throws AxisFault {
 
+        assertTenantAccessAllowed(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         EndpointAdminServiceProxy endpointAdminServiceProxy =
                 getEndpointAdminServiceClient(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         return endpointAdminServiceProxy.addEndpoint(endpointData);
@@ -406,6 +420,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
      */
     public boolean deleteEndpoint(String endpointName) throws AxisFault {
 
+        assertTenantAccessAllowed(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         EndpointAdminServiceProxy endpointAdminServiceProxy =
                 getEndpointAdminServiceClient(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         return endpointAdminServiceProxy.deleteEndpoint(endpointName);
@@ -461,6 +476,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
      */
     public boolean addSequence(String sequence) throws AxisFault {
 
+        assertTenantAccessAllowed(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         SequenceAdminServiceProxy client =
                 getSequenceAdminServiceClient(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         if (sequence != null && !sequence.isEmpty()) {
@@ -513,6 +529,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
      */
     public boolean deleteSequence(String sequenceName) throws AxisFault {
 
+        assertTenantAccessAllowed(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         SequenceAdminServiceProxy client =
                 getSequenceAdminServiceClient(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         client.deleteSequence(sequenceName);
@@ -535,6 +552,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
      */
     public OMElement getSequence(String sequenceName) throws AxisFault {
 
+        assertTenantAccessAllowed(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         SequenceAdminServiceProxy client =
                 getSequenceAdminServiceClient(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         return (OMElement) client.getSequence(sequenceName);
@@ -549,6 +567,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
 
     public boolean isExistingSequence(String sequenceName) throws AxisFault {
 
+        assertTenantAccessAllowed(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         SequenceAdminServiceProxy client =
                 getSequenceAdminServiceClient(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         return client.isExistingSequence(sequenceName);

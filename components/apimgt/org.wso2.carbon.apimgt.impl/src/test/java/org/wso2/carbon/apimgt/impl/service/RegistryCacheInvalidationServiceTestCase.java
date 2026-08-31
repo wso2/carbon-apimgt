@@ -175,4 +175,14 @@ public class RegistryCacheInvalidationServiceTestCase {
         registryCacheInvalidationService.invalidateCache(path, tenantDomain);
         Mockito.verify(cache, Mockito.times(0)).remove(ArgumentMatchers.any());
     }
+
+    @Test(expected = APIMgtAuthorizationFailedException.class)
+    public void testInvalidateCacheRejectsBlankCallerTenantEvenWithBlankTargetTenant() throws Exception {
+
+        PrivilegedCarbonContext privilegedCarbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        Mockito.when(privilegedCarbonContext.getTenantDomain()).thenReturn("");
+
+        RegistryCacheInvalidationService registryCacheInvalidationService = new RegistryCacheInvalidationService();
+        registryCacheInvalidationService.invalidateCache(path, "");
+    }
 }

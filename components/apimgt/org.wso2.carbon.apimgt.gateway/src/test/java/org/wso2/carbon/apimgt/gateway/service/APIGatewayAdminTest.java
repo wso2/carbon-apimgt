@@ -413,6 +413,13 @@ public class APIGatewayAdminTest {
         APIGatewayAdmin.assertTenantAccessAllowed("tenant-b.example");
     }
 
+    @Test(expected = AxisFault.class)
+    public void testBlankCallerTenantIsRejectedEvenWithBlankTargetTenant() throws Exception {
+
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain("");
+        APIGatewayAdmin.assertTenantAccessAllowed("");
+    }
+
     // --- tenant-access check wiring: doEncryption, deploy/unDeploy API, deploy/unDeploy gateway
     // policy also take a caller-controlled target tenant and must reject a non-super caller naming
     // a different tenant, exactly like the *ForTenant methods above. The check runs before any
@@ -459,5 +466,122 @@ public class APIGatewayAdminTest {
         GatewayPolicyDTO gatewayPolicyDTO = new GatewayPolicyDTO();
         gatewayPolicyDTO.setTenantDomain("tenant-b.example");
         new APIGatewayAdmin().unDeployGatewayPolicy(gatewayPolicyDTO);
+    }
+
+    // --- tenant-access check wiring: the non-*ForTenant overloads below all hard-code
+    // carbon.super as the target tenant instead of taking one from the caller, so only the super
+    // tenant itself should be permitted to invoke them; a non-super caller must be rejected. The
+    // check runs before any proxy is touched, so no mocking is needed to observe the rejection. ---
+
+    @Test(expected = AxisFault.class)
+    public void addApiRejectsNonSuperCaller() throws Exception {
+
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain("tenant-a.example");
+        new APIGatewayAdmin().addApi(provider, name, version, config);
+    }
+
+    @Test(expected = AxisFault.class)
+    public void addPrototypeApiScriptImplRejectsNonSuperCaller() throws Exception {
+
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain("tenant-a.example");
+        new APIGatewayAdmin().addPrototypeApiScriptImpl(provider, name, version, config);
+    }
+
+    @Test(expected = AxisFault.class)
+    public void addDefaultAPIRejectsNonSuperCaller() throws Exception {
+
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain("tenant-a.example");
+        new APIGatewayAdmin().addDefaultAPI(provider, name, version, config);
+    }
+
+    @Test(expected = AxisFault.class)
+    public void getApiRejectsNonSuperCaller() throws Exception {
+
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain("tenant-a.example");
+        new APIGatewayAdmin().getApi(name, version);
+    }
+
+    @Test(expected = AxisFault.class)
+    public void getDefaultApiRejectsNonSuperCaller() throws Exception {
+
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain("tenant-a.example");
+        new APIGatewayAdmin().getDefaultApi(name, version);
+    }
+
+    @Test(expected = AxisFault.class)
+    public void updateApiRejectsNonSuperCaller() throws Exception {
+
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain("tenant-a.example");
+        new APIGatewayAdmin().updateApi(name, version, config);
+    }
+
+    @Test(expected = AxisFault.class)
+    public void updateApiForInlineScriptRejectsNonSuperCaller() throws Exception {
+
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain("tenant-a.example");
+        new APIGatewayAdmin().updateApiForInlineScript(name, version, config);
+    }
+
+    @Test(expected = AxisFault.class)
+    public void updateDefaultApiRejectsNonSuperCaller() throws Exception {
+
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain("tenant-a.example");
+        new APIGatewayAdmin().updateDefaultApi(name, version, config);
+    }
+
+    @Test(expected = AxisFault.class)
+    public void deleteApiRejectsNonSuperCaller() throws Exception {
+
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain("tenant-a.example");
+        new APIGatewayAdmin().deleteApi(provider, name, version);
+    }
+
+    @Test(expected = AxisFault.class)
+    public void deleteDefaultApiRejectsNonSuperCaller() throws Exception {
+
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain("tenant-a.example");
+        new APIGatewayAdmin().deleteDefaultApi(name, version);
+    }
+
+    @Test(expected = AxisFault.class)
+    public void addEndpointRejectsNonSuperCaller() throws Exception {
+
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain("tenant-a.example");
+        new APIGatewayAdmin().addEndpoint(config);
+    }
+
+    @Test(expected = AxisFault.class)
+    public void deleteEndpointRejectsNonSuperCaller() throws Exception {
+
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain("tenant-a.example");
+        new APIGatewayAdmin().deleteEndpoint(name);
+    }
+
+    @Test(expected = AxisFault.class)
+    public void addSequenceRejectsNonSuperCaller() throws Exception {
+
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain("tenant-a.example");
+        new APIGatewayAdmin().addSequence(config);
+    }
+
+    @Test(expected = AxisFault.class)
+    public void deleteSequenceRejectsNonSuperCaller() throws Exception {
+
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain("tenant-a.example");
+        new APIGatewayAdmin().deleteSequence(name);
+    }
+
+    @Test(expected = AxisFault.class)
+    public void getSequenceRejectsNonSuperCaller() throws Exception {
+
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain("tenant-a.example");
+        new APIGatewayAdmin().getSequence(name);
+    }
+
+    @Test(expected = AxisFault.class)
+    public void isExistingSequenceRejectsNonSuperCaller() throws Exception {
+
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain("tenant-a.example");
+        new APIGatewayAdmin().isExistingSequence(name);
     }
 }
