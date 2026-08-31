@@ -66,9 +66,9 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
 
     /**
      * Rejects the request unless the caller is the super tenant or is naming their own tenant.
-     * Every {@code *ForTenant} operation on this service is reachable by any tenant administrator
-     * holding the default admin permission in their own realm; the tenant to operate on is
-     * otherwise taken from the request unchecked.
+     * Every operation on this service that takes a target tenant is reachable by any tenant
+     * administrator holding the default admin permission in their own realm; the tenant to
+     * operate on is otherwise taken from the request unchecked.
      */
     static void assertTenantAccessAllowed(String tenantDomain) throws AxisFault {
 
@@ -570,6 +570,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
      */
     public String doEncryption(String tenantDomain, String secureVaultAlias, String plainTextPass) throws AxisFault {
 
+        assertTenantAccessAllowed(tenantDomain);
         MediationSecurityAdminServiceProxy client = getMediationSecurityAdminServiceProxy(tenantDomain);
         String encodedValue;
         try {
@@ -710,6 +711,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
     }
 
     public boolean deployAPI(GatewayAPIDTO gatewayAPIDTO) throws AxisFault {
+        assertTenantAccessAllowed(gatewayAPIDTO.getTenantDomain());
         try {
             CertificateManager certificateManager = CertificateManagerImpl.getInstance();
             SequenceAdminServiceProxy sequenceAdminServiceProxy = getSequenceAdminServiceClient(
@@ -984,6 +986,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
     }
 
     public boolean unDeployAPI(GatewayAPIDTO gatewayAPIDTO) throws AxisFault {
+        assertTenantAccessAllowed(gatewayAPIDTO.getTenantDomain());
         try {
             SequenceAdminServiceProxy sequenceAdminServiceProxy =
                     getSequenceAdminServiceClient(gatewayAPIDTO.getTenantDomain());
@@ -1016,6 +1019,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
      */
     public void deployGatewayPolicy(GatewayPolicyDTO gatewayPolicyDTO) throws AxisFault {
 
+        assertTenantAccessAllowed(gatewayPolicyDTO.getTenantDomain());
         SequenceAdminServiceProxy sequenceAdminServiceProxy =
                 getSequenceAdminServiceClient(gatewayPolicyDTO.getTenantDomain());
         if (gatewayPolicyDTO.getGatewayPolicySequenceToBeAdded() != null) {
@@ -1047,6 +1051,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
      */
     public void unDeployGatewayPolicy(GatewayPolicyDTO gatewayPolicyDTO) throws AxisFault {
 
+        assertTenantAccessAllowed(gatewayPolicyDTO.getTenantDomain());
         SequenceAdminServiceProxy sequenceAdminServiceProxy = getSequenceAdminServiceClient(
                 gatewayPolicyDTO.getTenantDomain());
         if (gatewayPolicyDTO.getGatewayPolicySequenceToBeAdded() != null) {

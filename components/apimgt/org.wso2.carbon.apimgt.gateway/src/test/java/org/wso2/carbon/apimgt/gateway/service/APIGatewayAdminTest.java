@@ -26,6 +26,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
+import org.wso2.carbon.apimgt.api.gateway.GatewayPolicyDTO;
 import org.wso2.carbon.apimgt.gateway.utils.EndpointAdminServiceProxy;
 import org.wso2.carbon.apimgt.gateway.utils.RESTAPIAdminServiceProxy;
 import org.wso2.carbon.apimgt.gateway.utils.SequenceAdminServiceProxy;
@@ -409,5 +411,53 @@ public class APIGatewayAdminTest {
 
         // setUp() already establishes the super tenant as caller.
         APIGatewayAdmin.assertTenantAccessAllowed("tenant-b.example");
+    }
+
+    // --- tenant-access check wiring: doEncryption, deploy/unDeploy API, deploy/unDeploy gateway
+    // policy also take a caller-controlled target tenant and must reject a non-super caller naming
+    // a different tenant, exactly like the *ForTenant methods above. The check runs before any
+    // downstream proxy is touched, so no mocking is needed to observe the rejection. ---
+
+    @Test(expected = AxisFault.class)
+    public void doEncryptionRejectsDifferentTenantForNonSuperCaller() throws Exception {
+
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain("tenant-a.example");
+        new APIGatewayAdmin().doEncryption("tenant-b.example", "alias", "secret");
+    }
+
+    @Test(expected = AxisFault.class)
+    public void deployAPIRejectsDifferentTenantForNonSuperCaller() throws Exception {
+
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain("tenant-a.example");
+        GatewayAPIDTO gatewayAPIDTO = new GatewayAPIDTO();
+        gatewayAPIDTO.setTenantDomain("tenant-b.example");
+        new APIGatewayAdmin().deployAPI(gatewayAPIDTO);
+    }
+
+    @Test(expected = AxisFault.class)
+    public void unDeployAPIRejectsDifferentTenantForNonSuperCaller() throws Exception {
+
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain("tenant-a.example");
+        GatewayAPIDTO gatewayAPIDTO = new GatewayAPIDTO();
+        gatewayAPIDTO.setTenantDomain("tenant-b.example");
+        new APIGatewayAdmin().unDeployAPI(gatewayAPIDTO);
+    }
+
+    @Test(expected = AxisFault.class)
+    public void deployGatewayPolicyRejectsDifferentTenantForNonSuperCaller() throws Exception {
+
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain("tenant-a.example");
+        GatewayPolicyDTO gatewayPolicyDTO = new GatewayPolicyDTO();
+        gatewayPolicyDTO.setTenantDomain("tenant-b.example");
+        new APIGatewayAdmin().deployGatewayPolicy(gatewayPolicyDTO);
+    }
+
+    @Test(expected = AxisFault.class)
+    public void unDeployGatewayPolicyRejectsDifferentTenantForNonSuperCaller() throws Exception {
+
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain("tenant-a.example");
+        GatewayPolicyDTO gatewayPolicyDTO = new GatewayPolicyDTO();
+        gatewayPolicyDTO.setTenantDomain("tenant-b.example");
+        new APIGatewayAdmin().unDeployGatewayPolicy(gatewayPolicyDTO);
     }
 }
