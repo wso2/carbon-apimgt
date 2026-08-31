@@ -19,9 +19,12 @@
 package org.wso2.carbon.apimgt.gateway.service;
 
 import org.apache.axis2.AxisFault;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.gateway.utils.LocalEntryServiceProxy;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 /**
  * API Local Entry Admin Service.
@@ -52,7 +55,25 @@ public class APILocalEntryAdmin extends org.wso2.carbon.core.AbstractAdmin {
      * @throws AxisFault
      */
     protected LocalEntryServiceProxy getLocalEntryAdminClient(String tenantDomain) throws AxisFault {
+        assertTenantAccessAllowed(tenantDomain);
         return new LocalEntryServiceProxy(tenantDomain);
+    }
+
+    /**
+     * Rejects the request unless the caller is the super tenant or is naming their own tenant.
+     * Every operation on this service is reachable by any tenant administrator holding the default
+     * admin permission in their own realm; the tenant to operate on is otherwise taken from the
+     * request unchecked.
+     */
+    static void assertTenantAccessAllowed(String tenantDomain) throws AxisFault {
+
+        String callerTenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        boolean callerIsSuperTenant = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(
+                callerTenantDomain);
+        if (!callerIsSuperTenant && !StringUtils.equalsIgnoreCase(tenantDomain, callerTenantDomain)) {
+            throw new AxisFault("Tenant admin '" + callerTenantDomain
+                    + "' is not permitted to act on tenant '" + tenantDomain + "'");
+        }
     }
 
     /**
