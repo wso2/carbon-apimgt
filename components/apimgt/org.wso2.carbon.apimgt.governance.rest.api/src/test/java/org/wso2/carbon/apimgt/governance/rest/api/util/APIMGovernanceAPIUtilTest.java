@@ -23,6 +23,7 @@ import org.junit.After;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.governance.api.APIMGovernanceAPIConstants;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -73,8 +74,11 @@ public class APIMGovernanceAPIUtilTest {
     public void testNonSuperCallerNamingDifferentTenantIsForbidden() {
 
         startAsTenant(OWN_TENANT);
-        assertThrows(APIMGovernanceException.class,
+        APIMGovernanceException exception = assertThrows(APIMGovernanceException.class,
                 () -> APIMGovernanceAPIUtil.getValidatedOrganization(messageContextFor(OTHER_TENANT)));
+        assertEquals(APIMGovExceptionCodes.ORGANIZATION_MISMATCH.getErrorCode(),
+                exception.getErrorHandler().getErrorCode());
+        assertEquals(403, exception.getErrorHandler().getHttpStatusCode());
     }
 
     @Test
@@ -89,7 +93,9 @@ public class APIMGovernanceAPIUtilTest {
     public void testMissingOrganizationStillRejected() {
 
         startAsTenant(OWN_TENANT);
-        assertThrows(APIMGovernanceException.class,
+        APIMGovernanceException exception = assertThrows(APIMGovernanceException.class,
                 () -> APIMGovernanceAPIUtil.getValidatedOrganization(messageContextFor(null)));
+        assertEquals(APIMGovExceptionCodes.ORGANIZATION_NOT_FOUND, exception.getErrorHandler());
+        assertEquals(400, exception.getErrorHandler().getHttpStatusCode());
     }
 }
