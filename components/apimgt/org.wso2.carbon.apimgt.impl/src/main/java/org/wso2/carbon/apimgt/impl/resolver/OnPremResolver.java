@@ -22,7 +22,6 @@ import java.util.TreeMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.APIMgtBadRequestException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
@@ -50,19 +49,12 @@ public class OnPremResolver implements OrganizationResolver {
         }
 
         String tenantDomain = null;
-        String callerTenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         if (requestedTenantDomain != null) {
             String header = requestedTenantDomain.get(0).toString();
             if (StringUtils.isEmpty(header)) {
-                tenantDomain = callerTenantDomain;
+                tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
             } else {
                 tenantDomain = header;
-            }
-            boolean callerIsSuperTenant = APIConstants.SUPER_TENANT_DOMAIN.equals(callerTenantDomain);
-            if (!callerIsSuperTenant && !StringUtils.equals(tenantDomain, callerTenantDomain)) {
-                String errorMessage = "Tenant admin '" + callerTenantDomain
-                        + "' is not permitted to act on tenant '" + tenantDomain + "'";
-                throw new APIMgtAuthorizationFailedException(errorMessage);
             }
             try {
                 if (APIConstants.ORG_ALL_QUERY_PARAM.equals(tenantDomain)){
