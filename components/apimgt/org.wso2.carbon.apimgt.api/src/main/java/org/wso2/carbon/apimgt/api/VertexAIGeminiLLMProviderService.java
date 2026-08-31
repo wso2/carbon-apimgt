@@ -75,16 +75,17 @@ public class VertexAIGeminiLLMProviderService extends BuiltInLLMProviderService 
             llmProviderConfiguration.setConnectorType(this.getType());
 
             List<LLMProviderMetadata> llmProviderMetadata = new ArrayList<>();
-            // Model is carried in the URL path (.../models/{model}:generateContent) for both request and
-            // response, since Vertex routes by path. Reuse the path regex for both.
+            // Request model is carried in the URL path (.../models/{model}:generateContent), since Vertex
+            // routes by path. The response body echoes the resolved model in "modelVersion", so take the
+            // response model from there (matching the direct Gemini provider).
             llmProviderMetadata.add(new LLMProviderMetadata(
                     APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_REQUEST_MODEL,
                     APIConstants.AIAPIConstants.INPUT_SOURCE_PATH,
                     APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_VERTEX_AI_METADATA_IDENTIFIER_MODEL, false));
             llmProviderMetadata.add(new LLMProviderMetadata(
                     APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_RESPONSE_MODEL,
-                    APIConstants.AIAPIConstants.INPUT_SOURCE_PATH,
-                    APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_VERTEX_AI_METADATA_IDENTIFIER_MODEL, false));
+                    APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD,
+                    APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_GEMINI_RESPONSE_METADATA_IDENTIFIER_MODEL, false));
             llmProviderMetadata.add(new LLMProviderMetadata(
                     APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_PROMPT_TOKEN_COUNT,
                     APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD,
