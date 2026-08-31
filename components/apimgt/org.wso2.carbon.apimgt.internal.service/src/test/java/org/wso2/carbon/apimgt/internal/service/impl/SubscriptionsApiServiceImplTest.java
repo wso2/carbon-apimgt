@@ -21,11 +21,15 @@ package org.wso2.carbon.apimgt.internal.service.impl;
 import org.junit.Test;
 import org.wso2.carbon.apimgt.api.model.subscription.Subscription;
 import org.wso2.carbon.apimgt.impl.dao.SubscriptionValidationDAO;
+import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionListDTO;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+
+import javax.ws.rs.core.Response;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 public class SubscriptionsApiServiceImplTest {
 
@@ -166,6 +170,30 @@ public class SubscriptionsApiServiceImplTest {
     public void testValidateOrganizationUsesAuthenticatedTenantWhenRequestedOrganizationIsMissing() {
 
         assertEquals(TENANT_ORGANIZATION, validateAs(TENANT_ORGANIZATION, null));
+    }
+
+    @Test
+    public void testValidateOrganizationRecognizesSuperTenantRegardlessOfCase() {
+
+        // Every other super-tenant check in this class is case-insensitive; this one must match.
+        assertEquals(OTHER_ORGANIZATION, validateAs(
+                MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.toUpperCase(), OTHER_ORGANIZATION));
+    }
+
+    @Test
+    public void testMissingAuthenticatedOrganizationReturnsEmptyListInsteadOfUnscopedQuery() throws Exception {
+
+        // A caller whose own tenant cannot be resolved must not fall through to the unscoped
+        // getAllSubscriptions() branches further down subscriptionsGet(). A thread that never
+        // started a tenant flow has no tenant domain set, reproducing that unresolved state
+        // directly, since RestApiCommonUtil.getLoggedInUserTenantDomain() is a plain
+        // CarbonContext read.
+        System.setProperty("carbon.home", SubscriptionsApiServiceImplTest.class.getResource("/").getFile());
+        Response response = new SubscriptionsApiServiceImpl().subscriptionsGet(
+                null, null, null, null, null, null);
+
+        assertEquals(200, response.getStatus());
+        assertTrue(((SubscriptionListDTO) response.getEntity()).getList().isEmpty());
     }
 
     private String validateAs(String authenticatedOrganization, String requestedOrganization) {

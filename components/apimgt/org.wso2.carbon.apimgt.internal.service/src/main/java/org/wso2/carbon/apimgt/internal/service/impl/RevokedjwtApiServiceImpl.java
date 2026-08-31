@@ -38,7 +38,7 @@ public class RevokedjwtApiServiceImpl implements RevokedjwtApiService {
             return revokedEventsDTO;
         }
 
-        boolean isSuperTenant = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain);
+        boolean isSuperTenant = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(tenantDomain);
         for (RevokedJWTEventData.RevokedJWTData revokedJWT : revokedJWTEventData.getRevokedJWTList()) {
             if (isSuperTenant || revokedJWT.getTenantId() == tenantId) {
                 RevokedJWTDTO revokedJWTDTO = new RevokedJWTDTO();
@@ -49,13 +49,13 @@ public class RevokedjwtApiServiceImpl implements RevokedjwtApiService {
         }
         for (RevokedJWTConsumerKeyDTO revokedConsumerKey :
                 revokedJWTEventData.getRevokedJWTConsumerKeyList()) {
-            if (isSuperTenant || tenantDomain.equals(revokedConsumerKey.getOrganization())) {
+            if (isSuperTenant || tenantDomain.equalsIgnoreCase(revokedConsumerKey.getOrganization())) {
                 revokedEventsDTO.getRevokedJWTConsumerKeyList().add(revokedConsumerKey);
             }
         }
         for (RevokedJWTSubjectEntityDTO revokedSubjectEntity :
                 revokedJWTEventData.getRevokedJWTSubjectEntityList()) {
-            if (isSuperTenant || tenantDomain.equals(revokedSubjectEntity.getOrganization())) {
+            if (isSuperTenant || tenantDomain.equalsIgnoreCase(revokedSubjectEntity.getOrganization())) {
                 revokedEventsDTO.getRevokedJWTSubjectEntityList().add(revokedSubjectEntity);
             }
         }
@@ -67,7 +67,7 @@ public class RevokedjwtApiServiceImpl implements RevokedjwtApiService {
         if (StringUtils.isBlank(tenantDomain)) {
             return false;
         }
-        boolean isSuperTenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain);
+        boolean isSuperTenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(tenantDomain);
         boolean isSuperTenantId = MultitenantConstants.SUPER_TENANT_ID == tenantId;
         return isSuperTenantDomain == isSuperTenantId && (isSuperTenantId || tenantId >= 0);
     }

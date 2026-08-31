@@ -74,6 +74,30 @@ public class RevokedjwtApiServiceImplTest {
     }
 
     @Test
+    public void testFilterRevokedJWTEventsForSuperTenantRegardlessOfDomainCase() {
+
+        RevokedEventsDTO result = RevokedjwtApiServiceImpl.filterRevokedJWTEvents(
+                createRevokedJWTEventData(), MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.toUpperCase(),
+                MultitenantConstants.SUPER_TENANT_ID);
+
+        assertEquals(3, result.getRevokedJWTList().size());
+        assertEquals(2, result.getRevokedJWTConsumerKeyList().size());
+        assertEquals(2, result.getRevokedJWTSubjectEntityList().size());
+    }
+
+    @Test
+    public void testFilterRevokedJWTEventsForTenantRegardlessOfOrganizationCase() {
+
+        RevokedEventsDTO result = RevokedjwtApiServiceImpl.filterRevokedJWTEvents(
+                createRevokedJWTEventData(), TENANT_DOMAIN.toUpperCase(), TENANT_ID);
+
+        assertEquals(1, result.getRevokedJWTConsumerKeyList().size());
+        assertEquals("own-consumer-key", result.getRevokedJWTConsumerKeyList().get(0).getConsumerKey());
+        assertEquals(1, result.getRevokedJWTSubjectEntityList().size());
+        assertEquals("own-subject", result.getRevokedJWTSubjectEntityList().get(0).getEntityId());
+    }
+
+    @Test
     public void testFilterRevokedJWTEventsFailsClosedForInvalidTenantContext() {
 
         assertEmpty(RevokedjwtApiServiceImpl.filterRevokedJWTEvents(

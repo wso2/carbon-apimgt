@@ -43,13 +43,18 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
 
         Response result;
 
-        SubscriptionValidationDAO subscriptionValidationDAO = new SubscriptionValidationDAO();
         List<Subscription> subscriptionList = new ArrayList<>();
+        String authenticatedOrganization = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        if (StringUtils.isEmpty(authenticatedOrganization)) {
+            return Response.ok().entity(
+                    SubscriptionValidationDataUtil.fromSubscriptionToSubscriptionListDTO(subscriptionList)).build();
+        }
+
+        SubscriptionValidationDAO subscriptionValidationDAO = new SubscriptionValidationDAO();
         xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
         String organization = validateOrganization(RestApiUtil.getOrganization(messageContext),
-                RestApiCommonUtil.getLoggedInUserTenantDomain());
+                authenticatedOrganization);
         if (StringUtils.isNotEmpty(applicationUUID) && StringUtils.isNotEmpty(apiUUID)) {
-            String authenticatedOrganization = RestApiCommonUtil.getLoggedInUserTenantDomain();
             Subscription subscription = getSubscription(subscriptionValidationDAO, apiUUID, applicationUUID,
                     authenticatedOrganization);
             if (subscription != null) {
@@ -58,7 +63,6 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             result = Response.ok().entity(
                     SubscriptionValidationDataUtil.fromSubscriptionToSubscriptionListDTO(subscriptionList)).build();
         } else if (apiId != null && appId != null) {
-            String authenticatedOrganization = RestApiCommonUtil.getLoggedInUserTenantDomain();
             Subscription subscription = getSubscription(subscriptionValidationDAO, apiId, appId,
                     authenticatedOrganization);
             if (subscription != null) {
@@ -117,7 +121,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         if (StringUtils.isEmpty(authenticatedOrganization)) {
             return null;
         }
-        return MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(authenticatedOrganization)
+        return MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(authenticatedOrganization)
                 ? requestedOrganization : authenticatedOrganization;
     }
 }
