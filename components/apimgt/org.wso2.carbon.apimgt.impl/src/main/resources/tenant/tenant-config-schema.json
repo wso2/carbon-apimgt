@@ -11,7 +11,6 @@
     "IsUnlimitedTierPaid",
     "ExtensionHandlerPosition",
     "RESTAPIScopes",
-    "Meta",
     "NotificationsEnabled",
     "Notifications",
     "DefaultRoles"
@@ -455,54 +454,6 @@
               }
             ]
           }
-        }
-      },
-      "additionalProperties": true
-    },
-    "Meta": {
-      "$id": "#/properties/Meta",
-      "type": "object",
-      "title": "The Meta schema",
-      "description": "An explanation about the purpose of this instance.",
-      "default": {},
-      "examples": [
-        {
-          "Migration": {
-            "3.0.0": true
-          }
-        }
-      ],
-      "required": [
-        "Migration"
-      ],
-      "properties": {
-        "Migration": {
-          "$id": "#/properties/Meta/properties/Migration",
-          "type": "object",
-          "title": "The Migration schema",
-          "description": "An explanation about the purpose of this instance.",
-          "default": {},
-          "examples": [
-            {
-              "3.0.0": true
-            }
-          ],
-          "required": [
-            "3.0.0"
-          ],
-          "properties": {
-            "3.0.0": {
-              "$id": "#/properties/Meta/properties/Migration/properties/3.0.0",
-              "type": "boolean",
-              "title": "The 3.0.0 schema",
-              "description": "An explanation about the purpose of this instance.",
-              "default": false,
-              "examples": [
-                true
-              ]
-            }
-          },
-          "additionalProperties": true
         }
       },
       "additionalProperties": true
