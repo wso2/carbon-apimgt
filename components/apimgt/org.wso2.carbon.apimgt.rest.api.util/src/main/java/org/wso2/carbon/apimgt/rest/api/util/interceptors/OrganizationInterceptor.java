@@ -25,6 +25,7 @@ import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.APIMgtBadRequestException;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -70,6 +71,8 @@ public class OrganizationInterceptor extends AbstractPhaseInterceptor {
         } catch (APIManagementException e) {
             if (e instanceof APIMgtBadRequestException) {
                 RestApiUtil.handleBadRequest(e.getMessage(), 901300L, logger);
+            } else if (e instanceof APIMgtAuthorizationFailedException) {
+                RestApiUtil.handleAuthorizationFailure(e.getMessage(), logger);
             } else {
                 RestApiUtil.handleInternalServerError("Error while resolving the organization resolver", e, logger);
             }
