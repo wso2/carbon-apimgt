@@ -6,6 +6,9 @@ info:
     models hosted on Google Vertex AI, via the `rawPredict` and `streamRawPredict`
     custom methods on the `publishers/anthropic` model resource.
 
+    Note: the streaming method (`streamRawPredict`) is not delivered incrementally on the
+    WSO2 API Manager Classic Gateway - the response is buffered and returned as a whole.
+
     **Vertex-specific notes:**
     - The target model is identified in the **URL path** (`.../models/{model}:rawPredict`),
       NOT in the request body. The body therefore omits the Anthropic `model` field.
@@ -43,7 +46,7 @@ paths:
         - name: model
           in: path
           required: true
-          description: "The Claude model identifier, e.g. `claude-sonnet-4@20250514`."
+          description: "The Claude model identifier, e.g. `claude-sonnet-4`."
           schema:
             type: string
       requestBody:
@@ -107,7 +110,7 @@ paths:
         - name: model
           in: path
           required: true
-          description: "The Claude model identifier, e.g. `claude-sonnet-4@20250514`."
+          description: "The Claude model identifier, e.g. `claude-sonnet-4`."
           schema:
             type: string
       requestBody:

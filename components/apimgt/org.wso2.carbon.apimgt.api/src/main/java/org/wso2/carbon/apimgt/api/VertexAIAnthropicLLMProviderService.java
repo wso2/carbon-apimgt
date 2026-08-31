@@ -103,9 +103,11 @@ public class VertexAIAnthropicLLMProviderService extends BuiltInLLMProviderServi
             // The model-group name must equal the provider's own name: the admin UI populates the
             // models section by finding the model group whose name matches the provider name.
             List<LLMModel> modelList = new ArrayList<>();
+            // Bare model IDs (no @YYYYMMDD suffix): they match Google's current documented usage, resolve to
+            // the model's current version, and - unlike the @-pinned form - route cleanly through the gateway
+            // resource path (the '@' character is not matched by the API resource template).
             modelList.add(new LLMModel(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_VERTEX_AI_ANTHROPIC_NAME,
-                    Arrays.asList("claude-sonnet-4@20250514", "claude-3-5-sonnet-v2@20241022",
-                            "claude-3-5-haiku@20241022")));
+                    Arrays.asList("claude-sonnet-4", "claude-3-5-sonnet-v2", "claude-3-5-haiku")));
             llmProvider.setModelList(modelList);
 
             llmProvider.setConfigurations(llmProviderConfiguration.toJsonString());
