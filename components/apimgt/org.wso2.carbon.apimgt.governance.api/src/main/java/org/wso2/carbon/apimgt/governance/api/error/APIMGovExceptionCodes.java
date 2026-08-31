@@ -31,6 +31,8 @@ public enum APIMGovExceptionCodes implements ErrorHandler {
     DATASOURCE_INACCESSIBLE(990003, "Error while accessing the datasource.",
             500, "Error while accessing the datasource with name: %s", true),
     BAD_REQUEST(990004, "Bad request.", 400, "Bad request: %s"),
+    ORGANIZATION_MISMATCH(990005, "Not permitted to act on the requested organization.",
+            403, "Tenant admin '%s' is not permitted to act on organization '%s'"),
 
     // Ruleset related codes
     RULESET_ALREADY_EXIST(990100, "Ruleset already exists",

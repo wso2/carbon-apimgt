@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.governance.rest.api.util;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.governance.api.APIMGovernanceAPIConstants;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
@@ -25,6 +26,7 @@ import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.ErrorHandler;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ErrorDTO;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 /**
  * This class contains utility methods for Governance API
@@ -44,6 +46,13 @@ public class APIMGovernanceAPIUtil {
             throw new APIMGovernanceException(
                     "Organization is not found in the request", APIMGovExceptionCodes
                     .ORGANIZATION_NOT_FOUND);
+        }
+        String callerTenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        boolean callerIsSuperTenant = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(
+                callerTenantDomain);
+        if (!callerIsSuperTenant && !StringUtils.equalsIgnoreCase(organization, callerTenantDomain)) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ORGANIZATION_MISMATCH,
+                    callerTenantDomain, organization);
         }
         return organization;
     }
