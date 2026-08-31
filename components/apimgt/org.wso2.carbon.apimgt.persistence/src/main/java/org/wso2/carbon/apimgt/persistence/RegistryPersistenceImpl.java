@@ -2789,7 +2789,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             String visibleOrgs = getOrganizationVisibilityForApiArtifact(registry, apiId);
             if (DocumentContent.ContentSourceType.FILE.equals(content.getSourceType())) {
                 ResourceFile resource = content.getResourceFile();
-                String filePath = RegistryPersistenceDocUtil.getDocumentFilePath(apiSourcePath,
+                String filePath = RegistryPersistenceDocUtil.getDocumentFilePath(apiSourcePath, docId,
                         resource.getName());
                 String visibility = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY);
                 String visibleRolesList = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES);
@@ -2846,6 +2846,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 updateDocArtifact.setAttribute("toggle", Boolean.toString(!toggle));
                 docArtifactManager.updateGenericArtifact(updateDocArtifact);
             }
+        } catch (IllegalArgumentException e) {
+            throw new DocumentationPersistenceException(e.getMessage(), e,
+                    ExceptionCodes.from(ExceptionCodes.DOCUMENT_INVALID_FILE_NAME, e.getMessage()));
         } catch (APIPersistenceException | RegistryException | APIManagementException | PersistenceException
                 | UserStoreException e) {
             throw new DocumentationPersistenceException("Error while adding document content", e);
