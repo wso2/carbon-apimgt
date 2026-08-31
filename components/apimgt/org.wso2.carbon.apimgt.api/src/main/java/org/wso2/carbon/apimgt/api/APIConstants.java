@@ -203,7 +203,7 @@ public class APIConstants {
         public static final String LLM_PROVIDER_SERVICE_VERTEX_AI_SCOPE =
                 "https://www.googleapis.com/auth/cloud-platform";
         public static final String LLM_PROVIDER_SERVICE_VERTEX_AI_METADATA_IDENTIFIER_MODEL =
-                "[a-zA-Z0-9.@\\-]+(?=:(?:rawPredict|streamRawPredict|generateContent|streamGenerateContent))";
+                "[a-zA-Z0-9.@\\-]+(?=:[a-zA-Z])";
 
         // Google Vertex AI - Gemini (publishers/google, :generateContent, usageMetadata.* token counts)
         public static final String LLM_PROVIDER_SERVICE_VERTEX_AI_GEMINI_NAME = "VertexAI-Gemini";
