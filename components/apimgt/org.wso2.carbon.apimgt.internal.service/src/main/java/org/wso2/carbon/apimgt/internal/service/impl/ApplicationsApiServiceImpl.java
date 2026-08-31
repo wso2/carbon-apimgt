@@ -25,10 +25,13 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.SubscriptionValidationDAO;
 import org.wso2.carbon.apimgt.internal.service.ApplicationsApiService;
 import org.wso2.carbon.apimgt.internal.service.utils.SubscriptionValidationDataUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.ws.rs.core.Response;
 
 public class ApplicationsApiServiceImpl implements ApplicationsApiService {
@@ -38,7 +41,9 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
         SubscriptionValidationDAO subscriptionValidationDAO = new SubscriptionValidationDAO();
         if (appId != null && appId > 0) {
-            List<Application> application = subscriptionValidationDAO.getApplicationById(appId);
+            String authenticatedOrganization = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            List<Application> application =
+                    getApplicationById(subscriptionValidationDAO, appId, authenticatedOrganization);
             return Response.ok().entity(SubscriptionValidationDataUtil.fromApplicationToApplicationListDTO(application)
             ).build();
         }
@@ -59,5 +64,20 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         }
         return Response.ok().entity(SubscriptionValidationDataUtil.fromApplicationToApplicationListDTO(
                 subscriptionValidationDAO.getAllApplications())).build();
+    }
+
+    static List<Application> getApplicationById(SubscriptionValidationDAO subscriptionValidationDAO, int appId,
+                                                String authenticatedOrganization) {
+
+        if (StringUtils.isEmpty(authenticatedOrganization)) {
+            return Collections.emptyList();
+        }
+        List<Application> applications = subscriptionValidationDAO.getApplicationById(appId);
+        if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(authenticatedOrganization)) {
+            return applications;
+        }
+        return applications.stream()
+                .filter(application -> authenticatedOrganization.equalsIgnoreCase(application.getOrganization()))
+                .collect(Collectors.toList());
     }
 }
