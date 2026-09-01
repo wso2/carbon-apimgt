@@ -58,6 +58,7 @@ import io.swagger.models.parameters.PathParameter;
 import io.swagger.models.parameters.RefParameter;
 import io.swagger.models.properties.AbstractProperty;
 import io.swagger.models.properties.ArrayProperty;
+import io.swagger.models.properties.ComposedProperty;
 import io.swagger.models.properties.MapProperty;
 import io.swagger.models.properties.ObjectProperty;
 import io.swagger.models.properties.Property;
@@ -3020,6 +3021,11 @@ public class OAS2Parser extends APIDefinition {
                     }
                     return objProp;
                 }
+                // The definition the reference names does not exist. Drop the field rather than
+                // emitting the reference unresolved: the generated schema carries no definitions
+                // section, so a surviving $ref points at nothing.
+                log.warn("Component not found in reference: " + ref);
+                return null;
             } finally {
                 visitedRefs.remove(ref);
             }
@@ -3032,6 +3038,26 @@ public class OAS2Parser extends APIDefinition {
             resolvedArray.setMaxItems(array.getMaxItems());
             resolvedArray.setItems(resolveProperty(array.getItems(), swagger, visitedRefs));
             return resolvedArray;
+        } else if (property instanceof ComposedProperty) {
+            // A property written as an inline allOf. Merged into one object, the same way
+            // resolveModel merges a ComposedModel and the same way OAS3Parser renders allOf, so
+            // that a consumer sees one plain object rather than a composition to interpret.
+            // Leaving it unresolved emitted a $ref the generated schema cannot follow.
+            ComposedProperty composed = (ComposedProperty) property;
+            ObjectProperty merged = new ObjectProperty();
+            copyCommonPropertyFields(composed, merged);
+            Map<String, Property> mergedProps = new LinkedHashMap<>();
+            if (composed.getAllOf() != null) {
+                for (Property part : composed.getAllOf()) {
+                    Property resolvedPart = resolveProperty(part, swagger, visitedRefs);
+                    if (resolvedPart instanceof ObjectProperty
+                            && ((ObjectProperty) resolvedPart).getProperties() != null) {
+                        mergedProps.putAll(((ObjectProperty) resolvedPart).getProperties());
+                    }
+                }
+            }
+            merged.setProperties(mergedProps);
+            return merged;
         } else if (property instanceof MapProperty) {
             MapProperty map = (MapProperty) property;
             MapProperty resolvedMap = new MapProperty();

@@ -33,6 +33,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import io.swagger.models.properties.AbstractProperty;
 import io.swagger.models.properties.ArrayProperty;
+import io.swagger.models.properties.ComposedProperty;
 import io.swagger.models.properties.MapProperty;
 import io.swagger.models.properties.ObjectProperty;
 import org.wso2.carbon.apimgt.api.APIConstants;
@@ -858,6 +859,7 @@ public class OAS2ParserTest extends OASTestBase {
         assertDeclaredFields(ArrayProperty.class, "TYPE", "uniqueItems", "items", "maxItems", "minItems");
         assertDeclaredFields(ObjectProperty.class, "TYPE", "properties");
         assertDeclaredFields(MapProperty.class, "property", "minProperties", "maxProperties");
+        assertDeclaredFields(ComposedProperty.class, "TYPE", "allOf");
     }
 
     private void assertDeclaredFields(Class<?> type, String... expected) {
@@ -1024,6 +1026,74 @@ public class OAS2ParserTest extends OASTestBase {
                 "integer", props.path("query_limit").path("type").asText());
         Assert.assertEquals("The circular body should still resolve alongside the parameters",
                 "string", props.path("requestBody").path("properties").path("text").path("type").asText());
+        assertNoUnresolvedReference(schema, "");
+    }
+
+    /**
+     * A property written as an inline allOf parses to a ComposedProperty. resolveProperty handled
+     * Ref, Array, Map and Object properties only, so its allOf entries were never traversed and any
+     * $ref inside them survived into the generated schema.
+     */
+    @Test(timeout = CIRCULAR_TIMEOUT_MS)
+    public void testComposedPropertyIsMergedIntoOneObject() throws Exception {
+        String definition = swagger20("/entries", "Entry",
+                "    \"Common\": { \"type\": \"object\",\n"
+                + "      \"properties\": { \"id\": { \"type\": \"string\" } } },\n"
+                + "    \"Entry\": { \"type\": \"object\", \"properties\": {\n"
+                + "        \"merged\": { \"allOf\": [ { \"$ref\": \"#/definitions/Common\" },\n"
+                + "            { \"type\": \"object\",\n"
+                + "              \"properties\": { \"note\": { \"type\": \"string\" } } } ] } } }");
+
+        JsonNode schema = generateToolSchema(definition, "/entries");
+        JsonNode merged = requestBodyProperties(schema).path("merged");
+
+        Assert.assertEquals("The composed property should render as one object",
+                "object", merged.path("type").asText());
+        Assert.assertEquals("Properties from the referenced part should be merged in",
+                "string", merged.path("properties").path("id").path("type").asText());
+        Assert.assertEquals("Properties declared inline should be merged in",
+                "string", merged.path("properties").path("note").path("type").asText());
+        assertNoUnresolvedReference(schema, "");
+    }
+
+    /** A composed property whose allOf points back at an enclosing model must still terminate. */
+    @Test(timeout = CIRCULAR_TIMEOUT_MS)
+    public void testCircularComposedPropertyTerminates() throws Exception {
+        String definition = swagger20("/nodes", "Node",
+                "    \"Node\": { \"type\": \"object\", \"properties\": {\n"
+                + "        \"label\": { \"type\": \"string\" },\n"
+                + "        \"child\": { \"allOf\": [ { \"$ref\": \"#/definitions/Node\" } ] } } }");
+
+        JsonNode schema = generateToolSchema(definition, "/nodes");
+        JsonNode props = requestBodyProperties(schema);
+
+        Assert.assertEquals("string", props.path("label").path("type").asText());
+        Assert.assertTrue("The composed field should still be declared", props.has("child"));
+        assertNoUnresolvedReference(schema, "");
+    }
+
+    /**
+     * A reference naming a definition that does not exist. It fails to resolve exactly as a
+     * circular one does, but it is not a cycle: the field is dropped rather than being emitted with
+     * an unresolved $ref, matching how OAS3Parser treats an undeclared component.
+     */
+    @Test(timeout = CIRCULAR_TIMEOUT_MS)
+    public void testUnknownDefinitionReferenceIsDropped() throws Exception {
+        String definition = swagger20("/holders", "Holder",
+                "    \"Holder\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": {\n"
+                + "        \"name\":    { \"type\": \"string\" },\n"
+                + "        \"missing\": { \"$ref\": \"#/definitions/DoesNotExist\" }\n"
+                + "      }\n"
+                + "    }");
+
+        JsonNode schema = generateToolSchema(definition, "/holders");
+        JsonNode props = requestBodyProperties(schema);
+
+        Assert.assertEquals("string", props.path("name").path("type").asText());
+        Assert.assertFalse("An undefined reference should not survive in the schema",
+                props.has("missing"));
         assertNoUnresolvedReference(schema, "");
     }
 }
