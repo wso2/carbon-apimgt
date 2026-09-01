@@ -393,8 +393,12 @@
         This enables the API Chat feature which leverages AI for API testing within Developer Portal.
     -->
     <APIChat>
-        <!-- Enable API Chat for API Manager -->
-        <Enabled>{{apim.ai.enable}}</Enabled>
+        <!--
+            Enable API Chat for API Manager. Enabled by default.
+            Set [apim.ai] api_chat_enable = false in deployment.toml to turn off this
+            feature alone, or enable = false to turn off every AI feature.
+        -->
+        <Enabled>{% if apim.ai.enable and apim.ai.api_chat_enable %}true{% else %}false{% endif %}</Enabled>
 
         <AuthToken>{{apim.ai.token}}</AuthToken>
 
@@ -442,8 +446,12 @@
         This enables the Marketplace Assistant feature which leverages AI for API searching within Developer Portal.
     -->
     <MarketplaceAssistant>
-        <!-- Enable Marketplace Assistant for API Manager -->
-        <Enabled>{{apim.ai.enable}}</Enabled>
+        <!--
+            Enable Marketplace Assistant for API Manager. Enabled by default.
+            Set [apim.ai] marketplace_assistant_enable = false in deployment.toml to
+            turn off this feature alone, or enable = false to turn off every AI feature.
+        -->
+        <Enabled>{% if apim.ai.enable and apim.ai.marketplace_assistant_enable %}true{% else %}false{% endif %}</Enabled>
 
         <AuthToken>{{apim.ai.token}}</AuthToken>
 
@@ -462,8 +470,12 @@
     </MarketplaceAssistant>
 
     <DesignAssistant>
-        <!-- Enable Design Assistant for API Manager -->
-        <Enabled>{{apim.ai.enable}}</Enabled>
+        <!--
+            Enable Design Assistant for API Manager. Enabled by default.
+            Set [apim.ai] design_assistant_enable = false in deployment.toml to turn off
+            this feature alone, or enable = false to turn off every AI feature.
+        -->
+        <Enabled>{% if apim.ai.enable and apim.ai.design_assistant_enable %}true{% else %}false{% endif %}</Enabled>
 
         <AuthToken>{{apim.ai.token}}</AuthToken>
 
@@ -1280,7 +1292,7 @@
                 {% elif apim.throttling.jms.job_queue_size is defined %}
                 <JobQueueSize>{{apim.throttling.jms.job_queue_size}}</JobQueueSize>
                 {% endif %}
-            <JMSTaskManager>
+            </JMSTaskManager>
             {% endif %}
             <JMSConnectionParameters>
                 <transport.jms.ConnectionFactoryJNDIName>{{apim.throttling.jms.conn_jndi_name}}</transport.jms.ConnectionFactoryJNDIName>
@@ -1366,6 +1378,9 @@
                 {% if apim.distributed_throttling.keyvalue_store.connection_timeout is defined %}
                 <ConnectionTimeout>{{apim.distributed_throttling.keyvalue_store.connection_timeout}}</ConnectionTimeout>
                 {% endif %}
+                {% if apim.distributed_throttling.keyvalue_store.socket_timeout is defined %}
+                <SocketTimeout>{{apim.distributed_throttling.keyvalue_store.socket_timeout}}</SocketTimeout>
+                {% endif %}
                 {% if apim.distributed_throttling.keyvalue_store.ssl is defined %}
                 <IsSslEnabled>{{apim.distributed_throttling.keyvalue_store.ssl}}</IsSslEnabled>
                 {% endif %}
@@ -1389,6 +1404,9 @@
                 {% endif %}
                 {% if apim.distributed_throttling.keyvalue_store.time_between_eviction_runs_millis is defined %}
                 <TimeBetweenEvictionRunsMillis>{{apim.distributed_throttling.keyvalue_store.time_between_eviction_runs_millis}}</TimeBetweenEvictionRunsMillis>
+                {% endif %}
+                {% if apim.distributed_throttling.keyvalue_store.max_wait_millis is defined %}
+                <MaxWaitMillis>{{apim.distributed_throttling.keyvalue_store.max_wait_millis}}</MaxWaitMillis>
                 {% endif %}
             </KeyValueStoreOptions>
             {% endif %}
@@ -2103,6 +2121,14 @@
                 <Property name="{{key}}">{{value}}</Property>
                 {% endfor %}
           </VectorDBProvider>
+          {% if apim.ai.property_enricher_impl is defined %}
+          <PropertyEnricherImpl>{{apim.ai.property_enricher_impl}}</PropertyEnricherImpl>
+          {% endif %}
+
+          <!-- Azure User-Managed Identity (UMI) Token Provider Configuration -->
+          <AzureUMI>
+              <Scope>{{apim.ai.azure_umi.scope}}</Scope>
+          </AzureUMI>
       </AI>
 
       <GatewayNotificationConfiguration>
@@ -2213,4 +2239,18 @@
       <Mediation>
         <EnableSecureXMLProcessing>{{apim.mediation.enable_secure_xml_processing}}</EnableSecureXMLProcessing>
       </Mediation>
+      {% if server.network_security.access_control is defined %}
+            <NetworkSecurityAccessControl>
+              <Enabled>true</Enabled>
+              {% if server.network_security.access_control.mode is defined %}
+              <Mode>{{server.network_security.access_control.mode}}</Mode>
+              {% endif %}
+              <BlockPrivateNetworkAccess>{{server.network_security.access_control.block_private_network_access | default("false")}}</BlockPrivateNetworkAccess>
+              {% if server.network_security.access_control.hosts is defined %}
+              {% for host in server.network_security.access_control.hosts %}
+              <Host>{{host}}</Host>
+              {% endfor %}
+              {% endif %}
+            </NetworkSecurityAccessControl>
+            {% endif %}
 </APIManager>

@@ -109,7 +109,11 @@ public class ServicesApiServiceImpl implements ServicesApiService {
             ServiceEntry createdService = serviceCatalog.getServiceByUUID(serviceId, tenantId);
             return Response.ok().entity(ServiceEntryMappingUtil.fromServiceToDTO(createdService, false)).build();
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error when validating the service definition", log);
+            if (e.getErrorHandler() != null && e.getErrorHandler().getHttpStatusCode() == 400) {
+                RestApiUtil.handleBadRequest(e.getErrorHandler().getErrorDescription(), log);
+            } else {
+                RestApiUtil.handleInternalServerError("Error when validating the service definition", log);
+            }
         } catch (IOException e) {
             RestApiUtil.handleInternalServerError("Error when reading the file content", log);
         }
@@ -428,7 +432,11 @@ public class ServicesApiServiceImpl implements ServicesApiService {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
                 RestApiUtil.handleResourceNotFoundError("Service", serviceId, e, log);
             }
-            RestApiUtil.handleInternalServerError("Error when validating the service definition", log);
+            if (e.getErrorHandler() != null && e.getErrorHandler().getHttpStatusCode() == 400) {
+                RestApiUtil.handleBadRequest(e.getErrorHandler().getErrorDescription(), log);
+            } else {
+                RestApiUtil.handleInternalServerError("Error when validating the service definition", log);
+            }
         } catch (IOException e) {
             RestApiUtil.handleInternalServerError("Error when reading the file content", log);
         }
@@ -504,7 +512,8 @@ public class ServicesApiServiceImpl implements ServicesApiService {
     private APIDefinitionValidationResponse validateOpenAPIDefinition(String url, String definitionContent)
             throws APIManagementException {
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
-        OASParserOptions parserOptions = CommonUtil.getOasParserOptions();
+        OASParserOptions parserOptions = APIUtil.buildRefResolutionOptions(CommonUtil.getOasParserOptions(),
+                RestApiCommonUtil.getLoggedInUserTenantDomain());
         if (definitionContent != null) {
             validationResponse = OASParserUtil.validateAPIDefinition(definitionContent, true, parserOptions);
         } else if (url != null) {

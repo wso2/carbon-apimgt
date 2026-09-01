@@ -44,6 +44,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "lifecycle state"),
     TIER_CANNOT_BE_NULL(900304, "The tier cannot be null.", 400, "The tier cannot be null"),
     TIER_NAME_INVALID(900305, "The tier name is invalid.", 400, "The tier name is invalid"),
+    SUBSCRIBER_NOT_FOUND(900306, "Subscriber not found", 404, "Subscriber with ID '%s' not found."),
     APPLICATION_NOT_FOUND(900307, "Application not found", 404, "Application not found"),
     API_NOT_FOUND(900308, "API Not Found", 404, "Requested API with id '%s' not found"),
     APPLICATION_INACTIVE(900309, "Application is not active", 400, "Application is not active"),
@@ -144,6 +145,13 @@ public enum ExceptionCodes implements ErrorHandler {
     RESOURCE_RETRIEVAL_FAILED(900402, "Resource retrieval failed", 400, "Resource retrieval failed"),
     USER_MAPPING_RETRIEVAL_FAILED(900404, "User mapping retrieval failed", 404, "User mapping retrieval failed"),
     MALFORMED_URL(900403, "Malformed URL", 400, "Malformed URL"),
+    UNTRUSTED_URL(900405, "URL could not be resolved", 400,
+            "The provided URL could not be resolved."),
+    UNTRUSTED_URL_IN_DEFINITION(900407, "Remote reference could not be resolved", 400,
+            "A remote reference in the definition could not be resolved."),
+    NETWORK_SECURITY_ACCESS_CONTROL_MISCONFIGURED(900406,
+            "Internal server error. Please contact the system administrator.", 500,
+            "Internal server error. Please contact the system administrator."),
 
     // Endpoint related codes
     ENDPOINT_NOT_FOUND(900450, "Endpoint Not Found", 404, "Endpoint Not Found"),
@@ -926,6 +934,9 @@ public enum ExceptionCodes implements ErrorHandler {
             "One or more MCP tools are duplicated."),
     INVALID_MCP_BACKEND_OPERATION(904014, "Invalid MCP backend operation", 400,
             "The backend operation '%s %s' does not match any resource in the referenced API '%s'."),
+    REFERENCE_API_NOT_FOUND(904015, "Reference API not found", 400,
+            "The API this MCP Server is built on (name '%s', version '%s', id '%s') does not exist in this "
+                    + "environment. Create that API here before importing the MCP Server."),
 
     // gateway notification related codes
     GATEWAY_NOTIFICATION_BAD_REQUEST(902052, "Invalid request for gateway notification", 400,

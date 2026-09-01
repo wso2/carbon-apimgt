@@ -41,6 +41,7 @@ import io.swagger.v3.parser.ObjectMapperFactory;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
@@ -57,6 +58,7 @@ import org.wso2.carbon.apimgt.api.APIComplianceException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
@@ -193,6 +195,7 @@ import static org.wso2.carbon.apimgt.impl.APIConstants.REPUBLISH;
 public class PublisherCommonUtils {
 
     private static final Log log = LogFactory.getLog(PublisherCommonUtils.class);
+    private static final String UNKNOWN_REFERENCE = "UNKNOWN";
     public static final String SESSION_TIMEOUT_CONFIG_KEY = "sessionTimeOut";
     static APIMGovernanceService apimGovernanceService = ServiceReferenceHolder.getInstance()
             .getAPIMGovernanceService();
@@ -1373,9 +1376,17 @@ public class PublisherCommonUtils {
                             .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION);
                     String productionEndpointType = (String) endpointSecurityProduction
                             .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
+                    String productionAuthType = (String) endpointSecurityProduction
+                            .get(APIConstants.ENDPOINT_SECURITY_AWS_AUTH_TYPE);
 
                     if (APIConstants.ENDPOINT_SECURITY_TYPE_AWS.equals(productionEndpointType)) {
-                        if (endpointSecurityProduction.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY) != null &&
+                        if (APIConstants.ENDPOINT_SECURITY_AWS_AUTH_TYPE_ENVIRONMENT.equalsIgnoreCase(
+                                productionAuthType)) {
+                            // Environment-credentials mode uses no static keys. Remove any secret key from
+                            // the payload so a plaintext secret can never be persisted.
+                            endpointSecurityProduction.remove(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY);
+                        } else if (endpointSecurityProduction.get(
+                                APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY) != null &&
                                 StringUtils.isNotEmpty(endpointSecurityProduction.get(
                                         APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY).toString()) &&
                                 !endpointSecurityProduction.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY)
@@ -1404,9 +1415,16 @@ public class PublisherCommonUtils {
                             .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX);
                     String sandboxEndpointType = (String) endpointSecuritySandbox
                             .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
+                    String sandboxAuthType = (String) endpointSecuritySandbox
+                            .get(APIConstants.ENDPOINT_SECURITY_AWS_AUTH_TYPE);
 
                     if (APIConstants.ENDPOINT_SECURITY_TYPE_AWS.equals(sandboxEndpointType)) {
-                        if (endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY) != null
+                        if (APIConstants.ENDPOINT_SECURITY_AWS_AUTH_TYPE_ENVIRONMENT.equalsIgnoreCase(
+                                sandboxAuthType)) {
+                            // Environment-credentials mode uses no static keys. Remove any secret key from
+                            // the payload so a plaintext secret can never be persisted.
+                            endpointSecuritySandbox.remove(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY);
+                        } else if (endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY) != null
                                 && StringUtils.isNotEmpty(
                                 endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY)
                                         .toString()) &&
@@ -1671,9 +1689,16 @@ public class PublisherCommonUtils {
                             APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION);
                     String productionEndpointType = (String) endpointSecurityProduction.get(
                             APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
+                    String productionAuthType = (String) endpointSecurityProduction.get(
+                            APIConstants.ENDPOINT_SECURITY_AWS_AUTH_TYPE);
 
                     if (APIConstants.ENDPOINT_SECURITY_TYPE_AWS.equals(productionEndpointType)) {
-                        if (endpointSecurityProduction.get(
+                        if (APIConstants.ENDPOINT_SECURITY_AWS_AUTH_TYPE_ENVIRONMENT.equalsIgnoreCase(
+                                productionAuthType)) {
+                            // Environment-credentials mode uses no static keys. Remove any secret key from
+                            // the payload so a plaintext secret can never be persisted.
+                            endpointSecurityProduction.remove(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY);
+                        } else if (endpointSecurityProduction.get(
                                 APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY) != null && StringUtils.isNotEmpty(
                                 endpointSecurityProduction.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY)
                                         .toString()) && !endpointSecurityProduction.get(
@@ -1705,9 +1730,16 @@ public class PublisherCommonUtils {
                             .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX);
                     String sandboxEndpointType = (String) endpointSecuritySandbox
                             .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
+                    String sandboxAuthType = (String) endpointSecuritySandbox
+                            .get(APIConstants.ENDPOINT_SECURITY_AWS_AUTH_TYPE);
 
                     if (APIConstants.ENDPOINT_SECURITY_TYPE_AWS.equals(sandboxEndpointType)) {
-                        if (endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY) != null
+                        if (APIConstants.ENDPOINT_SECURITY_AWS_AUTH_TYPE_ENVIRONMENT.equalsIgnoreCase(
+                                sandboxAuthType)) {
+                            // Environment-credentials mode uses no static keys. Remove any secret key from
+                            // the payload so a plaintext secret can never be persisted.
+                            endpointSecuritySandbox.remove(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY);
+                        } else if (endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY) != null
                                 && StringUtils.isNotEmpty(
                                 endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY)
                                         .toString()) &&
@@ -2043,8 +2075,10 @@ public class PublisherCommonUtils {
                     String updatedVerb = updatedOperation.getVerb();
                     String updatedPath = updatedOperation.getTarget();
 
-                    //Check if existing reused resource is among updated resources
-                    if (existingVerb.equalsIgnoreCase(updatedVerb) && existingPath.equalsIgnoreCase(updatedPath)) {
+                    //Check if existing reused resource is among updated resources.
+                    //Resource paths are case-sensitive, hence a change which only alters the letter case of the
+                    //path removes the existing resource. The HTTP verb, however, is case-insensitive.
+                    if (existingVerb.equalsIgnoreCase(updatedVerb) && existingPath.equals(updatedPath)) {
                         isReusedResourceRemoved = false;
                         break;
                     }
@@ -2518,15 +2552,37 @@ public class PublisherCommonUtils {
             return apiToAdd.getUriTemplates();
         }
 
-        String backendApiUuid = template.getAPIOperationMapping().getApiUuid();
+        APIOperationMapping apiOperationMapping = template.getAPIOperationMapping();
+        String backendApiUuid = apiOperationMapping.getApiUuid();
 
-        API refApi = StringUtils.isNotEmpty(backendApiUuid)
-                ? apiProvider.getAPIbyUUID(backendApiUuid, organization)
-                : null;
+        API refApi = null;
+        if (StringUtils.isNotEmpty(backendApiUuid)) {
+            try {
+                refApi = apiProvider.getAPIbyUUID(backendApiUuid, organization);
+            } catch (APIManagementException e) {
+                // A referenced API that does not exist in this environment surfaces as a retrieval failure caused by
+                // an APIMgtResourceNotFoundException. It is reported below against the API the artifact names, which
+                // is more useful than the UUID alone since the UUID is environment specific. Any other failure is a
+                // genuine retrieval error and is left untouched.
+                Throwable cause = ExceptionUtils.getRootCause(e);
+                cause = cause == null ? e : cause;
+                if (!(cause instanceof APIMgtResourceNotFoundException)) {
+                    throw e;
+                }
+                if (log.isDebugEnabled()) {
+                    log.debug("Referenced API not found for UUID: " + backendApiUuid, e);
+                }
+            }
+        }
         if (refApi == null) {
-            String error = "Referenced API not found. UUID: " + backendApiUuid;
+            String refApiName = StringUtils.defaultIfBlank(apiOperationMapping.getApiName(), UNKNOWN_REFERENCE);
+            String refApiVersion = StringUtils.defaultIfBlank(apiOperationMapping.getApiVersion(), UNKNOWN_REFERENCE);
+            String refApiUuid = StringUtils.defaultIfBlank(backendApiUuid, UNKNOWN_REFERENCE);
+            String error = "Referenced API not found. Name: " + refApiName + ", version: " + refApiVersion
+                    + ", UUID: " + refApiUuid;
             log.error(error);
-            throw new APIManagementException(error, ExceptionCodes.API_NOT_FOUND);
+            throw new APIManagementException(error, ExceptionCodes.from(ExceptionCodes.REFERENCE_API_NOT_FOUND,
+                    refApiName, refApiVersion, refApiUuid));
         }
         if (!APIConstants.API_TYPE_HTTP.equalsIgnoreCase(refApi.getType())
                 || APIConstants.API_SUBTYPE_AI_API.equalsIgnoreCase(refApi.getSubtype())) {
@@ -2719,6 +2775,15 @@ public class PublisherCommonUtils {
         if (externalExtractor != null) {
             externalExtractor.accept(endpoints);
         }
+        extractURLsFromEndpointConfig(endpointConfigObj, APIConstants.ENDPOINT_PRODUCTION_FAILOVERS, endpoints);
+        extractURLsFromEndpointConfig(endpointConfigObj, APIConstants.ENDPOINT_SANDBOX_FAILOVERS, endpoints);
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        for (String endpoint : endpoints) {
+            if (!endpoint.startsWith("jms:") && !endpoint.startsWith("consul(")
+                    && !endpoint.contains("{") && !endpoint.contains("}")) {
+                APIUtil.validateRemoteURL(endpoint, tenantDomain);
+            }
+        }
         return APIUtil.validateEndpointURLs(endpoints);
     }
 
@@ -2746,9 +2811,30 @@ public class PublisherCommonUtils {
                             errorHandler);
                 }
             } else {
-                org.json.JSONArray endpointArray = endpointConfigObj.getJSONArray(endpointType);
-                for (int i = 0; i < endpointArray.length(); i++) {
-                    endpoints.add((String) endpointArray.getJSONObject(i).get(APIConstants.API_DATA_URL));
+                org.json.JSONArray endpointArray = endpointConfigObj.optJSONArray(endpointType);
+                if (endpointArray != null && endpointArray.length() > 0) {
+                    boolean urlFound = false;
+                    for (int i = 0; i < endpointArray.length(); i++) {
+                        // Skip malformed (non-object) entries instead of failing the request.
+                        org.json.JSONObject endpointEntry = endpointArray.optJSONObject(i);
+                        if (endpointEntry == null) {
+                            continue;
+                        }
+                        String url = endpointEntry.optString(APIConstants.API_DATA_URL, null);
+                        if (StringUtils.isNotBlank(url)) {
+                            endpoints.add(url);
+                            urlFound = true;
+                        }
+                    }
+                    if (!urlFound) {
+                        // A populated endpoint array with no usable URL is a client error for this endpoint type.
+                        ErrorHandler errorHandler = ExceptionCodes.from(ExceptionCodes.ENDPOINT_URL_NOT_PROVIDED,
+                                endpointType);
+                        throw new APIManagementException(
+                                "Url is not provided for the endpoint type: " + endpointType + " in the endpoint " +
+                                        "config",
+                                errorHandler);
+                    }
                 }
             }
         }
@@ -4557,6 +4643,10 @@ public class PublisherCommonUtils {
             throw new APIManagementException("Invalid/Malformed endpoint URL detected",
                     ExceptionCodes.API_ENDPOINT_URL_INVALID);
         }
+        if (!endpointURL.startsWith("jms:") && !endpointURL.startsWith("consul(")
+                && !endpointURL.contains("{") && !endpointURL.contains("}")) {
+            APIUtil.validateRemoteURL(endpointURL, RestApiCommonUtil.getLoggedInUserTenantDomain());
+        }
 
         APIEndpointInfo apiEndpointUpdated = apiProvider.updateAPIEndpoint(apiId, apiEndpoint, organization);
         if (apiEndpointUpdated == null) {
@@ -4605,6 +4695,10 @@ public class PublisherCommonUtils {
         if (!APIUtil.validateEndpointURL(endpointURL)) {
             throw new APIManagementException("Invalid/Malformed endpoint URL detected",
                     ExceptionCodes.API_ENDPOINT_URL_INVALID);
+        }
+        if (!endpointURL.startsWith("jms:") && !endpointURL.startsWith("consul(")
+                && !endpointURL.contains("{") && !endpointURL.contains("}")) {
+            APIUtil.validateRemoteURL(endpointURL, RestApiCommonUtil.getLoggedInUserTenantDomain());
         }
 
         // validate endpoint name
@@ -5138,6 +5232,7 @@ public class PublisherCommonUtils {
             final String authHeader = securityInfo != null ? securityInfo.getHeader() : null;
             final String authValue = securityInfo != null ? securityInfo.getValue() : null;
 
+            APIUtil.validateRemoteURL(serverUrl, RestApiCommonUtil.getLoggedInUserTenantDomain());
             MCPInitializerAndToolFetcher fetcher =
                     new MCPInitializerAndToolFetcher(serverUrl, authHeader, authValue, secureRequested);
 
@@ -5226,7 +5321,8 @@ public class PublisherCommonUtils {
             serverOperation.setFeature(MCPServerOperationDTO.FeatureEnum.TOOL);
             serverOperation.setTarget(toolName);
             serverOperation.setDescription(toolDescription);
-            serverOperation.setSchemaDefinition(inputSchema);
+            serverOperation.setSchemaDefinition(
+                    MCPInitializerAndToolFetcher.buildToolMetadata(toolJsonObject).toString());
             operationList.add(serverOperation);
         }
         return operationList;

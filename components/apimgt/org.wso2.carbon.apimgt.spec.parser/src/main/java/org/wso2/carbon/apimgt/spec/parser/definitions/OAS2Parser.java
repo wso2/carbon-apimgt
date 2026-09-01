@@ -61,7 +61,9 @@ import io.swagger.models.properties.ObjectProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.parser.SwaggerParser;
+import io.swagger.parser.SwaggerResolver;
 import io.swagger.parser.util.DeserializationUtils;
+import io.swagger.parser.util.ParseOptions;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.util.Json;
 import org.apache.commons.collections.CollectionUtils;
@@ -84,6 +86,7 @@ import org.wso2.carbon.apimgt.api.model.APIOperationMapping;
 import org.wso2.carbon.apimgt.api.model.BackendOperation;
 import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
+import org.wso2.carbon.apimgt.api.model.OASParserOptions;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -714,10 +717,29 @@ public class OAS2Parser extends APIDefinition {
     public APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, boolean returnJsonContent)
             throws APIManagementException {
 
+        return validateAPIDefinition(apiDefinition, returnJsonContent, null);
+    }
+
+    /**
+     * Validate the given Swagger 2.0 definition, honoring the supplied network access-control options. When a
+     * policy is configured, remote {@code $ref} resolution is routed through swagger-parser's built-in Safe URL
+     * Resolver ({@link #readWithInfoSafely}) so every ref - including refs nested inside a fetched remote document -
+     * is host-validated before it is fetched; a blocked host surfaces as
+     * {@link ExceptionCodes#UNTRUSTED_URL_IN_DEFINITION}. When no policy is configured, behaviour is identical to
+     * {@link #validateAPIDefinition(String, boolean)}.
+     *
+     * @param apiDefinition     OpenAPI 2.0 definition content
+     * @param returnJsonContent whether to return the converted json form of the definition
+     * @param oasParserOptions  network access-control options; {@code null} preserves the legacy unrestricted behaviour
+     * @return APIDefinitionValidationResponse object with validation information
+     */
+    @Override
+    public APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, boolean returnJsonContent,
+            OASParserOptions oasParserOptions) throws APIManagementException {
+
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
-        SwaggerParser parser = new SwaggerParser();
         Set<URITemplate> uriTemplates = null;
-        SwaggerDeserializationResult parseAttemptForV2 = parser.readWithInfo(apiDefinition);
+        SwaggerDeserializationResult parseAttemptForV2 = readWithInfoSafely(apiDefinition, oasParserOptions);
         if (CollectionUtils.isNotEmpty(parseAttemptForV2.getMessages())) {
             for (String message : parseAttemptForV2.getMessages()) {
                 OASParserUtil.addErrorToValidationResponse(validationResponse, message);
@@ -1501,6 +1523,91 @@ public class OAS2Parser extends APIDefinition {
     }
 
     /**
+     * Build the swagger-parser (v1) {@link ParseOptions} that enable the built-in Safe URL Resolver for embedded
+     * remote {@code $ref}s, mirroring {@link OAS3Parser#convertOptionsToParseOptions}. The resolver is enabled only
+     * when a network access-control policy is configured; otherwise resolution stays unrestricted to preserve the
+     * historical (backwards-compatible) behaviour for deployments that have not opted into the policy.
+     *
+     * @param options network access-control options
+     * @return v1 {@link ParseOptions} carrying the safe-resolve flag and the allow/block lists
+     */
+    private ParseOptions convertToV1ParseOptions(OASParserOptions options) {
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setSafelyResolveURL(options.isNetworkAccessControlEnabled());
+        parseOptions.setRemoteRefAllowList(options.getRemoteRefAllowList());
+        parseOptions.setRemoteRefBlockList(options.getRemoteRefBlockList());
+        return parseOptions;
+    }
+
+    /**
+     * Deserialize a Swagger 2.0 definition and resolve its remote {@code $ref}s, routing resolution through
+     * swagger-parser's built-in Safe URL Resolver when a network access-control policy is configured. The single
+     * argument {@link SwaggerParser#readWithInfo(String)} resolves every remote {@code $ref} - including refs nested
+     * inside a fetched remote document - with no host validation; this helper instead deserializes without fetching
+     * and then resolves with {@code safelyResolveURL} enabled, so every ref (top-level and transitively nested) is
+     * host-checked before it is fetched. When no policy is configured, it falls back to the legacy unrestricted
+     * {@link SwaggerParser#readWithInfo(String)} for backwards compatibility.
+     *
+     * @param oasDefinition    OpenAPI 2.0 definition content
+     * @param oasParserOptions network access-control options; {@code null}/non-policy value keeps legacy behaviour
+     * @return the deserialization result (its swagger resolved when a policy is configured)
+     * @throws APIManagementException with {@link ExceptionCodes#UNTRUSTED_URL_IN_DEFINITION} if a remote ref targets a
+     *                                host blocked by the policy
+     */
+    private SwaggerDeserializationResult readWithInfoSafely(String oasDefinition, OASParserOptions oasParserOptions)
+            throws APIManagementException {
+
+        SwaggerParser parser = new SwaggerParser();
+        if (oasParserOptions == null || !oasParserOptions.isNetworkAccessControlEnabled()) {
+            // No policy configured: resolve as the legacy parser always has (unrestricted, backwards compatible).
+            return parser.readWithInfo(oasDefinition);
+        }
+        // Deserialize WITHOUT resolving so the parse messages are preserved and no remote ref is fetched yet.
+        SwaggerDeserializationResult parseResult = parser.readWithInfo(oasDefinition, false);
+        if (parseResult.getSwagger() == null) {
+            return parseResult;
+        }
+        // Resolve through the Safe URL Resolver: ResolverCache validates every ref (nested included) before fetch.
+        ParseOptions parseOptions = convertToV1ParseOptions(oasParserOptions);
+        parseOptions.setResolve(true);
+        try {
+            Swagger resolved = new SwaggerResolver(parseResult.getSwagger(), new ArrayList<>(), null, null,
+                    parseOptions).resolve();
+            parseResult.setSwagger(resolved);
+        } catch (RuntimeException e) {
+            // The v1 resolver rethrows a blocked host as a RuntimeException carrying the HostDeniedException message.
+            // Map only a genuine policy block to the definition-scoped 400; other failures fall to lenient handling.
+            if (OASParserUtil.isUntrustedUrlInDefinition(e.getMessage())) {
+                throw new APIManagementException(ExceptionCodes.UNTRUSTED_URL_IN_DEFINITION.getErrorMessage(),
+                        ExceptionCodes.UNTRUSTED_URL_IN_DEFINITION);
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("Error while resolving remote references in the OpenAPI 2.0 definition", e);
+            }
+        }
+        return parseResult;
+    }
+
+    /**
+     * Get parsed Swagger object, honoring the supplied network access-control options for remote {@code $ref}
+     * resolution (see {@link #readWithInfoSafely}). When {@code oasParserOptions} is {@code null} or carries no
+     * policy, behaviour is identical to {@link #getSwagger(String)}.
+     *
+     * @param oasDefinition    OAS definition
+     * @param oasParserOptions network access-control options; may be {@code null}
+     * @return Swagger
+     * @throws APIManagementException if a remote ref targets a host blocked by the policy
+     */
+    Swagger getSwagger(String oasDefinition, OASParserOptions oasParserOptions) throws APIManagementException {
+
+        SwaggerDeserializationResult parseAttemptForV2 = readWithInfoSafely(oasDefinition, oasParserOptions);
+        if (CollectionUtils.isNotEmpty(parseAttemptForV2.getMessages())) {
+            log.debug("Errors found when parsing OAS definition");
+        }
+        return parseAttemptForV2.getSwagger();
+    }
+
+    /**
      * Get parsed Swagger object
      *
      * @param oasDefinition OAS definition
@@ -1515,6 +1622,93 @@ public class OAS2Parser extends APIDefinition {
             log.debug("Errors found when parsing OAS definition");
         }
         return parseAttemptForV2.getSwagger();
+    }
+
+    // Network access-control aware overloads: with a policy configured, each re-parses through the Safe URL Resolver,
+    // rejecting a remote $ref to a blocked host with UNTRUSTED_URL_IN_DEFINITION; otherwise they delegate unchanged.
+
+    @Override
+    public String generateAPIDefinition(SwaggerData swaggerData, String swagger, OASParserOptions options)
+            throws APIManagementException {
+        if (options != null && options.isNetworkAccessControlEnabled()) {
+            getSwagger(swagger, options);
+        }
+        return generateAPIDefinition(swaggerData, swagger);
+    }
+
+    @Override
+    public String populateCustomManagementInfo(String oasDefinition, SwaggerData swaggerData, OASParserOptions options)
+            throws APIManagementException {
+        if (options != null && options.isNetworkAccessControlEnabled()) {
+            getSwagger(oasDefinition, options);
+        }
+        return populateCustomManagementInfo(oasDefinition, swaggerData);
+    }
+
+    @Override
+    public String getOASDefinitionForStore(API api, String oasDefinition, Map<String, String> hostsWithSchemes,
+            KeyManagerConfigurationDTO keyManagerConfigurationDTO, OASParserOptions options)
+            throws APIManagementException {
+        if (options != null && options.isNetworkAccessControlEnabled()) {
+            getSwagger(oasDefinition, options);
+        }
+        return getOASDefinitionForStore(api, oasDefinition, hostsWithSchemes, keyManagerConfigurationDTO);
+    }
+
+    @Override
+    public String getOASDefinitionForStore(APIProduct product, String oasDefinition,
+            Map<String, String> hostsWithSchemes, KeyManagerConfigurationDTO keyManagerConfigurationDTO,
+            OASParserOptions options) throws APIManagementException {
+        if (options != null && options.isNetworkAccessControlEnabled()) {
+            getSwagger(oasDefinition, options);
+        }
+        return getOASDefinitionForStore(product, oasDefinition, hostsWithSchemes, keyManagerConfigurationDTO);
+    }
+
+    @Override
+    public String getOASDefinitionForPublisher(API api, String oasDefinition, OASParserOptions options)
+            throws APIManagementException {
+        if (options != null && options.isNetworkAccessControlEnabled()) {
+            getSwagger(oasDefinition, options);
+        }
+        return getOASDefinitionForPublisher(api, oasDefinition);
+    }
+
+    @Override
+    public String processOtherSchemeScopes(String resourceConfigsJSON, OASParserOptions options)
+            throws APIManagementException {
+        if (options != null && options.isNetworkAccessControlEnabled()) {
+            getSwagger(resourceConfigsJSON, options);
+        }
+        return processOtherSchemeScopes(resourceConfigsJSON);
+    }
+
+    @Override
+    public String injectMgwThrottlingExtensionsToDefault(String swaggerContent, OASParserOptions options)
+            throws APIManagementException {
+        if (options != null && options.isNetworkAccessControlEnabled()) {
+            getSwagger(swaggerContent, options);
+        }
+        return injectMgwThrottlingExtensionsToDefault(swaggerContent);
+    }
+
+    @Override
+    public String copyVendorExtensions(String existingOASContent, String updatedOASContent, OASParserOptions options)
+            throws APIManagementException {
+        if (options != null && options.isNetworkAccessControlEnabled()) {
+            getSwagger(existingOASContent, options);
+            getSwagger(updatedOASContent, options);
+        }
+        return copyVendorExtensions(existingOASContent, updatedOASContent);
+    }
+
+    @Override
+    public String processDisableSecurityExtension(String swaggerContent, OASParserOptions options)
+            throws APIManagementException {
+        if (options != null && options.isNetworkAccessControlEnabled()) {
+            getSwagger(swaggerContent, options);
+        }
+        return processDisableSecurityExtension(swaggerContent);
     }
 
     /**

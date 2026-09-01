@@ -96,7 +96,6 @@ public class ExportConsumptionApiServiceImpl implements ExportConsumptionApiServ
                     .type(RestApiConstants.APPLICATION_ZIP)
                     .header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
                             "attachment; filename=\"" + zipFilename + "\"")
-                    .header("Content-Length", String.valueOf(zipBytes.length))
                     .build();
         } catch (IllegalStateException e) {
             RestApiAdminUtils.handleInternalServerError(e.getMessage(), log);

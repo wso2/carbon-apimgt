@@ -531,6 +531,11 @@ public final class APIConstants {
     public static final String HASHING = "Hashing";
     public static final String HASGING_ALGORITHM= "HashingAlgorithm";
     public static final String ENDPOINT_SECURITY_AWS_SECRET_KEY = "secretKey";
+    // AWS Bedrock endpoint credential source: "stored" (static keys) or "environment"
+    // (resolved from the runtime via the AWS SDK default provider chain - EC2 instance profile / EKS IRSA).
+    public static final String ENDPOINT_SECURITY_AWS_AUTH_TYPE = "authType";
+    public static final String ENDPOINT_SECURITY_AWS_AUTH_TYPE_STORED = "stored";
+    public static final String ENDPOINT_SECURITY_AWS_AUTH_TYPE_ENVIRONMENT = "environment";
     public static final String DEVPORTAL_MODE_HYBRID = "HYBRID";
     public static final String DEVPORTAL_MODE_MCP_ONLY = "MCP_ONLY";
     public static final String DEVPORTAL_MODE_API_ONLY = "API_ONLY";
@@ -601,6 +606,13 @@ public final class APIConstants {
         public static final String MARKETPLACE_ASSISTANT_DELETE_API_RESOURCE = "ApiDeleteResource";
         public static final String MARKETPLACE_ASSISTANT_API_COUNT_RESOURCE = "ApiCountResource";
         public static final String AI_CONFIGURATION = "AiConfiguration";
+
+        /**
+         * Fully qualified class name of the AIRequestPropertyEnricher implementation used to attach
+         * additional properties to outbound AI service request payloads. Configured with
+         * [apim.ai] propertyEnricherImpl in deployment.toml.
+         */
+        public static final String PROPERTY_ENRICHER_IMPL = "PropertyEnricherImpl";
         public static final String MCP = "MCP";
         public static final String MCP_SUPPORT_ENABLED = "Enabled";
         public static final String MCP_ENFORCE_AUTH_FOR_ALL = "EnforceAuthForAllMCPMethods";
@@ -751,6 +763,26 @@ public final class APIConstants {
         public static final String CLASSIFICATION_SYSTEM_PROMPT =
                 "You are an API routing assistant. Analyze the user request and determine the best category. " +
                 "Respond with ONLY the category name, nothing else.";
+
+        // Auth type selection — shared across embedding and guardrail providers
+        public static final String AUTH_TYPE = "auth_type";
+        public static final String AUTH_TYPE_API_KEY = "apikey";
+        public static final String AUTH_TYPE_UMI = "umi";
+
+        // Azure UMI (Workload Identity) token provider
+        public static final String AZURE_UMI_TOKEN_PROVIDER_TYPE = "azure-umi";
+        // Scope for Azure OpenAI / Content Safety (*.openai.azure.com, *.cognitiveservices.azure.com) endpoints.
+        public static final String AZURE_UMI_COGNITIVE_SERVICES_SCOPE = "https://cognitiveservices.azure.com/.default";
+        // XML path prefix for the AzureUMI config block.
+        public static final String AZURE_UMI = AI + ".AzureUMI.";
+        // AI Foundry (*.services.ai.azure.com) scope — defaults via default.json.
+        public static final String AZURE_UMI_SCOPE = AZURE_UMI + "Scope";
+        // Key used in the properties map
+        public static final String AZURE_UMI_SCOPE_KEY = "azure_umi_scope";
+        // Environment variables injected by the AKS Workload Identity mutating webhook
+        public static final String AZURE_UMI_ENV_TENANT_ID = "AZURE_TENANT_ID";
+        public static final String AZURE_UMI_ENV_CLIENT_ID = "AZURE_CLIENT_ID";
+        public static final String AZURE_UMI_ENV_FEDERATED_TOKEN_FILE = "AZURE_FEDERATED_TOKEN_FILE";
 
         private AI() {
 
@@ -1832,6 +1864,8 @@ public final class APIConstants {
     public static final String DISTRIBUTED_THROTTLE_MIN_EVICTABLE_IDLE_TIME_IN_MILLIS = "MinEvictableIdleTimeMillis";
     public static final String DISTRIBUTED_THROTTLE_TIME_BETWEEN_EVICTION_RUNS_IN_MILLIS = "TimeBetweenEvictionRunsMillis";
     public static final String DISTRIBUTED_THROTTLE_NUM_TESTS_PER_EVICTION_RUNS = "NumTestsPerEvictionRun";
+    public static final String DISTRIBUTED_THROTTLE_SOCKET_TIMEOUT = "SocketTimeout";
+    public static final String DISTRIBUTED_THROTTLE_MAX_WAIT_MILLIS = "MaxWaitMillis";
 
     // Solace Configurations
     public static final String SOLACE_CONFIG = "SolaceConfig";
@@ -2141,6 +2175,8 @@ public final class APIConstants {
     public static final String ENDPOINT_SECURITY_TYPE_API_KEY = "apikey";
     public static final String ENDPOINT_SECURITY_TYPE_AWS =
             org.wso2.carbon.apimgt.api.APIConstants.ENDPOINT_SECURITY_TYPE_AWS;
+    public static final String ENDPOINT_SECURITY_TYPE_UMI =
+            org.wso2.carbon.apimgt.api.APIConstants.ENDPOINT_SECURITY_TYPE_UMI;
     public static final String ENDPOINT_SECURITY_API_KEY_IDENTIFIER = "apiKeyIdentifier";
     public static final String ENDPOINT_SECURITY_API_KEY_VALUE = "apiKeyValue";
     public static final String ENDPOINT_SECURITY_API_KEY_IDENTIFIER_TYPE = "apiKeyIdentifierType";
@@ -4014,4 +4050,24 @@ public final class APIConstants {
         public static final String QUEUE_CAPACITY = THREAD_POOL_CONFIG + "QueueCapacity";
     }
 
+    // Constants related to network security access control
+    public static class NetworkSecurityAccessControl {
+
+        private static final String CONFIG_PREFIX = "NetworkSecurityAccessControl.";
+        public static final String ENABLED = CONFIG_PREFIX + "Enabled";
+        public static final String MODE = CONFIG_PREFIX + "Mode";
+        public static final String HOSTS = CONFIG_PREFIX + "Host";
+        public static final String BLOCK_PRIVATE_NETWORK_ACCESS = CONFIG_PREFIX + "BlockPrivateNetworkAccess";
+        public static final String MODE_ALLOW = "allow";
+        public static final String MODE_DENY = "deny";
+        // Wildcard deny-list entry for the remote-$ref resolver: matches every host, so an allow-mode policy denies
+        // everything not on its allow-list (a restrictive whitelist).
+        public static final String MATCH_ALL_HOSTS = "*";
+
+        // Tenant config JSON keys (under "NetworkSecurityAccessControl" in tenant-conf.json)
+        public static final String TENANT_CONFIG_KEY = "NetworkSecurityAccessControl";
+        public static final String TENANT_MODE = "Mode";
+        public static final String TENANT_HOSTS = "Hosts";
+        public static final String TENANT_BLOCK_PRIVATE_NETWORK_ACCESS = "BlockPrivateNetworkAccess";
+    }
 }
