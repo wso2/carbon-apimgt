@@ -2946,10 +2946,13 @@ public class RegistryPersistenceImpl implements APIPersistence {
     public void deleteDocumentation(Organization org, String apiId, String docId)
             throws DocumentationPersistenceException {
         boolean isTenantFlowStarted = false;
+        boolean transactionCommitted = false;
+        Registry registry = null;
         try {
             RegistryHolder holder = getRegistry(org.getName());
-            Registry registry = holder.getRegistry();
+            registry = holder.getRegistry();
             isTenantFlowStarted = holder.isTenantFlowStarted();
+            registry.beginTransaction();
             GenericArtifactManager artifactManager = RegistryPersistenceDocUtil.getDocumentArtifactManager(registry);
             if (artifactManager == null) {
                 String errorMessage = "Failed to retrieve artifact manager when removing documentation of " + apiId
@@ -2958,18 +2961,96 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 throw new DocumentationPersistenceException(errorMessage);
             }
             GenericArtifact artifact = artifactManager.getGenericArtifact(docId);
-            String docPath = artifact.getPath();
-            if (docPath != null) {
-                if (registry.resourceExists(docPath)) {
-                    registry.delete(docPath);
-                }
+            if (artifact == null) {
+                String errorMessage = "Failed to retrieve documentation artifact for API " + apiId
+                        + " Document ID " + docId;
+                log.error(errorMessage);
+                throw new DocumentationPersistenceException(errorMessage, ExceptionCodes.DOCUMENT_NOT_FOUND);
             }
-
+            deleteDocumentationContent(registry, artifact, apiId, docId);
+            String docPath = artifact.getPath();
+            if (docPath == null) {
+                String errorMessage = "Failed to retrieve path of documentation artifact for API " + apiId
+                        + " Document ID " + docId;
+                log.error(errorMessage);
+                throw new DocumentationPersistenceException(errorMessage);
+            }
+            if (!registry.resourceExists(docPath)) {
+                String errorMessage = "Failed to retrieve documentation artifact for API " + apiId
+                        + " Document ID " + docId;
+                log.error(errorMessage);
+                throw new DocumentationPersistenceException(errorMessage, ExceptionCodes.DOCUMENT_NOT_FOUND);
+            }
+            registry.delete(docPath);
+            registry.commitTransaction();
+            transactionCommitted = true;
         } catch (RegistryException | APIPersistenceException e) {
             throw new DocumentationPersistenceException("Failed to delete documentation", e);
         } finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
+            }
+            try {
+                if (registry != null && !transactionCommitted) {
+                    registry.rollbackTransaction();
+                }
+            } catch (RegistryException ex) {
+                log.error("Error while rolling back the transaction for documentation delete of API: " + apiId, ex);
+            }
+        }
+    }
+
+    /**
+     * Deletes the content resource of a documentation artifact, if one exists. FILE and INLINE/MARKDOWN documents
+     * store their content in a separate registry resource from the artifact itself; URL documents have no such
+     * resource.
+     *
+     * @param registry Registry
+     * @param artifact GenericArtifact of the documentation
+     * @param apiId    API identifier, used to give context in error messages
+     * @param docId    Document identifier, used to give context in error messages
+     * @throws RegistryException                on failure
+     * @throws DocumentationPersistenceException on failure
+     */
+    private void deleteDocumentationContent(Registry registry, GenericArtifact artifact, String apiId, String docId)
+            throws RegistryException, DocumentationPersistenceException {
+        Documentation documentation = RegistryPersistenceDocUtil.getDocumentation(artifact);
+        if (documentation.getSourceType().equals(Documentation.DocumentSourceType.FILE)) {
+            String resource = documentation.getFilePath();
+            if (resource == null) {
+                throw new DocumentationPersistenceException("Invalid file resource path for API " + apiId
+                        + " Document ID " + docId);
+            }
+
+            String[] resourceSplitPath = resource.split(RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH);
+            if (resourceSplitPath.length == 2) {
+                if (registry.resourceExists(resourceSplitPath[1])) {
+                    registry.delete(resourceSplitPath[1]);
+                }
+            } else {
+                throw new DocumentationPersistenceException("Invalid file resource path " + resource + " for API "
+                        + apiId + " Document ID " + docId);
+            }
+        } else if (documentation.getSourceType().equals(Documentation.DocumentSourceType.INLINE)
+                || documentation.getSourceType().equals(Documentation.DocumentSourceType.MARKDOWN)) {
+            String artifactPath = artifact.getPath();
+            if (artifactPath == null) {
+                throw new DocumentationPersistenceException("Invalid artifact path for API " + apiId
+                        + " Document ID " + docId);
+            }
+
+            String docNameSuffix = RegistryConstants.PATH_SEPARATOR + documentation.getName();
+            int docNameIndex = artifactPath.lastIndexOf(docNameSuffix);
+            if (docNameIndex == -1) {
+                throw new DocumentationPersistenceException("Invalid artifact path " + artifactPath + " for API "
+                        + apiId + " Document ID " + docId);
+            }
+            String docBasePath = artifactPath.substring(0, docNameIndex);
+            String contentPath = docBasePath
+                    + RegistryConstants.PATH_SEPARATOR + APIConstants.INLINE_DOCUMENT_CONTENT_DIR
+                    + RegistryConstants.PATH_SEPARATOR + documentation.getName();
+            if (registry.resourceExists(contentPath)) {
+                registry.delete(contentPath);
             }
         }
     }
