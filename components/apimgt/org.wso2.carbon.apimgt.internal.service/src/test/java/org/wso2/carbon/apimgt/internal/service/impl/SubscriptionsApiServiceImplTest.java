@@ -188,12 +188,21 @@ public class SubscriptionsApiServiceImplTest {
         // started a tenant flow has no tenant domain set, reproducing that unresolved state
         // directly, since RestApiCommonUtil.getLoggedInUserTenantDomain() is a plain
         // CarbonContext read.
+        String previousCarbonHome = System.getProperty("carbon.home");
         System.setProperty("carbon.home", SubscriptionsApiServiceImplTest.class.getResource("/").getFile());
-        Response response = new SubscriptionsApiServiceImpl().subscriptionsGet(
-                null, null, null, null, null, null);
+        try {
+            Response response = new SubscriptionsApiServiceImpl().subscriptionsGet(
+                    null, null, null, null, null, null);
 
-        assertEquals(200, response.getStatus());
-        assertTrue(((SubscriptionListDTO) response.getEntity()).getList().isEmpty());
+            assertEquals(200, response.getStatus());
+            assertTrue(((SubscriptionListDTO) response.getEntity()).getList().isEmpty());
+        } finally {
+            if (previousCarbonHome != null) {
+                System.setProperty("carbon.home", previousCarbonHome);
+            } else {
+                System.clearProperty("carbon.home");
+            }
+        }
     }
 
     private String validateAs(String authenticatedOrganization, String requestedOrganization) {
