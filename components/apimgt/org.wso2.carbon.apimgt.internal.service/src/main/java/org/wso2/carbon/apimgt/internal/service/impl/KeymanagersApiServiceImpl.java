@@ -10,7 +10,9 @@ import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.internal.service.KeymanagersApiService;
 import org.wso2.carbon.apimgt.internal.service.dto.KeyManagerDTO;
 import org.wso2.carbon.apimgt.internal.service.utils.SubscriptionValidationDataUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +41,7 @@ public class KeymanagersApiServiceImpl implements KeymanagersApiService {
     public Response keymanagersGet(String xWSO2Tenant, MessageContext messageContext) {
 
         xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
+        String authenticatedTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
 
         try {
 
@@ -52,10 +55,32 @@ public class KeymanagersApiServiceImpl implements KeymanagersApiService {
             for (KeyManagerConfigurationDTO keyManagerConfiguration : keyManagerConfigurations) {
                 keyManagerDTOList.add(toKeyManagerDTO(keyManagerConfiguration));
             }
-            return Response.ok(keyManagerDTOList).build();
+            return Response.ok(redactAdditionalPropertiesForNonSuperTenant(
+                    keyManagerDTOList, authenticatedTenantDomain)).build();
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while retrieving key manager configurations", e, log);
         }
         return null;
+    }
+
+    /**
+     * The key manager list above includes the credential material (Username/Password, OAuth client
+     * secret, etc.) carried in each key manager's additionalProperties, decrypted. This is served to
+     * every caller that clears the WAR's own permission gate, including an ordinary tenant
+     * administrator, and always includes the global key managers regardless of which organization
+     * the caller belongs to. A non-super caller must not receive that credential material — for its
+     * own key managers it already has the admin REST API, and for the global ones it has no
+     * legitimate reason to read them at all. An unresolved authenticated tenant is treated as
+     * non-super (fail closed).
+     */
+    static List<KeyManagerDTO> redactAdditionalPropertiesForNonSuperTenant(
+            List<KeyManagerDTO> keyManagerDTOList, String authenticatedTenantDomain) {
+
+        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(authenticatedTenantDomain)) {
+            for (KeyManagerDTO keyManagerDTO : keyManagerDTOList) {
+                keyManagerDTO.setAdditionalProperties(null);
+            }
+        }
+        return keyManagerDTOList;
     }
 }
