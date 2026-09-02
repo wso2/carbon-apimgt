@@ -62,11 +62,7 @@ public class GCPMetadataTokenProvider extends GCPAccessTokenProvider {
     @Override
     protected JSONObject fetchToken() throws IOException {
 
-        String url = METADATA_TOKEN_URL;
-        if (StringUtils.isNotEmpty(scope)) {
-            url += "?scopes=" + URLEncoder.encode(scope, StandardCharsets.UTF_8);
-        }
-        HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+        HttpURLConnection connection = (HttpURLConnection) new URL(buildTokenUrl(scope)).openConnection();
         try {
             connection.setRequestMethod("GET");
             connection.setRequestProperty(METADATA_FLAVOR_HEADER, METADATA_FLAVOR_VALUE);
@@ -94,5 +90,24 @@ public class GCPMetadataTokenProvider extends GCPAccessTokenProvider {
         } finally {
             connection.disconnect();
         }
+    }
+
+    /**
+     * Builds the metadata token URL, appending the {@code scopes} query parameter when a scope is configured.
+     * The metadata server expects the scopes as a comma-separated list, whereas the JWT-bearer path (and hence
+     * the stored scope value) uses a space-separated list; any run of whitespace is normalised to a single comma
+     * so multiple scopes are delivered correctly (matching the google-auth-library {@code ComputeEngineCredentials}
+     * behaviour). A single scope is unaffected.
+     *
+     * @param scope the configured OAuth2 scope(s); may be empty.
+     * @return the metadata token URL.
+     */
+    static String buildTokenUrl(String scope) {
+
+        if (StringUtils.isEmpty(scope)) {
+            return METADATA_TOKEN_URL;
+        }
+        String metadataScopes = scope.trim().replaceAll("\\s+", ",");
+        return METADATA_TOKEN_URL + "?scopes=" + URLEncoder.encode(metadataScopes, StandardCharsets.UTF_8);
     }
 }
