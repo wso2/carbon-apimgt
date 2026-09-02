@@ -82,6 +82,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -1175,6 +1176,9 @@ public class TemplateBuilderUtil {
                                              SimplifiedEndpoint defaultEndpoint, API api, GatewayAPIDTO gatewayAPIDTO
             , APITemplateBuilder builder) throws APIManagementException, XMLStreamException, APITemplateException {
 
+        // Secure-vault mode: register each GCP service-account key chunk in the vault and assign the aliases
+        // on the endpoints before the template is rendered, so it emits vault-lookups instead of chunk values.
+        registerGCPServiceAccountKeyVaultChunks(type, endpoints, defaultEndpoint, api, gatewayAPIDTO);
         String endpointsString = builder.getStringForEndpoints(type, endpoints, defaultEndpoint);
         OMElement endpointsElement = APIUtil.buildOMElement(
                 new ByteArrayInputStream(endpointsString.getBytes()));
@@ -1190,6 +1194,59 @@ public class TemplateBuilderUtil {
             endpointSequence.setContent(APIUtil.convertOMtoString(endpointsElement));
             gatewayAPIDTO.setSequenceToBeAdd(
                     addGatewayContentToList(endpointSequence, gatewayAPIDTO.getSequenceToBeAdd()));
+        }
+    }
+
+    /**
+     * When secure vault is enabled, registers each base64 chunk of a GCP endpoint's service-account key as a
+     * separate secure-vault credential (keyed by a per-chunk alias) on the {@link GatewayAPIDTO}, and records
+     * the aliases on the endpoint so the template emits {@code wso2:vault-lookup} of the aliases instead of
+     * literal chunk values. GCP endpoints only; other auth types, keyless endpoints and normal (non-vault)
+     * mode are left untouched.
+     *
+     * @param stage          the deployment stage (PRODUCTION / SANDBOX)
+     * @param endpoints      the endpoints of this stage
+     * @param defaultEndpoint the default endpoint of this stage (usually also present in {@code endpoints})
+     * @param api            the API being deployed
+     * @param gatewayAPIDTO  the gateway artifact the credentials are added to
+     */
+    private static void registerGCPServiceAccountKeyVaultChunks(String stage, List<SimplifiedEndpoint> endpoints,
+            SimplifiedEndpoint defaultEndpoint, API api, GatewayAPIDTO gatewayAPIDTO) {
+
+        boolean isSecureVaultEnabled = Boolean.parseBoolean(ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfiguration().getFirstProperty(APIConstants.API_SECUREVAULT_ENABLE));
+        if (!isSecureVaultEnabled) {
+            return;
+        }
+        List<SimplifiedEndpoint> allEndpoints = new ArrayList<>(endpoints);
+        if (defaultEndpoint != null) {
+            allEndpoints.add(defaultEndpoint);
+        }
+        Set<SimplifiedEndpoint> processed = new HashSet<>();
+        for (SimplifiedEndpoint endpoint : allEndpoints) {
+            // SimplifiedEndpoint has no equals(): the Set dedups by identity, so an endpoint that is both in
+            // the list and the default is processed once (avoids duplicate vault entries).
+            if (endpoint == null || !processed.add(endpoint)) {
+                continue;
+            }
+            if (!APIConstants.ENDPOINT_SECURITY_TYPE_GCP.equalsIgnoreCase(endpoint.getAuthenticationType())
+                    || endpoint.getServiceAccountKeyChunks() == null
+                    || endpoint.getServiceAccountKeyChunks().isEmpty()) {
+                continue;
+            }
+            List<String> chunks = endpoint.getServiceAccountKeyChunks();
+            List<String> aliases = new ArrayList<>(chunks.size());
+            for (int i = 0; i < chunks.size(); i++) {
+                String alias = GatewayUtils.retrieveGCPServiceAccountKeyChunkAlias(api.getId().getApiName(),
+                        api.getId().getVersion(), endpoint.getEndpointUuid(), stage, i);
+                aliases.add(alias);
+                CredentialDto credentialDto = new CredentialDto();
+                credentialDto.setAlias(alias);
+                credentialDto.setPassword(chunks.get(i));
+                gatewayAPIDTO.setCredentialsToBeAdd(
+                        addCredentialsToList(credentialDto, gatewayAPIDTO.getCredentialsToBeAdd()));
+            }
+            endpoint.setServiceAccountKeyChunkAliases(aliases);
         }
     }
 
@@ -1247,7 +1304,7 @@ public class TemplateBuilderUtil {
                 .map(SimplifiedEndpoint::new)
                 .collect(Collectors.toList());
         // Last-mile decrypt for the gateway: the GCP service-account key is encrypted at rest, so decrypt it here
-        // so GCPOAuth2TokenInjector receives usable service-account JSON. base64DecodeAndDecryptAnySize routes
+        // so GCPOAuth2Mediator receives usable service-account JSON. base64DecodeAndDecryptAnySize routes
         // on the storage format (single-shot or chunked); the guard lets plaintext/already-decrypted values pass
         // through unchanged.
         CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
@@ -1267,9 +1324,40 @@ public class TemplateBuilderUtil {
                     throw new RuntimeException("Error while decrypting the GCP service-account key for endpoint "
                             + simplifiedEndpoint.getEndpointName(), e);
                 }
+                // Split the (now plaintext) key into ordered base64 chunks that the gateway mediator
+                // reassembles. base64 is ASCII, so it splits at any boundary and is XML-attribute-safe. In
+                // secure-vault mode the chunk aliases are assigned later in addEndpointsSequence, where the
+                // API name/version are available.
+                String plaintextServiceAccountKey = simplifiedEndpoint.getServiceAccountKey();
+                List<String> serviceAccountKeyChunks = chunkString(
+                        Base64.getEncoder().encodeToString(
+                                plaintextServiceAccountKey.getBytes(StandardCharsets.UTF_8)),
+                        AIAPIConstants.GCP_SERVICE_ACCOUNT_KEY_VAULT_CHUNK_LENGTH);
+                simplifiedEndpoint.setServiceAccountKeyChunks(serviceAccountKeyChunks);
+                simplifiedEndpoint.setServiceAccountKeyChunkCount(serviceAccountKeyChunks.size());
+                // The chunks now carry the key; drop the whole plaintext key from the endpoint so it does not
+                // linger on the SimplifiedEndpoint through template rendering.
+                simplifiedEndpoint.setServiceAccountKey(null);
             }
         }
         return simplifiedEndpoints;
+    }
+
+    /**
+     * Splits a string into ordered chunks of at most {@code chunkLength} characters. The input is base64,
+     * so it can be split at any character boundary without corrupting multi-byte characters.
+     *
+     * @param value       the base64 string to split
+     * @param chunkLength the maximum length of each chunk
+     * @return the ordered list of chunks
+     */
+    private static List<String> chunkString(String value, int chunkLength) {
+
+        List<String> chunks = new ArrayList<>();
+        for (int offset = 0; offset < value.length(); offset += chunkLength) {
+            chunks.add(value.substring(offset, Math.min(value.length(), offset + chunkLength)));
+        }
+        return chunks;
     }
 
     private static void addWebsocketTopicMappings(API api, APIDTO apidto) {

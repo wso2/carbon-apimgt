@@ -36,7 +36,7 @@ import org.wso2.carbon.apimgt.api.model.LLMProvider;
  * response use Anthropic's native Messages format (token usage under {@code usage.input_tokens} /
  * {@code usage.output_tokens}); the model is carried in the URL path and the body declares
  * {@code anthropic_version} instead of a model field. Authentication is a GCP service-account OAuth2
- * bearer token, handled by the {@code gcp} endpoint security type and the {@code GCPOAuth2TokenInjector}
+ * bearer token, handled by the {@code gcp} endpoint security type and the {@code GCPOAuth2Mediator}
  * gateway mediator - the same auth path shared with {@link VertexAIGeminiLLMProviderService}.
  */
 @Component(

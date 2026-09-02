@@ -35,7 +35,7 @@ import org.wso2.carbon.apimgt.api.model.LLMProvider;
  * resource and the {@code :generateContent} custom method. The response format is identical to the
  * plain Gemini API (token usage under {@code usageMetadata.*}); only the URL shape and authentication
  * (GCP service-account OAuth2 bearer token) differ. Auth is handled by the {@code gcp} endpoint
- * security type and the {@code GCPOAuth2TokenInjector} gateway mediator.
+ * security type and the {@code GCPOAuth2Mediator} gateway mediator.
  */
 @Component(
         name = "vertexAiGemini.llm.provider.service",

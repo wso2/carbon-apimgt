@@ -20,9 +20,11 @@ package org.wso2.carbon.apimgt.gateway.mediators;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -75,22 +77,39 @@ public class GCPServiceAccountTokenProvider extends GCPAccessTokenProvider {
     }
 
     /**
+     * Streaming variant: parses the key JSON directly off the stream, so the caller never has to materialise
+     * the (sensitive) key as a {@code String}. The caller retains ownership of - and should wipe/close - the
+     * stream's backing buffer.
+     *
+     * @param serviceAccountKeyJson the service-account key JSON as a stream.
+     * @param scope                 the OAuth2 scope to request (space-separated for multiple scopes).
+     * @throws IllegalArgumentException if the JSON is malformed, is missing required fields, or the private
+     *                                  key is invalid.
+     */
+    public GCPServiceAccountTokenProvider(InputStream serviceAccountKeyJson, String scope) {
+
+        this(serviceAccountKeyJson, scope, DEFAULT_TOKEN_URI);
+    }
+
+    /**
      * Package-private constructor that lets tests point the token exchange at a loopback stub. The token
      * endpoint is deliberately NOT taken from the (untrusted) service-account key JSON: a malicious or
      * mistyped {@code token_uri} must not be able to make the gateway POST the signed assertion to an
      * arbitrary or internal host (SSRF / credential leak). Production always uses {@link #DEFAULT_TOKEN_URI}
-     * via the public constructor.
+     * via the public constructors.
      */
     GCPServiceAccountTokenProvider(String serviceAccountKeyJson, String scope, String tokenUri) {
 
-        JSONObject key;
-        try {
-            key = new JSONObject(serviceAccountKeyJson);
-        } catch (JSONException e) {
-            // Honour the declared contract: every invalid input surfaces as IllegalArgumentException so
-            // GCPOAuth2TokenInjector.init() can wrap it in the intended SynapseException guidance.
-            throw new IllegalArgumentException("Service-account key is not valid JSON.", e);
-        }
+        this(parseKey(serviceAccountKeyJson), scope, tokenUri);
+    }
+
+    GCPServiceAccountTokenProvider(InputStream serviceAccountKeyJson, String scope, String tokenUri) {
+
+        this(parseKey(serviceAccountKeyJson), scope, tokenUri);
+    }
+
+    private GCPServiceAccountTokenProvider(JSONObject key, String scope, String tokenUri) {
+
         this.clientEmail = key.optString("client_email", null);
         this.privateKeyId = key.optString("private_key_id", null);
         String privateKeyPem = key.optString("private_key", null);
@@ -101,6 +120,27 @@ public class GCPServiceAccountTokenProvider extends GCPAccessTokenProvider {
                     "Service-account key JSON is missing required fields (client_email / private_key).");
         }
         this.privateKey = parsePrivateKey(privateKeyPem);
+    }
+
+    private static JSONObject parseKey(String serviceAccountKeyJson) {
+
+        try {
+            return new JSONObject(serviceAccountKeyJson);
+        } catch (JSONException e) {
+            // Honour the declared contract: every invalid input surfaces as IllegalArgumentException so
+            // GCPOAuth2Mediator can wrap it in the intended SynapseException guidance.
+            throw new IllegalArgumentException("Service-account key is not valid JSON.", e);
+        }
+    }
+
+    private static JSONObject parseKey(InputStream serviceAccountKeyJson) {
+
+        try {
+            return new JSONObject(new JSONTokener(
+                    new InputStreamReader(serviceAccountKeyJson, StandardCharsets.UTF_8)));
+        } catch (JSONException e) {
+            throw new IllegalArgumentException("Service-account key is not valid JSON.", e);
+        }
     }
 
     @Override

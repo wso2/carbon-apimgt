@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointDTO;
@@ -106,6 +107,17 @@ public class PublisherCommonUtilsGCPTest {
 
         Assert.assertEquals("OLD_ENCRYPTED", securityBlock(endpointConfig, PRODUCTION).get(GCP_KEY));
         verify(cryptoUtil, never()).encryptAndBase64EncodeAnySize(any(byte[].class));
+    }
+
+    @Test(expected = APIManagementException.class)
+    public void testInvalidJsonKeyIsRejectedAtSave() throws Exception {
+
+        // A newly-supplied key that is not valid JSON must be rejected at save time (before it is encrypted),
+        // rather than deploying successfully and failing when the gateway mediator later parses it.
+        Map<String, Object> endpointConfig = gcpEndpointConfig(PRODUCTION, "{ invalid json");
+
+        PublisherCommonUtils.encryptEndpointSecurityGCPServiceAccountKey(
+                endpointConfig, cryptoUtil, null, null, new APIDTO());
     }
 
     // -------------------------------------------------------------------------
