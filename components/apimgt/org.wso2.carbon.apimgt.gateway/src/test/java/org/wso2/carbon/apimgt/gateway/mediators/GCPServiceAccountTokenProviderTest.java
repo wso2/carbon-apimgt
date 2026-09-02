@@ -24,6 +24,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -118,7 +119,7 @@ public class GCPServiceAccountTokenProviderTest {
     public void testConstructorRejectsMalformedJson() {
 
         // A truncated or wrongly decrypted key is not valid JSON; it must still surface as
-        // IllegalArgumentException so GCPOAuth2TokenInjector can turn it into the intended guidance.
+        // IllegalArgumentException so GCPOAuth2Mediator can turn it into the intended guidance.
         assertConstructorRejects("this-is-not-json");
     }
 
@@ -213,6 +214,44 @@ public class GCPServiceAccountTokenProviderTest {
         Assert.assertEquals("srv-token", provider.getAccessToken());
         Assert.assertEquals("The key's token_uri must be ignored; only the fixed endpoint is contacted",
                 1, requestCount.get());
+    }
+
+    // -------------------------------------------------------------------------
+    // Streaming (InputStream) constructor
+    // -------------------------------------------------------------------------
+
+    @Test
+    public void testStreamConstructorPerformsJwtBearerExchange() throws Exception {
+
+        responseStatus = 200;
+        responseBody = new JSONObject().put("access_token", "srv-token").put("expires_in", 3600).toString();
+
+        // Build the provider from the streaming (InputStream) constructor - the key is never materialised as a
+        // String by the caller - and confirm it parses and mints a token identically to the String constructor.
+        GCPServiceAccountTokenProvider provider = new GCPServiceAccountTokenProvider(
+                new ByteArrayInputStream(keyJson(CLIENT_EMAIL, validPrivateKeyPem())
+                        .getBytes(StandardCharsets.UTF_8)), SCOPE, tokenUri);
+
+        Assert.assertEquals("srv-token", provider.getAccessToken());
+
+        Map<String, String> form = parseForm(capturedBody.get());
+        Assert.assertEquals(JWT_BEARER_GRANT_TYPE, form.get("grant_type"));
+        JSONObject claims = new JSONObject(
+                new String(base64UrlDecode(form.get("assertion").split("\\.")[1]), StandardCharsets.UTF_8));
+        Assert.assertEquals("The streamed key must sign the assertion with the same issuer",
+                CLIENT_EMAIL, claims.getString("iss"));
+    }
+
+    @Test
+    public void testStreamConstructorRejectsInvalidJson() {
+
+        try {
+            new GCPServiceAccountTokenProvider(
+                    new ByteArrayInputStream("{ invalid json".getBytes(StandardCharsets.UTF_8)), SCOPE);
+            Assert.fail("Expected an IllegalArgumentException for a non-JSON key stream");
+        } catch (IllegalArgumentException expected) {
+            // expected
+        }
     }
 
     // -------------------------------------------------------------------------
