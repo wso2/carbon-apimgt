@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.gateway.throttling;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -118,6 +119,19 @@ public class ThrottleDataHolderTest {
 
     @Test
     public void isThrottled() throws Exception {
+        ThrottleDataHolder throttleDataHolder = ThrottleDataHolder.getInstance();
+        String activeKey = "test-active-throttle-key";
+        String expiredKey = "test-expired-throttle-key";
+        try {
+            throttleDataHolder.addThrottleData(activeKey, System.currentTimeMillis() + 10_000);
+            throttleDataHolder.addThrottleData(expiredKey, System.currentTimeMillis() - 1_000);
+
+            Assert.assertTrue(throttleDataHolder.isThrottled(activeKey));
+            Assert.assertFalse(throttleDataHolder.isThrottled(expiredKey));
+        } finally {
+            throttleDataHolder.removeThrottleData(activeKey);
+            throttleDataHolder.removeThrottleData(expiredKey);
+        }
     }
 
     @Test
