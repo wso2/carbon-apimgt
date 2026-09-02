@@ -36,6 +36,8 @@ import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.ComposedProperty;
 import io.swagger.models.properties.MapProperty;
 import io.swagger.models.properties.ObjectProperty;
+import io.swagger.models.properties.Property;
+import io.swagger.models.properties.StringProperty;
 import org.wso2.carbon.apimgt.api.APIConstants;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
@@ -50,7 +52,10 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -852,7 +857,7 @@ public class OAS2ParserTest extends OASTestBase {
      * copyCommonPropertyFields before updating the expected names here.
      */
     @Test
-    public void testCopiedPropertyFieldsAreStillComplete() {
+    public void testPropertyFieldsHaveNotChanged() {
         assertDeclaredFields(AbstractProperty.class, "name", "type", "format", "example", "xml",
                 "required", "position", "description", "title", "readOnly", "allowEmptyValue",
                 "access", "vendorExtensions", "booleanValue");
@@ -1095,5 +1100,144 @@ public class OAS2ParserTest extends OASTestBase {
         Assert.assertFalse("An undefined reference should not survive in the schema",
                 props.has("missing"));
         assertNoUnresolvedReference(schema, "");
+    }
+
+    /**
+     * Fields that resolution deliberately does not carry across to a rebuilt property.
+     */
+    private static final Set<String> FIELDS_NOT_CARRIED = new HashSet<>(Arrays.asList(
+            "type",   // each property class fixes its own type in its constructor
+            "xml"));  // swagger-models exposes no getter, so it can neither be copied nor serialised
+
+    /**
+     * Fields holding nested content, which resolution rewrites by design. Checked for presence
+     * rather than equality.
+     */
+    private static final Set<String> FIELDS_RESOLVED = new HashSet<>(Arrays.asList(
+            "items",       // ArrayProperty
+            "properties",  // ObjectProperty
+            "property",    // MapProperty, its additionalProperties
+            "allOf"));     // ComposedProperty
+
+    /**
+     * Verifies behaviourally that resolution carries every field a property declares.
+     *
+     * Resolution rebuilds properties rather than editing them in place, so anything the rebuild
+     * forgets is dropped silently from every generated schema. testPropertyFieldsHaveNotChanged
+     * only notices when swagger-models changes shape; this drives the copy itself, so a field added
+     * to these classes fails here by name even if someone updates that list without updating the
+     * copy.
+     */
+    @Test
+    public void testResolutionCarriesEveryDeclaredPropertyField() throws Exception {
+        Swagger swagger = new SwaggerParser().parse(swagger20("/x", "Empty",
+                "    \"Empty\": { \"type\": \"object\", \"properties\": {} }"));
+
+        for (Class<? extends AbstractProperty> type : Arrays.asList(
+                ArrayProperty.class, ObjectProperty.class, MapProperty.class, ComposedProperty.class)) {
+
+            AbstractProperty source = type.getDeclaredConstructor().newInstance();
+            for (Field f : declaredFieldsOf(type)) {
+                Object value = sampleValue(f);
+                if (value != null) {
+                    f.setAccessible(true);
+                    f.set(source, value);
+                }
+            }
+
+            Property resolved = invokeResolveProperty(source, swagger);
+            Assert.assertNotNull(type.getSimpleName() + " should resolve to a property", resolved);
+
+            for (Field f : declaredFieldsOf(type)) {
+                String name = f.getName();
+                if (FIELDS_NOT_CARRIED.contains(name)) {
+                    continue;
+                }
+                f.setAccessible(true);
+                Object before = f.get(source);
+                if (FIELDS_RESOLVED.contains(name)) {
+                    // rewritten by design; only its presence is meaningful
+                    Field target = fieldOn(resolved.getClass(), name);
+                    if (target != null) {
+                        target.setAccessible(true);
+                        Assert.assertNotNull(type.getSimpleName() + "." + name
+                                + " lost its nested content during resolution", target.get(resolved));
+                    }
+                    continue;
+                }
+                Field target = fieldOn(resolved.getClass(), name);
+                Assert.assertNotNull(type.getSimpleName() + "." + name
+                        + " has no counterpart on the resolved property", target);
+                target.setAccessible(true);
+                Assert.assertEquals(type.getSimpleName() + "." + name
+                                + " was not carried across by resolution - add it to "
+                                + "OAS2Parser.copyCommonPropertyFields or to the branch that "
+                                + "rebuilds this property type",
+                        before, target.get(resolved));
+            }
+        }
+    }
+
+    /** Declared fields of the class itself plus those it inherits from AbstractProperty. */
+    private List<Field> declaredFieldsOf(Class<?> type) {
+        List<Field> fields = new ArrayList<>();
+        for (Class<?> c = type; c != null && AbstractProperty.class.isAssignableFrom(c); c = c.getSuperclass()) {
+            for (Field f : c.getDeclaredFields()) {
+                if (!f.isSynthetic() && !java.lang.reflect.Modifier.isStatic(f.getModifiers())) {
+                    fields.add(f);
+                }
+            }
+        }
+        return fields;
+    }
+
+    private Field fieldOn(Class<?> type, String name) {
+        for (Class<?> c = type; c != null; c = c.getSuperclass()) {
+            try {
+                return c.getDeclaredField(name);
+            } catch (NoSuchFieldException ignored) {
+                // keep walking up
+            }
+        }
+        return null;
+    }
+
+    private Object sampleValue(Field f) {
+        Class<?> t = f.getType();
+        String name = f.getName();
+        if (FIELDS_NOT_CARRIED.contains(name)) {
+            return null;
+        }
+        if (t == String.class) {
+            return "value-of-" + name;
+        }
+        if (t == Boolean.class || t == boolean.class) {
+            return Boolean.TRUE;
+        }
+        if (t == Integer.class) {
+            return 7;
+        }
+        if (t == java.util.List.class) {
+            return Collections.singletonList(new ObjectProperty());
+        }
+        if (t == java.util.Map.class) {
+            return "vendorExtensions".equals(name)
+                    ? Collections.singletonMap("x-sample", (Object) "on")
+                    : Collections.singletonMap("nested", new StringProperty());
+        }
+        if (Property.class.isAssignableFrom(t)) {
+            return new StringProperty();
+        }
+        if (t == Object.class) {
+            return "example-of-" + name;
+        }
+        return null;
+    }
+
+    private Property invokeResolveProperty(Property property, Swagger swagger) throws Exception {
+        Method m = OAS2Parser.class.getDeclaredMethod("resolveProperty",
+                Property.class, Swagger.class, Set.class);
+        m.setAccessible(true);
+        return (Property) m.invoke(oas2Parser, property, swagger, new HashSet<String>());
     }
 }
