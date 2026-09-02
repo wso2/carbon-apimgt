@@ -204,6 +204,11 @@ public class APIConstants {
                 "https://www.googleapis.com/auth/cloud-platform";
         public static final String LLM_PROVIDER_SERVICE_VERTEX_AI_METADATA_IDENTIFIER_MODEL =
                 "[a-zA-Z0-9.@\\-]+(?=:[a-zA-Z])";
+        // Max characters per secure-vault chunk of the GCP service-account key. The key is base64-encoded
+        // (ASCII, 1 byte/char) before chunking, so a chunk's plaintext is <= this many bytes - under the
+        // RSA-2048 secure-vault block limit (~214 B) and, once encrypted+base64'd, under
+        // REG_PROPERTY.REG_VALUE (VARCHAR(1000)).
+        public static final int GCP_SERVICE_ACCOUNT_KEY_VAULT_CHUNK_LENGTH = 180;
 
         // Google Vertex AI - Gemini (publishers/google, :generateContent, usageMetadata.* token counts)
         public static final String LLM_PROVIDER_SERVICE_VERTEX_AI_GEMINI_NAME = "VertexAI-Gemini";

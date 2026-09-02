@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.gateway.mediators;
 
+import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseException;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.json.JSONObject;
@@ -27,6 +28,9 @@ import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.util.Base64;
@@ -34,47 +38,41 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Unit tests for {@link GCPOAuth2TokenInjector}: the deploy-time provider selection and the request-time
- * {@code Authorization: Bearer <token>} injection.
+ * Unit tests for {@link GCPOAuth2Mediator}: the deploy-time / first-request provider selection, the
+ * reassembly of the chunked service-account key, and the request-time {@code Authorization: Bearer <token>}
+ * injection.
  * <p>
- * The token provider is injected directly via reflection (or asserted after {@code init()}), and the Synapse
- * message context is mocked, so no gateway runtime or network is required.
+ * The service-account key is delivered as base64 chunk properties (as it is by the endpoint sequence), the
+ * token provider is asserted/injected via reflection, and the Synapse message context is mocked, so no
+ * gateway runtime or network is required.
  */
-public class GCPOAuth2TokenInjectorTest {
+public class GCPOAuth2MediatorTest {
 
     private static final String SCOPE = "https://www.googleapis.com/auth/cloud-platform";
+    private static final String CHUNK_PREFIX = "_gcp_sak_chunk_";
+    private static final int CHUNK_LENGTH = 180;
 
-    private GCPOAuth2TokenInjector injector;
+    private GCPOAuth2Mediator injector;
     private Axis2MessageContext synapseCtx;
     private org.apache.axis2.context.MessageContext axis2Ctx;
 
     @Before
     public void setUp() {
 
-        injector = new GCPOAuth2TokenInjector();
+        injector = new GCPOAuth2Mediator();
         synapseCtx = Mockito.mock(Axis2MessageContext.class);
         axis2Ctx = Mockito.mock(org.apache.axis2.context.MessageContext.class);
         Mockito.when(synapseCtx.getAxis2MessageContext()).thenReturn(axis2Ctx);
     }
 
     // -------------------------------------------------------------------------
-    // init() — provider selection
+    // Provider selection
     // -------------------------------------------------------------------------
-
-    @Test
-    public void testInitSelectsServiceAccountProviderWhenKeyPresent() throws Exception {
-
-        injector.setServiceAccountKey(validKeyJson());
-        injector.setScope(SCOPE);
-        injector.init(null);
-
-        Assert.assertTrue("A configured key must select the service-account provider",
-                getProvider() instanceof GCPServiceAccountTokenProvider);
-    }
 
     @Test
     public void testInitSelectsMetadataProviderWhenNoKey() {
 
+        // No key chunks configured (count stays 0) -> keyless -> metadata (attached-identity) provider, eager.
         injector.setScope(SCOPE);
         injector.init(null);
 
@@ -83,15 +81,53 @@ public class GCPOAuth2TokenInjectorTest {
     }
 
     @Test
-    public void testInitWithInvalidKeyThrowsSynapseException() {
+    public void testInitDefersServiceAccountProviderWhenChunksPresent() throws Exception {
 
-        injector.setServiceAccountKey("{\"type\":\"service_account\"}");
+        // With key chunks the chunks are per-request properties, so the provider is NOT built at init time.
+        setChunkProperties(validKeyJson());
+        injector.setScope(SCOPE);
+        injector.init(null);
+
+        Assert.assertNull("The service-account provider must be built lazily, not at init", getProvider());
+    }
+
+    @Test
+    public void testBuildsServiceAccountProviderFromChunks() throws Exception {
+
+        setChunkProperties(validKeyJson());
+        injector.setScope(SCOPE);
+
+        GCPAccessTokenProvider provider = invokeBuildFromChunks();
+
+        Assert.assertTrue("Configured key chunks must build the service-account provider",
+                provider instanceof GCPServiceAccountTokenProvider);
+    }
+
+    @Test
+    public void testBuildFromChunksWithInvalidKeyThrowsSynapseException() throws Exception {
+
+        setChunkProperties("{\"type\":\"service_account\"}");   // missing client_email / private_key
         try {
-            injector.init(null);
+            invokeBuildFromChunks();
             Assert.fail("Expected a SynapseException for an invalid service-account key");
-        } catch (SynapseException expected) {
-            // expected
+        } catch (InvocationTargetException e) {
+            Assert.assertTrue("Cause must be a SynapseException", e.getCause() instanceof SynapseException);
         }
+    }
+
+    @Test
+    public void testReassembleServiceAccountKeyRoundTrips() throws Exception {
+
+        String keyJson = validKeyJson();
+        setChunkProperties(keyJson);
+
+        Method method = GCPOAuth2Mediator.class
+                .getDeclaredMethod("reassembleServiceAccountKey", MessageContext.class);
+        method.setAccessible(true);
+        byte[] reassembled = (byte[]) method.invoke(injector, synapseCtx);
+
+        Assert.assertEquals("Reassembled key must equal the original",
+                keyJson, new String(reassembled, StandardCharsets.UTF_8));
     }
 
     // -------------------------------------------------------------------------
@@ -150,10 +186,34 @@ public class GCPOAuth2TokenInjectorTest {
         return provider;
     }
 
+    /**
+     * base64-encodes the key, splits it into chunks the way the endpoint sequence does, stubs each chunk as a
+     * message-context property, and wires the injector's prefix + count.
+     */
+    private void setChunkProperties(String keyJson) {
+
+        String base64 = Base64.getEncoder().encodeToString(keyJson.getBytes(StandardCharsets.UTF_8));
+        int count = 0;
+        for (int offset = 0; offset < base64.length(); offset += CHUNK_LENGTH, count++) {
+            String chunk = base64.substring(offset, Math.min(base64.length(), offset + CHUNK_LENGTH));
+            Mockito.when(synapseCtx.getProperty(CHUNK_PREFIX + count)).thenReturn(chunk);
+        }
+        injector.setServiceAccountKeyChunkPrefix(CHUNK_PREFIX);
+        injector.setServiceAccountKeyChunkCount(String.valueOf(count));
+    }
+
+    private GCPAccessTokenProvider invokeBuildFromChunks() throws Exception {
+
+        Method method = GCPOAuth2Mediator.class
+                .getDeclaredMethod("buildProviderFromChunks", MessageContext.class);
+        method.setAccessible(true);
+        return (GCPAccessTokenProvider) method.invoke(injector, synapseCtx);
+    }
+
     private GCPAccessTokenProvider getProvider() {
 
         try {
-            Field field = GCPOAuth2TokenInjector.class.getDeclaredField("tokenProvider");
+            Field field = GCPOAuth2Mediator.class.getDeclaredField("tokenProvider");
             field.setAccessible(true);
             return (GCPAccessTokenProvider) field.get(injector);
         } catch (ReflectiveOperationException e) {
@@ -164,7 +224,7 @@ public class GCPOAuth2TokenInjectorTest {
     private void setProvider(GCPAccessTokenProvider provider) {
 
         try {
-            Field field = GCPOAuth2TokenInjector.class.getDeclaredField("tokenProvider");
+            Field field = GCPOAuth2Mediator.class.getDeclaredField("tokenProvider");
             field.setAccessible(true);
             field.set(injector, provider);
         } catch (ReflectiveOperationException e) {
