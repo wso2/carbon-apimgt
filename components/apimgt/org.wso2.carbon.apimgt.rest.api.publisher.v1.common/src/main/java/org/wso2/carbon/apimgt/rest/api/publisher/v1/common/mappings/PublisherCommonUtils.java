@@ -196,6 +196,7 @@ public class PublisherCommonUtils {
 
     private static final Log log = LogFactory.getLog(PublisherCommonUtils.class);
     private static final String UNKNOWN_REFERENCE = "UNKNOWN";
+    private static final Gson GCP_SERVICE_ACCOUNT_KEY_GSON = new Gson();
     public static final String SESSION_TIMEOUT_CONFIG_KEY = "sessionTimeOut";
     static APIMGovernanceService apimGovernanceService = ServiceReferenceHolder.getInstance()
             .getAPIMGovernanceService();
@@ -1522,6 +1523,7 @@ public class PublisherCommonUtils {
                                         .equals(oldProductionGCPKey)) {
                             String keyValue = endpointSecurityProduction
                                     .get(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY).toString();
+                            validateGCPServiceAccountKey(keyValue);
                             String encryptedKeyValue = cryptoUtil.encryptAndBase64EncodeAnySize(
                                     keyValue.getBytes(StandardCharsets.UTF_8));
                             endpointSecurityProduction
@@ -1569,6 +1571,7 @@ public class PublisherCommonUtils {
                                         .equals(oldSandboxGCPKey)) {
                             String keyValue = endpointSecuritySandbox
                                     .get(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY).toString();
+                            validateGCPServiceAccountKey(keyValue);
                             String encryptedKeyValue = cryptoUtil.encryptAndBase64EncodeAnySize(
                                     keyValue.getBytes(StandardCharsets.UTF_8));
                             endpointSecuritySandbox
@@ -1959,6 +1962,7 @@ public class PublisherCommonUtils {
                                         APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY).equals(oldApiSecret)) {
                             String keyValue = endpointSecurityProduction.get(
                                     APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY).toString();
+                            validateGCPServiceAccountKey(keyValue);
                             String encryptedKeyValue = cryptoUtil.encryptAndBase64EncodeAnySize(
                                     keyValue.getBytes(StandardCharsets.UTF_8));
                             endpointSecurityProduction.put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY,
@@ -2013,6 +2017,7 @@ public class PublisherCommonUtils {
                                         .equals(oldApiSecret)) {
                             String keyValue = endpointSecuritySandbox
                                     .get(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY).toString();
+                            validateGCPServiceAccountKey(keyValue);
                             String encryptedKeyValue = cryptoUtil.encryptAndBase64EncodeAnySize(
                                     keyValue.getBytes(StandardCharsets.UTF_8));
                             endpointSecuritySandbox
@@ -2038,6 +2043,25 @@ public class PublisherCommonUtils {
                     apiEndpointDTO.setEndpointConfig(endpointConfig);
                 }
             }
+        }
+    }
+
+    /**
+     * Validates that the GCP service-account key is well-formed JSON before it is encrypted and stored, so a
+     * malformed key is rejected at save time rather than failing when the gateway mediator later builds the
+     * token provider. Only the JSON structure is checked here - the key contents (required fields, private key)
+     * are validated by the mediator when it constructs the provider.
+     *
+     * @param serviceAccountKey the plaintext service-account key JSON
+     * @throws APIManagementException if the value is not valid JSON
+     */
+    private static void validateGCPServiceAccountKey(String serviceAccountKey) throws APIManagementException {
+
+        try {
+            GCP_SERVICE_ACCOUNT_KEY_GSON.fromJson(serviceAccountKey, JsonObject.class);
+        } catch (JsonSyntaxException e) {
+            throw new APIManagementException("Invalid GCP service-account key: the provided value is not valid JSON.",
+                    e);
         }
     }
 
