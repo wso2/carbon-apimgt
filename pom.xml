@@ -2104,7 +2104,7 @@
         <!-- NOTE: bumped for the CryptoUtil.encryptAndBase64EncodeAnySize / base64DecodeAndDecryptAnySize
              additions (any-size secret encryption, used by the Vertex AI GCP service-account key). This must
              point to the carbon-kernel build that carries those methods; adjust to the actual released version. -->
-        <carbon.kernel.version>4.11.20-SNAPSHOT</carbon.kernel.version>
+        <carbon.kernel.version>4.11.17</carbon.kernel.version>
         <carbon.kernel.feature.version>${carbon.kernel.version}</carbon.kernel.feature.version>
         <carbon.kernel.package.import.version.range>[4.5.0, 5.0.0)</carbon.kernel.package.import.version.range>
 
