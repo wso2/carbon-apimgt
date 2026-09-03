@@ -1769,11 +1769,11 @@ public class APIMappingUtil {
                             // Only decrypt genuine ciphertext; a plaintext/already-decrypted key passes through
                             // so API->DTO mapping never fails on a non-ciphertext value.
                             if (StringUtils.isNotEmpty(serviceAccountKey)
-                                    && (cryptoUtil.isChunkedCipherText(serviceAccountKey)
+                                    && (APIUtil.isChunkedCipherText(serviceAccountKey)
                                     || cryptoUtil.base64DecodeAndIsSelfContainedCipherText(serviceAccountKey))) {
                                 productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY,
-                                        new String(cryptoUtil.base64DecodeAndDecryptAnySize(serviceAccountKey),
-                                                StandardCharsets.UTF_8));
+                                        new String(APIUtil.base64DecodeAndDecryptAnySize(
+                                                cryptoUtil, serviceAccountKey), StandardCharsets.UTF_8));
                             }
                         }
                         endpointSecurity.put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION,
@@ -1830,11 +1830,11 @@ public class APIMappingUtil {
                             // Only decrypt genuine ciphertext; a plaintext/already-decrypted key passes through
                             // so API->DTO mapping never fails on a non-ciphertext value.
                             if (StringUtils.isNotEmpty(serviceAccountKey)
-                                    && (cryptoUtil.isChunkedCipherText(serviceAccountKey)
+                                    && (APIUtil.isChunkedCipherText(serviceAccountKey)
                                     || cryptoUtil.base64DecodeAndIsSelfContainedCipherText(serviceAccountKey))) {
                                 sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY,
-                                        new String(cryptoUtil.base64DecodeAndDecryptAnySize(serviceAccountKey),
-                                                StandardCharsets.UTF_8));
+                                        new String(APIUtil.base64DecodeAndDecryptAnySize(
+                                                cryptoUtil, serviceAccountKey), StandardCharsets.UTF_8));
                             }
                         }
                         endpointSecurity.put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX,
@@ -5045,11 +5045,11 @@ public class APIMappingUtil {
             if (StringUtils.isNotEmpty(gcpServiceAccountKeyValue)) {
                 // Guard against plaintext / already-decrypted keys (which can occur for this field): only
                 // decrypt genuine ciphertext, otherwise pass the value through unchanged.
-                if (cryptoUtil.isChunkedCipherText(gcpServiceAccountKeyValue)
+                if (APIUtil.isChunkedCipherText(gcpServiceAccountKeyValue)
                         || cryptoUtil.base64DecodeAndIsSelfContainedCipherText(gcpServiceAccountKeyValue)) {
                     deploymentStage.put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY,
-                            new String(cryptoUtil.base64DecodeAndDecryptAnySize(gcpServiceAccountKeyValue),
-                                    StandardCharsets.UTF_8));
+                            new String(APIUtil.base64DecodeAndDecryptAnySize(
+                                    cryptoUtil, gcpServiceAccountKeyValue), StandardCharsets.UTF_8));
                 }
             }
 

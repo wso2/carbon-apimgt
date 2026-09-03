@@ -53,7 +53,7 @@ public class PublisherCommonUtilsGCPTest {
     public void setUp() throws Exception {
 
         cryptoUtil = mock(CryptoUtil.class);
-        when(cryptoUtil.encryptAndBase64EncodeAnySize(any(byte[].class))).thenReturn("ENCRYPTED");
+        when(cryptoUtil.encryptAndBase64Encode(any(byte[].class))).thenReturn("ENCRYPTED");
     }
 
     // -------------------------------------------------------------------------
@@ -68,8 +68,9 @@ public class PublisherCommonUtilsGCPTest {
         PublisherCommonUtils.encryptEndpointSecurityGCPServiceAccountKey(
                 endpointConfig, cryptoUtil, null, null, new APIDTO());
 
-        Assert.assertEquals("ENCRYPTED", securityBlock(endpointConfig, PRODUCTION).get(GCP_KEY));
-        verify(cryptoUtil).encryptAndBase64EncodeAnySize(any(byte[].class));
+        // The key is small (one chunk), so the any-size helper wraps the single-shot ciphertext with chunk:v1:.
+        Assert.assertEquals("chunk:v1:ENCRYPTED", securityBlock(endpointConfig, PRODUCTION).get(GCP_KEY));
+        verify(cryptoUtil).encryptAndBase64Encode(any(byte[].class));
     }
 
     @Test
@@ -82,7 +83,7 @@ public class PublisherCommonUtilsGCPTest {
 
         Assert.assertFalse("Keyless GCP auth must not persist a service-account key",
                 securityBlock(endpointConfig, PRODUCTION).containsKey(GCP_KEY));
-        verify(cryptoUtil, never()).encryptAndBase64EncodeAnySize(any(byte[].class));
+        verify(cryptoUtil, never()).encryptAndBase64Encode(any(byte[].class));
     }
 
     @Test
@@ -94,7 +95,7 @@ public class PublisherCommonUtilsGCPTest {
                 endpointConfig, cryptoUtil, null, null, new APIDTO());
 
         Assert.assertFalse(securityBlock(endpointConfig, SANDBOX).containsKey(GCP_KEY));
-        verify(cryptoUtil, never()).encryptAndBase64EncodeAnySize(any(byte[].class));
+        verify(cryptoUtil, never()).encryptAndBase64Encode(any(byte[].class));
     }
 
     @Test
@@ -106,7 +107,7 @@ public class PublisherCommonUtilsGCPTest {
                 endpointConfig, cryptoUtil, "OLD_ENCRYPTED", null, new APIDTO());
 
         Assert.assertEquals("OLD_ENCRYPTED", securityBlock(endpointConfig, PRODUCTION).get(GCP_KEY));
-        verify(cryptoUtil, never()).encryptAndBase64EncodeAnySize(any(byte[].class));
+        verify(cryptoUtil, never()).encryptAndBase64Encode(any(byte[].class));
     }
 
     @Test(expected = APIManagementException.class)
@@ -135,7 +136,7 @@ public class PublisherCommonUtilsGCPTest {
                 apiEndpointDTO, cryptoUtil, "", endpointConfig);
 
         Assert.assertFalse(securityBlock(endpointConfig, PRODUCTION).containsKey(GCP_KEY));
-        verify(cryptoUtil, never()).encryptAndBase64EncodeAnySize(any(byte[].class));
+        verify(cryptoUtil, never()).encryptAndBase64Encode(any(byte[].class));
     }
 
     // -------------------------------------------------------------------------
@@ -157,7 +158,7 @@ public class PublisherCommonUtilsGCPTest {
         Assert.assertFalse("The transient clear flag must never be persisted",
                 securityBlock(endpointConfig, PRODUCTION)
                         .containsKey(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY_CLEAR));
-        verify(cryptoUtil, never()).encryptAndBase64EncodeAnySize(any(byte[].class));
+        verify(cryptoUtil, never()).encryptAndBase64Encode(any(byte[].class));
     }
 
     @Test
@@ -175,7 +176,7 @@ public class PublisherCommonUtilsGCPTest {
         Assert.assertFalse("The transient clear flag must never be persisted",
                 securityBlock(endpointConfig, SANDBOX)
                         .containsKey(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY_CLEAR));
-        verify(cryptoUtil, never()).encryptAndBase64EncodeAnySize(any(byte[].class));
+        verify(cryptoUtil, never()).encryptAndBase64Encode(any(byte[].class));
     }
 
     @Test
@@ -194,7 +195,7 @@ public class PublisherCommonUtilsGCPTest {
         Assert.assertFalse("The transient clear flag must never be persisted",
                 securityBlock(endpointConfig, PRODUCTION)
                         .containsKey(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY_CLEAR));
-        verify(cryptoUtil, never()).encryptAndBase64EncodeAnySize(any(byte[].class));
+        verify(cryptoUtil, never()).encryptAndBase64Encode(any(byte[].class));
     }
 
     // -------------------------------------------------------------------------
