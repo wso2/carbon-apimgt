@@ -49,7 +49,7 @@ import java.util.Map;
 public class GCPOAuth2MediatorTest {
 
     private static final String SCOPE = "https://www.googleapis.com/auth/cloud-platform";
-    private static final String CHUNK_PREFIX = "_gcp_sak_chunk_";
+    private static final String CHUNK_PREFIX = "gcpServiceAccountKeyChunk_";
     private static final int CHUNK_LENGTH = 180;
 
     private GCPOAuth2Mediator injector;
