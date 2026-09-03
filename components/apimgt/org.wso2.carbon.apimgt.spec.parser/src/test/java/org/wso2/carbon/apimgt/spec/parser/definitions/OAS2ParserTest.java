@@ -546,6 +546,13 @@ public class OAS2ParserTest extends OASTestBase {
         Assert.assertTrue("The circular field should still be declared", props.has("parent"));
         Assert.assertEquals("An unexpanded cycle should render as a plain object",
                 "object", props.path("parent").path("type").asText());
+        // The description is the only signal an agent has that content was omitted rather than
+        // genuinely absent, and it is the only place the omitted model is named.
+        String description = props.path("parent").path("description").asText();
+        Assert.assertTrue("An unexpanded cycle should say that its nested properties were omitted, "
+                + "but the description was: " + description, description.contains("omitted"));
+        Assert.assertTrue("The description should name the model that was omitted, "
+                + "but the description was: " + description, description.contains("Comment"));
     }
 
     @Test(timeout = CIRCULAR_TIMEOUT_MS)
