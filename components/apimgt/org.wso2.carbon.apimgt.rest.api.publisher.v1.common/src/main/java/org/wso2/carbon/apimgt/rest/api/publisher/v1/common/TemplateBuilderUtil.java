@@ -1231,11 +1231,14 @@ public class TemplateBuilderUtil {
                 continue;
             }
             if (!APIConstants.ENDPOINT_SECURITY_TYPE_GCP.equalsIgnoreCase(endpoint.getAuthenticationType())
-                    || endpoint.getServiceAccountKeyChunks() == null
-                    || endpoint.getServiceAccountKeyChunks().isEmpty()) {
+                    || StringUtils.isEmpty(endpoint.getServiceAccountKeyBase64())) {
                 continue;
             }
-            List<String> chunks = endpoint.getServiceAccountKeyChunks();
+            // Split the base64 key into vault-sized chunks: the secure-vault column caps each stored value, so
+            // one large key cannot be a single vault entry. Each chunk is registered under its own alias, and the
+            // mediator later reassembles them (pipe-joined) before decoding.
+            List<String> chunks = chunkString(endpoint.getServiceAccountKeyBase64(),
+                    AIAPIConstants.GCP_SERVICE_ACCOUNT_KEY_VAULT_CHUNK_LENGTH);
             List<String> aliases = new ArrayList<>(chunks.size());
             for (int i = 0; i < chunks.size(); i++) {
                 String alias = GatewayUtils.retrieveGCPServiceAccountKeyChunkAlias(api.getId().getApiName(),
@@ -1247,8 +1250,36 @@ public class TemplateBuilderUtil {
                 gatewayAPIDTO.setCredentialsToBeAdd(
                         addCredentialsToList(credentialDto, gatewayAPIDTO.getCredentialsToBeAdd()));
             }
-            endpoint.setServiceAccountKeyChunkAliases(aliases);
+            // Emit a single serviceAccountKey property whose value is the vault-resolved, pipe-joined key.
+            endpoint.setServiceAccountKeyVaultExpression(buildVaultLookupExpression(aliases));
+            // Vault mode: the key now lives in the vault under the aliases, so drop the base64 literal to keep
+            // it out of the rendered sequence artifact.
+            endpoint.setServiceAccountKeyBase64(null);
         }
+    }
+
+    /**
+     * Builds the synapse XPath expression that reassembles the GCP service-account key from its per-chunk vault
+     * aliases. Each alias resolves via {@code wso2:vault-lookup} and the chunks are joined with {@code '|'} (the
+     * mediator splits on that delimiter; base64 never contains it). A single alias is emitted as a bare lookup
+     * because XPath {@code concat} requires at least two arguments.
+     *
+     * @param aliases the ordered per-chunk vault aliases
+     * @return the {@code wso2:vault-lookup} / {@code concat(...)} expression
+     */
+    static String buildVaultLookupExpression(List<String> aliases) {
+
+        if (aliases.size() == 1) {
+            return "wso2:vault-lookup('" + aliases.get(0) + "')";
+        }
+        StringBuilder expression = new StringBuilder("concat(");
+        for (int i = 0; i < aliases.size(); i++) {
+            if (i > 0) {
+                expression.append(", '|', ");
+            }
+            expression.append("wso2:vault-lookup('").append(aliases.get(i)).append("')");
+        }
+        return expression.append(")").toString();
     }
 
     /**
@@ -1325,19 +1356,15 @@ public class TemplateBuilderUtil {
                     throw new RuntimeException("Error while decrypting the GCP service-account key for endpoint "
                             + simplifiedEndpoint.getEndpointName(), e);
                 }
-                // Split the (now plaintext) key into ordered base64 chunks that the gateway mediator
-                // reassembles. base64 is ASCII, so it splits at any boundary and is XML-attribute-safe. In
-                // secure-vault mode the chunk aliases are assigned later in addEndpointsSequence, where the
-                // API name/version are available.
+                // Deliver the (now plaintext) key to the gateway mediator as a single base64 value. base64 is
+                // ASCII and XML-attribute-safe, and the mediator base64-decodes it. In secure-vault mode this
+                // base64 is later split into vault chunks in addEndpointsSequence (where the API name/version
+                // are available) and this literal is dropped.
                 String plaintextServiceAccountKey = simplifiedEndpoint.getServiceAccountKey();
-                List<String> serviceAccountKeyChunks = chunkString(
-                        Base64.getEncoder().encodeToString(
-                                plaintextServiceAccountKey.getBytes(StandardCharsets.UTF_8)),
-                        AIAPIConstants.GCP_SERVICE_ACCOUNT_KEY_VAULT_CHUNK_LENGTH);
-                simplifiedEndpoint.setServiceAccountKeyChunks(serviceAccountKeyChunks);
-                simplifiedEndpoint.setServiceAccountKeyChunkCount(serviceAccountKeyChunks.size());
-                // The chunks now carry the key; drop the whole plaintext key from the endpoint so it does not
-                // linger on the SimplifiedEndpoint through template rendering.
+                simplifiedEndpoint.setServiceAccountKeyBase64(Base64.getEncoder().encodeToString(
+                        plaintextServiceAccountKey.getBytes(StandardCharsets.UTF_8)));
+                // The base64 field now carries the key; drop the whole plaintext key from the endpoint so it
+                // does not linger on the SimplifiedEndpoint through template rendering.
                 simplifiedEndpoint.setServiceAccountKey(null);
             }
         }
