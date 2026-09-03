@@ -20,7 +20,6 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.dto.EndpointConfigDTO;
 import org.wso2.carbon.apimgt.api.dto.EndpointDTO;
 
-import java.util.List;
 
 public class SimplifiedEndpoint {
 
@@ -40,12 +39,12 @@ public class SimplifiedEndpoint {
     private String roleExternalId;
     private String authType;
     private String serviceAccountKey;
-    // GCP service-account key delivered to the gateway mediator as ordered base64 chunks. Normal mode:
-    // the chunks are emitted as literal property values. Secure-vault mode: the chunks are registered in
-    // the vault and the aliases (parallel list) are emitted as vault-lookups. Count is the number of chunks.
-    private List<String> serviceAccountKeyChunks;
-    private List<String> serviceAccountKeyChunkAliases;
-    private int serviceAccountKeyChunkCount;
+    // GCP service-account key delivered to the gateway mediator as a single base64 property that the mediator
+    // base64-decodes. Normal mode: the whole base64 key is emitted as a literal value ({@code serviceAccountKeyBase64}).
+    // Secure-vault mode: the base64 key is split into chunks registered in the vault, and a pipe-joined concat of
+    // vault-lookups ({@code serviceAccountKeyVaultExpression}) is emitted instead (the mediator splits on '|').
+    private String serviceAccountKeyBase64;
+    private String serviceAccountKeyVaultExpression;
     private String endpoint;
     private String deploymentStage;
     private static final String PRODUCTION = "PRODUCTION";
@@ -242,28 +241,20 @@ public class SimplifiedEndpoint {
         this.serviceAccountKey = serviceAccountKey;
     }
 
-    public List<String> getServiceAccountKeyChunks() {
-        return serviceAccountKeyChunks;
+    public String getServiceAccountKeyBase64() {
+        return serviceAccountKeyBase64;
     }
 
-    public void setServiceAccountKeyChunks(List<String> serviceAccountKeyChunks) {
-        this.serviceAccountKeyChunks = serviceAccountKeyChunks;
+    public void setServiceAccountKeyBase64(String serviceAccountKeyBase64) {
+        this.serviceAccountKeyBase64 = serviceAccountKeyBase64;
     }
 
-    public List<String> getServiceAccountKeyChunkAliases() {
-        return serviceAccountKeyChunkAliases;
+    public String getServiceAccountKeyVaultExpression() {
+        return serviceAccountKeyVaultExpression;
     }
 
-    public void setServiceAccountKeyChunkAliases(List<String> serviceAccountKeyChunkAliases) {
-        this.serviceAccountKeyChunkAliases = serviceAccountKeyChunkAliases;
-    }
-
-    public int getServiceAccountKeyChunkCount() {
-        return serviceAccountKeyChunkCount;
-    }
-
-    public void setServiceAccountKeyChunkCount(int serviceAccountKeyChunkCount) {
-        this.serviceAccountKeyChunkCount = serviceAccountKeyChunkCount;
+    public void setServiceAccountKeyVaultExpression(String serviceAccountKeyVaultExpression) {
+        this.serviceAccountKeyVaultExpression = serviceAccountKeyVaultExpression;
     }
 
     public String getEndpoint() {

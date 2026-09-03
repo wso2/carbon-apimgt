@@ -45,17 +45,17 @@ import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
  * <ul>
  *     <li>When a service-account key is configured, {@link GCPServiceAccountTokenProvider} mints the
  *     token from that key via the JWT Bearer assertion grant.</li>
- *     <li>When no key is configured (no chunks), {@link GCPMetadataTokenProvider} uses the gateway's
+ *     <li>When no key is configured, {@link GCPMetadataTokenProvider} uses the gateway's
  *     attached GCP identity (Application Default Credentials / Workload Identity) via the metadata
  *     server - only valid when the gateway runs on GCP.</li>
  * </ul>
- * The service-account key is delivered to the mediator as ordered base64 chunks via synapse
- * message-context properties ({@code <prefix><index>}), reassembled here into the full key. The chunk
- * values are set by the endpoint sequence: literal values in normal mode, or {@code wso2:vault-lookup}
- * results in secure-vault mode - so this mediator is agnostic to which mode is in effect. When key chunks
- * are present the provider is built lazily on the first request (the chunks are per-request properties)
- * and cached; the keyless (metadata) provider is built eagerly at init time. The reassembled key is
- * handled as a byte stream and wiped after use, never held as an immutable {@code String}.
+ * The service-account key is delivered to the mediator as a single base64 {@code serviceAccountKey}
+ * property, set by the endpoint sequence: the whole base64 key as a literal in normal mode, or a
+ * pipe-joined {@code concat} of {@code wso2:vault-lookup} results in secure-vault mode - so this mediator
+ * is agnostic to which mode is in effect. Because the value is a per-request property (an expression in
+ * secure-vault mode), the provider is built lazily on the first request and cached; when the property is
+ * absent the mediator is keyless and uses the metadata provider. The reassembled key is handled as a byte
+ * stream and wiped after use, never held as an immutable {@code String}.
  */
 public class GCPOAuth2Mediator extends AbstractMediator implements ManagedLifecycle {
 
@@ -63,8 +63,7 @@ public class GCPOAuth2Mediator extends AbstractMediator implements ManagedLifecy
     private static final String BEARER = "Bearer ";
     private static final String DEFAULT_SCOPE = "https://www.googleapis.com/auth/cloud-platform";
 
-    private String serviceAccountKeyChunkPrefix;
-    private int serviceAccountKeyChunkCount;
+    private String serviceAccountKey;
     private String scope;
 
     private volatile GCPAccessTokenProvider tokenProvider;
@@ -72,17 +71,9 @@ public class GCPOAuth2Mediator extends AbstractMediator implements ManagedLifecy
     @Override
     public void init(SynapseEnvironment synapseEnvironment) {
 
-        // Keyless: no key chunks are configured, so use the gateway's attached GCP identity (ADC / Workload
-        // Identity) via the metadata server - this can be resolved eagerly. When key chunks ARE configured they
-        // arrive as per-request properties (literal values in normal mode, vault-lookups in secure-vault mode),
-        // so the service-account provider is built lazily on the first request and cached.
-        if (serviceAccountKeyChunkCount == 0) {
-            this.tokenProvider = new GCPMetadataTokenProvider(appliedScope());
-            if (log.isDebugEnabled()) {
-                log.debug("No GCP service-account key configured; using the gateway's attached GCP identity "
-                        + "(metadata server) for GCPOAuth2Mediator.");
-            }
-        }
+        // Provider selection is deferred to the first request: in secure-vault mode the serviceAccountKey
+        // property is an expression resolved per-request, so it is not yet available at init time. Deciding
+        // keyless-vs-key here would misread a not-yet-resolved vault key as keyless.
     }
 
     @Override
@@ -94,7 +85,7 @@ public class GCPOAuth2Mediator extends AbstractMediator implements ManagedLifecy
         try {
             GCPAccessTokenProvider provider = tokenProvider;
             if (provider == null) {
-                provider = buildProviderFromChunks(messageContext);
+                provider = buildProvider();
             }
             // getAccessToken() is synchronized inside the provider and only performs a network round-trip
             // to the token source (Google token endpoint or metadata server) when the cached token is
@@ -119,16 +110,25 @@ public class GCPOAuth2Mediator extends AbstractMediator implements ManagedLifecy
     }
 
     /**
-     * Builds the service-account token provider once from the ordered key chunks and caches it (double-checked
-     * under the monitor). The key is reassembled into a {@code byte[]} and streamed into the provider - never
-     * held as an immutable {@code String} - and the buffer is wiped as soon as the provider has consumed it.
+     * Builds the token provider once and caches it (double-checked under the monitor). When a service-account
+     * key is present it is reassembled into a {@code byte[]} and streamed into the provider - never held as an
+     * immutable {@code String} - and the buffer is wiped as soon as the provider has consumed it. When no key
+     * is configured the keyless metadata provider is used instead.
      */
-    private synchronized GCPAccessTokenProvider buildProviderFromChunks(MessageContext messageContext) {
+    private synchronized GCPAccessTokenProvider buildProvider() {
 
         if (tokenProvider != null) {
             return tokenProvider;
         }
-        byte[] keyBytes = reassembleServiceAccountKey(messageContext);
+        if (StringUtils.isEmpty(serviceAccountKey)) {
+            this.tokenProvider = new GCPMetadataTokenProvider(appliedScope());
+            if (log.isDebugEnabled()) {
+                log.debug("No GCP service-account key configured; using the gateway's attached GCP identity "
+                        + "(metadata server) for GCPOAuth2Mediator.");
+            }
+            return tokenProvider;
+        }
+        byte[] keyBytes = reassembleServiceAccountKey(serviceAccountKey);
         try (InputStream keyStream = new ByteArrayInputStream(keyBytes)) {
             this.tokenProvider = new GCPServiceAccountTokenProvider(keyStream, appliedScope());
         } catch (IllegalArgumentException e) {
@@ -144,21 +144,21 @@ public class GCPOAuth2Mediator extends AbstractMediator implements ManagedLifecy
     }
 
     /**
-     * Reassembles the ordered base64 chunk properties into the raw service-account key bytes. Each property's
-     * value is already resolved - a literal (normal mode) or a {@code wso2:vault-lookup} result (secure-vault
-     * mode) - so this is mode-agnostic. The chunks are base64 fragments of the key: concatenate then decode.
+     * Reassembles the delivered {@code serviceAccountKey} value into the raw key bytes. The value is a base64
+     * key split into pipe-separated chunks - a single literal in normal mode, or the {@code concat} of
+     * {@code wso2:vault-lookup} results in secure-vault mode (base64 never contains {@code '|'}, so it is a safe
+     * delimiter). Concatenate the chunks then base64-decode.
      */
-    private byte[] reassembleServiceAccountKey(MessageContext messageContext) {
+    private byte[] reassembleServiceAccountKey(String pipeJoinedBase64) {
 
         // Assemble the base64 as bytes (not an immutable String) so the encoded key can be wiped after decoding.
         ByteArrayOutputStream base64 = new ByteArrayOutputStream();
-        for (int i = 0; i < serviceAccountKeyChunkCount; i++) {
-            Object chunk = messageContext.getProperty(serviceAccountKeyChunkPrefix + i);
-            if (chunk == null || chunk.toString().isEmpty()) {
-                throw new SynapseException("Missing GCP service-account key chunk " + i
-                        + " (secure-vault lookup or chunk property returned empty).");
+        for (String chunk : pipeJoinedBase64.split("\\|", -1)) {
+            if (chunk.isEmpty()) {
+                throw new SynapseException("Empty GCP service-account key chunk "
+                        + "(a secure-vault lookup returned empty).");
             }
-            byte[] chunkBytes = chunk.toString().getBytes(StandardCharsets.US_ASCII);
+            byte[] chunkBytes = chunk.getBytes(StandardCharsets.US_ASCII);
             base64.write(chunkBytes, 0, chunkBytes.length);
         }
         byte[] base64Bytes = base64.toByteArray();
@@ -200,29 +200,14 @@ public class GCPOAuth2Mediator extends AbstractMediator implements ManagedLifecy
         return false;
     }
 
-    public String getServiceAccountKeyChunkPrefix() {
+    public String getServiceAccountKey() {
 
-        return serviceAccountKeyChunkPrefix;
+        return serviceAccountKey;
     }
 
-    public void setServiceAccountKeyChunkPrefix(String serviceAccountKeyChunkPrefix) {
+    public void setServiceAccountKey(String serviceAccountKey) {
 
-        this.serviceAccountKeyChunkPrefix = serviceAccountKeyChunkPrefix;
-    }
-
-    public int getServiceAccountKeyChunkCount() {
-
-        return serviceAccountKeyChunkCount;
-    }
-
-    /**
-     * Synapse sets class-mediator properties as strings; parse the count here so the setter is robust
-     * regardless of how the value is supplied.
-     */
-    public void setServiceAccountKeyChunkCount(String serviceAccountKeyChunkCount) {
-
-        this.serviceAccountKeyChunkCount = StringUtils.isNotEmpty(serviceAccountKeyChunkCount)
-                ? Integer.parseInt(serviceAccountKeyChunkCount) : 0;
+        this.serviceAccountKey = serviceAccountKey;
     }
 
     public String getScope() {
