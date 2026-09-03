@@ -1312,11 +1312,11 @@ public class TemplateBuilderUtil {
             String serviceAccountKey = simplifiedEndpoint.getServiceAccountKey();
             if (StringUtils.isNotEmpty(serviceAccountKey)) {
                 try {
-                    if (cryptoUtil.isChunkedCipherText(serviceAccountKey)
+                    if (APIUtil.isChunkedCipherText(serviceAccountKey)
                             || cryptoUtil.base64DecodeAndIsSelfContainedCipherText(serviceAccountKey)) {
                         simplifiedEndpoint.setServiceAccountKey(
-                                new String(cryptoUtil.base64DecodeAndDecryptAnySize(serviceAccountKey),
-                                        StandardCharsets.UTF_8));
+                                new String(APIUtil.base64DecodeAndDecryptAnySize(
+                                        cryptoUtil, serviceAccountKey), StandardCharsets.UTF_8));
                     }
                 } catch (CryptoException e) {
                     // Keep this public method free of checked exceptions (avoids a source/binary break for

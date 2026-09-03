@@ -1524,7 +1524,7 @@ public class PublisherCommonUtils {
                             String keyValue = endpointSecurityProduction
                                     .get(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY).toString();
                             validateGCPServiceAccountKey(keyValue);
-                            String encryptedKeyValue = cryptoUtil.encryptAndBase64EncodeAnySize(
+                            String encryptedKeyValue = APIUtil.encryptAndBase64EncodeAnySize(cryptoUtil, 
                                     keyValue.getBytes(StandardCharsets.UTF_8));
                             endpointSecurityProduction
                                     .put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY, encryptedKeyValue);
@@ -1572,7 +1572,7 @@ public class PublisherCommonUtils {
                             String keyValue = endpointSecuritySandbox
                                     .get(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY).toString();
                             validateGCPServiceAccountKey(keyValue);
-                            String encryptedKeyValue = cryptoUtil.encryptAndBase64EncodeAnySize(
+                            String encryptedKeyValue = APIUtil.encryptAndBase64EncodeAnySize(cryptoUtil, 
                                     keyValue.getBytes(StandardCharsets.UTF_8));
                             endpointSecuritySandbox
                                     .put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY, encryptedKeyValue);
@@ -1963,14 +1963,14 @@ public class PublisherCommonUtils {
                             String keyValue = endpointSecurityProduction.get(
                                     APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY).toString();
                             validateGCPServiceAccountKey(keyValue);
-                            String encryptedKeyValue = cryptoUtil.encryptAndBase64EncodeAnySize(
+                            String encryptedKeyValue = APIUtil.encryptAndBase64EncodeAnySize(cryptoUtil, 
                                     keyValue.getBytes(StandardCharsets.UTF_8));
                             endpointSecurityProduction.put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY,
                                     encryptedKeyValue);
                         } else if (StringUtils.isNotBlank(oldApiSecret)) {
                             // oldApiSecret is the decrypted key (updateAPIEndpoint reads it with decryption),
                             // so re-encrypt before storing to keep it encrypted at rest and decryptable on read.
-                            String encryptedOldKeyValue = cryptoUtil.encryptAndBase64EncodeAnySize(
+                            String encryptedOldKeyValue = APIUtil.encryptAndBase64EncodeAnySize(cryptoUtil, 
                                     oldApiSecret.getBytes(StandardCharsets.UTF_8));
                             endpointSecurityProduction.put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY,
                                     encryptedOldKeyValue);
@@ -2018,14 +2018,14 @@ public class PublisherCommonUtils {
                             String keyValue = endpointSecuritySandbox
                                     .get(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY).toString();
                             validateGCPServiceAccountKey(keyValue);
-                            String encryptedKeyValue = cryptoUtil.encryptAndBase64EncodeAnySize(
+                            String encryptedKeyValue = APIUtil.encryptAndBase64EncodeAnySize(cryptoUtil, 
                                     keyValue.getBytes(StandardCharsets.UTF_8));
                             endpointSecuritySandbox
                                     .put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY, encryptedKeyValue);
                         } else if (StringUtils.isNotBlank(oldApiSecret)) {
                             // oldApiSecret is the decrypted key (updateAPIEndpoint reads it with decryption),
                             // so re-encrypt before storing to keep it encrypted at rest and decryptable on read.
-                            String encryptedOldKeyValue = cryptoUtil.encryptAndBase64EncodeAnySize(
+                            String encryptedOldKeyValue = APIUtil.encryptAndBase64EncodeAnySize(cryptoUtil, 
                                     oldApiSecret.getBytes(StandardCharsets.UTF_8));
                             endpointSecuritySandbox
                                     .put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY, encryptedOldKeyValue);
