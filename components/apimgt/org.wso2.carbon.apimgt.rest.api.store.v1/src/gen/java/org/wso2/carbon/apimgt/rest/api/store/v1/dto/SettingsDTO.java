@@ -492,7 +492,7 @@ return null;
   }
 
 
-  @ApiModelProperty(example = "true", value = "DEPRECATED. Indicates that an application's subscriptions to APIs owned by other tenants are listed in the Dev Portal. Present and true only when the APIStore.EnableDeprecatedCrossTenantSubscriptionVisibility configuration is enabled, and omitted from the response otherwise. ")
+  @ApiModelProperty(example = "true", value = "DEPRECATED. Indicates that an application's subscriptions to APIs and API Products owned by other organizations are listed and counted in the Dev Portal, instead of the listing being scoped to the organization the request is made in. Present and true only when the APIStore.EnableDeprecatedCrossTenantSubscriptionVisibility configuration is enabled, and omitted from the response otherwise. ")
   @JsonInclude(JsonInclude.Include.NON_NULL)
   @JsonProperty("crossTenantSubscriptionEnabled")
   public Boolean isCrossTenantSubscriptionEnabled() {

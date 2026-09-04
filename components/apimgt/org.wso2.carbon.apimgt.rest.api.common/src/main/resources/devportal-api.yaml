@@ -6341,9 +6341,12 @@ components:
         apiProviderTenantDomain:
           type: string
           description: |
-            Tenant domain of the API or API Product owner. DEPRECATED. Present only when cross tenant subscription
-            visibility is enabled via the APIStore.EnableDeprecatedCrossTenantSubscriptionVisibility configuration,
-            and omitted from the response otherwise.
+            Tenant domain that owns the API or API Product this subscription points to. DEPRECATED. Present only
+            when cross tenant subscription visibility is enabled via the
+            APIStore.EnableDeprecatedCrossTenantSubscriptionVisibility configuration, and omitted from the response
+            otherwise.
+          deprecated: true
+          readOnly: true
           example: carbon.super
         apiInfo:
           $ref: '#/components/schemas/APIInfo'
@@ -7570,10 +7573,12 @@ components:
         crossTenantSubscriptionEnabled:
           type: boolean
           description: |
-            DEPRECATED. Indicates that an application's subscriptions to APIs owned by other tenants are listed in
-            the Dev Portal. Present and true only when the
-            APIStore.EnableDeprecatedCrossTenantSubscriptionVisibility configuration is enabled, and omitted from the
-            response otherwise.
+            DEPRECATED. Indicates that an application's subscriptions to APIs and API Products owned by other
+            organizations are listed and counted in the Dev Portal, instead of the listing being scoped to the
+            organization the request is made in. Present and true only when the
+            APIStore.EnableDeprecatedCrossTenantSubscriptionVisibility configuration is enabled, and omitted from
+            the response otherwise.
+          deprecated: true
           example: true
     ApplicationAttribute:
       title: Application attributes
