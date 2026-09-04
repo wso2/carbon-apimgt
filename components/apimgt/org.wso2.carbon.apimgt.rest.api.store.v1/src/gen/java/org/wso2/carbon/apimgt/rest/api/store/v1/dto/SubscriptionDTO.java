@@ -135,7 +135,7 @@ return null;
   }
 
 
-  @ApiModelProperty(example = "carbon.super", value = "Tenant domain of the API or API Product owner. ")
+  @ApiModelProperty(example = "carbon.super", value = "Tenant domain of the API or API Product owner. DEPRECATED. Present only when cross tenant subscription visibility is enabled via the APIStore.EnableDeprecatedCrossTenantSubscriptionVisibility configuration, and omitted from the response otherwise. ")
   @JsonInclude(JsonInclude.Include.NON_NULL)
   @JsonProperty("apiProviderTenantDomain")
   public String getApiProviderTenantDomain() {
