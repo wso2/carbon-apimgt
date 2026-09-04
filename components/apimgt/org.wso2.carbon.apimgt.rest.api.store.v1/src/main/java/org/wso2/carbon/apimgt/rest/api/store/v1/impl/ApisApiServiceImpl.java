@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -69,6 +70,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -1092,7 +1094,14 @@ public class ApisApiServiceImpl implements ApisApiService {
                         swaggerDefinition);
                 //Create the sdk response.
                 File sdkFile = new File(sdkArtifacts.get("zipFilePath"));
-                return Response.ok(sdkFile, MediaType.APPLICATION_OCTET_STREAM_TYPE).header("Content-Disposition",
+                // read the SDK into memory and delete the temp staging dir before returning so
+                // it does not leak on the success path. Returned content is unchanged.
+                byte[] sdkBytes = Files.readAllBytes(sdkFile.toPath());
+                // deleteDirectory (not the shipped cleanTempDirectory, which only empties
+                // contents and leaves the dir shell) so no <UUID>/ directory leaks.
+                FileUtils.deleteDirectory(new java.io.File(sdkArtifacts.get("tempDirectoryPath")));
+
+                return Response.ok(sdkBytes, MediaType.APPLICATION_OCTET_STREAM_TYPE).header("Content-Disposition",
                         "attachment; filename=\"" + sdkArtifacts.get("zipFileName") + "\"" ).build();
             } catch (APIClientGenerationException e) {
                 String message = "Error generating client sdk for api: " + api.getName() + " for language: " + language;

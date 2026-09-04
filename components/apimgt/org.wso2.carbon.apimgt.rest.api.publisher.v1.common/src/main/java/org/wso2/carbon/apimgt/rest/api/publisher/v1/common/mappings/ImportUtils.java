@@ -2938,6 +2938,16 @@ public class ImportUtils {
                 log.error("Failed to find the thumbnail file. ", e);
             }
         }
+        // restrict imported thumbnail MIME to raster images / json (prevent stored-XSS
+        // via caller-named files like icon.html that guessContentTypeFromName maps to text/html).
+        String thumbnailMimeType = (mimeType == null) ? "" : mimeType.toLowerCase().trim();
+        java.util.Set<String> thumbnailAllowedList = new java.util.HashSet<String>(java.util.Arrays.asList(
+                "image/png", "image/jpeg", "image/jpg", "image/gif", "image/bmp", "image/webp",
+                APIConstants.APPLICATION_JSON_MEDIA_TYPE));
+        if (!thumbnailAllowedList.contains(thumbnailMimeType)) {
+            log.warn("Skipping imported thumbnail with disallowed content type: " + mimeType);
+            return;
+        }
         try (FileInputStream inputStream = new FileInputStream(imageFile.getAbsolutePath())) {
             String apiOrApiProductId = (!apiTypeWrapper.isAPIProduct()) ?
                     apiTypeWrapper.getApi().getUuid() :
