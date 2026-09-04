@@ -10692,6 +10692,36 @@ public final class APIUtil {
         return false;
     }
 
+    /**
+     * DEPRECATED. Whether an application's subscriptions to APIs owned by other organizations should be listed and
+     * counted in the Dev Portal, restoring the pre 4.1.0 behaviour where the listing was scoped to the subscriber's
+     * tenant rather than to the organization the request is made in.
+     * <p>
+     * Controlled by the {@code APIStore.EnableDeprecatedCrossTenantSubscriptionVisibility} configuration and disabled
+     * by default. Provided only for deployments migrating a Dev Portal customisation that relied on the old
+     * behaviour; it is not recommended for new deployments and organization scoped listing remains the default.
+     *
+     * @return true if deprecated cross organization subscription visibility is enabled
+     */
+    public static boolean isDeprecatedCrossTenantSubscriptionVisibilityEnabled() {
+
+        APIManagerConfigurationService apiManagerConfigurationService =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
+        if (apiManagerConfigurationService == null) {
+            return false;
+        }
+        APIManagerConfiguration apiManagerConfiguration = apiManagerConfigurationService.getAPIManagerConfiguration();
+        if (apiManagerConfiguration == null) {
+            return false;
+        }
+        String property = apiManagerConfiguration.getFirstProperty(
+                APIConstants.API_DEVPORTAL_ENABLE_DEPRECATED_CROSS_TENANT_SUBSCRIPTION_VISIBILITY);
+        if (StringUtils.isNotEmpty(property)) {
+            return Boolean.parseBoolean(property);
+        }
+        return false;
+    }
+
     public static boolean isApplicationScopesEnabledForResidentKM() {
 
         APIManagerConfiguration apiManagerConfiguration =

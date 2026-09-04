@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
@@ -45,6 +46,7 @@ public class SettingsDTO   {
     private Boolean aiAuthTokenProvided = false;
     private Boolean marketplaceAssistantEnabled = true;
     private Boolean orgWideAppUpdateEnabled = false;
+    private Boolean crossTenantSubscriptionEnabled = null;
 
     @XmlType(name="DevportalModeEnum")
     @XmlEnum(String.class)
@@ -480,6 +482,26 @@ return null;
     this.devportalMode = devportalMode;
   }
 
+  /**
+   * DEPRECATED. Whether an application's subscriptions to APIs owned by other organizations are listed in the
+   * Dev Portal. Set only when the behaviour is enabled; omitted from the response otherwise.
+   **/
+  public SettingsDTO crossTenantSubscriptionEnabled(Boolean crossTenantSubscriptionEnabled) {
+    this.crossTenantSubscriptionEnabled = crossTenantSubscriptionEnabled;
+    return this;
+  }
+
+
+  @ApiModelProperty(example = "false", value = "Is Cross Tenant Subscription visibility enabled ")
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  @JsonProperty("crossTenantSubscriptionEnabled")
+  public Boolean isCrossTenantSubscriptionEnabled() {
+    return crossTenantSubscriptionEnabled;
+  }
+  public void setCrossTenantSubscriptionEnabled(Boolean crossTenantSubscriptionEnabled) {
+    this.crossTenantSubscriptionEnabled = crossTenantSubscriptionEnabled;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -512,12 +534,13 @@ return null;
         Objects.equals(aiAuthTokenProvided, settings.aiAuthTokenProvided) &&
         Objects.equals(marketplaceAssistantEnabled, settings.marketplaceAssistantEnabled) &&
         Objects.equals(orgWideAppUpdateEnabled, settings.orgWideAppUpdateEnabled) &&
-        Objects.equals(devportalMode, settings.devportalMode);
+        Objects.equals(devportalMode, settings.devportalMode) &&
+        Objects.equals(crossTenantSubscriptionEnabled, settings.crossTenantSubscriptionEnabled);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(grantTypes, scopes, applicationSharingEnabled, isLegacyApiKeysEnabled, mapExistingAuthApps, apiGatewayEndpoint, monetizationEnabled, recommendationEnabled, isUnlimitedTierPaid, identityProvider, isAnonymousModeEnabled, isPasswordChangeEnabled, isJWTEnabledForLoginTokens, orgAccessControlEnabled, userStorePasswordPattern, passwordPolicyPattern, passwordPolicyMinLength, passwordPolicyMaxLength, apiChatEnabled, aiAuthTokenProvided, marketplaceAssistantEnabled, orgWideAppUpdateEnabled, devportalMode);
+    return Objects.hash(grantTypes, scopes, applicationSharingEnabled, isLegacyApiKeysEnabled, mapExistingAuthApps, apiGatewayEndpoint, monetizationEnabled, recommendationEnabled, isUnlimitedTierPaid, identityProvider, isAnonymousModeEnabled, isPasswordChangeEnabled, isJWTEnabledForLoginTokens, orgAccessControlEnabled, userStorePasswordPattern, passwordPolicyPattern, passwordPolicyMinLength, passwordPolicyMaxLength, apiChatEnabled, aiAuthTokenProvided, marketplaceAssistantEnabled, orgWideAppUpdateEnabled, devportalMode, crossTenantSubscriptionEnabled);
   }
 
   @Override
@@ -548,6 +571,7 @@ return null;
     sb.append("    marketplaceAssistantEnabled: ").append(toIndentedString(marketplaceAssistantEnabled)).append("\n");
     sb.append("    orgWideAppUpdateEnabled: ").append(toIndentedString(orgWideAppUpdateEnabled)).append("\n");
     sb.append("    devportalMode: ").append(toIndentedString(devportalMode)).append("\n");
+    sb.append("    crossTenantSubscriptionEnabled: ").append(toIndentedString(crossTenantSubscriptionEnabled)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -37,6 +38,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionListDTO;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,6 +66,7 @@ public class SubscriptionMappingUtil {
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
         SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
         subscriptionDTO.setSubscriptionId(subscription.getUUID());
+        setApiProviderTenantDomain(subscriptionDTO, subscription);
         APIInfoDTO apiInfo;
         Identifier apiId = subscription.getIdentifier();
         ApiTypeWrapper apiTypeWrapper;
@@ -89,6 +92,7 @@ public class SubscriptionMappingUtil {
             apiInfo = new APIInfoDTO();
             apiInfo.setName(apiId.getName());
             apiInfo.setVersion(apiId.getVersion());
+            setApiTypeForUnresolvedApi(apiInfo, apiId);
             subscriptionDTO.setApiInfo(apiInfo);
         }
         Application application = subscription.getApplication();
@@ -108,6 +112,7 @@ public class SubscriptionMappingUtil {
 
         SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
         subscriptionDTO.setSubscriptionId(subscription.getUUID());
+        setApiProviderTenantDomain(subscriptionDTO, subscription);
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
         Set<String> deniedTiers = apiConsumer.getDeniedTiers(organization);
         Map<String,Tier> tierMap = APIUtil.getTiers(organization);
@@ -134,6 +139,51 @@ public class SubscriptionMappingUtil {
         subscriptionDTO.setApplicationInfo(applicationInfoDTO);
 
         return subscriptionDTO;
+    }
+
+    /**
+     * DEPRECATED. Sets the API type on the partially populated API information of a subscription whose API could not
+     * be resolved in the requesting organization, but only when cross organization subscription visibility is
+     * enabled. The type is read from the stored API record, which is not organization scoped, so that the Dev Portal
+     * can still tell an MCP Server subscription apart from an API subscription and list it under the correct
+     * section. Failures are logged and ignored: the row is still worth listing without its type.
+     *
+     * @param apiInfo partially populated API information
+     * @param apiId   identifier of the API the subscription points to
+     */
+    private static void setApiTypeForUnresolvedApi(APIInfoDTO apiInfo, Identifier apiId) {
+
+        if (!APIUtil.isDeprecatedCrossTenantSubscriptionVisibilityEnabled() || apiId.getUUID() == null) {
+            return;
+        }
+        try {
+            apiInfo.setType(ApiMgtDAO.getInstance().getAPITypeFromUUID(apiId.getUUID()));
+        } catch (APIManagementException e) {
+            log.warn("Failed to resolve the API type of " + apiId.getUUID() + " for a cross organization "
+                    + "subscription. The subscription is listed without its type.", e);
+        }
+    }
+
+    /**
+     * DEPRECATED. Sets the tenant domain of the API or API Product owner on the subscription DTO, but only when cross
+     * organization subscription visibility is enabled. When the behaviour is disabled the field is left null and is
+     * therefore omitted from the response, keeping the subscription response identical to a deployment without this
+     * change.
+     *
+     * @param subscriptionDTO subscription DTO being populated
+     * @param subscription    the subscription the DTO is built from
+     */
+    private static void setApiProviderTenantDomain(SubscriptionDTO subscriptionDTO, SubscribedAPI subscription) {
+
+        if (!APIUtil.isDeprecatedCrossTenantSubscriptionVisibilityEnabled()) {
+            return;
+        }
+        Identifier identifier = subscription.getIdentifier();
+        if (identifier == null || identifier.getProviderName() == null) {
+            return;
+        }
+        subscriptionDTO.setApiProviderTenantDomain(
+                MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName())));
     }
 
     /**

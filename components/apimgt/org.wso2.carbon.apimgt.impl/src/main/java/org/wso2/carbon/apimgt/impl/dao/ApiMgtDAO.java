@@ -1452,10 +1452,18 @@ public class ApiMgtDAO {
                                                         String organization) throws SQLException {
 
         int subscriptionCount = 0;
-        String sqlQuery = SQLConstants.GET_SUBSCRIPTION_COUNT_BY_APP_ID_SQL;
+        // DEPRECATED: when cross organization subscription visibility is enabled, count the application's
+        // subscriptions to APIs owned by other organizations as well, so the count is consistent with the listing
+        // returned by getPaginatedSubscribedAPIsByApplication (pre 4.1.0 behaviour). Off by default.
+        boolean crossOrganizationVisibility = APIUtil.isDeprecatedCrossTenantSubscriptionVisibilityEnabled();
+        String sqlQuery = crossOrganizationVisibility
+                ? SQLConstants.GET_SUBSCRIPTION_COUNT_BY_APP_ID_ALL_ORGANIZATIONS_SQL
+                : SQLConstants.GET_SUBSCRIPTION_COUNT_BY_APP_ID_SQL;
         try (PreparedStatement ps = connection.prepareStatement(sqlQuery)) {
             ps.setInt(1, application.getId());
-            ps.setString(2, organization);
+            if (!crossOrganizationVisibility) {
+                ps.setString(2, organization);
+            }
             try (ResultSet result = ps.executeQuery()) {
                 while (result.next()) {
                     subscriptionCount = result.getInt("SUB_COUNT");
@@ -23043,11 +23051,20 @@ public class ApiMgtDAO {
                 
         Set<SubscribedAPI> subscribedAPIs = new LinkedHashSet<>();
 
+        // DEPRECATED: when cross organization subscription visibility is enabled, use the unfiltered query so the
+        // application's subscriptions to APIs owned by other organizations are listed as well (pre 4.1.0
+        // behaviour). Off by default, in which case the listing stays scoped to the requesting organization.
+        boolean crossOrganizationVisibility = APIUtil.isDeprecatedCrossTenantSubscriptionVisibilityEnabled();
+        String sqlQuery = crossOrganizationVisibility
+                ? SQLConstants.GET_PAGINATED_SUBSCRIBED_APIS_BY_APP_ID_ALL_ORGANIZATIONS_SQL
+                : SQLConstants.GET_PAGINATED_SUBSCRIBED_APIS_BY_APP_ID_SQL;
+
         try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement ps =
-                     connection.prepareStatement(SQLConstants.GET_PAGINATED_SUBSCRIBED_APIS_BY_APP_ID_SQL)) {
+             PreparedStatement ps = connection.prepareStatement(sqlQuery)) {
             ps.setInt(1, application.getId());
-            ps.setString(2, organization);
+            if (!crossOrganizationVisibility) {
+                ps.setString(2, organization);
+            }
             try (ResultSet result = ps.executeQuery()) {
                 int index = 0;
                 while (result.next()) {
