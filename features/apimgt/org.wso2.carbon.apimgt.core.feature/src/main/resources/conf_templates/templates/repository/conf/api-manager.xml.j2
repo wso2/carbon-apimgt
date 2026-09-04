@@ -676,6 +676,14 @@
         <!--This parameter specifies whether Anonymous Mode is enabled. By default it is true.-->
         <EnableAnonymousMode>{{apim.devportal.enable_anonymous_mode}}</EnableAnonymousMode>
         <EnableCrossTenantSubscription>{{apim.devportal.enable_cross_tenant_subscriptions}}</EnableCrossTenantSubscription>
+        {% if apim.devportal.enable_deprecated_cross_tenant_subscription_visibility is defined %}
+        <!--DEPRECATED: When enabled, an application's subscriptions to APIs owned by other organizations are listed
+            and counted in the Dev Portal Applications > Subscriptions view, restoring the pre 4.1.0 behaviour.
+            Organization scoped listing is the default and the recommended behaviour. This is provided only for
+            deployments migrating a Dev Portal customisation that relied on the old behaviour and should not be
+            enabled for new deployments.-->
+        <EnableDeprecatedCrossTenantSubscriptionVisibility>{{apim.devportal.enable_deprecated_cross_tenant_subscription_visibility}}</EnableDeprecatedCrossTenantSubscriptionVisibility>
+        {% endif %}
         <DefaultReservedUsername>{{apim.devportal.default_reserved_username}}</DefaultReservedUsername>
         {% if apim.devportal.create_default_application is defined %}
         <CreateDefaultApplication>{{apim.devportal.create_default_application}}</CreateDefaultApplication>
