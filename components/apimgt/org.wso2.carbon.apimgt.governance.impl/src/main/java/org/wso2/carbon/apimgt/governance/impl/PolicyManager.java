@@ -399,4 +399,71 @@ public class PolicyManager {
         policyMgtDAO.deleteLabelPolicyMappings(label);
         AuditLogger.log("Governance Policy", "Label policy mappings deleted for label %s", label);
     }
+
+    /**
+     * Get the compliance affecting severities configured for a policy
+     *
+     * @param policyId     Policy ID
+     * @param organization Organization
+     * @return Comma separated severities, null when none are configured or the feature is unavailable
+     * @throws APIMGovernanceException If the severities cannot be read
+     */
+    public String getComplianceAffectingSeverities(String policyId, String organization)
+            throws APIMGovernanceException {
+
+        return policyMgtDAO.getComplianceAffectingSeverities(policyId, organization);
+    }
+
+    /**
+     * Update the compliance affecting severities of a policy
+     *
+     * @param policyId     Policy ID
+     * @param organization Organization
+     * @param severities   Comma separated severities, null to clear the setting
+     * @throws APIMGovernanceException If the severities cannot be stored
+     */
+    public void updateComplianceAffectingSeverities(String policyId, String organization, String severities)
+            throws APIMGovernanceException {
+
+        policyMgtDAO.updateComplianceAffectingSeverities(policyId, organization, severities);
+        AuditLogger.log("Governance Policy", "Compliance affecting severities of policy %s updated to %s", policyId,
+                severities);
+    }
+
+    /**
+     * Check whether per policy compliance affecting severity filtering is enabled in the configuration
+     *
+     * @return True when the configuration enables the feature
+     */
+    public boolean isComplianceAffectingSeverityFilteringEnabled() {
+
+        return policyMgtDAO.isComplianceAffectingSeverityFilteringEnabled();
+    }
+
+    /**
+     * Check whether a compliance affecting severity can actually be stored against a policy
+     * <p>
+     * Callers which are about to write a policy use this first, so a deployment that cannot store the severity is
+     * rejected before anything is committed rather than after.
+     *
+     * @return True when a severity can be stored
+     * @throws APIMGovernanceException If the schema cannot be inspected
+     */
+    public boolean isComplianceAffectingSeverityStorageAvailable() throws APIMGovernanceException {
+
+        return policyMgtDAO.isComplianceAffectingSeverityStorageAvailable();
+    }
+
+    /**
+     * Get the compliance affecting severities of every policy in an organization
+     *
+     * @param organization Organization
+     * @return Policy ID to comma separated severities, empty when none are stored
+     * @throws APIMGovernanceException If the severities cannot be read
+     */
+    public Map<String, String> getComplianceAffectingSeverities(String organization) throws APIMGovernanceException {
+
+        return policyMgtDAO.getComplianceAffectingSeverities(organization);
+    }
+
 }

@@ -24,6 +24,8 @@ import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.dto.APIMGovernanceConfigDTO;
 import org.wso2.carbon.apimgt.impl.dto.PlatformGatewayConnectConfig;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -66,7 +68,28 @@ public class SettingsMappingUtil {
         settingsDTO.setPlatformGatewayVersions(resolvePlatformGatewayVersions());
         settingsDTO.setConsumptionExportEnabled(
                 ServiceReferenceHolder.getInstance().getConsumptionDataExportService() != null);
+        settingsDTO.setPerPolicySeverityFilteringEnabled(isPerPolicySeverityFilteringEnabled());
         return settingsDTO;
+    }
+
+    /**
+     * Check whether per policy compliance affecting severity filtering is enabled for governance policies.
+     * <p>
+     * The admin portal needs this before a policy exists, on the policy create form, where the tri-state
+     * complianceAffectingSeverities field of a policy payload is not available to tell it from.
+     *
+     * @return True when the configuration enables the feature
+     */
+    private static boolean isPerPolicySeverityFilteringEnabled() {
+
+        APIManagerConfigurationService configurationService = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService();
+        if (configurationService == null || configurationService.getAPIManagerConfiguration() == null) {
+            return false;
+        }
+        APIMGovernanceConfigDTO governanceConfig = configurationService.getAPIManagerConfiguration()
+                .getAPIMGovernanceConfigurationDto();
+        return governanceConfig != null && governanceConfig.isPerPolicySeverityFilteringEnabled();
     }
 
     private static List<String> resolvePlatformGatewayVersions() {

@@ -88,7 +88,62 @@
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.common.jms</artifactId>
         </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.h2database</groupId>
+            <artifactId>h2-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
+
+    <profiles>
+        <!--
+            Puts a JDBC driver on the test classpath so SeverityColumnLiveDatabaseTest can run the severity
+            detection and queries against a real database. Activated only when a driver is named, so an ordinary
+            build never sees it.
+
+            The driver is taken from a path rather than declared as a dependency, because Oracle ojdbc and IBM jcc
+            are redistributed under the Oracle FUTC and IBM IPLA rather than an OSI licence and cannot be added to
+            this repository. Naming a path works the same way for all six vendors and needs nothing downloaded.
+
+            mvn test -Pgov-vendor-driver -Dtest=SeverityColumnLiveDatabaseTest \
+                -Dgov.test.db.driverJar=$HOME/drivers/postgresql-42.7.4.jar \
+                -Dgov.test.db.driver=org.postgresql.Driver \
+                -Dgov.test.db.url=jdbc:postgresql://localhost:5432/govscratch \
+                -Dgov.test.db.username=wso2carbon -Dgov.test.db.password=wso2carbon \
+                -Dgov.test.db.disposable=true
+        -->
+        <profile>
+            <id>gov-vendor-driver</id>
+            <activation>
+                <property>
+                    <name>gov.test.db.driverJar</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <additionalClasspathElements>
+                                <additionalClasspathElement>${gov.test.db.driverJar}</additionalClasspathElement>
+                            </additionalClasspathElements>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
     <build>
         <plugins>

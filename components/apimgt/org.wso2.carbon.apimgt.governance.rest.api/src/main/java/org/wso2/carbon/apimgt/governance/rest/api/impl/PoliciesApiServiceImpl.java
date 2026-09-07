@@ -19,6 +19,7 @@
 
 package org.wso2.carbon.apimgt.governance.rest.api.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.governance.api.APIMGovernanceAPIConstants;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
@@ -39,6 +40,7 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.Response;
@@ -70,11 +72,28 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
             String username = APIMGovernanceAPIUtil.getLoggedInUsername();
             String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
 
+            // Checked before the policy is written, because the severity is stored by a second write. Finding out
+            // afterwards would leave the policy created while the request is reported as failed.
+            rejectUnstorableSeverities(policyManager, governancePolicyDTO.getComplianceAffectingSeverities(), false);
+
             governancePolicy.setCreatedBy(username);
             governancePolicy = policyManager.createGovernancePolicy(organization,
                     governancePolicy);
 
-            // Access policy compliance in the background
+            // Written as a follow up update, because the optional column cannot appear in the policy insert
+            String complianceAffectingSeverities = governancePolicyDTO.getComplianceAffectingSeverities();
+
+            // If validation is successful, proceed with the update
+            if (StringUtils.isNotBlank(complianceAffectingSeverities)) {
+                policyManager.updateComplianceAffectingSeverities(governancePolicy.getId(), organization,
+                        complianceAffectingSeverities);
+            }
+            setComplianceAffectingSeverities(policyManager, governancePolicy, governancePolicy.getId(),
+                    organization);
+
+            // Queued only once the severity selection is stored, as the update path already does. Queueing first
+            // leaves a window in which the scheduler evaluates the policy before its severities are written, and
+            // every severity would then affect compliance rather than the ones the policy asked for.
             new ComplianceManager().handlePolicyChangeEvent(governancePolicy.getId(), organization);
 
             createdPolicyDTO = PolicyMappingUtil.
@@ -110,8 +129,22 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
                         fromDTOtoGovernancePolicy(governancePolicyDTO);
 
         governancePolicy.setUpdatedBy(username);
+
+        // As in create: the severity is a second write, so a deployment which cannot store it has to be rejected
+        // before the policy changes are committed rather than after.
+        rejectUnstorableSeverities(policyManager, governancePolicyDTO.getComplianceAffectingSeverities(), true);
+
         APIMGovernancePolicy updatedPolicy = policyManager.updateGovernancePolicy
                 (policyId, governancePolicy, organization);
+
+        // Rejected by the manager when the optional column does not exist. A blank value clears the setting,
+        // which falls back to every severity affecting compliance.
+        String complianceAffectingSeverities = governancePolicyDTO.getComplianceAffectingSeverities();
+        if (complianceAffectingSeverities != null) {
+            policyManager.updateComplianceAffectingSeverities(policyId, organization,
+                    StringUtils.isBlank(complianceAffectingSeverities) ? null : complianceAffectingSeverities);
+        }
+        setComplianceAffectingSeverities(policyManager, updatedPolicy, policyId, organization);
 
         APIMGovernancePolicyDTO updatedPolicyDTO = PolicyMappingUtil.
                 fromGovernancePolicyToGovernancePolicyDTO(updatedPolicy);
@@ -154,6 +187,7 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
         String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
 
         APIMGovernancePolicy policy = policyManager.getGovernancePolicyByID(policyId, organization);
+        setComplianceAffectingSeverities(policyManager, policy, policyId, organization);
         APIMGovernancePolicyDTO policyDTO = PolicyMappingUtil.fromGovernancePolicyToGovernancePolicyDTO(policy);
         return Response.status(Response.Status.OK).entity(policyDTO).build();
     }
@@ -184,7 +218,8 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
             policyList = policyManager.getGovernancePolicies(organization);
         }
 
-        APIMGovernancePolicyListDTO policyListDTO = getPaginatedPolicyList(policyList, limit, offset, query);
+        APIMGovernancePolicyListDTO policyListDTO = getPaginatedPolicyList(policyList, limit, offset, query,
+                policyManager, organization);
 
         return Response.status(Response.Status.OK).entity(policyListDTO).build();
     }
@@ -200,8 +235,20 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
      */
     private APIMGovernancePolicyListDTO getPaginatedPolicyList(APIMGovernancePolicyList policyList, int limit,
                                                                int offset,
-                                                               String query) {
+                                                               String query, PolicyManager policyManager,
+                                                               String organization)
+            throws APIMGovernanceException {
         int policyCount = policyList.getCount();
+
+        // A listing has to report the same three states as the single policy response, or a client reading the list
+        // concludes the feature is unavailable while the detail view of the same policy says otherwise. The values
+        // are read in one query rather than one per row.
+        // Availability is decided the same way as the single policy response, so the two cannot disagree about
+        // whether the feature is offered at all.
+        boolean severityFilteringEnabled = policyManager.isComplianceAffectingSeverityStorageAvailable();
+        Map<String, String> severitiesByPolicy = severityFilteringEnabled
+                ? policyManager.getComplianceAffectingSeverities(organization) : Collections.emptyMap();
+
         List<APIMGovernancePolicyDTO> policies = new ArrayList<>();
         APIMGovernancePolicyListDTO paginatedPolicyListDTO = new APIMGovernancePolicyListDTO();
         paginatedPolicyListDTO.setCount(Math.min(policyCount, limit));
@@ -217,6 +264,9 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
         for (int i = start; i < end; i++) {
             APIMGovernancePolicy policy = policyList.getGovernancePolicyList().get(i);
             APIMGovernancePolicyDTO policyDTO = PolicyMappingUtil.fromGovernancePolicyToGovernancePolicyDTO(policy);
+            policyDTO.setComplianceAffectingSeverities(
+                    severityFilteringEnabled ? severitiesByPolicy.getOrDefault(policy.getId(), StringUtils.EMPTY)
+                            : null);
             policies.add(policyDTO);
         }
         paginatedPolicyListDTO.setList(policies);
@@ -249,5 +299,48 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
         paginationDTO.setNext(paginatedNext);
 
         return paginatedPolicyListDTO;
+    }
+
+    /**
+     * Refuse a request which asks to store a compliance affecting severity the deployment cannot hold
+     * <p>
+     * The severity lives in an optional column and is written separately from the policy itself, so whether it can
+     * be stored is settled here, before anything is committed. Both halves of the opt in are deployment wide and
+     * knowable up front, which is why this needs no transaction spanning the two writes.
+     *
+     * @param policyManager                 Manager used to ask whether the deployment can store a severity
+     * @param complianceAffectingSeverities Value from the request, null when the field was not sent
+     * @param blankClearsTheValue           True on update, where a blank value clears the stored one and so is
+     *                                      still a write; false on create, where there is nothing to clear
+     * @throws APIMGovernanceException If the value cannot be stored, or the schema cannot be inspected
+     */
+    private void rejectUnstorableSeverities(PolicyManager policyManager, String complianceAffectingSeverities,
+                                            boolean blankClearsTheValue) throws APIMGovernanceException {
+
+        boolean writeRequested = blankClearsTheValue ? complianceAffectingSeverities != null
+                : StringUtils.isNotBlank(complianceAffectingSeverities);
+        if (!writeRequested || policyManager.isComplianceAffectingSeverityStorageAvailable()) {
+            return;
+        }
+        throw new APIMGovernanceException(APIMGovExceptionCodes.PER_POLICY_SEVERITY_FILTERING_UNAVAILABLE,
+                "Per policy severity filtering is not available on this deployment. Set "
+                        + "apim.governance.per_policy_severity_filtering_enabled to true in deployment.toml, add the "
+                        + "optional COMPLIANCE_AFFECTING_SEVERITIES column to GOV_POLICY, and restart the server");
+    }
+
+    private void setComplianceAffectingSeverities(PolicyManager policyManager, APIMGovernancePolicy policy,
+                                                  String policyId, String organization)
+            throws APIMGovernanceException {
+
+        // Storage availability rather than the configuration alone, because null is documented as "the feature is
+        // not available here, do not offer it". A deployment which has the configuration on but not the column
+        // cannot store a severity at all: the guard above rejects such a write, so reporting the empty string
+        // would advertise a control the client is then refused when it uses it.
+        if (!policyManager.isComplianceAffectingSeverityStorageAvailable()) {
+            policy.setComplianceAffectingSeverities(null);
+            return;
+        }
+        String severities = policyManager.getComplianceAffectingSeverities(policyId, organization);
+        policy.setComplianceAffectingSeverities(severities == null ? StringUtils.EMPTY : severities);
     }
 }
