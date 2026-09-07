@@ -20,6 +20,8 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.dto.EndpointConfigDTO;
 import org.wso2.carbon.apimgt.api.dto.EndpointDTO;
 
+import java.util.List;
+
 public class SimplifiedEndpoint {
 
     private String endpointUuid;
@@ -37,6 +39,13 @@ public class SimplifiedEndpoint {
     private String roleRegion;
     private String roleExternalId;
     private String authType;
+    private String serviceAccountKey;
+    // GCP service-account key delivered to the gateway mediator as ordered base64 chunks. Normal mode:
+    // the chunks are emitted as literal property values. Secure-vault mode: the chunks are registered in
+    // the vault and the aliases (parallel list) are emitted as vault-lookups. Count is the number of chunks.
+    private List<String> serviceAccountKeyChunks;
+    private List<String> serviceAccountKeyChunkAliases;
+    private int serviceAccountKeyChunkCount;
     private String endpoint;
     private String deploymentStage;
     private static final String PRODUCTION = "PRODUCTION";
@@ -93,6 +102,7 @@ public class SimplifiedEndpoint {
             this.roleRegion = endpointSecurity.getRoleRegion();
             this.roleExternalId = endpointSecurity.getRoleExternalId();
             this.authType = endpointSecurity.getAuthType();
+            this.serviceAccountKey = endpointSecurity.getServiceAccountKey();
             this.endpoint = endpointDetails.getUrl();
         }
     }
@@ -222,6 +232,38 @@ public class SimplifiedEndpoint {
 
     public void setAuthType(String authType) {
         this.authType = authType;
+    }
+
+    public String getServiceAccountKey() {
+        return serviceAccountKey;
+    }
+
+    public void setServiceAccountKey(String serviceAccountKey) {
+        this.serviceAccountKey = serviceAccountKey;
+    }
+
+    public List<String> getServiceAccountKeyChunks() {
+        return serviceAccountKeyChunks;
+    }
+
+    public void setServiceAccountKeyChunks(List<String> serviceAccountKeyChunks) {
+        this.serviceAccountKeyChunks = serviceAccountKeyChunks;
+    }
+
+    public List<String> getServiceAccountKeyChunkAliases() {
+        return serviceAccountKeyChunkAliases;
+    }
+
+    public void setServiceAccountKeyChunkAliases(List<String> serviceAccountKeyChunkAliases) {
+        this.serviceAccountKeyChunkAliases = serviceAccountKeyChunkAliases;
+    }
+
+    public int getServiceAccountKeyChunkCount() {
+        return serviceAccountKeyChunkCount;
+    }
+
+    public void setServiceAccountKeyChunkCount(int serviceAccountKeyChunkCount) {
+        this.serviceAccountKeyChunkCount = serviceAccountKeyChunkCount;
     }
 
     public String getEndpoint() {

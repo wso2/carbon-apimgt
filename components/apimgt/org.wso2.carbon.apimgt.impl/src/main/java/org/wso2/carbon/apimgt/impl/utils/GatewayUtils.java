@@ -186,6 +186,26 @@ public class GatewayUtils {
         return name.concat("--v").concat(version).concat("--").concat(type);
     }
 
+    /**
+     * Builds the secure-vault alias for one chunk of a GCP endpoint's service-account key. The alias must be
+     * identical on the store side (credential registration) and the lookup side (template vault-lookup), so it
+     * is derived deterministically from the API name/version, the endpoint UUID, the deployment stage and the
+     * chunk index (an AI API holds a key per endpoint per stage).
+     *
+     * @param name       the API name
+     * @param version    the API version
+     * @param endpointId the endpoint UUID
+     * @param type       the deployment stage (PRODUCTION / SANDBOX)
+     * @param index      the zero-based chunk index
+     * @return the per-chunk secure-vault alias
+     */
+    public static String retrieveGCPServiceAccountKeyChunkAlias(String name, String version, String endpointId,
+                                                                String type, int index) {
+
+        return name.concat("--v").concat(version).concat("--gcpsak--").concat(endpointId).concat("--")
+                .concat(type).concat("--").concat(String.valueOf(index));
+    }
+
     public static String retrieveUniqueIdentifier(String apiId, String type) {
 
         return apiId.concat("--").concat(type);

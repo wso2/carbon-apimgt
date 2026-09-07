@@ -1,0 +1,141 @@
+/*
+ * Copyright (c) 2026 WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 LLC. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+package org.wso2.carbon.apimgt.api;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.osgi.service.component.annotations.Component;
+import org.wso2.carbon.apimgt.api.model.LLMModel;
+import org.wso2.carbon.apimgt.api.model.LLMProvider;
+
+/**
+ * Google Vertex AI - Anthropic Claude LLM Provider Service.
+ * <p>
+ * Fronts Anthropic Claude models hosted on Vertex AI via the {@code publishers/anthropic} model
+ * resource and the {@code :rawPredict} / {@code :streamRawPredict} custom methods. The request and
+ * response use Anthropic's native Messages format (token usage under {@code usage.input_tokens} /
+ * {@code usage.output_tokens}); the model is carried in the URL path and the body declares
+ * {@code anthropic_version} instead of a model field. Authentication is a GCP service-account OAuth2
+ * bearer token, handled by the {@code gcp} endpoint security type and the {@code GCPOAuth2Mediator}
+ * gateway mediator - the same auth path shared with {@link VertexAIGeminiLLMProviderService}.
+ */
+@Component(
+        name = "vertexAiAnthropic.llm.provider.service",
+        immediate = true,
+        service = LLMProviderService.class
+)
+public class VertexAIAnthropicLLMProviderService extends BuiltInLLMProviderService {
+
+    @Override
+    public String getType() {
+
+        return APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_VERTEX_AI_ANTHROPIC_CONNECTOR;
+    }
+
+    @Override
+    public LLMProvider getLLMProvider()
+            throws APIManagementException {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Initializing Vertex AI - Anthropic LLM Provider: " + this.getType());
+        }
+        try {
+            LLMProvider llmProvider = new LLMProvider();
+            llmProvider.setName(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_VERTEX_AI_ANTHROPIC_NAME);
+            llmProvider.setApiVersion(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_VERTEX_AI_VERSION);
+            llmProvider.setDescription(
+                    APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_VERTEX_AI_ANTHROPIC_DESCRIPTION);
+            llmProvider.setBuiltInSupport(true);
+
+            llmProvider.setApiDefinition(readApiDefinition("repository" + File.separator + "resources"
+                    + File.separator + "api_definitions" + File.separator
+                    + APIConstants.AIAPIConstants
+                    .LLM_PROVIDER_SERVICE_VERTEX_AI_ANTHROPIC_API_DEFINITION_FILE_NAME));
+
+            LLMProviderConfiguration llmProviderConfiguration = new LLMProviderConfiguration();
+            llmProviderConfiguration.setAuthenticationConfiguration(getLlmProviderAuthenticationConfiguration());
+            llmProviderConfiguration.setConnectorType(this.getType());
+
+            List<LLMProviderMetadata> llmProviderMetadata = new ArrayList<>();
+            // Request model is carried in the URL path (.../models/{model}:rawPredict) - Anthropic on Vertex
+            // does not put the model in the request body. The response body echoes the resolved model in
+            // "model", so take the response model from there (matching the direct Anthropic provider).
+            llmProviderMetadata.add(new LLMProviderMetadata(
+                    APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_REQUEST_MODEL,
+                    APIConstants.AIAPIConstants.INPUT_SOURCE_PATH,
+                    APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_VERTEX_AI_METADATA_IDENTIFIER_MODEL, false));
+            llmProviderMetadata.add(new LLMProviderMetadata(
+                    APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_RESPONSE_MODEL,
+                    APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD,
+                    APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_MODEL, false));
+            llmProviderMetadata.add(new LLMProviderMetadata(
+                    APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_PROMPT_TOKEN_COUNT,
+                    APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD,
+                    APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_INPUT_TOKEN, true));
+            llmProviderMetadata.add(new LLMProviderMetadata(
+                    APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_COMPLETION_TOKEN_COUNT,
+                    APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD,
+                    APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_OUTPUT_TOKEN, true));
+            // Anthropic's Messages response has no single "total" token field; total is derived downstream
+            // from prompt + completion, so no TOTAL_TOKEN_COUNT metadata is mapped here.
+            llmProviderConfiguration.setMetadata(llmProviderMetadata);
+
+            // The model-group name must equal the provider's own name: the admin UI populates the
+            // models section by finding the model group whose name matches the provider name.
+            List<LLMModel> modelList = new ArrayList<>();
+            // Bare model IDs (no @YYYYMMDD suffix): they match Google's current documented usage, resolve to
+            // the model's current version, and - unlike the @-pinned form - route cleanly through the gateway
+            // resource path (the '@' character is not matched by the API resource template).
+            modelList.add(new LLMModel(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_VERTEX_AI_ANTHROPIC_NAME,
+                    Arrays.asList("claude-sonnet-4", "claude-3-5-sonnet-v2", "claude-3-5-haiku")));
+            llmProvider.setModelList(modelList);
+
+            llmProvider.setConfigurations(llmProviderConfiguration.toJsonString());
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully configured Vertex AI - Anthropic LLM Provider: " + this.getType());
+            }
+            return llmProvider;
+        } catch (Exception e) {
+            log.error("Error occurred when registering LLM Provider: " + this.getType());
+            throw new APIManagementException("Error occurred when registering LLM Provider: " + this.getType(), e);
+        }
+    }
+
+    /**
+     * Builds the GCP OAuth2 authentication configuration. The service-account key itself is supplied
+     * per-API as endpoint security; the vendor config only declares the auth type and the OAuth2 scope.
+     *
+     * @return LLMProviderAuthenticationConfiguration
+     */
+    private static LLMProviderAuthenticationConfiguration getLlmProviderAuthenticationConfiguration() {
+
+        LLMProviderAuthenticationConfiguration llmProviderAuthenticationConfiguration =
+                new LLMProviderAuthenticationConfiguration();
+        llmProviderAuthenticationConfiguration.setEnabled(true);
+        llmProviderAuthenticationConfiguration.setType(APIConstants.ENDPOINT_SECURITY_TYPE_GCP);
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("scope", APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_VERTEX_AI_SCOPE);
+        llmProviderAuthenticationConfiguration.setParameters(parameters);
+        return llmProviderAuthenticationConfiguration;
+    }
+}
