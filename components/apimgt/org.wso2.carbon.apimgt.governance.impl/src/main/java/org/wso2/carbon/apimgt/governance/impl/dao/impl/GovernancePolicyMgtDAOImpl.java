@@ -1218,24 +1218,36 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             // Hiding the control in the portal is not enough, the REST API can be called directly. The two
             // reasons are reported separately so that the cause is obvious without inspecting the schema.
             if (!isPerPolicySeverityFilteringEnabled()) {
-                throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_UPDATING_POLICY,
+                throw new APIMGovernanceException(
+                        APIMGovExceptionCodes.PER_POLICY_SEVERITY_FILTERING_UNAVAILABLE,
                         "Per policy severity filtering is not enabled. Set "
                                 + "apim.governance.per_policy_severity_filtering_enabled to true in "
                                 + "deployment.toml and restart the server");
             }
             if (!isComplianceAffectingSeverityColumnPresent(connection)) {
-                throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_UPDATING_POLICY,
+                throw new APIMGovernanceException(
+                        APIMGovExceptionCodes.PER_POLICY_SEVERITY_FILTERING_UNAVAILABLE,
                         "Per policy severity filtering is enabled but the "
                                 + SQLConstants.COMPLIANCE_AFFECTING_SEVERITIES_COLUMN + " column is missing from "
                                 + SQLConstants.GOV_POLICY_TABLE + ". Add the column and restart the server");
             }
-            try (PreparedStatement prepStmnt = connection
-                    .prepareStatement(SQLConstants.UPDATE_POLICY_COMPLIANCE_AFFECTING_SEVERITIES)) {
-                prepStmnt.setString(1, severities);
-                prepStmnt.setString(2, policyId);
-                prepStmnt.setString(3, organization);
-                prepStmnt.executeUpdate();
+            // The pool hands out connections with autocommit on, and committing one of those is an error rather
+            // than a no-op on PostgreSQL and MySQL. Every other write in this class turns it off first, and this
+            // one has to as well or the update commits itself and the commit then throws, reporting a failure for
+            // a write that already happened.
+            connection.setAutoCommit(false);
+            try {
+                try (PreparedStatement prepStmnt = connection
+                        .prepareStatement(SQLConstants.UPDATE_POLICY_COMPLIANCE_AFFECTING_SEVERITIES)) {
+                    prepStmnt.setString(1, severities);
+                    prepStmnt.setString(2, policyId);
+                    prepStmnt.setString(3, organization);
+                    prepStmnt.executeUpdate();
+                }
                 connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
             }
         } catch (SQLException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_UPDATING_POLICY, e, policyId);

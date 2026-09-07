@@ -139,6 +139,12 @@ public enum APIMGovExceptionCodes implements ErrorHandler {
     ERROR_WHILE_DELETING_LABEL_POLICY_MAPPINGS(990211, "Error while deleting label policy mappings",
             500, "Error while deleting label policy mappings for label with ID: %s", true),
 
+    // A deployment which has not opted in to per policy severity filtering is a supported state rather than a
+    // fault, so asking it to store a severity is a client error. The caller supplies the half of the opt in that
+    // is missing, so the response says which deployment step to take.
+    PER_POLICY_SEVERITY_FILTERING_UNAVAILABLE(990212, "Per policy severity filtering is not available",
+            400, "Compliance affecting severities cannot be stored. %s"),
+
 
     // Request related codes
     ERROR_WHILE_ADDING_NEW_GOV_EVAL_REQUEST(990300, "Error while adding new governance evaluation request.",

@@ -82,7 +82,6 @@ public class ComplianceAPIUtilSeverityTest {
     /**
      * Invoke the ruleset validation mapping with severities declared by the policy the ruleset is evaluated under
      *
-     * @param configuredSeverities      Comma separated severities stored against the ruleset, may be null
      * @param ruleViolations            Violations the compliance manager should report
      * @param policyAffectingSeverities Severities declared by the policy, null when it declares none
      * @return RulesetValidationResultWithoutRulesDTO as returned to the portals

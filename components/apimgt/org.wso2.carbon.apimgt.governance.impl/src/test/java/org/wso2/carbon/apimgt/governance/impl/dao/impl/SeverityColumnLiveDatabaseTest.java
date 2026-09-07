@@ -29,6 +29,7 @@ import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
 import org.wso2.carbon.apimgt.governance.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.governance.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceDBUtil;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
@@ -36,11 +37,15 @@ import org.wso2.carbon.apimgt.impl.dto.APIMGovernanceConfigDTO;
 
 import java.lang.reflect.Field;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Locale;
+
+import javax.sql.DataSource;
 
 /**
  * Runs the compliance affecting severity detection and queries against a real database of any vendor.
@@ -55,8 +60,9 @@ import java.sql.Statement;
  *          -Dgov.test.db.url=jdbc:postgresql://localhost:5432/apimdb \
  *          -Dgov.test.db.username=wso2carbon -Dgov.test.db.password=wso2carbon
  * </pre>
- * The driver has to be on the test classpath. The vendor profiles in this module's pom put it there, for example
- * {@code -Pdb-postgres}.
+ * The driver has to be on the test classpath. The {@code gov-vendor-driver} profile in this module's pom puts it
+ * there from a path, which is how all six vendors are covered without redistributing a driver:
+ * {@code -Pgov-vendor-driver -Dgov.test.db.driverJar=$HOME/drivers/postgresql-42.7.4.jar}.
  * <p>
  * This creates and drops the real {@code GOV_} tables, because the queries under test name them, so it must only
  * ever be pointed at a disposable schema. Saying so is required rather than assumed: without
@@ -80,6 +86,15 @@ public class SeverityColumnLiveDatabaseTest {
 
     private Connection connection;
 
+    /**
+     * Whether the supplied schema has been confirmed disposable, which is the only state in which this test is
+     * allowed to drop tables.
+     * <p>
+     * The safety check runs after the connection is opened, and JUnit runs the teardown even when the setup
+     * throws. Without this flag the teardown would drop the very tables the check had just refused to touch.
+     */
+    private boolean schemaIsDisposable;
+
     @Before
     public void openTheSuppliedDatabase() throws Exception {
 
@@ -102,6 +117,10 @@ public class SeverityColumnLiveDatabaseTest {
         connection.setAutoCommit(true);
 
         refuseToTouchARealDeployment();
+
+        // Only past the check is dropping anything permitted, and the teardown reads this before it drops.
+        schemaIsDisposable = true;
+
         dropSchema();
         createSchema();
         enableFeature();
@@ -133,6 +152,43 @@ public class SeverityColumnLiveDatabaseTest {
         Field cached = GovernancePolicyMgtDAOImpl.class.getDeclaredField("policySeverityColumnPresent");
         cached.setAccessible(true);
         cached.set(null, null);
+    }
+
+    /**
+     * Point the governance component at a data source which hands out connections the way a pooled deployment
+     * does, with auto commit left on.
+     * <p>
+     * Every other test here drives the SQL on this class's own connection, so none of them reaches the DAO's
+     * transaction handling. That handling is what has to turn auto commit off before committing, because
+     * committing a connection which still has it on is an error rather than a no-op on PostgreSQL and MySQL.
+     *
+     * @throws Exception If the data source cannot be injected
+     */
+    private void handOutConnectionsWithAutoCommitOn() throws Exception {
+
+        DataSource dataSource = Mockito.mock(DataSource.class);
+        Mockito.when(dataSource.getConnection()).thenAnswer(invocation -> {
+            // A fresh connection each time, so the DAO closing its own cannot close the one this test reads with.
+            Connection pooled = DriverManager.getConnection(System.getProperty(URL_PROPERTY),
+                    System.getProperty(USERNAME_PROPERTY), System.getProperty(PASSWORD_PROPERTY));
+            pooled.setAutoCommit(true);
+            return pooled;
+        });
+
+        setDataSource(dataSource);
+    }
+
+    /**
+     * Replace the data source the governance component reads through
+     *
+     * @param dataSource Data source to install, null to leave the component without one
+     * @throws Exception If the field cannot be written
+     */
+    private void setDataSource(DataSource dataSource) throws Exception {
+
+        Field field = APIMGovernanceDBUtil.class.getDeclaredField("dataSource");
+        field.setAccessible(true);
+        field.set(null, dataSource);
     }
 
     /**
@@ -170,8 +226,38 @@ public class SeverityColumnLiveDatabaseTest {
                         + "database.");
             }
         } catch (SQLException e) {
-            // The table not existing is the expected state for a fresh scratch schema, and is not a reason to stop
+            // The table not existing is the expected state for a fresh scratch schema, and is not a reason to
+            // stop. Anything else -- a denied permission, a lock timeout, a dropped connection -- must not be
+            // read as absence. This method is the only thing standing between the test and a real deployment's
+            // data, so a check which could not be completed has to stop the run rather than wave it through.
+            //
+            // Which SQLException means "no such table" differs on every vendor, so the driver is asked whether
+            // the table is there instead of matching error codes.
+            if (govPolicyTableExists()) {
+                throw e;
+            }
             log.debug("No existing " + SQLConstants.GOV_POLICY_TABLE + " to inspect in the supplied schema", e);
+        }
+    }
+
+    /**
+     * Ask the driver whether the policy table exists, so a count which failed can be told apart from a table
+     * which is not there
+     *
+     * @return True when the supplied schema holds the policy table
+     * @throws SQLException If the metadata cannot be read, which also stops the run
+     */
+    private boolean govPolicyTableExists() throws SQLException {
+
+        DatabaseMetaData metaData = connection.getMetaData();
+        // PostgreSQL folds unquoted identifiers to lower case, so the name has to be asked for the way that
+        // vendor stores it, exactly as the detection under test does.
+        String tableName = metaData.storesLowerCaseIdentifiers()
+                ? SQLConstants.GOV_POLICY_TABLE.toLowerCase(Locale.ENGLISH)
+                : SQLConstants.GOV_POLICY_TABLE;
+        try (ResultSet tables = metaData.getTables(connection.getCatalog(), connection.getSchema(),
+                tableName, null)) {
+            return tables.next();
         }
     }
 
@@ -376,6 +462,24 @@ public class SeverityColumnLiveDatabaseTest {
     }
 
     @Test
+    public void testTheDaoWriteCommitsOnAConnectionWhichArrivesWithAutoCommitOn() throws Exception {
+
+        addTheOptionalColumn();
+        seedThePolicies();
+        clearCache();
+        handOutConnectionsWithAutoCommitOn();
+
+        // This goes through the DAO rather than the statement, so the transaction handling is what is under test.
+        // A write which leaves auto commit on fails here on the vendors which reject the commit, and a write which
+        // never commits fails on the read instead, so both halves of the handling are covered.
+        GovernancePolicyMgtDAOImpl.getInstance()
+                .updateComplianceAffectingSeverities(POLICY_ID, ORGANIZATION, "ERROR,WARN");
+
+        Assert.assertEquals("The DAO write must commit, and report success, on a connection which arrived with "
+                + "auto commit on", "ERROR,WARN", read(POLICY_ID));
+    }
+
+    @Test
     public void testTheSeverityQueriesRunOnThisDialect() throws Exception {
 
         // The three policy aware queries are the ones that could fail to parse on a dialect. Running them here is
@@ -414,10 +518,16 @@ public class SeverityColumnLiveDatabaseTest {
             return;
         }
         try {
-            dropSchema();
+            // A setup which failed the safety check leaves this false, and the supplied schema is left untouched.
+            if (schemaIsDisposable) {
+                dropSchema();
+            }
         } finally {
             ServiceReferenceHolder.getInstance().setAPIMConfigurationService(null);
             clearCache();
+            // The injected data source outlives this test otherwise, and a later one in the same JVM would then
+            // reach a database it was never given.
+            setDataSource(null);
             connection.close();
         }
     }

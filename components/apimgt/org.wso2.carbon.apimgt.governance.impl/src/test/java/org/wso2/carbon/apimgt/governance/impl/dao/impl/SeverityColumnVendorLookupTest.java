@@ -46,8 +46,10 @@ import java.sql.SQLException;
  * quietly keeps counting every severity.
  * <p>
  * The same assertions can be run against a real database of any vendor with
- * {@link SeverityColumnLiveDatabaseTest}, which is how the contracts asserted here were confirmed for H2 and
- * PostgreSQL.
+ * {@link SeverityColumnLiveDatabaseTest}, which is how the contracts asserted here were confirmed for H2,
+ * PostgreSQL, MySQL in both identifier modes, SQL Server on a case sensitive collation, and Oracle. DB2 could not
+ * be reached for long enough to run that test, so its catalog and folding answers were read from the driver
+ * directly instead.
  */
 public class SeverityColumnVendorLookupTest {
 
@@ -91,10 +93,13 @@ public class SeverityColumnVendorLookupTest {
             // H2, Oracle and DB2 fold unquoted identifiers to upper case, which is what the SQL standard asks for.
             new Vendor("H2", false, "WSO2AM_DB", "PUBLIC", COLUMN, TABLE),
 
-            // Oracle reports no catalog at all. A null catalog with a real schema is still narrowed enough, which
-            // is why the schema is what matters most on the vendors that hold many of them in one instance.
+            // Oracle and DB2 both report no catalog at all. A null catalog with a real schema is still narrowed
+            // enough, which is why the schema is what matters most on the vendors that hold many of them in one
+            // instance. DB2 was observed returning a null catalog and the schema DB2INST1 on 12.1 with jcc
+            // 4.33.31, so the null here is the driver's real answer rather than an assumption: an empty string
+            // would be a filter matching nothing, and would disable the feature silently.
             new Vendor("Oracle", false, null, "APIMGMT", COLUMN, TABLE),
-            new Vendor("DB2", false, "APIMDB", "APIMGMT", COLUMN, TABLE),
+            new Vendor("DB2", false, null, "DB2INST1", COLUMN, TABLE),
 
             // PostgreSQL folds to lower case, so both the table asked for and the column reported come back in
             // lower case. A case sensitive comparison would find nothing here while working everywhere else.

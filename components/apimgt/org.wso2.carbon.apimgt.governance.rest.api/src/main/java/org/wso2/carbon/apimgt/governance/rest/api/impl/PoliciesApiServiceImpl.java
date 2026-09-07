@@ -80,9 +80,6 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
             governancePolicy = policyManager.createGovernancePolicy(organization,
                     governancePolicy);
 
-            // Access policy compliance in the background
-            new ComplianceManager().handlePolicyChangeEvent(governancePolicy.getId(), organization);
-
             // Written as a follow up update, because the optional column cannot appear in the policy insert
             String complianceAffectingSeverities = governancePolicyDTO.getComplianceAffectingSeverities();
 
@@ -93,6 +90,11 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
             }
             setComplianceAffectingSeverities(policyManager, governancePolicy, governancePolicy.getId(),
                     organization);
+
+            // Queued only once the severity selection is stored, as the update path already does. Queueing first
+            // leaves a window in which the scheduler evaluates the policy before its severities are written, and
+            // every severity would then affect compliance rather than the ones the policy asked for.
+            new ComplianceManager().handlePolicyChangeEvent(governancePolicy.getId(), organization);
 
             createdPolicyDTO = PolicyMappingUtil.
                     fromGovernancePolicyToGovernancePolicyDTO(governancePolicy);
@@ -241,7 +243,9 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
         // A listing has to report the same three states as the single policy response, or a client reading the list
         // concludes the feature is unavailable while the detail view of the same policy says otherwise. The values
         // are read in one query rather than one per row.
-        boolean severityFilteringEnabled = policyManager.isComplianceAffectingSeverityFilteringEnabled();
+        // Availability is decided the same way as the single policy response, so the two cannot disagree about
+        // whether the feature is offered at all.
+        boolean severityFilteringEnabled = policyManager.isComplianceAffectingSeverityStorageAvailable();
         Map<String, String> severitiesByPolicy = severityFilteringEnabled
                 ? policyManager.getComplianceAffectingSeverities(organization) : Collections.emptyMap();
 
@@ -298,19 +302,6 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
     }
 
     /**
-     * Populate the compliance affecting severities of a policy so that clients can tell three states apart.
-     * <p>
-     * Null means per policy severity filtering is not enabled on this deployment, and a client should not offer
-     * it. An empty string means it is enabled but nothing is configured for this policy, so every severity
-     * affects compliance. A value lists the severities that do.
-     *
-     * @param policyManager Policy manager
-     * @param policy        Policy to populate
-     * @param policyId      Policy ID
-     * @param organization  Organization
-     * @throws APIMGovernanceException If the stored severities cannot be read
-     */
-    /**
      * Refuse a request which asks to store a compliance affecting severity the deployment cannot hold
      * <p>
      * The severity lives in an optional column and is written separately from the policy itself, so whether it can
@@ -331,18 +322,21 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
         if (!writeRequested || policyManager.isComplianceAffectingSeverityStorageAvailable()) {
             return;
         }
-        throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_UPDATING_POLICY,
-                "Per policy severity filtering is not available on this deployment, so a compliance affecting "
-                        + "severity cannot be stored. Set apim.governance.per_policy_severity_filtering_enabled to "
-                        + "true in deployment.toml, add the optional COMPLIANCE_AFFECTING_SEVERITIES column to "
-                        + "GOV_POLICY, and restart the server");
+        throw new APIMGovernanceException(APIMGovExceptionCodes.PER_POLICY_SEVERITY_FILTERING_UNAVAILABLE,
+                "Per policy severity filtering is not available on this deployment. Set "
+                        + "apim.governance.per_policy_severity_filtering_enabled to true in deployment.toml, add the "
+                        + "optional COMPLIANCE_AFFECTING_SEVERITIES column to GOV_POLICY, and restart the server");
     }
 
     private void setComplianceAffectingSeverities(PolicyManager policyManager, APIMGovernancePolicy policy,
                                                   String policyId, String organization)
             throws APIMGovernanceException {
 
-        if (!policyManager.isComplianceAffectingSeverityFilteringEnabled()) {
+        // Storage availability rather than the configuration alone, because null is documented as "the feature is
+        // not available here, do not offer it". A deployment which has the configuration on but not the column
+        // cannot store a severity at all: the guard above rejects such a write, so reporting the empty string
+        // would advertise a control the client is then refused when it uses it.
+        if (!policyManager.isComplianceAffectingSeverityStorageAvailable()) {
             policy.setComplianceAffectingSeverities(null);
             return;
         }

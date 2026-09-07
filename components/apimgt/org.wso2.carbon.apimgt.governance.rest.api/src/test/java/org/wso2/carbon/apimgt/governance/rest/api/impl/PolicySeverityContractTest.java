@@ -24,6 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
+import org.mockito.InOrder;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -59,6 +60,7 @@ public class PolicySeverityContractTest {
     private static final String ORGANIZATION = "carbon.super";
 
     private PolicyManager policyManager;
+    private ComplianceManager complianceManager;
     private MessageContext messageContext;
     private PoliciesApiServiceImpl policiesApiService;
 
@@ -68,7 +70,7 @@ public class PolicySeverityContractTest {
         policyManager = Mockito.mock(PolicyManager.class);
         PowerMockito.whenNew(PolicyManager.class).withNoArguments().thenReturn(policyManager);
 
-        ComplianceManager complianceManager = Mockito.mock(ComplianceManager.class);
+        complianceManager = Mockito.mock(ComplianceManager.class);
         PowerMockito.whenNew(ComplianceManager.class).withNoArguments().thenReturn(complianceManager);
 
         APIMGovernancePolicy stored = new APIMGovernancePolicy();
@@ -183,10 +185,26 @@ public class PolicySeverityContractTest {
     @Test
     public void testTheFieldIsNullWhenTheDeploymentHasNotOptedIn() throws Exception {
 
+        // Neither half of the opt in, so neither reporter can claim the feature.
         Mockito.when(policyManager.isComplianceAffectingSeverityFilteringEnabled()).thenReturn(false);
+        Mockito.when(policyManager.isComplianceAffectingSeverityStorageAvailable()).thenReturn(false);
 
         Assert.assertNull("A deployment which has not opted in must report null, which is what tells a portal not "
                         + "to offer the control at all",
+                fieldOf(policiesApiService.updateGovernancePolicyById(POLICY_ID, payload(null), messageContext)));
+    }
+
+    @Test
+    public void testTheFieldIsNullWhenTheConfigurationIsOnButTheColumnIsMissing() throws Exception {
+
+        // Half an opt in: the configuration wants the feature and the schema cannot store it. Writes are rejected
+        // in that state, so reporting the empty string would offer a portal a control it is then refused when it
+        // uses it. Null is documented as "not available here", which is exactly what this deployment is.
+        Mockito.when(policyManager.isComplianceAffectingSeverityFilteringEnabled()).thenReturn(true);
+        Mockito.when(policyManager.isComplianceAffectingSeverityStorageAvailable()).thenReturn(false);
+
+        Assert.assertNull("A deployment which cannot store a severity must report null rather than an empty "
+                        + "string, so the field and the write guard agree",
                 fieldOf(policiesApiService.updateGovernancePolicyById(POLICY_ID, payload(null), messageContext)));
     }
 
@@ -234,6 +252,22 @@ public class PolicySeverityContractTest {
         policiesApiService.createGovernancePolicy(payload("ERROR,WARN"), messageContext);
 
         Mockito.verify(policyManager).updateComplianceAffectingSeverities(POLICY_ID, ORGANIZATION, "ERROR,WARN");
+    }
+
+    @Test
+    public void testCreationStoresTheSelectionBeforeQueueingEvaluation() throws Exception {
+
+        // The scheduler picks evaluation requests up on its own interval, so a request queued before the severity
+        // write can be evaluated while the policy still has nothing stored, and every severity would affect
+        // compliance rather than the ones the policy asked for. That is the verdict this feature exists to
+        // correct, so creation must store the selection first. The update path already does.
+        featureAvailable("ERROR,WARN");
+
+        policiesApiService.createGovernancePolicy(payload("ERROR,WARN"), messageContext);
+
+        InOrder order = Mockito.inOrder(policyManager, complianceManager);
+        order.verify(policyManager).updateComplianceAffectingSeverities(POLICY_ID, ORGANIZATION, "ERROR,WARN");
+        order.verify(complianceManager).handlePolicyChangeEvent(POLICY_ID, ORGANIZATION);
     }
 
     @Test
@@ -300,6 +334,11 @@ public class PolicySeverityContractTest {
             Assert.assertTrue("The rejection must say what to do about it, since it is a deployment step rather "
                             + "than anything wrong with the request",
                     String.valueOf(expected.getMessage()).contains("per_policy_severity_filtering_enabled"));
+            // A deployment which has not opted in is a supported state rather than a fault. Reporting it as a
+            // server error would put a routine configuration answer into error dashboards, and would log a stack
+            // trace for it on every attempt.
+            Assert.assertEquals("A deployment which cannot store a severity is a client error, not a server failure",
+                    Response.Status.BAD_REQUEST.getStatusCode(), expected.getErrorHandler().getHttpStatusCode());
         }
 
         Mockito.verify(policyManager, Mockito.never()).updateGovernancePolicy(ArgumentMatchers.anyString(),
@@ -407,9 +446,24 @@ public class PolicySeverityContractTest {
     public void testTheListingReportsNullWhenTheDeploymentHasNotOptedIn() throws Exception {
 
         Mockito.when(policyManager.isComplianceAffectingSeverityFilteringEnabled()).thenReturn(false);
+        Mockito.when(policyManager.isComplianceAffectingSeverityStorageAvailable()).thenReturn(false);
 
         Assert.assertNull("A deployment which has not opted in must report null in the listing",
                 onlyListedPolicy().getComplianceAffectingSeverities());
+    }
+
+    @Test
+    public void testTheListingReportsNullWhenTheConfigurationIsOnButTheColumnIsMissing() throws Exception {
+
+        // The listing has to reach the same conclusion as the detail view, or a portal reading the list offers the
+        // control while the policy it opens says the feature is unavailable.
+        Mockito.when(policyManager.isComplianceAffectingSeverityFilteringEnabled()).thenReturn(true);
+        Mockito.when(policyManager.isComplianceAffectingSeverityStorageAvailable()).thenReturn(false);
+
+        Assert.assertNull("A listing on a deployment which cannot store a severity must report null",
+                onlyListedPolicy().getComplianceAffectingSeverities());
+        // Nothing can be stored, so there is nothing worth reading either.
+        Mockito.verify(policyManager, Mockito.never()).getComplianceAffectingSeverities(ORGANIZATION);
     }
 
     @Test
