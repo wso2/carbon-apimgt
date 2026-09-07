@@ -47,6 +47,7 @@ import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.SynapseConstants;
+import org.apache.synapse.api.ApiUtils;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
@@ -1233,6 +1234,44 @@ public class GatewayUtils {
         if (consumerKey != null) {
             Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_APPLICATION_CONSUMER_KEY,
                     (String) consumerKey);
+        }
+    }
+
+    public static void setCommonHTTPAttributes(TelemetrySpan tracingSpan,
+                                               org.apache.synapse.MessageContext messageContext) {
+        // Skip if the tracing span is null or the message context is not an Axis2MessageContext.
+        if (tracingSpan == null || !(messageContext instanceof Axis2MessageContext)) {
+            return;
+        }
+
+        try {
+            org.apache.axis2.context.MessageContext axis2MessageContext =
+                    ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+
+            String httpMethod = (String) axis2MessageContext.getProperty(Constants.Configuration.HTTP_METHOD);
+            if (StringUtils.isEmpty(httpMethod)) {
+                httpMethod = (String) messageContext.getProperty(RESTConstants.REST_METHOD);
+            }
+            if (StringUtils.isNotEmpty(httpMethod)) {
+                TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.HTTP_METHOD_ATTRIBUTE, httpMethod);
+            }
+
+            String fullRequestPath = ApiUtils.getFullRequestPath(messageContext);
+            if (StringUtils.isNotEmpty(fullRequestPath)) {
+                TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.HTTP_URL_ATTRIBUTE, fullRequestPath);
+            }
+
+            Object httpStatusCode = axis2MessageContext.getProperty(HTTP_SC);
+            if (httpStatusCode != null) {
+                TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.HTTP_STATUS_CODE_ATTRIBUTE,
+                        httpStatusCode.toString());
+            }
+        } catch (Exception e) {
+//            log.error("Error while setting common HTTP attributes on the tracing span.", e);
+            // for debugging purpose
+            if (log.isDebugEnabled()) {
+                log.debug("Error while setting common HTTP attributes on the tracing span.", e);
+            }
         }
     }
 
