@@ -26,6 +26,9 @@ import org.junit.Test;
  */
 public class IPConditionTest {
 
+    /**
+     * An address with its high bit set must not become a negative Siddhi comparison operand.
+     */
     @Test
     public void testSpecificIPv6AddressUsesUnsignedValue() {
 
@@ -36,6 +39,9 @@ public class IPConditionTest {
                 + "'340282366920938463463374607431768211455')==0)", condition.getCondition());
     }
 
+    /**
+     * Compressed and expanded literals for the same address must produce identical policy expressions.
+     */
     @Test
     public void testEquivalentIPv6RepresentationsGenerateSameCondition() {
 
@@ -48,6 +54,9 @@ public class IPConditionTest {
         Assert.assertEquals(expected, condition.getCondition());
     }
 
+    /**
+     * Excluding a specific IPv6 address must negate its equality predicate.
+     */
     @Test
     public void testInvertedSpecificIPv6Condition() {
 
@@ -59,6 +68,9 @@ public class IPConditionTest {
                 condition.getCondition());
     }
 
+    /**
+     * Both ends of the full unsigned IPv6 range must remain inclusive.
+     */
     @Test
     public void testIPv6RangeIncludesBothBounds() {
 
@@ -71,6 +83,9 @@ public class IPConditionTest {
                 + "'340282366920938463463374607431768211455')<=0)", condition.getCondition());
     }
 
+    /**
+     * Range exclusion must negate the conjunction, not just one boundary comparison.
+     */
     @Test
     public void testInvertedIPv6RangeNegatesWholeCondition() {
 
@@ -83,6 +98,9 @@ public class IPConditionTest {
                 + "throttler:bigIntcmp(map:get(propertiesMap,'ipv6'), '2')<=0)", condition.getCondition());
     }
 
+    /**
+     * IPv4 bounds above Integer.MAX_VALUE must retain the long literals used by Siddhi.
+     */
     @Test
     public void testIPv4RangeRetainsUnsignedLongBounds() {
 
