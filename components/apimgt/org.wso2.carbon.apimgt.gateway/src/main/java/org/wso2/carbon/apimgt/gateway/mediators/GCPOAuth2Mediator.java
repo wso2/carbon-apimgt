@@ -100,10 +100,10 @@ public class GCPOAuth2Mediator extends AbstractMediator implements ManagedLifecy
                 log.debug("GCP bearer token set: " + GatewayUtils.getMaskedToken(accessToken));
             }
             return true;
-        } catch (Throwable e) {
-            // Catch Throwable (not just IOException) so class-loading Errors and any runtime exception from
-            // the token provider surface in the log with a full stack trace instead of Synapse's generic
-            // "Error occurred in the mediation of the class mediator". Rethrown, never swallowed.
+        } catch (Exception e) {
+            // Wrap any failure from provider construction or token acquisition (IOException, IllegalArgumentException,
+            // SynapseException, etc.) with a full stack trace instead of Synapse's generic "Error occurred in the
+            // mediation of the class mediator". Rethrown, never swallowed. JVM Errors are intentionally not caught.
             log.error("GCPOAuth2Mediator failed while generating/injecting the GCP OAuth2 access token", e);
             throw new SynapseException("Error while generating the GCP OAuth2 access token: " + e.getMessage(), e);
         }

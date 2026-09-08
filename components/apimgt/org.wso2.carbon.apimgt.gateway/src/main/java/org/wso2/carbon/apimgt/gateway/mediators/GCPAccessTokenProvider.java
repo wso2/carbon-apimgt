@@ -87,7 +87,13 @@ public abstract class GCPAccessTokenProvider {
             throw new IOException("The GCP token response did not contain an access_token.");
         }
         long expiresIn = tokenResponse.optLong("expires_in", DEFAULT_TOKEN_LIFETIME_SECONDS);
-        this.cached = new CachedToken(accessToken, now + expiresIn);
+        // A missing or non-positive expires_in must not cache an already-expired token; fall back to the default.
+        if (expiresIn <= 0) {
+            expiresIn = DEFAULT_TOKEN_LIFETIME_SECONDS;
+        }
+        // Base the expiry on the time AFTER the token was received, not the timestamp captured before the (slow)
+        // network call, so the token is never treated as longer-lived than it actually is.
+        this.cached = new CachedToken(accessToken, (System.currentTimeMillis() / 1000L) + expiresIn);
         return accessToken;
     }
 
