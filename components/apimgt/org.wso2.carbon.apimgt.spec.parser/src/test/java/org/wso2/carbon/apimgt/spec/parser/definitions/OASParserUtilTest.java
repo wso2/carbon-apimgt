@@ -603,6 +603,28 @@ public class OASParserUtilTest {
     }
 
     @Test
+    public void testParseYamlWithLimitResolvesAnchorAlias() throws Exception {
+        String yaml =
+                "openapi: \"3.0.0\"\n" +
+                "components:\n" +
+                "  schemas:\n" +
+                "    Base:\n" +
+                "      x-required-fields: &ref_0\n" +
+                "        - field_a\n" +
+                "        - field_b\n" +
+                "    Derived:\n" +
+                "      required: *ref_0\n";
+
+        JsonNode result = OASParserUtil.parseYamlWithLimit(yaml, null);
+
+        JsonNode required = result.path("components").path("schemas").path("Derived").path("required");
+        Assert.assertTrue("'required' must resolve to an array, not an alias string", required.isArray());
+        Assert.assertEquals(2, required.size());
+        Assert.assertEquals("field_a", required.get(0).asText());
+        Assert.assertEquals("field_b", required.get(1).asText());
+    }
+
+    @Test
     public void testPreprocessYamlWithLimitJsonPassThrough() throws Exception {
 
         OASParserOptions parserOptions = new OASParserOptions();
