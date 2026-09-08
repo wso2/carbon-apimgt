@@ -1233,52 +1233,20 @@ public class TemplateBuilderUtil {
                     || StringUtils.isEmpty(endpoint.getServiceAccountKeyBase64())) {
                 continue;
             }
-            // Split the base64 key into vault-sized chunks: the secure-vault column caps each stored value, so
-            // one large key cannot be a single vault entry. Each chunk is registered under its own alias, and the
-            // mediator later reassembles them (pipe-joined) before decoding.
-            List<String> chunks = chunkString(endpoint.getServiceAccountKeyBase64(),
-                    AIAPIConstants.GCP_SERVICE_ACCOUNT_KEY_VAULT_CHUNK_LENGTH);
-            List<String> aliases = new ArrayList<>(chunks.size());
-            for (int i = 0; i < chunks.size(); i++) {
-                String alias = GatewayUtils.retrieveGCPServiceAccountKeyChunkAlias(api.getId().getApiName(),
-                        api.getId().getVersion(), endpoint.getEndpointUuid(), stage, i);
-                aliases.add(alias);
-                CredentialDto credentialDto = new CredentialDto();
-                credentialDto.setAlias(alias);
-                credentialDto.setPassword(chunks.get(i));
+            // Register the key's vault chunks (sizing/alias/expression details are encapsulated in the store) and
+            // emit a single serviceAccountKey property whose value is the vault-resolved, pipe-joined key.
+            GCPServiceAccountKeyVaultStore.VaultChunks vaultChunks = GCPServiceAccountKeyVaultStore.chunkForVault(
+                    endpoint.getServiceAccountKeyBase64(), api.getId().getApiName(), api.getId().getVersion(),
+                    endpoint.getEndpointUuid(), stage);
+            for (CredentialDto credentialDto : vaultChunks.getCredentials()) {
                 gatewayAPIDTO.setCredentialsToBeAdd(
                         addCredentialsToList(credentialDto, gatewayAPIDTO.getCredentialsToBeAdd()));
             }
-            // Emit a single serviceAccountKey property whose value is the vault-resolved, pipe-joined key.
-            endpoint.setServiceAccountKeyVaultExpression(buildVaultLookupExpression(aliases));
+            endpoint.setServiceAccountKeyVaultExpression(vaultChunks.getVaultLookupExpression());
             // Vault mode: the key now lives in the vault under the aliases, so drop the base64 literal to keep
             // it out of the rendered sequence artifact.
             endpoint.setServiceAccountKeyBase64(null);
         }
-    }
-
-    /**
-     * Builds the synapse XPath expression that reassembles the GCP service-account key from its per-chunk vault
-     * aliases. Each alias resolves via {@code wso2:vault-lookup} and the chunks are joined with {@code '|'} (the
-     * mediator splits on that delimiter; base64 never contains it). A single alias is emitted as a bare lookup
-     * because XPath {@code concat} requires at least two arguments.
-     *
-     * @param aliases the ordered per-chunk vault aliases
-     * @return the {@code wso2:vault-lookup} / {@code concat(...)} expression
-     */
-    static String buildVaultLookupExpression(List<String> aliases) {
-
-        if (aliases.size() == 1) {
-            return "wso2:vault-lookup('" + aliases.get(0) + "')";
-        }
-        StringBuilder expression = new StringBuilder("concat(");
-        for (int i = 0; i < aliases.size(); i++) {
-            if (i > 0) {
-                expression.append(", '|', ");
-            }
-            expression.append("wso2:vault-lookup('").append(aliases.get(i)).append("')");
-        }
-        return expression.append(")").toString();
     }
 
     /**
@@ -1368,23 +1336,6 @@ public class TemplateBuilderUtil {
             }
         }
         return simplifiedEndpoints;
-    }
-
-    /**
-     * Splits a string into ordered chunks of at most {@code chunkLength} characters. The input is base64,
-     * so it can be split at any character boundary without corrupting multi-byte characters.
-     *
-     * @param value       the base64 string to split
-     * @param chunkLength the maximum length of each chunk
-     * @return the ordered list of chunks
-     */
-    private static List<String> chunkString(String value, int chunkLength) {
-
-        List<String> chunks = new ArrayList<>();
-        for (int offset = 0; offset < value.length(); offset += chunkLength) {
-            chunks.add(value.substring(offset, Math.min(value.length(), offset + chunkLength)));
-        }
-        return chunks;
     }
 
     private static void addWebsocketTopicMappings(API api, APIDTO apidto) {
