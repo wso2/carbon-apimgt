@@ -42,8 +42,12 @@ import java.nio.charset.StandardCharsets;
  */
 public class GCPMetadataTokenProvider extends GCPAccessTokenProvider {
 
-    private static final String METADATA_TOKEN_URL =
-            "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token";
+    private static final String DEFAULT_METADATA_HOST = "metadata.google.internal";
+    private static final String METADATA_TOKEN_PATH =
+            "/computeMetadata/v1/instance/service-accounts/default/token";
+    // VM-level override of the metadata host, matching the google-auth-library convention (host only; the path
+    // is fixed). Set on the workload, e.g. GCE_METADATA_HOST=metadata.internal.example.
+    static final String GCE_METADATA_HOST_ENV_VAR = "GCE_METADATA_HOST";
     // The metadata server requires this header on every request as an anti-SSRF guard.
     private static final String METADATA_FLAVOR_HEADER = "Metadata-Flavor";
     private static final String METADATA_FLAVOR_VALUE = "Google";
@@ -62,6 +66,8 @@ public class GCPMetadataTokenProvider extends GCPAccessTokenProvider {
     @Override
     protected JSONObject fetchToken() throws IOException {
 
+        // The metadata call is never routed through a proxy: 169.254.169.254 is a link-local address that is
+        // not routable and only reachable directly on the GCP VM.
         HttpURLConnection connection = (HttpURLConnection) new URL(buildTokenUrl(scope)).openConnection();
         try {
             connection.setRequestMethod("GET");
@@ -93,21 +99,46 @@ public class GCPMetadataTokenProvider extends GCPAccessTokenProvider {
     }
 
     /**
-     * Builds the metadata token URL, appending the {@code scopes} query parameter when a scope is configured.
-     * The metadata server expects the scopes as a comma-separated list, whereas the JWT-bearer path (and hence
-     * the stored scope value) uses a space-separated list; any run of whitespace is normalised to a single comma
-     * so multiple scopes are delivered correctly (matching the google-auth-library {@code ComputeEngineCredentials}
-     * behaviour). A single scope is unaffected.
+     * Builds the metadata token URL against the resolved metadata host (see {@link #resolveMetadataHost()}).
      *
      * @param scope the configured OAuth2 scope(s); may be empty.
      * @return the metadata token URL.
      */
     static String buildTokenUrl(String scope) {
 
+        return buildTokenUrl(scope, resolveMetadataHost());
+    }
+
+    /**
+     * Builds the metadata token URL for a given host, appending the {@code scopes} query parameter when a scope
+     * is configured. The metadata server expects the scopes as a comma-separated list, whereas the JWT-bearer
+     * path (and hence the stored scope value) uses a space-separated list; any run of whitespace is normalised to
+     * a single comma so multiple scopes are delivered correctly (matching the google-auth-library
+     * {@code ComputeEngineCredentials} behaviour). A single scope is unaffected.
+     *
+     * @param scope the configured OAuth2 scope(s); may be empty.
+     * @param host  the metadata host.
+     * @return the metadata token URL.
+     */
+    static String buildTokenUrl(String scope, String host) {
+
+        String base = "http://" + host + METADATA_TOKEN_PATH;
         if (StringUtils.isEmpty(scope)) {
-            return METADATA_TOKEN_URL;
+            return base;
         }
         String metadataScopes = scope.trim().replaceAll("\\s+", ",");
-        return METADATA_TOKEN_URL + "?scopes=" + URLEncoder.encode(metadataScopes, StandardCharsets.UTF_8);
+        return base + "?scopes=" + URLEncoder.encode(metadataScopes, StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Resolves the metadata host: the {@code GCE_METADATA_HOST} environment variable (set on the VM/workload,
+     * matching the google-auth-library) when present, otherwise the default {@code metadata.google.internal}.
+     *
+     * @return the metadata host to use.
+     */
+    static String resolveMetadataHost() {
+
+        String host = System.getenv(GCE_METADATA_HOST_ENV_VAR);
+        return StringUtils.isNotEmpty(host) ? host : DEFAULT_METADATA_HOST;
     }
 }

@@ -18,6 +18,8 @@
 package org.wso2.carbon.apimgt.gateway.mediators;
 
 import com.sun.net.httpserver.HttpServer;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Assert;
@@ -134,7 +136,7 @@ public class GCPServiceAccountTokenProviderTest {
         responseBody = new JSONObject().put("access_token", "srv-token").put("expires_in", 3600).toString();
 
         GCPServiceAccountTokenProvider provider =
-                new GCPServiceAccountTokenProvider(keyJson(CLIENT_EMAIL, validPrivateKeyPem()), SCOPE, tokenUri);
+                new TestTokenProvider(keyJson(CLIENT_EMAIL, validPrivateKeyPem()), SCOPE, tokenUri);
         String token = provider.getAccessToken();
 
         Assert.assertEquals("srv-token", token);
@@ -174,7 +176,7 @@ public class GCPServiceAccountTokenProviderTest {
         responseBody = "{\"error\":\"invalid_grant\"}";
 
         try {
-            new GCPServiceAccountTokenProvider(keyJson(CLIENT_EMAIL, validPrivateKeyPem()), SCOPE, tokenUri)
+            new TestTokenProvider(keyJson(CLIENT_EMAIL, validPrivateKeyPem()), SCOPE, tokenUri)
                     .getAccessToken();
             Assert.fail("Expected an IOException for a non-2xx token endpoint response");
         } catch (IOException e) {
@@ -190,7 +192,7 @@ public class GCPServiceAccountTokenProviderTest {
         responseBody = new JSONObject().put("access_token", "srv-token").put("expires_in", 3600).toString();
 
         GCPServiceAccountTokenProvider provider =
-                new GCPServiceAccountTokenProvider(keyJson(CLIENT_EMAIL, validPrivateKeyPem()), SCOPE, tokenUri);
+                new TestTokenProvider(keyJson(CLIENT_EMAIL, validPrivateKeyPem()), SCOPE, tokenUri);
         provider.getAccessToken();
         provider.getAccessToken();
 
@@ -209,7 +211,7 @@ public class GCPServiceAccountTokenProviderTest {
         JSONObject key = new JSONObject(keyJson(CLIENT_EMAIL, validPrivateKeyPem()));
         key.put("token_uri", "http://169.254.169.254/latest/meta-data/");
         GCPServiceAccountTokenProvider provider =
-                new GCPServiceAccountTokenProvider(key.toString(), SCOPE, tokenUri);
+                new TestTokenProvider(key.toString(), SCOPE, tokenUri);
 
         Assert.assertEquals("srv-token", provider.getAccessToken());
         Assert.assertEquals("The key's token_uri must be ignored; only the fixed endpoint is contacted",
@@ -228,7 +230,7 @@ public class GCPServiceAccountTokenProviderTest {
 
         // Build the provider from the streaming (InputStream) constructor - the key is never materialised as a
         // String by the caller - and confirm it parses and mints a token identically to the String constructor.
-        GCPServiceAccountTokenProvider provider = new GCPServiceAccountTokenProvider(
+        GCPServiceAccountTokenProvider provider = new TestTokenProvider(
                 new ByteArrayInputStream(keyJson(CLIENT_EMAIL, validPrivateKeyPem())
                         .getBytes(StandardCharsets.UTF_8)), SCOPE, tokenUri);
 
@@ -257,6 +259,27 @@ public class GCPServiceAccountTokenProviderTest {
     // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------
+
+    /**
+     * Provider variant whose token exchange runs over a plain {@link CloseableHttpClient}, so the loopback
+     * endpoint is reachable in a unit test. Production uses the shared {@code APIUtil.getHttpClient}, which
+     * needs the gateway runtime (and applies the configured proxy).
+     */
+    private static final class TestTokenProvider extends GCPServiceAccountTokenProvider {
+
+        TestTokenProvider(String keyJson, String scope, String tokenUri) {
+            super(keyJson, scope, tokenUri);
+        }
+
+        TestTokenProvider(InputStream keyJson, String scope, String tokenUri) {
+            super(keyJson, scope, tokenUri);
+        }
+
+        @Override
+        protected CloseableHttpClient getHttpClient(int port, String protocol) {
+            return HttpClients.createDefault();
+        }
+    }
 
     private void assertConstructorRejects(String keyJson) {
 
