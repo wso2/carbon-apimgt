@@ -1503,41 +1503,9 @@ public class PublisherCommonUtils {
                             .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
 
                     if (APIConstants.ENDPOINT_SECURITY_TYPE_GCP.equals(productionEndpointType)) {
-                        boolean clearGcpKey = Boolean.parseBoolean(String.valueOf(
-                                endpointSecurityProduction.get(
-                                        APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY_CLEAR)));
-                        // Never persist the transient flag.
-                        endpointSecurityProduction.remove(
-                                APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY_CLEAR);
-                        if (clearGcpKey) {
-                            // Explicit clear: drop the stored key so the gateway falls back to keyless
-                            // (ADC / Workload Identity).
-                            endpointSecurityProduction.remove(
-                                    APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY);
-                        } else {
-                        if (endpointSecurityProduction.get(
-                                APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY) != null &&
-                                StringUtils.isNotEmpty(endpointSecurityProduction.get(
-                                        APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY).toString()) &&
-                                !endpointSecurityProduction.get(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY)
-                                        .equals(oldProductionGCPKey)) {
-                            String keyValue = endpointSecurityProduction
-                                    .get(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY).toString();
-                            validateGCPServiceAccountKey(keyValue);
-                            String encryptedKeyValue = APIUtil.encryptAndBase64EncodeAnySize(cryptoUtil, 
-                                    keyValue.getBytes(StandardCharsets.UTF_8));
-                            endpointSecurityProduction
-                                    .put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY, encryptedKeyValue);
-                        } else if (StringUtils.isNotBlank(oldProductionGCPKey)) {
-                            endpointSecurityProduction
-                                    .put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY, oldProductionGCPKey);
-                        } else {
-                            // No service-account key provided: keyless GCP auth. The gateway uses its attached
-                            // GCP identity (Application Default Credentials / Workload Identity) when running on
-                            // GCP, so there is nothing to encrypt or store. Drop any empty placeholder.
-                            endpointSecurityProduction.remove(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY);
-                        }
-                        }
+                        // The APIDTO path carries the old key already encrypted at rest, so preserve it as-is.
+                        applyGCPServiceAccountKeyForStage(endpointSecurityProduction, oldProductionGCPKey, true,
+                                cryptoUtil);
                     }
                     endpointSecurity
                             .put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION, endpointSecurityProduction);
@@ -1551,41 +1519,8 @@ public class PublisherCommonUtils {
                             .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
 
                     if (APIConstants.ENDPOINT_SECURITY_TYPE_GCP.equals(sandboxEndpointType)) {
-                        boolean clearGcpKey = Boolean.parseBoolean(String.valueOf(
-                                endpointSecuritySandbox.get(
-                                        APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY_CLEAR)));
-                        // Never persist the transient flag.
-                        endpointSecuritySandbox.remove(
-                                APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY_CLEAR);
-                        if (clearGcpKey) {
-                            // Explicit clear: drop the stored key so the gateway falls back to keyless
-                            // (ADC / Workload Identity).
-                            endpointSecuritySandbox.remove(
-                                    APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY);
-                        } else {
-                        if (endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY) != null
-                                && StringUtils.isNotEmpty(
-                                endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY)
-                                        .toString()) &&
-                                !endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY)
-                                        .equals(oldSandboxGCPKey)) {
-                            String keyValue = endpointSecuritySandbox
-                                    .get(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY).toString();
-                            validateGCPServiceAccountKey(keyValue);
-                            String encryptedKeyValue = APIUtil.encryptAndBase64EncodeAnySize(cryptoUtil, 
-                                    keyValue.getBytes(StandardCharsets.UTF_8));
-                            endpointSecuritySandbox
-                                    .put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY, encryptedKeyValue);
-                        } else if (StringUtils.isNotBlank(oldSandboxGCPKey)) {
-                            endpointSecuritySandbox
-                                    .put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY, oldSandboxGCPKey);
-                        } else {
-                            // No service-account key provided: keyless GCP auth. The gateway uses its attached
-                            // GCP identity (Application Default Credentials / Workload Identity) when running on
-                            // GCP, so there is nothing to encrypt or store. Drop any empty placeholder.
-                            endpointSecuritySandbox.remove(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY);
-                        }
-                        }
+                        // The APIDTO path carries the old key already encrypted at rest, so preserve it as-is.
+                        applyGCPServiceAccountKeyForStage(endpointSecuritySandbox, oldSandboxGCPKey, true, cryptoUtil);
                     }
                     endpointSecurity
                             .put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX, endpointSecuritySandbox);
@@ -1942,45 +1877,8 @@ public class PublisherCommonUtils {
                             APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
 
                     if (APIConstants.ENDPOINT_SECURITY_TYPE_GCP.equals(productionEndpointType)) {
-                        boolean clearGcpKey = Boolean.parseBoolean(String.valueOf(
-                                endpointSecurityProduction.get(
-                                        APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY_CLEAR)));
-                        // Never persist the transient flag.
-                        endpointSecurityProduction.remove(
-                                APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY_CLEAR);
-                        if (clearGcpKey) {
-                            // Explicit clear: drop the stored key so the gateway falls back to keyless
-                            // (ADC / Workload Identity).
-                            endpointSecurityProduction.remove(
-                                    APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY);
-                        } else {
-                        if (endpointSecurityProduction.get(
-                                APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY) != null
-                                && StringUtils.isNotEmpty(endpointSecurityProduction.get(
-                                        APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY).toString())
-                                && !endpointSecurityProduction.get(
-                                        APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY).equals(oldApiSecret)) {
-                            String keyValue = endpointSecurityProduction.get(
-                                    APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY).toString();
-                            validateGCPServiceAccountKey(keyValue);
-                            String encryptedKeyValue = APIUtil.encryptAndBase64EncodeAnySize(cryptoUtil, 
-                                    keyValue.getBytes(StandardCharsets.UTF_8));
-                            endpointSecurityProduction.put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY,
-                                    encryptedKeyValue);
-                        } else if (StringUtils.isNotBlank(oldApiSecret)) {
-                            // oldApiSecret is the decrypted key (updateAPIEndpoint reads it with decryption),
-                            // so re-encrypt before storing to keep it encrypted at rest and decryptable on read.
-                            String encryptedOldKeyValue = APIUtil.encryptAndBase64EncodeAnySize(cryptoUtil, 
-                                    oldApiSecret.getBytes(StandardCharsets.UTF_8));
-                            endpointSecurityProduction.put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY,
-                                    encryptedOldKeyValue);
-                        } else {
-                            // No service-account key provided: keyless GCP auth. The gateway uses its attached
-                            // GCP identity (Application Default Credentials / Workload Identity) when running on
-                            // GCP, so there is nothing to encrypt or store. Drop any empty placeholder.
-                            endpointSecurityProduction.remove(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY);
-                        }
-                        }
+                        // The APIEndpointDTO path reads the old key decrypted, so re-encrypt it before storing.
+                        applyGCPServiceAccountKeyForStage(endpointSecurityProduction, oldApiSecret, false, cryptoUtil);
                     }
                     endpointSecurity.put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION,
                             endpointSecurityProduction);
@@ -1996,46 +1894,8 @@ public class PublisherCommonUtils {
                             .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
 
                     if (APIConstants.ENDPOINT_SECURITY_TYPE_GCP.equals(sandboxEndpointType)) {
-                        boolean clearGcpKey = Boolean.parseBoolean(String.valueOf(
-                                endpointSecuritySandbox.get(
-                                        APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY_CLEAR)));
-                        // Never persist the transient flag.
-                        endpointSecuritySandbox.remove(
-                                APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY_CLEAR);
-                        if (clearGcpKey) {
-                            // Explicit clear: drop the stored key so the gateway falls back to keyless
-                            // (ADC / Workload Identity).
-                            endpointSecuritySandbox.remove(
-                                    APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY);
-                        } else {
-                        if (endpointSecuritySandbox.get(
-                                APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY) != null
-                                && StringUtils.isNotEmpty(
-                                endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY)
-                                        .toString()) &&
-                                !endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY)
-                                        .equals(oldApiSecret)) {
-                            String keyValue = endpointSecuritySandbox
-                                    .get(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY).toString();
-                            validateGCPServiceAccountKey(keyValue);
-                            String encryptedKeyValue = APIUtil.encryptAndBase64EncodeAnySize(cryptoUtil, 
-                                    keyValue.getBytes(StandardCharsets.UTF_8));
-                            endpointSecuritySandbox
-                                    .put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY, encryptedKeyValue);
-                        } else if (StringUtils.isNotBlank(oldApiSecret)) {
-                            // oldApiSecret is the decrypted key (updateAPIEndpoint reads it with decryption),
-                            // so re-encrypt before storing to keep it encrypted at rest and decryptable on read.
-                            String encryptedOldKeyValue = APIUtil.encryptAndBase64EncodeAnySize(cryptoUtil, 
-                                    oldApiSecret.getBytes(StandardCharsets.UTF_8));
-                            endpointSecuritySandbox
-                                    .put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY, encryptedOldKeyValue);
-                        } else {
-                            // No service-account key provided: keyless GCP auth. The gateway uses its attached
-                            // GCP identity (Application Default Credentials / Workload Identity) when running on
-                            // GCP, so there is nothing to encrypt or store. Drop any empty placeholder.
-                            endpointSecuritySandbox.remove(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY);
-                        }
-                        }
+                        // The APIEndpointDTO path reads the old key decrypted, so re-encrypt it before storing.
+                        applyGCPServiceAccountKeyForStage(endpointSecuritySandbox, oldApiSecret, false, cryptoUtil);
                     }
                     endpointSecurity
                             .put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX, endpointSecuritySandbox);
@@ -2062,6 +1922,51 @@ public class PublisherCommonUtils {
         } catch (JsonSyntaxException e) {
             throw new APIManagementException("Invalid GCP service-account key: the provided value is not valid JSON.",
                     e);
+        }
+    }
+
+    /**
+     * Applies the GCP service-account key handling for one deployment stage's endpoint-security map: honours the
+     * transient clear flag, encrypts a newly supplied key (after validating it is well-formed JSON), preserves the
+     * previously stored key when unchanged, or leaves the stage keyless when no key is present. Centralised so the
+     * {@link APIDTO} (update) and {@link APIEndpointDTO} (add/update-endpoint) save paths cannot drift, and applied
+     * identically to the production and sandbox stages.
+     *
+     * @param stageSecurity   the endpoint-security map for the stage (production or sandbox)
+     * @param oldKey          the previously stored key - encrypted-at-rest on the {@link APIDTO} path, decrypted on
+     *                        the {@link APIEndpointDTO} path (see {@code oldKeyEncrypted})
+     * @param oldKeyEncrypted whether {@code oldKey} is already the encrypted-at-rest value (store as-is) or the
+     *                        decrypted value (re-encrypt before storing)
+     * @param cryptoUtil      cryptography utility
+     * @throws CryptoException        if an error occurs while encrypting
+     * @throws APIManagementException if the newly supplied key is not valid JSON
+     */
+    private static void applyGCPServiceAccountKeyForStage(Map stageSecurity, String oldKey, boolean oldKeyEncrypted,
+            CryptoUtil cryptoUtil) throws CryptoException, APIManagementException {
+
+        boolean clearGcpKey = Boolean.parseBoolean(String.valueOf(
+                stageSecurity.get(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY_CLEAR)));
+        // Never persist the transient flag.
+        stageSecurity.remove(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY_CLEAR);
+        if (clearGcpKey) {
+            // Explicit clear: drop the stored key so the gateway falls back to keyless (ADC / Workload Identity).
+            stageSecurity.remove(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY);
+            return;
+        }
+        Object currentKey = stageSecurity.get(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY);
+        if (currentKey != null && StringUtils.isNotEmpty(currentKey.toString()) && !currentKey.equals(oldKey)) {
+            // A newly supplied key: validate it is well-formed JSON, then encrypt it at rest.
+            String keyValue = currentKey.toString();
+            validateGCPServiceAccountKey(keyValue);
+            stageSecurity.put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY,
+                    APIUtil.encryptAndBase64EncodeAnySize(cryptoUtil, keyValue.getBytes(StandardCharsets.UTF_8)));
+        } else if (StringUtils.isNotBlank(oldKey)) {
+            // Unchanged key: preserve the previously stored value, re-encrypting it when it was decrypted on read.
+            stageSecurity.put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY, oldKeyEncrypted ? oldKey
+                    : APIUtil.encryptAndBase64EncodeAnySize(cryptoUtil, oldKey.getBytes(StandardCharsets.UTF_8)));
+        } else {
+            // No service-account key provided: keyless GCP auth. Drop any empty placeholder.
+            stageSecurity.remove(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY);
         }
     }
 
