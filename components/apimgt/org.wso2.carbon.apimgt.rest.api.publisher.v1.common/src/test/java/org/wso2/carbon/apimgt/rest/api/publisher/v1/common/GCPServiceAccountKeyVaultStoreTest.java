@@ -25,18 +25,18 @@ import java.util.Collections;
 
 /**
  * Unit tests for the GCP secure-vault key-lookup expression built by
- * {@link TemplateBuilderUtil#buildVaultLookupExpression(java.util.List)}. The expression is what the endpoint
- * sequence emits in secure-vault mode; the gateway mediator splits its resolved value on {@code '|'} before
- * base64-decoding the key.
+ * {@link GCPServiceAccountKeyVaultStore#buildVaultLookupExpression(java.util.List)}. The expression is what the
+ * endpoint sequence emits in secure-vault mode; the gateway mediator splits its resolved value on {@code '|'}
+ * before base64-decoding the key.
  */
-public class TemplateBuilderUtilGCPTest {
+public class GCPServiceAccountKeyVaultStoreTest {
 
     @Test
     public void testSingleAliasIsABareLookup() {
 
         // XPath concat() requires >= 2 args, so one chunk must be a bare vault-lookup (not concat).
         Assert.assertEquals("wso2:vault-lookup('a0')",
-                TemplateBuilderUtil.buildVaultLookupExpression(Collections.singletonList("a0")));
+                GCPServiceAccountKeyVaultStore.buildVaultLookupExpression(Collections.singletonList("a0")));
     }
 
     @Test
@@ -44,13 +44,13 @@ public class TemplateBuilderUtilGCPTest {
 
         Assert.assertEquals(
                 "concat(wso2:vault-lookup('a0'), '|', wso2:vault-lookup('a1'))",
-                TemplateBuilderUtil.buildVaultLookupExpression(Arrays.asList("a0", "a1")));
+                GCPServiceAccountKeyVaultStore.buildVaultLookupExpression(Arrays.asList("a0", "a1")));
     }
 
     @Test
     public void testManyAliasesInterleavePipeDelimiters() {
 
-        String expression = TemplateBuilderUtil.buildVaultLookupExpression(Arrays.asList("a0", "a1", "a2"));
+        String expression = GCPServiceAccountKeyVaultStore.buildVaultLookupExpression(Arrays.asList("a0", "a1", "a2"));
 
         Assert.assertEquals(
                 "concat(wso2:vault-lookup('a0'), '|', wso2:vault-lookup('a1'), '|', wso2:vault-lookup('a2'))",
