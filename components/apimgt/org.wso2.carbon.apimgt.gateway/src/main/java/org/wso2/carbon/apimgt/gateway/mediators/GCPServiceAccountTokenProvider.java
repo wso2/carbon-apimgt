@@ -18,15 +18,20 @@
 package org.wso2.carbon.apimgt.gateway.mediators;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -48,9 +53,9 @@ import java.util.Base64;
  * ({@code grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer}) for a short-lived access token.
  * Caching and refresh are inherited from {@link GCPAccessTokenProvider}.
  * <p>
- * Implemented with only the JDK ({@code java.security} for RS256 signing, {@code HttpURLConnection}
- * for the token exchange) plus a JSON parser, so the gateway does not depend on the Google auth /
- * http-client / opencensus / grpc-context library chain.
+ * Implemented with the JDK ({@code java.security} for RS256 signing) plus a JSON parser and the shared API
+ * Manager HTTP client for the token exchange, so the gateway does not depend on the Google auth / opencensus /
+ * grpc-context library chain. Using the shared client means the exchange honours the configured outbound proxy.
  */
 public class GCPServiceAccountTokenProvider extends GCPAccessTokenProvider {
 
@@ -184,33 +189,40 @@ public class GCPServiceAccountTokenProvider extends GCPAccessTokenProvider {
 
     /**
      * POSTs the assertion to the token endpoint and returns the parsed JSON response.
+     * <p>
+     * The exchange goes over the shared API Manager HTTP client ({@link APIUtil#getHttpClient(int, String)}), the
+     * same client the REST/OAuth backend token calls use, so it honours the configured outbound proxy
+     * ({@code [apim.proxy_config]}) - including authenticated proxies in front of the HTTPS token endpoint.
      */
     private JSONObject exchangeAssertionForToken(String assertion) throws IOException {
 
         String body = "grant_type=" + URLEncoder.encode(JWT_BEARER_GRANT_TYPE, StandardCharsets.UTF_8)
                 + "&assertion=" + URLEncoder.encode(assertion, StandardCharsets.UTF_8);
-        HttpURLConnection connection = (HttpURLConnection) new URL(tokenUri).openConnection();
-        try {
-            connection.setRequestMethod("POST");
-            connection.setDoOutput(true);
-            connection.setConnectTimeout(CONNECT_TIMEOUT_MS);
-            connection.setReadTimeout(READ_TIMEOUT_MS);
-            connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-            connection.setRequestProperty("Accept", "application/json");
-            try (OutputStream out = connection.getOutputStream()) {
-                out.write(body.getBytes(StandardCharsets.UTF_8));
+        URL url = new URL(tokenUri);
+        try (CloseableHttpClient httpClient = getHttpClient(url.getPort(), url.getProtocol())) {
+            HttpPost httpPost = new HttpPost(tokenUri);
+            httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
+            httpPost.setHeader("Accept", "application/json");
+            httpPost.setEntity(new StringEntity(body, StandardCharsets.UTF_8));
+            try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
+                int status = response.getStatusLine().getStatusCode();
+                String payload = response.getEntity() == null ? ""
+                        : EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+                if (status < HttpStatus.SC_OK || status >= HttpStatus.SC_MULTIPLE_CHOICES) {
+                    throw new IOException("The GCP token endpoint returned HTTP " + status + ": " + payload);
+                }
+                return new JSONObject(payload);
             }
-            int status = connection.getResponseCode();
-            boolean success = status >= HttpURLConnection.HTTP_OK && status < HttpURLConnection.HTTP_MULT_CHOICE;
-            InputStream stream = success ? connection.getInputStream() : connection.getErrorStream();
-            String response = (stream == null) ? "" : readAll(stream);
-            if (!success) {
-                throw new IOException("The GCP token endpoint returned HTTP " + status + ": " + response);
-            }
-            return new JSONObject(response);
-        } finally {
-            connection.disconnect();
         }
+    }
+
+    /**
+     * Supplies the HTTP client for the token exchange. Uses the shared API Manager client (which applies the
+     * configured proxy); overridable in tests to target a loopback endpoint without the gateway runtime.
+     */
+    protected CloseableHttpClient getHttpClient(int port, String protocol) {
+
+        return (CloseableHttpClient) APIUtil.getHttpClient(port, protocol);
     }
 
     /**
