@@ -18,6 +18,7 @@
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.json.simple.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,6 +28,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
@@ -35,12 +37,17 @@ import org.wso2.carbon.apimgt.impl.dto.OrgAccessControl;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({APIManagerConfiguration.class})
@@ -117,5 +124,103 @@ public class APIMappingUtilTest {
 
         API apiModel = APIMappingUtil.fromDTOtoAPI(apidto, PROVIDER);
         Assert.assertEquals("WSDL URL not set on API model", expectedUrl, apiModel.getWsdlUrl());
+    }
+
+    /**
+     * Builds a minimal API model with two additional properties - one plain and one carrying the
+     * "__display" suffix - to exercise the expandProperties mapping path of the API listing.
+     */
+    private API createApiWithAdditionalProperties() {
+
+        API api = new API(new APIIdentifier(PROVIDER, "PizzaShackAPI", "1.0.0"));
+        api.setUUID("873a103f-684b-470e-a4cb-a4b2a3d87ea1");
+        api.setContextTemplate("/pizzashack");
+        api.setStatus(APIConstants.PUBLISHED);
+        api.setType(APIConstants.API_TYPE_HTTP);
+
+        JSONObject additionalProperties = new JSONObject();
+        additionalProperties.put("dept", "finance");
+        additionalProperties.put("owner" + APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX, "jane");
+        api.setAdditionalProperties(additionalProperties);
+        return api;
+    }
+
+    @Test
+    public void testFromAPIToInfoDTOWithoutExpandPropertiesKeepsDefaults() {
+
+        APIInfoDTO apiInfoDTO = APIMappingUtil.fromAPIToInfoDTO(createApiWithAdditionalProperties(), false);
+
+        Assert.assertTrue("additionalProperties must stay empty when expandProperties is false",
+                apiInfoDTO.getAdditionalProperties().isEmpty());
+        Assert.assertTrue("additionalPropertiesMap must stay empty when expandProperties is false",
+                apiInfoDTO.getAdditionalPropertiesMap().isEmpty());
+    }
+
+    @Test
+    public void testFromAPIToInfoDTODefaultsToNotExpandingProperties() {
+
+        APIInfoDTO apiInfoDTO = APIMappingUtil.fromAPIToInfoDTO(createApiWithAdditionalProperties());
+
+        Assert.assertTrue("The single argument overload must not expand additional properties",
+                apiInfoDTO.getAdditionalProperties().isEmpty());
+        Assert.assertTrue("The single argument overload must not expand additional properties",
+                apiInfoDTO.getAdditionalPropertiesMap().isEmpty());
+    }
+
+    @Test
+    public void testFromAPIToInfoDTOWithExpandPropertiesPopulatesBothFields() {
+
+        APIInfoDTO apiInfoDTO = APIMappingUtil.fromAPIToInfoDTO(createApiWithAdditionalProperties(), true);
+
+        List<APIInfoAdditionalPropertiesDTO> additionalProperties = apiInfoDTO.getAdditionalProperties();
+        Assert.assertEquals(2, additionalProperties.size());
+        for (APIInfoAdditionalPropertiesDTO property : additionalProperties) {
+            if ("dept".equals(property.getName())) {
+                Assert.assertEquals("finance", property.getValue());
+                Assert.assertFalse("A property without the __display suffix is not displayable",
+                        property.isDisplay());
+            } else if ("owner".equals(property.getName())) {
+                Assert.assertEquals("jane", property.getValue());
+                Assert.assertTrue("A property with the __display suffix is displayable", property.isDisplay());
+            } else {
+                Assert.fail("Unexpected additional property " + property.getName());
+            }
+        }
+
+        Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap =
+                apiInfoDTO.getAdditionalPropertiesMap();
+        Assert.assertEquals(2, additionalPropertiesMap.size());
+
+        APIInfoAdditionalPropertiesMapDTO deptProperty = additionalPropertiesMap.get("dept");
+        Assert.assertEquals("dept", deptProperty.getName());
+        Assert.assertEquals("finance", deptProperty.getValue());
+        Assert.assertFalse(deptProperty.isDisplay());
+
+        // The map is keyed by the raw property name, so the __display suffix is carried by the key while the
+        // name is stripped. display is intentionally always false here - fromDTOtoAPI rebuilds the stored key
+        // as <mapKey> + "__display" whenever isDisplay() is true, so a true value would round-trip a
+        // displayable property back as "owner__display__display".
+        APIInfoAdditionalPropertiesMapDTO ownerProperty = additionalPropertiesMap
+                .get("owner" + APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX);
+        Assert.assertEquals("The map entry name is stripped of the __display suffix", "owner",
+                ownerProperty.getName());
+        Assert.assertEquals("jane", ownerProperty.getValue());
+        Assert.assertFalse("display must stay false so that fromDTOtoAPI does not append __display twice",
+                ownerProperty.isDisplay());
+    }
+
+    @Test
+    public void testFromAPIListToDTOPropagatesExpandProperties() throws APIManagementException {
+
+        List<API> apiList = new ArrayList<>();
+        apiList.add(createApiWithAdditionalProperties());
+
+        APIListDTO notExpanded = (APIListDTO) APIMappingUtil.fromAPIListToDTO(apiList, false);
+        Assert.assertTrue(notExpanded.getList().get(0).getAdditionalProperties().isEmpty());
+        Assert.assertTrue(notExpanded.getList().get(0).getAdditionalPropertiesMap().isEmpty());
+
+        APIListDTO expanded = (APIListDTO) APIMappingUtil.fromAPIListToDTO(apiList, true);
+        Assert.assertEquals(2, expanded.getList().get(0).getAdditionalProperties().size());
+        Assert.assertEquals(2, expanded.getList().get(0).getAdditionalPropertiesMap().size());
     }
 }
