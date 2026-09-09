@@ -18,6 +18,8 @@
 package org.wso2.carbon.apimgt.gateway.mediators;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
@@ -40,6 +42,8 @@ import java.nio.charset.StandardCharsets;
  * about-to-expire token.
  */
 public abstract class GCPAccessTokenProvider {
+
+    private static final Log log = LogFactory.getLog(GCPAccessTokenProvider.class);
 
     protected static final int CONNECT_TIMEOUT_MS = 10000;
     protected static final int READ_TIMEOUT_MS = 10000;
@@ -94,6 +98,11 @@ public abstract class GCPAccessTokenProvider {
         // Base the expiry on the time AFTER the token was received, not the timestamp captured before the (slow)
         // network call, so the token is never treated as longer-lived than it actually is.
         this.cached = new CachedToken(accessToken, (System.currentTimeMillis() / 1000L) + expiresIn);
+        if (log.isDebugEnabled()) {
+            // Safe to log: only the lifetime (a number). The access token itself is never logged.
+            log.debug("Minted a fresh GCP access token (cache miss or near expiry); expires in " + expiresIn
+                    + " seconds.");
+        }
         return accessToken;
     }
 
