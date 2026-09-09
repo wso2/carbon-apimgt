@@ -18,6 +18,8 @@
 package org.wso2.carbon.apimgt.gateway.mediators;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -41,6 +43,8 @@ import java.nio.charset.StandardCharsets;
  * actually runs on GCP; off-GCP the metadata host does not resolve and {@link #fetchToken()} fails.
  */
 public class GCPMetadataTokenProvider extends GCPAccessTokenProvider {
+
+    private static final Log log = LogFactory.getLog(GCPMetadataTokenProvider.class);
 
     private static final String DEFAULT_METADATA_HOST = "metadata.google.internal";
     private static final String METADATA_TOKEN_PATH =
@@ -68,7 +72,13 @@ public class GCPMetadataTokenProvider extends GCPAccessTokenProvider {
 
         // The metadata call is never routed through a proxy: 169.254.169.254 is a link-local address that is
         // not routable and only reachable directly on the GCP VM.
-        HttpURLConnection connection = (HttpURLConnection) new URL(buildTokenUrl(scope)).openConnection();
+        String tokenUrl = buildTokenUrl(scope);
+        if (log.isDebugEnabled()) {
+            // Safe to log: the URL carries only the host (shows a GCE_METADATA_HOST override) and scope names,
+            // no secret. The minted token/response is never logged.
+            log.debug("Fetching GCP access token (keyless) from the metadata endpoint: " + tokenUrl);
+        }
+        HttpURLConnection connection = (HttpURLConnection) new URL(tokenUrl).openConnection();
         try {
             connection.setRequestMethod("GET");
             connection.setRequestProperty(METADATA_FLAVOR_HEADER, METADATA_FLAVOR_VALUE);

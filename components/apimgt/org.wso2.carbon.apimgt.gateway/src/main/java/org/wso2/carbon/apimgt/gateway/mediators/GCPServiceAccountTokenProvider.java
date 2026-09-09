@@ -18,6 +18,8 @@
 package org.wso2.carbon.apimgt.gateway.mediators;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -58,6 +60,8 @@ import java.util.Base64;
  * grpc-context library chain. Using the shared client means the exchange honours the configured outbound proxy.
  */
 public class GCPServiceAccountTokenProvider extends GCPAccessTokenProvider {
+
+    private static final Log log = LogFactory.getLog(GCPServiceAccountTokenProvider.class);
 
     private static final String JWT_BEARER_GRANT_TYPE = "urn:ietf:params:oauth:grant-type:jwt-bearer";
     private static final String DEFAULT_TOKEN_URI = "https://oauth2.googleapis.com/token";
@@ -199,6 +203,12 @@ public class GCPServiceAccountTokenProvider extends GCPAccessTokenProvider {
         String body = "grant_type=" + URLEncoder.encode(JWT_BEARER_GRANT_TYPE, StandardCharsets.UTF_8)
                 + "&assertion=" + URLEncoder.encode(assertion, StandardCharsets.UTF_8);
         URL url = new URL(tokenUri);
+        if (log.isDebugEnabled()) {
+            // Safe to log: only the token endpoint URL. The signed assertion, request body and token response
+            // are credentials and are never logged.
+            log.debug("Exchanging the JWT-bearer assertion for a GCP access token at the token endpoint: "
+                    + tokenUri);
+        }
         try (CloseableHttpClient httpClient = getHttpClient(url.getPort(), url.getProtocol())) {
             HttpPost httpPost = new HttpPost(tokenUri);
             httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
