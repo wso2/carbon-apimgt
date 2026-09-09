@@ -952,6 +952,32 @@ public class RegistryPersistenceUtil {
     }
 
     /**
+     * To extract the API related custom properties (additional properties) of an API from its registry resource.
+     * Additional properties are stored as registry resource properties with the
+     * {@link APIConstants#API_RELATED_CUSTOM_PROPERTIES_PREFIX} prefix, which is stripped off here.
+     *
+     * @param apiResource Registry resource of the API.
+     * @return Map of additional property names against their values. Never null.
+     */
+    public static Map<String, String> getAdditionalProperties(Resource apiResource) {
+
+        Map<String, String> additionalProperties = new HashMap<>();
+        Properties properties = apiResource.getProperties();
+        if (properties != null) {
+            Enumeration<?> propertyNames = properties.propertyNames();
+            while (propertyNames.hasMoreElements()) {
+                String propertyName = (String) propertyNames.nextElement();
+                if (propertyName.startsWith(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX)) {
+                    String property = propertyName
+                            .substring(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX.length());
+                    additionalProperties.put(property, apiResource.getProperty(propertyName));
+                }
+            }
+        }
+        return additionalProperties;
+    }
+
+    /**
      * To set the resource properties to the API.
      *
      * @param api          API that need to set the resource properties.
@@ -962,20 +988,13 @@ public class RegistryPersistenceUtil {
      */
     private static API setResourceProperties(API api, Resource apiResource, String artifactPath) throws RegistryException {
 
-        Properties properties = apiResource.getProperties();
-        if (properties != null) {
-            Enumeration<?> propertyNames = properties.propertyNames();
-            while (propertyNames.hasMoreElements()) {
-                String propertyName = (String) propertyNames.nextElement();
-                if (log.isDebugEnabled()) {
-                    log.debug("API '" + api.getId().toString() + "' " + "has the property " + propertyName);
-                }
-                if (propertyName.startsWith(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX)) {
-                    String property = propertyName
-                            .substring(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX.length());
-                    api.addProperty(property, apiResource.getProperty(propertyName));
-                }
-            }
+        Map<String, String> additionalProperties = getAdditionalProperties(apiResource);
+        if (log.isDebugEnabled()) {
+            log.debug("API '" + api.getId().toString() + "' " + "has the properties "
+                    + additionalProperties.keySet());
+        }
+        for (Map.Entry<String, String> entry : additionalProperties.entrySet()) {
+            api.addProperty(entry.getKey(), entry.getValue());
         }
         api.setAccessControl(apiResource.getProperty(APIConstants.ACCESS_CONTROL));
         String visibleOrg = apiResource.getProperty(APIConstants.VISIBLE_ORGANIZATIONS);
