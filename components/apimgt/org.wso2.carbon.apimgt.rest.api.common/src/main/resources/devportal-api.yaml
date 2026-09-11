@@ -6338,6 +6338,16 @@ components:
           type: string
           description: The unique identifier of the API.
           example: 2962f3bb-8330-438e-baee-0ee1d6434ba4
+        apiProviderTenantDomain:
+          type: string
+          description: |
+            Tenant domain that owns the API or API Product this subscription points to. DEPRECATED. Present only
+            when cross tenant subscription visibility is enabled via the
+            APIStore.EnableDeprecatedCrossTenantSubscriptionVisibility configuration, and omitted from the response
+            otherwise.
+          deprecated: true
+          readOnly: true
+          example: carbon.super
         apiInfo:
           $ref: '#/components/schemas/APIInfo'
         applicationInfo:
@@ -7560,6 +7570,16 @@ components:
             - MCP_ONLY
             - API_ONLY
           default: HYBRID
+        crossTenantSubscriptionEnabled:
+          type: boolean
+          description: |
+            DEPRECATED. Indicates that an application's subscriptions to APIs and API Products owned by other
+            organizations are listed and counted in the Dev Portal, instead of the listing being scoped to the
+            organization the request is made in. Present and true only when the
+            APIStore.EnableDeprecatedCrossTenantSubscriptionVisibility configuration is enabled, and omitted from
+            the response otherwise.
+          deprecated: true
+          example: true
     ApplicationAttribute:
       title: Application attributes
       type: object

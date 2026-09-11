@@ -1208,6 +1208,8 @@ public final class APIConstants {
     public static final String ENABLE_ANONYMOUS_MODE = "EnableAnonymous";
     public static final String API_DEVPORTAL_ENABLE_CROSS_TENANT_SUBSCRIPTION = API_STORE +
             "EnableCrossTenantSubscription";
+    public static final String API_DEVPORTAL_ENABLE_DEPRECATED_CROSS_TENANT_SUBSCRIPTION_VISIBILITY = API_STORE +
+            "EnableDeprecatedCrossTenantSubscriptionVisibility";
     public static final String DEVPORTAL_MODE = "Mode";
     public static final String API_DEVPORTAL_DEFAULT_RESERVED_USERNAME = API_STORE +
             "DefaultReservedUsername";

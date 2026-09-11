@@ -65,6 +65,12 @@ public class SettingsMappingUtil {
         settingsDTO.setMapExistingAuthApps(APIUtil.isMapExistingAuthAppsEnabled());
         settingsDTO.setMonetizationEnabled(moneatizationEnabled);
         settingsDTO.setOrgWideAppUpdateEnabled(APIUtil.isOrgWideAppUpdateEnabled());
+        // DEPRECATED: the Dev Portal renders the provider organization column in the application subscriptions view
+        // only when this is present and true. Left unset when the behaviour is disabled so that the settings
+        // response is unchanged for every deployment that does not opt in.
+        if (APIUtil.isDeprecatedCrossTenantSubscriptionVisibilityEnabled()) {
+            settingsDTO.setCrossTenantSubscriptionEnabled(true);
+        }
         SettingsIdentityProviderDTO identityProviderDTO = new SettingsIdentityProviderDTO();
         identityProviderDTO.setExternal(APIUtil.getIdentityProviderConfig() != null);
         settingsDTO.setIdentityProvider(identityProviderDTO);

@@ -475,6 +475,23 @@ public class SQLConstants {
                     "   AND APP.APPLICATION_ID = ?" +
                     "   AND API.ORGANIZATION = ?";
 
+    /**
+     * DEPRECATED cross organization subscription visibility variant of
+     * {@link #GET_SUBSCRIPTION_COUNT_BY_APP_ID_SQL}. Identical apart from the omitted {@code API.ORGANIZATION = ?}
+     * filter, so the application's subscription count also covers subscriptions to APIs owned by other
+     * organizations (pre 4.1.0 behaviour). Used only when
+     * {@code APIStore.EnableDeprecatedCrossTenantSubscriptionVisibility} is enabled.
+     */
+    public static final String GET_SUBSCRIPTION_COUNT_BY_APP_ID_ALL_ORGANIZATIONS_SQL =
+            " SELECT COUNT(*) AS SUB_COUNT " +
+                    " FROM " +
+                    "   AM_SUBSCRIPTION SUBS, AM_APPLICATION APP,AM_API API " +
+                    " WHERE SUBS.SUBS_CREATE_STATE ='" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'" +
+                    "   AND SUBS.APPLICATION_ID = APP.APPLICATION_ID" +
+                    "   AND API.API_ID = SUBS.API_ID" +
+                    "   AND API.SUB_VALIDATION = 'ENABLED'" +
+                    "   AND APP.APPLICATION_ID = ?";
+
     public static final String GET_SUBSCRIPTION_COUNT_CASE_INSENSITIVE_SQL =
             " SELECT COUNT(*) AS SUB_COUNT " +
             " FROM " +
@@ -551,6 +568,39 @@ public class SQLConstants {
                     "   AND API.API_ID=SUBS.API_ID " +
                     "   AND APP.APPLICATION_ID = ? " +
                     "   AND API.ORGANIZATION = ?"+
+                    "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'" +
+                    " ORDER BY API_NAME ASC";
+
+    /**
+     * DEPRECATED cross organization subscription visibility variant of
+     * {@link #GET_PAGINATED_SUBSCRIBED_APIS_BY_APP_ID_SQL}. Identical apart from the omitted
+     * {@code API.ORGANIZATION = ?} filter, so an application's subscriptions to APIs owned by any organization are
+     * returned (pre 4.1.0 behaviour). Used only when
+     * {@code APIStore.EnableDeprecatedCrossTenantSubscriptionVisibility} is enabled.
+     */
+    public static final String GET_PAGINATED_SUBSCRIBED_APIS_BY_APP_ID_ALL_ORGANIZATIONS_SQL =
+            " SELECT " +
+                    "   SUBS.SUBSCRIPTION_ID, " +
+                    "   API.API_PROVIDER AS API_PROVIDER, " +
+                    "   API.API_UUID AS API_UUID, " +
+                    "   API.API_NAME AS API_NAME, " +
+                    "   API.API_TYPE AS TYPE, " +
+                    "   API.API_VERSION AS API_VERSION, " +
+                    "   SUBS.TIER_ID AS TIER_ID, " +
+                    "   SUBS.TIER_ID_PENDING AS TIER_ID_PENDING, " +
+                    "   APP.APPLICATION_ID AS APP_ID, " +
+                    "   SUBS.SUB_STATUS AS SUB_STATUS, " +
+                    "   SUBS.UUID AS SUB_UUID, " +
+                    "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
+                    "   APP.NAME AS APP_NAME " +
+                    " FROM " +
+                    "   AM_APPLICATION APP, " +
+                    "   AM_SUBSCRIPTION SUBS, " +
+                    "   AM_API API " +
+                    " WHERE " +
+                    "   APP.APPLICATION_ID=SUBS.APPLICATION_ID " +
+                    "   AND API.API_ID=SUBS.API_ID " +
+                    "   AND APP.APPLICATION_ID = ? " +
                     "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'" +
                     " ORDER BY API_NAME ASC";
 
