@@ -1068,6 +1068,10 @@ public class APIControllerUtil {
             cert.setAlias(alias);
             cert.setTierName(certObject.get(ImportExportConstants.CERTIFICATE_TIER_NAME_PROPERTY).getAsString());
             String certName = certObject.get(ImportExportConstants.CERTIFICATE_PATH_PROPERTY).getAsString();
+            if (certName != null && (certName.contains("/") || certName.contains("\\") || certName.contains(".."))) {
+                // cert path must be a bare filename inside the archive cert dir
+                throw new APIManagementException("Invalid certificate path (must be a bare filename): " + certName);
+            }
             cert.setCertificate(certName);
 
             String clientCertificatesDirectory;

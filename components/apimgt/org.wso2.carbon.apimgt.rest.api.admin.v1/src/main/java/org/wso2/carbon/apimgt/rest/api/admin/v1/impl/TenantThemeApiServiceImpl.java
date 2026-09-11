@@ -98,14 +98,16 @@ public class TenantThemeApiServiceImpl implements TenantThemeApiService {
         InputStream tenantTheme = apiAdmin.getTenantTheme(tenantId);
         String tempPath =
                 System.getProperty(RestApiConstants.JAVA_IO_TMPDIR) + File.separator + TENANT_THEMES_EXPORT_DIR_PREFIX;
-        String tempFile = tenantDomain + APIConstants.ZIP_FILE_EXTENSION;
-        File tenantThemeArchive = new File(tempPath, tempFile);
-
         try {
+            // random (non-predictable) temp file name + auto-cleanup (CWE-377/459).
+            new File(tempPath).mkdirs();
+            File tenantThemeArchive = File.createTempFile(tenantDomain + "-", APIConstants.ZIP_FILE_EXTENSION,
+                    new File(tempPath));
+            tenantThemeArchive.deleteOnExit();
             FileUtils.copyInputStreamToFile(tenantTheme, tenantThemeArchive);
             return Response.ok(tenantThemeArchive, MediaType.APPLICATION_OCTET_STREAM)
-                    .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\""
-                            + tenantThemeArchive.getName() + "\"").build();
+                    .header(RestApiConstants.HEADER_COdNTENT_DISPOSITION, "attachment; filename=\""
+                            + tenantDomain + APIConstants.ZIP_FILE_EXTENSION + "\"").build();
         } catch (IOException e) {
             throw new APIManagementException(e.getMessage(), e,
                     ExceptionCodes.from(ExceptionCodes.TENANT_THEME_EXPORT_FAILED, tenantDomain, e.getMessage()));
