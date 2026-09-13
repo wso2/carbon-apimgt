@@ -917,14 +917,18 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
             throws APIMGovernanceException {
         Set<String> artifactRefIds = new HashSet<>();
         try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
-            if (GovernancePolicyMgtDAOImpl.isComplianceAffectingSeverityColumnPresent(connection)) {
+            boolean severityAware = GovernancePolicyMgtDAOImpl.isPerPolicySeverityFilteringEnabled();
+            if (severityAware) {
                 try (PreparedStatement prepStmnt = connection
                         .prepareStatement(SQLConstants.GET_NON_COMPLIANT_ARTIFACTS_WITH_SEVERITY)) {
                     prepStmnt.setString(1, String.valueOf(artifactType));
                     prepStmnt.setString(2, organization);
                     collectSeverityAware(prepStmnt, "ARTIFACT_REF_ID", artifactRefIds);
+                } catch (SQLException e) {
+                    severityAware = fallBackToEverySeverity(e, artifactRefIds);
                 }
-            } else {
+            }
+            if (!severityAware) {
                 try (PreparedStatement prepStmnt = connection
                         .prepareStatement(SQLConstants.GET_NON_COMPLIANT_ARTIFACTS)) {
                     prepStmnt.setString(1, String.valueOf(artifactType));
@@ -977,13 +981,17 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
         Set<String> rulesetIds = new HashSet<>();
         try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
             // Each branch passes a constant query, so the statements stay compile time constants
-            if (GovernancePolicyMgtDAOImpl.isComplianceAffectingSeverityColumnPresent(connection)) {
+            boolean severityAware = GovernancePolicyMgtDAOImpl.isPerPolicySeverityFilteringEnabled();
+            if (severityAware) {
                 try (PreparedStatement prepStmnt = connection
                         .prepareStatement(SQLConstants.GET_FAILED_RULESET_RUNS_WITH_SEVERITY)) {
                     prepStmnt.setString(1, organization);
                     collectSeverityAware(prepStmnt, "RULESET_ID", rulesetIds);
+                } catch (SQLException e) {
+                    severityAware = fallBackToEverySeverity(e, rulesetIds);
                 }
-            } else {
+            }
+            if (!severityAware) {
                 try (PreparedStatement prepStmnt = connection
                         .prepareStatement(SQLConstants.GET_FAILED_RULESET_RUNS)) {
                     prepStmnt.setString(1, organization);
@@ -1011,15 +1019,19 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                                                        String organization) throws APIMGovernanceException {
         Set<String> rulesetIds = new HashSet<>();
         try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
-            if (GovernancePolicyMgtDAOImpl.isComplianceAffectingSeverityColumnPresent(connection)) {
+            boolean severityAware = GovernancePolicyMgtDAOImpl.isPerPolicySeverityFilteringEnabled();
+            if (severityAware) {
                 try (PreparedStatement prepStmnt = connection
                         .prepareStatement(SQLConstants.GET_FAILED_RULESET_RUNS_FOR_ARTIFACT_WITH_SEVERITY)) {
                     prepStmnt.setString(1, artifactRefId);
                     prepStmnt.setString(2, String.valueOf(artifactType));
                     prepStmnt.setString(3, organization);
                     collectSeverityAware(prepStmnt, "RULESET_ID", rulesetIds);
+                } catch (SQLException e) {
+                    severityAware = fallBackToEverySeverity(e, rulesetIds);
                 }
-            } else {
+            }
+            if (!severityAware) {
                 try (PreparedStatement prepStmnt = connection
                         .prepareStatement(SQLConstants.GET_FAILED_RULESET_RUNS_FOR_ARTIFACT)) {
                     prepStmnt.setString(1, artifactRefId);
@@ -1203,6 +1215,31 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
      * @param collected Set the values are added to
      * @throws SQLException If the query fails
      */
+    /**
+     * Decide whether a failed severity aware query should be answered by its legacy counterpart
+     * <p>
+     * The legacy query is the every severity answer already: it counts a ruleset run as failed without consulting
+     * the policy's severities, which is exactly what the configuration documents should happen while the optional
+     * column is missing. So the missing column is not a broken deployment here, it is the state the legacy query
+     * was written for, and falling back to it keeps the compliance screens rendering through a rollout.
+     * <p>
+     * Nothing asked the schema in advance. The severity aware query was issued and its failure classified, so a
+     * deadlock or a denied permission is rethrown and reaches the caller rather than quietly widening what counts.
+     *
+     * @param e         Failure from the severity aware query
+     * @param collected Values gathered so far, discarded before the legacy query runs
+     * @return False when the legacy query should run, which reads as no longer severity aware
+     * @throws SQLException When the failure is not a missing column, and is therefore a real fault
+     */
+    private boolean fallBackToEverySeverity(SQLException e, Set<String> collected) throws SQLException {
+
+        if (!GovernancePolicyMgtDAOImpl.severityColumnMissing(e)) {
+            throw e;
+        }
+        collected.clear();
+        return false;
+    }
+
     private void collectSeverityAware(PreparedStatement prepStmnt, String column, Set<String> collected)
             throws SQLException {
 

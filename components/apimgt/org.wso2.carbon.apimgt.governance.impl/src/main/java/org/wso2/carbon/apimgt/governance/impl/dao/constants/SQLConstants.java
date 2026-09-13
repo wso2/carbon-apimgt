@@ -100,6 +100,17 @@ public class SQLConstants {
                     "ORGANIZATION, CREATED_BY, IS_GLOBAL, CREATED_TIME) " +
                     "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
+    /**
+     * Insert which also carries the optional compliance affecting severity column, so a policy and the severities
+     * it is judged on are written by one statement inside one transaction. Used only when per policy severity
+     * filtering is enabled in the configuration and the request actually asked for a severity selection; a policy
+     * created without one runs the plain insert above and never names the column.
+     */
+    public static final String CREATE_POLICY_WITH_SEVERITIES =
+            "INSERT INTO GOV_POLICY (POLICY_ID, NAME, DESCRIPTION, " +
+                    "ORGANIZATION, CREATED_BY, IS_GLOBAL, CREATED_TIME, COMPLIANCE_AFFECTING_SEVERITIES) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
     public static final String CREATE_POLICY_RULESET_MAPPING =
             "INSERT INTO GOV_POLICY_RULESET (POLICY_ID, RULESET_ID) VALUES (?, ?)";
 
@@ -154,6 +165,17 @@ public class SQLConstants {
     public static final String UPDATE_POLICY =
             "UPDATE GOV_POLICY SET NAME = ?, DESCRIPTION = ?, UPDATED_BY = ?, IS_GLOBAL = ?, " +
                     "LAST_UPDATED_TIME = ? " +
+                    "WHERE POLICY_ID = ? AND ORGANIZATION = ?";
+
+    /**
+     * Update which also carries the optional compliance affecting severity column. Used only when per policy
+     * severity filtering is enabled in the configuration and the request sent the field; leaving the field out of a
+     * request runs the plain update above, which is what makes an absent field preserve the stored value while a
+     * blank one clears it.
+     */
+    public static final String UPDATE_POLICY_WITH_SEVERITIES =
+            "UPDATE GOV_POLICY SET NAME = ?, DESCRIPTION = ?, UPDATED_BY = ?, IS_GLOBAL = ?, " +
+                    "LAST_UPDATED_TIME = ?, COMPLIANCE_AFFECTING_SEVERITIES = ? " +
                     "WHERE POLICY_ID = ? AND ORGANIZATION = ?";
 
     public static final String GET_RULESET_IDS_BY_POLICY_ID =
@@ -354,7 +376,9 @@ public class SQLConstants {
 
     /**
      * Name of the optional column holding the severities that affect compliance for a policy. The column is not
-     * created by the product; a deployment opts in to per-policy severity filtering by adding it.
+     * created by the product; a deployment opts in to per-policy severity filtering by adding it. Nothing probes
+     * for it: the configuration alone decides which statements name it, and a missing column surfaces as a failed
+     * statement rather than as a silently disabled feature.
      */
     public static final String COMPLIANCE_AFFECTING_SEVERITIES_COLUMN = "COMPLIANCE_AFFECTING_SEVERITIES";
 
@@ -370,12 +394,9 @@ public class SQLConstants {
     public static final String GET_POLICY_COMPLIANCE_AFFECTING_SEVERITIES_BY_ORGANIZATION = "SELECT POLICY_ID, "
             + "COMPLIANCE_AFFECTING_SEVERITIES FROM GOV_POLICY WHERE ORGANIZATION = ?";
 
-    public static final String UPDATE_POLICY_COMPLIANCE_AFFECTING_SEVERITIES = "UPDATE GOV_POLICY "
-            + "SET COMPLIANCE_AFFECTING_SEVERITIES = ? WHERE POLICY_ID = ? AND ORGANIZATION = ?";
-
     /**
-     * Policy aware variants of the failing ruleset and non compliant artifact queries, used only when the optional
-     * compliance affecting severity column exists on GOV_POLICY. Each returns the violated severity alongside the
+     * Policy aware variants of the failing ruleset and non compliant artifact queries, used only when per policy
+     * severity filtering is enabled in the configuration. Each returns the violated severity alongside the
      * severities configured for the policy the ruleset was run under, so the comparison happens in Java. Matching a
      * severity against a comma separated column in SQL would need vendor specific string functions, which these
      * queries deliberately avoid.

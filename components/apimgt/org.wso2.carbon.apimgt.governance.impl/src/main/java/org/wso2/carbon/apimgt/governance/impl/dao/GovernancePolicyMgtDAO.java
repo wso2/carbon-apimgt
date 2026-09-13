@@ -187,43 +187,21 @@ public interface GovernancePolicyMgtDAO {
      *
      * @param policyId     Policy ID
      * @param organization Organization
-     * @return Comma separated severities, null when none are configured or the optional column does not exist
+     * @return Comma separated severities, null when none are configured or the feature is not enabled
      * @throws APIMGovernanceException If the severities cannot be read
      */
     String getComplianceAffectingSeverities(String policyId, String organization) throws APIMGovernanceException;
 
     /**
-     * Update the compliance affecting severities of a policy
-     *
-     * @param policyId     Policy ID
-     * @param organization Organization
-     * @param severities   Comma separated severities, null to clear the setting
-     * @throws APIMGovernanceException If the severities cannot be stored
-     */
-    void updateComplianceAffectingSeverities(String policyId, String organization, String severities)
-            throws APIMGovernanceException;
-
-    /**
      * Check whether per policy compliance affecting severity filtering is enabled in the configuration.
      * <p>
-     * This reflects the configuration only. The optional GOV_POLICY column must also exist before a severity can be
-     * stored, which is reported when a value is saved rather than here.
+     * This is the only switch the code consults. The optional GOV_POLICY column is an operator prerequisite which
+     * is trusted rather than verified: with the configuration on and the column absent, the statements which name
+     * it fail, and a write says which ALTER TABLE to run.
      *
      * @return True when the configuration enables the feature
      */
     boolean isComplianceAffectingSeverityFilteringEnabled();
-
-    /**
-     * Check whether a compliance affecting severity can actually be stored against a policy.
-     * <p>
-     * This reports both halves of the opt in: the configuration and the optional GOV_POLICY column. It exists so a
-     * caller can find out before writing anything else, rather than discovering it when the severity write is
-     * rejected after the policy has already been committed.
-     *
-     * @return True when a severity can be stored
-     * @throws APIMGovernanceException If the schema cannot be inspected
-     */
-    boolean isComplianceAffectingSeverityStorageAvailable() throws APIMGovernanceException;
 
     /**
      * Get the compliance affecting severities of every policy in an organization
@@ -232,7 +210,7 @@ public interface GovernancePolicyMgtDAO {
      * absent from the map rather than mapped to null.
      *
      * @param organization Organization
-     * @return Policy ID to comma separated severities, empty when the optional column does not exist
+     * @return Policy ID to comma separated severities, empty when the feature is not enabled
      * @throws APIMGovernanceException If the severities cannot be read
      */
     Map<String, String> getComplianceAffectingSeverities(String organization) throws APIMGovernanceException;

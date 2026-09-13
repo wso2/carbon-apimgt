@@ -68,8 +68,11 @@ public class PolicySeverityQueryTest {
             statement.execute("CREATE TABLE GOV_ARTIFACT (ARTIFACT_KEY VARCHAR(36) NOT NULL, "
                     + "ARTIFACT_REF_ID VARCHAR(36) NOT NULL, ARTIFACT_TYPE VARCHAR(32) NOT NULL, "
                     + "ORGANIZATION VARCHAR(128) NOT NULL)");
+            // Every column the severity aware update names, because that statement is one of the things under
+            // test here and it writes the rest of the policy alongside the severity.
             statement.execute("CREATE TABLE GOV_POLICY (POLICY_ID VARCHAR(36) NOT NULL, NAME VARCHAR(256) NOT NULL, "
-                    + "ORGANIZATION VARCHAR(128) NOT NULL, "
+                    + "DESCRIPTION VARCHAR(1024), ORGANIZATION VARCHAR(128) NOT NULL, UPDATED_BY VARCHAR(128), "
+                    + "LAST_UPDATED_TIME TIMESTAMP, IS_GLOBAL INT, "
                     + SQLConstants.COMPLIANCE_AFFECTING_SEVERITIES_COLUMN + " VARCHAR(64))");
             statement.execute("CREATE TABLE GOV_POLICY_RUN (ARTIFACT_KEY VARCHAR(36) NOT NULL, "
                     + "POLICY_ID VARCHAR(36) NOT NULL)");
@@ -86,8 +89,10 @@ public class PolicySeverityQueryTest {
 
             statement.execute("INSERT INTO GOV_ARTIFACT VALUES ('" + ARTIFACT_KEY + "', '" + ARTIFACT_REF_ID
                     + "', '" + API + "', '" + ORGANIZATION + "')");
-            statement.execute("INSERT INTO GOV_POLICY VALUES ('" + POLICY_ID + "', 'Severity Test Policy', '"
-                    + ORGANIZATION + "', " + (policySeverities == null ? "NULL" : "'" + policySeverities + "'") + ")");
+            statement.execute("INSERT INTO GOV_POLICY (POLICY_ID, NAME, ORGANIZATION, "
+                    + SQLConstants.COMPLIANCE_AFFECTING_SEVERITIES_COLUMN + ") VALUES ('" + POLICY_ID
+                    + "', 'Severity Test Policy', '" + ORGANIZATION + "', "
+                    + (policySeverities == null ? "NULL" : "'" + policySeverities + "'") + ")");
             statement.execute("INSERT INTO GOV_POLICY_RUN VALUES ('" + ARTIFACT_KEY + "', '" + POLICY_ID + "')");
             statement.execute("INSERT INTO GOV_POLICY_RULESET VALUES ('" + POLICY_ID + "', '" + RULESET_ID + "')");
             // The stored flag says the run was not completely clean, which is what the old queries keyed off
@@ -221,8 +226,10 @@ public class PolicySeverityQueryTest {
     private void addGoverningPolicy(Connection connection, String policyId, String severities) throws Exception {
 
         try (Statement statement = connection.createStatement()) {
-            statement.execute("INSERT INTO GOV_POLICY VALUES ('" + policyId + "', 'Second Policy', '"
-                    + ORGANIZATION + "', " + (severities == null ? "NULL" : "'" + severities + "'") + ")");
+            statement.execute("INSERT INTO GOV_POLICY (POLICY_ID, NAME, ORGANIZATION, "
+                    + SQLConstants.COMPLIANCE_AFFECTING_SEVERITIES_COLUMN + ") VALUES ('" + policyId
+                    + "', 'Second Policy', '" + ORGANIZATION + "', "
+                    + (severities == null ? "NULL" : "'" + severities + "'") + ")");
             statement.execute("INSERT INTO GOV_POLICY_RUN VALUES ('" + ARTIFACT_KEY + "', '" + policyId + "')");
             statement.execute("INSERT INTO GOV_POLICY_RULESET VALUES ('" + policyId + "', '" + RULESET_ID + "')");
         }
@@ -310,14 +317,8 @@ public class PolicySeverityQueryTest {
         // Both statements are scoped by organization as well as policy id, so a policy id colliding across
         // tenants cannot be written or read across the boundary.
         try (Connection connection = database("store_other_org", null)) {
-            try (PreparedStatement prepStmnt = connection
-                    .prepareStatement(SQLConstants.UPDATE_POLICY_COMPLIANCE_AFFECTING_SEVERITIES)) {
-                prepStmnt.setString(1, "ERROR");
-                prepStmnt.setString(2, POLICY_ID);
-                prepStmnt.setString(3, "another.org");
-                Assert.assertEquals("A write scoped to another organization must not match this policy",
-                        0, prepStmnt.executeUpdate());
-            }
+            Assert.assertEquals("A write scoped to another organization must not match this policy",
+                    0, writeSeverities(connection, POLICY_ID, "another.org", "ERROR"));
 
             Assert.assertNull("The policy must be untouched by a write for another organization",
                     read(connection, POLICY_ID));
@@ -326,6 +327,10 @@ public class PolicySeverityQueryTest {
 
     /**
      * Store a severity selection against a policy through the statement the DAO uses
+     * <p>
+     * The severity is written by the same statement as the rest of the policy, so this exercises the parameter
+     * order of that statement as well as the value that lands in the column. Getting the order wrong would write
+     * a severity into the name.
      *
      * @param connection Connection to the prepared database
      * @param policyId   Policy to write to
@@ -334,13 +339,34 @@ public class PolicySeverityQueryTest {
      */
     private void store(Connection connection, String policyId, String severities) throws Exception {
 
+        Assert.assertEquals("The write must match exactly the policy it was aimed at",
+                1, writeSeverities(connection, policyId, ORGANIZATION, severities));
+    }
+
+    /**
+     * Run the severity aware policy update and report how many rows it matched
+     *
+     * @param connection   Connection to the prepared database
+     * @param policyId     Policy to write to
+     * @param organization Organization to scope the write to
+     * @param severities   Comma separated severities, null to clear the setting
+     * @return Number of rows the statement matched
+     * @throws Exception If the write fails
+     */
+    private int writeSeverities(Connection connection, String policyId, String organization, String severities)
+            throws Exception {
+
         try (PreparedStatement prepStmnt = connection
-                .prepareStatement(SQLConstants.UPDATE_POLICY_COMPLIANCE_AFFECTING_SEVERITIES)) {
-            prepStmnt.setString(1, severities);
-            prepStmnt.setString(2, policyId);
-            prepStmnt.setString(3, ORGANIZATION);
-            Assert.assertEquals("The write must match exactly the policy it was aimed at",
-                    1, prepStmnt.executeUpdate());
+                .prepareStatement(SQLConstants.UPDATE_POLICY_WITH_SEVERITIES)) {
+            prepStmnt.setString(1, "Severity Test Policy");
+            prepStmnt.setString(2, "Written by PolicySeverityQueryTest");
+            prepStmnt.setString(3, "admin");
+            prepStmnt.setInt(4, 0);
+            prepStmnt.setTimestamp(5, new java.sql.Timestamp(System.currentTimeMillis()));
+            prepStmnt.setString(6, severities);
+            prepStmnt.setString(7, policyId);
+            prepStmnt.setString(8, organization);
+            return prepStmnt.executeUpdate();
         }
     }
 

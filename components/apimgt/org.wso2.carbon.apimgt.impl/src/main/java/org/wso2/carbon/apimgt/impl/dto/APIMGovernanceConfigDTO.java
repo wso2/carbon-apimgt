@@ -30,8 +30,9 @@ public class APIMGovernanceConfigDTO {
     private int schedulerTaskCleanupInterval;
 
     /**
-     * Whether per policy compliance affecting severity filtering may be used. Defaults to false, so a deployment
-     * has to opt in before the optional GOV_RULESET column is even looked for.
+     * Whether per policy compliance affecting severity filtering may be used. Defaults to false, so no statement
+     * names the optional GOV_POLICY.COMPLIANCE_AFFECTING_SEVERITIES column until a deployment opts in. Turning it
+     * on asserts that the column has been added; nothing verifies that.
      */
     private boolean perPolicySeverityFilteringEnabled;
 
