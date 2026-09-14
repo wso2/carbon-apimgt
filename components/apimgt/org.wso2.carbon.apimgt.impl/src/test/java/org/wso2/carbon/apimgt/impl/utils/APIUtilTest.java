@@ -352,6 +352,58 @@ public class APIUtilTest {
     }
 
     @Test
+    public void testIsSandboxEndpointsWithNullEndpointType() throws Exception {
+
+        // Regression test for GitHub issue #5213:
+        // When endpoint_type is absent (null), calling .toString() on it must not throw NPE.
+        JSONObject root = new JSONObject();
+        root.put("endpoint_type", null);
+
+        Assert.assertFalse("isSandboxEndpointsExists must return false when endpoint_type is null",
+                APIUtil.isSandboxEndpointsExists(root.toJSONString()));
+    }
+
+    @Test
+    public void testIsSandboxEndpointsGraphqlWithNullHttpConfig() throws Exception {
+
+        // Regression test for GitHub issue #5213:
+        // When endpoint_type is graphql but the http config is absent (null),
+        // calling .toString() on it must not throw NPE.
+        JSONObject root = new JSONObject();
+        root.put("endpoint_type", "graphql");
+        root.put("http", null);
+
+        Assert.assertFalse("isSandboxEndpointsExists must return false when graphql http config is null",
+                APIUtil.isSandboxEndpointsExists(root.toJSONString()));
+    }
+
+    @Test
+    public void testIsProductionEndpointsWithNullEndpointType() throws Exception {
+
+        // Regression test for GitHub issue #5213:
+        // When endpoint_type is absent (null), calling .toString() on it must not throw NPE.
+        JSONObject root = new JSONObject();
+        root.put("endpoint_type", null);
+
+        Assert.assertFalse("isProductionEndpointsExists must return false when endpoint_type is null",
+                APIUtil.isProductionEndpointsExists(root.toJSONString()));
+    }
+
+    @Test
+    public void testIsProductionEndpointsGraphqlWithNullHttpConfig() throws Exception {
+
+        // Regression test for GitHub issue #5213:
+        // When endpoint_type is graphql but the http config is absent (null),
+        // calling .toString() on it must not throw NPE.
+        JSONObject root = new JSONObject();
+        root.put("endpoint_type", "graphql");
+        root.put("http", null);
+
+        Assert.assertFalse("isProductionEndpointsExists must return false when graphql http config is null",
+                APIUtil.isProductionEndpointsExists(root.toJSONString()));
+    }
+
+    @Test
     public void testIsProductionEndpointsInvalidJSON() throws Exception {
 
         Log log = Mockito.mock(Log.class);
