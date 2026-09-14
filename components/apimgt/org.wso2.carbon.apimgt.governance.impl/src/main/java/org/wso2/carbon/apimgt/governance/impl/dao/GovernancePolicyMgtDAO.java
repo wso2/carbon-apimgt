@@ -181,6 +181,39 @@ public interface GovernancePolicyMgtDAO {
      * @throws APIMGovernanceException If an error occurs while deleting the mappings
      */
     void deleteLabelPolicyMappings(String label) throws APIMGovernanceException;
+
+    /**
+     * Get the compliance affecting severities configured for a policy
+     *
+     * @param policyId     Policy ID
+     * @param organization Organization
+     * @return Comma separated severities, null when none are configured or the feature is not enabled
+     * @throws APIMGovernanceException If the severities cannot be read
+     */
+    String getComplianceAffectingSeverities(String policyId, String organization) throws APIMGovernanceException;
+
+    /**
+     * Check whether per policy compliance affecting severity filtering is enabled in the configuration.
+     * <p>
+     * This is the only switch the code consults. The optional GOV_POLICY column is an operator prerequisite which
+     * is trusted rather than verified: with the configuration on and the column absent, the statements which name
+     * it fail, and a write says which ALTER TABLE to run.
+     *
+     * @return True when the configuration enables the feature
+     */
+    boolean isComplianceAffectingSeverityFilteringEnabled();
+
+    /**
+     * Get the compliance affecting severities of every policy in an organization
+     * <p>
+     * Used by listings, which would otherwise issue one query per policy. Policies with nothing configured are
+     * absent from the map rather than mapped to null.
+     *
+     * @param organization Organization
+     * @return Policy ID to comma separated severities, empty when the feature is not enabled
+     * @throws APIMGovernanceException If the severities cannot be read
+     */
+    Map<String, String> getComplianceAffectingSeverities(String organization) throws APIMGovernanceException;
 }
 
 
