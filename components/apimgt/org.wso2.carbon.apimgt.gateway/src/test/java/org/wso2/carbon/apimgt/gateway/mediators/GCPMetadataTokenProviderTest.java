@@ -17,22 +17,68 @@
  */
 package org.wso2.carbon.apimgt.gateway.mediators;
 
+import com.sun.net.httpserver.HttpServer;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.json.JSONObject;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
+
 /**
- * Unit tests for {@link GCPMetadataTokenProvider} focused on the metadata token-URL construction - the
- * comma-separated {@code scopes} query parameter (as the GCE metadata server expects, unlike the
- * space-separated JWT-bearer form) and the {@code GCE_METADATA_HOST} host override.
+ * Unit tests for {@link GCPMetadataTokenProvider}: the metadata token-URL construction - the comma-separated
+ * {@code scopes} query parameter (as the GCE metadata server expects, unlike the space-separated JWT-bearer
+ * form) and the {@code GCE_METADATA_HOST} host override - and the metadata fetch itself over the shared HTTP
+ * client, including the {@code Metadata-Flavor: Google} anti-spoof response check.
  * <p>
  * The scope tests use the host-explicit {@code buildTokenUrl(scope, host)} overload so they are independent of
- * any {@code GCE_METADATA_HOST} set in the build environment.
+ * any {@code GCE_METADATA_HOST} set in the build environment. The fetch tests stub the metadata server with a
+ * local {@link HttpServer} and override the URL/HTTP-client seams to reach it.
  */
 public class GCPMetadataTokenProviderTest {
 
     private static final String DEFAULT_HOST = "metadata.google.internal";
     private static final String BASE_URL =
             "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token";
+    private static final String SCOPE = "https://www.googleapis.com/auth/cloud-platform";
+
+    private HttpServer server;
+    private String tokenUrl;
+    private volatile int responseStatus;
+    private volatile String responseBody;
+    private volatile boolean sendMetadataFlavor;
+
+    @Before
+    public void startStubServer() throws Exception {
+
+        server = HttpServer.create(new InetSocketAddress("localhost", 0), 0);
+        server.createContext("/token", exchange -> {
+            if (sendMetadataFlavor) {
+                exchange.getResponseHeaders().add("Metadata-Flavor", "Google");
+            }
+            byte[] out = responseBody.getBytes(StandardCharsets.UTF_8);
+            exchange.sendResponseHeaders(responseStatus, out.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(out);
+            }
+        });
+        server.start();
+        tokenUrl = "http://localhost:" + server.getAddress().getPort() + "/token";
+    }
+
+    @After
+    public void stopStubServer() {
+
+        if (server != null) {
+            server.stop(0);
+        }
+    }
 
     @Test
     public void testNoScopeOmitsScopesParameter() {
@@ -96,6 +142,79 @@ public class GCPMetadataTokenProviderTest {
         // unit test since the JVM cannot set its own environment).
         if (System.getenv(GCPMetadataTokenProvider.GCE_METADATA_HOST_ENV_VAR) == null) {
             Assert.assertEquals(DEFAULT_HOST, GCPMetadataTokenProvider.resolveMetadataHost());
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Metadata fetch (over the shared HTTP client)
+    // -------------------------------------------------------------------------
+
+    @Test
+    public void testFetchReturnsTokenWhenMetadataFlavorPresent() throws Exception {
+
+        responseStatus = 200;
+        responseBody = new JSONObject().put("access_token", "meta-token").put("expires_in", 3600).toString();
+        sendMetadataFlavor = true;
+
+        Assert.assertEquals("meta-token", new TestMetadataProvider(SCOPE, tokenUrl).getAccessToken());
+    }
+
+    @Test
+    public void testFetchRejectsResponseMissingMetadataFlavor() {
+
+        // A response without "Metadata-Flavor: Google" may come from an impersonated endpoint; it must be refused
+        // even when it carries a plausible token body.
+        responseStatus = 200;
+        responseBody = new JSONObject().put("access_token", "meta-token").put("expires_in", 3600).toString();
+        sendMetadataFlavor = false;
+
+        try {
+            new TestMetadataProvider(SCOPE, tokenUrl).getAccessToken();
+            Assert.fail("Expected an IOException when the Metadata-Flavor header is absent");
+        } catch (IOException e) {
+            Assert.assertTrue("Message should mention the missing header: " + e.getMessage(),
+                    e.getMessage().contains("Metadata-Flavor"));
+        }
+    }
+
+    @Test
+    public void testFetchThrowsOnErrorStatus() {
+
+        responseStatus = 500;
+        responseBody = "metadata server error";
+        sendMetadataFlavor = true;
+
+        try {
+            new TestMetadataProvider(SCOPE, tokenUrl).getAccessToken();
+            Assert.fail("Expected an IOException for a non-2xx metadata response");
+        } catch (IOException e) {
+            Assert.assertTrue("Message should carry the HTTP status: " + e.getMessage(),
+                    e.getMessage().contains("500"));
+        }
+    }
+
+    /**
+     * Provider variant pointed at the loopback stub: the URL seam returns the stub URL (instead of the real
+     * metadata host, which is not set via {@code GCE_METADATA_HOST} in a unit test) and the HTTP client is a
+     * plain {@link CloseableHttpClient} rather than the gateway's shared client.
+     */
+    private static final class TestMetadataProvider extends GCPMetadataTokenProvider {
+
+        private final String stubUrl;
+
+        TestMetadataProvider(String scope, String stubUrl) {
+            super(scope);
+            this.stubUrl = stubUrl;
+        }
+
+        @Override
+        String resolveTokenUrl() {
+            return stubUrl;
+        }
+
+        @Override
+        protected CloseableHttpClient getHttpClient(int port, String protocol) {
+            return HttpClients.createDefault();
         }
     }
 }
