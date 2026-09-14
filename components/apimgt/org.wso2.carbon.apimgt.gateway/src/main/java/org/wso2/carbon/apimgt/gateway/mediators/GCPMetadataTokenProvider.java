@@ -20,11 +20,17 @@ package org.wso2.carbon.apimgt.gateway.mediators;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.Header;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -70,42 +76,68 @@ public class GCPMetadataTokenProvider extends GCPAccessTokenProvider {
     @Override
     protected JSONObject fetchToken() throws IOException {
 
-        // The metadata call is never routed through a proxy: 169.254.169.254 is a link-local address that is
-        // not routable and only reachable directly on the GCP VM.
-        String tokenUrl = buildTokenUrl(scope);
+        // Fetched over the shared API Manager HTTP client (the same client the service-account token exchange
+        // uses), so this path is not a bespoke HTTP stack. The metadata host is link-local and must NOT be
+        // routed through a proxy: operators running the gateway behind a proxy must add the metadata host to
+        // non_proxy_hosts so the shared client bypasses the proxy for this request.
+        String tokenUrl = resolveTokenUrl();
         if (log.isDebugEnabled()) {
             // Safe to log: the URL carries only the host (shows a GCE_METADATA_HOST override) and scope names,
             // no secret. The minted token/response is never logged.
             log.debug("Fetching GCP access token (keyless) from the metadata endpoint: " + tokenUrl);
         }
-        HttpURLConnection connection = (HttpURLConnection) new URL(tokenUrl).openConnection();
-        try {
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty(METADATA_FLAVOR_HEADER, METADATA_FLAVOR_VALUE);
-            connection.setRequestProperty("Accept", "application/json");
-            connection.setConnectTimeout(CONNECT_TIMEOUT_MS);
-            connection.setReadTimeout(READ_TIMEOUT_MS);
-            int status = connection.getResponseCode();
-            boolean success = status >= HttpURLConnection.HTTP_OK && status < HttpURLConnection.HTTP_MULT_CHOICE;
-            InputStream stream = success ? connection.getInputStream() : connection.getErrorStream();
-            String response = (stream == null) ? "" : readAll(stream);
-            if (!success) {
-                throw new IOException("The GCP metadata server returned HTTP " + status + ": " + response
+        URL url = new URL(tokenUrl);
+        HttpGet httpGet = new HttpGet(tokenUrl);
+        httpGet.setHeader(METADATA_FLAVOR_HEADER, METADATA_FLAVOR_VALUE);
+        httpGet.setHeader("Accept", "application/json");
+        httpGet.setConfig(RequestConfig.custom()
+                .setConnectTimeout(CONNECT_TIMEOUT_MS)
+                .setConnectionRequestTimeout(CONNECT_TIMEOUT_MS)
+                .setSocketTimeout(READ_TIMEOUT_MS)
+                .build());
+        try (CloseableHttpClient httpClient = getHttpClient(url.getPort(), url.getProtocol());
+                CloseableHttpResponse response = httpClient.execute(httpGet)) {
+            int status = response.getStatusLine().getStatusCode();
+            String body = response.getEntity() == null ? ""
+                    : EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+            if (status < HttpStatus.SC_OK || status >= HttpStatus.SC_MULTIPLE_CHOICES) {
+                throw new IOException("The GCP metadata server returned HTTP " + status + ": " + body
                         + ". Ensure the gateway runs on GCP with a service account attached to the workload.");
             }
             // Verify the response carries the "Metadata-Flavor: Google" header, confirming the token came from
             // the real GCP metadata server and not another service answering on metadata.google.internal /
             // 169.254.169.254 (a spoofed local proxy, a poisoned hosts file, or an off-GCP host). This is the
             // check google-auth relies on before trusting the metadata endpoint.
-            if (!METADATA_FLAVOR_VALUE.equalsIgnoreCase(connection.getHeaderField(METADATA_FLAVOR_HEADER))) {
+            Header flavor = response.getFirstHeader(METADATA_FLAVOR_HEADER);
+            if (flavor == null || !METADATA_FLAVOR_VALUE.equalsIgnoreCase(flavor.getValue())) {
                 throw new IOException("The response from the GCP metadata server is missing the expected '"
                         + METADATA_FLAVOR_HEADER + ": " + METADATA_FLAVOR_VALUE + "' header; refusing to trust the "
                         + "token (the metadata endpoint may be impersonated).");
             }
-            return new JSONObject(response);
-        } finally {
-            connection.disconnect();
+            return new JSONObject(body);
         }
+    }
+
+    /**
+     * Supplies the HTTP client for the metadata call - the shared API Manager client, so that a gateway behind a
+     * proxy can make the link-local metadata host bypass the proxy via non_proxy_hosts. Overridable in tests to
+     * target a loopback endpoint without the gateway runtime.
+     */
+    protected CloseableHttpClient getHttpClient(int port, String protocol) {
+
+        return (CloseableHttpClient) APIUtil.getHttpClient(port, protocol);
+    }
+
+    /**
+     * Resolves the metadata token URL for this request (host from {@code GCE_METADATA_HOST} or the default).
+     * Package-private instance seam over the static builder so tests can point {@link #fetchToken()} at a
+     * loopback stub without setting the environment.
+     *
+     * @return the metadata token URL to fetch.
+     */
+    String resolveTokenUrl() {
+
+        return buildTokenUrl(scope);
     }
 
     /**
