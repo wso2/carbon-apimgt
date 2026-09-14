@@ -22,10 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 
 /**
  * Base for GCP OAuth2 access-token providers: owns the caching, proactive refresh and thread-safety, and
@@ -76,6 +73,17 @@ public abstract class GCPAccessTokenProvider {
     }
 
     /**
+     * Drops the cached token so the next {@link #getAccessToken()} mints a fresh one. Called reactively when the
+     * backend rejects the current token with HTTP 401 <em>before</em> its scheduled expiry (e.g. the credential was
+     * revoked mid-life) - the time-based cache alone would keep serving the dead token until the refresh window.
+     * This is the equivalent of the token-refresh step in google-auth's {@code HttpCredentialsAdapter} 401 handler.
+     */
+    public void invalidate() {
+
+        this.cached = null;
+    }
+
+    /**
      * Refreshes the cached token under the lock. Re-checks first so that if another thread refreshed while
      * this one was waiting for the lock, the token source is not contacted again.
      */
@@ -113,17 +121,6 @@ public abstract class GCPAccessTokenProvider {
      * @throws IOException if the request fails.
      */
     protected abstract JSONObject fetchToken() throws IOException;
-
-    protected static String readAll(InputStream stream) throws IOException {
-
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        byte[] chunk = new byte[1024];
-        int read;
-        while ((read = stream.read(chunk)) != -1) {
-            buffer.write(chunk, 0, read);
-        }
-        return new String(buffer.toByteArray(), StandardCharsets.UTF_8);
-    }
 
     /**
      * Immutable snapshot of the cached token and its expiry, published atomically via a single volatile
