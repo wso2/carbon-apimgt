@@ -33,7 +33,9 @@ import org.apache.synapse.SynapseException;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 /**
  * Injects a Google Cloud OAuth2 bearer token into outbound requests to Vertex AI backends.
@@ -62,6 +64,9 @@ public class GCPOAuth2Mediator extends AbstractMediator implements ManagedLifecy
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String BEARER = "Bearer ";
     private static final String DEFAULT_SCOPE = "https://www.googleapis.com/auth/cloud-platform";
+    // Carries the built token provider from this (request-flow) mediator to the response-flow
+    // GCPOAuth2ResponseMediator, so a backend 401 can invalidate the exact cached token that was injected.
+    public static final String GCP_TOKEN_PROVIDER_PROPERTY = "GCP_TOKEN_PROVIDER_INSTANCE";
 
     private String serviceAccountKey;
     private String scope;
@@ -87,6 +92,8 @@ public class GCPOAuth2Mediator extends AbstractMediator implements ManagedLifecy
             if (provider == null) {
                 provider = buildProvider();
             }
+            // Expose the provider so the response-flow mediator can invalidate this cached token on a backend 401.
+            messageContext.setProperty(GCP_TOKEN_PROVIDER_PROPERTY, provider);
             // getAccessToken() is synchronized inside the provider and only performs a network round-trip
             // to the token source (Google token endpoint or metadata server) when the cached token is
             // missing or near expiry.
@@ -129,8 +136,9 @@ public class GCPOAuth2Mediator extends AbstractMediator implements ManagedLifecy
             return tokenProvider;
         }
         byte[] keyBytes = reassembleServiceAccountKey(serviceAccountKey);
+        GCPServiceAccountTokenProvider provider;
         try (InputStream keyStream = new ByteArrayInputStream(keyBytes)) {
-            this.tokenProvider = new GCPServiceAccountTokenProvider(keyStream, appliedScope());
+            provider = new GCPServiceAccountTokenProvider(keyStream, appliedScope());
         } catch (IllegalArgumentException e) {
             throw new SynapseException("Error while initializing GCP service-account credentials for "
                     + "GCPOAuth2Mediator. Verify the service-account key JSON is valid.", e);
@@ -140,7 +148,44 @@ public class GCPOAuth2Mediator extends AbstractMediator implements ManagedLifecy
             // Wipe the plaintext key bytes as soon as the provider has parsed them.
             Arrays.fill(keyBytes, (byte) 0);
         }
+        // The token endpoint can come from the (user-supplied) key JSON, so gate it with the network
+        // access-control policy before the signed assertion is ever POSTed there - a hostile or mistyped
+        // token_uri must not redirect the assertion to an internal or attacker-chosen host. Cache the
+        // provider only after the endpoint has passed the policy.
+        validateTokenEndpoint(provider.getTokenUri());
+        this.tokenProvider = provider;
         return tokenProvider;
+    }
+
+    /**
+     * Gates the resolved token endpoint with the network access-control policy
+     * ({@link APIUtil#validateRemoteURL(String, String)}). The policy is off unless configured; when enabled it
+     * rejects hosts outside the allow-list and (optionally) private / link-local ranges, so a {@code token_uri}
+     * taken from a user-supplied key cannot be used to mount an SSRF against the gateway.
+     *
+     * @param tokenUri the resolved token endpoint the exchange would contact.
+     */
+    private void validateTokenEndpoint(String tokenUri) {
+
+        try {
+            validateRemoteUrl(tokenUri);
+        } catch (APIManagementException e) {
+            throw new SynapseException("The GCP token endpoint (" + tokenUri + ") is not permitted by the "
+                    + "network access-control policy.", e);
+        }
+    }
+
+    /**
+     * Seam over {@link APIUtil#validateRemoteURL(String, String)} - the network access-control policy check for
+     * the current tenant. Overridable (and it resolves the tenant itself) so unit tests can drive the mediator
+     * without the {@code PrivilegedCarbonContext} / tenant-config / caching runtime the real lookup requires.
+     *
+     * @param url the token endpoint to validate.
+     * @throws APIManagementException if the policy rejects the URL.
+     */
+    protected void validateRemoteUrl(String url) throws APIManagementException {
+
+        APIUtil.validateRemoteURL(url, GatewayUtils.getTenantDomain());
     }
 
     /**

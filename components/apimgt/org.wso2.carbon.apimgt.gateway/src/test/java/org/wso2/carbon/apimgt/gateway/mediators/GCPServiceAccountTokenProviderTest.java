@@ -48,10 +48,11 @@ import java.util.concurrent.atomic.AtomicReference;
  * service-account OAuth2 flow.
  * <p>
  * The token endpoint is stubbed with a local {@link HttpServer}; the tests construct the provider through
- * its package-private constructor to point the exchange at the loopback server. Production always uses the
- * fixed Google endpoint and ignores any {@code token_uri} in the key. This exercises the real RS256
- * JWT-bearer assertion building, signing and token exchange - the signature is verified against the
- * generated public key.
+ * its package-private constructor, whose third argument is the fallback endpoint used when the key omits
+ * {@code token_uri}. Matching the google-auth SDK, the provider honours a {@code token_uri} embedded in the
+ * key JSON and falls back to the fixed Google endpoint otherwise; the mediator gates the resolved endpoint
+ * with the network access-control policy. This exercises the real RS256 JWT-bearer assertion building,
+ * signing and token exchange - the signature is verified against the generated public key.
  */
 public class GCPServiceAccountTokenProviderTest {
 
@@ -201,21 +202,41 @@ public class GCPServiceAccountTokenProviderTest {
     }
 
     @Test
-    public void testTokenUriInKeyIsIgnored() throws Exception {
+    public void testTokenUriInKeyIsHonored() throws Exception {
 
         responseStatus = 200;
         responseBody = new JSONObject().put("access_token", "srv-token").put("expires_in", 3600).toString();
 
-        // The key carries a hostile token_uri; the provider must ignore it and post the signed assertion
-        // only to the endpoint it was constructed with - never to an attacker-chosen or internal host.
+        // Matching the google-auth SDK, a token_uri embedded in the key JSON is used for the exchange. Here the
+        // key points at the loopback stub while the constructor fallback is an unusable URL, proving the key's
+        // token_uri takes precedence. The mediator (not this provider) gates the resolved endpoint against the
+        // network access-control policy before it is contacted.
         JSONObject key = new JSONObject(keyJson(CLIENT_EMAIL, validPrivateKeyPem()));
-        key.put("token_uri", "http://169.254.169.254/latest/meta-data/");
+        key.put("token_uri", tokenUri);
+        GCPServiceAccountTokenProvider provider =
+                new TestTokenProvider(key.toString(), SCOPE, "http://never.invalid/token");
+
+        Assert.assertEquals("The resolved endpoint must be the key's token_uri", tokenUri, provider.getTokenUri());
+        Assert.assertEquals("srv-token", provider.getAccessToken());
+        Assert.assertEquals("The key's token_uri must be used for the exchange", 1, requestCount.get());
+
+        JSONObject claims = new JSONObject(new String(
+                base64UrlDecode(parseForm(capturedBody.get()).get("assertion").split("\\.")[1]),
+                StandardCharsets.UTF_8));
+        Assert.assertEquals("aud must be the key's token_uri", tokenUri, claims.getString("aud"));
+    }
+
+    @Test
+    public void testFallbackTokenUriUsedWhenKeyOmitsIt() {
+
+        // When the key JSON has no token_uri, the constructor fallback (here the loopback stub) is used -
+        // in production the public constructors pass the fixed Google endpoint as this fallback.
+        JSONObject key = new JSONObject(keyJson(CLIENT_EMAIL, validPrivateKeyPem()));
         GCPServiceAccountTokenProvider provider =
                 new TestTokenProvider(key.toString(), SCOPE, tokenUri);
 
-        Assert.assertEquals("srv-token", provider.getAccessToken());
-        Assert.assertEquals("The key's token_uri must be ignored; only the fixed endpoint is contacted",
-                1, requestCount.get());
+        Assert.assertEquals("The fallback endpoint must be used when the key omits token_uri",
+                tokenUri, provider.getTokenUri());
     }
 
     // -------------------------------------------------------------------------
