@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -64,6 +65,8 @@ public class GCPServiceAccountTokenProvider extends GCPAccessTokenProvider {
     private static final Log log = LogFactory.getLog(GCPServiceAccountTokenProvider.class);
 
     private static final String JWT_BEARER_GRANT_TYPE = "urn:ietf:params:oauth:grant-type:jwt-bearer";
+    // Fallback token endpoint, used only when the service-account key JSON omits token_uri - matching the
+    // google-auth SDK, whose generated keys always carry "token_uri": "https://oauth2.googleapis.com/token".
     private static final String DEFAULT_TOKEN_URI = "https://oauth2.googleapis.com/token";
     // GCP caps the assertion (and hence the minted token) lifetime at 1 hour.
     private static final long ASSERTION_LIFETIME_SECONDS = 3600L;
@@ -101,34 +104,55 @@ public class GCPServiceAccountTokenProvider extends GCPAccessTokenProvider {
     }
 
     /**
-     * Package-private constructor that lets tests point the token exchange at a loopback stub. The token
-     * endpoint is deliberately NOT taken from the (untrusted) service-account key JSON: a malicious or
-     * mistyped {@code token_uri} must not be able to make the gateway POST the signed assertion to an
-     * arbitrary or internal host (SSRF / credential leak). Production always uses {@link #DEFAULT_TOKEN_URI}
-     * via the public constructors.
+     * Package-private constructor whose third argument is the <em>fallback</em> token endpoint - used only when
+     * the key JSON omits {@code token_uri}. Tests pass a loopback URL here (with a key that carries no
+     * {@code token_uri}) to point the exchange at a local stub. The public constructors pass
+     * {@link #DEFAULT_TOKEN_URI}.
+     * <p>
+     * The effective {@code token_uri} may come from the (user-supplied) key JSON, so callers must gate it with
+     * the network access-control policy ({@link org.wso2.carbon.apimgt.impl.utils.APIUtil#validateRemoteURL}) via
+     * {@link #getTokenUri()} before the exchange, so a hostile or mistyped {@code token_uri} cannot make the
+     * gateway POST the signed assertion to an internal or attacker-chosen host.
      */
-    GCPServiceAccountTokenProvider(String serviceAccountKeyJson, String scope, String tokenUri) {
+    GCPServiceAccountTokenProvider(String serviceAccountKeyJson, String scope, String fallbackTokenUri) {
 
-        this(parseKey(serviceAccountKeyJson), scope, tokenUri);
+        this(parseKey(serviceAccountKeyJson), scope, fallbackTokenUri);
     }
 
-    GCPServiceAccountTokenProvider(InputStream serviceAccountKeyJson, String scope, String tokenUri) {
+    GCPServiceAccountTokenProvider(InputStream serviceAccountKeyJson, String scope, String fallbackTokenUri) {
 
-        this(parseKey(serviceAccountKeyJson), scope, tokenUri);
+        this(parseKey(serviceAccountKeyJson), scope, fallbackTokenUri);
     }
 
-    private GCPServiceAccountTokenProvider(JSONObject key, String scope, String tokenUri) {
+    private GCPServiceAccountTokenProvider(JSONObject key, String scope, String fallbackTokenUri) {
 
         this.clientEmail = key.optString("client_email", null);
         this.privateKeyId = key.optString("private_key_id", null);
         String privateKeyPem = key.optString("private_key", null);
-        this.tokenUri = tokenUri;
+        // Match the google-auth SDK (ServiceAccountCredentials): use the token_uri embedded in the key JSON,
+        // falling back to the standard Google endpoint only when the key omits it. Because this value can come
+        // from a user-supplied key, the mediator validates it against the network access-control policy (see
+        // getTokenUri()) before the exchange.
+        String tokenUriFromKey = key.optString("token_uri", null);
+        this.tokenUri = StringUtils.isNotEmpty(tokenUriFromKey) ? tokenUriFromKey : fallbackTokenUri;
         this.scope = scope;
         if (StringUtils.isEmpty(clientEmail) || StringUtils.isEmpty(privateKeyPem)) {
             throw new IllegalArgumentException(
                     "Service-account key JSON is missing required fields (client_email / private_key).");
         }
         this.privateKey = parsePrivateKey(privateKeyPem);
+    }
+
+    /**
+     * The resolved token endpoint the exchange will POST the signed assertion to - the key JSON's
+     * {@code token_uri} when present, else the fallback. Exposed so the mediator can gate it with the
+     * network access-control policy before any network round-trip.
+     *
+     * @return the effective token endpoint URI.
+     */
+    String getTokenUri() {
+
+        return tokenUri;
     }
 
     private static JSONObject parseKey(String serviceAccountKeyJson) {
@@ -214,6 +238,14 @@ public class GCPServiceAccountTokenProvider extends GCPAccessTokenProvider {
             httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
             httpPost.setHeader("Accept", "application/json");
             httpPost.setEntity(new StringEntity(body, StandardCharsets.UTF_8));
+            // The shared client sets only connect/connection-request timeouts; add a read (socket) timeout so a
+            // token endpoint that accepts the connection then stalls cannot hang the exchange (and, since the
+            // refresh is synchronized, block every request waiting on a token) indefinitely.
+            httpPost.setConfig(RequestConfig.custom()
+                    .setConnectTimeout(CONNECT_TIMEOUT_MS)
+                    .setConnectionRequestTimeout(CONNECT_TIMEOUT_MS)
+                    .setSocketTimeout(READ_TIMEOUT_MS)
+                    .build());
             try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
                 int status = response.getStatusLine().getStatusCode();
                 String payload = response.getEntity() == null ? ""
