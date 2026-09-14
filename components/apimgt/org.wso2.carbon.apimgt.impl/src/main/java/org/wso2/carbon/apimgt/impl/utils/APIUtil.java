@@ -5038,6 +5038,18 @@ public final class APIUtil {
         tenantRegistryLoader.loadTenantRegistry(tenantId);
     }
 
+    /**
+     * Checks whether a non-null sandbox endpoint exists in the given endpoint config JSON.
+     *
+     * <p>Fixes GitHub issue #5213: {@code config.containsKey("sandbox_endpoints")} returned
+     * {@code true} even when the key was present with a {@code null} value (e.g., an MCP
+     * server imported without a sandbox URL).  The template engine then invoked
+     * {@code $util.escapeXml(null)}, causing a {@link NullPointerException}.
+     * This method now requires the value to be non-null.</p>
+     *
+     * @param endpointConfig the raw JSON string for the endpoint configuration
+     * @return {@code true} only when a non-null {@code sandbox_endpoints} value is present
+     */
     public static boolean isSandboxEndpointsExists(String endpointConfig) {
 
         JSONParser parser = new JSONParser();
@@ -5045,13 +5057,17 @@ public final class APIUtil {
         try {
             config = (JSONObject) parser.parse(endpointConfig);
 
-            if (config.containsKey("sandbox_endpoints")) {
+            if (config.get("sandbox_endpoints") != null) {
                 return true;
             }
-            if (StringUtils.equals(config.get("endpoint_type").toString(), "graphql")) {
-                JSONObject httpConfig = (JSONObject) parser.parse(config.get("http").toString());
-                if (httpConfig.containsKey("sandbox_endpoints")) {
-                    return true;
+            Object endpointType = config.get("endpoint_type");
+            if (endpointType != null && StringUtils.equals(endpointType.toString(), "graphql")) {
+                Object httpValue = config.get("http");
+                if (httpValue != null) {
+                    JSONObject httpConfig = (JSONObject) parser.parse(httpValue.toString());
+                    if (httpConfig.get("sandbox_endpoints") != null) {
+                        return true;
+                    }
                 }
             }
         } catch (ParseException e) {
@@ -5062,6 +5078,15 @@ public final class APIUtil {
         return false;
     }
 
+    /**
+     * Checks whether a non-null production endpoint exists in the given endpoint config JSON.
+     *
+     * <p>Mirrors the null-value fix applied to {@link #isSandboxEndpointsExists} for
+     * GitHub issue #5213.</p>
+     *
+     * @param endpointConfig the raw JSON string for the endpoint configuration
+     * @return {@code true} only when a non-null {@code production_endpoints} value is present
+     */
     public static boolean isProductionEndpointsExists(String endpointConfig) {
 
         JSONParser parser = new JSONParser();
@@ -5069,13 +5094,17 @@ public final class APIUtil {
         try {
             config = (JSONObject) parser.parse(endpointConfig);
 
-            if (config.containsKey("production_endpoints")) {
+            if (config.get("production_endpoints") != null) {
                 return true;
             }
-            if (StringUtils.equals(config.get("endpoint_type").toString(), "graphql")) {
-                JSONObject httpConfig = (JSONObject) parser.parse(config.get("http").toString());
-                if (httpConfig.containsKey("production_endpoints")) {
-                    return true;
+            Object endpointType = config.get("endpoint_type");
+            if (endpointType != null && StringUtils.equals(endpointType.toString(), "graphql")) {
+                Object httpValue = config.get("http");
+                if (httpValue != null) {
+                    JSONObject httpConfig = (JSONObject) parser.parse(httpValue.toString());
+                    if (httpConfig.get("production_endpoints") != null) {
+                        return true;
+                    }
                 }
             }
         } catch (ParseException e) {
