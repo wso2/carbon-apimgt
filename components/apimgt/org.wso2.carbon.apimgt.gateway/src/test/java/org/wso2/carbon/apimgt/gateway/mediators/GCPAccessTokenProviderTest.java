@@ -103,6 +103,23 @@ public class GCPAccessTokenProviderTest {
     }
 
     @Test
+    public void testInvalidateForcesReMintOnNextCall() throws Exception {
+
+        // A still-valid token is cached; invalidate() (called on a backend 401) must drop it so the next call
+        // mints a fresh one instead of serving the rejected token until the refresh window.
+        StubTokenProvider provider = new StubTokenProvider(3600L, true, true);
+
+        Assert.assertEquals("token-1", provider.getAccessToken());
+        Assert.assertEquals("token-1", provider.getAccessToken());
+        Assert.assertEquals("Still cached before invalidate", 1, provider.fetchCount());
+
+        provider.invalidate();
+
+        Assert.assertEquals("After invalidate the next call must re-mint", "token-2", provider.getAccessToken());
+        Assert.assertEquals(2, provider.fetchCount());
+    }
+
+    @Test
     public void testTokenIsRefreshedWhenWithinExpirySkew() throws Exception {
 
         // expires_in (100s) is below the 300s refresh skew, so the cached token is always considered
