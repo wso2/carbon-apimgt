@@ -56,7 +56,10 @@ import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.models.parameters.PathParameter;
 import io.swagger.models.parameters.RefParameter;
+import io.swagger.models.properties.AbstractProperty;
 import io.swagger.models.properties.ArrayProperty;
+import io.swagger.models.properties.ComposedProperty;
+import io.swagger.models.properties.MapProperty;
 import io.swagger.models.properties.ObjectProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
@@ -2826,7 +2829,7 @@ public class OAS2Parser extends APIDefinition {
                     }
                     BodyParameter bodyParam = (BodyParameter) param;
                     Model rawModel = bodyParam.getSchema();
-                    Model resolvedModel = resolveModel(rawModel, swagger);
+                    Model resolvedModel = resolveModel(rawModel, swagger, new HashSet<>());
 
                     Map<String, Object> requestBodyNode = new LinkedHashMap<>();
                     requestBodyNode.put(APISpecParserConstants.TYPE, APISpecParserConstants.OBJECT);
@@ -2874,33 +2877,62 @@ public class OAS2Parser extends APIDefinition {
     }
 
     /**
-     * Resolves a model by following references and composed models in the Swagger definition.
-     * It merges properties from all referenced models and handles composed models.
+     * Resolves a model, tracking the references already visited on the current resolution path so
+     * that a circular reference terminates instead of recursing until the stack overflows.
+     * <p>
+     * The visited set is the path currently being walked, not everything seen so far: each reference
+     * is removed again as the recursion unwinds, so a model referenced from two unrelated places is
+     * still expanded at both. Every nested call must be given this same set - starting a fresh one
+     * loses the path, which is what made a cycle through an object's properties recurse forever.
      *
-     * @param model   the model to resolve
-     * @param swagger the Swagger definition containing model references
+     * @param model       the model to resolve
+     * @param swagger     the Swagger definition containing model references
+     * @param visitedRefs references on the current resolution path
      * @return the resolved ModelImpl or ComposedModel
      */
-    private Model resolveModel(Model model, Swagger swagger) {
+    private Model resolveModel(Model model, Swagger swagger, Set<String> visitedRefs) {
 
         if (model == null) {
             return null;
         }
-        Set<String> visitedRefs = new HashSet<>();
 
+        // resolveComponentRef follows nested RefModels internally and never returns one, so this
+        // runs at most once and resolves the whole reference chain.
+        String heldRef = null;
         while (model instanceof RefModel) {
             String ref = ((RefModel) model).getSimpleRef();
             model = resolveComponentRef(ref, swagger, visitedRefs, Model.class);
-            if (model == null) break;
-            if (visitedRefs.contains(ref)) {
-                log.warn("Circular reference detected for model: " + ref);
-                break;
+            if (model == null) {
+                // Either undefined, or already on the path. resolveComponentRef has logged which.
+                return null;
             }
+            // resolveComponentRef releases the reference as soon as its lookup finishes. Hold it
+            // again for the whole traversal of the resolved model's body, otherwise a cycle that
+            // runs through allOf rather than through a property is never detected: nothing else on
+            // that path registers the reference.
             visitedRefs.add(ref);
-            Model resolved = swagger.getDefinitions().get(ref);
-            if (resolved == null || resolved == model) break;
-            model = resolved;
+            heldRef = ref;
         }
+        try {
+            return resolveModelBody(model, swagger, visitedRefs);
+        } finally {
+            if (heldRef != null) {
+                visitedRefs.remove(heldRef);
+            }
+        }
+    }
+
+    /**
+     * Resolves the composed parts or the properties of a model that has already been dereferenced.
+     * Split out of {@link #resolveModel(Model, Swagger, Set)} so that the reference the model came
+     * from stays on the visited path for the whole traversal.
+     *
+     * @param model       dereferenced model whose body should be resolved
+     * @param swagger     the Swagger definition containing model references
+     * @param visitedRefs references on the current resolution path
+     * @return the resolved ModelImpl
+     */
+    private Model resolveModelBody(Model model, Swagger swagger, Set<String> visitedRefs) {
 
         if (model instanceof ComposedModel) {
             ComposedModel composed = (ComposedModel) model;
@@ -2910,7 +2942,7 @@ public class OAS2Parser extends APIDefinition {
 
             if (composed.getAllOf() != null) {
                 for (Model part : composed.getAllOf()) {
-                    Model resolvedPart = resolveModel(part, swagger);
+                    Model resolvedPart = resolveModel(part, swagger, visitedRefs);
                     if (resolvedPart instanceof ModelImpl) {
                         ModelImpl impl = (ModelImpl) resolvedPart;
                         if (impl.getProperties() != null) mergedProps.putAll(impl.getProperties());
@@ -2927,24 +2959,42 @@ public class OAS2Parser extends APIDefinition {
         if (model instanceof ModelImpl && model.getProperties() != null) {
             Map<String, Property> resolvedProps = new LinkedHashMap<>();
             for (Map.Entry<String, Property> entry : model.getProperties().entrySet()) {
-                resolvedProps.put(entry.getKey(), resolveProperty(entry.getValue(), swagger));
+                resolvedProps.put(entry.getKey(), resolveProperty(entry.getValue(), swagger, visitedRefs));
             }
-            model.setProperties(resolvedProps);
+            // Hand the resolved properties back on a separate model instead of writing them onto the
+            // definition. The definition belongs to the parsed Swagger object; once a cycle is
+            // truncated a resolved property can contain the definition it came from, and writing
+            // that back would make the definition its own descendant and impossible to serialise.
+            //
+            // Only getProperties() and getRequired() are read back from the returned model - the
+            // model is never serialised itself, only the properties it carries - so a carrier for
+            // those two is enough.
+            ModelImpl resolvedModel = new ModelImpl();
+            resolvedModel.setProperties(resolvedProps);
+            List<String> required = ((ModelImpl) model).getRequired();
+            if (required != null) {
+                resolvedModel.setRequired(required);
+            }
+            return resolvedModel;
         }
 
         return model;
     }
 
-    private Property resolveProperty(Property property, Swagger swagger) {
-        return resolveProperty(property, swagger, new HashSet<>());
-    }
-
     /**
      * Resolves a property by following references and handling nested properties.
      * It recursively resolves RefProperties, ArrayProperties, and ObjectProperties.
+     * <p>
+     * The visited set is shared with {@link #resolveModel(Model, Swagger, Set)} and with every
+     * nested call below, so that a cycle running through an object's properties, a list's item type
+     * or an inline object is detected instead of recursed into indefinitely.
+     * <p>
+     * Each branch builds a new property rather than resolving the existing one in place, so that
+     * resolution leaves the parsed Swagger object untouched.
      *
-     * @param property the property to resolve
-     * @param swagger  the Swagger definition containing model references
+     * @param property    the property to resolve
+     * @param swagger     the Swagger definition containing model references
+     * @param visitedRefs references on the current resolution path
      * @return the resolved Property
      */
     private Property resolveProperty(Property property, Swagger swagger, Set<String> visitedRefs) {
@@ -2952,42 +3002,135 @@ public class OAS2Parser extends APIDefinition {
         if (property instanceof RefProperty) {
             String ref = ((RefProperty) property).getSimpleRef();
             if (visitedRefs.contains(ref)) {
-                log.warn("Circular reference detected for property: " + ref);
-                return property;
+                log.warn("Circular reference truncated while resolving property reference: " + ref);
+                return unexpandedObjectProperty((RefProperty) property, ref);
             }
             visitedRefs.add(ref);
-            Model refModel = swagger.getDefinitions().get(ref);
-            if (refModel instanceof ModelImpl) {
-                ModelImpl impl = (ModelImpl) resolveModel(refModel, swagger);
-                ObjectProperty objProp = new ObjectProperty();
-                objProp.setDescription(property.getDescription());
-                objProp.setExample(property.getExample());
-                if (impl.getProperties() != null) {
-                    Map<String, Property> nested = new LinkedHashMap<>();
-                    for (Map.Entry<String, Property> entry : impl.getProperties().entrySet()) {
-                        nested.put(entry.getKey(), resolveProperty(entry.getValue(), swagger, visitedRefs));
+            try {
+                Model refModel = swagger.getDefinitions().get(ref);
+                if (refModel != null) {
+                    // resolveModel merges a composed (allOf) definition into a plain one, so a
+                    // reference to either kind of definition is expanded here. Accepting only
+                    // ModelImpl left a reference to a composed definition unresolved, emitting a
+                    // $ref the generated schema cannot follow: it carries no definitions section.
+                    Model resolvedModel = resolveModel(refModel, swagger, visitedRefs);
+                    ObjectProperty objProp = new ObjectProperty();
+                    copyCommonPropertyFields((RefProperty) property, objProp);
+                    if (resolvedModel != null && resolvedModel.getProperties() != null) {
+                        objProp.setProperties(new LinkedHashMap<>(resolvedModel.getProperties()));
                     }
-                    objProp.setProperties(nested);
+                    return objProp;
                 }
-                return objProp;
+                // The definition the reference names does not exist. Drop the field rather than
+                // emitting the reference unresolved: the generated schema carries no definitions
+                // section, so a surviving $ref points at nothing.
+                log.warn("Component not found in reference: " + ref);
+                return null;
+            } finally {
+                visitedRefs.remove(ref);
             }
         } else if (property instanceof ArrayProperty) {
             ArrayProperty array = (ArrayProperty) property;
-            array.setItems(resolveProperty(array.getItems(), swagger));
-            return array;
+            ArrayProperty resolvedArray = new ArrayProperty();
+            copyCommonPropertyFields(array, resolvedArray);
+            resolvedArray.setUniqueItems(array.getUniqueItems());
+            resolvedArray.setMinItems(array.getMinItems());
+            resolvedArray.setMaxItems(array.getMaxItems());
+            resolvedArray.setItems(resolveProperty(array.getItems(), swagger, visitedRefs));
+            return resolvedArray;
+        } else if (property instanceof ComposedProperty) {
+            // A property written as an inline allOf. Merged into one object, the same way
+            // resolveModel merges a ComposedModel and the same way OAS3Parser renders allOf, so
+            // that a consumer sees one plain object rather than a composition to interpret.
+            // Leaving it unresolved emitted a $ref the generated schema cannot follow.
+            ComposedProperty composed = (ComposedProperty) property;
+            ObjectProperty merged = new ObjectProperty();
+            copyCommonPropertyFields(composed, merged);
+            Map<String, Property> mergedProps = new LinkedHashMap<>();
+            if (composed.getAllOf() != null) {
+                for (Property part : composed.getAllOf()) {
+                    Property resolvedPart = resolveProperty(part, swagger, visitedRefs);
+                    if (resolvedPart instanceof ObjectProperty
+                            && ((ObjectProperty) resolvedPart).getProperties() != null) {
+                        mergedProps.putAll(((ObjectProperty) resolvedPart).getProperties());
+                    }
+                }
+            }
+            merged.setProperties(mergedProps);
+            return merged;
+        } else if (property instanceof MapProperty) {
+            MapProperty map = (MapProperty) property;
+            MapProperty resolvedMap = new MapProperty();
+            copyCommonPropertyFields(map, resolvedMap);
+            resolvedMap.setMinProperties(map.getMinProperties());
+            resolvedMap.setMaxProperties(map.getMaxProperties());
+            resolvedMap.setAdditionalProperties(
+                    resolveProperty(map.getAdditionalProperties(), swagger, visitedRefs));
+            return resolvedMap;
         } else if (property instanceof ObjectProperty) {
             ObjectProperty obj = (ObjectProperty) property;
+            ObjectProperty resolvedObj = new ObjectProperty();
+            copyCommonPropertyFields(obj, resolvedObj);
             if (obj.getProperties() != null) {
                 Map<String, Property> resolved = new LinkedHashMap<>();
                 for (Map.Entry<String, Property> entry : obj.getProperties().entrySet()) {
-                    resolved.put(entry.getKey(), resolveProperty(entry.getValue(), swagger));
+                    resolved.put(entry.getKey(), resolveProperty(entry.getValue(), swagger, visitedRefs));
                 }
-                obj.setProperties(resolved);
+                resolvedObj.setProperties(resolved);
             }
-            return obj;
+            return resolvedObj;
         }
 
         return property;
+    }
+
+    /**
+     * Builds the property emitted in place of a reference that closes a circular chain. An object
+     * with no declared properties states what is true of it - the field takes an object, whose shape
+     * cannot be written out without recursing forever. Dropping the field instead would claim the
+     * API does not accept it, and returning the reference unresolved would leave a $ref no consumer
+     * can follow, because the generated schema carries no definitions section.
+     *
+     * @param original the reference that could not be expanded
+     * @param ref      the definition name it points at
+     * @return an object property standing in for the unexpanded reference
+     */
+    private ObjectProperty unexpandedObjectProperty(RefProperty original, String ref) {
+        ObjectProperty placeholder = new ObjectProperty();
+        copyCommonPropertyFields(original, placeholder);
+        if (StringUtils.isBlank(placeholder.getDescription())) {
+            placeholder.setDescription("Circular reference to '" + ref
+                    + "'; nested properties are omitted.");
+        }
+        return placeholder;
+    }
+
+    /**
+     * Copies every attribute a property carries in its own right onto a resolved copy, so that
+     * resolution changes only nested content and nothing about how the property is rendered.
+     * <p>
+     * Two of the declared fields are deliberately not copied: type, because each property class sets
+     * its own, and xml, which swagger-models exposes no getter for and therefore never serialises
+     * either. OAS2ParserTest guards this list against changes in the library.
+     *
+     * @param from the property being resolved
+     * @param to   the copy being built
+     */
+    private void copyCommonPropertyFields(AbstractProperty from, AbstractProperty to) {
+        to.setName(from.getName());
+        to.setTitle(from.getTitle());
+        to.setDescription(from.getDescription());
+        to.setFormat(from.getFormat());
+        to.setExample(from.getExample());
+        to.setRequired(from.getRequired());
+        to.setReadOnly(from.getReadOnly());
+        to.setAllowEmptyValue(from.getAllowEmptyValue());
+        to.setAccess(from.getAccess());
+        to.setPosition(from.getPosition());
+        to.setBooleanValue(from.getBooleanValue());
+        if (from.getVendorExtensions() != null && !from.getVendorExtensions().isEmpty()) {
+            to.setVendorExtensionMap(from.getVendorExtensions());
+        }
     }
 
     /**
@@ -3017,30 +3160,38 @@ public class OAS2Parser extends APIDefinition {
             return null;
         }
         visitedRefs.add(ref);
-        Object resolved = null;
-        if (swagger.getDefinitions() != null && swagger.getDefinitions().containsKey(ref)) {
-            resolved = swagger.getDefinitions().get(ref);
+        // Removed again on the way out so the set stays the path currently being walked. Keeping it
+        // would leave a component unresolved the second time it is referenced from an unrelated
+        // place - for instance an allOf whose two branches both compose the same model.
+        try {
+            Object resolved = null;
+            if (swagger.getDefinitions() != null && swagger.getDefinitions().containsKey(ref)) {
+                resolved = swagger.getDefinitions().get(ref);
+            }
+            if (resolved == null && swagger.getParameters() != null && swagger.getParameters().containsKey(ref)) {
+                resolved = swagger.getParameters().get(ref);
+            }
+            if (resolved == null && swagger.getResponses() != null && swagger.getResponses().containsKey(ref)) {
+                resolved = swagger.getResponses().get(ref);
+            }
+            if (resolved == null) {
+                log.warn("Component not found in reference: " + ref);
+                return null;
+            }
+            if (resolved instanceof RefModel) {
+                return (T) resolveComponentRef(((RefModel) resolved).getSimpleRef(), swagger, visitedRefs,
+                        expectedType);
+            } else if (resolved instanceof RefParameter) {
+                return (T) resolveComponentRef(((RefParameter) resolved).getSimpleRef(), swagger, visitedRefs,
+                        expectedType);
+            } else if (resolved instanceof Response && ((Response) resolved).getSchema() instanceof RefModel) {
+                return (T) resolveComponentRef(((RefModel) ((Response) resolved).getSchema()).getSimpleRef(), swagger,
+                        visitedRefs, expectedType);
+            }
+            return expectedType.cast(resolved);
+        } finally {
+            visitedRefs.remove(ref);
         }
-        if (resolved == null && swagger.getParameters() != null && swagger.getParameters().containsKey(ref)) {
-            resolved = swagger.getParameters().get(ref);
-        }
-        if (resolved == null && swagger.getResponses() != null && swagger.getResponses().containsKey(ref)) {
-            resolved = swagger.getResponses().get(ref);
-        }
-        if (resolved == null) {
-            log.warn("Component not found in reference: " + ref);
-            return null;
-        }
-        if (resolved instanceof RefModel) {
-            return (T) resolveComponentRef(((RefModel) resolved).getSimpleRef(), swagger, visitedRefs, expectedType);
-        } else if (resolved instanceof RefParameter) {
-            return (T) resolveComponentRef(((RefParameter) resolved).getSimpleRef(), swagger, visitedRefs,
-                    expectedType);
-        } else if (resolved instanceof Response && ((Response) resolved).getSchema() instanceof RefModel) {
-            return (T) resolveComponentRef(((RefModel) ((Response) resolved).getSchema()).getSimpleRef(), swagger,
-                    visitedRefs, expectedType);
-        }
-        return expectedType.cast(resolved);
     }
 
     /**
