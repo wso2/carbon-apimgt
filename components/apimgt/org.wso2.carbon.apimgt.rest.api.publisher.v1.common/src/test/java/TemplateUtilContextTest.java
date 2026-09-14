@@ -103,6 +103,6 @@ public class TemplateUtilContextTest {
         TemplateUtilContext templateUtilContext = new TemplateUtilContext(configcontext);
 
         String result = templateUtilContext.escapeXml("");
-        Assert.assertEquals("escapeXml("") must return """, "", result);
+        Assert.assertEquals("escapeXml(\"\") must return empty string", "", result);
     }
 }
