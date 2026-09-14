@@ -322,6 +322,36 @@ public class APIUtilTest {
     }
 
     @Test
+    public void testIsSandboxEndpointsWithNullValue() throws Exception {
+
+        API api = Mockito.mock(API.class);
+
+        JSONObject root = new JSONObject();
+        root.put("sandbox_endpoints", null);
+        root.put("endpoint_type", "http");
+
+        Mockito.when(api.getEndpointConfig()).thenReturn(root.toJSONString());
+
+        Assert.assertFalse("Unexpected sandbox endpoint found when sandbox_endpoints is null",
+                APIUtil.isSandboxEndpointsExists(root.toJSONString()));
+    }
+
+    @Test
+    public void testIsProductionEndpointsWithNullValue() throws Exception {
+
+        API api = Mockito.mock(API.class);
+
+        JSONObject root = new JSONObject();
+        root.put("production_endpoints", null);
+        root.put("endpoint_type", "http");
+
+        Mockito.when(api.getEndpointConfig()).thenReturn(root.toJSONString());
+
+        Assert.assertFalse("Unexpected production endpoint found when production_endpoints is null",
+                APIUtil.isProductionEndpointsExists(root.toJSONString()));
+    }
+
+    @Test
     public void testIsProductionEndpointsInvalidJSON() throws Exception {
 
         Log log = Mockito.mock(Log.class);

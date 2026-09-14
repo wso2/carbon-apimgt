@@ -18,6 +18,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template;
 
 import com.google.gson.Gson;
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.velocity.VelocityContext;
 
 import java.util.Map;
@@ -40,8 +41,23 @@ public class TemplateUtilContext extends ConfigContextDecorator {
         return context;
     }
 
+    /**
+     * Escapes special XML characters in the given string.
+     *
+     * <p>Returns the input unchanged if it is {@code null} or blank, so that
+     * Velocity templates that call {@code $util.escapeXml($ep.get("url"))}
+     * with a {@code null} value (e.g., when {@code sandbox_endpoint} is absent)
+     * do not throw a {@link NullPointerException}. Fixes GitHub issue #5213.</p>
+     *
+     * @param url the string to escape; may be {@code null}
+     * @return the XML-escaped string, or the original value if {@code null}/blank
+     */
     public String escapeXml(String url) {
-        return StringEscapeUtils.escapeXml(StringEscapeUtils.unescapeXml(url)).trim();
+        if (StringUtils.isBlank(url)) {
+            return url;
+        }
+        String escaped = StringEscapeUtils.escapeXml(StringEscapeUtils.unescapeXml(url));
+        return escaped != null ? escaped.trim() : url;
     }
 
     /**

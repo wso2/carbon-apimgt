@@ -67,4 +67,42 @@ public class TemplateUtilContextTest {
         Assert.assertNotNull("Result map should not be null", resultMap);
         Assert.assertEquals("Map does not match expected value", expectedMap, resultMap);
     }
+
+    /**
+     * Tests that {@link TemplateUtilContext#escapeXml(String)} returns {@code null}
+     * when passed {@code null}, without throwing a {@link NullPointerException}.
+     *
+     * <p>Regression test for GitHub issue #5213: previously
+     * {@code StringEscapeUtils.escapeXml(null)} returned {@code null}, and the
+     * subsequent {@code .trim()} call caused an NPE during gateway artifact
+     * generation for MCP servers that have no sandbox endpoint.</p>
+     */
+    @Test
+    public void testEscapeXmlWithNullInputDoesNotThrowNPE() {
+        API api = new API(new APIIdentifier("admin", "TestAPI", "1.0.0"));
+        api.setStatus(APIConstants.CREATED);
+        api.setContextTemplate("/");
+        ConfigContext configcontext = new APIConfigContextWrapper(api);
+        TemplateUtilContext templateUtilContext = new TemplateUtilContext(configcontext);
+
+        // Should return null without throwing NullPointerException
+        String result = templateUtilContext.escapeXml(null);
+        Assert.assertNull("escapeXml(null) must return null, not throw NPE", result);
+    }
+
+    /**
+     * Tests that {@link TemplateUtilContext#escapeXml(String)} returns an empty string
+     * unchanged when passed an empty string.
+     */
+    @Test
+    public void testEscapeXmlWithEmptyStringReturnsEmpty() {
+        API api = new API(new APIIdentifier("admin", "TestAPI", "1.0.0"));
+        api.setStatus(APIConstants.CREATED);
+        api.setContextTemplate("/");
+        ConfigContext configcontext = new APIConfigContextWrapper(api);
+        TemplateUtilContext templateUtilContext = new TemplateUtilContext(configcontext);
+
+        String result = templateUtilContext.escapeXml("");
+        Assert.assertEquals("escapeXml("") must return """, "", result);
+    }
 }
