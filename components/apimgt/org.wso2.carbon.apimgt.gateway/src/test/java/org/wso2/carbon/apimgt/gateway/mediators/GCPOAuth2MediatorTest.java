@@ -24,6 +24,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -58,7 +59,9 @@ public class GCPOAuth2MediatorTest {
     @Before
     public void setUp() {
 
-        mediator = new GCPOAuth2Mediator();
+        // The policy check is stubbed to a no-op so buildProvider can run without the tenant-config / caching
+        // runtime that APIUtil.validateRemoteURL needs; the reject path is covered by its own test below.
+        mediator = new TestGCPOAuth2Mediator();
         synapseCtx = Mockito.mock(Axis2MessageContext.class);
         axis2Ctx = Mockito.mock(org.apache.axis2.context.MessageContext.class);
         Mockito.when(synapseCtx.getAxis2MessageContext()).thenReturn(axis2Ctx);
@@ -120,6 +123,29 @@ public class GCPOAuth2MediatorTest {
         } catch (InvocationTargetException e) {
             Assert.assertTrue("Cause must be a SynapseException", e.getCause() instanceof SynapseException);
         }
+    }
+
+    @Test
+    public void testBuildRejectsTokenEndpointBlockedByPolicy() throws Exception {
+
+        // When the network access-control policy rejects the resolved token endpoint, the provider must not be
+        // built or cached - the mediation fails instead of contacting the disallowed host.
+        mediator = new GCPOAuth2Mediator() {
+            @Override
+            protected void validateRemoteUrl(String url) throws APIManagementException {
+                throw new APIManagementException("blocked by policy");
+            }
+        };
+        mediator.setServiceAccountKey(pipeJoined(validKeyJson()));
+        mediator.setScope(SCOPE);
+
+        try {
+            invokeBuildProvider();
+            Assert.fail("Expected a SynapseException when the token endpoint is blocked by policy");
+        } catch (InvocationTargetException e) {
+            Assert.assertTrue("Cause must be a SynapseException", e.getCause() instanceof SynapseException);
+        }
+        Assert.assertNull("A rejected endpoint must not cache a provider", getProvider());
     }
 
     // -------------------------------------------------------------------------
@@ -206,6 +232,15 @@ public class GCPOAuth2MediatorTest {
     // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------
+
+    /** Mediator with the network-policy check stubbed to a no-op, so buildProvider runs without the runtime. */
+    private static class TestGCPOAuth2Mediator extends GCPOAuth2Mediator {
+
+        @Override
+        protected void validateRemoteUrl(String url) {
+            // No-op: the reject path is covered by testBuildRejectsTokenEndpointBlockedByPolicy.
+        }
+    }
 
     private static GCPAccessTokenProvider stubProvider(String token) throws Exception {
 
