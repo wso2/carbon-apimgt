@@ -125,6 +125,7 @@ paths:
                 - role: user
                   content: "Explain what Vertex AI is in one sentence."
               max_tokens: 256
+              stream: true
       responses:
         '200':
           description: Successful streaming response from the model.
