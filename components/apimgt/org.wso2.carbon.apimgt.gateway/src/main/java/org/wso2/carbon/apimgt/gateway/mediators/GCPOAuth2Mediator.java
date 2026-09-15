@@ -189,10 +189,11 @@ public class GCPOAuth2Mediator extends AbstractMediator implements ManagedLifecy
     }
 
     /**
-     * Reassembles the delivered {@code serviceAccountKey} value into the raw key bytes. The value is a base64
-     * key split into pipe-separated chunks - a single literal in normal mode, or the {@code concat} of
-     * {@code wso2:vault-lookup} results in secure-vault mode (base64 never contains {@code '|'}, so it is a safe
-     * delimiter). Concatenate the chunks then base64-decode.
+     * Reassembles the delivered {@code serviceAccountKey} value into the raw key bytes. The value is the base64
+     * of the key JSON: in normal mode a single base64 literal (no {@code '|'}); in secure-vault mode the
+     * {@code concat} of {@code wso2:vault-lookup} results, i.e. the base64 split into pipe-separated chunks that
+     * synapse rejoins before the mediator runs (base64 never contains {@code '|'}, so it is a safe delimiter).
+     * Split on {@code '|'}, concatenate the chunks, then base64-decode.
      */
     private byte[] reassembleServiceAccountKey(String pipeJoinedBase64) {
 
