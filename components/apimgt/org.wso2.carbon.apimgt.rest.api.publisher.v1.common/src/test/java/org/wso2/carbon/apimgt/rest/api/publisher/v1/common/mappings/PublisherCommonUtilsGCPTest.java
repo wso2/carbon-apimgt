@@ -121,6 +121,17 @@ public class PublisherCommonUtilsGCPTest {
                 endpointConfig, cryptoUtil, null, null, new APIDTO());
     }
 
+    @Test(expected = APIManagementException.class)
+    public void testJsonNullLiteralKeyIsRejectedAtSave() throws Exception {
+
+        // The JSON literal null parses without a syntax error but is not a JSON object (Gson returns null); it
+        // must be rejected at save time rather than being encrypted and stored as an unusable key.
+        Map<String, Object> endpointConfig = gcpEndpointConfig(PRODUCTION, "null");
+
+        PublisherCommonUtils.encryptEndpointSecurityGCPServiceAccountKey(
+                endpointConfig, cryptoUtil, null, null, new APIDTO());
+    }
+
     // -------------------------------------------------------------------------
     // APIEndpointDTO-based overload (add/update-endpoint flow)
     // -------------------------------------------------------------------------
