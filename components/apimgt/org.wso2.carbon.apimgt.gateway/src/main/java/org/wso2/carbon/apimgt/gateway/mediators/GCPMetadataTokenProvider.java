@@ -1,0 +1,186 @@
+/*
+ * Copyright (c) 2026 WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 LLC. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+package org.wso2.carbon.apimgt.gateway.mediators;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.http.Header;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONObject;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
+/**
+ * Fetches a Google Cloud OAuth2 access token for the gateway's <em>attached</em> GCP identity from the
+ * GCP metadata server - the keyless equivalent of Application Default Credentials / Workload Identity.
+ * <p>
+ * When the gateway runs on GCP compute (GCE, GKE with Workload Identity, Cloud Run, ...) with a service
+ * account attached to the workload, the metadata server mints access tokens for that identity directly -
+ * so no service-account key needs to be stored, mounted or rotated. Unlike
+ * {@link GCPServiceAccountTokenProvider}, there is no private key and no JWT signing: the token is a
+ * single authenticated GET against the metadata endpoint.
+ * <p>
+ * Caching and refresh are inherited from {@link GCPAccessTokenProvider}. This only works when the gateway
+ * actually runs on GCP; off-GCP the metadata host does not resolve and {@link #fetchToken()} fails.
+ */
+public class GCPMetadataTokenProvider extends GCPAccessTokenProvider {
+
+    private static final Log log = LogFactory.getLog(GCPMetadataTokenProvider.class);
+
+    private static final String DEFAULT_METADATA_HOST = "metadata.google.internal";
+    private static final String METADATA_TOKEN_PATH =
+            "/computeMetadata/v1/instance/service-accounts/default/token";
+    // VM-level override of the metadata host, matching the google-auth-library convention (host only; the path
+    // is fixed). Set on the workload, e.g. GCE_METADATA_HOST=metadata.internal.example.
+    static final String GCE_METADATA_HOST_ENV_VAR = "GCE_METADATA_HOST";
+    // The metadata server requires this header on every request as an anti-SSRF guard.
+    private static final String METADATA_FLAVOR_HEADER = "Metadata-Flavor";
+    private static final String METADATA_FLAVOR_VALUE = "Google";
+
+    private final String scope;
+
+    /**
+     * @param scope the OAuth2 scope to request (space-separated for multiple scopes); may be empty to use
+     *              the scopes already configured for the attached service account.
+     */
+    public GCPMetadataTokenProvider(String scope) {
+
+        this.scope = scope;
+    }
+
+    @Override
+    protected JSONObject fetchToken() throws IOException {
+
+        // Fetched over the shared API Manager HTTP client (the same client the service-account token exchange
+        // uses), so this path is not a bespoke HTTP stack. The metadata host is link-local and must NOT be
+        // routed through a proxy: operators running the gateway behind a proxy must add the metadata host to
+        // non_proxy_hosts so the shared client bypasses the proxy for this request.
+        String tokenUrl = resolveTokenUrl();
+        if (log.isDebugEnabled()) {
+            // Safe to log: the URL carries only the host (shows a GCE_METADATA_HOST override) and scope names,
+            // no secret. The minted token/response is never logged.
+            log.debug("Fetching GCP access token (keyless) from the metadata endpoint: " + tokenUrl);
+        }
+        URL url = new URL(tokenUrl);
+        HttpGet httpGet = new HttpGet(tokenUrl);
+        httpGet.setHeader(METADATA_FLAVOR_HEADER, METADATA_FLAVOR_VALUE);
+        httpGet.setHeader("Accept", "application/json");
+        httpGet.setConfig(RequestConfig.custom()
+                .setConnectTimeout(CONNECT_TIMEOUT_MS)
+                .setConnectionRequestTimeout(CONNECT_TIMEOUT_MS)
+                .setSocketTimeout(READ_TIMEOUT_MS)
+                .build());
+        try (CloseableHttpClient httpClient = getHttpClient(url.getPort(), url.getProtocol());
+                CloseableHttpResponse response = httpClient.execute(httpGet)) {
+            int status = response.getStatusLine().getStatusCode();
+            String body = response.getEntity() == null ? ""
+                    : EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+            if (status < HttpStatus.SC_OK || status >= HttpStatus.SC_MULTIPLE_CHOICES) {
+                throw new IOException("The GCP metadata server returned HTTP " + status + ": " + body
+                        + ". Ensure the gateway runs on GCP with a service account attached to the workload.");
+            }
+            // Verify the response carries the "Metadata-Flavor: Google" header, confirming the token came from
+            // the real GCP metadata server and not another service answering on metadata.google.internal /
+            // 169.254.169.254 (a spoofed local proxy, a poisoned hosts file, or an off-GCP host). This is the
+            // check google-auth relies on before trusting the metadata endpoint.
+            Header flavor = response.getFirstHeader(METADATA_FLAVOR_HEADER);
+            if (flavor == null || !METADATA_FLAVOR_VALUE.equalsIgnoreCase(flavor.getValue())) {
+                throw new IOException("The response from the GCP metadata server is missing the expected '"
+                        + METADATA_FLAVOR_HEADER + ": " + METADATA_FLAVOR_VALUE + "' header; refusing to trust the "
+                        + "token (the metadata endpoint may be impersonated).");
+            }
+            return new JSONObject(body);
+        }
+    }
+
+    /**
+     * Supplies the HTTP client for the metadata call - the shared API Manager client, so that a gateway behind a
+     * proxy can make the link-local metadata host bypass the proxy via non_proxy_hosts. Overridable in tests to
+     * target a loopback endpoint without the gateway runtime.
+     */
+    protected CloseableHttpClient getHttpClient(int port, String protocol) {
+
+        return (CloseableHttpClient) APIUtil.getHttpClient(port, protocol);
+    }
+
+    /**
+     * Resolves the metadata token URL for this request (host from {@code GCE_METADATA_HOST} or the default).
+     * Package-private instance seam over the static builder so tests can point {@link #fetchToken()} at a
+     * loopback stub without setting the environment.
+     *
+     * @return the metadata token URL to fetch.
+     */
+    String resolveTokenUrl() {
+
+        return buildTokenUrl(scope);
+    }
+
+    /**
+     * Builds the metadata token URL against the resolved metadata host (see {@link #resolveMetadataHost()}).
+     *
+     * @param scope the configured OAuth2 scope(s); may be empty.
+     * @return the metadata token URL.
+     */
+    static String buildTokenUrl(String scope) {
+
+        return buildTokenUrl(scope, resolveMetadataHost());
+    }
+
+    /**
+     * Builds the metadata token URL for a given host, appending the {@code scopes} query parameter when a scope
+     * is configured. The metadata server expects the scopes as a comma-separated list, whereas the JWT-bearer
+     * path (and hence the stored scope value) uses a space-separated list; any run of whitespace is normalised to
+     * a single comma so multiple scopes are delivered correctly (matching the google-auth-library
+     * {@code ComputeEngineCredentials} behaviour). A single scope is unaffected.
+     *
+     * @param scope the configured OAuth2 scope(s); may be empty.
+     * @param host  the metadata host.
+     * @return the metadata token URL.
+     */
+    static String buildTokenUrl(String scope, String host) {
+
+        String base = "http://" + host + METADATA_TOKEN_PATH;
+        if (StringUtils.isEmpty(scope)) {
+            return base;
+        }
+        String metadataScopes = scope.trim().replaceAll("\\s+", ",");
+        return base + "?scopes=" + URLEncoder.encode(metadataScopes, StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Resolves the metadata host: the {@code GCE_METADATA_HOST} environment variable (set on the VM/workload,
+     * matching the google-auth-library) when present, otherwise the default {@code metadata.google.internal}.
+     *
+     * @return the metadata host to use.
+     */
+    static String resolveMetadataHost() {
+
+        String host = System.getenv(GCE_METADATA_HOST_ENV_VAR);
+        return StringUtils.isNotEmpty(host) ? host : DEFAULT_METADATA_HOST;
+    }
+}

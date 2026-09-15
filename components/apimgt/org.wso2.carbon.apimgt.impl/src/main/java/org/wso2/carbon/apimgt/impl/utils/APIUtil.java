@@ -406,6 +406,10 @@ public final class APIUtil {
 
     private static final String SHA256_WITH_RSA = "SHA256withRSA";
     private static final String NONE = "NONE";
+    // Any-size (chunked) ciphertext format shared by encryptAndBase64EncodeAnySize / base64DecodeAndDecryptAnySize.
+    private static final String CIPHER_CHUNK_MARKER = "chunk:v1:";
+    private static final String CIPHER_CHUNK_DELIMITER = ";";
+    private static final int CIPHER_MAX_PLAINTEXT_CHUNK_SIZE = 126;
     private static final String SUPER_TENANT_SUFFIX =
             APIConstants.EMAIL_DOMAIN_SEPARATOR + APIConstants.SUPER_TENANT_DOMAIN;
 
@@ -3196,6 +3200,7 @@ public final class APIUtil {
                     APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH,
                     APIConstants.ENDPOINT_SECURITY_TYPE_API_KEY,
                     APIConstants.ENDPOINT_SECURITY_TYPE_AWS,
+                    APIConstants.ENDPOINT_SECURITY_TYPE_GCP,
                     APIConstants.ENDPOINT_SECURITY_TYPE_UMI
             );
             if (validTypes.stream().noneMatch(type::equalsIgnoreCase)) {
@@ -4936,6 +4941,93 @@ public final class APIUtil {
             return hash(token);
         }
         return token;
+    }
+
+    /**
+     * Encrypts and base64-encodes a secret of <em>any</em> size on top of the kernel {@link CryptoUtil}
+     * single-shot primitives, independently of the configured crypto provider/algorithm.
+     * <p>
+     * A block cipher such as RSA caps the plaintext it can encrypt in one shot at the key/block size, so a
+     * large secret (e.g. a GCP service-account key JSON) cannot go through
+     * {@link CryptoUtil#encryptAndBase64Encode(byte[])} directly. The plaintext is split into
+     * {@value #CIPHER_MAX_PLAINTEXT_CHUNK_SIZE}-byte blocks, each encrypted with the single-shot primitive, and
+     * the base64 chunks are joined with {@code ';'} behind a self-describing {@code chunk:v1:} marker. Reverse
+     * with {@link #base64DecodeAndDecryptAnySize(CryptoUtil, String)}.
+     *
+     * @param cryptoUtil the kernel crypto utility to encrypt each block with.
+     * @param plainText  the plaintext bytes to encrypt (must not be null; an empty array is encrypted as-is).
+     * @return a {@code chunk:v1:} chunked ciphertext (an empty array is encrypted single-shot, as-is).
+     * @throws CryptoException on error during encryption, or if {@code plainText} is null.
+     */
+    public static String encryptAndBase64EncodeAnySize(CryptoUtil cryptoUtil, byte[] plainText)
+            throws CryptoException {
+
+        if (plainText == null) {
+            throw new CryptoException("Plaintext to encrypt can't be null.");
+        }
+        if (plainText.length == 0) {
+            return cryptoUtil.encryptAndBase64Encode(plainText);
+        }
+        // Encrypt in blocks regardless of the configured algorithm: a block cipher (e.g. RSA) is satisfied by
+        // the block size, a cipher with no size limit simply encrypts each block. No algorithm detection needed.
+        List<String> encodedChunks = new ArrayList<>();
+        for (int offset = 0; offset < plainText.length; offset += CIPHER_MAX_PLAINTEXT_CHUNK_SIZE) {
+            int length = Math.min(CIPHER_MAX_PLAINTEXT_CHUNK_SIZE, plainText.length - offset);
+            byte[] chunk = new byte[length];
+            System.arraycopy(plainText, offset, chunk, 0, length);
+            encodedChunks.add(cryptoUtil.encryptAndBase64Encode(chunk));
+        }
+        return CIPHER_CHUNK_MARKER + String.join(CIPHER_CHUNK_DELIMITER, encodedChunks);
+    }
+
+    /**
+     * Base64-decodes and decrypts a value produced by
+     * {@link #encryptAndBase64EncodeAnySize(CryptoUtil, byte[])}. Routes on the {@code chunk:v1:} marker: a
+     * marked value is decoded block-by-block; a value without a marker (e.g. a legacy single-shot ciphertext) is
+     * decrypted directly with the single-shot primitive.
+     *
+     * @param cryptoUtil the kernel crypto utility to decrypt each block with.
+     * @param cipherText the stored ciphertext.
+     * @return the decrypted plaintext bytes.
+     * @throws CryptoException on error during decryption, or if {@code cipherText} is null.
+     */
+    public static byte[] base64DecodeAndDecryptAnySize(CryptoUtil cryptoUtil, String cipherText)
+            throws CryptoException {
+
+        if (cipherText == null) {
+            throw new CryptoException("Ciphertext can't be null.");
+        }
+        if (!isChunkedCipherText(cipherText)) {
+            return cryptoUtil.base64DecodeAndDecrypt(cipherText);
+        }
+        // Keep empty entries (split with limit -1 preserves trailing ones) and reject any empty chunk, so a
+        // malformed value fails loudly instead of silently reassembling to incomplete plaintext.
+        String[] encodedChunks = cipherText.substring(CIPHER_CHUNK_MARKER.length())
+                .split(CIPHER_CHUNK_DELIMITER, -1);
+        ByteArrayOutputStream plainTextStream = new ByteArrayOutputStream();
+        try {
+            for (String encodedChunk : encodedChunks) {
+                if (encodedChunk.isEmpty()) {
+                    throw new CryptoException("Malformed chunked ciphertext: contains an empty chunk.");
+                }
+                byte[] decrypted = cryptoUtil.base64DecodeAndDecrypt(encodedChunk);
+                plainTextStream.write(decrypted, 0, decrypted.length);
+            }
+        } catch (RuntimeException e) {
+            // CryptoException (checked) propagates unchanged; only unchecked failures (e.g. a base64 decode
+            // error on a corrupt chunk) reach here and are normalized into a CryptoException.
+            throw new CryptoException("Error occurred while reassembling chunked plaintext.", e);
+        }
+        return plainTextStream.toByteArray();
+    }
+
+    /**
+     * @param value a stored ciphertext value.
+     * @return {@code true} if the value is in the any-size chunked format ({@code chunk:v1:}).
+     */
+    public static boolean isChunkedCipherText(String value) {
+
+        return value != null && value.startsWith(CIPHER_CHUNK_MARKER);
     }
 
     /**
