@@ -199,7 +199,6 @@ public class APIConstants {
         // method, for every publisher. Token-usage JSONPaths differ per publisher, hence the separate
         // provider services below.
         public static final String LLM_PROVIDER_SERVICE_VERTEX_AI_VERSION = "1.0.0";
-        public static final String LLM_PROVIDER_SERVICE_VERTEX_AI_SERVICE_NAME = "aiplatform";
         public static final String LLM_PROVIDER_SERVICE_VERTEX_AI_SCOPE =
                 "https://www.googleapis.com/auth/cloud-platform";
         public static final String LLM_PROVIDER_SERVICE_VERTEX_AI_METADATA_IDENTIFIER_MODEL =
