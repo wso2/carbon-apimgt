@@ -988,7 +988,19 @@ public class APIMappingUtil {
      * @return APIListDTO object containing APIDTOs
      */
     public static Object fromAPIListToDTO(List<API> apiList) throws APIManagementException {
-        return fromAPIListToInfoDTO(apiList);
+        return fromAPIListToDTO(apiList, false);
+    }
+
+    /**
+     * Converts a List object of APIs into a DTO.
+     *
+     * @param apiList          List of APIs
+     * @param expandProperties whether the additional properties of each API should be included in the DTO
+     * @return APIListDTO object containing APIDTOs
+     */
+    public static Object fromAPIListToDTO(List<API> apiList, boolean expandProperties)
+            throws APIManagementException {
+        return fromAPIListToInfoDTO(apiList, expandProperties);
     }
 
     /**
@@ -998,11 +1010,23 @@ public class APIMappingUtil {
      * @return APIListDTO object containing APIDTOs
      */
     public static APIListDTO fromAPIListToInfoDTO(List<API> apiList) throws APIManagementException {
+        return fromAPIListToInfoDTO(apiList, false);
+    }
+
+    /**
+     * Converts a List object of APIs into Info DTO List.
+     *
+     * @param apiList          List of APIs
+     * @param expandProperties whether the additional properties of each API should be included in the DTO
+     * @return APIListDTO object containing APIDTOs
+     */
+    public static APIListDTO fromAPIListToInfoDTO(List<API> apiList, boolean expandProperties)
+            throws APIManagementException {
 
         APIListDTO apiListDTO = new APIListDTO();
         List<APIInfoDTO> apiInfoDTOs = apiListDTO.getList();
         for (API api : apiList) {
-            apiInfoDTOs.add(fromAPIToInfoDTO(api));
+            apiInfoDTOs.add(fromAPIToInfoDTO(api, expandProperties));
         }
         apiListDTO.setCount(apiInfoDTOs.size());
         return apiListDTO;
@@ -1095,6 +1119,17 @@ public class APIMappingUtil {
      * @return a minimal representation DTO
      */
     public static APIInfoDTO fromAPIToInfoDTO(API api) {
+        return fromAPIToInfoDTO(api, false);
+    }
+
+    /**
+     * Creates a minimal DTO representation of an API object.
+     *
+     * @param api              API object
+     * @param expandProperties whether the additional properties of the API should be included in the DTO
+     * @return a minimal representation DTO
+     */
+    public static APIInfoDTO fromAPIToInfoDTO(API api, boolean expandProperties) {
 
         APIInfoDTO apiInfoDTO = new APIInfoDTO();
         apiInfoDTO.setDescription(api.getDescription());
@@ -1133,7 +1168,7 @@ public class APIMappingUtil {
         }
         apiInfoDTO.updatedBy(api.getUpdatedBy());
         apiInfoDTO.setAdvertiseOnly(api.isAdvertiseOnly());
-        if (api.getAdditionalProperties() != null) {
+        if (expandProperties && api.getAdditionalProperties() != null) {
             JSONObject additionalProperties = api.getAdditionalProperties();
             List<APIInfoAdditionalPropertiesDTO> additionalPropertiesList = new ArrayList<>();
             Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap = new HashMap<>();
