@@ -4976,9 +4976,8 @@ public final class APIUtil {
         // the block size, a cipher with no size limit simply encrypts each block. No algorithm detection needed.
         List<String> encodedChunks = new ArrayList<>();
         for (int offset = 0; offset < plainText.length; offset += CIPHER_MAX_PLAINTEXT_CHUNK_SIZE) {
-            int length = Math.min(CIPHER_MAX_PLAINTEXT_CHUNK_SIZE, plainText.length - offset);
-            byte[] chunk = new byte[length];
-            System.arraycopy(plainText, offset, chunk, 0, length);
+            int end = Math.min(offset + CIPHER_MAX_PLAINTEXT_CHUNK_SIZE, plainText.length);
+            byte[] chunk = Arrays.copyOfRange(plainText, offset, end);
             encodedChunks.add(cryptoUtil.encryptAndBase64Encode(chunk));
         }
         return CIPHER_CHUNK_MARKER + String.join(CIPHER_CHUNK_DELIMITER, encodedChunks);
