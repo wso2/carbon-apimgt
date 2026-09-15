@@ -1214,26 +1214,34 @@ public class TemplateBuilderUtil {
     private static void registerGCPServiceAccountKeyVaultChunks(String stage, List<SimplifiedEndpoint> endpoints,
             SimplifiedEndpoint defaultEndpoint, API api, GatewayAPIDTO gatewayAPIDTO) {
 
+        // Collect the GCP endpoints that actually carry a key, deduplicated by identity (an endpoint that is
+        // both in the stage list and the default must be processed once). If there are none, return before
+        // looking up the secure-vault config - a non-GCP AI API has no reason to consult vault configuration.
+        List<SimplifiedEndpoint> allEndpoints = new ArrayList<>(endpoints);
+        if (defaultEndpoint != null) {
+            allEndpoints.add(defaultEndpoint);
+        }
+        List<SimplifiedEndpoint> gcpKeyEndpoints = new ArrayList<>();
+        Set<SimplifiedEndpoint> processed = new HashSet<>();
+        for (SimplifiedEndpoint endpoint : allEndpoints) {
+            // SimplifiedEndpoint has no equals(): the Set dedups by identity.
+            if (endpoint == null || !processed.add(endpoint)) {
+                continue;
+            }
+            if (APIConstants.ENDPOINT_SECURITY_TYPE_GCP.equalsIgnoreCase(endpoint.getAuthenticationType())
+                    && StringUtils.isNotEmpty(endpoint.getServiceAccountKeyBase64())) {
+                gcpKeyEndpoints.add(endpoint);
+            }
+        }
+        if (gcpKeyEndpoints.isEmpty()) {
+            return;
+        }
         boolean isSecureVaultEnabled = Boolean.parseBoolean(ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfiguration().getFirstProperty(APIConstants.API_SECUREVAULT_ENABLE));
         if (!isSecureVaultEnabled) {
             return;
         }
-        List<SimplifiedEndpoint> allEndpoints = new ArrayList<>(endpoints);
-        if (defaultEndpoint != null) {
-            allEndpoints.add(defaultEndpoint);
-        }
-        Set<SimplifiedEndpoint> processed = new HashSet<>();
-        for (SimplifiedEndpoint endpoint : allEndpoints) {
-            // SimplifiedEndpoint has no equals(): the Set dedups by identity, so an endpoint that is both in
-            // the list and the default is processed once (avoids duplicate vault entries).
-            if (endpoint == null || !processed.add(endpoint)) {
-                continue;
-            }
-            if (!APIConstants.ENDPOINT_SECURITY_TYPE_GCP.equalsIgnoreCase(endpoint.getAuthenticationType())
-                    || StringUtils.isEmpty(endpoint.getServiceAccountKeyBase64())) {
-                continue;
-            }
+        for (SimplifiedEndpoint endpoint : gcpKeyEndpoints) {
             // Register the key's vault chunks (sizing/alias/expression details are encapsulated in the store) and
             // emit a single serviceAccountKey property whose value is the vault-resolved, pipe-joined key.
             GCPServiceAccountKeyVaultStore.VaultChunks vaultChunks = GCPServiceAccountKeyVaultStore.chunkForVault(
@@ -1309,6 +1317,12 @@ public class TemplateBuilderUtil {
         // through unchanged.
         CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
         for (SimplifiedEndpoint simplifiedEndpoint : simplifiedEndpoints) {
+            // Only GCP endpoints carry a service-account key; skip every other AI provider so the decrypt path
+            // is provably off for them (a keyless GCP endpoint has an empty key and is skipped just below).
+            if (!APIConstants.ENDPOINT_SECURITY_TYPE_GCP.equalsIgnoreCase(
+                    simplifiedEndpoint.getAuthenticationType())) {
+                continue;
+            }
             String serviceAccountKey = simplifiedEndpoint.getServiceAccountKey();
             if (StringUtils.isNotEmpty(serviceAccountKey)) {
                 try {
