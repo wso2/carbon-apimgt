@@ -20,7 +20,6 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.dto.EndpointConfigDTO;
 import org.wso2.carbon.apimgt.api.dto.EndpointDTO;
 
-
 public class SimplifiedEndpoint {
 
     private String endpointUuid;
