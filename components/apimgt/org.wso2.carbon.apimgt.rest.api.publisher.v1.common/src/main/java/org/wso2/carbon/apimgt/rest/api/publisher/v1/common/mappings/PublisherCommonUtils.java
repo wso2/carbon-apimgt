@@ -1918,7 +1918,12 @@ public class PublisherCommonUtils {
     private static void validateGCPServiceAccountKey(String serviceAccountKey) throws APIManagementException {
 
         try {
-            GCP_SERVICE_ACCOUNT_KEY_GSON.fromJson(serviceAccountKey, JsonObject.class);
+            // Gson returns null for the JSON literal null (and any non-object is not a valid key), so reject a
+            // null parse result - otherwise the caller would encrypt and store the unchanged non-object value.
+            if (GCP_SERVICE_ACCOUNT_KEY_GSON.fromJson(serviceAccountKey, JsonObject.class) == null) {
+                throw new APIManagementException(
+                        "Invalid GCP service-account key: the provided value is not a JSON object.");
+            }
         } catch (JsonSyntaxException e) {
             throw new APIManagementException("Invalid GCP service-account key: the provided value is not valid JSON.",
                     e);
