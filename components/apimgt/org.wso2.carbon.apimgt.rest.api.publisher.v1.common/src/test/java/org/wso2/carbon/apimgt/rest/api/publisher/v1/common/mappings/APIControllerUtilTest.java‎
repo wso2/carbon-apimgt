@@ -1,0 +1,254 @@
+/*
+ *
+ *   Copyright (c) 2026, WSO2 LLC. (http://www.wso2.com) All Rights Reserved.
+ *
+ *   WSO2 LLC. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ *
+ */
+package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
+
+import com.google.gson.JsonObject;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.reflect.Whitebox;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
+
+/**
+ * Tests for the endpoint security handling of the API Controller (apictl) params file.
+ */
+@RunWith(PowerMockRunner.class)
+public class APIControllerUtilTest {
+
+    private static final String API_KEY_IDENTIFIER = "x-api-key";
+    private static final String API_KEY_VALUE = "11111111111111111111111";
+    private static final String HEADER = "HEADER";
+
+    /**
+     * Build an env params object with a single production endpoint security definition.
+     */
+    private JsonObject createEnvParamsWithProductionSecurity(JsonObject securityDetails) {
+
+        JsonObject security = new JsonObject();
+        security.add(APIConstants.ENDPOINT_SECURITY_PRODUCTION, securityDetails);
+        JsonObject envParams = new JsonObject();
+        envParams.add(ImportExportConstants.ENDPOINT_SECURITY_FIELD, security);
+        return envParams;
+    }
+
+    private JsonObject createApiKeySecurityDetails() {
+
+        JsonObject securityDetails = new JsonObject();
+        securityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_ENABLED, Boolean.TRUE);
+        securityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_TYPE,
+                APIConstants.ENDPOINT_SECURITY_TYPE_API_KEY);
+        securityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_API_KEY_IDENTIFIER, API_KEY_IDENTIFIER);
+        securityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE, API_KEY_VALUE);
+        return securityDetails;
+    }
+
+    private JsonObject invokeHandleEndpointSecurityConfigs(JsonObject envParams) throws Exception {
+
+        JsonObject endpointConfig = new JsonObject();
+        Whitebox.invokeMethod(APIControllerUtil.class, "handleEndpointSecurityConfigs", envParams, endpointConfig);
+        return endpointConfig;
+    }
+
+    private JsonObject getProductionSecurity(JsonObject endpointConfig) {
+
+        return endpointConfig.getAsJsonObject(APIConstants.ENDPOINT_SECURITY)
+                .getAsJsonObject(APIConstants.ENDPOINT_SECURITY_PRODUCTION);
+    }
+
+    @Test
+    public void testHandleEndpointSecurityConfigsWithApiKey() throws Exception {
+
+        JsonObject securityDetails = createApiKeySecurityDetails();
+        securityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_API_KEY_IDENTIFIER_TYPE, HEADER);
+        JsonObject production = getProductionSecurity(
+                invokeHandleEndpointSecurityConfigs(createEnvParamsWithProductionSecurity(securityDetails)));
+
+        // The type should be retained in lower case, since PublisherCommonUtils#encryptApiKeyInternal and
+        // APIMappingUtil match it with equals() and not with equalsIgnoreCase()
+        Assert.assertEquals(APIConstants.ENDPOINT_SECURITY_TYPE_API_KEY,
+                production.get(APIConstants.ENDPOINT_SECURITY_TYPE).getAsString());
+        Assert.assertEquals(API_KEY_IDENTIFIER,
+                production.get(APIConstants.ENDPOINT_SECURITY_API_KEY_IDENTIFIER).getAsString());
+        Assert.assertEquals(API_KEY_VALUE,
+                production.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE).getAsString());
+        Assert.assertEquals(HEADER,
+                production.get(APIConstants.ENDPOINT_SECURITY_API_KEY_IDENTIFIER_TYPE).getAsString());
+    }
+
+    @Test
+    public void testHandleEndpointSecurityConfigsDefaultsApiKeyIdentifierTypeToHeader() throws Exception {
+
+        // The identifier type is not defined in the params file
+        JsonObject production = getProductionSecurity(invokeHandleEndpointSecurityConfigs(
+                createEnvParamsWithProductionSecurity(createApiKeySecurityDetails())));
+        Assert.assertEquals(HEADER,
+                production.get(APIConstants.ENDPOINT_SECURITY_API_KEY_IDENTIFIER_TYPE).getAsString());
+    }
+
+    @Test
+    public void testHandleEndpointSecurityConfigsWithApiKeyTypeInMixedCase() throws Exception {
+
+        JsonObject securityDetails = createApiKeySecurityDetails();
+        securityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_TYPE, "APIKey");
+        JsonObject envParams = createEnvParamsWithProductionSecurity(securityDetails);
+
+        JsonObject production = getProductionSecurity(invokeHandleEndpointSecurityConfigs(envParams));
+        Assert.assertEquals(APIConstants.ENDPOINT_SECURITY_TYPE_API_KEY,
+                production.get(APIConstants.ENDPOINT_SECURITY_TYPE).getAsString());
+    }
+
+    @Test(expected = APIManagementException.class)
+    public void testHandleEndpointSecurityConfigsWithoutApiKeyIdentifier() throws Exception {
+
+        JsonObject securityDetails = createApiKeySecurityDetails();
+        securityDetails.remove(APIConstants.ENDPOINT_SECURITY_API_KEY_IDENTIFIER);
+        invokeHandleEndpointSecurityConfigs(createEnvParamsWithProductionSecurity(securityDetails));
+    }
+
+    @Test(expected = APIManagementException.class)
+    public void testHandleEndpointSecurityConfigsWithoutApiKeyValue() throws Exception {
+
+        JsonObject securityDetails = createApiKeySecurityDetails();
+        securityDetails.remove(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE);
+        invokeHandleEndpointSecurityConfigs(createEnvParamsWithProductionSecurity(securityDetails));
+    }
+
+    @Test(expected = APIManagementException.class)
+    public void testHandleEndpointSecurityConfigsWithUnsupportedType() throws Exception {
+
+        JsonObject securityDetails = createApiKeySecurityDetails();
+        securityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_TYPE, "jwt");
+        invokeHandleEndpointSecurityConfigs(createEnvParamsWithProductionSecurity(securityDetails));
+    }
+
+    @Test
+    public void testHandleEndpointSecurityConfigsWithBasicAuth() throws Exception {
+
+        JsonObject securityDetails = new JsonObject();
+        securityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_ENABLED, Boolean.TRUE);
+        securityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_TYPE,
+                APIConstants.ENDPOINT_SECURITY_TYPE_BASIC);
+        securityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_USERNAME, "admin");
+        securityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_PASSWORD, "admin");
+
+        JsonObject production = getProductionSecurity(
+                invokeHandleEndpointSecurityConfigs(createEnvParamsWithProductionSecurity(securityDetails)));
+        // Basic, digest and oauth types are still stored in upper case
+        Assert.assertEquals(APIConstants.ENDPOINT_SECURITY_TYPE_BASIC.toUpperCase(),
+                production.get(APIConstants.ENDPOINT_SECURITY_TYPE).getAsString());
+    }
+
+    @Test
+    public void testHandleEndpointSecurityConfigsWithDigestAuth() throws Exception {
+
+        JsonObject securityDetails = new JsonObject();
+        securityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_ENABLED, Boolean.TRUE);
+        securityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_TYPE,
+                APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST);
+        securityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_USERNAME, "admin");
+        securityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_PASSWORD, "admin");
+
+        JsonObject production = getProductionSecurity(
+                invokeHandleEndpointSecurityConfigs(createEnvParamsWithProductionSecurity(securityDetails)));
+        Assert.assertEquals(APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST.toUpperCase(),
+                production.get(APIConstants.ENDPOINT_SECURITY_TYPE).getAsString());
+    }
+
+    @Test(expected = APIManagementException.class)
+    public void testHandleEndpointSecurityConfigsWithoutUsername() throws Exception {
+
+        JsonObject securityDetails = new JsonObject();
+        securityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_ENABLED, Boolean.TRUE);
+        securityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_TYPE,
+                APIConstants.ENDPOINT_SECURITY_TYPE_BASIC);
+        securityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_PASSWORD, "admin");
+        invokeHandleEndpointSecurityConfigs(createEnvParamsWithProductionSecurity(securityDetails));
+    }
+
+    @Test
+    public void testHandleEndpointSecurityConfigsWithOauth() throws Exception {
+
+        JsonObject securityDetails = new JsonObject();
+        securityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_ENABLED, Boolean.TRUE);
+        securityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_TYPE,
+                APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH);
+        securityDetails.addProperty(APIConstants.OAuthConstants.GRANT_TYPE,
+                APIConstants.OAuthConstants.CLIENT_CREDENTIALS);
+        securityDetails.addProperty(APIConstants.OAuthConstants.OAUTH_CLIENT_ID, "clientId");
+        securityDetails.addProperty(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET, "clientSecret");
+
+        JsonObject production = getProductionSecurity(
+                invokeHandleEndpointSecurityConfigs(createEnvParamsWithProductionSecurity(securityDetails)));
+        Assert.assertEquals(APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH.toUpperCase(),
+                production.get(APIConstants.ENDPOINT_SECURITY_TYPE).getAsString());
+    }
+
+    @Test(expected = APIManagementException.class)
+    public void testHandleEndpointSecurityConfigsWithOauthWithoutGrantType() throws Exception {
+
+        JsonObject securityDetails = new JsonObject();
+        securityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_ENABLED, Boolean.TRUE);
+        securityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_TYPE,
+                APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH);
+        securityDetails.addProperty(APIConstants.OAuthConstants.OAUTH_CLIENT_ID, "clientId");
+        securityDetails.addProperty(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET, "clientSecret");
+        invokeHandleEndpointSecurityConfigs(createEnvParamsWithProductionSecurity(securityDetails));
+    }
+
+    @Test(expected = APIManagementException.class)
+    public void testHandleEndpointSecurityConfigsWithoutType() throws Exception {
+
+        JsonObject securityDetails = new JsonObject();
+        securityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_ENABLED, Boolean.TRUE);
+        invokeHandleEndpointSecurityConfigs(createEnvParamsWithProductionSecurity(securityDetails));
+    }
+
+    @Test
+    public void testHandleEndpointSecurityConfigsWhenDisabled() throws Exception {
+
+        JsonObject securityDetails = new JsonObject();
+        securityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_ENABLED, Boolean.FALSE);
+        securityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_TYPE,
+                APIConstants.ENDPOINT_SECURITY_TYPE_API_KEY);
+
+        JsonObject production = getProductionSecurity(
+                invokeHandleEndpointSecurityConfigs(createEnvParamsWithProductionSecurity(securityDetails)));
+        Assert.assertEquals(ImportExportConstants.ENDPOINT_NONE_SECURITY_TYPE,
+                production.get(APIConstants.ENDPOINT_SECURITY_TYPE).getAsString());
+    }
+
+    @Test
+    public void testHandleEndpointSecurityConfigsDefaultsUndefinedEndpointTypeToNone() throws Exception {
+
+        // Only the production endpoint security is defined in the params file. The sandbox endpoint security should
+        // be defaulted to none, so that it is not left blank in the Publisher Portal.
+        JsonObject endpointConfig = invokeHandleEndpointSecurityConfigs(
+                createEnvParamsWithProductionSecurity(createApiKeySecurityDetails()));
+
+        JsonObject sandbox = endpointConfig.getAsJsonObject(APIConstants.ENDPOINT_SECURITY)
+                .getAsJsonObject(APIConstants.ENDPOINT_SECURITY_SANDBOX);
+        Assert.assertEquals(ImportExportConstants.ENDPOINT_NONE_SECURITY_TYPE,
+                sandbox.get(APIConstants.ENDPOINT_SECURITY_TYPE).getAsString());
+        Assert.assertFalse(sandbox.get(APIConstants.ENDPOINT_SECURITY_ENABLED).getAsBoolean());
+    }
+}
