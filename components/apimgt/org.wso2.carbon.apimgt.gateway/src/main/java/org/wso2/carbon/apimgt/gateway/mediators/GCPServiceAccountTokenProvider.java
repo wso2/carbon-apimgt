@@ -251,7 +251,9 @@ public class GCPServiceAccountTokenProvider extends GCPAccessTokenProvider {
                 String payload = response.getEntity() == null ? ""
                         : EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
                 if (status < HttpStatus.SC_OK || status >= HttpStatus.SC_MULTIPLE_CHOICES) {
-                    throw new IOException("The GCP token endpoint returned HTTP " + status + ": " + payload);
+                    // Report the HTTP status only. The response body can contain reflected assertions or token
+                    // material, and this exception is logged by the mediator, so it must not carry the payload.
+                    throw new IOException("The GCP token endpoint returned HTTP " + status);
                 }
                 return new JSONObject(payload);
             }
