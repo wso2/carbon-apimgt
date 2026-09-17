@@ -99,6 +99,8 @@ import org.wso2.carbon.apimgt.persistence.APIPersistence;
 import org.wso2.carbon.apimgt.persistence.dto.MediationInfo;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
+import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.api.model.APIInfo;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.UserContext;
@@ -2137,5 +2139,43 @@ public class APIProviderImplTest {
             uriTemplate.addUsedByProduct(new APIProductIdentifier("admin", "PizzaShackProduct", "1.0.0"));
         }
         return uriTemplate;
+    }
+
+    @Test
+    public void testGenerateApiKey_APIProductCrossTenantRejected() throws Exception {
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO);
+        APIInfo apiInfo = new APIInfo.Builder()
+                .id("victim-product-uuid").name("VictimProduct").version("1.0.0")
+                .context("/victim-product/1.0.0").apiType(APIConstants.API_PRODUCT)
+                .organization("victim.example").build();
+        Mockito.when(apimgtDAO.getAPIInfoByUUID("victim-product-uuid", null)).thenReturn(apiInfo);
+        Mockito.when(apiPersistenceInstance.getPublisherAPIProduct(
+                Mockito.argThat(org -> "attacker.example".equals(org.getName())), Mockito.eq("victim-product-uuid"))).thenReturn(null);
+        try {
+            apiProvider.generateApiKey("victim-product-uuid", "attacker.example");
+            Assert.fail("Expected APIMgtResourceNotFoundException for cross-tenant API Product key generation");
+        } catch (APIMgtResourceNotFoundException e) {
+            // Registry-scoped lookup found nothing in attacker's org — cross-tenant rejected
+        }
+    }
+
+    @Test
+    public void testGenerateApiKey_APIProductSameOrgAllowed() throws Exception {
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO);
+        APIInfo apiInfo = new APIInfo.Builder()
+                .id("own-product-uuid").name("OwnProduct").version("1.0.0")
+                .context("/own-product/1.0.0").apiType(APIConstants.API_PRODUCT)
+                .organization("victim.example").build();
+        Mockito.when(apimgtDAO.getAPIInfoByUUID("own-product-uuid", null)).thenReturn(apiInfo);
+        Mockito.when(apiPersistenceInstance.getPublisherAPIProduct(
+                Mockito.any(Organization.class), Mockito.eq("own-product-uuid")))
+                .thenThrow(new APIPersistenceException("test"));
+        try {
+            apiProvider.generateApiKey("own-product-uuid", "victim.example");
+        } catch (APIMgtResourceNotFoundException e) {
+            Assert.fail("Same-org API Product key generation was incorrectly rejected by org check");
+        } catch (Exception e) {
+            // Downstream of org check — org check passed correctly
+        }
     }
 }
