@@ -201,7 +201,8 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             result = apiProvider.searchPaginatedAPIs(query, organization, offset, limit);
             Set<API> apis = (Set<API>) result.get("apis");
             allMatchedApis.addAll(apis);
-            apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis);
+            // MCP server listings do not expose additional properties, so they are explicitly left out here.
+            apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis, false);
             Object totalLength = result.get("length");
             Integer length = 0;
             if (totalLength != null) {
