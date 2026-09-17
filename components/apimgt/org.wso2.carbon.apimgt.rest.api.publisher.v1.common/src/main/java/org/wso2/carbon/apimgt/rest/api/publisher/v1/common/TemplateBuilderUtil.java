@@ -82,6 +82,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
@@ -1324,29 +1325,41 @@ public class TemplateBuilderUtil {
             }
             String serviceAccountKey = simplifiedEndpoint.getServiceAccountKey();
             if (StringUtils.isNotEmpty(serviceAccountKey)) {
+                // Hold the plaintext key as bytes (never as a String) so it can be wiped after use, matching the
+                // byte[]+Arrays.fill pattern the gateway mediator uses. Only the base64 delivered to the template
+                // stays a String (the sequence template requires it); the raw key JSON no longer lingers as one.
+                byte[] plaintextKeyBytes = null;
                 try {
                     if (APIUtil.isChunkedCipherText(serviceAccountKey)
                             || cryptoUtil.base64DecodeAndIsSelfContainedCipherText(serviceAccountKey)) {
-                        simplifiedEndpoint.setServiceAccountKey(
-                                new String(APIUtil.base64DecodeAndDecryptAnySize(
-                                        cryptoUtil, serviceAccountKey), StandardCharsets.UTF_8));
+                        // Encrypted at rest: decrypt into bytes. base64DecodeAndDecryptAnySize routes on the
+                        // storage format (single-shot or chunked).
+                        plaintextKeyBytes = APIUtil.base64DecodeAndDecryptAnySize(cryptoUtil, serviceAccountKey);
+                    } else {
+                        // Already plaintext/decrypted (pass-through): take its bytes so the same wipe applies.
+                        plaintextKeyBytes = serviceAccountKey.getBytes(StandardCharsets.UTF_8);
                     }
+                    // Deliver the plaintext key to the gateway mediator as a single base64 value, encoding the
+                    // bytes directly. base64 is ASCII and XML-attribute-safe, and the mediator base64-decodes it.
+                    // In secure-vault mode this base64 is later split into vault chunks in addEndpointsSequence
+                    // (where the API name/version are available) and this literal is dropped.
+                    simplifiedEndpoint.setServiceAccountKeyBase64(
+                            Base64.getEncoder().encodeToString(plaintextKeyBytes));
+                    // Drop the key String from the endpoint so it does not linger through template rendering
+                    // (reference only - a Java String cannot be zeroed).
+                    simplifiedEndpoint.setServiceAccountKey(null);
                 } catch (CryptoException e) {
                     // Keep this public method free of checked exceptions (avoids a source/binary break for
                     // callers). A decryption failure here is deploy-blocking, so surface it as unchecked.
                     throw new RuntimeException("Error while decrypting the GCP service-account key for endpoint "
                             + simplifiedEndpoint.getEndpointName(), e);
+                } finally {
+                    if (plaintextKeyBytes != null) {
+                        // Wipe the decrypted plaintext key bytes; only the base64 String (required by the
+                        // template) remains, which cannot be wiped.
+                        Arrays.fill(plaintextKeyBytes, (byte) 0);
+                    }
                 }
-                // Deliver the (now plaintext) key to the gateway mediator as a single base64 value. base64 is
-                // ASCII and XML-attribute-safe, and the mediator base64-decodes it. In secure-vault mode this
-                // base64 is later split into vault chunks in addEndpointsSequence (where the API name/version
-                // are available) and this literal is dropped.
-                String plaintextServiceAccountKey = simplifiedEndpoint.getServiceAccountKey();
-                simplifiedEndpoint.setServiceAccountKeyBase64(Base64.getEncoder().encodeToString(
-                        plaintextServiceAccountKey.getBytes(StandardCharsets.UTF_8)));
-                // The base64 field now carries the key; drop the whole plaintext key from the endpoint so it
-                // does not linger on the SimplifiedEndpoint through template rendering.
-                simplifiedEndpoint.setServiceAccountKey(null);
             }
         }
         return simplifiedEndpoints;
