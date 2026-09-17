@@ -12645,7 +12645,7 @@ public final class APIUtil {
         String marker = URL_TEMPLATE_MARKER + UUID.randomUUID().toString().replace("-", "");
         String normalizedUrl = URL_TEMPLATE_PATTERN.matcher(url)
                 .replaceAll(Matcher.quoteReplacement(marker));
-        String host;
+        String host = null;
         try {
             URI uri = new URI(normalizedUrl);
             host = uri.getHost();
@@ -12655,11 +12655,26 @@ public final class APIUtil {
                 // templated port, is split by hand. Any other unreadable authority stays unresolved.
                 if (authority != null && authority.contains(marker)) {
                     host = extractHostFromAuthority(authority);
+                } else if (authority == null) {
+                    // A URL carrying no authority at all still names a parameterized host when a template
+                    // stands where the host would begin.
+                    String schemeSpecificPart = uri.getSchemeSpecificPart();
+                    if (schemeSpecificPart != null && schemeSpecificPart.startsWith(marker)) {
+                        host = marker;
+                    }
                 }
             }
         } catch (URISyntaxException e) {
-            throw new APIManagementException("The provided URL is malformed: " + url,
-                    ExceptionCodes.MALFORMED_URL);
+            // A substituted template inside the authority can leave the URL unparseable, so the authority
+            // is split by hand only when a template is what made it unreadable.
+            String authority = extractAuthority(normalizedUrl);
+            if (authority != null && authority.contains(marker)) {
+                host = extractHostFromAuthority(authority);
+            }
+            if (StringUtils.isBlank(host)) {
+                throw new APIManagementException("The provided URL is malformed: " + url,
+                        ExceptionCodes.MALFORMED_URL);
+            }
         }
         if (StringUtils.isBlank(host)) {
             throw new APIManagementException("Could not extract a valid host from the provided URL: " + url,
@@ -12667,6 +12682,31 @@ public final class APIUtil {
         }
         // The marker survives only when the host itself was parameterized.
         return host.contains(marker) ? null : host;
+    }
+
+    /**
+     * Reads the authority component straight out of a URL string. Used only when the URL cannot be parsed
+     * at all, so the authority is still available for inspection.
+     *
+     * @param url the URL to read, may be null
+     * @return the authority component, or {@code null} if the URL carries none
+     */
+    private static String extractAuthority(String url) {
+        if (url == null) {
+            return null;
+        }
+        int authorityStart = url.indexOf("://");
+        if (authorityStart < 0) {
+            return null;
+        }
+        authorityStart += 3;
+        for (int i = authorityStart; i < url.length(); i++) {
+            char delimiter = url.charAt(i);
+            if (delimiter == '/' || delimiter == '?' || delimiter == '#') {
+                return url.substring(authorityStart, i);
+            }
+        }
+        return url.substring(authorityStart);
     }
 
     /**

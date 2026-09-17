@@ -225,6 +225,44 @@ public class APIUtilRemoteUrlTest {
     }
 
     @Test
+    public void testTemplatedPortAfterAnIpv6LiteralIsValidated() throws Exception {
+        // Substituting a template can stop the URL parsing at all. The address is still concrete, so it has
+        // to be found and checked rather than the URL being called malformed.
+        PowerMockito.spy(APIUtil.class);
+        PowerMockito.doReturn(null).when(APIUtil.class, "getTenantConfig", TENANT);
+        Whitebox.setInternalState(APIUtil.class, "networkSecurityEnabled", true);
+        Whitebox.setInternalState(APIUtil.class, "networkSecurityMode", "deny");
+        Whitebox.setInternalState(APIUtil.class, "networkSecurityHosts",
+                Collections.singletonList("[2001:db8::1]"));
+        Whitebox.setInternalState(APIUtil.class, "networkSecurityBlockPrivateAccess", false);
+
+        assertRejected("http://[2001:db8::1]:{uri.var.port}/path", ExceptionCodes.UNTRUSTED_URL);
+    }
+
+    @Test
+    public void testTemplatedIpv6LiteralIsSkipped() throws Exception {
+        // The address is only known at runtime, so it cannot be resolved to a decision and is skipped.
+        denyBlockedHost();
+        assertAccepted("http://[{uri.var.host}]/path");
+    }
+
+    @Test
+    public void testWholeUrlTemplateIsSkipped() throws Exception {
+        // A template standing for the entire URL names no host, so it gets the same treatment as any other
+        // parameterized host rather than being rejected as malformed.
+        denyBlockedHost();
+        assertAccepted("{uri.var.endpoint}");
+        assertAccepted("{uri.var.endpoint}/orders");
+    }
+
+    @Test
+    public void testTemplatedUrlBehindALeadingSchemeIsSkipped() throws Exception {
+        // The documented legacy-encoding form carries the whole URL in a template behind a scheme.
+        denyBlockedHost();
+        assertAccepted("legacy-encoding:{uri.var.APIurl}");
+    }
+
+    @Test
     public void testWildcardDenyMatchesTemplatedUrl() throws Exception {
         PowerMockito.spy(APIUtil.class);
         PowerMockito.doReturn(null).when(APIUtil.class, "getTenantConfig", TENANT);
