@@ -101,7 +101,9 @@ public class GCPMetadataTokenProvider extends GCPAccessTokenProvider {
             String body = response.getEntity() == null ? ""
                     : EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
             if (status < HttpStatus.SC_OK || status >= HttpStatus.SC_MULTIPLE_CHOICES) {
-                throw new IOException("The GCP metadata server returned HTTP " + status + ": " + body
+                // Report the HTTP status only. The response body can carry sensitive material, and this
+                // exception is logged by the mediator, so it must not include the payload.
+                throw new IOException("The GCP metadata server returned HTTP " + status
                         + ". Ensure the gateway runs on GCP with a service account attached to the workload.");
             }
             // Verify the response carries the "Metadata-Flavor: Google" header, confirming the token came from
