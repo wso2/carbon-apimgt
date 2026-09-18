@@ -139,6 +139,11 @@ public enum APIMGovExceptionCodes implements ErrorHandler {
     ERROR_WHILE_DELETING_LABEL_POLICY_MAPPINGS(990211, "Error while deleting label policy mappings",
             500, "Error while deleting label policy mappings for label with ID: %s", true),
 
+    // A severity the product does not define would be dropped when the selection is read back, leaving the policy
+    // judged on severities the caller never asked for. Rejecting the write says so instead of failing quietly.
+    INVALID_COMPLIANCE_AFFECTING_SEVERITIES(990212, "Invalid compliance affecting severities",
+            400, "Invalid compliance affecting rule severity provided for the policy: %s. " +
+            "Allowed severities are ERROR, WARN and INFO"),
 
     // Request related codes
     ERROR_WHILE_ADDING_NEW_GOV_EVAL_REQUEST(990300, "Error while adding new governance evaluation request.",

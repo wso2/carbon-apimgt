@@ -1200,6 +1200,20 @@ components:
           description: Timestamp when the governance policy was last updated.
           readOnly: true
           example: "2024-08-02T12:00:00Z"
+        complianceAffectingSeverities:
+          type: string
+          description: |
+            Comma separated rule severities that make this policy fail. Violations of other severities are still
+            reported but do not affect the policy adherence status.
+
+            Allowed severities are `ERROR`, `WARN` and `INFO`. Any other value is rejected with 400, and an
+            accepted value is stored normalised to upper case with repeats removed, so it may read back in a
+            different form from the one sent.
+
+            An empty string means this policy has not narrowed its severities, so every severity affects
+            compliance. A value lists the severities that do. Omitting the field on an update preserves whatever
+            is stored; sending it empty clears the selection.
+          example: "ERROR,WARN"
       required:
         - name
         - rulesets

@@ -69,6 +69,7 @@ public class SettingsMappingUtil {
         return settingsDTO;
     }
 
+
     private static List<String> resolvePlatformGatewayVersions() {
         PlatformGatewayConnectConfig config = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration().getPlatformGatewayConnectConfig();

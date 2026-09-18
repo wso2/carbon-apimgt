@@ -70,6 +70,7 @@ return null;
     private String createdTime = null;
     private String updatedBy = null;
     private String updatedTime = null;
+    private String complianceAffectingSeverities = null;
 
   /**
    * UUID of the governance policy.
@@ -275,6 +276,24 @@ return null;
     this.updatedTime = updatedTime;
   }
 
+  /**
+   * Comma separated rule severities that make this policy fail. Violations of other severities are still reported but do not affect the policy adherence status.  Allowed severities are &#x60;ERROR&#x60;, &#x60;WARN&#x60; and &#x60;INFO&#x60;. Any other value is rejected with 400, and an accepted value is stored normalised to upper case with repeats removed, so it may read back in a different form from the one sent.  An empty string means this policy has not narrowed its severities, so every severity affects compliance. A value lists the severities that do. Omitting the field on an update preserves whatever is stored; sending it empty clears the selection. 
+   **/
+  public APIMGovernancePolicyDTO complianceAffectingSeverities(String complianceAffectingSeverities) {
+    this.complianceAffectingSeverities = complianceAffectingSeverities;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "ERROR,WARN", value = "Comma separated rule severities that make this policy fail. Violations of other severities are still reported but do not affect the policy adherence status.  Allowed severities are `ERROR`, `WARN` and `INFO`. Any other value is rejected with 400, and an accepted value is stored normalised to upper case with repeats removed, so it may read back in a different form from the one sent.  An empty string means this policy has not narrowed its severities, so every severity affects compliance. A value lists the severities that do. Omitting the field on an update preserves whatever is stored; sending it empty clears the selection. ")
+  @JsonProperty("complianceAffectingSeverities")
+  public String getComplianceAffectingSeverities() {
+    return complianceAffectingSeverities;
+  }
+  public void setComplianceAffectingSeverities(String complianceAffectingSeverities) {
+    this.complianceAffectingSeverities = complianceAffectingSeverities;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -295,12 +314,13 @@ return null;
         Objects.equals(createdBy, apIMGovernancePolicy.createdBy) &&
         Objects.equals(createdTime, apIMGovernancePolicy.createdTime) &&
         Objects.equals(updatedBy, apIMGovernancePolicy.updatedBy) &&
-        Objects.equals(updatedTime, apIMGovernancePolicy.updatedTime);
+        Objects.equals(updatedTime, apIMGovernancePolicy.updatedTime) &&
+        Objects.equals(complianceAffectingSeverities, apIMGovernancePolicy.complianceAffectingSeverities);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, governableStates, actions, rulesets, labels, createdBy, createdTime, updatedBy, updatedTime);
+    return Objects.hash(id, name, description, governableStates, actions, rulesets, labels, createdBy, createdTime, updatedBy, updatedTime, complianceAffectingSeverities);
   }
 
   @Override
@@ -319,6 +339,7 @@ return null;
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    updatedBy: ").append(toIndentedString(updatedBy)).append("\n");
     sb.append("    updatedTime: ").append(toIndentedString(updatedTime)).append("\n");
+    sb.append("    complianceAffectingSeverities: ").append(toIndentedString(complianceAffectingSeverities)).append("\n");
     sb.append("}");
     return sb.toString();
   }

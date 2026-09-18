@@ -29,6 +29,7 @@ public class APIMGovernanceConfigDTO {
     private int schedulerTaskCheckInterval;
     private int schedulerTaskCleanupInterval;
 
+
     public String getDataSourceName() {
         return dataSourceName;
     }
@@ -68,4 +69,5 @@ public class APIMGovernanceConfigDTO {
     public void setSchedulerTaskCleanupInterval(int schedulerTaskCleanupInterval) {
         this.schedulerTaskCleanupInterval = schedulerTaskCleanupInterval;
     }
+
 }

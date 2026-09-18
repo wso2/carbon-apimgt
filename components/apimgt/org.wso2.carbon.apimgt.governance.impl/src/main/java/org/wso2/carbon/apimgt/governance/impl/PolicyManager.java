@@ -399,4 +399,31 @@ public class PolicyManager {
         policyMgtDAO.deleteLabelPolicyMappings(label);
         AuditLogger.log("Governance Policy", "Label policy mappings deleted for label %s", label);
     }
+
+    /**
+     * Get the compliance affecting severities configured for a policy
+     *
+     * @param policyId     Policy ID
+     * @param organization Organization
+     * @return Comma separated severities, null when none are configured or the feature is not enabled
+     * @throws APIMGovernanceException If the severities cannot be read
+     */
+    public String getComplianceAffectingSeverities(String policyId, String organization)
+            throws APIMGovernanceException {
+
+        return policyMgtDAO.getComplianceAffectingSeverities(policyId, organization);
+    }
+
+    /**
+     * Get the compliance affecting severities of every policy in an organization
+     *
+     * @param organization Organization
+     * @return Policy ID to comma separated severities, empty when none are stored
+     * @throws APIMGovernanceException If the severities cannot be read
+     */
+    public Map<String, String> getComplianceAffectingSeverities(String organization) throws APIMGovernanceException {
+
+        return policyMgtDAO.getComplianceAffectingSeverities(organization);
+    }
+
 }
