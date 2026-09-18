@@ -316,6 +316,18 @@
     "production_endpoints": {
       "url": "default"
     }
+  },
+  "http_production_failover_null_primary": {
+    "production_failovers": [
+      {
+        "endpoint_type": "http",
+        "template_not_supported": false,
+        "url": "https://localhost:9443/publisher/apis"
+      }
+    ],
+    "endpoint_type": "failover",
+    "failOver": "True",
+    "production_endpoints": null,
+    "sandbox_failovers": []
   }
-
 }
