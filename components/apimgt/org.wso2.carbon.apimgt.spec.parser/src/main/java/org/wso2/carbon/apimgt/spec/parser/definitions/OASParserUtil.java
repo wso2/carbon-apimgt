@@ -1730,14 +1730,14 @@ public class OASParserUtil {
             if (endpointConfig.has(APISpecParserConstants.ENDPOINT_PRODUCTION_FAILOVERS)) {
                 endpointsURLs = endpointConfig.getJSONArray(APISpecParserConstants.ENDPOINT_PRODUCTION_FAILOVERS);
             }
-            if (endpointConfig.has(APISpecParserConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
+            if (!endpointConfig.isNull(APISpecParserConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
                 primaryEndpoints = endpointConfig.getJSONObject(APISpecParserConstants.ENDPOINT_PRODUCTION_ENDPOINTS);
             }
         } else {
             if (endpointConfig.has(APISpecParserConstants.ENDPOINT_SANDBOX_FAILOVERS)) {
                 endpointsURLs = endpointConfig.getJSONArray(APISpecParserConstants.ENDPOINT_SANDBOX_FAILOVERS);
             }
-            if (endpointConfig.has(APISpecParserConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
+            if (!endpointConfig.isNull(APISpecParserConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
                 primaryEndpoints = endpointConfig.getJSONObject(APISpecParserConstants.ENDPOINT_SANDBOX_ENDPOINTS);
             }
         }
@@ -1758,7 +1758,10 @@ public class OASParserUtil {
         ObjectNode endpointResult = objectMapper.createObjectNode();
         endpointResult.set(APISpecParserConstants.ENDPOINT_URLS, endpointsArray);
         endpointResult.put(APISpecParserConstants.X_WSO2_ENDPOINT_TYPE, APISpecParserConstants.ENDPOINT_TYPE_FAILOVER);
-        return updateEndpointResult(primaryEndpoints, endpointResult);
+        if (primaryEndpoints != null) {
+            return updateEndpointResult(primaryEndpoints, endpointResult);
+        }
+        return endpointResult;
     }
 
     /**
@@ -1818,11 +1821,11 @@ public class OASParserUtil {
             throws APIManagementException {
         JSONObject primaryEndpoints = new JSONObject();
         if (isProd) {
-            if (endpointConfig.has(APISpecParserConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
+            if (!endpointConfig.isNull(APISpecParserConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
                 primaryEndpoints = endpointConfig.getJSONObject(APISpecParserConstants.ENDPOINT_PRODUCTION_ENDPOINTS);
             }
         } else {
-            if (endpointConfig.has(APISpecParserConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
+            if (!endpointConfig.isNull(APISpecParserConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
                 primaryEndpoints = endpointConfig.getJSONObject(APISpecParserConstants.ENDPOINT_SANDBOX_ENDPOINTS);
             }
         }
