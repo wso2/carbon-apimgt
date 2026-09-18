@@ -74,11 +74,16 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
 import org.wso2.carbon.apimgt.spec.parser.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
+import org.wso2.carbon.core.util.CryptoException;
+import org.wso2.carbon.core.util.CryptoUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -587,6 +592,9 @@ public class TemplateBuilderUtil {
         JSONObject modifiedProperties = getModifiedProperties(originalProperties);
         api.setAdditionalProperties(modifiedProperties);
 
+        // Restore the original additional properties in a finally block, so that if any of the dependent work
+        // below fails, a reused API object is never left carrying the temporary (modified) properties.
+        try {
         String endpointConfigString = api.getEndpointConfig();
         if (StringUtils.isNotBlank(endpointConfigString)) {
             try {
@@ -645,11 +653,13 @@ public class TemplateBuilderUtil {
         GatewayAPIDTO gatewayAPIDto = createAPIGatewayDTOtoPublishAPI(environment, api, apiTemplateBuilder,
                 tenantDomain, extractedFolderPath, apidto, clientCertificatesDTOListProduction,
                 clientCertificatesDTOListSandbox, endpointDTOList);
-        // Reset the additional properties to the original values
-        if (originalProperties != null) {
-            api.setAdditionalProperties(originalProperties);
-        }
         return gatewayAPIDto;
+        } finally {
+            // Reset the additional properties to the original values, even if the work above failed.
+            if (originalProperties != null) {
+                api.setAdditionalProperties(originalProperties);
+            }
+        }
     }
 
     /**
@@ -1051,8 +1061,17 @@ public class TemplateBuilderUtil {
         }
 
         boolean isAiApi = APIConstants.API_SUBTYPE_AI_API.equals(api.getSubtype());
-        Map<String, List<SimplifiedEndpoint>> groupedEndpoints = simplifyEndpoints(endpointList).stream()
-                .collect(Collectors.groupingBy(SimplifiedEndpoint::getDeploymentStage));
+        Map<String, List<SimplifiedEndpoint>> groupedEndpoints;
+        try {
+            // simplifyEndpoints can fail at runtime - notably a GCP service-account key decryption failure on
+            // corrupted ciphertext, surfaced as an unchecked exception. Map any such failure to
+            // APIManagementException here so it flows through the standard API error path instead of
+            // bypassing it as a generic server error.
+            groupedEndpoints = simplifyEndpoints(endpointList).stream()
+                    .collect(Collectors.groupingBy(SimplifiedEndpoint::getDeploymentStage));
+        } catch (RuntimeException e) {
+            throw new APIManagementException("Error while preparing endpoint security: " + api.getUuid(), e);
+        }
         List<SimplifiedEndpoint> productionEndpoints = new ArrayList<>(
                 groupedEndpoints.getOrDefault(APIConstants.APIEndpoint.PRODUCTION, Collections.emptyList()));
         List<SimplifiedEndpoint> sandboxEndpoints = new ArrayList<>(
@@ -1158,6 +1177,9 @@ public class TemplateBuilderUtil {
                                              SimplifiedEndpoint defaultEndpoint, API api, GatewayAPIDTO gatewayAPIDTO
             , APITemplateBuilder builder) throws APIManagementException, XMLStreamException, APITemplateException {
 
+        // Secure-vault mode: register each GCP service-account key chunk in the vault and assign the aliases
+        // on the endpoints before the template is rendered, so it emits vault-lookups instead of chunk values.
+        registerGCPServiceAccountKeyVaultChunks(type, endpoints, defaultEndpoint, api, gatewayAPIDTO);
         String endpointsString = builder.getStringForEndpoints(type, endpoints, defaultEndpoint);
         OMElement endpointsElement = APIUtil.buildOMElement(
                 new ByteArrayInputStream(endpointsString.getBytes()));
@@ -1173,6 +1195,66 @@ public class TemplateBuilderUtil {
             endpointSequence.setContent(APIUtil.convertOMtoString(endpointsElement));
             gatewayAPIDTO.setSequenceToBeAdd(
                     addGatewayContentToList(endpointSequence, gatewayAPIDTO.getSequenceToBeAdd()));
+        }
+    }
+
+    /**
+     * When secure vault is enabled, registers each base64 chunk of a GCP endpoint's service-account key as a
+     * separate secure-vault credential (keyed by a per-chunk alias) on the {@link GatewayAPIDTO}, and records
+     * the aliases on the endpoint so the template emits {@code wso2:vault-lookup} of the aliases instead of
+     * literal chunk values. GCP endpoints only; other auth types, keyless endpoints and normal (non-vault)
+     * mode are left untouched.
+     *
+     * @param stage          the deployment stage (PRODUCTION / SANDBOX)
+     * @param endpoints      the endpoints of this stage
+     * @param defaultEndpoint the default endpoint of this stage (usually also present in {@code endpoints})
+     * @param api            the API being deployed
+     * @param gatewayAPIDTO  the gateway artifact the credentials are added to
+     */
+    private static void registerGCPServiceAccountKeyVaultChunks(String stage, List<SimplifiedEndpoint> endpoints,
+            SimplifiedEndpoint defaultEndpoint, API api, GatewayAPIDTO gatewayAPIDTO) {
+
+        // Collect the GCP endpoints that actually carry a key, deduplicated by identity (an endpoint that is
+        // both in the stage list and the default must be processed once). If there are none, return before
+        // looking up the secure-vault config - a non-GCP AI API has no reason to consult vault configuration.
+        List<SimplifiedEndpoint> allEndpoints = new ArrayList<>(endpoints);
+        if (defaultEndpoint != null) {
+            allEndpoints.add(defaultEndpoint);
+        }
+        List<SimplifiedEndpoint> gcpKeyEndpoints = new ArrayList<>();
+        Set<SimplifiedEndpoint> processed = new HashSet<>();
+        for (SimplifiedEndpoint endpoint : allEndpoints) {
+            // SimplifiedEndpoint has no equals(): the Set dedups by identity.
+            if (endpoint == null || !processed.add(endpoint)) {
+                continue;
+            }
+            if (APIConstants.ENDPOINT_SECURITY_TYPE_GCP.equalsIgnoreCase(endpoint.getAuthenticationType())
+                    && StringUtils.isNotEmpty(endpoint.getServiceAccountKeyBase64())) {
+                gcpKeyEndpoints.add(endpoint);
+            }
+        }
+        if (gcpKeyEndpoints.isEmpty()) {
+            return;
+        }
+        boolean isSecureVaultEnabled = Boolean.parseBoolean(ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfiguration().getFirstProperty(APIConstants.API_SECUREVAULT_ENABLE));
+        if (!isSecureVaultEnabled) {
+            return;
+        }
+        for (SimplifiedEndpoint endpoint : gcpKeyEndpoints) {
+            // Register the key's vault chunks (sizing/alias/expression details are encapsulated in the store) and
+            // emit a single serviceAccountKey property whose value is the vault-resolved, pipe-joined key.
+            GCPServiceAccountKeyVaultStore.VaultChunks vaultChunks = GCPServiceAccountKeyVaultStore.chunkForVault(
+                    endpoint.getServiceAccountKeyBase64(), api.getId().getApiName(), api.getId().getVersion(),
+                    endpoint.getEndpointUuid(), stage);
+            for (CredentialDto credentialDto : vaultChunks.getCredentials()) {
+                gatewayAPIDTO.setCredentialsToBeAdd(
+                        addCredentialsToList(credentialDto, gatewayAPIDTO.getCredentialsToBeAdd()));
+            }
+            endpoint.setServiceAccountKeyVaultExpression(vaultChunks.getVaultLookupExpression());
+            // Vault mode: the key now lives in the vault under the aliases, so drop the base64 literal to keep
+            // it out of the rendered sequence artifact.
+            endpoint.setServiceAccountKeyBase64(null);
         }
     }
 
@@ -1226,9 +1308,61 @@ public class TemplateBuilderUtil {
         if (endpoints == null || endpoints.isEmpty()) {
             return new ArrayList<>();
         }
-        return endpoints.stream()
+        List<SimplifiedEndpoint> simplifiedEndpoints = endpoints.stream()
                 .map(SimplifiedEndpoint::new)
                 .collect(Collectors.toList());
+        // Last-mile decrypt for the gateway: the GCP service-account key is encrypted at rest, so decrypt it here
+        // so GCPOAuth2Mediator receives usable service-account JSON. base64DecodeAndDecryptAnySize routes
+        // on the storage format (single-shot or chunked); the guard lets plaintext/already-decrypted values pass
+        // through unchanged.
+        CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+        for (SimplifiedEndpoint simplifiedEndpoint : simplifiedEndpoints) {
+            // Only GCP endpoints carry a service-account key; skip every other AI provider so the decrypt path
+            // is provably off for them (a keyless GCP endpoint has an empty key and is skipped just below).
+            if (!APIConstants.ENDPOINT_SECURITY_TYPE_GCP.equalsIgnoreCase(
+                    simplifiedEndpoint.getAuthenticationType())) {
+                continue;
+            }
+            String serviceAccountKey = simplifiedEndpoint.getServiceAccountKey();
+            if (StringUtils.isNotEmpty(serviceAccountKey)) {
+                // Hold the plaintext key as bytes (never as a String) so it can be wiped after use, matching the
+                // byte[]+Arrays.fill pattern the gateway mediator uses. Only the base64 delivered to the template
+                // stays a String (the sequence template requires it); the raw key JSON no longer lingers as one.
+                byte[] plaintextKeyBytes = null;
+                try {
+                    if (APIUtil.isChunkedCipherText(serviceAccountKey)
+                            || cryptoUtil.base64DecodeAndIsSelfContainedCipherText(serviceAccountKey)) {
+                        // Encrypted at rest: decrypt into bytes. base64DecodeAndDecryptAnySize routes on the
+                        // storage format (single-shot or chunked).
+                        plaintextKeyBytes = APIUtil.base64DecodeAndDecryptAnySize(cryptoUtil, serviceAccountKey);
+                    } else {
+                        // Already plaintext/decrypted (pass-through): take its bytes so the same wipe applies.
+                        plaintextKeyBytes = serviceAccountKey.getBytes(StandardCharsets.UTF_8);
+                    }
+                    // Deliver the plaintext key to the gateway mediator as a single base64 value, encoding the
+                    // bytes directly. base64 is ASCII and XML-attribute-safe, and the mediator base64-decodes it.
+                    // In secure-vault mode this base64 is later split into vault chunks in addEndpointsSequence
+                    // (where the API name/version are available) and this literal is dropped.
+                    simplifiedEndpoint.setServiceAccountKeyBase64(
+                            Base64.getEncoder().encodeToString(plaintextKeyBytes));
+                    // Drop the key String from the endpoint so it does not linger through template rendering
+                    // (reference only - a Java String cannot be zeroed).
+                    simplifiedEndpoint.setServiceAccountKey(null);
+                } catch (CryptoException e) {
+                    // Keep this public method free of checked exceptions (avoids a source/binary break for
+                    // callers). A decryption failure here is deploy-blocking, so surface it as unchecked.
+                    throw new RuntimeException("Error while decrypting the GCP service-account key for endpoint "
+                            + simplifiedEndpoint.getEndpointName(), e);
+                } finally {
+                    if (plaintextKeyBytes != null) {
+                        // Wipe the decrypted plaintext key bytes; only the base64 String (required by the
+                        // template) remains, which cannot be wiped.
+                        Arrays.fill(plaintextKeyBytes, (byte) 0);
+                    }
+                }
+            }
+        }
+        return simplifiedEndpoints;
     }
 
     private static void addWebsocketTopicMappings(API api, APIDTO apidto) {
