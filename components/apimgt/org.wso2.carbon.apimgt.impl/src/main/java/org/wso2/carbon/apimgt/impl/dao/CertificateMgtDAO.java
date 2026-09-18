@@ -598,37 +598,22 @@ public class CertificateMgtDAO {
                                             String keyType, int tenantId) throws SQLException {
 
         boolean result;
-        String deleteCertQuery = SQLConstants.ClientCertificateConstants.PRE_DELETE_CERTIFICATES;
+        /* Client certificates are hard deleted. The REMOVED = 1 entry was only consumed by the pre revision
+           gateway sync, which no longer exists, and keeping it collides with the primary key
+           (ALIAS, TENANT_ID, KEY_TYPE, REMOVED, REVISION_UUID) when the same alias is later deleted from another
+           API, because API_ID is not part of that key. */
+        String deleteCertQuery = SQLConstants.ClientCertificateConstants.HARD_DELETE_CERTIFICATES;
         if (apiIdentifier == null) {
-            deleteCertQuery = SQLConstants.ClientCertificateConstants.PRE_DELETE_CERTIFICATES_WITHOUT_APIID;
+            deleteCertQuery = SQLConstants.ClientCertificateConstants.HARD_DELETE_CERTIFICATES_WITHOUT_APIID;
         }
-            /* If an entry exists already with "Removed" true, remove that particular entry and update the current
-             entry with removed true */
         try (PreparedStatement preparedStatement = connection.prepareStatement(deleteCertQuery)) {
             preparedStatement.setInt(1, tenantId);
-            preparedStatement.setBoolean(2, true);
-            preparedStatement.setString(3, alias);
-            preparedStatement.setString(4, keyType);
+            preparedStatement.setString(2, alias);
+            preparedStatement.setString(3, keyType);
             if (apiIdentifier != null) {
-                preparedStatement.setString(5, APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
-                preparedStatement.setString(6, apiIdentifier.getName());
-                preparedStatement.setString(7, apiIdentifier.getVersion());
-            }
-            preparedStatement.executeUpdate();
-        }
-        deleteCertQuery = SQLConstants.ClientCertificateConstants.DELETE_CERTIFICATES;
-        if (apiIdentifier == null) {
-            deleteCertQuery = SQLConstants.ClientCertificateConstants.DELETE_CERTIFICATES_WITHOUT_APIID;
-        }
-        try (PreparedStatement preparedStatement = connection.prepareStatement(deleteCertQuery)) {
-            preparedStatement.setBoolean(1, true);
-            preparedStatement.setInt(2, tenantId);
-            preparedStatement.setString(3, alias);
-            preparedStatement.setString(4, keyType);
-            if (apiIdentifier != null) {
-                preparedStatement.setString(5, APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
-                preparedStatement.setString(6, apiIdentifier.getName());
-                preparedStatement.setString(7, apiIdentifier.getVersion());
+                preparedStatement.setString(4, APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+                preparedStatement.setString(5, apiIdentifier.getName());
+                preparedStatement.setString(6, apiIdentifier.getVersion());
             }
             result = preparedStatement.executeUpdate() >= 1;
         }
@@ -717,6 +702,43 @@ public class CertificateMgtDAO {
                     + tenantId + ".", e);
         }
         return count;
+    }
+
+    /**
+     * To check whether the given alias is held by a revision of a different API of the same tenant. API_ID is not
+     * part of the primary key of AM_API_CLIENT_CERTIFICATE, so an alias reserved by another API's revision cannot
+     * be reused by this API - restoring that revision would violate the primary key. Revisions of the API
+     * identified by apiIdentifier are excluded so that deleting and re-adding an alias on the same API
+     * (certificate rotation) remains possible.
+     *
+     * @param keyType       Key type of the certificate
+     * @param alias         Relevant alias.
+     * @param apiIdentifier Identifier of the API the certificate is being added to.
+     * @param tenantId      The id of the tenant.
+     * @return true if a revision of another API holds the alias, false if not.
+     * @throws CertificateManagementException Certificate Management Exception.
+     */
+    public boolean checkWhetherAliasExistInRevisions(String keyType, String alias, Identifier apiIdentifier,
+                                                     int tenantId) throws CertificateManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(
+                     SQLConstants.ClientCertificateConstants.SELECT_CERTIFICATE_FOR_ALIAS_IN_REVISIONS)) {
+            preparedStatement.setString(1, keyType);
+            preparedStatement.setString(2, alias);
+            preparedStatement.setBoolean(3, false);
+            preparedStatement.setInt(4, tenantId);
+            preparedStatement.setString(5, APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+            preparedStatement.setString(6, apiIdentifier.getName());
+            preparedStatement.setString(7, apiIdentifier.getVersion());
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                return resultSet.next();
+            }
+        } catch (SQLException e) {
+            handleException("Error while checking whether the alias " + alias + " exists in a revision of tenant "
+                    + tenantId, e);
+        }
+        return false;
     }
 
     /**

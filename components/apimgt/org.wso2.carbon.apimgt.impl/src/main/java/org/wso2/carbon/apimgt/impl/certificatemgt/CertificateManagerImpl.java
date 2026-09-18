@@ -123,6 +123,9 @@ public class CertificateManagerImpl implements CertificateManager {
             if (responseCode == ResponseCode.SUCCESS) {
                 if (certificateMgtDAO.checkWhetherAliasExist(keyType, alias, tenantId)) {
                     responseCode = ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE;
+                } else if (certificateMgtDAO.checkWhetherAliasExistInRevisions(keyType, alias, apiIdentifier,
+                        tenantId)) {
+                    responseCode = ResponseCode.ALIAS_EXISTS_IN_API_REVISION;
                 } else {
                     certificateMgtDAO
                             .addClientCertificate(certificate, apiIdentifier, alias, tierName, keyType,

@@ -25,6 +25,7 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -130,8 +131,9 @@ public class ApisApiServiceImpl implements ApisApiService {
     private static final String API_PRODUCT_TYPE = "APIPRODUCT";
 
     @Override
-    public Response getAllAPIs(Integer limit, Integer offset, String xWSO2Tenant, String query, String ifNoneMatch,
-                               String accept, MessageContext messageContext) {
+    public Response getAllAPIs(Integer limit, Integer offset, String xWSO2Tenant, String query,
+                               Boolean expandProperties, String ifNoneMatch, String accept,
+                               MessageContext messageContext) {
 
         List<API> allMatchedApis = new ArrayList<>();
         Object apiListDTO;
@@ -171,7 +173,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             Set<API> apis = (Set<API>) result.get("apis");
             allMatchedApis.addAll(apis);
 
-            apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis);
+            apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis, BooleanUtils.isTrue(expandProperties));
 
             //Add pagination section in the response
             Object totalLength = result.get("length");
@@ -1577,6 +1579,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else if (ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE.getResponseCode() == responseCode) {
                 RestApiUtil.handleResourceAlreadyExistsError("The alias '" + alias +
                         "' already exists in the trust store for " + keyType + " key type.", log);
+            } else if (ResponseCode.ALIAS_EXISTS_IN_API_REVISION.getResponseCode() == responseCode) {
+                RestApiUtil.handleResourceAlreadyExistsError("The alias '" + alias + "' is already used by a "
+                        + "revision of another API or API Product in this tenant. Client certificate aliases must "
+                        + "be unique within a tenant, including aliases held by API revisions.", log);
             } else if (ResponseCode.CERTIFICATE_EXPIRED.getResponseCode() == responseCode) {
                 RestApiUtil.handleBadRequest(
                         "Error while adding the certificate to the API " + apiId + ". " + "Certificate Expired.", log);

@@ -886,6 +886,7 @@ public interface APIProvider extends APIManager {
      * @return SUCCESS : If operation succeeded,
      * INTERNAL_SERVER_ERROR : If any internal error occurred,
      * ALIAS_EXISTS_IN_TRUST_STORE : If alias is already present in the trust store,
+     * ALIAS_EXISTS_IN_API_REVISION : If a revision of another API of the same tenant holds the alias,
      * CERTIFICATE_EXPIRED : If the certificate is expired.
      * @throws APIManagementException API Management Exception.
      */
