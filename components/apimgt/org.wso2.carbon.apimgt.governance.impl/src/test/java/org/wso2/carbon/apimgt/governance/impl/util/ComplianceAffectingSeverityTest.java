@@ -18,8 +18,11 @@
 
 package org.wso2.carbon.apimgt.governance.impl.util;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 
@@ -91,6 +94,70 @@ public class ComplianceAffectingSeverityTest {
         Assert.assertEquals("An unknown token must be skipped without discarding the valid ones",
                 EnumSet.of(RuleSeverity.ERROR),
                 APIMGovernanceUtil.resolveComplianceAffectingSeverities("ERROR,BLOCKER"));
+    }
+
+    // Validating a requested selection, which is what keeps the leniency above off the write path
+
+    @Test
+    public void testAValidSelectionIsAcceptedAndNormalised() throws Exception {
+
+        Assert.assertEquals("An accepted selection is stored upper cased and in a stable order",
+                "ERROR,WARN", APIMGovernanceUtil.validateComplianceAffectingSeverities(" warn , Error "));
+    }
+
+    @Test
+    public void testRepeatedSeveritiesAreStoredOnce() throws Exception {
+
+        // A caller can repeat a severity until the request outgrows the column. Normalising bounds what is
+        // stored by the number of severities the product defines rather than by the length of the request.
+        Assert.assertEquals("ERROR", APIMGovernanceUtil
+                .validateComplianceAffectingSeverities("ERROR,ERROR,ERROR,ERROR,ERROR,ERROR,ERROR,ERROR,ERROR,"
+                        + "ERROR,ERROR,ERROR,ERROR,ERROR,ERROR,ERROR,ERROR,ERROR,ERROR,ERROR"));
+    }
+
+    @Test
+    public void testAnUnknownSeverityIsRejected() {
+
+        try {
+            APIMGovernanceUtil.validateComplianceAffectingSeverities("ERROR,BLOCKER");
+            Assert.fail("A severity the product does not define must be rejected rather than stored");
+        } catch (APIMGovernanceException e) {
+            Assert.assertEquals(APIMGovExceptionCodes.INVALID_COMPLIANCE_AFFECTING_SEVERITIES.getErrorCode(),
+                    e.getErrorHandler().getErrorCode());
+            Assert.assertEquals("An unusable selection is the caller's mistake, not a server fault",
+                    400, e.getErrorHandler().getHttpStatusCode());
+            Assert.assertTrue("The response has to name the token that was refused",
+                    e.getErrorHandler().getErrorDescription().contains("BLOCKER"));
+        }
+    }
+
+    @Test
+    public void testAMisspelledSeverityIsRejectedRatherThanSilentlyDropped() {
+
+        // The case this guards: WRAN is dropped on read, so an unvalidated write would leave a policy the
+        // operator meant to judge on ERROR and WARN silently judged on ERROR alone.
+        try {
+            APIMGovernanceUtil.validateComplianceAffectingSeverities("ERROR,WRAN");
+            Assert.fail("A misspelled severity must not be accepted");
+        } catch (APIMGovernanceException e) {
+            Assert.assertTrue(e.getErrorHandler().getErrorDescription().contains("WRAN"));
+        }
+    }
+
+    @Test
+    public void testAnOmittedSelectionStaysOmittedAndABlankOneStaysBlank() throws Exception {
+
+        // Null means the field was not sent, which preserves what is stored; blank means clear it. Validation
+        // must not collapse the two, or an update would start clearing selections it was meant to leave alone.
+        Assert.assertNull(APIMGovernanceUtil.validateComplianceAffectingSeverities(null));
+        Assert.assertEquals(StringUtils.EMPTY, APIMGovernanceUtil.validateComplianceAffectingSeverities(""));
+    }
+
+    @Test
+    public void testASelectionOfOnlySeparatorsClearsTheSelection() throws Exception {
+
+        Assert.assertEquals("A value naming no severity means the same as a blank one",
+                StringUtils.EMPTY, APIMGovernanceUtil.validateComplianceAffectingSeverities(" , , "));
     }
 
     @Test

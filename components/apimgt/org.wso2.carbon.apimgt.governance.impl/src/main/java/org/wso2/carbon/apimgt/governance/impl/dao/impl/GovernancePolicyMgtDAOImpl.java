@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.governance.impl.dao.impl;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
@@ -38,15 +39,11 @@ import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 import org.wso2.carbon.apimgt.governance.impl.APIMGovernanceConstants;
 import org.wso2.carbon.apimgt.governance.impl.dao.GovernancePolicyMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.constants.SQLConstants;
-import org.wso2.carbon.apimgt.governance.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceDBUtil;
-import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.apimgt.impl.dto.APIMGovernanceConfigDTO;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -81,6 +78,10 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
 
     /**
      * Create a new Governance Policy
+     * <p>
+     * The severity selection rides the same insert as the policy, so it lands inside the transaction that creates
+     * the policy rather than in a second write that could fail on its own. A policy created without a selection
+     * stores null, which resolves to every severity affecting compliance.
      *
      * @param governancePolicy Governance Policy Info with Ruleset Ids
      * @param organization     Organization
@@ -103,6 +104,8 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                     Timestamp createdTime = new Timestamp(System.currentTimeMillis());
                     prepStmt.setTimestamp(7, createdTime);
                     governancePolicy.setCreatedTime(createdTime.toString());
+
+                    prepStmt.setString(8, storedSeverities(governancePolicy.getComplianceAffectingSeverities()));
 
                     prepStmt.execute();
                 }
@@ -207,6 +210,27 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
     public APIMGovernancePolicy updateGovernancePolicy(String policyId, APIMGovernancePolicy governancePolicy,
                                                        String organization)
             throws APIMGovernanceException {
+
+        // Whether the request sent the field is the only thing that decides which update runs. A request which
+        // did not send it is written by the statement that omits the column, which is what makes an absent field
+        // preserve whatever was stored while a blank one clears it.
+        if (governancePolicy.getComplianceAffectingSeverities() == null) {
+            return updatePolicy(policyId, governancePolicy, organization);
+        }
+        return updatePolicyWithSeverities(policyId, governancePolicy, organization);
+    }
+
+    /**
+     * Update a policy without naming the optional compliance affecting severity column
+     *
+     * @param policyId         Policy ID
+     * @param governancePolicy Governance Policy
+     * @param organization     Organization
+     * @return APIMGovernancePolicy Updated object
+     * @throws APIMGovernanceException If an error occurs while updating the policy
+     */
+    private APIMGovernancePolicy updatePolicy(String policyId, APIMGovernancePolicy governancePolicy,
+                                              String organization) throws APIMGovernanceException {
         try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try {
@@ -238,6 +262,60 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
         } catch (SQLException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_UPDATING_POLICY, e,
                     policyId);
+        }
+        governancePolicy.setId(policyId);
+        return governancePolicy;
+    }
+
+    /**
+     * Update a policy and its compliance affecting severities with one statement
+     * <p>
+     * A blank selection means every severity is judged, which the column holds as null. The severity is part of the
+     * same transaction as the rest of the policy, so a deployment which enabled the configuration without adding
+     * the column changes nothing at all: the update is refused and rolled back, and the response names the missing
+     * column instead of reporting a server fault.
+     *
+     * @param policyId         Policy ID
+     * @param governancePolicy Governance Policy
+     * @param organization     Organization
+     * @return APIMGovernancePolicy Updated object
+     * @throws APIMGovernanceException If an error occurs while updating the policy
+     */
+    private APIMGovernancePolicy updatePolicyWithSeverities(String policyId, APIMGovernancePolicy governancePolicy,
+                                                            String organization) throws APIMGovernanceException {
+        try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                // Update policy details
+                try (PreparedStatement updateStatement = connection
+                        .prepareStatement(SQLConstants.UPDATE_POLICY_WITH_SEVERITIES)) {
+                    updateStatement.setString(1, governancePolicy.getName());
+                    updateStatement.setString(2, governancePolicy.getDescription());
+                    updateStatement.setString(3, governancePolicy.getUpdatedBy());
+                    updateStatement.setInt(4, governancePolicy.isGlobal() ? 1 : 0);
+
+                    Timestamp updatedTime = new Timestamp(System.currentTimeMillis());
+                    updateStatement.setTimestamp(5, updatedTime);
+                    governancePolicy.setUpdatedTime(updatedTime.toString());
+
+                    updateStatement.setString(6,
+                            storedSeverities(governancePolicy.getComplianceAffectingSeverities()));
+                    updateStatement.setString(7, policyId);
+                    updateStatement.setString(8, organization);
+                    updateStatement.executeUpdate();
+                }
+                updatePolicyRulesetMappings(connection, policyId, governancePolicy);
+                updatePolicyLabels(connection, policyId, governancePolicy);
+                updateStatesAndPolicyActions(connection, policyId, governancePolicy);
+                deletePolicyResultsForPolicy(connection, policyId);
+
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
+            }
+        } catch (SQLException e) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_UPDATING_POLICY, e, policyId);
         }
         governancePolicy.setId(policyId);
         return governancePolicy;
@@ -998,190 +1076,27 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
         }
     }
 
-    /**
-     * Cached result of looking for the optional compliance affecting severity column on GOV_POLICY. Null until the
-     * first lookup, so a server restart is required after the column is added.
-     */
-    private static volatile Boolean policySeverityColumnPresent = null;
-
-    /**
-     * Check whether the optional compliance affecting severity column exists on GOV_POLICY.
-     * <p>
-     * The column is not created by the product. A deployment opts in by adding it, exactly as it does for
-     * GOV_RULESET, and until then every severity affects compliance.
-     *
-     * @param connection Connection to inspect
-     * @return True when the column is present
-     * @throws SQLException If the database metadata cannot be read
-     */
-    static boolean isComplianceAffectingSeverityColumnPresent(Connection connection) throws SQLException {
-
-        // The configuration is checked first, so a deployment which has not opted in never issues the metadata
-        // query at all and keeps behaving exactly as it did before the feature existed.
-        if (!isPerPolicySeverityFilteringEnabled()) {
-            return false;
-        }
-
-        if (policySeverityColumnPresent != null) {
-            return policySeverityColumnPresent;
-        }
-
-        DatabaseMetaData metaData = connection.getMetaData();
-        boolean found = false;
-        // The lookup is narrowed to the catalog and schema this connection actually reads and writes. A null pair
-        // searches every schema the login can see, so a second deployment or a copied schema elsewhere on the same
-        // instance would be reported as this one having the column, and the queries would then fail at runtime
-        // instead of falling back cleanly. It also keeps the data dictionary scan small on Oracle and DB2.
-        //
-        // Identifier case differs between databases, so the column name is compared ignoring case rather than
-        // relying on getColumns matching a hard coded spelling.
-        try (ResultSet resultSet = metaData.getColumns(currentCatalog(connection), currentSchema(connection),
-                resolveTableNameCase(metaData, SQLConstants.GOV_POLICY_TABLE), null)) {
-            while (resultSet.next()) {
-                if (SQLConstants.COMPLIANCE_AFFECTING_SEVERITIES_COLUMN
-                        .equalsIgnoreCase(resultSet.getString("COLUMN_NAME"))) {
-                    found = true;
-                    break;
-                }
-            }
-        }
-
-        policySeverityColumnPresent = found;
-        if (found) {
-            log.info("Per policy severity filtering is enabled and the "
-                    + SQLConstants.COMPLIANCE_AFFECTING_SEVERITIES_COLUMN + " column was found on "
-                    + SQLConstants.GOV_POLICY_TABLE + "; the feature is available");
-        } else {
-            // Half an opt in is a misconfiguration rather than a state to report quietly: the setting says the
-            // feature is wanted, the schema cannot store it, and every severity keeps affecting compliance.
-            log.warn("Per policy severity filtering is enabled by "
-                    + "apim.governance.per_policy_severity_filtering_enabled, but the optional "
-                    + SQLConstants.COMPLIANCE_AFFECTING_SEVERITIES_COLUMN + " column is missing from "
-                    + SQLConstants.GOV_POLICY_TABLE + ". Every severity affects compliance and saving a severity "
-                    + "threshold will be rejected. Add the column with: ALTER TABLE "
-                    + SQLConstants.GOV_POLICY_TABLE + " ADD "
-                    + SQLConstants.COMPLIANCE_AFFECTING_SEVERITIES_COLUMN + " VARCHAR(64); then restart the server");
-        }
-        return found;
-    }
-
-    /**
-     * Check whether per policy severity filtering has been enabled in the configuration.
-     * <p>
-     * Enabling it is only half of the opt in. The optional column must also exist on GOV_POLICY before the feature
-     * becomes available, which is what {@link #isComplianceAffectingSeverityColumnPresent(Connection)} decides.
-     *
-     * @return True when the configuration allows per policy severity filtering
-     */
-    static boolean isPerPolicySeverityFilteringEnabled() {
-
-        APIManagerConfigurationService configurationService = ServiceReferenceHolder.getInstance()
-                .getAPIMConfigurationService();
-        if (configurationService == null || configurationService.getAPIManagerConfiguration() == null) {
-            return false;
-        }
-        APIMGovernanceConfigDTO governanceConfig = configurationService.getAPIManagerConfiguration()
-                .getAPIMGovernanceConfigurationDto();
-        return governanceConfig != null && governanceConfig.isPerPolicySeverityFilteringEnabled();
-    }
-
-    /**
-     * Spell a table name the way the underlying database stores unquoted identifiers
-     *
-     * @param metaData  Database metadata
-     * @param tableName Table name in upper case
-     * @return Table name in the case the database stores it in
-     * @throws SQLException If the database metadata cannot be read
-     */
-    private static String resolveTableNameCase(DatabaseMetaData metaData, String tableName) throws SQLException {
-
-        if (metaData.storesLowerCaseIdentifiers()) {
-            return tableName.toLowerCase(java.util.Locale.ENGLISH);
-        }
-        return tableName;
-    }
-
-    /**
-     * Read the catalog of the given connection, so the metadata lookup covers only the database it is bound to
-     * <p>
-     * Returning null leaves the lookup unnarrowed, which is the behaviour to fall back to when a driver cannot
-     * answer. Not every driver supports the call, and a driver refusing it must not stop the feature being detected.
-     *
-     * @param connection Connection to the governance database
-     * @return Catalog of the connection, or null when it cannot be determined
-     */
-    private static String currentCatalog(Connection connection) {
-
-        try {
-            return connection.getCatalog();
-        } catch (SQLException | AbstractMethodError e) {
-            log.debug("Could not read the catalog of the governance connection, searching every catalog instead", e);
-            return null;
-        }
-    }
-
-    /**
-     * Read the schema of the given connection, so the metadata lookup covers only the schema it writes to
-     * <p>
-     * Oracle and DB2 instances commonly hold several schemas, and a null schema would match a table of the same
-     * name in any of them. Returning null is the unnarrowed fallback for drivers which cannot answer.
-     *
-     * @param connection Connection to the governance database
-     * @return Schema of the connection, or null when it cannot be determined
-     */
-    private static String currentSchema(Connection connection) {
-
-        try {
-            return connection.getSchema();
-        } catch (SQLException | AbstractMethodError | UnsupportedOperationException e) {
-            log.debug("Could not read the schema of the governance connection, searching every schema instead", e);
-            return null;
-        }
-    }
-
-    @Override
-    public boolean isComplianceAffectingSeverityFilteringEnabled() {
-
-        // Reports the configuration only and deliberately does not touch the database, matching the ruleset side.
-        return isPerPolicySeverityFilteringEnabled();
-    }
-
-    @Override
-    public boolean isComplianceAffectingSeverityStorageAvailable() throws APIMGovernanceException {
-
-        if (!isPerPolicySeverityFilteringEnabled()) {
-            return false;
-        }
-        try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
-            return isComplianceAffectingSeverityColumnPresent(connection);
-        } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_UPDATING_POLICY, e);
-        }
-    }
-
     @Override
     public Map<String, String> getComplianceAffectingSeverities(String organization) throws APIMGovernanceException {
 
+        // A policy absent from the map has not narrowed its severities, which resolves to every severity
+        // affecting compliance.
         Map<String, String> severitiesByPolicy = new HashMap<>();
-        try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
-            if (!isComplianceAffectingSeverityColumnPresent(connection)) {
-                return severitiesByPolicy;
-            }
-            try (PreparedStatement prepStmnt = connection
-                    .prepareStatement(SQLConstants.GET_POLICY_COMPLIANCE_AFFECTING_SEVERITIES_BY_ORGANIZATION)) {
-                prepStmnt.setString(1, organization);
-                try (ResultSet resultSet = prepStmnt.executeQuery()) {
-                    while (resultSet.next()) {
-                        String severities =
-                                resultSet.getString(SQLConstants.COMPLIANCE_AFFECTING_SEVERITIES_COLUMN);
-                        if (severities != null) {
-                            severitiesByPolicy.put(resultSet.getString("POLICY_ID"), severities);
-                        }
+        try (Connection connection = APIMGovernanceDBUtil.getConnection();
+             PreparedStatement prepStmnt = connection
+                     .prepareStatement(SQLConstants.GET_POLICY_COMPLIANCE_AFFECTING_SEVERITIES_BY_ORGANIZATION)) {
+            prepStmnt.setString(1, organization);
+            try (ResultSet resultSet = prepStmnt.executeQuery()) {
+                while (resultSet.next()) {
+                    String severities =
+                            resultSet.getString(SQLConstants.COMPLIANCE_AFFECTING_SEVERITIES_COLUMN);
+                    if (severities != null) {
+                        severitiesByPolicy.put(resultSet.getString("POLICY_ID"), severities);
                     }
                 }
             }
         } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_POLICIES, e);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_POLICIES, e, organization);
         }
         return severitiesByPolicy;
     }
@@ -1190,55 +1105,33 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
     public String getComplianceAffectingSeverities(String policyId, String organization)
             throws APIMGovernanceException {
 
-        try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
-            if (!isComplianceAffectingSeverityColumnPresent(connection)) {
-                return null;
-            }
-            try (PreparedStatement prepStmnt = connection
-                    .prepareStatement(SQLConstants.GET_POLICY_COMPLIANCE_AFFECTING_SEVERITIES)) {
-                prepStmnt.setString(1, policyId);
-                prepStmnt.setString(2, organization);
-                try (ResultSet resultSet = prepStmnt.executeQuery()) {
-                    if (resultSet.next()) {
-                        return resultSet.getString(SQLConstants.COMPLIANCE_AFFECTING_SEVERITIES_COLUMN);
-                    }
+        try (Connection connection = APIMGovernanceDBUtil.getConnection();
+             PreparedStatement prepStmnt = connection
+                     .prepareStatement(SQLConstants.GET_POLICY_COMPLIANCE_AFFECTING_SEVERITIES)) {
+            prepStmnt.setString(1, policyId);
+            prepStmnt.setString(2, organization);
+            try (ResultSet resultSet = prepStmnt.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getString(SQLConstants.COMPLIANCE_AFFECTING_SEVERITIES_COLUMN);
                 }
             }
         } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_POLICY_BY_ID, e);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_POLICY_BY_ID, e, policyId);
         }
         return null;
     }
 
-    @Override
-    public void updateComplianceAffectingSeverities(String policyId, String organization, String severities)
-            throws APIMGovernanceException {
+    /**
+     * Value to store in the optional column for a requested severity selection
+     * <p>
+     * Selecting every severity is the same statement as selecting none, and both are held as null rather than as a
+     * list of everything, so a policy has one representation of "every severity counts" instead of two.
+     *
+     * @param requestedSeverities Comma separated severities from the request, blank when every severity counts
+     * @return Value to store, null when every severity counts
+     */
+    private static String storedSeverities(String requestedSeverities) {
 
-        try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
-            // Hiding the control in the portal is not enough, the REST API can be called directly. The two
-            // reasons are reported separately so that the cause is obvious without inspecting the schema.
-            if (!isPerPolicySeverityFilteringEnabled()) {
-                throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_UPDATING_POLICY,
-                        "Per policy severity filtering is not enabled. Set "
-                                + "apim.governance.per_policy_severity_filtering_enabled to true in "
-                                + "deployment.toml and restart the server");
-            }
-            if (!isComplianceAffectingSeverityColumnPresent(connection)) {
-                throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_UPDATING_POLICY,
-                        "Per policy severity filtering is enabled but the "
-                                + SQLConstants.COMPLIANCE_AFFECTING_SEVERITIES_COLUMN + " column is missing from "
-                                + SQLConstants.GOV_POLICY_TABLE + ". Add the column and restart the server");
-            }
-            try (PreparedStatement prepStmnt = connection
-                    .prepareStatement(SQLConstants.UPDATE_POLICY_COMPLIANCE_AFFECTING_SEVERITIES)) {
-                prepStmnt.setString(1, severities);
-                prepStmnt.setString(2, policyId);
-                prepStmnt.setString(3, organization);
-                prepStmnt.executeUpdate();
-                connection.commit();
-            }
-        } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_UPDATING_POLICY, e, policyId);
-        }
+        return StringUtils.isBlank(requestedSeverities) ? null : requestedSeverities;
     }
 }

@@ -277,7 +277,7 @@ return null;
   }
 
   /**
-   * Comma separated rule severities that make this policy fail. Violations of other severities are still reported but do not affect the policy adherence status.  Three states are meaningful. Null means per policy severity filtering is not enabled on this deployment, and clients should not offer it. An empty string means it is enabled but nothing has been configured for this policy, so every severity affects compliance. A value lists the severities that do. 
+   * Comma separated rule severities that make this policy fail. Violations of other severities are still reported but do not affect the policy adherence status.  Allowed severities are &#x60;ERROR&#x60;, &#x60;WARN&#x60; and &#x60;INFO&#x60;. Any other value is rejected with 400, and an accepted value is stored normalised to upper case with repeats removed, so it may read back in a different form from the one sent.  An empty string means this policy has not narrowed its severities, so every severity affects compliance. A value lists the severities that do. Omitting the field on an update preserves whatever is stored; sending it empty clears the selection. 
    **/
   public APIMGovernancePolicyDTO complianceAffectingSeverities(String complianceAffectingSeverities) {
     this.complianceAffectingSeverities = complianceAffectingSeverities;
@@ -285,7 +285,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "ERROR,WARN", value = "Comma separated rule severities that make this policy fail. Violations of other severities are still reported but do not affect the policy adherence status.  Three states are meaningful. Null means per policy severity filtering is not enabled on this deployment, and clients should not offer it. An empty string means it is enabled but nothing has been configured for this policy, so every severity affects compliance. A value lists the severities that do. ")
+  @ApiModelProperty(example = "ERROR,WARN", value = "Comma separated rule severities that make this policy fail. Violations of other severities are still reported but do not affect the policy adherence status.  Allowed severities are `ERROR`, `WARN` and `INFO`. Any other value is rejected with 400, and an accepted value is stored normalised to upper case with repeats removed, so it may read back in a different form from the one sent.  An empty string means this policy has not narrowed its severities, so every severity affects compliance. A value lists the severities that do. Omitting the field on an update preserves whatever is stored; sending it empty clears the selection. ")
   @JsonProperty("complianceAffectingSeverities")
   public String getComplianceAffectingSeverities() {
     return complianceAffectingSeverities;
