@@ -8329,7 +8329,88 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.
                     ERROR_RESTORING_API_REVISION, apiRevision.getApiUUID()));
         }
+        int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+        // Local scopes attached to the current API before the restore. These are the only scopes which can be
+        // orphaned by the restore, and they have to be captured now because the restore removes the resource
+        // mappings which identify them.
+        Set<String> localScopesBeforeRestore = apiMgtDAO.getAllLocalScopeKeysForAPI(apiId, tenantId);
         apiMgtDAO.restoreAPIRevision(apiRevision, organization);
+        removeOrphanedLocalScopes(localScopesBeforeRestore, tenantId);
+    }
+
+    /**
+     * Removes local scopes which are no longer used by the API after a revision restore.
+     * <p>
+     * A scope is removed only when the conditional delete confirms, within a single statement, that no API
+     * resource refers to it any more - neither the restored current API, nor any revision of it, nor any other
+     * API of the tenant. Scopes which are still referenced are left untouched, so restoring a revision cannot
+     * remove scopes another revision depends on.
+     * <p>
+     * The Key Manager is updated only for scopes which were actually deleted. If that fails, the local scope is
+     * added back so that the local database and the Key Manager do not drift apart; the scope then simply
+     * remains until it is cleaned up. A Key Manager failure never fails the restore itself, which has already
+     * been committed at this point.
+     *
+     * @param candidateScopeKeys local scope keys which were attached to the API before the restore
+     * @param tenantId           tenant id
+     */
+    private void removeOrphanedLocalScopes(Set<String> candidateScopeKeys, int tenantId) {
+
+        if (candidateScopeKeys == null || candidateScopeKeys.isEmpty()) {
+            return;
+        }
+        String scopeTenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
+        for (String scopeKey : candidateScopeKeys) {
+            if (StringUtils.isEmpty(scopeKey)) {
+                continue;
+            }
+            try {
+                Scope scopeToRestore = scopesDAO.getScope(scopeKey, tenantId);
+                if (scopeToRestore == null || !scopesDAO.deleteScopeIfUnused(scopeKey, tenantId)) {
+                    // Still attached to an API resource of some revision or API. Nothing to clean up.
+                    continue;
+                }
+                try {
+                    deleteScopeFromKeyManagers(scopeKey, scopeTenantDomain);
+                } catch (Exception e) {
+                    // Catch broadly: the Key Manager client can throw unchecked exceptions when the Key Manager
+                    // is unreachable, and those must not fail an already committed restore.
+                    scopesDAO.addScopes(Collections.singleton(scopeToRestore), tenantId);
+                    log.error("Could not remove scope: " + scopeKey + " from the Key Manager of tenant: "
+                            + scopeTenantDomain + ". The local scope has been restored and remains registered.", e);
+                    continue;
+                }
+                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SCOPE, scopeKey,
+                        APIConstants.AuditLogConstants.DELETED, this.username);
+                ScopeEvent scopeEvent = new ScopeEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
+                        APIConstants.EventType.SCOPE_DELETE.name(), tenantId, scopeTenantDomain, scopeKey, null,
+                        null);
+                APIUtil.sendNotification(scopeEvent, APIConstants.NotifierType.SCOPE.name());
+                if (log.isDebugEnabled()) {
+                    log.debug("Removed orphaned local scope: " + scopeKey + " after restoring a revision.");
+                }
+            } catch (Exception e) {
+                log.error("Error while removing orphaned local scope: " + scopeKey, e);
+            }
+        }
+    }
+
+    /**
+     * Removes the given scope from every Key Manager of the tenant.
+     *
+     * @param scopeKey     scope key
+     * @param tenantDomain tenant domain
+     * @throws APIManagementException if a Key Manager fails to remove the scope
+     */
+    private void deleteScopeFromKeyManagers(String scopeKey, String tenantDomain) throws APIManagementException {
+
+        Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getGlobalAndTenantKeyManagers(tenantDomain);
+        for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
+            KeyManager keyManager = keyManagerDtoEntry.getValue().getKeyManager();
+            if (keyManager != null) {
+                keyManager.deleteScope(scopeKey);
+            }
+        }
     }
 
     /**

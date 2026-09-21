@@ -156,6 +156,40 @@ public class ScopesDAO {
         }
     }
 
+    /**
+     * Deletes a local scope only if it is no longer attached to any API resource. The check and the delete are
+     * performed by a single conditional statement, so a scope which gets attached concurrently is left untouched
+     * instead of being removed.
+     *
+     * @param scopeName scope key
+     * @param tenantId  tenant id
+     * @return true if the scope was unused and has been deleted, false if it is still in use
+     * @throws APIManagementException if an error occurs while deleting the scope
+     */
+    public boolean deleteScopeIfUnused(String scopeName, int tenantId) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try (PreparedStatement preparedStatement = connection
+                    .prepareStatement(SQLConstants.DELETE_UNUSED_LOCAL_SCOPE)) {
+                preparedStatement.setString(1, scopeName);
+                preparedStatement.setInt(2, tenantId);
+                preparedStatement.setString(3, scopeName);
+                preparedStatement.setInt(4, tenantId);
+                int deletedRows = preparedStatement.executeUpdate();
+                connection.commit();
+                return deletedRows > 0;
+            } catch (SQLException e) {
+                connection.rollback();
+                throw new APIManagementException("Error while deleting unused local scope " + scopeName + " from db",
+                        e, ExceptionCodes.INTERNAL_ERROR);
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while retrieving database connection", e,
+                    ExceptionCodes.INTERNAL_ERROR);
+        }
+    }
+
     public boolean deleteScopes(Set<String> scopes, int tenantId) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
