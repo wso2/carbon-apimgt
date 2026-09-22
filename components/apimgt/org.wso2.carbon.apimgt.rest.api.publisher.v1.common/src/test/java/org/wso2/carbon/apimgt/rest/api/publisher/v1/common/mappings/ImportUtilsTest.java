@@ -33,18 +33,21 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataDTO;
 
 import java.io.File;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ ImportUtils.class, APIConstants.class, APIProvider.class, CommonUtil.class,
-        FileUtils.class, APIUtil.class })
+        FileUtils.class, APIUtil.class, RestApiCommonUtil.class })
 public class ImportUtilsTest {
     private static final String ORGANIZATION = "carbon.super";
     private static final String POLICYNAME = "customCommonLogPolicy";
@@ -146,5 +149,47 @@ public class ImportUtilsTest {
         JsonObject actualConfig = ImportUtils.getUpdatedEndpointConfig(endpointConfigObject)
                 .get(APIConstants.ENDPOINT_SPECIFIC_CONFIG).getAsJsonObject();
         Assert.assertNull(actualConfig.get(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION));
+    }
+
+    /**
+     * An endpoint URL carried in a project archive must be checked against the network access control policy
+     * before the endpoint is added, and the rejection must keep its own error code rather than being reported
+     * as a generic failure to add endpoints.
+     */
+    @Test
+    public void testArchiveEndpointBlockedByPolicyKeepsItsErrorCode() throws Exception {
+
+        String endpointsJson = "{\"data\":[{\"id\":\"endpoint-1\",\"name\":\"ep1\","
+                + "\"deploymentStage\":\"PRODUCTION\",\"endpointConfig\":{\"endpoint_type\":\"http\","
+                + "\"production_endpoints\":{\"url\":\"http://blocked.test/store\"}}}]}";
+
+        PowerMockito.when(CommonUtil.checkFileExistence(ArgumentMatchers.anyString())).thenReturn(true);
+        PowerMockito.when(CommonUtil.yamlToJson(ArgumentMatchers.anyString())).thenReturn(endpointsJson);
+        PowerMockito.when(FileUtils.readFileToString(ArgumentMatchers.any(File.class)))
+                .thenReturn(endpointsJson);
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        PowerMockito.when(RestApiCommonUtil.getLoggedInUserTenantDomain()).thenReturn(ORGANIZATION);
+
+        // Only the policy check is stubbed, so the real URL extraction still runs and the endpoint URL has
+        // to reach the gate for this to throw at all.
+        PowerMockito.spy(APIUtil.class);
+        PowerMockito.doThrow(new APIManagementException("blocked", ExceptionCodes.UNTRUSTED_URL))
+                .when(APIUtil.class, "validateRemoteURL", ArgumentMatchers.anyString(),
+                        ArgumentMatchers.anyString());
+
+        API api = Mockito.mock(API.class);
+        Mockito.when(api.getUuid()).thenReturn("api-uuid-1");
+
+        try {
+            ImportUtils.populateAPIWithEndpoints(api, apiProvider, pathToArchive, ORGANIZATION);
+            Assert.fail("Expected the archive endpoint URL to be rejected by the access control policy");
+        } catch (APIManagementException e) {
+            Assert.assertNotNull("The rejection must carry an error handler", e.getErrorHandler());
+            Assert.assertEquals("The policy error code must survive the outer exception wrapping",
+                    ExceptionCodes.UNTRUSTED_URL.getErrorCode(), e.getErrorHandler().getErrorCode());
+        }
+        // The endpoint must never be persisted once its URL is refused.
+        Mockito.verify(apiProvider, Mockito.never())
+                .addAPIEndpoint(ArgumentMatchers.anyString(), ArgumentMatchers.any(), ArgumentMatchers.anyString());
     }
 }
