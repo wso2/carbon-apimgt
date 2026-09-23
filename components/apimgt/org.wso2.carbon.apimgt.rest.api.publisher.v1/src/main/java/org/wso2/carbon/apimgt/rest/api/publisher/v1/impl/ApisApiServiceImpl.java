@@ -4521,7 +4521,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             String vhost = apiRevisionDeploymentDTO.getVhost();
             APIRevisionDeployment apiRevisionDeployment = ApisApiServiceImplUtils.mapAPIRevisionDeploymentWithValidation(revisionId,
                     environments, environment, displayOnDevportal, vhost, true);
-            validateEndpointsForGatewayEnvironmentType(environments.get(environment), apiDto);
+
+            APIDTO apiRevisionDto = getAPIByID(revisionId, apiProvider, organization);
+            validateEndpointsForGatewayEnvironmentType(environments.get(environment), apiRevisionDto);
             apiRevisionDeployments.add(apiRevisionDeployment);
         }
         Map<String, String> complianceResult = PublisherCommonUtils.checkGovernanceComplianceSync(apiId,
