@@ -39,6 +39,10 @@ public class GraphQLConstants {
     public static final int GRAPHQL_QUERY_TOO_COMPLEX = 900821;
     public static final String GRAPHQL_QUERY_TOO_COMPLEX_MESSAGE = "QUERY TOO COMPLEX";
 
+    public static final int GRAPHQL_INTROSPECTION_NOT_SUPPORTED = 900822;
+    public static final String GRAPHQL_INTROSPECTION_NOT_SUPPORTED_MESSAGE =
+            "GraphQL introspection is not supported by the API Gateway";
+
     public static final int GRAPHQL_INVALID_QUERY = 900422;
     public static final String GRAPHQL_API_FAILURE_HANDLER = "_graphql_failure_handler";
     public static final String GRAPHQL_INVALID_QUERY_MESSAGE = "INVALID QUERY";

@@ -19,7 +19,9 @@ package org.wso2.carbon.apimgt.gateway.handlers.graphQL;
 
 import graphql.language.Definition;
 import graphql.language.Document;
+import graphql.language.Field;
 import graphql.language.OperationDefinition;
+import graphql.language.Selection;
 import graphql.parser.InvalidSyntaxException;
 import graphql.parser.Parser;
 import graphql.schema.GraphQLFieldDefinition;
@@ -27,6 +29,7 @@ import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLType;
 import graphql.validation.Validator;
 import org.apache.axiom.om.OMElement;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
@@ -35,6 +38,7 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
+import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
 import org.wso2.carbon.apimgt.api.gateway.GraphQLSchemaDTO;
@@ -51,6 +55,7 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
 import static org.apache.axis2.Constants.Configuration.HTTP_METHOD;
@@ -63,6 +68,10 @@ public class GraphQLAPIHandler extends AbstractHandler {
     private static final String GRAPHQL_API = "GRAPHQL";
     private static final String HTTP_VERB = "HTTP_VERB";
     private static final String UNICODE_TRANSFORMATION_FORMAT = "UTF-8";
+    // Per the GraphQL spec, introspection meta-fields (__schema, __type, __typename) always start with "__".
+    // They are never declared in an API's SDL, so they can never appear in the schema-derived elected-resource
+    // list - they must be detected explicitly instead of silently falling through as "no match".
+    private static final String INTROSPECTION_FIELD_PREFIX = "__";
     private static final Log log = LogFactory.getLog(GraphQLAPIHandler.class);
     private GraphQLSchemaDTO graphQLSchemaDTO;
     private String apiUUID;
@@ -136,6 +145,17 @@ public class GraphQLAPIHandler extends AbstractHandler {
                             messageContext.setProperty(HTTP_VERB, httpVerb);
                             ((Axis2MessageContext) messageContext).getAxis2MessageContext().setProperty(HTTP_METHOD,
                                     operation.getOperation().toString());
+                            // Check for introspection fields before electing a resource: a top-level selection
+                            // set may contain an introspection field ALONGSIDE a genuine schema-defined field
+                            // (e.g. "{ characters { id } __schema { types { name } } }") - in that case
+                            // getOperationListAsString below would still resolve non-empty (from the matched
+                            // field), so introspection must be checked unconditionally rather than only when
+                            // the elected-resource list turns out empty.
+                            List<String> introspectionFields = getIntrospectionFieldNames(operation);
+                            if (!introspectionFields.isEmpty()) {
+                                handleIntrospectionNotSupported(messageContext, introspectionFields);
+                                return false;
+                            }
                             String operationList = GraphQLProcessorUtil.getOperationListAsString(operation,
                                     graphQLSchemaDTO.getTypeDefinitionRegistry());
                             messageContext.setProperty(APIConstants.API_ELECTED_RESOURCE, operationList);
@@ -274,6 +294,63 @@ public class GraphQLAPIHandler extends AbstractHandler {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Returns the top-level GraphQL introspection meta-field names (e.g. "__schema", "__type") present in the
+     * given operation's selection set, if any. Introspection fields are never declared in an API's SDL, so they
+     * are never part of the schema-derived "supported fields" used for resource election - without this explicit
+     * check they would silently be dropped, leaving an empty elected resource that is indistinguishable from a
+     * request for a genuinely nonexistent resource.
+     *
+     * @param operation the parsed GraphQL operation
+     * @return the introspection field names found in the top-level selection set, or an empty list if none
+     */
+    private List<String> getIntrospectionFieldNames(OperationDefinition operation) {
+
+        List<String> introspectionFields = new ArrayList<>();
+        for (Selection selection : operation.getSelectionSet().getSelections()) {
+            if (selection instanceof Field) {
+                String fieldName = ((Field) selection).getName();
+                if (fieldName != null && fieldName.startsWith(INTROSPECTION_FIELD_PREFIX)) {
+                    introspectionFields.add(fieldName);
+                }
+            }
+        }
+        return introspectionFields;
+    }
+
+    /**
+     * Rejects a GraphQL request whose top-level selection set contains a blocked introspection field, with a
+     * fault that accurately reflects what happened (introspection is not supported by the Gateway) instead of
+     * the generic, REST-shaped "no matching resource" error the request would otherwise fall through to.
+     *
+     * @param messageContext      message context of the request
+     * @param introspectionFields the introspection field name(s) that triggered the rejection
+     */
+    private void handleIntrospectionNotSupported(MessageContext messageContext, List<String> introspectionFields) {
+
+        String apiContext = StringUtils.defaultIfBlank(
+                (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT), "unknown");
+        String apiVersion = StringUtils.defaultIfBlank(
+                (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION), "unknown");
+        String fieldList = String.join(",", introspectionFields);
+
+        log.warn("GraphQL introspection request blocked for API: " + apiContext + ", version: " + apiVersion
+                + " - requested introspection field(s): " + fieldList);
+
+        messageContext.setProperty(SynapseConstants.ERROR_CODE,
+                GraphQLConstants.GRAPHQL_INTROSPECTION_NOT_SUPPORTED);
+        messageContext.setProperty(SynapseConstants.ERROR_MESSAGE,
+                GraphQLConstants.GRAPHQL_INTROSPECTION_NOT_SUPPORTED_MESSAGE);
+        messageContext.setProperty(SynapseConstants.ERROR_DETAIL,
+                "GraphQL introspection field(s) [" + fieldList + "] are not supported by the API Gateway. "
+                        + "Introspection queries are not routed to the backend.");
+        Mediator sequence = messageContext.getSequence(GraphQLConstants.GRAPHQL_API_FAILURE_HANDLER);
+        if (sequence != null && !sequence.mediate(messageContext)) {
+            return;
+        }
+        Utils.sendFault(messageContext, HttpStatus.SC_FORBIDDEN);
     }
 
     /**
