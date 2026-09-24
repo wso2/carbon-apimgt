@@ -344,8 +344,8 @@ public class GraphQLAPIHandler extends AbstractHandler {
         messageContext.setProperty(SynapseConstants.ERROR_MESSAGE,
                 GraphQLConstants.GRAPHQL_INTROSPECTION_NOT_SUPPORTED_MESSAGE);
         messageContext.setProperty(SynapseConstants.ERROR_DETAIL,
-                "GraphQL introspection field(s) [" + fieldList + "] are not supported by the API Gateway. "
-                        + "Introspection queries are not routed to the backend.");
+                "GraphQL introspection queries are not allowed through the API Gateway. "
+                        + "Remove the introspection field(s) [" + fieldList + "] and retry the request. ");
         Mediator sequence = messageContext.getSequence(GraphQLConstants.GRAPHQL_API_FAILURE_HANDLER);
         if (sequence != null && !sequence.mediate(messageContext)) {
             return;
