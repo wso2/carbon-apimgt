@@ -1267,8 +1267,6 @@ public class GatewayUtils {
                         httpStatusCode.toString());
             }
         } catch (Exception e) {
-//            log.error("Error while setting common HTTP attributes on the tracing span.", e);
-            // for debugging purpose
             if (log.isDebugEnabled()) {
                 log.debug("Error while setting common HTTP attributes on the tracing span.", e);
             }
