@@ -52,10 +52,10 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
         }
 
         if (TelemetryUtil.telemetryEnabled()) {
-            //synapse message context -> axis2 message context
+            // synapse message context -> axis2 message context
             org.apache.axis2.context.MessageContext axis2MessageContext =
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-            //retrieves all http request headers (opentelemtry stores tracing info inside http headers)
+            // retrieves all http request headers (opentelemetry stores tracing info inside http headers)
             Map headersMap =
                     (Map) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
             if (headersMap != null) {
