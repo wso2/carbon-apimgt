@@ -111,7 +111,8 @@ public class MutualSSLAuthenticator implements Authenticator {
         Certificate sslCertObject;
         try {
             sslCertObject = Utils.getClientCertificate(axis2MessageContext);
-            if (!APIUtil.isCertificateExistsInListenerTrustStore(sslCertObject)) {
+            if (Utils.isClientCertificateValidationEnabled()
+                    && !APIUtil.isCertificateExistsInListenerTrustStore(sslCertObject)) {
                 log.debug("Certificate in Header didn't exist in truststore");
                 sslCertObject = null;
             }

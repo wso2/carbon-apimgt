@@ -503,6 +503,16 @@ public class Utils {
             }
 
             if (!isClientCertificateEncoded()) {
+                // Discard any characters (e.g. trailing spaces, \r, \n, [\r], [\n]) that load balancers may
+                // append outside the BEGIN/END markers before restructuring the certificate.
+                if (certificate.contains(APIConstants.BEGIN_CERTIFICATE_STRING)
+                        && certificate.contains(APIConstants.END_CERTIFICATE_STRING)) {
+                    certificate = APIConstants.BEGIN_CERTIFICATE_STRING
+                            + certificate.substring(certificate.indexOf(APIConstants.BEGIN_CERTIFICATE_STRING)
+                                    + APIConstants.BEGIN_CERTIFICATE_STRING.length(),
+                            certificate.indexOf(APIConstants.END_CERTIFICATE_STRING))
+                            + APIConstants.END_CERTIFICATE_STRING;
+                }
                 // Remove invalid characters, restructure line separators, and reconstruct the certificate
                 certificate = certificate
                         .replaceAll(APIConstants.BEGIN_CERTIFICATE_STRING.concat(System.lineSeparator()), "")
@@ -511,6 +521,8 @@ public class Utils {
                         .replaceAll(System.lineSeparator().concat(APIConstants.END_CERTIFICATE_STRING), "")
                         .replaceAll("\n".concat(APIConstants.END_CERTIFICATE_STRING), "")
                         .replaceAll(APIConstants.END_CERTIFICATE_STRING, "")
+                        // remove illegal characters such as \r, \n, [\r], [\n] injected by load balancers
+                        .replaceAll("\\\\r|\\\\n|\\[|]", "")
                         .trim()
                         .replaceAll(" ", System.lineSeparator())
                         .trim();
@@ -543,7 +555,7 @@ public class Utils {
         return null;
     }
 
-    private static boolean isClientCertificateValidationEnabled() {
+    public static boolean isClientCertificateValidationEnabled() {
 
         APIManagerConfiguration apiManagerConfiguration =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
