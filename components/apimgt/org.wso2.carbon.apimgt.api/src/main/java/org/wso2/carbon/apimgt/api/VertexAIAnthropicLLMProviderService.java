@@ -107,7 +107,7 @@ public class VertexAIAnthropicLLMProviderService extends BuiltInLLMProviderServi
             // the model's current version, and - unlike the @-pinned form - route cleanly through the gateway
             // resource path (the '@' character is not matched by the API resource template).
             modelList.add(new LLMModel(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_VERTEX_AI_ANTHROPIC_NAME,
-                    Arrays.asList("claude-sonnet-4", "claude-3-5-sonnet-v2", "claude-3-5-haiku")));
+                    Arrays.asList("claude-opus-4-6", "claude-sonnet-4-6", "claude-haiku-4-5")));
             llmProvider.setModelList(modelList);
 
             llmProvider.setConfigurations(llmProviderConfiguration.toJsonString());
