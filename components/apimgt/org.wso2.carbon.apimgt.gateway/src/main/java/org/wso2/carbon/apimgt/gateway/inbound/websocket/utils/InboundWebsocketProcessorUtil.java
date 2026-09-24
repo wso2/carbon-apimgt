@@ -55,6 +55,8 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
@@ -362,9 +364,9 @@ public class InboundWebsocketProcessorUtil {
             return;
         }
         StringBuilder retained = new StringBuilder();
-        for (String pair : fullRequestPath.substring(queryStart + 1).split("&")) {
+        for (String pair : fullRequestPath.substring(queryStart + 1).split("[&;]")) {
             int equals = pair.indexOf('=');
-            String name = equals < 0 ? pair : pair.substring(0, equals);
+            String name = decodeQueryParamName(equals < 0 ? pair : pair.substring(0, equals));
             if (name.isEmpty() || tokenType.equals(name)) {
                 continue;
             }
@@ -375,6 +377,26 @@ public class InboundWebsocketProcessorUtil {
         }
         String path = fullRequestPath.substring(0, queryStart);
         inboundMessageContext.setFullRequestPath(retained.length() == 0 ? path : path + '?' + retained);
+    }
+
+    /**
+     * Decodes a query parameter name so that encoded forms of the same name compare equal. The credential
+     * was located with QueryStringDecoder, which decodes names, so comparing raw text here would leave an
+     * encoded form of that credential in the query.
+     *
+     * @param name raw query parameter name as it appears in the request path
+     * @return the decoded name, or the raw name when it cannot be decoded
+     */
+    private static String decodeQueryParamName(String name) {
+
+        if (name.indexOf('%') < 0 && name.indexOf('+') < 0) {
+            return name;
+        }
+        try {
+            return URLDecoder.decode(name, StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException | IllegalArgumentException e) {
+            return name;
+        }
     }
 
     /**
