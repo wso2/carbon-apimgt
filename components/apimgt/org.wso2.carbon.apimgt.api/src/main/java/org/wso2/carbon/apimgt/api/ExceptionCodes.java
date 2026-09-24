@@ -128,6 +128,8 @@ public enum ExceptionCodes implements ErrorHandler {
     SUB_ORGANIZATION_NOT_IDENTIFIED(900361, "User's Organization Not Identified", 403, "User's Organization is not identified"),
     CANNOT_CREATE_API_VERSION(900362, "New API Version cannot be created from a different provider", 409, "Initial provider of an API must be preserved in all versions of that API"),
     INTERNAL_ERROR_WHILE_UPDATING_API(900363, "Internal Server Error occurred while updating the API", 500, "Internal Server Error. '%s'"),
+    MISSING_ENDPOINT_FOR_GATEWAY_ENV_TYPE(900366, "Missing endpoint for the gateway environment type", 400, "Cannot deploy to gateway environment '%s' " +
+            "because the API does not define a '%s' endpoint, which is required by that environment type"),
     ERROR_WHILE_UPDATING_MANDATORY_PROPERTIES(903010, "Error while updating required properties", 400, "Error while updating required properties."),
     ERROR_WHILE_VALIDATING_MANDATORY_PROPERTIES(903015, "Error while validating required properties", 400, "Error while validating required properties."),
 
