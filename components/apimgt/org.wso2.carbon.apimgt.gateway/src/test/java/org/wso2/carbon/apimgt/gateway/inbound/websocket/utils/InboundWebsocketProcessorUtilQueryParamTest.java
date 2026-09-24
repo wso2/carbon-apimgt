@@ -112,4 +112,32 @@ public class InboundWebsocketProcessorUtilQueryParamTest {
         Assert.assertEquals("/ws?access_token_hint=X",
                 strip("/ws?access_token_hint=X&access_token=GW"));
     }
+
+    // QueryStringDecoder, which located the credential, decodes names and treats ';' as a separator.
+    // Removal must match that view or an encoded or ';' separated credential survives in the query.
+
+    @Test
+    public void testEncodedCredentialNameRemoved() {
+        Assert.assertEquals("/ws?authToken=X", strip("/ws?%61ccess_token=GW&authToken=X"));
+    }
+
+    @Test
+    public void testUnderscoreEncodedCredentialNameRemoved() {
+        Assert.assertEquals("/ws?authToken=X", strip("/ws?access%5Ftoken=GW&authToken=X"));
+    }
+
+    @Test
+    public void testSemicolonSeparatedCredentialRemoved() {
+        Assert.assertEquals("/ws?authToken=X", strip("/ws?access_token=GW;authToken=X"));
+    }
+
+    @Test
+    public void testSemicolonSeparatedCredentialLastRemoved() {
+        Assert.assertEquals("/ws?authToken=X", strip("/ws?authToken=X;access_token=GW"));
+    }
+
+    @Test
+    public void testEncodedNonCredentialNameKeptVerbatim() {
+        Assert.assertEquals("/ws?%61uthToken=X", strip("/ws?%61uthToken=X&access_token=GW"));
+    }
 }
