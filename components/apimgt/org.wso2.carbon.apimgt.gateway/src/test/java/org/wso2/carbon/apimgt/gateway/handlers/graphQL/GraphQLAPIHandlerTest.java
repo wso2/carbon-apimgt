@@ -185,12 +185,13 @@ public class GraphQLAPIHandlerTest {
     }
 
     /**
-     * An introspection field sitting in the same top-level selection set as a genuine schema-defined field must
-     * still be rejected. Resource election would otherwise succeed on the schema-defined field alone and the
-     * whole query - introspection included - would be forwarded to the backend.
+     * A query that mixes a schema-defined field with an introspection field elects the schema-defined field, so
+     * it is routed exactly as it was before this change. Such a request does not hit the misleading "no matching
+     * resource" error this change addresses, and altering it would change the behaviour of a request that
+     * currently succeeds - deliberately out of scope.
      */
     @Test
-    public void testHandleRequestForMixedIntrospectionAndFieldQuery() {
+    public void testHandleRequestForMixedIntrospectionAndFieldQueryIsUnchanged() {
 
         Mockito.when(messageContext.getProperty(APIConstants.GRAPHQL_SUBSCRIPTION_REQUEST)).thenReturn(false);
         Mockito.when(axis2MessageContext.getProperty(HTTP_METHOD)).thenReturn("QUERY");
@@ -199,11 +200,28 @@ public class GraphQLAPIHandlerTest {
         GraphQLAPIHandler graphQLAPIHandler = new GraphQLAPIHandler();
         graphQLAPIHandler.setApiUUID("12345");
 
-        Assert.assertFalse("A query mixing a schema-defined field with an introspection field should be rejected",
+        Assert.assertTrue("A query that elects an operation must keep its existing behaviour",
                 graphQLAPIHandler.handleRequest(messageContext));
-        assertIntrospectionRejection("__schema");
-        Mockito.verify(messageContext, Mockito.never())
-                .setProperty(Mockito.eq(APIConstants.API_ELECTED_RESOURCE), Mockito.any());
+        Mockito.verify(messageContext).setProperty(APIConstants.API_ELECTED_RESOURCE, "allLifts");
+    }
+
+    /**
+     * The same holds when a root-level {@code __typename} accompanies a schema-defined field: an operation is
+     * elected, so the request is routed unchanged.
+     */
+    @Test
+    public void testHandleRequestForFieldPlusRootTypeNameIsUnchanged() {
+
+        Mockito.when(messageContext.getProperty(APIConstants.GRAPHQL_SUBSCRIPTION_REQUEST)).thenReturn(false);
+        Mockito.when(axis2MessageContext.getProperty(HTTP_METHOD)).thenReturn("QUERY");
+        Mockito.when(omElement.getText()).thenReturn("{allLifts{name} __typename}");
+
+        GraphQLAPIHandler graphQLAPIHandler = new GraphQLAPIHandler();
+        graphQLAPIHandler.setApiUUID("12345");
+
+        Assert.assertTrue("__typename alongside a schema-defined field must keep its existing behaviour",
+                graphQLAPIHandler.handleRequest(messageContext));
+        Mockito.verify(messageContext).setProperty(APIConstants.API_ELECTED_RESOURCE, "allLifts");
     }
 
     /**
@@ -227,7 +245,7 @@ public class GraphQLAPIHandlerTest {
 
     /**
      * Asserts the fault the handler raises for a blocked introspection request: the dedicated error code,
-     * message and a detail naming the offending field, plus the 403 status.
+     * message and a detail naming the offending field, plus the 400 status.
      *
      * @param expectedField the introspection field expected to be named in the error detail
      */
@@ -244,6 +262,6 @@ public class GraphQLAPIHandlerTest {
                 + detail.getValue(), detail.getValue().contains(expectedField));
 
         PowerMockito.verifyStatic(Utils.class);
-        Utils.sendFault(messageContext, HttpStatus.SC_FORBIDDEN);
+        Utils.sendFault(messageContext, HttpStatus.SC_BAD_REQUEST);
     }
 }

@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.gateway.handlers.graphQL;
 
+import graphql.introspection.Introspection;
 import graphql.language.Definition;
 import graphql.language.Document;
 import graphql.language.Field;
@@ -53,8 +54,11 @@ import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -71,7 +75,13 @@ public class GraphQLAPIHandler extends AbstractHandler {
     // Per the GraphQL spec, introspection meta-fields (__schema, __type, __typename) always start with "__".
     // They are never declared in an API's SDL, so they can never appear in the schema-derived elected-resource
     // list - they must be detected explicitly instead of silently falling through as "no match".
-    private static final String INTROSPECTION_FIELD_PREFIX = "__";
+    // The two meta-fields that expose the schema. The GraphQL spec allows both only at the query root,
+    // and graphql-java names them here so the values cannot drift. __typename is deliberately NOT in this
+    // set: it names the type of an object already being fetched, which is ordinary response data, and
+    // GraphQL clients add it to requests routinely.
+    private static final Set<String> SCHEMA_DISCOVERY_FIELDS = Collections.unmodifiableSet(
+            new HashSet<>(Arrays.asList(Introspection.SchemaMetaFieldDef.getName(),
+                    Introspection.TypeMetaFieldDef.getName())));
     private static final Log log = LogFactory.getLog(GraphQLAPIHandler.class);
     private GraphQLSchemaDTO graphQLSchemaDTO;
     private String apiUUID;
@@ -145,19 +155,22 @@ public class GraphQLAPIHandler extends AbstractHandler {
                             messageContext.setProperty(HTTP_VERB, httpVerb);
                             ((Axis2MessageContext) messageContext).getAxis2MessageContext().setProperty(HTTP_METHOD,
                                     operation.getOperation().toString());
-                            // Check for introspection fields before electing a resource: a top-level selection
-                            // set may contain an introspection field ALONGSIDE a genuine schema-defined field
-                            // (e.g. "{ characters { id } __schema { types { name } } }") - in that case
-                            // getOperationListAsString below would still resolve non-empty (from the matched
-                            // field), so introspection must be checked unconditionally rather than only when
-                            // the elected-resource list turns out empty.
-                            List<String> introspectionFields = getIntrospectionFieldNames(operation);
-                            if (!introspectionFields.isEmpty()) {
-                                handleIntrospectionNotSupported(messageContext, introspectionFields);
-                                return false;
-                            }
                             String operationList = GraphQLProcessorUtil.getOperationListAsString(operation,
                                     graphQLSchemaDTO.getTypeDefinitionRegistry());
+                            // Only a request that elects no operation is affected here. Such a request already
+                            // fails downstream, in the authentication handler, with the generic REST-shaped
+                            // "no matching resource" error - which is the misleading error this change is about.
+                            // When the reason no operation was elected is that the request asks only for
+                            // schema-discovery meta-fields, answer with an accurate GraphQL error instead. A
+                            // request that elects at least one operation is left exactly as it was, so no
+                            // currently succeeding request changes behaviour.
+                            if (StringUtils.isEmpty(operationList)) {
+                                List<String> introspectionFields = getIntrospectionFieldNames(operation);
+                                if (!introspectionFields.isEmpty()) {
+                                    handleIntrospectionNotSupported(messageContext, introspectionFields);
+                                    return false;
+                                }
+                            }
                             messageContext.setProperty(APIConstants.API_ELECTED_RESOURCE, operationList);
                             if (log.isDebugEnabled()) {
                                 log.debug("Operation list has been successfully added to elected property");
@@ -312,7 +325,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
         for (Selection selection : operation.getSelectionSet().getSelections()) {
             if (selection instanceof Field) {
                 String fieldName = ((Field) selection).getName();
-                if (fieldName != null && fieldName.startsWith(INTROSPECTION_FIELD_PREFIX)) {
+                if (SCHEMA_DISCOVERY_FIELDS.contains(fieldName)) {
                     introspectionFields.add(fieldName);
                 }
             }
@@ -350,7 +363,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
         if (sequence != null && !sequence.mediate(messageContext)) {
             return;
         }
-        Utils.sendFault(messageContext, HttpStatus.SC_FORBIDDEN);
+        Utils.sendFault(messageContext, HttpStatus.SC_BAD_REQUEST);
     }
 
     /**
