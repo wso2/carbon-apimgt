@@ -3896,12 +3896,13 @@ public class SQLConstants {
 
     /**
      * Deletes a local scope only if it is not attached to any API resource - neither the current API nor any
-     * revision of it, nor any other API in the tenant. The existence check and the delete are evaluated as a
-     * single statement so that a concurrent attachment cannot slip in between them.
+     * revision of it, nor any other API in the tenant - and it is not a shared scope. The checks and the delete are
+     * evaluated as a single statement so that a concurrent attachment cannot slip in between them.
      */
     public static final String DELETE_UNUSED_LOCAL_SCOPE =
             "DELETE FROM AM_SCOPE WHERE NAME = ? AND TENANT_ID = ? AND NOT EXISTS "
-                    + "(SELECT 1 FROM AM_API_RESOURCE_SCOPE_MAPPING WHERE SCOPE_NAME = ? AND TENANT_ID = ?)";
+                    + "(SELECT 1 FROM AM_API_RESOURCE_SCOPE_MAPPING WHERE SCOPE_NAME = ? AND TENANT_ID = ?) "
+                    + "AND NOT EXISTS (SELECT 1 FROM AM_SHARED_SCOPE WHERE NAME = ? AND TENANT_ID = ?)";
 
     public static final String REMOVE_RESOURCE_SCOPE_URL_MAPPING_SQL =
             " DELETE FROM AM_API_RESOURCE_SCOPE_MAPPING "

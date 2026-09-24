@@ -157,13 +157,13 @@ public class ScopesDAO {
     }
 
     /**
-     * Deletes a local scope only if it is no longer attached to any API resource. The check and the delete are
-     * performed by a single conditional statement, so a scope which gets attached concurrently is left untouched
-     * instead of being removed.
+     * Deletes a local scope only if it is no longer attached to any API resource and it is not a shared scope. The
+     * checks and the delete are performed by a single conditional statement, so a scope which gets attached
+     * concurrently is left untouched instead of being removed.
      *
      * @param scopeName scope key
      * @param tenantId  tenant id
-     * @return true if the scope was unused and has been deleted, false if it is still in use
+     * @return true if the scope was unused and has been deleted, false if it is still in use or is a shared scope
      * @throws APIManagementException if an error occurs while deleting the scope
      */
     public boolean deleteScopeIfUnused(String scopeName, int tenantId) throws APIManagementException {
@@ -176,6 +176,8 @@ public class ScopesDAO {
                 preparedStatement.setInt(2, tenantId);
                 preparedStatement.setString(3, scopeName);
                 preparedStatement.setInt(4, tenantId);
+                preparedStatement.setString(5, scopeName);
+                preparedStatement.setInt(6, tenantId);
                 int deletedRows = preparedStatement.executeUpdate();
                 connection.commit();
                 return deletedRows > 0;
