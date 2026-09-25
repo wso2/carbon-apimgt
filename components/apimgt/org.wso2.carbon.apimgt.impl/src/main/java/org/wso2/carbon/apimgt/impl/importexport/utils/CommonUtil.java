@@ -46,6 +46,7 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
+import org.yaml.snakeyaml.nodes.Tag;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -251,7 +252,10 @@ public class CommonUtil {
      */
     public static String yamlToJson(String yaml) throws IOException {
 
-        Object obj = new Yaml(new SafeConstructor(new LoaderOptions())).load(yaml);
+        SafeConstructor constructor = new SafeConstructor(new LoaderOptions()) {{
+            yamlConstructors.put(Tag.TIMESTAMP, yamlConstructors.get(Tag.STR));
+        }};
+        Object obj = new Yaml(constructor).load(yaml);
 
         ObjectMapper jsonWriter = new ObjectMapper();
         return jsonWriter.writeValueAsString(obj);

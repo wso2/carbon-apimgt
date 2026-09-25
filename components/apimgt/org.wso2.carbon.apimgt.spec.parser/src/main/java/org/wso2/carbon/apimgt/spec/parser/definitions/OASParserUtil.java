@@ -96,6 +96,7 @@ import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.spec.parser.definitions.mixin.License31Mixin;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
+import org.yaml.snakeyaml.nodes.Tag;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -2616,7 +2617,10 @@ public class OASParserUtil {
             loaderOptions.setCodePointLimit(yamlCodePointLimit);
         }
 
-        Object loaded = new org.yaml.snakeyaml.Yaml(new SafeConstructor(loaderOptions)).load(yaml);
+        SafeConstructor constructor = new SafeConstructor(loaderOptions) {{
+            yamlConstructors.put(Tag.TIMESTAMP, yamlConstructors.get(Tag.STR));
+        }};
+        Object loaded = new org.yaml.snakeyaml.Yaml(constructor).load(yaml);
         return new ObjectMapper().valueToTree(loaded);
     }
 
