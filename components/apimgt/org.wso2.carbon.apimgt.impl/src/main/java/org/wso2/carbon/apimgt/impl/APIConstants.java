@@ -3858,7 +3858,18 @@ public final class APIConstants {
         public static final String PROTOCOL_VERSION_2024_NOVEMBER = "2024-11-05";
         public static final String PROTOCOL_VERSION_2025_MARCH = "2025-03-26";
         public static final String PROTOCOL_VERSION_2025_JUNE = "2025-06-18";
+        public static final String PROTOCOL_VERSION_2025_NOVEMBER = "2025-11-25";
         public static final List<String> SUPPORTED_PROTOCOL_VERSIONS = Arrays.asList(PROTOCOL_VERSION_2025_JUNE);
+        /**
+         * Protocol revisions accepted in the MCP-Protocol-Version request header. A client declaring a revision
+         * outside this list is answered with a bare HTTP 400 so that it falls back to the initialize handshake.
+         * Kept separate from SUPPORTED_PROTOCOL_VERSIONS, which only supplies the "supported" set reported in an
+         * initialize error body. The gateway does not validate the protocolVersion sent in initialize params, and
+         * for an MCP server proxying a third party backend the revision is settled by that backend, so the two
+         * lists are not required to hold the same values.
+         */
+        public static final List<String> SUPPORTED_PROTOCOL_VERSION_HEADERS =
+                Arrays.asList(PROTOCOL_VERSION_2025_JUNE, PROTOCOL_VERSION_2025_NOVEMBER);
         public static final String PROTOCOL_VERSION_REQUESTED = "requested";
         public static final String PROTOCOL_VERSION_SUPPORTED = "supported";
         public static final String PROTOCOL_MISMATCH_ERROR = "Unsupported protocol version";
