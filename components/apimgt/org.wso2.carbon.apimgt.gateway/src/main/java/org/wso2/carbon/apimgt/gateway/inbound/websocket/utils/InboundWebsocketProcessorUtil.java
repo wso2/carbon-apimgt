@@ -55,6 +55,8 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
@@ -344,24 +346,57 @@ public class InboundWebsocketProcessorUtil {
     /**
      * Remove token query parameter from full request path in InboundMessageContext.
      *
-     * @param parameters            Query parameters
+     * The query is rewritten by copying the pairs that are kept across byte for byte, so percent encoding is
+     * preserved and repeated parameters survive. Rebuilding it from the decoded parameter map loses both:
+     * QueryStringDecoder decodes the values, and a map holds only one value per name.
+     *
+     * @param parameters            Query parameters. Retained for backward compatibility and no longer read,
+     *                              since the query is rewritten from the raw request path.
      * @param inboundMessageContext InboundMessageContext
+     * @param tokenType             Name of the query parameter to remove
      */
     public static void removeTokenFromQuery(Map<String, List<String>> parameters,
                                             InboundMessageContext inboundMessageContext, String tokenType) {
 
         String fullRequestPath = inboundMessageContext.getFullRequestPath();
-        StringBuilder queryBuilder = new StringBuilder(fullRequestPath.substring(0, fullRequestPath.indexOf('?') + 1));
-
-        for (Map.Entry<String, List<String>> entry : parameters.entrySet()) {
-            if (!tokenType.equals(entry.getKey())) {
-                queryBuilder.append(entry.getKey()).append('=').append(entry.getValue().get(0)).append('&');
-            }
+        int queryStart = fullRequestPath == null ? -1 : fullRequestPath.indexOf('?');
+        if (queryStart < 0) {
+            return;
         }
+        StringBuilder retained = new StringBuilder();
+        for (String pair : fullRequestPath.substring(queryStart + 1).split("[&;]")) {
+            int equals = pair.indexOf('=');
+            String name = decodeQueryParamName(equals < 0 ? pair : pair.substring(0, equals));
+            if (name.isEmpty() || tokenType.equals(name)) {
+                continue;
+            }
+            if (retained.length() > 0) {
+                retained.append('&');
+            }
+            retained.append(pair);
+        }
+        String path = fullRequestPath.substring(0, queryStart);
+        inboundMessageContext.setFullRequestPath(retained.length() == 0 ? path : path + '?' + retained);
+    }
 
-        // remove trailing '?' or '&' from the built string
-        fullRequestPath = queryBuilder.substring(0, queryBuilder.length() - 1);
-        inboundMessageContext.setFullRequestPath(fullRequestPath);
+    /**
+     * Decodes a query parameter name so that encoded forms of the same name compare equal. The credential
+     * was located with QueryStringDecoder, which decodes names, so comparing raw text here would leave an
+     * encoded form of that credential in the query.
+     *
+     * @param name raw query parameter name as it appears in the request path
+     * @return the decoded name, or the raw name when it cannot be decoded
+     */
+    private static String decodeQueryParamName(String name) {
+
+        if (name.indexOf('%') < 0 && name.indexOf('+') < 0) {
+            return name;
+        }
+        try {
+            return URLDecoder.decode(name, StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException | IllegalArgumentException e) {
+            return name;
+        }
     }
 
     /**
