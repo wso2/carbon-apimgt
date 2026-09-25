@@ -2182,4 +2182,25 @@ public class APIUtilTest {
         fileName = "test1.pdf";
         Assert.assertFalse("PDF type should not be allowed", APIUtil.isSupportedFileType(fileName));
     }
+    @Test
+    public void testIsSupportedFileTypeWithNullAndEmpty() throws Exception {
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        APIManagerConfigurationService apiManagerConfigurationService = Mockito
+                .mock(APIManagerConfigurationService.class);
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService())
+                .thenReturn(apiManagerConfigurationService);
+        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+
+        // Edge Case 1: Test how the utility handles a null filename
+        Assert.assertFalse("Null file name should not be evaluated as a supported file type", 
+                APIUtil.isSupportedFileType(null));
+
+        // Edge Case 2: Test how the utility handles an empty string filename
+        Assert.assertFalse("Empty file name string should not be evaluated as a supported file type", 
+                APIUtil.isSupportedFileType(""));
+    }
+   
 }
