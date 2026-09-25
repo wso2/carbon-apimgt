@@ -26,16 +26,22 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPBody;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpStatus;
+import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.gateway.GraphQLSchemaDTO;
+import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
@@ -52,7 +58,7 @@ import static org.apache.synapse.rest.RESTConstants.REST_SUB_REQUEST_PATH;
  * Unit test cases related GraphQLAPIHandler.
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ DataHolder.class })
+@PrepareForTest({ DataHolder.class, Utils.class })
 public class GraphQLAPIHandlerTest {
 
     Axis2MessageContext messageContext;
@@ -71,6 +77,10 @@ public class GraphQLAPIHandlerTest {
         SOAPEnvelope soapEnvelope = Mockito.mock(SOAPEnvelope.class);
         SOAPBody soapBody = Mockito.mock(SOAPBody.class);
         PowerMockito.mockStatic(DataHolder.class);
+        // Partial static spy: every Utils method keeps its real behaviour (notably
+        // isGraphQLSubscriptionRequest, which handleRequest short-circuits on), while sendFault is
+        // suppressed so the fault raised for a blocked request can be verified without a transport.
+        PowerMockito.spy(Utils.class);
         OMElement body = Mockito.mock(OMElement.class);
         Map propertyList = Mockito.mock(Map.class);
 
@@ -102,6 +112,13 @@ public class GraphQLAPIHandlerTest {
         schemaDTOMap.put("12345", schemaDTO);
 
         Mockito.when(dataHolder.getApiToGraphQLSchemaDTOMap()).thenReturn(schemaDTOMap);
+
+        try {
+            PowerMockito.doNothing().when(Utils.class, "sendFault", Mockito.any(MessageContext.class),
+                    Mockito.anyInt());
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to suppress Utils.sendFault", e);
+        }
     }
 
     /**
@@ -127,5 +144,124 @@ public class GraphQLAPIHandlerTest {
         GraphQLAPIHandler graphQLAPIHandler = new GraphQLAPIHandler();
         graphQLAPIHandler.setApiUUID("12345");
         Assert.assertTrue(graphQLAPIHandler.handleRequest(messageContext));
+    }
+
+    /**
+     * A pure introspection query ({@code __schema}) must be rejected by the handler itself with the dedicated
+     * GraphQL introspection error, instead of being allowed through with an empty elected resource and later
+     * surfacing as the generic REST-shaped "no matching resource" authentication failure.
+     */
+    @Test
+    public void testHandleRequestForIntrospectionQuery() {
+
+        Mockito.when(messageContext.getProperty(APIConstants.GRAPHQL_SUBSCRIPTION_REQUEST)).thenReturn(false);
+        Mockito.when(axis2MessageContext.getProperty(HTTP_METHOD)).thenReturn("QUERY");
+        Mockito.when(omElement.getText()).thenReturn("{__schema{queryType{name}}}");
+
+        GraphQLAPIHandler graphQLAPIHandler = new GraphQLAPIHandler();
+        graphQLAPIHandler.setApiUUID("12345");
+
+        Assert.assertFalse("Introspection query should be rejected by the GraphQL handler",
+                graphQLAPIHandler.handleRequest(messageContext));
+        assertIntrospectionRejection("__schema");
+    }
+
+    /**
+     * {@code __type} is the other query-root introspection meta-field and must be rejected the same way.
+     */
+    @Test
+    public void testHandleRequestForTypeIntrospectionQuery() {
+
+        Mockito.when(messageContext.getProperty(APIConstants.GRAPHQL_SUBSCRIPTION_REQUEST)).thenReturn(false);
+        Mockito.when(axis2MessageContext.getProperty(HTTP_METHOD)).thenReturn("QUERY");
+        Mockito.when(omElement.getText()).thenReturn("{__type(name:\"Lift\"){fields{name}}}");
+
+        GraphQLAPIHandler graphQLAPIHandler = new GraphQLAPIHandler();
+        graphQLAPIHandler.setApiUUID("12345");
+
+        Assert.assertFalse("__type introspection query should be rejected by the GraphQL handler",
+                graphQLAPIHandler.handleRequest(messageContext));
+        assertIntrospectionRejection("__type");
+    }
+
+    /**
+     * A query that mixes a schema-defined field with an introspection field elects the schema-defined field, so
+     * it is routed exactly as it was before this change. Such a request does not hit the misleading "no matching
+     * resource" error this change addresses, and altering it would change the behaviour of a request that
+     * currently succeeds - deliberately out of scope.
+     */
+    @Test
+    public void testHandleRequestForMixedIntrospectionAndFieldQueryIsUnchanged() {
+
+        Mockito.when(messageContext.getProperty(APIConstants.GRAPHQL_SUBSCRIPTION_REQUEST)).thenReturn(false);
+        Mockito.when(axis2MessageContext.getProperty(HTTP_METHOD)).thenReturn("QUERY");
+        Mockito.when(omElement.getText()).thenReturn("{allLifts{name} __schema{queryType{name}}}");
+
+        GraphQLAPIHandler graphQLAPIHandler = new GraphQLAPIHandler();
+        graphQLAPIHandler.setApiUUID("12345");
+
+        Assert.assertTrue("A query that elects an operation must keep its existing behaviour",
+                graphQLAPIHandler.handleRequest(messageContext));
+        Mockito.verify(messageContext).setProperty(APIConstants.API_ELECTED_RESOURCE, "allLifts");
+    }
+
+    /**
+     * The same holds when a root-level {@code __typename} accompanies a schema-defined field: an operation is
+     * elected, so the request is routed unchanged.
+     */
+    @Test
+    public void testHandleRequestForFieldPlusRootTypeNameIsUnchanged() {
+
+        Mockito.when(messageContext.getProperty(APIConstants.GRAPHQL_SUBSCRIPTION_REQUEST)).thenReturn(false);
+        Mockito.when(axis2MessageContext.getProperty(HTTP_METHOD)).thenReturn("QUERY");
+        Mockito.when(omElement.getText()).thenReturn("{allLifts{name} __typename}");
+
+        GraphQLAPIHandler graphQLAPIHandler = new GraphQLAPIHandler();
+        graphQLAPIHandler.setApiUUID("12345");
+
+        Assert.assertTrue("__typename alongside a schema-defined field must keep its existing behaviour",
+                graphQLAPIHandler.handleRequest(messageContext));
+        Mockito.verify(messageContext).setProperty(APIConstants.API_ELECTED_RESOURCE, "allLifts");
+    }
+
+    /**
+     * Introspection meta-fields below the top level (notably {@code __typename}, which GraphQL clients such as
+     * Apollo add to every nested selection set automatically) are ordinary response data and must keep working.
+     */
+    @Test
+    public void testHandleRequestForNestedTypeNameIsAllowed() {
+
+        Mockito.when(messageContext.getProperty(APIConstants.GRAPHQL_SUBSCRIPTION_REQUEST)).thenReturn(false);
+        Mockito.when(axis2MessageContext.getProperty(HTTP_METHOD)).thenReturn("QUERY");
+        Mockito.when(omElement.getText()).thenReturn("{allLifts{__typename name}}");
+
+        GraphQLAPIHandler graphQLAPIHandler = new GraphQLAPIHandler();
+        graphQLAPIHandler.setApiUUID("12345");
+
+        Assert.assertTrue("A nested __typename must not be treated as an introspection request",
+                graphQLAPIHandler.handleRequest(messageContext));
+        Mockito.verify(messageContext).setProperty(APIConstants.API_ELECTED_RESOURCE, "allLifts");
+    }
+
+    /**
+     * Asserts the fault the handler raises for a blocked introspection request: the dedicated error code,
+     * message and a detail naming the offending field, plus the 400 status.
+     *
+     * @param expectedField the introspection field expected to be named in the error detail
+     */
+    private void assertIntrospectionRejection(String expectedField) {
+
+        Mockito.verify(messageContext).setProperty(SynapseConstants.ERROR_CODE,
+                GraphQLConstants.GRAPHQL_INTROSPECTION_NOT_SUPPORTED);
+        Mockito.verify(messageContext).setProperty(SynapseConstants.ERROR_MESSAGE,
+                GraphQLConstants.GRAPHQL_INTROSPECTION_NOT_SUPPORTED_MESSAGE);
+
+        ArgumentCaptor<String> detail = ArgumentCaptor.forClass(String.class);
+        Mockito.verify(messageContext).setProperty(Mockito.eq(SynapseConstants.ERROR_DETAIL), detail.capture());
+        Assert.assertTrue("Error detail should name the rejected introspection field but was: "
+                + detail.getValue(), detail.getValue().contains(expectedField));
+
+        PowerMockito.verifyStatic(Utils.class);
+        Utils.sendFault(messageContext, HttpStatus.SC_BAD_REQUEST);
     }
 }
