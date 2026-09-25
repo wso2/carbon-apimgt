@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * This class represent an Environment.
@@ -328,19 +329,14 @@ public class Environment implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         Environment that = (Environment) o;
-
-        if (!getName().equals(that.getName())) return false;
-        if (!type.equals(that.getType())) return false;
-
-        return true;
+        return Objects.equals(getName(), that.getName()) &&
+               Objects.equals(getType(), that.getType());
     }
 
     @Override
     public int hashCode() {
-        int result = type.hashCode();
-        return  31 * result + getName().hashCode();
+        return Objects.hash(getType(), getName());
     }
     public String getMode() {
         return StringUtils.defaultIfBlank(mode, GatewayMode.WRITE_ONLY.getMode());
