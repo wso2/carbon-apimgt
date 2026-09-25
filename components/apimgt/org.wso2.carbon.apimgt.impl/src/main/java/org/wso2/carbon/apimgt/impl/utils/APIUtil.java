@@ -5049,12 +5049,18 @@ public final class APIUtil {
         try {
             config = (JSONObject) parser.parse(endpointConfig);
 
-            if (config.containsKey("sandbox_endpoints")) {
+            if ((config.containsKey("sandbox_endpoints") && config.get("sandbox_endpoints") != null)
+                    || (config.get("sandbox_failovers") instanceof JSONArray
+                    && !((JSONArray) config.get("sandbox_failovers")).isEmpty())) {
                 return true;
             }
-            if (StringUtils.equals(config.get("endpoint_type").toString(), "graphql")) {
+            Object endpointType = config.get("endpoint_type");
+            if (endpointType != null && StringUtils.equals(endpointType.toString(), "graphql")
+                    && config.get("http") != null) {
                 JSONObject httpConfig = (JSONObject) parser.parse(config.get("http").toString());
-                if (httpConfig.containsKey("sandbox_endpoints")) {
+                if ((httpConfig.containsKey("sandbox_endpoints") && httpConfig.get("sandbox_endpoints") != null)
+                        || (httpConfig.get("sandbox_failovers") instanceof JSONArray
+                        && !((JSONArray) httpConfig.get("sandbox_failovers")).isEmpty())) {
                     return true;
                 }
             }
@@ -5073,12 +5079,18 @@ public final class APIUtil {
         try {
             config = (JSONObject) parser.parse(endpointConfig);
 
-            if (config.containsKey("production_endpoints")) {
+            if ((config.containsKey("production_endpoints") && config.get("production_endpoints") != null)
+                    || (config.get("production_failovers") instanceof JSONArray
+                    && !((JSONArray) config.get("production_failovers")).isEmpty())) {
                 return true;
             }
-            if (StringUtils.equals(config.get("endpoint_type").toString(), "graphql")) {
+            Object endpointType = config.get("endpoint_type");
+            if (endpointType != null && StringUtils.equals(endpointType.toString(), "graphql")
+                    && config.get("http") != null) {
                 JSONObject httpConfig = (JSONObject) parser.parse(config.get("http").toString());
-                if (httpConfig.containsKey("production_endpoints")) {
+                if ((httpConfig.containsKey("production_endpoints") && httpConfig.get("production_endpoints") != null)
+                        || (httpConfig.get("production_failovers") instanceof JSONArray
+                        && !((JSONArray) httpConfig.get("production_failovers")).isEmpty())) {
                     return true;
                 }
             }

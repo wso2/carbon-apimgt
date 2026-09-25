@@ -111,6 +111,17 @@ public class OASParserUtilTest {
         sandNode = OASParserUtil.generateOASConfigForEndpoints(api, false);
         Assert.assertNull(sandNode);
 
+        //failover config with an explicit null primary endpoint (failover-only), should not throw
+        String httpProductionFailoverNullPrimary =
+                jsonObject.getJSONObject("http_production_failover_null_primary").toString();
+        api.setEndpointConfig(httpProductionFailoverNullPrimary);
+        prodNode = OASParserUtil.generateOASConfigForEndpoints(api, true);
+        Assert.assertNotNull(prodNode);
+        Assert.assertEquals(1, prodNode.get(APISpecParserConstants.ENDPOINT_URLS).size());
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_TYPE_FAILOVER,
+                prodNode.get(APISpecParserConstants.X_WSO2_ENDPOINT_TYPE).asText());
+        Assert.assertFalse(prodNode.has(APISpecParserConstants.ADVANCE_ENDPOINT_CONFIG));
+
         String httpProductionLoadbalance = jsonObject.getJSONObject("http_production_loadbalance").toString();
         api.setEndpointConfig(httpProductionLoadbalance);
         prodNode = OASParserUtil.generateOASConfigForEndpoints(api, true);

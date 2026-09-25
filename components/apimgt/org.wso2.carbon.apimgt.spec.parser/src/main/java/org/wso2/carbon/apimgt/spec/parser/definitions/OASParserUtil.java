@@ -1730,14 +1730,14 @@ public class OASParserUtil {
             if (endpointConfig.has(APISpecParserConstants.ENDPOINT_PRODUCTION_FAILOVERS)) {
                 endpointsURLs = endpointConfig.getJSONArray(APISpecParserConstants.ENDPOINT_PRODUCTION_FAILOVERS);
             }
-            if (endpointConfig.has(APISpecParserConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
+            if (!endpointConfig.isNull(APISpecParserConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
                 primaryEndpoints = endpointConfig.getJSONObject(APISpecParserConstants.ENDPOINT_PRODUCTION_ENDPOINTS);
             }
         } else {
             if (endpointConfig.has(APISpecParserConstants.ENDPOINT_SANDBOX_FAILOVERS)) {
                 endpointsURLs = endpointConfig.getJSONArray(APISpecParserConstants.ENDPOINT_SANDBOX_FAILOVERS);
             }
-            if (endpointConfig.has(APISpecParserConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
+            if (!endpointConfig.isNull(APISpecParserConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
                 primaryEndpoints = endpointConfig.getJSONObject(APISpecParserConstants.ENDPOINT_SANDBOX_ENDPOINTS);
             }
         }
@@ -1818,11 +1818,11 @@ public class OASParserUtil {
             throws APIManagementException {
         JSONObject primaryEndpoints = new JSONObject();
         if (isProd) {
-            if (endpointConfig.has(APISpecParserConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
+            if (!endpointConfig.isNull(APISpecParserConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
                 primaryEndpoints = endpointConfig.getJSONObject(APISpecParserConstants.ENDPOINT_PRODUCTION_ENDPOINTS);
             }
         } else {
-            if (endpointConfig.has(APISpecParserConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
+            if (!endpointConfig.isNull(APISpecParserConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
                 primaryEndpoints = endpointConfig.getJSONObject(APISpecParserConstants.ENDPOINT_SANDBOX_ENDPOINTS);
             }
         }
@@ -1840,11 +1840,14 @@ public class OASParserUtil {
     /**
      * Add advance configuration to the endpointResult object
      *
-     * @param primaryEndpoints production and sandbox endpoint configuration Json object
+     * @param primaryEndpoints production and sandbox endpoint configuration Json object;
      * @param endpointResult         endpoint result ObjectNode
      */
     private static ObjectNode updateEndpointResult(JSONObject primaryEndpoints, ObjectNode endpointResult)
             throws APIManagementException {
+        if (primaryEndpoints == null) {
+            return endpointResult;
+        }
         if (primaryEndpoints.has(APISpecParserConstants.ADVANCE_ENDPOINT_CONFIG)) {
             try {
                 endpointResult.put(APISpecParserConstants.ADVANCE_ENDPOINT_CONFIG, objectMapper

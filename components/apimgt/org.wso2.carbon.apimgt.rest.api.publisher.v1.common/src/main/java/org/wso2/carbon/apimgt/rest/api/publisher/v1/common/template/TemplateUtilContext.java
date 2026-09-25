@@ -41,6 +41,10 @@ public class TemplateUtilContext extends ConfigContextDecorator {
     }
 
     public String escapeXml(String url) {
+        if (url == null) {
+            throw new IllegalArgumentException("Value passed to escapeXml cannot be null when rendering the "
+                    + "endpoint template");
+        }
         return StringEscapeUtils.escapeXml(StringEscapeUtils.unescapeXml(url)).trim();
     }
 
