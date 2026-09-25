@@ -638,4 +638,21 @@ public class OASParserUtilTest {
         result = OASParserUtil.preprocessYamlWithLimit(jsonWithSpace, parserOptions);
         Assert.assertEquals("JSON with whitespace should pass through", jsonWithSpace, result);
     }
+
+    @Test
+    public void testParseYamlWithLimitPreservesDateStrings() throws Exception {
+        String yaml =
+                "openapi: \"3.0.0\"\n" +
+                "info:\n" +
+                "  title: Date Preservation Test\n" +
+                "  version: 2024-01-01\n" +
+                "paths: {}\n";
+
+        JsonNode result = OASParserUtil.parseYamlWithLimit(yaml, null);
+
+        JsonNode version = result.path("info").path("version");
+        Assert.assertTrue("Date-like version must remain a string, not be converted to a number",
+                version.isTextual());
+        Assert.assertEquals("2024-01-01", version.asText());
+    }
 }

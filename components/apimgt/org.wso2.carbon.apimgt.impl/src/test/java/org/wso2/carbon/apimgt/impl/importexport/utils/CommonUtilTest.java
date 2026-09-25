@@ -26,6 +26,27 @@ import org.junit.Test;
 public class CommonUtilTest {
 
     @Test
+    public void testYamlToJsonPreservesDateStrings() throws Exception {
+        String yaml =
+                "release:\n" +
+                "  version: 2024-01-01\n" +
+                "  count: 3\n" +
+                "  active: true\n";
+
+        String json = CommonUtil.yamlToJson(yaml);
+        JsonNode root = new ObjectMapper().readTree(json);
+
+        JsonNode version = root.path("release").path("version");
+        Assert.assertTrue("Date-like string must remain a string, not be converted to a number",
+                version.isTextual());
+        Assert.assertEquals("2024-01-01", version.asText());
+        Assert.assertTrue("Non-date integer must stay as integer",
+                root.path("release").path("count").isInt());
+        Assert.assertTrue("Boolean must stay as boolean",
+                root.path("release").path("active").isBoolean());
+    }
+
+    @Test
     public void testYamlToJsonResolvesAnchorAlias() throws Exception {
         String yaml =
                 "defaults:\n" +
