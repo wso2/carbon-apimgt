@@ -28,9 +28,9 @@ import javax.xml.stream.XMLStreamException;
 /**
  * Tests how the per-policy severity filtering setting is read out of the governance configuration.
  * <p>
- * Enabling the feature is one half of a deliberate opt-in, so the setting has to be off for every deployment that
- * has not asked for it. That includes an upgraded deployment whose api-manager.xml predates the element entirely,
- * which is the case these tests exist to protect.
+ * Enabling the feature is the deliberate opt-in, so the setting has to be off for every deployment that has not
+ * asked for it. That includes an upgraded deployment whose api-manager.xml predates the element entirely, which is
+ * the case these tests exist to protect.
  */
 public class APIMGovernanceSeverityConfigTest {
 
@@ -61,8 +61,8 @@ public class APIMGovernanceSeverityConfigTest {
     public void testTheFeatureIsOffOnAFreshConfiguration() {
 
         Assert.assertFalse(new APIMGovernanceConfigDTO().isPerPolicySeverityFilteringEnabled(),
-                "The feature must default to off, so that adding the optional column alone never changes how a "
-                        + "deployment judges compliance");
+                "The feature must default to off, so an upgraded deployment keeps the compliance posture it had "
+                        + "before until someone asks for it");
     }
 
     @Test
@@ -79,7 +79,7 @@ public class APIMGovernanceSeverityConfigTest {
 
         Assert.assertTrue(parse("<APIMGovernance><PerPolicySeverityFilteringEnabled>true"
                         + "</PerPolicySeverityFilteringEnabled></APIMGovernance>"),
-                "Asking for the feature must enable the configuration half of the opt-in");
+                "Asking for the feature must enable the configuration");
     }
 
     @Test

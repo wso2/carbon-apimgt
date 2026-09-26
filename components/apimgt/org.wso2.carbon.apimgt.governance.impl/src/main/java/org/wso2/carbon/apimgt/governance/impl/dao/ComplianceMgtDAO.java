@@ -218,27 +218,35 @@ public interface ComplianceMgtDAO {
     List<String> getAllComplianceEvaluatedPolicies(String organization) throws APIMGovernanceException;
 
     /**
-     * Get list of all violated rulesets
-     *
-     * @param organization Organization
-     * @return List of all violated rulesets
-     * @throws APIMGovernanceException If an error occurs while getting the list of all violated rulesets
-     */
-    List<String> getViolatedRulesets(String organization) throws APIMGovernanceException;
-
-    /**
-     * Get list of all violated rulesets for an artifact
+     * Get list of rulesets an artifact violates under one policy's severity selection
+     * <p>
+     * Only the given policy's selection is consulted, unlike a query that unions the selections of every policy
+     * governing the artifact. A policy must not be reported as violated because a different policy governing the
+     * same artifact counts a severity this one excluded.
      *
      * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
      * @param artifactType  Artifact Type
      * @param organization  Organization
-     * @return List of all violated rulesets for an artifact
-     * @throws APIMGovernanceException If an error occurs while getting the list of all
-     *                                 violated rulesets for an artifact
+     * @param policyId      Policy whose severity selection decides the verdict
+     * @return List of rulesets this policy counts as violated for the artifact
+     * @throws APIMGovernanceException If an error occurs while getting the list
      */
-    List<String> getViolatedRulesetsForArtifact(String artifactRefId, ArtifactType artifactType,
-                                                String organization)
+    List<String> getViolatedRulesetsForArtifactAndPolicy(String artifactRefId, ArtifactType artifactType,
+                                                         String organization, String policyId)
             throws APIMGovernanceException;
+
+    /**
+     * Get the policies the organization is violating
+     * <p>
+     * Answers for every policy at once what {@link #getViolatedRulesetsForArtifactAndPolicy} answers for one
+     * artifact under one policy, so a summary does not have to walk every artifact of every policy to find out.
+     * Each policy is judged on its own severity selection.
+     *
+     * @param organization Organization
+     * @return IDs of the policies with at least one violation that affects their compliance
+     * @throws APIMGovernanceException If an error occurs while getting the list
+     */
+    List<String> getViolatedPolicies(String organization) throws APIMGovernanceException;
 
     /**
      * Get list of all evaluated artifacts for a policy

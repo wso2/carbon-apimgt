@@ -370,37 +370,24 @@ public class ComplianceManager {
         List<String> allComplianceEvaluatedPolicies = complianceMgtDAO
                 .getAllComplianceEvaluatedPolicies(organization);
 
-        // Get a map of policies to their rulesets
-        Map<String, List<String>> policyRulesetsMap = new HashMap<>();
-        for (String policyId : allComplianceEvaluatedPolicies) {
-            List<String> rulesets = policyMgtDAO.getRulesetsByPolicyId(policyId, organization)
-                    .stream().map(RulesetInfo::getId).collect(Collectors.toList());
-            policyRulesetsMap.put(policyId, rulesets);
-        }
-
-        // Get the list of violated rulesets
-        List<String> violatedRulesets = complianceMgtDAO.getViolatedRulesets(organization);
-
-        // Identify violated policies
-        List<String> violatedPolicies = new ArrayList<>();
-        for (Map.Entry<String, List<String>> entry : policyRulesetsMap.entrySet()) {
-            String policyId = entry.getKey();
-            List<String> rulesets = entry.getValue();
-            if (violatedRulesets.stream().anyMatch(rulesets::contains)) {
-                violatedPolicies.add(policyId);
-            }
-        }
-
         Map<PolicyAdherenceSate, List<String>> policyAdherence = new HashMap<>();
         policyAdherence.put(PolicyAdherenceSate.FOLLOWED, new ArrayList<>());
         policyAdherence.put(PolicyAdherenceSate.VIOLATED, new ArrayList<>());
 
-        for (String policy : allComplianceEvaluatedPolicies) {
-            if (violatedPolicies.contains(policy)) {
-                policyAdherence.get(PolicyAdherenceSate.VIOLATED).add(policy);
-            } else {
-                policyAdherence.get(PolicyAdherenceSate.FOLLOWED).add(policy);
-            }
+        // Each policy is judged on its own severity selection, which is what keeps this summary in step with the
+        // policy adherence listing it summarises. The previous version intersected each policy's rulesets with the
+        // organization wide violated ruleset list, which applied the union of every policy's selection and so was
+        // a third answer to the same question.
+        //
+        // Asked once for the organization rather than once per policy. Deriving each verdict from
+        // getArtifactsComplianceForPolicy would agree, but it reads every artifact of every policy and then runs a
+        // query per artifact, so a summary that returns a boolean per policy would cost a query per artifact per
+        // policy. The query below is bounded by the number of policies instead.
+        Set<String> violatedPolicies = new HashSet<>(complianceMgtDAO.getViolatedPolicies(organization));
+
+        for (String policyId : allComplianceEvaluatedPolicies) {
+            policyAdherence.get(violatedPolicies.contains(policyId)
+                    ? PolicyAdherenceSate.VIOLATED : PolicyAdherenceSate.FOLLOWED).add(policyId);
         }
 
         return policyAdherence;
@@ -438,8 +425,11 @@ public class ComplianceManager {
                         .getArtifactVersion(artifactRefId, artifactType, organization));
             }
 
-            List<String> violatedRulesets = complianceMgtDAO.getViolatedRulesetsForArtifact
-                    (artifactRefId, artifactType, organization);
+            // Scoped to this policy. The unscoped query unions the severities of every policy governing the
+            // artifact, which would report this policy as violated because another one counts a severity this
+            // policy excluded — and would disagree with what the artifact compliance view reports for it.
+            List<String> violatedRulesets = complianceMgtDAO.getViolatedRulesetsForArtifactAndPolicy
+                    (artifactRefId, artifactType, organization, policyId);
 
             if (violatedRulesets.stream().anyMatch(applicableRulesets::contains)) {
                 complianceStateOfEvaluatedArtifacts.get(ArtifactComplianceState.NON_COMPLIANT).add(artifactInfo);
@@ -742,28 +732,6 @@ public class ComplianceManager {
     public void deleteArtifact(String artifactRefId, ArtifactType artifactType, String organization)
             throws APIMGovernanceException {
         complianceMgtDAO.deleteArtifact(artifactRefId, artifactType, organization);
-    }
-
-    /**
-     * Get the list of rulesets evaluated for the artifact
-     *
-     * @param evaluatedPolicies List of evaluated policies
-     * @param violatedRulesets  List of violated rulesets
-     * @param organization      Organization
-     * @return List of violated policies
-     */
-
-    public List<String> identifyViolatedPolicies(List<String> evaluatedPolicies, List<String> violatedRulesets,
-                                                 String organization) throws APIMGovernanceException {
-        Set<String> violatedPolicies = new HashSet<>();
-        for (String policy : evaluatedPolicies) {
-            List<String> rulesets = policyMgtDAO.getRulesetsByPolicyId(policy, organization).stream()
-                    .map(RulesetInfo::getId).collect(Collectors.toList());
-            if (violatedRulesets.stream().anyMatch(rulesets::contains)) {
-                violatedPolicies.add(policy);
-            }
-        }
-        return new ArrayList<>(violatedPolicies);
     }
 
     /**

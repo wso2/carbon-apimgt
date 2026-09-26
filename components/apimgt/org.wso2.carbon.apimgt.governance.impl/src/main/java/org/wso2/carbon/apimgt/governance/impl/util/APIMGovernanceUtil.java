@@ -696,6 +696,47 @@ public class APIMGovernanceUtil {
         return Collections.unmodifiableSet(EnumSet.allOf(RuleSeverity.class));
     }
 
+    /**
+     * Validate a requested severity selection and return the form it is stored in
+     * <p>
+     * Reading a stored selection drops tokens the product does not define, so an unvalidated write would leave the
+     * policy judged on severities the caller never asked for, and a selection of nothing but unknown tokens would
+     * silently mean every severity. Rejecting the write is the only point at which the caller can still be told.
+     * <p>
+     * The accepted value is normalised rather than stored verbatim: tokens are upper cased and repeats dropped, so
+     * the column holds one representation of a selection, a read gives back what a client can compare against, and
+     * the stored value cannot outgrow the column however long the request was.
+     *
+     * @param requestedSeverities Comma separated severities from the request, blank to clear the selection
+     * @return Normalised selection to store, the given value when it is blank
+     * @throws APIMGovernanceException If a token does not name a severity the product defines
+     */
+    public static String validateComplianceAffectingSeverities(String requestedSeverities)
+            throws APIMGovernanceException {
+
+        if (StringUtils.isBlank(requestedSeverities)) {
+            return requestedSeverities;
+        }
+
+        Set<RuleSeverity> severities = EnumSet.noneOf(RuleSeverity.class);
+        for (String severityToken : requestedSeverities.split(",")) {
+            String trimmedSeverity = severityToken.trim();
+            if (StringUtils.isEmpty(trimmedSeverity)) {
+                continue;
+            }
+            RuleSeverity severity = RuleSeverity.fromString(trimmedSeverity);
+            if (severity == null) {
+                throw new APIMGovernanceException(APIMGovExceptionCodes.INVALID_COMPLIANCE_AFFECTING_SEVERITIES,
+                        trimmedSeverity);
+            }
+            severities.add(severity);
+        }
+
+        // A value which held nothing but separators names no severity, and storing it would read back as every
+        // severity. That is what a blank request already means, so it is kept as one state rather than two.
+        return severities.stream().map(Enum::name).collect(Collectors.joining(","));
+    }
+
     public static Set<RuleSeverity> resolveComplianceAffectingSeverities(String configuredSeverities) {
 
         if (StringUtils.isBlank(configuredSeverities)) {
@@ -710,15 +751,19 @@ public class APIMGovernanceUtil {
             }
             RuleSeverity severity = RuleSeverity.fromString(trimmedSeverity);
             if (severity == null) {
-                log.warn("Ignoring unknown compliance affecting rule severity '" + trimmedSeverity + "'");
+                if (log.isDebugEnabled()) {
+                    log.debug("Ignoring unknown compliance affecting rule severity '" + trimmedSeverity + "'");
+                }
                 continue;
             }
             severities.add(severity);
         }
 
         if (severities.isEmpty()) {
-            log.warn("No valid compliance affecting rule severity found in '" + configuredSeverities
-                    + "'. Treating every severity as compliance affecting");
+            if (log.isDebugEnabled()) {
+                log.debug("No valid compliance affecting rule severity found in '" + configuredSeverities
+                        + "'. Treating every severity as compliance affecting");
+            }
             return allSeverities();
         }
         return Collections.unmodifiableSet(severities);

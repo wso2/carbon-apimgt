@@ -68,8 +68,11 @@ public class PolicySeverityQueryTest {
             statement.execute("CREATE TABLE GOV_ARTIFACT (ARTIFACT_KEY VARCHAR(36) NOT NULL, "
                     + "ARTIFACT_REF_ID VARCHAR(36) NOT NULL, ARTIFACT_TYPE VARCHAR(32) NOT NULL, "
                     + "ORGANIZATION VARCHAR(128) NOT NULL)");
+            // Every column the severity aware update names, because that statement is one of the things under
+            // test here and it writes the rest of the policy alongside the severity.
             statement.execute("CREATE TABLE GOV_POLICY (POLICY_ID VARCHAR(36) NOT NULL, NAME VARCHAR(256) NOT NULL, "
-                    + "ORGANIZATION VARCHAR(128) NOT NULL, "
+                    + "DESCRIPTION VARCHAR(1024), ORGANIZATION VARCHAR(128) NOT NULL, UPDATED_BY VARCHAR(128), "
+                    + "LAST_UPDATED_TIME TIMESTAMP, IS_GLOBAL INT, "
                     + SQLConstants.COMPLIANCE_AFFECTING_SEVERITIES_COLUMN + " VARCHAR(64))");
             statement.execute("CREATE TABLE GOV_POLICY_RUN (ARTIFACT_KEY VARCHAR(36) NOT NULL, "
                     + "POLICY_ID VARCHAR(36) NOT NULL)");
@@ -86,8 +89,10 @@ public class PolicySeverityQueryTest {
 
             statement.execute("INSERT INTO GOV_ARTIFACT VALUES ('" + ARTIFACT_KEY + "', '" + ARTIFACT_REF_ID
                     + "', '" + API + "', '" + ORGANIZATION + "')");
-            statement.execute("INSERT INTO GOV_POLICY VALUES ('" + POLICY_ID + "', 'Severity Test Policy', '"
-                    + ORGANIZATION + "', " + (policySeverities == null ? "NULL" : "'" + policySeverities + "'") + ")");
+            statement.execute("INSERT INTO GOV_POLICY (POLICY_ID, NAME, ORGANIZATION, "
+                    + SQLConstants.COMPLIANCE_AFFECTING_SEVERITIES_COLUMN + ") VALUES ('" + POLICY_ID
+                    + "', 'Severity Test Policy', '" + ORGANIZATION + "', "
+                    + (policySeverities == null ? "NULL" : "'" + policySeverities + "'") + ")");
             statement.execute("INSERT INTO GOV_POLICY_RUN VALUES ('" + ARTIFACT_KEY + "', '" + POLICY_ID + "')");
             statement.execute("INSERT INTO GOV_POLICY_RULESET VALUES ('" + POLICY_ID + "', '" + RULESET_ID + "')");
             // The stored flag says the run was not completely clean, which is what the old queries keyed off
@@ -141,52 +146,6 @@ public class PolicySeverityQueryTest {
     }
 
     @Test
-    public void testRulesetIsNotViolatedWhenOnlyAnExcludedSeverityIsViolated() throws Exception {
-
-        try (Connection connection = database("policy_query_info_only", "ERROR,WARN", "api-description-check")) {
-            Assert.assertTrue("A policy judged on ERROR and WARN must not report the ruleset as violated for an "
-                            + "info violation",
-                    collectAffecting(connection, SQLConstants.GET_FAILED_RULESET_RUNS_FOR_ARTIFACT_WITH_SEVERITY,
-                            "RULESET_ID", ARTIFACT_REF_ID, API, ORGANIZATION).isEmpty());
-        }
-    }
-
-    @Test
-    public void testRulesetIsViolatedWhenACountedSeverityIsViolated() throws Exception {
-
-        try (Connection connection = database("policy_query_error", "ERROR,WARN", "api-version-prefix",
-                "api-description-check")) {
-            Set<String> violated = collectAffecting(connection,
-                    SQLConstants.GET_FAILED_RULESET_RUNS_FOR_ARTIFACT_WITH_SEVERITY, "RULESET_ID",
-                    ARTIFACT_REF_ID, API, ORGANIZATION);
-
-            Assert.assertEquals("The error violation must still report the ruleset as violated",
-                    new HashSet<>(java.util.Collections.singletonList(RULESET_ID)), violated);
-        }
-    }
-
-    @Test
-    public void testEverySeverityCountsWhenThePolicyConfiguresNothing() throws Exception {
-
-        try (Connection connection = database("policy_query_unset", null, "api-description-check")) {
-            Assert.assertEquals("A policy with nothing configured must keep counting every severity",
-                    new HashSet<>(java.util.Collections.singletonList(RULESET_ID)),
-                    collectAffecting(connection, SQLConstants.GET_FAILED_RULESET_RUNS_FOR_ARTIFACT_WITH_SEVERITY,
-                            "RULESET_ID", ARTIFACT_REF_ID, API, ORGANIZATION));
-        }
-    }
-
-    @Test
-    public void testOrganizationWideQueryAppliesThePolicySeverities() throws Exception {
-
-        try (Connection connection = database("policy_query_org", "ERROR", "api-description-check")) {
-            Assert.assertTrue("The organization wide listing must apply the same severities",
-                    collectAffecting(connection, SQLConstants.GET_FAILED_RULESET_RUNS_WITH_SEVERITY, "RULESET_ID",
-                            ORGANIZATION).isEmpty());
-        }
-    }
-
-    @Test
     public void testArtifactIsNotNonCompliantWhenOnlyAnExcludedSeverityIsViolated() throws Exception {
 
         try (Connection connection = database("policy_query_artifact_info", "ERROR,WARN", "api-description-check")) {
@@ -221,39 +180,70 @@ public class PolicySeverityQueryTest {
     private void addGoverningPolicy(Connection connection, String policyId, String severities) throws Exception {
 
         try (Statement statement = connection.createStatement()) {
-            statement.execute("INSERT INTO GOV_POLICY VALUES ('" + policyId + "', 'Second Policy', '"
-                    + ORGANIZATION + "', " + (severities == null ? "NULL" : "'" + severities + "'") + ")");
+            statement.execute("INSERT INTO GOV_POLICY (POLICY_ID, NAME, ORGANIZATION, "
+                    + SQLConstants.COMPLIANCE_AFFECTING_SEVERITIES_COLUMN + ") VALUES ('" + policyId
+                    + "', 'Second Policy', '" + ORGANIZATION + "', "
+                    + (severities == null ? "NULL" : "'" + severities + "'") + ")");
             statement.execute("INSERT INTO GOV_POLICY_RUN VALUES ('" + ARTIFACT_KEY + "', '" + policyId + "')");
             statement.execute("INSERT INTO GOV_POLICY_RULESET VALUES ('" + policyId + "', '" + RULESET_ID + "')");
         }
     }
 
     @Test
-    public void testSharedRulesetIsViolatedWhenAnyGoverningPolicyCountsTheSeverity() throws Exception {
+    public void testAPerPolicyVerdictIgnoresAnotherPolicysSeverities() throws Exception {
 
-        // The shared ruleset produces one row per governing policy. The listing has no policy in its path, so it
-        // must report the ruleset as violated while any policy governing the artifact still counts the severity,
-        // otherwise a lenient policy would silently suppress a strict one's finding.
-        try (Connection connection = database("shared_ruleset_union", "ERROR,WARN", "api-description-check")) {
+        // The strict policy is judged on ERROR only, the lenient one counts everything, and they share a ruleset
+        // whose single violation is not ERROR. Asked about the strict policy, the answer must be that it is not
+        // violated, because a per-policy verdict must not be decided by a severity a different policy counts.
+        try (Connection connection = database("per_policy_scope", "ERROR", "api-description-check")) {
             addGoverningPolicy(connection, SECOND_POLICY_ID, null);
 
-            Assert.assertEquals("A policy still counting info must keep the shared ruleset violated, even though "
-                            + "the other policy excludes it",
+            Assert.assertTrue("A policy judged on ERROR alone must not be violated by an INFO finding, whatever "
+                            + "the other policy governing the artifact counts",
+                    collectAffecting(connection,
+                            SQLConstants.GET_FAILED_RULESET_RUNS_FOR_ARTIFACT_AND_POLICY_WITH_SEVERITY,
+                            "RULESET_ID", ARTIFACT_REF_ID, API, ORGANIZATION, POLICY_ID).isEmpty());
+
+            Assert.assertEquals("The unrestricted policy sharing the ruleset must still be violated by it",
                     new HashSet<>(java.util.Collections.singletonList(RULESET_ID)),
-                    collectAffecting(connection, SQLConstants.GET_FAILED_RULESET_RUNS_FOR_ARTIFACT_WITH_SEVERITY,
-                            "RULESET_ID", ARTIFACT_REF_ID, API, ORGANIZATION));
+                    collectAffecting(connection,
+                            SQLConstants.GET_FAILED_RULESET_RUNS_FOR_ARTIFACT_AND_POLICY_WITH_SEVERITY,
+                            "RULESET_ID", ARTIFACT_REF_ID, API, ORGANIZATION, SECOND_POLICY_ID));
         }
     }
 
     @Test
-    public void testSharedRulesetIsNotViolatedWhenEveryGoverningPolicyExcludesTheSeverity() throws Exception {
+    public void testTheAdherenceSummaryNamesOnlyThePoliciesTheirOwnSelectionViolates() throws Exception {
 
-        try (Connection connection = database("shared_ruleset_all_exclude", "ERROR,WARN", "api-description-check")) {
-            addGoverningPolicy(connection, SECOND_POLICY_ID, "ERROR");
+        // The query behind the adherence summary. It answers for every policy at once what the per-policy query
+        // above answers for one, so it has to reach the same verdict: the strict policy is judged on ERROR alone
+        // and must be absent, while the lenient one sharing the same ruleset must be named.
+        try (Connection connection = database("adherence_summary", "ERROR", "api-description-check")) {
+            addGoverningPolicy(connection, SECOND_POLICY_ID, null);
 
-            Assert.assertTrue("With every governing policy excluding info the shared ruleset must not be violated",
-                    collectAffecting(connection, SQLConstants.GET_FAILED_RULESET_RUNS_FOR_ARTIFACT_WITH_SEVERITY,
-                            "RULESET_ID", ARTIFACT_REF_ID, API, ORGANIZATION).isEmpty());
+            Assert.assertEquals("Only the policy whose own selection counts the violated severity may be listed",
+                    new HashSet<>(java.util.Collections.singletonList(SECOND_POLICY_ID)),
+                    collectAffecting(connection, SQLConstants.GET_VIOLATED_POLICIES_WITH_SEVERITY,
+                            "POLICY_ID", ORGANIZATION));
+        }
+    }
+
+    @Test
+    public void testTheAdherenceSummaryAgreesWithThePerPolicyVerdict() throws Exception {
+
+        // Both queries have to answer the same question the same way, or the summary and the listing it summarises
+        // disagree about a policy again, which is the defect this whole path was rewritten to remove.
+        try (Connection connection = database("adherence_agreement", "ERROR,WARN", "api-version-prefix")) {
+            boolean namedBySummary = collectAffecting(connection, SQLConstants.GET_VIOLATED_POLICIES_WITH_SEVERITY,
+                    "POLICY_ID", ORGANIZATION).contains(POLICY_ID);
+            boolean violatedPerPolicy = !collectAffecting(connection,
+                    SQLConstants.GET_FAILED_RULESET_RUNS_FOR_ARTIFACT_AND_POLICY_WITH_SEVERITY, "RULESET_ID",
+                    ARTIFACT_REF_ID, API, ORGANIZATION, POLICY_ID).isEmpty();
+
+            Assert.assertTrue("A policy violated by an ERROR finding must be named by the summary",
+                    namedBySummary);
+            Assert.assertEquals("The summary and the per-policy verdict must agree on the same policy",
+                    violatedPerPolicy, namedBySummary);
         }
     }
 
@@ -310,14 +300,8 @@ public class PolicySeverityQueryTest {
         // Both statements are scoped by organization as well as policy id, so a policy id colliding across
         // tenants cannot be written or read across the boundary.
         try (Connection connection = database("store_other_org", null)) {
-            try (PreparedStatement prepStmnt = connection
-                    .prepareStatement(SQLConstants.UPDATE_POLICY_COMPLIANCE_AFFECTING_SEVERITIES)) {
-                prepStmnt.setString(1, "ERROR");
-                prepStmnt.setString(2, POLICY_ID);
-                prepStmnt.setString(3, "another.org");
-                Assert.assertEquals("A write scoped to another organization must not match this policy",
-                        0, prepStmnt.executeUpdate());
-            }
+            Assert.assertEquals("A write scoped to another organization must not match this policy",
+                    0, writeSeverities(connection, POLICY_ID, "another.org", "ERROR"));
 
             Assert.assertNull("The policy must be untouched by a write for another organization",
                     read(connection, POLICY_ID));
@@ -326,6 +310,10 @@ public class PolicySeverityQueryTest {
 
     /**
      * Store a severity selection against a policy through the statement the DAO uses
+     * <p>
+     * The severity is written by the same statement as the rest of the policy, so this exercises the parameter
+     * order of that statement as well as the value that lands in the column. Getting the order wrong would write
+     * a severity into the name.
      *
      * @param connection Connection to the prepared database
      * @param policyId   Policy to write to
@@ -334,13 +322,34 @@ public class PolicySeverityQueryTest {
      */
     private void store(Connection connection, String policyId, String severities) throws Exception {
 
+        Assert.assertEquals("The write must match exactly the policy it was aimed at",
+                1, writeSeverities(connection, policyId, ORGANIZATION, severities));
+    }
+
+    /**
+     * Run the severity aware policy update and report how many rows it matched
+     *
+     * @param connection   Connection to the prepared database
+     * @param policyId     Policy to write to
+     * @param organization Organization to scope the write to
+     * @param severities   Comma separated severities, null to clear the setting
+     * @return Number of rows the statement matched
+     * @throws Exception If the write fails
+     */
+    private int writeSeverities(Connection connection, String policyId, String organization, String severities)
+            throws Exception {
+
         try (PreparedStatement prepStmnt = connection
-                .prepareStatement(SQLConstants.UPDATE_POLICY_COMPLIANCE_AFFECTING_SEVERITIES)) {
-            prepStmnt.setString(1, severities);
-            prepStmnt.setString(2, policyId);
-            prepStmnt.setString(3, ORGANIZATION);
-            Assert.assertEquals("The write must match exactly the policy it was aimed at",
-                    1, prepStmnt.executeUpdate());
+                .prepareStatement(SQLConstants.UPDATE_POLICY_WITH_SEVERITIES)) {
+            prepStmnt.setString(1, "Severity Test Policy");
+            prepStmnt.setString(2, "Written by PolicySeverityQueryTest");
+            prepStmnt.setString(3, "admin");
+            prepStmnt.setInt(4, 0);
+            prepStmnt.setTimestamp(5, new java.sql.Timestamp(System.currentTimeMillis()));
+            prepStmnt.setString(6, severities);
+            prepStmnt.setString(7, policyId);
+            prepStmnt.setString(8, organization);
+            return prepStmnt.executeUpdate();
         }
     }
 

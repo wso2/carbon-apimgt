@@ -28,7 +28,6 @@ public class SettingsDTO   {
     private List<String> gatewayTypes = new ArrayList<String>();
     private Boolean isJWTEnabledForLoginTokens = false;
     private Boolean orgAccessControlEnabled = null;
-    private Boolean perPolicySeverityFilteringEnabled = null;
     private List<SettingsKeyManagerConfigurationDTO> keyManagerConfiguration = new ArrayList<SettingsKeyManagerConfigurationDTO>();
     private List<SettingsGatewayConfigurationDTO> gatewayConfiguration = new ArrayList<SettingsGatewayConfigurationDTO>();
     private Boolean analyticsEnabled = null;
@@ -36,6 +35,7 @@ public class SettingsDTO   {
     private Boolean isGatewayNotificationEnabled = false;
     private List<String> platformGatewayVersions = new ArrayList<String>();
     private Boolean consumptionExportEnabled = null;
+    private Boolean perPolicySeverityFilteringEnabled = null;
 
   /**
    **/
@@ -104,24 +104,6 @@ public class SettingsDTO   {
   }
   public void setOrgAccessControlEnabled(Boolean orgAccessControlEnabled) {
     this.orgAccessControlEnabled = orgAccessControlEnabled;
-  }
-
-  /**
-   * Is per policy compliance affecting severity filtering enabled for governance policies. When enabled a policy can declare which rule severities affect its compliance verdict. Enabling it also requires the optional COMPLIANCE_AFFECTING_SEVERITIES column on GOV_POLICY. 
-   **/
-  public SettingsDTO perPolicySeverityFilteringEnabled(Boolean perPolicySeverityFilteringEnabled) {
-    this.perPolicySeverityFilteringEnabled = perPolicySeverityFilteringEnabled;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "false", value = "Is per policy compliance affecting severity filtering enabled for governance policies. When enabled a policy can declare which rule severities affect its compliance verdict. Enabling it also requires the optional COMPLIANCE_AFFECTING_SEVERITIES column on GOV_POLICY. ")
-  @JsonProperty("perPolicySeverityFilteringEnabled")
-  public Boolean isPerPolicySeverityFilteringEnabled() {
-    return perPolicySeverityFilteringEnabled;
-  }
-  public void setPerPolicySeverityFilteringEnabled(Boolean perPolicySeverityFilteringEnabled) {
-    this.perPolicySeverityFilteringEnabled = perPolicySeverityFilteringEnabled;
   }
 
   /**
@@ -250,6 +232,24 @@ public class SettingsDTO   {
     this.consumptionExportEnabled = consumptionExportEnabled;
   }
 
+  /**
+   * Is per policy compliance affecting severity filtering enabled for governance policies. When enabled a policy can declare which rule severities affect its compliance verdict. 
+   **/
+  public SettingsDTO perPolicySeverityFilteringEnabled(Boolean perPolicySeverityFilteringEnabled) {
+    this.perPolicySeverityFilteringEnabled = perPolicySeverityFilteringEnabled;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "Is per policy compliance affecting severity filtering enabled for governance policies. When enabled a policy can declare which rule severities affect its compliance verdict. ")
+  @JsonProperty("perPolicySeverityFilteringEnabled")
+  public Boolean isPerPolicySeverityFilteringEnabled() {
+    return perPolicySeverityFilteringEnabled;
+  }
+  public void setPerPolicySeverityFilteringEnabled(Boolean perPolicySeverityFilteringEnabled) {
+    this.perPolicySeverityFilteringEnabled = perPolicySeverityFilteringEnabled;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -264,19 +264,19 @@ public class SettingsDTO   {
         Objects.equals(gatewayTypes, settings.gatewayTypes) &&
         Objects.equals(isJWTEnabledForLoginTokens, settings.isJWTEnabledForLoginTokens) &&
         Objects.equals(orgAccessControlEnabled, settings.orgAccessControlEnabled) &&
-        Objects.equals(perPolicySeverityFilteringEnabled, settings.perPolicySeverityFilteringEnabled) &&
         Objects.equals(keyManagerConfiguration, settings.keyManagerConfiguration) &&
         Objects.equals(gatewayConfiguration, settings.gatewayConfiguration) &&
         Objects.equals(analyticsEnabled, settings.analyticsEnabled) &&
         Objects.equals(transactionCounterEnable, settings.transactionCounterEnable) &&
         Objects.equals(isGatewayNotificationEnabled, settings.isGatewayNotificationEnabled) &&
         Objects.equals(platformGatewayVersions, settings.platformGatewayVersions) &&
-        Objects.equals(consumptionExportEnabled, settings.consumptionExportEnabled);
+        Objects.equals(consumptionExportEnabled, settings.consumptionExportEnabled) &&
+        Objects.equals(perPolicySeverityFilteringEnabled, settings.perPolicySeverityFilteringEnabled);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(scopes, gatewayTypes, isJWTEnabledForLoginTokens, orgAccessControlEnabled, perPolicySeverityFilteringEnabled, keyManagerConfiguration, gatewayConfiguration, analyticsEnabled, transactionCounterEnable, isGatewayNotificationEnabled, platformGatewayVersions, consumptionExportEnabled);
+    return Objects.hash(scopes, gatewayTypes, isJWTEnabledForLoginTokens, orgAccessControlEnabled, keyManagerConfiguration, gatewayConfiguration, analyticsEnabled, transactionCounterEnable, isGatewayNotificationEnabled, platformGatewayVersions, consumptionExportEnabled, perPolicySeverityFilteringEnabled);
   }
 
   @Override
@@ -288,7 +288,6 @@ public class SettingsDTO   {
     sb.append("    gatewayTypes: ").append(toIndentedString(gatewayTypes)).append("\n");
     sb.append("    isJWTEnabledForLoginTokens: ").append(toIndentedString(isJWTEnabledForLoginTokens)).append("\n");
     sb.append("    orgAccessControlEnabled: ").append(toIndentedString(orgAccessControlEnabled)).append("\n");
-    sb.append("    perPolicySeverityFilteringEnabled: ").append(toIndentedString(perPolicySeverityFilteringEnabled)).append("\n");
     sb.append("    keyManagerConfiguration: ").append(toIndentedString(keyManagerConfiguration)).append("\n");
     sb.append("    gatewayConfiguration: ").append(toIndentedString(gatewayConfiguration)).append("\n");
     sb.append("    analyticsEnabled: ").append(toIndentedString(analyticsEnabled)).append("\n");
@@ -296,6 +295,7 @@ public class SettingsDTO   {
     sb.append("    isGatewayNotificationEnabled: ").append(toIndentedString(isGatewayNotificationEnabled)).append("\n");
     sb.append("    platformGatewayVersions: ").append(toIndentedString(platformGatewayVersions)).append("\n");
     sb.append("    consumptionExportEnabled: ").append(toIndentedString(consumptionExportEnabled)).append("\n");
+    sb.append("    perPolicySeverityFilteringEnabled: ").append(toIndentedString(perPolicySeverityFilteringEnabled)).append("\n");
     sb.append("}");
     return sb.toString();
   }

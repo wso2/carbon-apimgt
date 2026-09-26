@@ -917,7 +917,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
             throws APIMGovernanceException {
         Set<String> artifactRefIds = new HashSet<>();
         try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
-            if (GovernancePolicyMgtDAOImpl.isComplianceAffectingSeverityColumnPresent(connection)) {
+            if (GovernancePolicyMgtDAOImpl.isPerPolicySeverityFilteringEnabled()) {
                 try (PreparedStatement prepStmnt = connection
                         .prepareStatement(SQLConstants.GET_NON_COMPLIANT_ARTIFACTS_WITH_SEVERITY)) {
                     prepStmnt.setString(1, String.valueOf(artifactType));
@@ -965,28 +965,41 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     }
 
     /**
-     * Get list of all violated rulesets
+     * Get list of rulesets an artifact violates under one policy's severity selection
+     * <p>
+     * Only the given policy's selection is consulted, unlike a query that unions the selections of every policy
+     * governing the artifact. A policy must not be reported as violated because a different policy governing the
+     * same artifact counts a severity this one excluded.
      *
-     * @param organization Organization
-     * @return List of all violated rulesets
-     * @throws APIMGovernanceException If an error occurs while getting the list of all violated rulesets
+     * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
+     * @param artifactType  Artifact Type
+     * @param organization  Organization
+     * @param policyId      Policy whose severity selection decides the verdict
+     * @return List of rulesets this policy counts as violated for the artifact
+     * @throws APIMGovernanceException If an error occurs while getting the list
      */
     @Override
-    public List<String> getViolatedRulesets(String organization) throws APIMGovernanceException {
-
+    public List<String> getViolatedRulesetsForArtifactAndPolicy(String artifactRefId, ArtifactType artifactType,
+                                                                String organization, String policyId)
+            throws APIMGovernanceException {
         Set<String> rulesetIds = new HashSet<>();
         try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
-            // Each branch passes a constant query, so the statements stay compile time constants
-            if (GovernancePolicyMgtDAOImpl.isComplianceAffectingSeverityColumnPresent(connection)) {
-                try (PreparedStatement prepStmnt = connection
-                        .prepareStatement(SQLConstants.GET_FAILED_RULESET_RUNS_WITH_SEVERITY)) {
-                    prepStmnt.setString(1, organization);
+            if (GovernancePolicyMgtDAOImpl.isPerPolicySeverityFilteringEnabled()) {
+                try (PreparedStatement prepStmnt = connection.prepareStatement(
+                        SQLConstants.GET_FAILED_RULESET_RUNS_FOR_ARTIFACT_AND_POLICY_WITH_SEVERITY)) {
+                    prepStmnt.setString(1, artifactRefId);
+                    prepStmnt.setString(2, String.valueOf(artifactType));
+                    prepStmnt.setString(3, organization);
+                    prepStmnt.setString(4, policyId);
                     collectSeverityAware(prepStmnt, "RULESET_ID", rulesetIds);
                 }
             } else {
                 try (PreparedStatement prepStmnt = connection
-                        .prepareStatement(SQLConstants.GET_FAILED_RULESET_RUNS)) {
-                    prepStmnt.setString(1, organization);
+                        .prepareStatement(SQLConstants.GET_FAILED_RULESET_RUNS_FOR_ARTIFACT_AND_POLICY)) {
+                    prepStmnt.setString(1, artifactRefId);
+                    prepStmnt.setString(2, String.valueOf(artifactType));
+                    prepStmnt.setString(3, organization);
+                    prepStmnt.setString(4, policyId);
                     collect(prepStmnt, "RULESET_ID", rulesetIds);
                 }
             }
@@ -997,41 +1010,34 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     }
 
     /**
-     * Get list of all violated rulesets for an artifact
+     * Get the policies the organization is violating
      *
-     * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
-     * @param artifactType  Artifact Type
-     * @param organization  Organization
-     * @return List of all violated rulesets for an artifact
-     * @throws APIMGovernanceException If an error occurs while getting the list of all
-     *                                 violated rulesets for an artifact
+     * @param organization Organization
+     * @return IDs of the policies with at least one violation that affects their compliance
+     * @throws APIMGovernanceException If an error occurs while getting the list
      */
     @Override
-    public List<String> getViolatedRulesetsForArtifact(String artifactRefId, ArtifactType artifactType,
-                                                       String organization) throws APIMGovernanceException {
-        Set<String> rulesetIds = new HashSet<>();
+    public List<String> getViolatedPolicies(String organization) throws APIMGovernanceException {
+
+        Set<String> policyIds = new HashSet<>();
         try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
-            if (GovernancePolicyMgtDAOImpl.isComplianceAffectingSeverityColumnPresent(connection)) {
+            if (GovernancePolicyMgtDAOImpl.isPerPolicySeverityFilteringEnabled()) {
                 try (PreparedStatement prepStmnt = connection
-                        .prepareStatement(SQLConstants.GET_FAILED_RULESET_RUNS_FOR_ARTIFACT_WITH_SEVERITY)) {
-                    prepStmnt.setString(1, artifactRefId);
-                    prepStmnt.setString(2, String.valueOf(artifactType));
-                    prepStmnt.setString(3, organization);
-                    collectSeverityAware(prepStmnt, "RULESET_ID", rulesetIds);
+                        .prepareStatement(SQLConstants.GET_VIOLATED_POLICIES_WITH_SEVERITY)) {
+                    prepStmnt.setString(1, organization);
+                    collectSeverityAware(prepStmnt, "POLICY_ID", policyIds);
                 }
             } else {
                 try (PreparedStatement prepStmnt = connection
-                        .prepareStatement(SQLConstants.GET_FAILED_RULESET_RUNS_FOR_ARTIFACT)) {
-                    prepStmnt.setString(1, artifactRefId);
-                    prepStmnt.setString(2, String.valueOf(artifactType));
-                    prepStmnt.setString(3, organization);
-                    collect(prepStmnt, "RULESET_ID", rulesetIds);
+                        .prepareStatement(SQLConstants.GET_VIOLATED_POLICIES)) {
+                    prepStmnt.setString(1, organization);
+                    collect(prepStmnt, "POLICY_ID", policyIds);
                 }
             }
         } catch (SQLException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_GOVERNANCE_RESULTS, e);
         }
-        return new ArrayList<>(rulesetIds);
+        return new ArrayList<>(policyIds);
     }
 
     /**

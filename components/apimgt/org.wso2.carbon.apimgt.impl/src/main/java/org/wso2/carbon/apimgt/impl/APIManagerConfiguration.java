@@ -231,7 +231,7 @@ public class APIManagerConfiguration {
 
     public static boolean isTokenRevocationEnabled() {
 
-    return !tokenRevocationClassName.isEmpty();
+        return !tokenRevocationClassName.isEmpty();
     }
 
     /**

@@ -786,9 +786,9 @@
         <DataSource>{{apim.governance.datasource.name}}</DataSource>
         {% if apim.governance.per_policy_severity_filtering_enabled is defined %}
         <!-- Allows a policy to declare which rule severities affect compliance. Violations of other severities
-             are still evaluated and reported, but do not violate the policy. Enabling this alone is not enough:
-             the optional COMPLIANCE_AFFECTING_SEVERITIES column must also be added to GOV_POLICY. When either is
-             missing, every severity affects compliance. -->
+             are still evaluated and reported, but do not violate the policy. This assumes GOV_POLICY already has
+             the COMPLIANCE_AFFECTING_SEVERITIES column, which a fresh install gets automatically; a deployment
+             upgraded from an older schema must add the column before enabling this, or writes will fail. -->
         <PerPolicySeverityFilteringEnabled>{{apim.governance.per_policy_severity_filtering_enabled}}</PerPolicySeverityFilteringEnabled>
         {% endif %}
         <SchedulerConfigurations>

@@ -52,6 +52,8 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -333,10 +335,13 @@ public class ComplianceAPIUtil {
         List<String> paginatedArtifactIds = allArtifacts.subList(offset,
                 Math.min(offset + limit, allArtifacts.size()));
 
+        // Read once for the whole page rather than once per artifact per policy
+        PolicyMetadata policyMetadata = new PolicyMetadata(organization);
+
         for (String artifactId : paginatedArtifactIds) {
             try {
                 ArtifactComplianceStatusDTO complianceStatus = getArtifactComplianceStatus(artifactId,
-                        artifactType, organization);
+                        artifactType, organization, policyMetadata);
                 complianceStatusList.add(complianceStatus);
             } catch (APIMGovernanceException e) {
                 if (log.isDebugEnabled()) {
@@ -363,12 +368,14 @@ public class ComplianceAPIUtil {
      * @param artifactRefId   Artifact Reference Id
      * @param artifactType artifact type
      * @param organization organization
+     * @param policyMetadata Policy severities and rulesets, shared by every artifact in the request
      * @return ArtifactComplianceStatusDTO
      * @throws APIMGovernanceException if an error occurs while getting the artifact compliance status
      */
     private static ArtifactComplianceStatusDTO getArtifactComplianceStatus(String artifactRefId,
                                                                            ArtifactType artifactType,
-                                                                           String organization)
+                                                                           String organization,
+                                                                           PolicyMetadata policyMetadata)
             throws APIMGovernanceException {
 
         ComplianceManager complianceManager = new ComplianceManager();
@@ -446,7 +453,7 @@ public class ComplianceAPIUtil {
         // Violations of a non compliance affecting severity are still counted above, but they do not make the
         // policy, and in turn the artifact, non-compliant
         List<String> violatedPolicies = identifyViolatedPolicies(evaluatedPolicies, ruleViolationsBySeverity,
-                organization);
+                policyMetadata);
 
         // Set policy adherence summary
         PolicyAdherenceSummaryDTO policyAdherenceSummaryDTO = new PolicyAdherenceSummaryDTO();
@@ -578,17 +585,21 @@ public class ComplianceAPIUtil {
             }
         }
 
-        // Every violation is reported to the user, including the ones of a non compliance affecting severity, but
-        // only the compliance affecting ones decide whether the ruleset passed. This screen has no policy in its
-        // path, so the severities are resolved from the policies that govern the artifact and hold this ruleset.
-        Set<RuleSeverity> affectingSeverities = resolveAffectingSeveritiesForRuleset(artifactRefId, artifactType,
-                rulesetId, organization);
+        // Every violation is reported to the user, including the ones of a non compliance affecting severity.
+        // This screen has no policy in its path, yet the severities a ruleset is judged on are declared per
+        // policy, so a single status is only ever answerable here when every governing policy is judged the
+        // same way. With the feature off that is always true: every severity affects compliance, so the status
+        // is just whether any violation was reported. With it on, this ruleset can legitimately pass under one
+        // governing policy and fail under another, so no status is reported at all rather than inventing one
+        // that would not agree with either policy's own verdict, matching what {@link #getPolicyAdherenceResultsDTO}
+        // and the policy scoped severity queries already do.
         rulesetValidationResultDTO.setViolatedRules(violatedRules);
         rulesetValidationResultDTO.setFollowedRules(followedRules);
-        rulesetValidationResultDTO.setStatus(
-                APIMGovernanceUtil.filterComplianceAffectingViolations(ruleViolations, affectingSeverities).isEmpty()
-                        ? RulesetValidationResultDTO.StatusEnum.PASSED
-                        : RulesetValidationResultDTO.StatusEnum.FAILED);
+        if (!new PolicyManager().isComplianceAffectingSeverityFilteringEnabled()) {
+            rulesetValidationResultDTO.setStatus(ruleViolations.isEmpty()
+                    ? RulesetValidationResultDTO.StatusEnum.PASSED
+                    : RulesetValidationResultDTO.StatusEnum.FAILED);
+        }
 
         return rulesetValidationResultDTO;
     }
@@ -672,52 +683,6 @@ public class ComplianceAPIUtil {
     }
 
     /**
-     * Resolve the severities a ruleset is judged on for one artifact, across every policy that governs it.
-     * <p>
-     * The ruleset detail screen has no policy in its path, yet the severities are declared per policy. A ruleset
-     * shared by several policies is therefore judged on the union of what those policies count, matching
-     * {@code getViolatedRulesetsForArtifact}, which reports a ruleset as violated when any governing policy counts
-     * the violation. A policy that declares nothing counts every severity, so the union collapses to every
-     * severity as soon as one such policy governs the artifact.
-     *
-     * @param artifactRefId Artifact Reference Id
-     * @param artifactType  Artifact type
-     * @param rulesetId     Ruleset ID
-     * @param organization  Organization
-     * @return Severities that affect compliance for this ruleset, every severity when none can be resolved
-     * @throws APIMGovernanceException If the policies of the artifact cannot be read
-     */
-    private static Set<RuleSeverity> resolveAffectingSeveritiesForRuleset(String artifactRefId,
-                                                                         ArtifactType artifactType,
-                                                                         String rulesetId, String organization)
-            throws APIMGovernanceException {
-
-        PolicyManager policyManager = new PolicyManager();
-        Map<String, String> applicablePolicies = APIMGovernanceUtil
-                .getApplicablePoliciesForArtifact(artifactRefId, artifactType, organization);
-
-        Set<RuleSeverity> union = new HashSet<>();
-        boolean governed = false;
-        for (String policyId : applicablePolicies.keySet()) {
-            boolean holdsRuleset = policyManager.getRulesetsByPolicyId(policyId, organization).stream()
-                    .anyMatch(ruleset -> rulesetId.equals(ruleset.getId()));
-            if (!holdsRuleset) {
-                continue;
-            }
-            governed = true;
-            Set<RuleSeverity> policySeverities = resolvePolicyAffectingSeverities(policyId, organization);
-            if (policySeverities == null) {
-                // This policy counts every severity, so nothing narrower can apply
-                return APIMGovernanceUtil.resolveComplianceAffectingSeverities(null);
-            }
-            union.addAll(policySeverities);
-        }
-
-        // A ruleset reached outside any governing policy keeps the original behaviour of counting every severity
-        return governed ? union : APIMGovernanceUtil.resolveComplianceAffectingSeverities(null);
-    }
-
-    /**
      * Resolve the compliance affecting severities declared by a policy.
      * <p>
      * A policy which declares none is judged on every severity, which is what null reports. A failure to read is
@@ -734,8 +699,10 @@ public class ComplianceAPIUtil {
             return StringUtils.isBlank(configured) ? null
                     : APIMGovernanceUtil.resolveComplianceAffectingSeverities(configured);
         } catch (APIMGovernanceException e) {
-            log.warn("Failed to resolve compliance affecting severities for policy " + policyId
-                    + ". Treating every severity as compliance affecting", e);
+            if (log.isDebugEnabled()) {
+                log.debug("Failed to resolve compliance affecting severities for policy " + policyId
+                        + ". Treating every severity as compliance affecting", e);
+            }
             return null;
         }
     }
@@ -748,22 +715,21 @@ public class ComplianceAPIUtil {
      *
      * @param evaluatedPolicies        Policies evaluated for the artifact
      * @param ruleViolationsBySeverity Violations of the artifact, grouped by severity
-     * @param organization             Organization
+     * @param policyMetadata           Policy severities and rulesets, read once for the request
      * @return IDs of the violated policies
      * @throws APIMGovernanceException If the rulesets of a policy cannot be read
      */
     private static List<String> identifyViolatedPolicies(List<String> evaluatedPolicies,
                                                          Map<RuleSeverity, List<RuleViolation>>
                                                                  ruleViolationsBySeverity,
-                                                         String organization) throws APIMGovernanceException {
+                                                         PolicyMetadata policyMetadata)
+            throws APIMGovernanceException {
 
-        PolicyManager policyManager = new PolicyManager();
         Set<String> violatedPolicies = new HashSet<>();
 
         for (String policyId : evaluatedPolicies) {
-            Set<RuleSeverity> policyAffectingSeverities = resolvePolicyAffectingSeverities(policyId, organization);
-            Set<String> policyRulesets = policyManager.getRulesetsByPolicyId(policyId, organization).stream()
-                    .map(RulesetInfo::getId).collect(Collectors.toSet());
+            Set<RuleSeverity> policyAffectingSeverities = policyMetadata.affectingSeverities(policyId);
+            Set<String> policyRulesets = policyMetadata.rulesetIds(policyId);
 
             for (Map.Entry<RuleSeverity, List<RuleViolation>> entry : ruleViolationsBySeverity.entrySet()) {
                 for (RuleViolation ruleViolation : entry.getValue()) {
@@ -782,5 +748,87 @@ public class ComplianceAPIUtil {
             }
         }
         return new ArrayList<>(violatedPolicies);
+    }
+
+    /**
+     * Policy metadata the violation check needs, read at most once per request.
+     * <p>
+     * A listing evaluates every artifact on the page, and each artifact is judged against every policy governing
+     * it. Reading a policy's severities and rulesets inside that nested loop makes the number of database round
+     * trips grow with artifacts multiplied by policies, so they are read once here and reused instead. The
+     * severities come from the single organization wide query the policy listing already uses.
+     * <p>
+     * This is deliberately request scoped rather than static: a policy's severities can be changed at any time,
+     * and a listing should reflect what was stored when it started rather than what some earlier request saw.
+     */
+    private static final class PolicyMetadata {
+
+        private final String organization;
+        private final PolicyManager policyManager = new PolicyManager();
+        private final Map<String, String> configuredSeverities;
+        private final Map<String, Set<String>> rulesetsByPolicy = new HashMap<>();
+
+        private PolicyMetadata(String organization) {
+
+            this.organization = organization;
+            Map<String, String> severities;
+            try {
+                severities = policyManager.getComplianceAffectingSeverities(organization);
+            } catch (APIMGovernanceException e) {
+                // Failing to read is treated as no policy declaring anything, so every severity affects
+                // compliance. One unreadable organization must not silently relax a whole listing.
+                if (log.isDebugEnabled()) {
+                    log.debug("Failed to read compliance affecting severities for organization " + organization
+                            + ". Treating every severity as compliance affecting", e);
+                }
+                severities = Collections.emptyMap();
+            }
+            this.configuredSeverities = severities;
+        }
+
+        /**
+         * Severities the given policy is judged on
+         *
+         * @param policyId Policy to read
+         * @return Configured severities, null when the policy is judged on every severity
+         */
+        private Set<RuleSeverity> affectingSeverities(String policyId) {
+
+            String configured = configuredSeverities.get(policyId);
+            return StringUtils.isBlank(configured) ? null
+                    : APIMGovernanceUtil.resolveComplianceAffectingSeverities(configured);
+        }
+
+        /**
+         * Rulesets attached to the given policy
+         * <p>
+         * A policy read as evaluated can still be deleted before this runs. That race must not cost the whole
+         * artifact its place in the listing, so a policy no longer found is treated as holding no rulesets, the
+         * same leniency {@link PolicyManager#getRulesetsWithContentByPolicyId} already extends elsewhere. Any
+         * other failure is a real fault and still propagates.
+         *
+         * @param policyId Policy to read
+         * @return IDs of the rulesets the policy holds, empty when the policy has since been deleted
+         * @throws APIMGovernanceException If the rulesets of a policy that still exists cannot be read
+         */
+        private Set<String> rulesetIds(String policyId) throws APIMGovernanceException {
+
+            Set<String> cached = rulesetsByPolicy.get(policyId);
+            if (cached != null) {
+                return cached;
+            }
+            Set<String> ids;
+            try {
+                ids = policyManager.getRulesetsByPolicyId(policyId, organization).stream()
+                        .map(RulesetInfo::getId).collect(Collectors.toSet());
+            } catch (APIMGovernanceException e) {
+                if (APIMGovExceptionCodes.POLICY_NOT_FOUND.getErrorCode() != e.getErrorHandler().getErrorCode()) {
+                    throw e;
+                }
+                ids = Collections.emptySet();
+            }
+            rulesetsByPolicy.put(policyId, ids);
+            return ids;
+        }
     }
 }

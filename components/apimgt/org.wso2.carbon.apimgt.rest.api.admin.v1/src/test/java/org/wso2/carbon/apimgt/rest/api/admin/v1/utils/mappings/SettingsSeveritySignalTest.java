@@ -32,8 +32,8 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
  * <p>
  * The tri-state {@code complianceAffectingSeverities} field of a policy payload tells a client whether to offer the
  * severity control, but the policy create form has no policy to read it from. That form relies on this flag in the
- * settings payload instead. If it reports true on a deployment which cannot store severities, an administrator is
- * offered a control whose every save is rejected; if it reports false on one which can, a working feature is
+ * settings payload instead. If it reports true on a deployment which has not enabled the feature, an administrator
+ * is offered a control whose every save is rejected; if it reports false on one which has, a working feature is
  * invisible.
  */
 public class SettingsSeveritySignalTest {

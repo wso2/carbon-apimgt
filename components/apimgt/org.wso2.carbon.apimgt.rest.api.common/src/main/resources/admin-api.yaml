@@ -6747,13 +6747,6 @@ components:
           description: |
             Is Organization-based access control configuration enabled
           example: true
-        perPolicySeverityFilteringEnabled:
-          type: boolean
-          description: |
-            Is per policy compliance affecting severity filtering enabled for governance policies. When enabled a
-            policy can declare which rule severities affect its compliance verdict. Enabling it also requires the
-            optional COMPLIANCE_AFFECTING_SEVERITIES column on GOV_POLICY.
-          example: false
         keyManagerConfiguration:
           type: array
           items:
@@ -6831,6 +6824,12 @@ components:
         consumptionExportEnabled:
           type: boolean
           description: Whether the ConsumptionDataExportService OSGi service is available
+          example: false
+        perPolicySeverityFilteringEnabled:
+          type: boolean
+          description: |
+            Is per policy compliance affecting severity filtering enabled for governance policies. When enabled a
+            policy can declare which rule severities affect its compliance verdict.
           example: false
     ScopeList:
       title: Scope Role Mapping List
