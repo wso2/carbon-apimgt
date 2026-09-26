@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.governance.impl.util;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.OASParserOptions;
@@ -35,7 +36,9 @@ import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.DefaultRuleset;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.RuleCategory;
+import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
+import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetContent;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
@@ -57,6 +60,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -70,6 +74,7 @@ import java.util.stream.Collectors;
  */
 public class APIMGovernanceUtil {
     private static final Log log = LogFactory.getLog(APIMGovernanceUtil.class);
+
 
     /**
      * Generates a UUID
@@ -680,4 +685,122 @@ public class APIMGovernanceUtil {
         return governanceOptions;
     }
 
+    /**
+     * Every severity, as a fresh immutable set. A new set is returned on each call so that callers can never reach a
+     * shared instance.
+     *
+     * @return Immutable set holding every rule severity
+     */
+    private static Set<RuleSeverity> allSeverities() {
+
+        return Collections.unmodifiableSet(EnumSet.allOf(RuleSeverity.class));
+    }
+
+    /**
+     * Validate a requested severity selection and return the form it is stored in
+     * <p>
+     * Reading a stored selection drops tokens the product does not define, so an unvalidated write would leave the
+     * policy judged on severities the caller never asked for, and a selection of nothing but unknown tokens would
+     * silently mean every severity. Rejecting the write is the only point at which the caller can still be told.
+     * <p>
+     * The accepted value is normalised rather than stored verbatim: tokens are upper cased and repeats dropped, so
+     * the column holds one representation of a selection, a read gives back what a client can compare against, and
+     * the stored value cannot outgrow the column however long the request was.
+     *
+     * @param requestedSeverities Comma separated severities from the request, blank to clear the selection
+     * @return Normalised selection to store, the given value when it is blank
+     * @throws APIMGovernanceException If a token does not name a severity the product defines
+     */
+    public static String validateComplianceAffectingSeverities(String requestedSeverities)
+            throws APIMGovernanceException {
+
+        if (StringUtils.isBlank(requestedSeverities)) {
+            return requestedSeverities;
+        }
+
+        Set<RuleSeverity> severities = EnumSet.noneOf(RuleSeverity.class);
+        for (String severityToken : requestedSeverities.split(",")) {
+            String trimmedSeverity = severityToken.trim();
+            if (StringUtils.isEmpty(trimmedSeverity)) {
+                continue;
+            }
+            RuleSeverity severity = RuleSeverity.fromString(trimmedSeverity);
+            if (severity == null) {
+                throw new APIMGovernanceException(APIMGovExceptionCodes.INVALID_COMPLIANCE_AFFECTING_SEVERITIES,
+                        trimmedSeverity);
+            }
+            severities.add(severity);
+        }
+
+        // A value which held nothing but separators names no severity, and storing it would read back as every
+        // severity. That is what a blank request already means, so it is kept as one state rather than two.
+        return severities.stream().map(Enum::name).collect(Collectors.joining(","));
+    }
+
+    public static Set<RuleSeverity> resolveComplianceAffectingSeverities(String configuredSeverities) {
+
+        if (StringUtils.isBlank(configuredSeverities)) {
+            return allSeverities();
+        }
+
+        Set<RuleSeverity> severities = EnumSet.noneOf(RuleSeverity.class);
+        for (String severityToken : configuredSeverities.split(",")) {
+            String trimmedSeverity = severityToken.trim();
+            if (StringUtils.isEmpty(trimmedSeverity)) {
+                continue;
+            }
+            RuleSeverity severity = RuleSeverity.fromString(trimmedSeverity);
+            if (severity == null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Ignoring unknown compliance affecting rule severity '" + trimmedSeverity + "'");
+                }
+                continue;
+            }
+            severities.add(severity);
+        }
+
+        if (severities.isEmpty()) {
+            if (log.isDebugEnabled()) {
+                log.debug("No valid compliance affecting rule severity found in '" + configuredSeverities
+                        + "'. Treating every severity as compliance affecting");
+            }
+            return allSeverities();
+        }
+        return Collections.unmodifiableSet(severities);
+    }
+
+    /**
+     * Check whether a violation of the given severity should affect compliance results
+     *
+     * @param severity  Rule severity, may be null when the severity of a violation could not be resolved
+     * @param affecting Severities that affect compliance, as resolved for the ruleset
+     * @return True if a violation of this severity should mark a ruleset as failed
+     */
+    public static boolean isComplianceAffectingSeverity(RuleSeverity severity, Set<RuleSeverity> affecting) {
+
+        // An unresolved severity is treated as compliance affecting so that a malformed severity in a ruleset can
+        // never silently stop a rule from being enforced.
+        return severity == null || affecting == null || affecting.contains(severity);
+    }
+
+    /**
+     * Filter out the rule violations that should not affect compliance results.
+     * <p>
+     * The given list is never modified. Callers keep using the original list for anything shown to the user and use
+     * the returned list only to decide whether a ruleset passed or failed.
+     *
+     * @param ruleViolations List of rule violations
+     * @param affecting      Severities that affect compliance, as resolved for the ruleset
+     * @return List holding only the violations that affect compliance
+     */
+    public static List<RuleViolation> filterComplianceAffectingViolations(List<RuleViolation> ruleViolations,
+                                                                         Set<RuleSeverity> affecting) {
+
+        if (ruleViolations == null || ruleViolations.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return ruleViolations.stream()
+                .filter(ruleViolation -> isComplianceAffectingSeverity(ruleViolation.getSeverity(), affecting))
+                .collect(Collectors.toList());
+    }
 }

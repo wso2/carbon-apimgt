@@ -54,6 +54,9 @@ public class PolicyMappingUtil {
         govPolicy.setCreatedBy(dto.getCreatedBy());
         govPolicy.setUpdatedBy(dto.getUpdatedBy());
         govPolicy.setUpdatedTime(dto.getUpdatedTime());
+        // Carried on the policy so the severity selection is written by the same statement as the rest of it.
+        // Null means the field was not sent, which the update path treats as "leave whatever is stored alone".
+        govPolicy.setComplianceAffectingSeverities(dto.getComplianceAffectingSeverities());
         govPolicy.setRulesetIds(dto.getRulesets());
         govPolicy.setActions(fromActionDTOListtoActionList(dto.getActions()));
         govPolicy.setGovernableStates(dto.getGovernableStates().stream()
@@ -89,6 +92,7 @@ public class PolicyMappingUtil {
         governancePolicyDTO.setCreatedTime(governancePolicy.getCreatedTime());
         governancePolicyDTO.setUpdatedBy(governancePolicy.getUpdatedBy());
         governancePolicyDTO.setUpdatedTime(governancePolicy.getUpdatedTime());
+        governancePolicyDTO.setComplianceAffectingSeverities(governancePolicy.getComplianceAffectingSeverities());
         governancePolicyDTO.setLabels(governancePolicy.getLabels());
         governancePolicyDTO.setRulesets(governancePolicy.getRulesetIds());
         governancePolicyDTO.setActions(

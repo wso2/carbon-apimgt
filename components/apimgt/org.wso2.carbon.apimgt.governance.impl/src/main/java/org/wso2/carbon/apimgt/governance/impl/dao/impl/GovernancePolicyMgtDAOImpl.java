@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.governance.impl.dao.impl;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
@@ -38,7 +39,10 @@ import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 import org.wso2.carbon.apimgt.governance.impl.APIMGovernanceConstants;
 import org.wso2.carbon.apimgt.governance.impl.dao.GovernancePolicyMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.constants.SQLConstants;
+import org.wso2.carbon.apimgt.governance.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceDBUtil;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.dto.APIMGovernanceConfigDTO;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -77,6 +81,11 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
 
     /**
      * Create a new Governance Policy
+     * <p>
+     * The configuration alone decides which insert runs, matching {@link #updateGovernancePolicy}. With it off the
+     * policy is written exactly as it was before the feature existed, by a statement which does not name the
+     * column; with it on the severity selection rides the same insert, so it lands inside the transaction that
+     * creates the policy rather than in a second write that could fail on its own.
      *
      * @param governancePolicy Governance Policy Info with Ruleset Ids
      * @param organization     Organization
@@ -84,6 +93,23 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
      */
     @Override
     public APIMGovernancePolicy createGovernancePolicy(APIMGovernancePolicy governancePolicy, String organization)
+            throws APIMGovernanceException {
+
+        if (!isPerPolicySeverityFilteringEnabled()) {
+            return createPolicy(governancePolicy, organization);
+        }
+        return createPolicyWithSeverities(governancePolicy, organization);
+    }
+
+    /**
+     * Create a policy without naming the compliance affecting severity column
+     *
+     * @param governancePolicy Governance Policy Info with Ruleset Ids
+     * @param organization     Organization
+     * @return APIMGovernancePolicy Created object
+     * @throws APIMGovernanceException If an error occurs while creating the policy
+     */
+    private APIMGovernancePolicy createPolicy(APIMGovernancePolicy governancePolicy, String organization)
             throws APIMGovernanceException {
         try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
             connection.setAutoCommit(false);
@@ -99,6 +125,52 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                     Timestamp createdTime = new Timestamp(System.currentTimeMillis());
                     prepStmt.setTimestamp(7, createdTime);
                     governancePolicy.setCreatedTime(createdTime.toString());
+
+                    prepStmt.execute();
+                }
+
+                insertPolicyRulesetMapping(connection, governancePolicy);
+                insertPolicyLabels(connection, governancePolicy);
+                insertPolicyStatesAndActions(connection, governancePolicy);
+
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
+            }
+        } catch (SQLException e) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_CREATING_POLICY, e, organization);
+        }
+        return governancePolicy;
+    }
+
+    /**
+     * Create a policy and its compliance affecting severities with one statement
+     *
+     * @param governancePolicy Governance Policy Info with Ruleset Ids
+     * @param organization     Organization
+     * @return APIMGovernancePolicy Created object
+     * @throws APIMGovernanceException If an error occurs while creating the policy
+     */
+    private APIMGovernancePolicy createPolicyWithSeverities(APIMGovernancePolicy governancePolicy,
+                                                            String organization) throws APIMGovernanceException {
+        try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                try (PreparedStatement prepStmt = connection
+                        .prepareStatement(SQLConstants.CREATE_POLICY_WITH_SEVERITIES)) {
+                    prepStmt.setString(1, governancePolicy.getId());
+                    prepStmt.setString(2, governancePolicy.getName());
+                    prepStmt.setString(3, governancePolicy.getDescription());
+                    prepStmt.setString(4, organization);
+                    prepStmt.setString(5, governancePolicy.getCreatedBy());
+                    prepStmt.setInt(6, governancePolicy.isGlobal() ? 1 : 0);
+
+                    Timestamp createdTime = new Timestamp(System.currentTimeMillis());
+                    prepStmt.setTimestamp(7, createdTime);
+                    governancePolicy.setCreatedTime(createdTime.toString());
+
+                    prepStmt.setString(8, storedSeverities(governancePolicy.getComplianceAffectingSeverities()));
 
                     prepStmt.execute();
                 }
@@ -203,6 +275,29 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
     public APIMGovernancePolicy updateGovernancePolicy(String policyId, APIMGovernancePolicy governancePolicy,
                                                        String organization)
             throws APIMGovernanceException {
+
+        // With the configuration off, a value the caller sent is discarded here the same way it is on create: the
+        // REST layer is expected to have already refused such a request, and this is what keeps that true even
+        // for a caller that bypasses it. With the configuration on, whether the request sent the field is what
+        // decides which update runs. A request which did not send it is written by the statement that omits the
+        // column, which is what makes an absent field preserve whatever was stored while a blank one clears it.
+        if (!isPerPolicySeverityFilteringEnabled() || governancePolicy.getComplianceAffectingSeverities() == null) {
+            return updatePolicy(policyId, governancePolicy, organization);
+        }
+        return updatePolicyWithSeverities(policyId, governancePolicy, organization);
+    }
+
+    /**
+     * Update a policy without naming the optional compliance affecting severity column
+     *
+     * @param policyId         Policy ID
+     * @param governancePolicy Governance Policy
+     * @param organization     Organization
+     * @return APIMGovernancePolicy Updated object
+     * @throws APIMGovernanceException If an error occurs while updating the policy
+     */
+    private APIMGovernancePolicy updatePolicy(String policyId, APIMGovernancePolicy governancePolicy,
+                                              String organization) throws APIMGovernanceException {
         try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try {
@@ -234,6 +329,59 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
         } catch (SQLException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_UPDATING_POLICY, e,
                     policyId);
+        }
+        governancePolicy.setId(policyId);
+        return governancePolicy;
+    }
+
+    /**
+     * Update a policy and its compliance affecting severities with one statement
+     * <p>
+     * A blank selection means every severity is judged, which the column holds as null. The severity is set by the
+     * same statement as the rest of the policy, so the two can never end up applied to different rows: either both
+     * take effect or, on failure, the whole update is rolled back.
+     *
+     * @param policyId         Policy ID
+     * @param governancePolicy Governance Policy
+     * @param organization     Organization
+     * @return APIMGovernancePolicy Updated object
+     * @throws APIMGovernanceException If an error occurs while updating the policy
+     */
+    private APIMGovernancePolicy updatePolicyWithSeverities(String policyId, APIMGovernancePolicy governancePolicy,
+                                                            String organization) throws APIMGovernanceException {
+        try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                // Update policy details
+                try (PreparedStatement updateStatement = connection
+                        .prepareStatement(SQLConstants.UPDATE_POLICY_WITH_SEVERITIES)) {
+                    updateStatement.setString(1, governancePolicy.getName());
+                    updateStatement.setString(2, governancePolicy.getDescription());
+                    updateStatement.setString(3, governancePolicy.getUpdatedBy());
+                    updateStatement.setInt(4, governancePolicy.isGlobal() ? 1 : 0);
+
+                    Timestamp updatedTime = new Timestamp(System.currentTimeMillis());
+                    updateStatement.setTimestamp(5, updatedTime);
+                    governancePolicy.setUpdatedTime(updatedTime.toString());
+
+                    updateStatement.setString(6,
+                            storedSeverities(governancePolicy.getComplianceAffectingSeverities()));
+                    updateStatement.setString(7, policyId);
+                    updateStatement.setString(8, organization);
+                    updateStatement.executeUpdate();
+                }
+                updatePolicyRulesetMappings(connection, policyId, governancePolicy);
+                updatePolicyLabels(connection, policyId, governancePolicy);
+                updateStatesAndPolicyActions(connection, policyId, governancePolicy);
+                deletePolicyResultsForPolicy(connection, policyId);
+
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
+            }
+        } catch (SQLException e) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_UPDATING_POLICY, e, policyId);
         }
         governancePolicy.setId(policyId);
         return governancePolicy;
@@ -992,5 +1140,101 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             throw new APIMGovernanceException(APIMGovExceptionCodes
                     .ERROR_WHILE_DELETING_LABEL_POLICY_MAPPINGS, e, label);
         }
+    }
+
+    @Override
+    public Map<String, String> getComplianceAffectingSeverities(String organization) throws APIMGovernanceException {
+
+        // A policy absent from the map has not narrowed its severities, which resolves to every severity
+        // affecting compliance. With the configuration off that is every policy, so an empty map is returned
+        // without a query, exactly matching what a deployment reported before the feature existed.
+        Map<String, String> severitiesByPolicy = new HashMap<>();
+        if (!isPerPolicySeverityFilteringEnabled()) {
+            return severitiesByPolicy;
+        }
+        try (Connection connection = APIMGovernanceDBUtil.getConnection();
+             PreparedStatement prepStmnt = connection
+                     .prepareStatement(SQLConstants.GET_POLICY_COMPLIANCE_AFFECTING_SEVERITIES_BY_ORGANIZATION)) {
+            prepStmnt.setString(1, organization);
+            try (ResultSet resultSet = prepStmnt.executeQuery()) {
+                while (resultSet.next()) {
+                    String severities =
+                            resultSet.getString(SQLConstants.COMPLIANCE_AFFECTING_SEVERITIES_COLUMN);
+                    if (severities != null) {
+                        severitiesByPolicy.put(resultSet.getString("POLICY_ID"), severities);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_POLICIES, e, organization);
+        }
+        return severitiesByPolicy;
+    }
+
+    @Override
+    public String getComplianceAffectingSeverities(String policyId, String organization)
+            throws APIMGovernanceException {
+
+        // With the configuration off nothing was ever stored, so this reports the same null a caller would see
+        // for a policy which has not narrowed its severities, without a query.
+        if (!isPerPolicySeverityFilteringEnabled()) {
+            return null;
+        }
+        try (Connection connection = APIMGovernanceDBUtil.getConnection();
+             PreparedStatement prepStmnt = connection
+                     .prepareStatement(SQLConstants.GET_POLICY_COMPLIANCE_AFFECTING_SEVERITIES)) {
+            prepStmnt.setString(1, policyId);
+            prepStmnt.setString(2, organization);
+            try (ResultSet resultSet = prepStmnt.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getString(SQLConstants.COMPLIANCE_AFFECTING_SEVERITIES_COLUMN);
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_POLICY_BY_ID, e, policyId);
+        }
+        return null;
+    }
+
+    /**
+     * Value to store in the compliance affecting severities column for a requested severity selection
+     * <p>
+     * Selecting every severity is the same statement as selecting none, and both are held as null rather than as a
+     * list of everything, so a policy has one representation of "every severity counts" instead of two. Only
+     * called from the two statements which name the column, so the configuration is already known to be on by
+     * the time this runs; it has nothing further to decide.
+     *
+     * @param requestedSeverities Comma separated severities from the request, blank when every severity counts
+     * @return Value to store, null when every severity counts
+     */
+    private static String storedSeverities(String requestedSeverities) {
+
+        return StringUtils.isBlank(requestedSeverities) ? null : requestedSeverities;
+    }
+
+    /**
+     * Check whether per policy severity filtering has been enabled in the configuration.
+     * <p>
+     * GOV_POLICY always has the storage for this, so this alone decides whether the feature is offered; there is
+     * no schema state to consult and nothing that can fail on account of a missing column.
+     *
+     * @return True when the configuration allows per policy severity filtering
+     */
+    static boolean isPerPolicySeverityFilteringEnabled() {
+
+        APIManagerConfigurationService configurationService = ServiceReferenceHolder.getInstance()
+                .getAPIMConfigurationService();
+        if (configurationService == null || configurationService.getAPIManagerConfiguration() == null) {
+            return false;
+        }
+        APIMGovernanceConfigDTO governanceConfig = configurationService.getAPIManagerConfiguration()
+                .getAPIMGovernanceConfigurationDto();
+        return governanceConfig != null && governanceConfig.isPerPolicySeverityFilteringEnabled();
+    }
+
+    @Override
+    public boolean isComplianceAffectingSeverityFilteringEnabled() {
+
+        return isPerPolicySeverityFilteringEnabled();
     }
 }
