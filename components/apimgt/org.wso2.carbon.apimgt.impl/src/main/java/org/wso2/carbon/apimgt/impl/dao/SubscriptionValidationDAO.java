@@ -1207,6 +1207,7 @@ public class SubscriptionValidationDAO {
         String sql = SubscriptionValidationSQLConstants.GET_ALL_API_PRODUCT_URI_TEMPLATES_SQL;
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setInt(1, api.getApiId());
+            preparedStatement.setString(2, revisionId);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     String httpMethod = resultSet.getString("HTTP_METHOD");
