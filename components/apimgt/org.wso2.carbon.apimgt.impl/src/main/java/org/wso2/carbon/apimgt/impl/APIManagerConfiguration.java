@@ -3276,10 +3276,15 @@ public class APIManagerConfiguration {
         }
         OMElement revisionBasedResourcesElement = omElement.getFirstChildWithName(
                 new QName(APIConstants.APIProductConfigs.ENABLE_REVISION_BASED_RESOURCES));
-        if (revisionBasedResourcesElement != null
-                && StringUtils.isNotEmpty(revisionBasedResourcesElement.getText())) {
-            isAPIProductRevisionBasedResourcesEnabled =
-                    Boolean.parseBoolean(revisionBasedResourcesElement.getText().trim());
+        if (revisionBasedResourcesElement != null && StringUtils.isNotBlank(revisionBasedResourcesElement.getText())) {
+            String revisionBasedResourcesValue = revisionBasedResourcesElement.getText().trim();
+            if (Boolean.TRUE.toString().equalsIgnoreCase(revisionBasedResourcesValue)
+                    || Boolean.FALSE.toString().equalsIgnoreCase(revisionBasedResourcesValue)) {
+                isAPIProductRevisionBasedResourcesEnabled = Boolean.parseBoolean(revisionBasedResourcesValue);
+            } else {
+                log.warn("Invalid value for " + APIConstants.APIProductConfigs.ENABLE_REVISION_BASED_RESOURCES
+                        + ". Using default: " + isAPIProductRevisionBasedResourcesEnabled);
+            }
         }
     }
 
