@@ -30,6 +30,7 @@
   "apim.datasource_sync_runtime_artifacts.name": "jdbc/WSO2AS_DB",
   "apim.gateway_type": "Regular",
   "apim.enable_secure_vault": "false",
+  "apim.api_product.enable_revision_based_resources": true,
   "apim.jwt.enable": false,
   "apim.jwt.enable_jwks_api": true,
   "apim.jwt.header": "X-JWT-Assertion",
