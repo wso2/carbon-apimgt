@@ -185,6 +185,7 @@ public class APIManagerConfiguration {
     private boolean isTransactionCounterEnabled;
     private static boolean isMCPSupportEnabled = true;
     private static boolean isMCPEnforceAuthForAllMethods = true;
+    private static boolean isAPIProductRevisionBasedResourcesEnabled = true;
     private static String devportalMode = APIConstants.DEVPORTAL_MODE_HYBRID;
     private static volatile boolean isRuntimeReadOnly = false;
 
@@ -911,6 +912,8 @@ public class APIManagerConfiguration {
                 setAiConfiguration(element);
             } else if (APIConstants.AI.MCP.equals(localName)) {
                 setMCPConfigurations(element);
+            } else if (APIConstants.APIProductConfigs.API_PRODUCT.equals(localName)) {
+                setAPIProductConfigurations(element);
             } else if (APIConstants.TokenValidationConstants.TOKEN_VALIDATION_CONFIG.equals(localName)) {
                 setTokenValidation(element);
             } else if (APIConstants.ORG_BASED_ACCESS_CONTROL.equals(localName)) {
@@ -3258,6 +3261,37 @@ public class APIManagerConfiguration {
     public boolean isMCPEnforceAuthForAllMethods() {
 
         return isMCPEnforceAuthForAllMethods;
+    }
+
+    /**
+     * Set API Product Configurations
+     *
+     * @param omElement XML Config
+     */
+    private void setAPIProductConfigurations(OMElement omElement) {
+
+        if (omElement == null) {
+            log.debug("API Product configuration element is null. Skipping configuration parsing.");
+            return;
+        }
+        OMElement revisionBasedResourcesElement = omElement.getFirstChildWithName(
+                new QName(APIConstants.APIProductConfigs.ENABLE_REVISION_BASED_RESOURCES));
+        if (revisionBasedResourcesElement != null
+                && StringUtils.isNotEmpty(revisionBasedResourcesElement.getText())) {
+            isAPIProductRevisionBasedResourcesEnabled =
+                    Boolean.parseBoolean(revisionBasedResourcesElement.getText().trim());
+        }
+    }
+
+    /**
+     * Returns whether the resource level settings (rate limiting tier, auth scheme and scopes) of an API Product sent
+     * to the Gateway are taken only from the deployed revision of the API Product.
+     *
+     * @return true if revision based API Product resources are enabled, false otherwise.
+     */
+    public boolean isAPIProductRevisionBasedResourcesEnabled() {
+
+        return isAPIProductRevisionBasedResourcesEnabled;
     }
 
     /**
