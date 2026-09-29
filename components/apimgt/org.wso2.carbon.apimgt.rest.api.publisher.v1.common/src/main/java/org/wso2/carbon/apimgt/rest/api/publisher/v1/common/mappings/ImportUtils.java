@@ -61,6 +61,7 @@ import org.wso2.carbon.apimgt.api.model.Backend;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
+import org.wso2.carbon.apimgt.api.model.OASParserOptions;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
@@ -94,12 +95,14 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationMappingDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerOperationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubtypeConfigurationDTO;
@@ -194,6 +197,9 @@ public class ImportUtils {
                 JsonElement jsonObject = retrieveValidatedDTOObject(extractedFolderPath, preserveProvider,
                         userName, ImportExportConstants.TYPE_MCP_SERVER);
                 importedApiDTO = new Gson().fromJson(jsonObject, MCPServerDTO.class);
+                if (importedApiDTO != null && importedApiDTO.getMcpPathAppended() == null) {
+                    importedApiDTO.setMcpPathAppended(Boolean.TRUE.toString());
+                }
             }
         } catch (IOException e) {
             throw new APIManagementException(
@@ -336,6 +342,25 @@ public class ImportUtils {
             // Get the endpoint config object updated
             APIUtil.validateAPIEndpointConfig(importedApiDTO.getEndpointConfig(), importedApiDTO.getType().toString(),
                     importedApiDTO.getName());
+            if (importedApiDTO.getEndpointConfig() instanceof Map) {
+                org.json.JSONObject endpointConfigObj =
+                        new org.json.JSONObject((Map) importedApiDTO.getEndpointConfig());
+                if (!APIConstants.ENDPOINT_TYPE_DEFAULT.equalsIgnoreCase(
+                        endpointConfigObj.optString(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                    ArrayList<String> endpointURLs = new ArrayList<>();
+                    APIUtil.extractURLsFromEndpointConfig(endpointConfigObj,
+                            APIConstants.API_DATA_PRODUCTION_ENDPOINTS, endpointURLs);
+                    APIUtil.extractURLsFromEndpointConfig(endpointConfigObj,
+                            APIConstants.API_DATA_SANDBOX_ENDPOINTS, endpointURLs);
+                    APIUtil.extractURLsFromEndpointConfig(endpointConfigObj,
+                            APIConstants.ENDPOINT_PRODUCTION_FAILOVERS, endpointURLs);
+                    APIUtil.extractURLsFromEndpointConfig(endpointConfigObj,
+                            APIConstants.ENDPOINT_SANDBOX_FAILOVERS, endpointURLs);
+                    for (String endpointURL : endpointURLs) {
+                        APIUtil.validateRemoteURL(endpointURL, tenantDomain);
+                    }
+                }
+            }
 
             API targetApi = retrieveApiToOverwrite(importedApiDTO.getName(), importedApiDTO.getVersion(),
                     currentTenantDomain, apiProvider, Boolean.TRUE, organization);
@@ -645,7 +670,7 @@ public class ImportUtils {
                 throw new APIManagementException("Error while importing API: " + e.getMessage(),
                         ExceptionCodes.from(ExceptionCodes.API_CONTEXT_MALFORMED_EXCEPTION, e.getMessage()));
             }
-            throw new APIManagementException(errorMessage + StringUtils.SPACE + e.getMessage(), e);
+            throw new APIManagementException(errorMessage + StringUtils.SPACE + e.getMessage(), e, e.getErrorHandler());
         }
     }
 
@@ -764,6 +789,8 @@ public class ImportUtils {
             final String currentTenantDomain =
                     MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(userName));
 
+            updateReferencedApiUuids(importedApiDTO, apiProvider, currentTenantDomain, organization);
+
             targetStatus = importedApiDTO.getLifeCycleStatus();
             APIUtil.validateAPIContext(importedApiDTO.getContext(), importedApiDTO.getName());
 
@@ -803,17 +830,58 @@ public class ImportUtils {
                 }
                 final API apiToUpdate = PublisherCommonUtils
                         .prepareForUpdateApi(targetApi, importedApiDTO, apiProvider, tokenScopes);
-                List<Backend> existingBackends = apiProvider.getMCPServerBackends(targetApi.getUuid(), organization);
-                List<Backend> importedBackends = getMCPServerBackends(extractedFolderPath);
-                if (existingBackends.isEmpty() || importedBackends.isEmpty()) {
-                    throw new APIManagementException("No backends found to update for API: " + targetApi.getUuid());
+                SubtypeConfigurationDTO subtypeConfigurationDTO = importedApiDTO.getSubtypeConfiguration();
+                String subtype = (subtypeConfigurationDTO != null)
+                        ? subtypeConfigurationDTO.getSubtype() : null;
+                if (!StringUtils.isBlank(subtype)
+                        && (APIConstants.API_SUBTYPE_SERVER_PROXY.equals(subtype)
+                        || APIConstants.API_SUBTYPE_DIRECT_BACKEND.equals(subtype))) {
+                    List<Backend> existingBackends =
+                            apiProvider.getMCPServerBackends(targetApi.getUuid(), organization);
+                    List<Backend> importedBackends = getMCPServerBackends(extractedFolderPath);
+                    if (existingBackends.isEmpty() || importedBackends.isEmpty()) {
+                        throw new APIManagementException(
+                                "No backends found to update for API: " + targetApi.getUuid());
+                    }
+                    Backend oldBackend = existingBackends.get(0);
+                    Backend importedBackend = importedBackends.get(0);
+                    org.json.JSONObject importedConfig =
+                            new org.json.JSONObject(importedBackend.getEndpointConfig());
+                    if (!APIConstants.ENDPOINT_TYPE_DEFAULT.equalsIgnoreCase(
+                            importedConfig.optString(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                        ArrayList<String> endpointURLs = new ArrayList<>();
+                        APIUtil.extractURLsFromEndpointConfig(importedConfig,
+                                APIConstants.API_DATA_PRODUCTION_ENDPOINTS, endpointURLs);
+                        APIUtil.extractURLsFromEndpointConfig(importedConfig,
+                                APIConstants.API_DATA_SANDBOX_ENDPOINTS, endpointURLs);
+                        APIUtil.extractURLsFromEndpointConfig(importedConfig,
+                                APIConstants.ENDPOINT_PRODUCTION_FAILOVERS, endpointURLs);
+                        APIUtil.extractURLsFromEndpointConfig(importedConfig,
+                                APIConstants.ENDPOINT_SANDBOX_FAILOVERS, endpointURLs);
+                        for (String endpointURL : endpointURLs) {
+                            APIUtil.validateRemoteURL(endpointURL, tenantDomain);
+                        }
+                    }
+                    Backend backend = new Backend(oldBackend);
+                    backend.setEndpointConfig(importedBackend.getEndpointConfig());
+                    String importedDefinition = importedBackend.getDefinition();
+                    if (StringUtils.isNotBlank(importedDefinition)) {
+                        if (APIConstants.API_SUBTYPE_DIRECT_BACKEND.equals(subtype)) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Validating and updating backend definition for API: "
+                                        + targetApi.getUuid());
+                            }
+                            retrieveValidatedSwaggerDefinition(importedDefinition);
+                            if (log.isDebugEnabled()) {
+                                log.debug("Backend API definition validated successfully for backend: "
+                                        + targetApi.getUuid());
+                            }
+                        }
+                        backend.setDefinition(importedDefinition);
+                    }
+                    PublisherCommonUtils.updateMCPServerBackend(targetApi.getUuid(), oldBackend, backend,
+                            organization, apiProvider);
                 }
-                Backend oldBackend = existingBackends.get(0);
-                Backend importedBackend = importedBackends.get(0);
-                Backend backend = new Backend(oldBackend);
-                backend.setEndpointConfig(importedBackend.getEndpointConfig());
-                PublisherCommonUtils.updateMCPServerBackend(targetApi.getUuid(), oldBackend, backend, organization
-                        , apiProvider);
                 apiProvider.updateAPI(apiToUpdate, targetApi);
                 importedApi = apiProvider.getAPIbyUUID(targetApi.getUuid(), organization);
 
@@ -854,6 +922,22 @@ public class ImportUtils {
 
                     final JSONObject endpointObject =
                             (JSONObject) new JSONParser().parse(backend.getEndpointConfig());
+                    org.json.JSONObject endpointConfigObj = new org.json.JSONObject((Map) endpointObject);
+                    if (!APIConstants.ENDPOINT_TYPE_DEFAULT.equalsIgnoreCase(
+                            endpointConfigObj.optString(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                        ArrayList<String> endpointURLs = new ArrayList<>();
+                        APIUtil.extractURLsFromEndpointConfig(endpointConfigObj,
+                                APIConstants.API_DATA_PRODUCTION_ENDPOINTS, endpointURLs);
+                        APIUtil.extractURLsFromEndpointConfig(endpointConfigObj,
+                                APIConstants.API_DATA_SANDBOX_ENDPOINTS, endpointURLs);
+                        APIUtil.extractURLsFromEndpointConfig(endpointConfigObj,
+                                APIConstants.ENDPOINT_PRODUCTION_FAILOVERS, endpointURLs);
+                        APIUtil.extractURLsFromEndpointConfig(endpointConfigObj,
+                                APIConstants.ENDPOINT_SANDBOX_FAILOVERS, endpointURLs);
+                        for (String endpointURL : endpointURLs) {
+                            APIUtil.validateRemoteURL(endpointURL, tenantDomain);
+                        }
+                    }
                     final Map<String, Object> endpointConfigMap =
                             (Map<String, Object>) endpointObject;
 
@@ -998,7 +1082,46 @@ public class ImportUtils {
                 throw new APIManagementException("Error while importing API: " + e.getMessage(),
                         ExceptionCodes.from(ExceptionCodes.API_CONTEXT_MALFORMED_EXCEPTION, e.getMessage()));
             }
-            throw new APIManagementException(errorMessage + StringUtils.SPACE + e.getMessage(), e);
+            // Carry the original error handler forward. Otherwise every import failure is reported as a generic
+            // server error, hiding the actual reason (for example a referenced API missing in this environment).
+            ErrorHandler errorHandler = e.getErrorHandler() != null
+                    ? e.getErrorHandler()
+                    : ExceptionCodes.INTERNAL_ERROR;
+            throw new APIManagementException(errorMessage + StringUtils.SPACE + e.getMessage(), e, errorHandler);
+        }
+    }
+
+    /**
+     * This method updates the UUIDs of the APIs referenced by an MCP Server, when the referenced APIs are already
+     * inside APIM. The exported artifact carries the UUID of the source environment, which does not resolve in
+     * another environment, hence the referenced API is looked up by its name and version.
+     *
+     * @param importedMCPServerDTO MCP Server DTO
+     * @param apiProvider          API Provider
+     * @param currentTenantDomain  Current tenant domain
+     * @param organization         Identifier of the organization
+     * @throws APIManagementException If failed when checking the existence of an API
+     */
+    private static void updateReferencedApiUuids(MCPServerDTO importedMCPServerDTO, APIProvider apiProvider,
+                                                 String currentTenantDomain, String organization)
+            throws APIManagementException {
+
+        if (importedMCPServerDTO.getOperations() == null) {
+            return;
+        }
+        for (MCPServerOperationDTO operation : importedMCPServerDTO.getOperations()) {
+            APIOperationMappingDTO apiOperationMapping = operation.getApiOperationMapping();
+            // The name and the version are the key the referenced API is looked up by. When they are not available,
+            // the UUID carried by the artifact is left untouched and resolved as before.
+            if (apiOperationMapping == null || StringUtils.isBlank(apiOperationMapping.getApiName())
+                    || StringUtils.isBlank(apiOperationMapping.getApiVersion())) {
+                continue;
+            }
+            API referencedApi = retrieveApiToOverwrite(apiOperationMapping.getApiName(),
+                    apiOperationMapping.getApiVersion(), currentTenantDomain, apiProvider, Boolean.TRUE, organization);
+            if (referencedApi != null) {
+                apiOperationMapping.setApiId(referencedApi.getUuid());
+            }
         }
     }
 
@@ -1305,6 +1428,7 @@ public class ImportUtils {
             String organization) throws APIManagementException {
 
         String apiUUID = api.getUuid();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         if (log.isDebugEnabled()) {
             log.debug("Populating API: " + apiUUID + " with endpoints");
         }
@@ -1328,6 +1452,10 @@ public class ImportUtils {
                         JsonObject endpointObj = endpointElement.getAsJsonObject();
                         APIEndpointInfo apiEndpointInfo = new Gson().fromJson(endpointObj, APIEndpointInfo.class);
                         String endpointUUID = apiEndpointInfo.getId();
+
+                        // An imported archive must meet the same policy as an endpoint created through the API.
+                        // Validated here so a rejection is not reported as an encryption failure.
+                        validateRemoteEndpointURLs(apiEndpointInfo.getEndpointConfig(), tenantDomain);
 
                         try {
                             if (log.isDebugEnabled()) {
@@ -1373,8 +1501,46 @@ public class ImportUtils {
             throw new APIManagementException("Error while reading API endpoints from path: " + extractedFolderPath, e,
                     ExceptionCodes.ERROR_READING_API_ENDPOINTS_FILE);
         } catch (APIManagementException e) {
-            throw new APIManagementException("Error while adding API endpoints to API: " + apiUUID, e,
-                    ExceptionCodes.ERROR_ADDING_API_ENDPOINTS);
+            // Carry the original error handler forward. Otherwise every failure is reported as a generic
+            // server error, hiding the actual reason (for example an endpoint URL refused by policy).
+            ErrorHandler errorHandler = e.getErrorHandler() != null
+                    ? e.getErrorHandler()
+                    : ExceptionCodes.ERROR_ADDING_API_ENDPOINTS;
+            throw new APIManagementException("Error while adding API endpoints to API: " + apiUUID, e, errorHandler);
+        }
+    }
+
+    /**
+     * Validates every production and sandbox URL in an endpoint configuration against the network access control
+     * policy. Templated hosts and non-resolvable schemes are skipped inside
+     * {@link APIUtil#validateRemoteURL(String, String)}.
+     *
+     * @param endpointConfig the endpoint configuration map, may be null
+     * @param tenantDomain   tenant domain used to load tenant-level policy
+     * @throws APIManagementException if a URL is malformed or blocked by an access control policy
+     */
+    private static void validateRemoteEndpointURLs(Map endpointConfig, String tenantDomain)
+            throws APIManagementException {
+
+        if (endpointConfig == null) {
+            return;
+        }
+        org.json.JSONObject endpointConfigObj = new org.json.JSONObject(endpointConfig);
+        if (APIConstants.ENDPOINT_TYPE_DEFAULT.equalsIgnoreCase(
+                endpointConfigObj.optString(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+            return;
+        }
+        ArrayList<String> endpointURLs = new ArrayList<>();
+        APIUtil.extractURLsFromEndpointConfig(endpointConfigObj, APIConstants.API_DATA_PRODUCTION_ENDPOINTS,
+                endpointURLs);
+        APIUtil.extractURLsFromEndpointConfig(endpointConfigObj, APIConstants.API_DATA_SANDBOX_ENDPOINTS,
+                endpointURLs);
+        APIUtil.extractURLsFromEndpointConfig(endpointConfigObj, APIConstants.ENDPOINT_PRODUCTION_FAILOVERS,
+                endpointURLs);
+        APIUtil.extractURLsFromEndpointConfig(endpointConfigObj, APIConstants.ENDPOINT_SANDBOX_FAILOVERS,
+                endpointURLs);
+        for (String endpointURL : endpointURLs) {
+            APIUtil.validateRemoteURL(endpointURL, tenantDomain);
         }
     }
 
@@ -2004,10 +2170,8 @@ public class ImportUtils {
         try {
             OperationPolicyDefinition synapseGatewayDefinition = null;
             OperationPolicyDefinition ccGatewayDefinition = null;
-            String[] fileLocations = pathToArchive.split("/");
 
-            // File names of all types should be the same
-            String fileName = fileLocations[fileLocations.length - 1];
+            String fileName = new File(pathToArchive).getName();
             policySpecification = getOperationPolicySpecificationFromFile(pathToArchive, fileName);
             if (policySpecification == null) {
                 throw new APIManagementException("Policy Specification Cannot be null",
@@ -2704,9 +2868,12 @@ public class ImportUtils {
     public static APIDefinitionValidationResponse retrieveValidatedSwaggerDefinition(String swaggerContent)
             throws APIManagementException {
 
+        OASParserOptions baseParserOptions = ServiceReferenceHolder.getInstance()
+                .getAPIMDependencyConfigurationService().getAPIMDependencyConfigurations().getOasParserOptions();
+        OASParserOptions parserOptions = APIUtil.buildRefResolutionOptions(baseParserOptions,
+                RestApiCommonUtil.getLoggedInUserTenantDomain());
         APIDefinitionValidationResponse validationResponse = OASParserUtil.validateAPIDefinition(swaggerContent,
-                Boolean.TRUE, ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
-                        .getAPIMDependencyConfigurations().getOasParserOptions());
+                Boolean.TRUE, parserOptions);
         if (!validationResponse.isValid()) {
             String errorDescription = "";
             if (validationResponse.getErrorItems().size() > 0) {
@@ -3254,12 +3421,21 @@ public class ImportUtils {
             Identifier apiIdentifier = apiTypeWrapper.getId();
             List<ClientCertificateDTO> certificateMetadataDTOS = retrieveClientCertificates(pathToArchive, keyType);
             for (ClientCertificateDTO certDTO : certificateMetadataDTOS) {
-                if (ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE.getResponseCode() == (apiProvider.addClientCertificate(
+                int certResponseCode = apiProvider.addClientCertificate(
                         APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()), apiTypeWrapper,
-                        certDTO.getCertificate(), certDTO.getAlias(), certDTO.getTierName(), keyType,
-                        organization)) && isOverwrite) {
-                    apiProvider.updateClientCertificate(certDTO.getCertificate(), certDTO.getAlias(), apiTypeWrapper,
-                            certDTO.getTierName(), keyType, tenantId, organization);
+                        certDTO.getCertificate(), certDTO.getAlias(), certDTO.getTierName(), keyType, organization);
+                if (ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE.getResponseCode() == certResponseCode) {
+                    if (isOverwrite) {
+                        apiProvider.updateClientCertificate(certDTO.getCertificate(), certDTO.getAlias(),
+                                apiTypeWrapper, certDTO.getTierName(), keyType, tenantId, organization);
+                    }
+                } else if (ResponseCode.ALIAS_EXISTS_IN_API_REVISION.getResponseCode() == certResponseCode) {
+                    /* The alias is reserved by a revision of a different API. There is no current API entry to
+                       update, so the certificate cannot be imported for this API. Log it rather than failing the
+                       whole import, but never drop it silently. */
+                    log.warn("The client certificate with alias " + certDTO.getAlias() + " was not imported for "
+                            + apiIdentifier + " because the alias is held by a revision of another API or API "
+                            + "Product in this tenant. The API is imported without this client certificate.");
                 }
             }
         } catch (APIManagementException e) {

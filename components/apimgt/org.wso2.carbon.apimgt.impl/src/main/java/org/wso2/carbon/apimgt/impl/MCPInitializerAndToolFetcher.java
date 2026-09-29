@@ -78,6 +78,10 @@ public class MCPInitializerAndToolFetcher {
             throw new APIManagementException("Invalid MCP server URL: " + mcpServerUrl, e);
         }
 
+        if (log.isDebugEnabled()) {
+            log.debug("Initializing MCP connection and fetching tools");
+        }
+
         try (CloseableHttpClient httpClient =
                      (CloseableHttpClient) APIUtil.getHttpClient(endpoint.getPort(), endpoint.getProtocol())) {
 
@@ -159,9 +163,6 @@ public class MCPInitializerAndToolFetcher {
     private JSONObject sendJsonRpcRequest(CloseableHttpClient httpClient, String targetUrl, JSONObject jsonBody,
                                           String sessionId) throws Exception {
 
-        targetUrl = targetUrl.endsWith("/") ?
-                targetUrl + APIConstants.MCP.MCP_RESOURCES_MCP_WITHOUT_TRAILING_SLASH :
-                targetUrl + APIConstants.MCP.MCP_RESOURCES_MCP;
         HttpPost request = new HttpPost(targetUrl);
         request.setHeader(APIConstants.MCP.HEADER_CONTENT_TYPE,
                 ContentType.APPLICATION_JSON.withCharset(StandardCharsets.UTF_8).toString());
@@ -277,6 +278,25 @@ public class MCPInitializerAndToolFetcher {
             }
         }
         return (lastData != null) ? lastData : responseText.trim();
+    }
+
+    /**
+     * Build the schema definition for a tool: all tool fields except name and description
+     * (i.e. the input schema plus any metadata such as annotations, _meta and outputSchema).
+     *
+     * @param toolJson Tool definition returned by the MCP server
+     * @return JSON object containing all tool fields except name and description
+     */
+    public static JSONObject buildToolMetadata(JSONObject toolJson) {
+
+        JSONObject toolMetadata = new JSONObject();
+        for (String key : toolJson.keySet()) {
+            if (!APIConstants.MCP.TOOL_NAME_KEY.equals(key)
+                    && !APIConstants.MCP.TOOL_DESCRIPTION_KEY.equals(key)) {
+                toolMetadata.put(key, toolJson.get(key));
+            }
+        }
+        return toolMetadata;
     }
 
     /**

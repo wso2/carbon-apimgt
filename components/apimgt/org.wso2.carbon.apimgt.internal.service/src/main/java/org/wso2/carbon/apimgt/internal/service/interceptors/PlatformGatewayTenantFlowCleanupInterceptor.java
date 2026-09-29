@@ -28,8 +28,10 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
  * via platform gateway api-key, {@link PlatformGatewayApiKeyAuthInterceptor} sets
  * a message property. This interceptor calls {@link PrivilegedCarbonContext#endTenantFlow()}
  * so the tenant flow started there is properly closed and the thread-local is cleared.
- * {@link #handleFault(Message)} runs on fault responses so cleanup also occurs when
- * an exception is thrown after the auth interceptor started the tenant flow.
+ * {@link #handleFault(Message)} runs on the out-fault chain when an exception is thrown after the
+ * auth interceptor started the tenant flow (CXF does not invoke {@code jaxrs.outInterceptors} on
+ * faults). Register in both {@code jaxrs.outInterceptors} (success path) and
+ * {@code jaxrs.outFaultInterceptors} (fault path).
  */
 public class PlatformGatewayTenantFlowCleanupInterceptor extends AbstractPhaseInterceptor<Message> {
 
@@ -53,13 +55,16 @@ public class PlatformGatewayTenantFlowCleanupInterceptor extends AbstractPhaseIn
      * handleMessage (success path) and handleFault (exception path).
      */
     private void ensureTenantFlowCleanedUp(Message message) {
-        if (!Boolean.TRUE.equals(message.get(PlatformGatewayApiKeyAuthInterceptor.MESSAGE_PROPERTY_TENANT_FLOW_STARTED))) {
-            return;
-        }
         try {
-            PrivilegedCarbonContext.endTenantFlow();
+            if (Boolean.TRUE.equals(
+                    message.get(PlatformGatewayApiKeyAuthInterceptor.MESSAGE_PROPERTY_TENANT_FLOW_STARTED))) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         } finally {
             message.remove(PlatformGatewayApiKeyAuthInterceptor.MESSAGE_PROPERTY_TENANT_FLOW_STARTED);
+            message.remove(PlatformGatewayApiKeyAuthInterceptor.MESSAGE_PROPERTY_CONNECT_WITH_TOKEN);
+            PlatformGatewayApiKeyAuthInterceptor.CONNECT_WITH_TOKEN_AUTH.remove();
+            PlatformGatewayApiKeyAuthInterceptor.CONNECT_WITH_TOKEN_MATCHED_ENTRY.remove();
         }
     }
 }

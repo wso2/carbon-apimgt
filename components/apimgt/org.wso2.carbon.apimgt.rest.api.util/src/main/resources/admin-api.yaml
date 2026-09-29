@@ -4819,6 +4819,10 @@ components:
           type: boolean
           example: false
           default: false
+        enableProvisionedAppValidation:
+          type: boolean
+          example: true
+          default: true
         enableSelfValidationJWT:
           type: boolean
           example: true

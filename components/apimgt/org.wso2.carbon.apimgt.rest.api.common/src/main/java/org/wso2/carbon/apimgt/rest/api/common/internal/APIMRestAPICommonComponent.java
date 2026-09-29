@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.impl.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidatorImpl;
 import org.wso2.carbon.apimgt.rest.api.common.APIMConfigUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestAPIAuthenticator;
+import org.wso2.carbon.user.core.service.RealmService;
 
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
@@ -113,6 +114,23 @@ public class APIMRestAPICommonComponent {
 
     protected void unsetAPIMDependencyConfigurationService(APIMDependencyConfigurationService service) {
         ServiceReferenceHolder.getInstance().setAPIMDependencyConfigurationService(null);
+    }
+
+    @Reference(
+            name = "user.realm.service",
+            service = org.wso2.carbon.user.core.service.RealmService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetRealmService")
+    protected void setRealmService(RealmService realmService) {
+        if (realmService != null && log.isDebugEnabled()) {
+            log.debug("Realm service initialized");
+        }
+        ServiceReferenceHolder.getInstance().setRealmService(realmService);
+    }
+
+    protected void unsetRealmService(RealmService realmService) {
+        ServiceReferenceHolder.getInstance().setRealmService(null);
     }
 
     private void initializeUrlSigningKey() {

@@ -201,6 +201,17 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
                                 this.api.getWebSocketTopicMappingConfiguration().getMappings());
                     }
                     context.put(APIConstants.VELOCITY_GRAPHQL_API_SUBSCRIPTION_AVAILABLE, isSubscriptionAvailable);
+                } else if (APIConstants.API_TYPE_MCP.equals(api.getType())) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Processing MCP API type for template configuration");
+                    }
+                    String mcpPathAppendedValue = api.getMetadata()
+                            .get(APIConstants.MCP.MCP_PATH_APPENDED_METADATA_KEY);
+                    context.put("mcpPathAppended",
+                            (mcpPathAppendedValue == null) || Boolean.parseBoolean(mcpPathAppendedValue));
+                    if (log.isDebugEnabled()) {
+                        log.debug("MCP path appended value set to: " + mcpPathAppendedValue);
+                    }
                 }
             } else {
                 t = velocityengine.getTemplate(getApiProductTemplatePath());

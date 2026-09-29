@@ -104,7 +104,7 @@ public interface ApisApiService {
       public Response deployAPIRevision(String apiId, String revisionId, List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTO, MessageContext messageContext) throws APIManagementException;
       public Response detachLabelsFromAPI(String apiId, RequestLabelListDTO requestLabelListDTO, MessageContext messageContext) throws APIManagementException;
       public Response editCommentOfAPI(String commentId, String apiId, PatchRequestBodyDTO patchRequestBodyDTO, MessageContext messageContext) throws APIManagementException;
-      public Response exportAPI(String apiId, String name, String version, String revisionNumber, String providerName, String format, Boolean preserveStatus, Boolean latestRevision, String gatewayEnvironment, Boolean preserveCredentials, MessageContext messageContext) throws APIManagementException;
+      public Response exportAPI(String apiId, String name, String version, String revisionNumber, String providerName, String format, Boolean preserveStatus, Boolean latestRevision, String gatewayEnvironment, Boolean preserveCredentials, Boolean all, Boolean allRevisions, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
       public Response generateInternalAPIKey(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response generateMockScripts(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAPI(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
@@ -133,7 +133,7 @@ public interface ApisApiService {
       public Response getAPISwagger(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAPIThumbnail(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAllAPISpecificOperationPolicies(String apiId, Integer limit, Integer offset, String query, MessageContext messageContext) throws APIManagementException;
-      public Response getAllAPIs(Integer limit, Integer offset, String xWSO2Tenant, String query, String ifNoneMatch, String accept, MessageContext messageContext) throws APIManagementException;
+      public Response getAllAPIs(Integer limit, Integer offset, String xWSO2Tenant, String query, Boolean expandProperties, String ifNoneMatch, String accept, MessageContext messageContext) throws APIManagementException;
       public Response getAllCommentsOfAPI(String apiId, String xWSO2Tenant, Integer limit, Integer offset, Boolean includeCommenterInfo, MessageContext messageContext) throws APIManagementException;
       public Response getAllPublishedExternalStoresByAPI(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAmazonResourceNamesOfAPI(String apiId, MessageContext messageContext) throws APIManagementException;

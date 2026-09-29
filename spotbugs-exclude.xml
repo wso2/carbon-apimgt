@@ -25,6 +25,10 @@
         <Bug pattern="MS_EXPOSE_REP, EI_EXPOSE_REP"/>
     </Match>
     <Match>
+        <Class name="org.wso2.carbon.apimgt.multitenant.auth.internal.MultiTenantAuthDataHolder"/>
+        <Bug pattern="MS_EXPOSE_REP, EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
+    </Match>
+    <Match>
         <Class name="org.wso2.carbon.apimgt.tracing.internal.ServiceReferenceHolder"/>
         <Bug pattern="MS_EXPOSE_REP, EI_EXPOSE_REP2, EI_EXPOSE_REP"/>
     </Match>

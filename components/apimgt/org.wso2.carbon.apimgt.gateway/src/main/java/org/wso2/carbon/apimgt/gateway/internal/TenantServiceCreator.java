@@ -74,6 +74,7 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
     private String webSocketDispatchSeq = "dispatchSeq";
     private final String mcpPolicyFailureHandlerSequenceName = "_mcp_failure_handler_";
     private final String guardRailPolicyFailureHandlerSequenceName = "guardrail_fault";
+    private final String openaiErrorResponseFormatterSequenceName = "openai_error_response_formatter";
     private String synapseConfigRootPath =
             CarbonBaseUtils.getCarbonHome() + "/repository/resources/apim-synapse-config/";
 
@@ -209,6 +210,19 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
                         new File(synapseConfigDir.getAbsolutePath() + File.separator +
                                 MultiXMLConfigurationBuilder.SEQUENCES_DIR + File.separator +
                                 guardRailPolicyFailureHandlerSequenceName + ".xml"));
+            }
+            String openaiErrorResponseFormatterSequence = synapseConfigsDir.getAbsolutePath() + File.separator +
+                    manger.getTracker().getCurrentConfigurationName() + File.separator +
+                    MultiXMLConfigurationBuilder.SEQUENCES_DIR + File.separator +
+                    openaiErrorResponseFormatterSequenceName + ".xml";
+            File openaiErrorResponseFormatterSequenceXml = new File(openaiErrorResponseFormatterSequence);
+            if (!openaiErrorResponseFormatterSequenceXml.exists()) {
+                log.debug("OpenAI error response formatter sequence not found. Copying from template.");
+                FileUtils.copyFile(
+                        new File(synapseConfigRootPath + openaiErrorResponseFormatterSequenceName + ".xml"),
+                        new File(synapseConfigDir.getAbsolutePath() + File.separator +
+                                MultiXMLConfigurationBuilder.SEQUENCES_DIR + File.separator +
+                                openaiErrorResponseFormatterSequenceName + ".xml"));
             }
         } catch (RemoteException e) {
             log.error("Failed to create Tenant's synapse sequences.", e);

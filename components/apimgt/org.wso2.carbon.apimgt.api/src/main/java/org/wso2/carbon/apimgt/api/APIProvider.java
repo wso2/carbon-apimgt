@@ -886,6 +886,7 @@ public interface APIProvider extends APIManager {
      * @return SUCCESS : If operation succeeded,
      * INTERNAL_SERVER_ERROR : If any internal error occurred,
      * ALIAS_EXISTS_IN_TRUST_STORE : If alias is already present in the trust store,
+     * ALIAS_EXISTS_IN_API_REVISION : If a revision of another API of the same tenant holds the alias,
      * CERTIFICATE_EXPIRED : If the certificate is expired.
      * @throws APIManagementException API Management Exception.
      */
@@ -2061,6 +2062,20 @@ public interface APIProvider extends APIManager {
      */
     APISearchResult searchPaginatedAPIsByFQDN(String endpoint, String tenantDomain, int start, int end) throws
             APIManagementException;
+
+    /**
+     * Search for APIs whose endpoint configs match any of the SANs (or CN) in the given certificate.
+     * Wildcard SANs such as *.example.com are matched as substring searches against endpoint hostnames.
+     *
+     * @param certificateMetadataDTO certificate metadata including the base64-encoded certificate content
+     * @param tenantDomain           tenant domain to scope the search
+     * @param start                  pagination start offset
+     * @param end                    pagination page size limit
+     * @return APISearchResult containing matching APIs and total count
+     * @throws APIManagementException if the search fails
+     */
+    APISearchResult searchPaginatedAPIsByCertificate(CertificateMetadataDTO certificateMetadataDTO,
+            String tenantDomain, int start, int end) throws APIManagementException;
 
     /**
      * This method checks if the contextTemplate of the API matches its previous versions.

@@ -229,6 +229,13 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
                     axis2MessageContext.setProperty(APIMgtGatewayConstants.HTTP_SC, mcpResponse.getStatusCode());
                     axis2MessageContext.setProperty(APIMgtGatewayConstants.MCP_METHOD, mcpMethod);
 
+                    //drop request headers from response
+                    Map headers = (Map) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+                    if (headers != null) {
+                        headers.clear();
+                        axis2MessageContext.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
+                    }
+
                     // Extract and set serverInfo properties for analytics on initialize
                     if (APIConstants.MCP.METHOD_INITIALIZE.equals(mcpMethod)) {
                         setServerInfoProperties(messageContext, mcpResponse.getResponse());

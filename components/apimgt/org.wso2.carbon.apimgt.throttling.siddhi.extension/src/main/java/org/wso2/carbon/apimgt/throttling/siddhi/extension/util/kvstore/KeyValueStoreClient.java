@@ -63,6 +63,27 @@ public interface KeyValueStoreClient {
     long decrementBy(String key, long decrement);
 
     /**
+     * Sets the string value for the given key with a TTL (time-to-live).
+     * The key is automatically removed from the store after {@code ttlMillis} milliseconds.
+     * This operation is atomic — value and expiry are set in a single command.
+     *
+     * @param key       The key with which the specified value is to be associated.
+     * @param value     The value to be associated with the specified key.
+     * @param ttlMillis The time-to-live in milliseconds after which the key is auto-deleted.
+     */
+    void setWithExpiry(String key, String value, long ttlMillis);
+
+    /**
+     * Sets a TTL on an existing key without changing its value (Redis PEXPIRE).
+     * If the key does not exist this is a no-op. Use this to stamp a TTL on a key
+     * that was created by INCRBY, which never sets an expiry on its own.
+     *
+     * @param key       The key whose expiry is to be set.
+     * @param ttlMillis The time-to-live in milliseconds.
+     */
+    void expireMillis(String key, long ttlMillis);
+
+    /**
      * Deletes the mapping for a key from this store if it is present.
      *
      * @param key The key whose mapping is to be removed from the store.

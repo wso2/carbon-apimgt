@@ -58,7 +58,7 @@ public class DataHolder {
     private Map<String, String> googleAnalyticsConfigMap = new HashMap<>();
     private Map<String, GraphQLSchemaDTO> apiToGraphQLSchemaDTOMap = new HashMap<>();
     private Map<String, List<String>> apiToKeyManagersMap = new HashMap<>();
-    private Map<String,Map<String, API>> tenantAPIMap  = new HashMap<>();
+    private Map<String, Map<String, API>> tenantAPIMap = new ConcurrentHashMap<>();
     private Map<String, Boolean> tenantDeployStatus = new HashMap<>();
     private Map<String, LLMProviderInfo> llmProviderMap = new HashMap<>();
     private final Map<String, APIKeyInfo> apiKeyInfoHashMap = new ConcurrentHashMap<>();
@@ -308,12 +308,8 @@ public class DataHolder {
         if (index != -1) {
             defaultContext = context.substring(0, index);
         }
-        Map<String, API> apiMap;
-        if (tenantAPIMap.containsKey(api.getOrganization())) {
-            apiMap = tenantAPIMap.get(api.getOrganization());
-        } else {
-            apiMap = new HashMap<>();
-        }
+        Map<String, API> apiMap = tenantAPIMap.computeIfAbsent(api.getOrganization(),
+                k -> new ConcurrentHashMap<>());
         API oldAPI = apiMap.get(api.getContext());
         if (oldAPI != null) {
             apiMap.remove(api.getContext());
@@ -325,10 +321,14 @@ public class DataHolder {
         if (api.isDefaultVersion()) {
             apiMap.put(defaultContext, api);
         }
-        tenantAPIMap.put(api.getOrganization(), apiMap);
     }
 
     public void markAPIAsDeployed(GatewayAPIDTO gatewayAPIDTO) {
+        if (gatewayAPIDTO.getApiContext() == null) {
+            // Internal/special-purpose APIs (e.g. JWKS endpoint) may not have an API context set;
+            // they are not tracked in tenantAPIMap, so nothing to mark.
+            return;
+        }
         Map<String, API> apiMap = tenantAPIMap.get(gatewayAPIDTO.getTenantDomain());
         if (apiMap != null) {
             API api = apiMap.get(gatewayAPIDTO.getApiContext());
@@ -340,6 +340,30 @@ public class DataHolder {
                 api.setRevisionId(gatewayAPIDTO.getRevision());
             }
         }
+    }
+
+    /**
+     * Checks whether the API represented by the given DTO is already marked as deployed
+     * in the in-memory tenant API map.
+     *
+     * <p>Used by the tenant-loading thread to skip deploying an API that the passthrough
+     * (on-demand) thread has already fully deployed.
+     *
+     * @param gatewayAPIDTO the DTO identifying the API by tenant domain and API context
+     * @return {@code true} if the API exists in the map and its {@code deployed} flag is
+     *         {@code true}; {@code false} otherwise
+     */
+    public boolean isDeployed(GatewayAPIDTO gatewayAPIDTO) {
+        if (gatewayAPIDTO.getApiContext() == null) {
+            // Internal/special-purpose APIs (e.g. JWKS endpoint) are not tracked in tenantAPIMap.
+            return false;
+        }
+        Map<String, API> apiMap = tenantAPIMap.get(gatewayAPIDTO.getTenantDomain());
+        if (apiMap != null) {
+            API api = apiMap.get(gatewayAPIDTO.getApiContext());
+            return api != null && api.isDeployed();
+        }
+        return false;
     }
 
     public boolean isDuplicateEvent(String tenantDomain, String apiContext, String lastUpdatedEventId) {

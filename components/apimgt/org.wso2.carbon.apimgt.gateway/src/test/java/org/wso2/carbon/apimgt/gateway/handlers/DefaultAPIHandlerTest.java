@@ -29,6 +29,7 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -41,7 +42,9 @@ import java.util.Set;
 import java.util.TreeMap;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ApiUtils.class, Utils.class, GatewayUtils.class, ServiceReferenceHolder.class, APIManagerConfiguration.class, ExtendedJWTConfigurationDto.class})
+@PrepareForTest({ApiUtils.class, Utils.class, GatewayUtils.class, ServiceReferenceHolder.class,
+        APIManagerConfiguration.class, ExtendedJWTConfigurationDto.class, InMemoryAPIDeployer.class,
+        DefaultAPIHandler.class})
 public class DefaultAPIHandlerTest {
 
     private ServiceReferenceHolder serviceReferenceHolder;
@@ -131,5 +134,93 @@ public class DefaultAPIHandlerTest {
         Mockito.verify(axis2MsgCntxt, Mockito.times(0)).setProperty(APIConstants.TRANSPORT_URL_IN, "/api1/abc/1.0" +
                 ".0/cde?c=a");
         Mockito.verify(properties, Mockito.times(0)).remove(RESTConstants.REST_FULL_REQUEST_PATH);
+    }
+
+    /**
+     * Consideration 3 — Test (a): On-demand loading is enabled and the API is NOT yet deployed.
+     * Verifies that {@code InMemoryAPIDeployer.deployAPI()} is called exactly once and the handler
+     * returns {@code true}.
+     *
+     * <p>This covers the path where the passthrough thread is the first to detect the undeployed
+     * state and acquires the APILockManager lock before deploying.
+     */
+    @Test
+    public void testOnDemandLoadingDeploysWhenNotDeployed() throws Exception {
+        MessageContext messageContext = Mockito.mock(Axis2MessageContext.class);
+        org.apache.axis2.context.MessageContext axis2MsgCntxt =
+                Mockito.mock(org.apache.axis2.context.MessageContext.class);
+        Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
+        Mockito.when(axis2MsgCntxt.getProperty(APIConstants.TRANSPORT_URL_IN)).thenReturn("/api1/abc/cde");
+        PowerMockito.when(GatewayUtils.getTenantDomain()).thenReturn("test.com");
+        PowerMockito.when(GatewayUtils.isOnDemandLoading()).thenReturn(true);
+        PowerMockito.when(ApiUtils.getFullRequestPath(messageContext)).thenReturn("/api1/abc/cde");
+        PowerMockito.when(GatewayUtils.checkForFileBasedApiContexts("/api1/abc/cde", "test.com"))
+                .thenReturn(false);
+
+        // API is NOT deployed initially
+        API api = new API("uuid-1", 1, "admin", "API1", "1.0.0", "/api1/abc/1.0.0", null, "HTTP",
+                "PUBLISHED", false, false);
+        TreeMap<String, API> apiTreeMap = new TreeMap<>();
+        apiTreeMap.put("/api1/abc", api);
+        PowerMockito.when(Utils.getSelectedAPIList("/api1/abc/cde", "test.com")).thenReturn(apiTreeMap);
+
+        // Mock new InMemoryAPIDeployer() so no real deployment is attempted
+        InMemoryAPIDeployer mockDeployer = Mockito.mock(InMemoryAPIDeployer.class);
+        PowerMockito.whenNew(InMemoryAPIDeployer.class).withNoArguments().thenReturn(mockDeployer);
+        Mockito.when(mockDeployer.deployAPI(Mockito.anyString())).thenReturn(true);
+
+        Set<String> properties = Mockito.mock(Set.class);
+        Mockito.when(messageContext.getPropertyKeySet()).thenReturn(properties);
+        Mockito.when(properties.contains(InboundWebsocketConstants.WEBSOCKET_SUBSCRIBER_PATH)).thenReturn(false);
+
+        DefaultAPIHandler handler = new DefaultAPIHandler();
+        boolean result = handler.handleRequestInFlow(messageContext);
+
+        Assert.assertTrue("Handler should return true after on-demand deploy", result);
+        // deployAPI must be invoked once since the API was not deployed
+        Mockito.verify(mockDeployer, Mockito.times(1)).deployAPI("uuid-1");
+    }
+
+    /**
+     * Consideration 3 — Test (b): On-demand loading is enabled but the API is ALREADY deployed
+     * (e.g., tenant-loading thread won the race and set isDeployed=true before the passthrough
+     * thread re-checked after acquiring the APILockManager lock).
+     *
+     * <p>Verifies that {@code InMemoryAPIDeployer.deployAPI()} is NOT called (idempotent
+     * re-entry) and the handler returns {@code true}.
+     */
+    @Test
+    public void testOnDemandLoadingSkipsDeployWhenAlreadyDeployed() throws Exception {
+        MessageContext messageContext = Mockito.mock(Axis2MessageContext.class);
+        org.apache.axis2.context.MessageContext axis2MsgCntxt =
+                Mockito.mock(org.apache.axis2.context.MessageContext.class);
+        Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
+        Mockito.when(axis2MsgCntxt.getProperty(APIConstants.TRANSPORT_URL_IN)).thenReturn("/api1/abc/cde");
+        PowerMockito.when(GatewayUtils.getTenantDomain()).thenReturn("test.com");
+        PowerMockito.when(GatewayUtils.isOnDemandLoading()).thenReturn(true);
+        PowerMockito.when(ApiUtils.getFullRequestPath(messageContext)).thenReturn("/api1/abc/cde");
+        PowerMockito.when(GatewayUtils.checkForFileBasedApiContexts("/api1/abc/cde", "test.com"))
+                .thenReturn(false);
+
+        // API is already deployed — simulates tenant-loading thread completing before passthrough
+        API api = new API("uuid-2", 1, "admin", "API1", "1.0.0", "/api1/abc/1.0.0", null, "HTTP",
+                "PUBLISHED", false, true /* isDeployed = true */);
+        TreeMap<String, API> apiTreeMap = new TreeMap<>();
+        apiTreeMap.put("/api1/abc", api);
+        PowerMockito.when(Utils.getSelectedAPIList("/api1/abc/cde", "test.com")).thenReturn(apiTreeMap);
+
+        InMemoryAPIDeployer mockDeployer = Mockito.mock(InMemoryAPIDeployer.class);
+        PowerMockito.whenNew(InMemoryAPIDeployer.class).withNoArguments().thenReturn(mockDeployer);
+
+        Set<String> properties = Mockito.mock(Set.class);
+        Mockito.when(messageContext.getPropertyKeySet()).thenReturn(properties);
+        Mockito.when(properties.contains(InboundWebsocketConstants.WEBSOCKET_SUBSCRIBER_PATH)).thenReturn(false);
+
+        DefaultAPIHandler handler = new DefaultAPIHandler();
+        boolean result = handler.handleRequestInFlow(messageContext);
+
+        Assert.assertTrue("Handler should return true when API is already deployed", result);
+        // deployAPI must NOT be called — the API is already deployed
+        Mockito.verify(mockDeployer, Mockito.never()).deployAPI(Mockito.anyString());
     }
 }

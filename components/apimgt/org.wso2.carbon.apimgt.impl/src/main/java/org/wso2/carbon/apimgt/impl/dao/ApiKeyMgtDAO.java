@@ -312,6 +312,54 @@ public class ApiKeyMgtDAO {
     }
 
     /**
+     * Returns all active API-scoped keys for APIs currently deployed on the given platform gateway.
+     * Scoped by {@code gatewayEnvUuid} via {@code AM_GW_PLATFORM_API_ARTIFACTS} so only keys
+     * for APIs this gateway actually serves are returned, avoiding stale accumulation in the
+     * gateway controller's local DB.
+     */
+    public List<APIKeyInfo> getPlatformGatewayAPIKeysByGateway(String gatewayEnvUuid)
+            throws APIManagementException {
+        List<APIKeyInfo> result = new ArrayList<>();
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(
+                     SQLConstants.GET_PLATFORM_GATEWAY_API_KEYS_BY_GATEWAY_SQL)) {
+            ps.setString(1, gatewayEnvUuid);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    APIKeyInfo info = new APIKeyInfo();
+                    info.setKeyUUID(rs.getString("API_KEY_UUID"));
+                    info.setKeyName(rs.getString("NAME"));
+                    info.setApiKeyHash(rs.getString("API_KEY_HASH"));
+                    info.setAuthUser(rs.getString("AUTHZ_USER"));
+                    info.setStatus(rs.getString("STATUS"));
+                    Timestamp createdTime = rs.getTimestamp("TIME_CREATED",
+                            Calendar.getInstance(TimeZone.getTimeZone(APIConstants.UTC_TIME_ZONE)));
+                    info.setCreatedTime(createdTime != null ? createdTime.getTime() : 0L);
+                    long validityPeriodSecs = rs.getLong("VALIDITY_PERIOD");
+                    if (validityPeriodSecs < 0) {
+                        info.setExpiresAt(Long.MAX_VALUE);
+                    } else if (createdTime != null) {
+                        long validityMs = validityPeriodSecs * 1000L;
+                        long createdMs = createdTime.getTime();
+                        if (validityMs < 0 || validityMs > Long.MAX_VALUE - createdMs) {
+                            info.setExpiresAt(Long.MAX_VALUE);
+                        } else {
+                            info.setExpiresAt(createdMs + validityMs);
+                        }
+                    } else {
+                        info.setExpiresAt(Long.MAX_VALUE);
+                    }
+                    info.setApiUUId(rs.getString("API_UUID"));
+                    result.add(info);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get platform gateway API keys for gateway " + gatewayEnvUuid, e);
+        }
+        return result;
+    }
+
+    /**
      * Returns a list of all api keys
      *
      * @param tenantDomain Tenant domain

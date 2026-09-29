@@ -44,6 +44,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "lifecycle state"),
     TIER_CANNOT_BE_NULL(900304, "The tier cannot be null.", 400, "The tier cannot be null"),
     TIER_NAME_INVALID(900305, "The tier name is invalid.", 400, "The tier name is invalid"),
+    SUBSCRIBER_NOT_FOUND(900306, "Subscriber not found", 404, "Subscriber with ID '%s' not found."),
     APPLICATION_NOT_FOUND(900307, "Application not found", 404, "Application not found"),
     API_NOT_FOUND(900308, "API Not Found", 404, "Requested API with id '%s' not found"),
     APPLICATION_INACTIVE(900309, "Application is not active", 400, "Application is not active"),
@@ -127,6 +128,8 @@ public enum ExceptionCodes implements ErrorHandler {
     SUB_ORGANIZATION_NOT_IDENTIFIED(900361, "User's Organization Not Identified", 403, "User's Organization is not identified"),
     CANNOT_CREATE_API_VERSION(900362, "New API Version cannot be created from a different provider", 409, "Initial provider of an API must be preserved in all versions of that API"),
     INTERNAL_ERROR_WHILE_UPDATING_API(900363, "Internal Server Error occurred while updating the API", 500, "Internal Server Error. '%s'"),
+    MISSING_ENDPOINT_FOR_GATEWAY_ENV_TYPE(900366, "Missing endpoint for the gateway environment type", 400, "Cannot deploy to gateway environment '%s' " +
+            "because the API does not define a '%s' endpoint, which is required by that environment type"),
     ERROR_WHILE_UPDATING_MANDATORY_PROPERTIES(903010, "Error while updating required properties", 400, "Error while updating required properties."),
     ERROR_WHILE_VALIDATING_MANDATORY_PROPERTIES(903015, "Error while validating required properties", 400, "Error while validating required properties."),
 
@@ -135,6 +138,8 @@ public enum ExceptionCodes implements ErrorHandler {
             "Updating the API is restricted as as it is %s."),
     UNSUPPORTED_LIFECYCLE_ACTION(900381, "Unsupported state change action", 400, "Lifecycle state change action %s is not allowed"),
     LIFECYCLE_STATE_INFORMATION_NOT_FOUND(900382, "Lifecycle state information not found", 500,"Lifecycle state change information for %s with %s cannot be found"),
+    API_PRODUCT_UPDATE_FORBIDDEN_PER_LC(900383, "Insufficient permission to update the API Product", 403,
+            "Updating the API Product is restricted as it is %s."),
 
     // Generic codes
     JSON_PARSE_ERROR(900400, "Json parse error", 500, "JSON parse error"),
@@ -142,6 +147,13 @@ public enum ExceptionCodes implements ErrorHandler {
     RESOURCE_RETRIEVAL_FAILED(900402, "Resource retrieval failed", 400, "Resource retrieval failed"),
     USER_MAPPING_RETRIEVAL_FAILED(900404, "User mapping retrieval failed", 404, "User mapping retrieval failed"),
     MALFORMED_URL(900403, "Malformed URL", 400, "Malformed URL"),
+    UNTRUSTED_URL(900405, "URL could not be resolved", 400,
+            "The provided URL could not be resolved."),
+    UNTRUSTED_URL_IN_DEFINITION(900407, "Remote reference could not be resolved", 400,
+            "A remote reference in the definition could not be resolved."),
+    NETWORK_SECURITY_ACCESS_CONTROL_MISCONFIGURED(900406,
+            "Internal server error. Please contact the system administrator.", 500,
+            "Internal server error. Please contact the system administrator."),
 
     // Endpoint related codes
     ENDPOINT_NOT_FOUND(900450, "Endpoint Not Found", 404, "Endpoint Not Found"),
@@ -664,6 +676,7 @@ public enum ExceptionCodes implements ErrorHandler {
     AI_SERVICE_INVALID_ACCESS_TOKEN(903101, "Invalid access token provided for AI service", 401, "Invalid access token provided for AI service"),
     AI_SERVICE_QUOTA_EXCEEDED(903102, "Quota exceeded for AI service", 429, "Quota exceeded for AI service"),
     AI_SERVICE_PROVIDER_NOT_FOUND(903103,"AI Service Provider Not found for %s in organization" ,404 ,"AI Service Provider Not found for %s in organization" ,false ),
+    AI_SERVICE_PROVIDER_INVALID_METADATA_IDENTIFIER(903104, "Invalid metadata identifier", 400, "%s"),
 
     DOCUMENT_NAME_ILLEGAL_CHARACTERS(902016, "Document name cannot contain illegal characters", 400, "Document name contains one or more illegal characters"),
 
@@ -921,6 +934,11 @@ public enum ExceptionCodes implements ErrorHandler {
             "Referenced API is not supported for MCP Server."),
     DUPLICATE_MCP_TOOLS(904013, "Duplicate MCP tools", 400,
             "One or more MCP tools are duplicated."),
+    INVALID_MCP_BACKEND_OPERATION(904014, "Invalid MCP backend operation", 400,
+            "The backend operation '%s %s' does not match any resource in the referenced API '%s'."),
+    REFERENCE_API_NOT_FOUND(904015, "Reference API not found", 400,
+            "The API this MCP Server is built on (name '%s', version '%s', id '%s') does not exist in this "
+                    + "environment. Create that API here before importing the MCP Server."),
 
     // gateway notification related codes
     GATEWAY_NOTIFICATION_BAD_REQUEST(902052, "Invalid request for gateway notification", 400,

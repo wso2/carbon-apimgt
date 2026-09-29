@@ -32,6 +32,7 @@ import org.apache.synapse.rest.RESTUtils;
 import org.apache.synapse.api.Resource;
 import org.apache.synapse.api.dispatch.RESTDispatcher;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.LogsHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
@@ -318,7 +319,11 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
         messageContext.setProperty(APIConstants.CUSTOM_HTTP_STATUS_CODE, statusCode);
         messageContext.setProperty(APIConstants.CUSTOM_ERROR_CODE, statusCode);
         messageContext.setProperty(APIConstants.CUSTOM_ERROR_MESSAGE, errorMessage);
-        Mediator resourceMisMatchedSequence = messageContext.getSequence(RESTConstants.NO_MATCHING_RESOURCE_HANDLER);
+        // Publish the error flow type such that any error sequence can branch on it.
+        messageContext.setProperty(APIMgtGatewayConstants.API_ERROR_TYPE,
+                APIMgtGatewayConstants.API_ERROR_TYPE_RESOURCE_MISMATCH);
+        Mediator resourceMisMatchedSequence = GatewayUtils.getErrorResponseFormatterSequence(
+                messageContext, RESTConstants.NO_MATCHING_RESOURCE_HANDLER);
         if (resourceMisMatchedSequence != null) {
             resourceMisMatchedSequence.mediate(messageContext);
         }

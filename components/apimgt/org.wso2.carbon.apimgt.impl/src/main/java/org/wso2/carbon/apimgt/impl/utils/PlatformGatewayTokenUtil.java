@@ -29,6 +29,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.Arrays;
 import java.util.Base64;
 
 /**
@@ -51,6 +52,67 @@ public final class PlatformGatewayTokenUtil {
     private static final SecureRandom UUID7_RANDOM = new SecureRandom();
 
     private PlatformGatewayTokenUtil() {
+    }
+
+    /**
+     * Parses the token row ID from a combined {@code tokenId.plainToken} registration token.
+     */
+    public static String parseTokenId(String combinedRegistrationToken) {
+        if (combinedRegistrationToken == null || !combinedRegistrationToken.contains(COMBINED_TOKEN_SEPARATOR)) {
+            return null;
+        }
+        int sep = combinedRegistrationToken.indexOf(COMBINED_TOKEN_SEPARATOR);
+        if (sep <= 0 || sep >= combinedRegistrationToken.length() - 1) {
+            return null;
+        }
+        return combinedRegistrationToken.substring(0, sep);
+    }
+
+    /**
+     * True when {@code apiKey} matches a connect-config {@code registration_token} and TOML fallback is allowed.
+     * Pre-bootstrap (no active DB row) is allowed; once a row exists the stored hash must match.
+     * <p>
+     * Performs one {@link PlatformGatewayDAO#getActiveTokenById(String)} lookup per call when the TOML
+     * token string matches {@code apiKey}. That read is required so stale TOML credentials are rejected
+     * after Admin token rotation; it runs on every internal API request authenticated via connect config.
+     */
+    public static boolean matchesConnectConfigRegistrationToken(String configRegistrationToken, String apiKey)
+            throws APIManagementException, NoSuchAlgorithmException {
+        if (!constantTimeEquals(configRegistrationToken, apiKey)) {
+            return false;
+        }
+        String tokenId = parseTokenId(apiKey);
+        if (tokenId == null) {
+            return false;
+        }
+        int sep = apiKey.indexOf(COMBINED_TOKEN_SEPARATOR);
+        String plainToken = apiKey.substring(sep + 1);
+        if (plainToken.isEmpty()) {
+            return false;
+        }
+        PlatformGatewayDAO.TokenWithGateway active =
+                PlatformGatewayDAO.getInstance().getActiveTokenById(tokenId);
+        if (active == null) {
+            return true;
+        }
+        return matchesActiveTokenHash(active, plainToken);
+    }
+
+    /**
+     * Constant-time comparison for connect registration tokens.
+     * Uses bitwise {@code &} (not {@code &&}) so {@link MessageDigest#isEqual(byte[], byte[])} always runs.
+     */
+    public static boolean constantTimeEquals(String expected, String actual) {
+        if (expected == null || actual == null) {
+            return false;
+        }
+        byte[] expectedBytes = expected.getBytes(StandardCharsets.UTF_8);
+        byte[] actualBytes = actual.getBytes(StandardCharsets.UTF_8);
+        int maxLen = Math.max(expectedBytes.length, actualBytes.length);
+        byte[] paddedExpected = Arrays.copyOf(expectedBytes, maxLen);
+        byte[] paddedActual = Arrays.copyOf(actualBytes, maxLen);
+        return (expectedBytes.length == actualBytes.length)
+                & MessageDigest.isEqual(paddedExpected, paddedActual);
     }
 
     /**
@@ -133,19 +195,7 @@ public final class PlatformGatewayTokenUtil {
             if (tokenRow == null) {
                 return null;
             }
-            String computedHash = hashToken(plainToken);
-            byte[] computedBytes;
-            byte[] storedBytes;
-            try {
-                computedBytes = Hex.decodeHex(computedHash.toCharArray());
-                storedBytes = Hex.decodeHex(tokenRow.tokenHash.toCharArray());
-            } catch (DecoderException e) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Token verification failed: invalid hash encoding for token id=" + tokenId);
-                }
-                return null;
-            }
-            if (computedBytes.length != storedBytes.length || !MessageDigest.isEqual(computedBytes, storedBytes)) {
+            if (!matchesActiveTokenHash(tokenRow, plainToken)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Token verification failed: hash mismatch for token id=" + tokenId);
                 }
@@ -165,5 +215,25 @@ public final class PlatformGatewayTokenUtil {
             log.debug("Platform gateway token verified successfully for gateway: " + tokenRow.gatewayId);
         }
         return PlatformGatewayDAO.fromTokenWithGateway(tokenRow);
+    }
+
+    /**
+     * Constant-time comparison of a plain token against a stored active token row hash.
+     */
+    public static boolean matchesActiveTokenHash(PlatformGatewayDAO.TokenWithGateway tokenRow, String plainToken)
+            throws NoSuchAlgorithmException {
+        if (tokenRow == null || plainToken == null) {
+            return false;
+        }
+        String computedHash = hashToken(plainToken);
+        byte[] computedBytes;
+        byte[] storedBytes;
+        try {
+            computedBytes = Hex.decodeHex(computedHash.toCharArray());
+            storedBytes = Hex.decodeHex(tokenRow.tokenHash.toCharArray());
+        } catch (DecoderException e) {
+            return false;
+        }
+        return computedBytes.length == storedBytes.length && MessageDigest.isEqual(computedBytes, storedBytes);
     }
 }

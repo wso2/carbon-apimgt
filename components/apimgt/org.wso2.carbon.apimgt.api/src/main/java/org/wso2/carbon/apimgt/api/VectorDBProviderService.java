@@ -66,4 +66,10 @@ public interface VectorDBProviderService {
      * @throws APIManagementException if an error occurs while retrieving the response.
      */
     <T extends Serializable> T retrieve(double[] embeddings, Map<String, String> filter) throws APIManagementException;
+
+    /**
+     * Releases any resources (connections, clients, thread pools, etc.) acquired by this provider
+     * during {@link #init}. Called when the provider is being shut down.
+     */
+    void close() throws APIManagementException;
 }

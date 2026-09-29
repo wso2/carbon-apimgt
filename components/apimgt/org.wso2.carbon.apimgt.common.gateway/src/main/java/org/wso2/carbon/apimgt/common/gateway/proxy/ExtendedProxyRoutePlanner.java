@@ -27,6 +27,10 @@ import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
 import org.apache.http.protocol.HttpContext;
 import org.wso2.carbon.apimgt.common.gateway.configdto.HttpClientConfigurationDTO;
 
+import java.util.Locale;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+
 /**
  * Extended ProxyRoutePlanner class to handle non proxy hosts implementation
  */
@@ -74,7 +78,7 @@ public class ExtendedProxyRoutePlanner extends DefaultProxyRoutePlanner {
                 if ("*".equals(nonProxyHost)) {
                     return true;
                 }
-                if (uriHost.matches(nonProxyHost)) {
+                if (matchesPattern(uriHost, nonProxyHost)) {
                     if (log.isDebugEnabled()) {
                         log.debug(
                                 "scheme:'" + uriScheme + "', host:'" + uriHost + "' matches nonProxyHost '"
@@ -93,7 +97,7 @@ public class ExtendedProxyRoutePlanner extends DefaultProxyRoutePlanner {
                     }
                     return false;
                 }
-                if (uriHost.matches(targetProxyHost)) {
+                if (matchesPattern(uriHost, targetProxyHost)) {
                     if (log.isDebugEnabled()) {
                         log.debug("scheme:'" + uriScheme + "', host:'" + uriHost + "' matches targetProxyHost '"
                                 + targetProxyHost + "' : PROXY");
@@ -112,6 +116,36 @@ public class ExtendedProxyRoutePlanner extends DefaultProxyRoutePlanner {
                             + nonProxyHostsLength + " non proxy host)");
         }
         return false;
+    }
+
+    private boolean matchesPattern(String hostname, String pattern) {
+        String normalizedHost = hostname.toLowerCase(Locale.ROOT);
+        String normalizedPattern = pattern.toLowerCase(Locale.ROOT);
+        StringBuilder regex = new StringBuilder(normalizedPattern.length() + 8);
+        StringBuilder literal = new StringBuilder();
+        for (int i = 0; i < normalizedPattern.length(); i++) {
+            char c = normalizedPattern.charAt(i);
+            if (c == '*') {
+                if (literal.length() > 0) {
+                    regex.append(Pattern.quote(literal.toString()));
+                    literal.setLength(0);
+                }
+                regex.append(".*");
+            } else {
+                literal.append(c);
+            }
+        }
+        if (literal.length() > 0) {
+            regex.append(Pattern.quote(literal.toString()));
+        }
+        try {
+            return normalizedHost.matches(regex.toString());
+        } catch (PatternSyntaxException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Invalid proxy host pattern [" + pattern + "], treating as no match.", e);
+            }
+            return false;
+        }
     }
 
     @Override

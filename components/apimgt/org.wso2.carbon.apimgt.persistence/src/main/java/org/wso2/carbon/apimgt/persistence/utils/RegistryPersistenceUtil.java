@@ -717,7 +717,7 @@ public class RegistryPersistenceUtil {
                                     throws APIManagementException {
         API api;
         try {
-            String providerName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+            String providerName = getProviderFromArtifact(artifact);
             String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
             APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion, artifact.getId());
@@ -952,6 +952,32 @@ public class RegistryPersistenceUtil {
     }
 
     /**
+     * To extract the API related custom properties (additional properties) of an API from its registry resource.
+     * Additional properties are stored as registry resource properties with the
+     * {@link APIConstants#API_RELATED_CUSTOM_PROPERTIES_PREFIX} prefix, which is stripped off here.
+     *
+     * @param apiResource Registry resource of the API.
+     * @return Map of additional property names against their values. Never null.
+     */
+    public static Map<String, String> getAdditionalProperties(Resource apiResource) {
+
+        Map<String, String> additionalProperties = new HashMap<>();
+        Properties properties = apiResource.getProperties();
+        if (properties != null) {
+            Enumeration<?> propertyNames = properties.propertyNames();
+            while (propertyNames.hasMoreElements()) {
+                String propertyName = (String) propertyNames.nextElement();
+                if (propertyName.startsWith(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX)) {
+                    String property = propertyName
+                            .substring(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX.length());
+                    additionalProperties.put(property, apiResource.getProperty(propertyName));
+                }
+            }
+        }
+        return additionalProperties;
+    }
+
+    /**
      * To set the resource properties to the API.
      *
      * @param api          API that need to set the resource properties.
@@ -1174,11 +1200,14 @@ public class RegistryPersistenceUtil {
                     boolean isRoleEveryOne = false;
                     /*If no roles have defined, authorize for everyone role */
                     if (roles != null) {
-                        if (roles.length == 1 && "".equals(roles[0])) {
+                        if (roles.length == 1 && StringUtils.isBlank(roles[0])) {
                             authManager.authorizeRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
                             isRoleEveryOne = true;
                         } else {
                             for (String role : roles) {
+                                if (StringUtils.isBlank(role)) {
+                                    continue;
+                                }
                                 if (APIConstants.EVERYONE_ROLE.equalsIgnoreCase(role.trim())) {
                                     isRoleEveryOne = true;
                                 }
@@ -1215,13 +1244,23 @@ public class RegistryPersistenceUtil {
 
                 if (visibility != null && APIConstants.API_RESTRICTED_VISIBILITY.equalsIgnoreCase(visibility)) {
                     boolean isRoleEveryOne = false;
+                    /*If no roles have defined, authorize for everyone role */
                     if (roles != null) {
-                        for (String role : roles) {
-                            if (APIConstants.EVERYONE_ROLE.equalsIgnoreCase(role.trim())) {
-                                isRoleEveryOne = true;
+                        if (roles.length == 1 && StringUtils.isBlank(roles[0])) {
+                            authorizationManager.authorizeRole(APIConstants.EVERYONE_ROLE, resourcePath,
+                                    ActionConstants.GET);
+                            isRoleEveryOne = true;
+                        } else {
+                            for (String role : roles) {
+                                if (StringUtils.isBlank(role)) {
+                                    continue;
+                                }
+                                if (APIConstants.EVERYONE_ROLE.equalsIgnoreCase(role.trim())) {
+                                    isRoleEveryOne = true;
+                                }
+                                authorizationManager.authorizeRole(role.trim(), resourcePath, ActionConstants.GET);
+                                publisherAccessRoles.append(",").append(role.trim().toLowerCase());
                             }
-                            authorizationManager.authorizeRole(role.trim(), resourcePath, ActionConstants.GET);
-                            publisherAccessRoles.append(",").append(role.toLowerCase());
                         }
                     }
                     if (!isRoleEveryOne) {
@@ -1578,7 +1617,7 @@ public class RegistryPersistenceUtil {
 
         return provider + "--" + apiName + apiVersion + ".wsdl";
     }
-    
+
     public static String getAPIBasePath(String provider, String apiName, String version) {
         return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + replaceEmailDomain(provider)
                 + RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR + version;
@@ -1771,7 +1810,7 @@ public class RegistryPersistenceUtil {
         APIProduct apiProduct;
         try {
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
-            String providerName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+            String providerName = getProviderFromArtifact(artifact);
             String productName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String productVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
             APIProductIdentifier apiProductIdentifier = new APIProductIdentifier(providerName, productName,
@@ -2031,11 +2070,67 @@ public class RegistryPersistenceUtil {
      * @param apiPath the current API path containing "provider/" (e.g., /apimgt/applicationdata/provider/admin/WSDL/1.0.0/api)
      * @param apiName the API name
      * @return the provider name
+     * @deprecated Use {@link #extractProviderFromPath(String, String, String)} instead which
+     * handles the edge case where API name matches the provider name (e.g., secondary userstore
+     * WSO2.COM/admin with API named "admin").
      */
+    @Deprecated
     public static String extractProvider(String apiPath, String apiName) {
-        int startIndex = apiPath.indexOf(APIConstants.API_PROVIDER_SUFFIX_SLASH) +
-                APIConstants.API_PROVIDER_SUFFIX_SLASH.length();
-        int endIndex = apiPath.indexOf("/" + apiName + "/");
+
+        String provider = null;
+        try {
+            String segment = RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR;
+            int startIndex = StringUtils.lastIndexOfIgnoreCase(apiPath, segment) + segment.length();
+            int endIndex = StringUtils.lastIndexOfIgnoreCase(apiPath, APIConstants.API_RESOURCE_NAME);
+            String apiVersion = apiPath.substring(startIndex, endIndex);
+            provider = extractProviderFromPath(apiPath, apiName, apiVersion);
+        } catch (APIPersistenceException | StringIndexOutOfBoundsException e) {
+            log.error("Error while extracting provider from path: " + apiPath
+                    + ", apiName: " + apiName, e);
+        }
+        return provider;
+    }
+
+    /**
+     * Extracts the provider name from the API artifact path using the full /{name}/{version}/api
+     * segment to unambiguously locate where the provider segment ends.
+     * This handles the edge case where the API name appears in the provider segment
+     * (e.g., secondary userstore: WSO2.COM/admin with API named "admin").
+     *
+     * @param apiPath    the full artifact path (ending with /api)
+     * @param apiName    the API name
+     * @param apiVersion the API version
+     * @return the provider name as it appears in the registry path
+     * @throws APIPersistenceException if the path format is invalid
+     */
+    public static String extractProviderFromPath(String apiPath, String apiName, String apiVersion)
+            throws APIPersistenceException {
+        if (apiPath == null) {
+            throw new APIPersistenceException("API path cannot be null");
+        }
+        if (StringUtils.isBlank(apiName)) {
+            throw new APIPersistenceException("API name cannot be null or empty. Path: " + apiPath);
+        }
+        if (StringUtils.isBlank(apiVersion)) {
+            throw new APIPersistenceException("API version cannot be null or empty. Path: " + apiPath);
+        }
+        String nameVersionApiSegment = RegistryConstants.PATH_SEPARATOR + apiName
+                + RegistryConstants.PATH_SEPARATOR + apiVersion + APIConstants.API_RESOURCE_NAME;
+        int endIndex = StringUtils.lastIndexOfIgnoreCase(apiPath, nameVersionApiSegment);
+        if (endIndex < 0) {
+            throw new APIPersistenceException("Unable to extract provider from path: " + apiPath
+                    + ". Expected segment '" + nameVersionApiSegment + "' not found.");
+        }
+        int startIndex = apiPath.indexOf(APIConstants.API_PROVIDER_SUFFIX_SLASH);
+        if (startIndex < 0) {
+            throw new APIPersistenceException("Unable to extract provider from path: " + apiPath
+                    + ". Provider prefix '" + APIConstants.API_PROVIDER_SUFFIX_SLASH + "' not found.");
+        }
+        startIndex += APIConstants.API_PROVIDER_SUFFIX_SLASH.length();
+        if (startIndex >= endIndex) {
+            throw new APIPersistenceException("Unable to extract provider from path: " + apiPath
+                    + ". Provider segment is empty between prefix and '" + nameVersionApiSegment + "'.");
+        }
         return apiPath.substring(startIndex, endIndex);
     }
 
@@ -2146,7 +2241,9 @@ public class RegistryPersistenceUtil {
      * @param registry the registry to lookup current API path for revisions
      * @return the provider name
      * @throws APIPersistenceException if path parsing fails
+     * @deprecated Use {@link #extractProviderFromPath(String, String, String, Registry)} instead.
      */
+    @Deprecated
     public static String extractProvider(String apiPath, String apiName, Registry registry)
             throws APIPersistenceException {
         if (apiPath == null || StringUtils.isBlank(apiName)) {
@@ -2171,6 +2268,61 @@ public class RegistryPersistenceUtil {
         } catch (IndexOutOfBoundsException e) {
             throw new APIPersistenceException("Invalid API path format for current: " + apiPath, e);
         }
+    }
+
+    /**
+     * Extracts the provider name from the API artifact path, with revision path support.
+     * Uses the full /{name}/{version}/api segment to unambiguously locate the provider.
+     *
+     * @param apiPath    the registry path of the API artifact
+     * @param apiName    the API name
+     * @param apiVersion the API version
+     * @param registry   Registry instance (used to resolve revision paths)
+     * @return the original provider name as it appears in the registry path
+     * @throws APIPersistenceException if the provider cannot be extracted
+     */
+    public static String extractProviderFromPath(String apiPath, String apiName, String apiVersion,
+            Registry registry) throws APIPersistenceException {
+        if (isRevisionPath(apiPath)) {
+            String apiUuid = extractApiIdFromRevisionPath(apiPath);
+            try {
+                String currentApiPath = GovernanceUtils.getArtifactPath(registry, apiUuid);
+                if (currentApiPath == null) {
+                    throw new APIPersistenceException(
+                            "Unable to find current API path for revision: " + apiPath
+                                    + ". Artifact may be missing or unindexed for UUID: " + apiUuid);
+                }
+                return extractProviderFromPath(currentApiPath, apiName, apiVersion);
+            } catch (GovernanceException e) {
+                throw new APIPersistenceException("Error retrieving current API path for revision: " + apiPath, e);
+            }
+        }
+        return extractProviderFromPath(apiPath, apiName, apiVersion);
+    }
+
+    /**
+     * Reads the API provider from the artifact and normalizes the email domain encoding.
+     * The provider in the artifact may contain raw @ (for APIs where provider was changed
+     * before the encoding fix) or -AT- (normal creation / post-fix provider change).
+     * This method always returns the -AT- encoded form for consistency.
+     *
+     * @param artifact the API governance artifact
+     * @return the provider name with @ encoded as -AT-
+     * @throws GovernanceException if the attribute cannot be read
+     */
+    public static String getProviderFromArtifact(GenericArtifact artifact) throws GovernanceException {
+        return replaceEmailDomain(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));
+    }
+
+    /**
+     * Reads the API provider from a GovernanceArtifact and normalizes the email domain encoding.
+     *
+     * @param artifact the API governance artifact
+     * @return the provider name with @ encoded as -AT-
+     * @throws GovernanceException if the attribute cannot be read
+     */
+    public static String getProviderFromArtifact(GovernanceArtifact artifact) throws GovernanceException {
+        return replaceEmailDomain(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));
     }
 
     /**

@@ -664,6 +664,15 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiMgtDAO.isApiNameWithDifferentCaseExist(apiName, tenantName, organization);
     }
 
+    public boolean isApiNameExistExactCase(String apiName, String organization) throws APIManagementException {
+
+        String tenantName = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            tenantName = tenantDomain;
+        }
+        return apiMgtDAO.isApiNameExistExactCase(apiName, tenantName, organization);
+    }
+
     public void addSubscriber(String username, String groupingId) throws APIManagementException {
         addSubscriber(username, groupingId, null);
     }
@@ -1174,7 +1183,7 @@ public abstract class AbstractAPIManager implements APIManager {
             if (StringUtils.isNotEmpty(consumerKey)) {
                 if (keyManager != null) {
                     if (APIConstants.OAuthAppMode.MAPPED.name().equalsIgnoreCase(apiKey.getCreateMode())
-                            && !isOauthAppValidation()) {
+                            && !isOauthAppValidation(keyManagerConfigurationDTO)) {
                         resultantApiKeyList.add(apiKey);
                     } else {
                         OAuthApplicationInfo oAuthApplicationInfo = null;
@@ -1761,12 +1770,39 @@ public abstract class AbstractAPIManager implements APIManager {
         return null;
     }
 
+    @Deprecated
     protected boolean isOauthAppValidation() {
+        return isOauthAppValidation((KeyManagerConfigurationDTO) null);
+    }
 
+    protected boolean isOauthAppValidation(KeyManagerConfigurationDTO keyManagerConfigurationDTO) {
+
+        // Check global validation config from deployment.toml
+        if (log.isDebugEnabled()) {
+            log.debug("Checking global provisioned app validation");
+        }
         String oauthAppValidation = getAPIManagerConfiguration()
                 .getFirstProperty(APIConstants.API_KEY_VALIDATOR_ENABLE_PROVISION_APP_VALIDATION);
-        if (StringUtils.isNotEmpty(oauthAppValidation)) {
-            return Boolean.parseBoolean(oauthAppValidation);
+        if (StringUtils.isNotEmpty(oauthAppValidation) && !Boolean.parseBoolean(oauthAppValidation)) {
+            // Global validation disabled, skip validation
+            if (log.isDebugEnabled()) {
+                log.debug("Global provisioned app validation is disabled");
+            }
+            return false;
+        }
+        // Check per-KM config: if provisionedAppValidation is explicitly set to false, skip validation for this KM
+        if (log.isDebugEnabled()) {
+            log.debug("Checking KM level provisioned app validation");
+        }
+        if (keyManagerConfigurationDTO != null && keyManagerConfigurationDTO.getAdditionalProperties() != null) {
+            Object provisionedAppValidation = keyManagerConfigurationDTO.getAdditionalProperties()
+                    .get(APIConstants.KeyManager.PROVISIONED_APP_VALIDATION);
+            if (provisionedAppValidation != null) {
+                String kmValidationValue = provisionedAppValidation.toString();
+                if ("false".equalsIgnoreCase(kmValidationValue)) {
+                    return false;
+                }
+            }
         }
         return true;
     }

@@ -43,7 +43,8 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Creates a new governance policy.", notes = "Creates a new governance policy for the user's organization.", response = APIMGovernancePolicyDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:gov_policy_manage", description = "Manage governance policies")
+            @AuthorizationScope(scope = "apim:gov_policy_manage", description = "Manage governance policies"),
+            @AuthorizationScope(scope = "apim:gov_policy_create", description = "Create governance policies")
         })
     }, tags={ "Governance Policies",  })
     @ApiResponses(value = { 
@@ -62,7 +63,8 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete a specific governance policy", notes = "Deletes an existing governance policy identified by the policyId.", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:gov_policy_manage", description = "Manage governance policies")
+            @AuthorizationScope(scope = "apim:gov_policy_manage", description = "Manage governance policies"),
+            @AuthorizationScope(scope = "apim:gov_policy_delete", description = "Delete governance policies")
         })
     }, tags={ "Governance Policies",  })
     @ApiResponses(value = { 
@@ -81,7 +83,8 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieves a list of all governance policies.", notes = "Retrieves a list of governance policies for the user's organization.", response = APIMGovernancePolicyListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:gov_policy_read", description = "Read governance policies")
+            @AuthorizationScope(scope = "apim:gov_policy_read", description = "Read governance policies"),
+            @AuthorizationScope(scope = "apim:gov_policy_manage", description = "Manage governance policies")
         })
     }, tags={ "Governance Policies",  })
     @ApiResponses(value = { 
@@ -100,7 +103,8 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get a specific governance policy", notes = "Retrieves details of a specific governance policy identified by the policyId.", response = APIMGovernancePolicyDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:gov_policy_read", description = "Read governance policies")
+            @AuthorizationScope(scope = "apim:gov_policy_read", description = "Read governance policies"),
+            @AuthorizationScope(scope = "apim:gov_policy_manage", description = "Manage governance policies")
         })
     }, tags={ "Governance Policies",  })
     @ApiResponses(value = { 
@@ -119,7 +123,8 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Update a specific governance policy", notes = "Updates the details of an existing governance policy identified by the policyId.", response = APIMGovernancePolicyDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:gov_policy_manage", description = "Manage governance policies")
+            @AuthorizationScope(scope = "apim:gov_policy_manage", description = "Manage governance policies"),
+            @AuthorizationScope(scope = "apim:gov_policy_update", description = "Update governance policies")
         })
     }, tags={ "Governance Policies" })
     @ApiResponses(value = { 

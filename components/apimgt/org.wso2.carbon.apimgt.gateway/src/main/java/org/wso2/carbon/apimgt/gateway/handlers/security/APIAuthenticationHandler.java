@@ -42,6 +42,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.basicauth.BasicAuthAuthe
 import org.wso2.carbon.apimgt.gateway.handlers.security.oauth.OAuthAuthenticator;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
+import org.wso2.carbon.apimgt.gateway.utils.MCPUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
@@ -471,6 +472,26 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                 }
                 handleNoAuthentication(messageContext);
                 setAPIParametersToMessageContext(messageContext);
+
+                //remove authorization header if exists
+                try {
+                    org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
+                            getAxis2MessageContext();
+                    Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+                    String authHeader = APIUtil.getOAuthConfigurationFromAPIMConfig(APIConstants.AUTHORIZATION_HEADER);
+                    if (authHeader == null) {
+                        authHeader = HttpHeaders.AUTHORIZATION;
+                    }
+                    
+                    if (headers != null && headers.get(authHeader) != null) {
+                        headers.remove(authHeader);
+                    }
+                } catch (APIManagementException e) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Error while removing authorization header for MCP request", e);
+                    }
+                }
+
                 return ExtensionListenerUtil.postProcessRequest(messageContext, type);
             }
 
@@ -484,10 +505,8 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                 }
 
                 String authenticationScheme;
-                String mcpMethod = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD);
-                if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(apiType) &&
-                        ((APIConstants.MCP.METHOD_TOOL_LIST.equals(mcpMethod)) || isMCPGetRequest(messageContext))) {
-                    authenticationScheme = APIConstants.AUTH_NO_AUTHENTICATION;
+                if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(apiType)) {
+                    authenticationScheme = MCPUtils.getResourceAuthenticationSchemeForMCP(messageContext, getAPIKeyValidator());
                 } else {
                     authenticationScheme = getAPIKeyValidator().getResourceAuthenticationScheme(messageContext);
                 }
@@ -727,56 +746,6 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     private void handleAuthFailure(MessageContext messageContext, APISecurityException e) {
         GatewayUtils.handleAuthFailure(messageContext, e, this.authorizationHeader, this.apiKeyHeader,
                 getAuthenticatorsChallengeString(), apiType);
-        try {
-            // If this is an MCP API, try to add DCR resource metadata to WWW-Authenticate header
-            if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(this.apiType) && this.apiUUID != null) {
-                if(log.isDebugEnabled()) {
-                    log.debug("Adding DCR resource metadata to WWW-Authenticate header for MCP API: " + this.apiUUID);
-                }
-                org.apache.axis2.context.MessageContext axis2MC =
-                        ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-                @SuppressWarnings("unchecked")
-                Map<String, String> transportHeaders = (Map<String, String>)
-                        axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-
-                if (transportHeaders == null) {
-                    transportHeaders = new java.util.TreeMap<>();
-                    axis2MC.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, transportHeaders);
-                }
-
-                java.util.List<String> keyManagers = org.wso2.carbon.apimgt.gateway.internal.DataHolder.getInstance()
-                        .getKeyManagersFromUUID(this.apiUUID);
-                if (keyManagers != null && !keyManagers.isEmpty()) {
-                    String existing = transportHeaders.get("WWW-Authenticate");
-                    StringBuilder sb = new StringBuilder();
-                    if (existing != null) {
-                        sb.append(existing);
-                    }
-                    for (String kmName : keyManagers) {
-                        // pass an empty tenant domain string to match mocks that use Mockito.anyString()
-                        KeyManagerDto kmDto = KeyManagerHolder.getKeyManagerByName("", kmName);
-                        KeyManager keyManager = kmDto != null ? kmDto.getKeyManager() : null;
-                        KeyManagerConfiguration kmConfig = keyManager != null ? keyManager.getKeyManagerConfiguration() : null;
-                        if (kmConfig == null) continue;
-
-                        Object dcrEndpointParam = kmConfig.getParameter(
-                                APIConstants.KeyManager.CLIENT_REGISTRATION_ENDPOINT);
-                        String dcrEndpoint = dcrEndpointParam != null ? dcrEndpointParam.toString() : null;
-                        if (dcrEndpoint != null) {
-                            if (sb.length() > 0) {
-                                sb.append(", ");
-                            }
-                            sb.append("resource_metadata=").append(dcrEndpoint);
-                        }
-                    }
-                    if (sb.length() > 0) {
-                        transportHeaders.put(HttpHeaders.WWW_AUTHENTICATE, sb.toString());
-                    }
-                }
-            }
-        } catch (Exception ex) {
-            log.info("Error while adding DCR metadata to WWW-Authenticate header", ex);
-        }
     }
 
     protected void sendFault(MessageContext messageContext, int status) {

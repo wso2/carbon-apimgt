@@ -121,11 +121,11 @@ public abstract class AbstractKeyManagerEventHandler implements KeyManagerEventH
 
     public boolean handleTokenRevocationBatchEvent(TokenRevocationBatchEvent tokenRevocationBatchEvent)
             throws APIManagementException {
+        extractPropertiesAndPublishTokenRevocationBatchEvent(tokenRevocationBatchEvent);
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
         String isRevokeTokenCleanupEnabled = config.getFirstProperty(APIConstants.ENABLE_REVOKE_TOKEN_CLEANUP);
         if (Boolean.parseBoolean(isRevokeTokenCleanupEnabled)) {
-            extractPropertiesAndPublishTokenRevocationBatchEvent(tokenRevocationBatchEvent);
             // Cleanup expired revoked tokens from db.
             Runnable expiredJWTCleaner = new ExpiredJWTCleaner();
             Thread cleanupThread = new Thread(expiredJWTCleaner);

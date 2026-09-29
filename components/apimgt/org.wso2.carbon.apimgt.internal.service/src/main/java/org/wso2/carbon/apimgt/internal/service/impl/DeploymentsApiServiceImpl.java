@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.PlatformGatewayArtifactService;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.PlatformGatewayArtifactDAO;
 import org.wso2.carbon.apimgt.impl.dao.PlatformGatewayDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -83,8 +84,12 @@ public class DeploymentsApiServiceImpl implements DeploymentsApiService {
             GatewayDeploymentInfoDTO info = new GatewayDeploymentInfoDTO();
             info.setDeploymentId(row.getDeploymentId());
             info.setArtifactId(row.getApiUuid());
-            info.setKind(GatewayDeploymentInfoDTO.KindEnum.RESTAPI);
-            info.setUpdatedAt(row.getDeployedTime() != null
+            info.setKind(APIConstants.GatewayNotification.PLATFORM_GATEWAY_RESTAPI_KIND);
+            // Every row returned by listDeploymentsByGatewayEnvUuid represents an artifact that is
+            // currently deployed on this gateway (undeploy removes the row). The gateway controller
+            // only fetches artifacts whose state is "deployed", so this field is required.
+            info.setState(APIConstants.GatewayNotification.PLATFORM_GATEWAY_RESTAPI_STATUS);
+            info.setDeployedAt(row.getDeployedTime() != null
                     ? row.getDeployedTime().toInstant().toString()
                     : null);
             list.add(info);
@@ -152,16 +157,14 @@ public class DeploymentsApiServiceImpl implements DeploymentsApiService {
 
         byte[] tarBytes;
         try {
-            tarBytes = DeploymentTarGzBuilder.buildTar(entries);
+            tarBytes = DeploymentTarGzBuilder.buildTarGz(entries);
         } catch (IOException e) {
-            log.error("Failed to build TAR for deployment batch", e);
+            log.error("Failed to build TAR.GZ for deployment batch", e);
             throw new APIManagementException("Failed to build deployment archive", e);
         }
 
-        // Payload is uncompressed TAR; GZIPOutInterceptor (if applied) adds Content-Encoding: gzip.
-        // Use application/x-tar so type matches uncompressed content; filename hints .tar.gz when gzip is applied.
         return Response.ok(tarBytes)
-                .type("application/x-tar")
+                .type("application/x-tar+gzip")
                 .header("Content-Disposition", "attachment; filename=\"deployments.tar.gz\"")
                 .build();
     }

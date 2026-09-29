@@ -47,6 +47,7 @@ import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
 import org.wso2.carbon.apimgt.impl.token.OpaqueAPIKeyNotifier;
+import org.wso2.carbon.apimgt.impl.token.RevokedTokenService;
 import org.wso2.carbon.apimgt.impl.workflow.DefaultWorkflowTaskService;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
@@ -60,6 +61,7 @@ import org.wso2.carbon.utils.ConfigurationContextService;
 import java.security.KeyStore;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.Map;
 import java.util.Set;
 
@@ -96,6 +98,7 @@ public class ServiceReferenceHolder {
     private FederatedAPIDiscoveryService federatedAPIDiscoveryService;
     private OpaqueAPIKeyNotifier opaqueApiKeyNotifier;
     private ConsumptionDataExportService consumptionDataExportService;
+    private final List<RevokedTokenService> revokedTokenServices = new CopyOnWriteArrayList<>();
 
     private Map<String, LLMProviderService> llmProviderServiceMap = new HashMap();
 
@@ -497,6 +500,28 @@ public class ServiceReferenceHolder {
 
     public void setConsumptionDataExportService(ConsumptionDataExportService consumptionDataExportService) {
         this.consumptionDataExportService = consumptionDataExportService;
+    }
+
+    public void addRevokedTokenService(RevokedTokenService revokedTokenService) {
+        revokedTokenServices.add(revokedTokenService);
+    }
+
+    public void removeRevokedTokenService(RevokedTokenService revokedTokenService) {
+        revokedTokenServices.remove(revokedTokenService);
+    }
+
+    public RevokedTokenService getRevokedTokenService() {
+        return new RevokedTokenService() {
+            public void addRevokedJWTIntoMap(String revokedToken, Long expiryTime) {
+                revokedTokenServices.forEach(s -> s.addRevokedJWTIntoMap(revokedToken, expiryTime));
+            }
+            public void removeTokenFromGatewayCache(String accessToken, boolean isJwtToken) {
+                revokedTokenServices.forEach(s -> s.removeTokenFromGatewayCache(accessToken, isJwtToken));
+            }
+            public void removeApiKeyFromGatewayCache(String tokenIdentifier) {
+                revokedTokenServices.forEach(s -> s.removeApiKeyFromGatewayCache(tokenIdentifier));
+            }
+        };
     }
 
 }

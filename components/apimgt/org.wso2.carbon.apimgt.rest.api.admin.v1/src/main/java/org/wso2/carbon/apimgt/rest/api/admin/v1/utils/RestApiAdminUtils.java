@@ -43,16 +43,21 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.exception.ForbiddenException;
+import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-
-import java.util.*;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -508,5 +513,20 @@ public class RestApiAdminUtils {
                     new APIManagementException("Tenant " + tenantDomain + " is not allowed to access " +
                             resourceDescription + ". Only super tenant is allowed"), log);
         }
+    }
+
+    /**
+     * Handles an internal server error by throwing an InternalServerErrorException
+     * with the given message. The message is logged at error level but the stack
+     * trace is not printed.
+     *
+     * @param msg error message to return to the client
+     * @param log logger instance
+     * @throws InternalServerErrorException always thrown
+     */
+    public static void handleInternalServerError(String msg, Log log) throws InternalServerErrorException {
+        InternalServerErrorException exception = RestApiUtil.buildInternalServerErrorException(msg);
+        log.error(msg);
+        throw exception;
     }
 }

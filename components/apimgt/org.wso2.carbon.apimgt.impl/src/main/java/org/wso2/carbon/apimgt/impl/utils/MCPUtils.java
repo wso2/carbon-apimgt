@@ -22,7 +22,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIOperationMapping;
+import org.wso2.carbon.apimgt.api.model.BackendOperation;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 
 import java.util.Map;
@@ -72,6 +76,58 @@ public class MCPUtils {
                     throw new APIManagementException("Cannot delete MCP attached resources from API",
                             ExceptionCodes.API_UPDATE_FORBIDDEN_PER_MCP_USAGE);
                 }
+            }
+        }
+    }
+
+    /**
+     * Validates that each backend operation of an MCP server (created from an existing API) maps to a resource
+     * that exists in the referenced API, rejecting invalid operations before any persistence or deletion.
+     *
+     * @param api the MCP server to validate
+     * @throws APIManagementException if a backend operation has no matching resource in the referenced API
+     */
+    public static void validateMCPBackendOperations(API api) throws APIManagementException {
+
+        if (!APIConstants.API_TYPE_MCP.equals(api.getType())
+                || !APIConstants.API_SUBTYPE_EXISTING_API.equals(api.getSubtype())) {
+            return;
+        }
+        Set<URITemplate> uriTemplates = api.getUriTemplates();
+        if (uriTemplates == null || uriTemplates.isEmpty()) {
+            return;
+        }
+        String referencedApiId = null;
+        for (URITemplate uriTemplate : uriTemplates) {
+            if (uriTemplate.getAPIOperationMapping() != null) {
+                referencedApiId = uriTemplate.getAPIOperationMapping().getApiUuid();
+                break;
+            }
+        }
+        if (referencedApiId == null) {
+            return;
+        }
+        Set<URITemplate> referencedUriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(referencedApiId);
+        if (referencedUriTemplates == null || referencedUriTemplates.isEmpty()) {
+            return;
+        }
+        for (URITemplate uriTemplate : uriTemplates) {
+            APIOperationMapping operationMapping = uriTemplate.getAPIOperationMapping();
+            if (operationMapping == null) {
+                continue;
+            }
+            BackendOperation backendOperation = operationMapping.getBackendOperation();
+            if (backendOperation == null || backendOperation.getVerb() == null) {
+                continue;
+            }
+            String target = backendOperation.getTarget();
+            String verb = backendOperation.getVerb().toString();
+            if (ApiMgtDAO.findMatchingTemplate(referencedUriTemplates, target, verb) == null) {
+                throw new APIManagementException(
+                        "No matching resource found in the referenced API '" + referencedApiId
+                                + "' for backend operation: " + verb + " " + target,
+                        ExceptionCodes.from(ExceptionCodes.INVALID_MCP_BACKEND_OPERATION, verb, target,
+                                referencedApiId));
             }
         }
     }

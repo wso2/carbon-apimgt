@@ -277,6 +277,11 @@ public class DataProcessAndPublishingAgent implements Runnable {
             }
         }
 
+        //Publish application name
+        if (!StringUtils.isEmpty(authenticationContext.getApplicationName())) {
+            jsonObMap.put(APIThrottleConstants.APPLICATION_NAME, authenticationContext.getApplicationName());
+        }
+
         //this parameter will be used to capture message size and pass it to calculation logic
         
         ArrayList<VerbInfoDTO> list = (ArrayList<VerbInfoDTO>) messageContext.getProperty(APIConstants.VERB_INFO_DTO);
@@ -291,9 +296,6 @@ public class DataProcessAndPublishingAgent implements Runnable {
                 log.debug("Message size: " + messageSizeInBytes + "B");
             }
             jsonObMap.put(APIThrottleConstants.MESSAGE_SIZE, messageSizeInBytes);
-            if (!StringUtils.isEmpty(authenticationContext.getApplicationName())) {
-                jsonObMap.put(APIThrottleConstants.APPLICATION_NAME, authenticationContext.getApplicationName());
-            }
             if (!StringUtils.isEmpty(authenticationContext.getProductName()) && !StringUtils
                     .isEmpty(authenticationContext.getProductProvider())) {
                 jsonObMap.put(APIThrottleConstants.SUBSCRIPTION_TYPE, APIConstants.API_PRODUCT_SUBSCRIPTION_TYPE);

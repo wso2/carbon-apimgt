@@ -32,17 +32,17 @@ public interface ScopeClient {
     @RequestLine("GET ")
     ScopeDTO[] getScopes() throws KeyManagerClientException;
 
-    @RequestLine("GET /name/{name}")
+    @RequestLine("GET /name/{name}?encoded=true")
     ScopeDTO getScopeByName(@Param("name") String name) throws KeyManagerClientException;
 
     @Headers("Content-Type: application/json")
-    @RequestLine("PUT /name/{name}")
+    @RequestLine("PUT /name/{name}?encoded=true")
     Response updateScope(ScopeDTO scopeDTO, @Param("name") String name) throws KeyManagerClientException;
 
     @Headers("Content-Type: application/json")
-    @RequestLine("DELETE /name/{name}")
+    @RequestLine("DELETE /name/{name}?encoded=true")
     Response deleteScope(@Param("name") String name) throws KeyManagerClientException;
 
-    @RequestLine("HEAD /name/{name}?includeOIDCScopes=true")
+    @RequestLine("HEAD /name/{name}?includeOIDCScopes=true&encoded=true")
     Response isScopeExist(@Param("name") String name) throws KeyManagerClientException;
 }

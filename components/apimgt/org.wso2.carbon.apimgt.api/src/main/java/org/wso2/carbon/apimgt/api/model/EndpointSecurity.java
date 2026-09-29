@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.api.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -53,6 +54,23 @@ public class EndpointSecurity {
     private String secretKey = null;
     private String region = null;
     private String service = null;
+
+    // Serialized only when set. API#getEndpointConfig() migrates legacy endpoint configs by
+    // constructing a bare EndpointSecurity and serializing it into endpoint_security; without
+    // NON_NULL these AWS-only fields would be written into every migrated basic/digest endpoint,
+    // changing the stored config of APIs that have nothing to do with AWS. The fields above predate
+    // this and are left as-is so existing stored configs keep their current shape.
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String roleArn = null;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String roleRegion = null;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String roleExternalId = null;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String authType = null;
 
     private String customParameters = null;
 
@@ -311,6 +329,38 @@ public class EndpointSecurity {
 
     public void setService(String service) {
         this.service = service;
+    }
+
+    public String getRoleArn() {
+        return roleArn;
+    }
+
+    public void setRoleArn(String roleArn) {
+        this.roleArn = roleArn;
+    }
+
+    public String getRoleRegion() {
+        return roleRegion;
+    }
+
+    public void setRoleRegion(String roleRegion) {
+        this.roleRegion = roleRegion;
+    }
+
+    public String getRoleExternalId() {
+        return roleExternalId;
+    }
+
+    public void setRoleExternalId(String roleExternalId) {
+        this.roleExternalId = roleExternalId;
+    }
+
+    public String getAuthType() {
+        return authType;
+    }
+
+    public void setAuthType(String authType) {
+        this.authType = authType;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

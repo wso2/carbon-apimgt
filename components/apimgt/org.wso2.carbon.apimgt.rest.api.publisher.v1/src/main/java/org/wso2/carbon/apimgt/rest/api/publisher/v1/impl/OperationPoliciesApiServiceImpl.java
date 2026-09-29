@@ -445,8 +445,8 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
         try {
             extractedFolderPath = ImportUtils.getArchivePathOfPolicyExtractedDirectory(fileInputStream);
             createdPolicy = ImportUtils.importPolicy(extractedFolderPath, organization, apiProvider);
-            createdPolicyUri = new URI(RestApiConstants.REST_API_PUBLISHER_VERSION + File.separator
-                    + RestApiConstants.RESOURCE_PATH_OPERATION_POLICIES + File.separator + createdPolicy.getId());
+            createdPolicyUri = new URI(RestApiConstants.REST_API_PUBLISHER_VERSION + "/"
+                    + RestApiConstants.RESOURCE_PATH_OPERATION_POLICIES + "/" + createdPolicy.getId());
             return Response.created(createdPolicyUri).entity(createdPolicy).build();
         } catch (URISyntaxException e) {
             String errorMessage = "An Error has occurred while adding common operation policy. " + e.getMessage();

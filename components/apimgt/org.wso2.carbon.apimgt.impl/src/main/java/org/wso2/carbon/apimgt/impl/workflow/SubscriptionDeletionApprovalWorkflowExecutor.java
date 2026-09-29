@@ -95,12 +95,7 @@ public class SubscriptionDeletionApprovalWorkflowExecutor extends WorkflowExecut
                 apiMgtDAO.updateSubscriptionStatus(Integer.parseInt(subWorkflowDTO.getWorkflowReference()),
                         APIConstants.SubscriptionStatus.UNBLOCKED);
             } catch (APIManagementException e) {
-                if (e.getMessage() == null) {
-                    errorMsg = "Couldn't complete simple application deletion workflow for application: ";
-                } else {
-                    errorMsg = e.getMessage();
-                }
-                throw new WorkflowException(errorMsg, e);
+                throw new WorkflowException("Could not complete subscription deletion workflow", e);
             }
         }
         return new GeneralWorkflowResponse();

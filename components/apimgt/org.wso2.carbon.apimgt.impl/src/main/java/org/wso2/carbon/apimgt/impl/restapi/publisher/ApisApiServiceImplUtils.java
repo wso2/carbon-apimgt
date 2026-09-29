@@ -78,6 +78,7 @@ import org.wso2.carbon.apimgt.spec.parser.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
 import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -119,6 +120,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.Objects;
 
 import static org.wso2.carbon.apimgt.impl.restapi.CommonUtils.constructEndpointConfigForService;
 import static org.wso2.carbon.apimgt.impl.restapi.CommonUtils.validateScopes;
@@ -311,8 +313,16 @@ public class ApisApiServiceImplUtils {
         if (log.isDebugEnabled()) {
             log.debug("Using user given stored credentials");
         }
-        if (secretKey.length() == APIConstants.AWS_ENCRYPTED_SECRET_KEY_LENGTH) {
-            CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+        CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+        boolean isEncryptedSecretKey = false;
+        try {
+            isEncryptedSecretKey = cryptoUtil.base64DecodeAndIsSelfContainedCipherText(secretKey);
+        } catch (CryptoException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("AWS secret key is not a self-contained cipher text; using stored value as-is.", e);
+            }
+        }
+        if (isEncryptedSecretKey) {
             secretKey = new String(cryptoUtil.base64DecodeAndDecrypt(secretKey),
                     StandardCharsets.UTF_8);
         }
@@ -650,19 +660,22 @@ public class ApisApiServiceImplUtils {
                                                                             boolean returnContent)
             throws APIManagementException {
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
-        OASParserOptions parserOptions = ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
-                .getAPIMDependencyConfigurations().getOasParserOptions();
+        OASParserOptions baseParserOptions = ServiceReferenceHolder.getInstance()
+                .getAPIMDependencyConfigurationService().getAPIMDependencyConfigurations().getOasParserOptions();
+        OASParserOptions parserOptions = APIUtil.buildRefResolutionOptions(baseParserOptions,
+                CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+        // Resolve the configured import size limit once so all validation paths honor it.
+        String maxContentSizeStr = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getFirstProperty(
+                        org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_OAS_FILE_SIZE_LIMIT);
+        if (maxContentSizeStr == null || maxContentSizeStr.trim().isEmpty()) {
+            maxContentSizeStr = org.wso2.carbon.apimgt.api.
+                    APIConstants.API_PUBLISHER_IMPORT_OAS_FILE_SIZE_LIMIT_DEFAULT_MB;
+        }
         if (url != null) {
             try {
                 URL urlObj = new URL(url);
                 HttpClient httpClient = APIUtil.getHttpClient(urlObj.getPort(), urlObj.getProtocol());
-                String maxContentSizeStr = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                        .getAPIManagerConfiguration().getFirstProperty(
-                                org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_OAS_FILE_SIZE_LIMIT);
-                if (maxContentSizeStr == null || maxContentSizeStr.trim().isEmpty()) {
-                    maxContentSizeStr = org.wso2.carbon.apimgt.api.
-                            APIConstants.API_PUBLISHER_IMPORT_OAS_FILE_SIZE_LIMIT_DEFAULT_MB;
-                }
                 validationResponse = OASParserUtil.validateAPIDefinitionByURL(url, httpClient, returnContent,
                         parserOptions, maxContentSizeStr);
             } catch (MalformedURLException e) {
@@ -673,7 +686,7 @@ public class ApisApiServiceImplUtils {
                 if (fileName != null) {
                     if (fileName.endsWith(".zip")) {
                         validationResponse = OASParserUtil.extractAndValidateOpenAPIArchive(inputStream, returnContent,
-                                parserOptions);
+                                parserOptions, maxContentSizeStr);
                     } else {
                         String openAPIContent = IOUtils.toString(inputStream, CHARSET);
                         validationResponse = OASParserUtil.validateAPIDefinition(openAPIContent, returnContent,
@@ -918,7 +931,8 @@ public class ApisApiServiceImplUtils {
                         ExceptionCodes.PARAMETER_NOT_PROVIDED);
             }
 
-            schemaByToolName.put(toolName, inputSchema);
+            schemaByToolName.put(toolName,
+                    MCPInitializerAndToolFetcher.buildToolMetadata(toolJson).toString());
             descriptionByToolName.put(toolName, toolDescription);
         }
     }
@@ -1157,7 +1171,8 @@ public class ApisApiServiceImplUtils {
             //Checking the vhost is included in the available vhost list
             if (vhostItem.getHost().equals(vhost)) {
                 isVhostValidated = true;
-            } else if (vhostItem.getWsHost().equals(vhost)) {
+            } else if (Objects.equals(vhostItem.getWsHost(), vhost) 
+                    || Objects.equals(vhostItem.getWssHost(), vhost)) {
                 // This was added to preserve the functionality in case of Deploying a WebSocket API revision.
                 // For WebSocket APIs apiRevisionDeploymentDTO.getVhost() returns the wsHost
                 isVhostValidated = true;

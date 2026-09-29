@@ -34,6 +34,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
@@ -53,6 +54,7 @@ import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -63,6 +65,7 @@ import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIInfoListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyAssociationDTO;
@@ -245,6 +248,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
             // Retrieve the application DTO object from the aggregated exported application
             ApplicationDTO applicationDTO = exportedApplication.getApplicationInfo();
+            validateApplicationGroups(applicationDTO.getGroups());
 
             if (!StringUtils.isBlank(appOwner)) {
                 ownerId = appOwner;
@@ -406,6 +410,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         if (tierName == null) {
             RestApiUtil.handleBadRequest("Throttling tier cannot be null", log);
         }
+        validateApplicationGroups(applicationDto.getGroups());
 
         Object applicationAttributesFromUser = applicationDto.getAttributes();
         Map<String, String> applicationAttributes = new ObjectMapper()
@@ -593,6 +598,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     private Application preProcessAndUpdateApplication(String username, ApplicationDTO applicationDto,
             Application oldApplication, String applicationId, OrganizationInfo sharedOrganizationInfo) throws APIManagementException {
         APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+        validateApplicationGroups(applicationDto.getGroups());
         Object applicationAttributesFromUser = applicationDto.getAttributes();
         Map<String, String> applicationAttributes = new ObjectMapper()
                 .convertValue(applicationAttributesFromUser, Map.class);
@@ -647,6 +653,18 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         return apiConsumer.getApplicationByUUID(applicationId);
     }
 
+    private void validateApplicationGroups(List<String> groups) throws APIManagementException {
+
+        if (groups == null) {
+            return;
+        }
+        for (String group : groups) {
+            if (group != null && !group.equals(StringUtils.strip(group))) {
+                RestApiUtil.handleBadRequest("Application groups must not contain leading or trailing whitespace.", log);
+            }
+        }
+    }
+
     /**
      * Export an existing Application
      *
@@ -659,13 +677,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      */
     @Override
     public Response applicationsExportGet(String appName, String appOwner, Boolean withKeys, String format,
-            MessageContext messageContext) throws APIManagementException {
+            Boolean all, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
         APIConsumer apiConsumer;
-        Application application = null;
-
-        if (StringUtils.isBlank(appName) || StringUtils.isBlank(appOwner)) {
-            RestApiUtil.handleBadRequest("Application name or owner should not be empty or null.", log);
-        }
+        String organization = RestApiCommonUtil.validateTenantDomain(xWSO2Tenant);
+        boolean tenantFlowStarted = false;
 
         // Default export format is YAML
         ExportFormat exportFormat = StringUtils.isNotEmpty(format) ?
@@ -681,14 +696,44 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             if (withKeys != null && withKeys) {
                 APIUtil.enableSkipSecretMasking();
             }
-            if (appOwner != null && apiConsumer.getSubscriber(appOwner) != null) {
-                application = ExportUtils.getApplicationDetails(appName, appOwner, apiConsumer);
+
+            if (!RestApiCommonUtil.getLoggedInUserTenantDomain().equals(organization)) {
+                RestApiCommonUtil.startTenantFlowWithTenantAdmin(organization);
+                tenantFlowStarted = true;
             }
+
+            if (Boolean.TRUE.equals(all)) {
+                APIAdmin apiAdmin = new APIAdminImpl();
+                Application[] applicationsOfOrganization =
+                        apiAdmin.getAllApplicationsOfTenantForMigration(organization);
+                List<Application> fullApplications = new ArrayList<>();
+                for (Application simpleApplication : applicationsOfOrganization) {
+                    Application fullApplication = ExportUtils.getApplicationDetails(simpleApplication.getName(),
+                            simpleApplication.getOwner(), apiConsumer);
+                    if (fullApplication != null) {
+                        fullApplications.add(fullApplication);
+                    }
+                }
+                File file = ExportUtils.exportApplications(fullApplications, apiConsumer, exportFormat, withKeys);
+                return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + file.getName() + "\"").build();
+            }
+
+            if (StringUtils.isBlank(appName) || StringUtils.isBlank(appOwner)) {
+                RestApiUtil.handleBadRequest("Application name or owner should not be empty or null.", log);
+            }
+
+            Application application = null;
+            if (apiConsumer.getSubscriber(appOwner) == null) {
+                throw new APIManagementException("No subscriber found with name " + appOwner,
+                        ExceptionCodes.from(ExceptionCodes.SUBSCRIBER_NOT_FOUND, appOwner));
+            }
+            application = ExportUtils.getApplicationDetails(appName, appOwner, apiConsumer);
             if (application == null) {
                 throw new APIManagementException("No application found with name " + appName + " owned by " + appOwner,
                         ExceptionCodes.APPLICATION_NOT_FOUND);
             } else if (!MultitenantUtils.getTenantDomain(application.getSubscriber().getName())
-                    .equals(MultitenantUtils.getTenantDomain(username))) {
+                    .equals(organization)) {
                 throw new APIManagementException("Cross Tenant Exports are not allowed", ExceptionCodes.TENANT_MISMATCH);
             }
 
@@ -697,6 +742,9 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     "attachment; filename=\"" + file.getName() + "\"").build();
         } finally {
             APIUtil.clearSkipSecretMasking();
+            if (tenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
     }
 

@@ -47,6 +47,7 @@ import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.service.APIGatewayAdmin;
 import org.wso2.carbon.apimgt.gateway.notifiers.DeploymentStatusNotifier;
+import org.wso2.carbon.apimgt.gateway.utils.APILockManager;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheInvalidationServiceImpl;
@@ -71,6 +72,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+
+import static org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants.API_LOADING_ON_DEMAND;
 
 /**
  * This class contains the methods used to retrieve artifacts from a storage and deploy and undeploy the API in gateway.
@@ -276,8 +279,42 @@ public class InMemoryAPIDeployer {
                                 if (redeployChangedAPIs && apiMap != null) {
                                     reDeployAPIs(gatewayAPIDTO, apiMap, assignedGatewayLabels, tenantDomain, apiGatewayAdmin);
                                 } else {
-                                    deployAPIFromDTO(gatewayAPIDTO, apiGatewayAdmin);
-                                    syncAPIPropertiesAcrossComponents(gatewayAPIDTO);
+                                    // Startup / tenant-loading path (redeployChangedAPIs=false).
+                                    // Coordinate with the passthrough on-demand thread via APILockManager:
+                                    // - skip if the API is already deployed or the passthrough thread is deploying it
+                                    // - use tryLockNow (non-blocking) so this thread does not stall startup
+                                    String startupKey = API_LOADING_ON_DEMAND.concat(gatewayAPIDTO.getApiContext());
+                                    if (DataHolder.getInstance().isDeployed(gatewayAPIDTO)
+                                            || APILockManager.getInstance().isLocked(startupKey)) {
+                                        if (log.isDebugEnabled()) {
+                                            log.debug("API " + gatewayAPIDTO.getName()
+                                                    + " is already deployed or on-demand deployment is in progress."
+                                                    + " Skipping tenant-startup deploy.");
+                                        }
+                                        continue;
+                                    }
+                                    if (APILockManager.getInstance().tryLockNow(startupKey)) {
+                                        try {
+                                            deployAPIFromDTO(gatewayAPIDTO, apiGatewayAdmin);
+                                            syncAPIPropertiesAcrossComponents(gatewayAPIDTO);
+                                        } finally {
+                                            APILockManager.getInstance().unlock(startupKey);
+                                        }
+                                    } else {
+                                        boolean alreadyDeployed = DataHolder.getInstance().isDeployed(gatewayAPIDTO);
+                                        if (log.isDebugEnabled()) {
+                                            if (alreadyDeployed) {
+                                                log.debug("API " + gatewayAPIDTO.getName()
+                                                        + " was deployed by another thread before acquiring the "
+                                                        + "startup lock. Skipping tenant-startup deploy.");
+                                            } else {
+                                                log.debug("Could not acquire startup lock for API "
+                                                        + gatewayAPIDTO.getName()
+                                                        + ". Another thread may be deploying it. "
+                                                        + "Skipping tenant-startup deploy for now.");
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         } catch (AxisFault axisFault) {
@@ -344,9 +381,25 @@ public class InMemoryAPIDeployer {
                                                     api.getName(), api.getVersion(),
                                                     api.getApiProvider(), api.getApiType(),
                                                     api.getContext());
-                unDeployAPI(deployAPIInGatewayEvent);
-                deployAPIFromDTO(gatewayAPIDTO, apiGatewayAdmin);
-                syncAPIPropertiesAcrossComponents(gatewayAPIDTO);
+                // Consideration 2: guard the JMS-reconnect redeployment path as well.
+                // If the passthrough (on-demand) thread is currently holding the lock for
+                // this API context it will deploy the latest revision, so we can safely skip.
+                String redeployKey = API_LOADING_ON_DEMAND.concat(gatewayAPIDTO.getApiContext());
+                if (APILockManager.getInstance().tryLockNow(redeployKey)) {
+                    try {
+                        unDeployAPI(deployAPIInGatewayEvent);
+                        deployAPIFromDTO(gatewayAPIDTO, apiGatewayAdmin);
+                        syncAPIPropertiesAcrossComponents(gatewayAPIDTO);
+                    } finally {
+                        APILockManager.getInstance().unlock(redeployKey);
+                    }
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("On-demand deployment is in progress for API "
+                                + gatewayAPIDTO.getName()
+                                + ". Skipping JMS-reconnect redeploy.");
+                    }
+                }
             } else if (DataHolder.getInstance().getGatewayRegistrationResponse()
                     != APIConstants.GatewayNotification.GatewayRegistrationResponse.ACKNOWLEDGED) {
                 // If the gateway is not registered yet or if it is registered during

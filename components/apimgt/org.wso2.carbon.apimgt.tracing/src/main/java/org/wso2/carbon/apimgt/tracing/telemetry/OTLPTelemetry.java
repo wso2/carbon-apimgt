@@ -27,6 +27,7 @@ import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporterBuilder;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
+import io.opentelemetry.sdk.trace.samplers.Sampler;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -87,6 +88,7 @@ public class OTLPTelemetry implements APIMOpenTelemetry {
             sdkTracerProvider = SdkTracerProvider.builder()
                     .addSpanProcessor(BatchSpanProcessor.builder(otlpGrpcSpanExporterBuilder.build()).build())
                     .setResource(TelemetryUtil.getTracerProviderResource(serviceName))
+                    .setSampler(getConfiguredSampler())
                     .build();
 
             openTelemetry = OpenTelemetrySdk.builder()
@@ -143,6 +145,29 @@ public class OTLPTelemetry implements APIMOpenTelemetry {
             }
         }
         return null;
+    }
+
+    /**
+     * Resolves the trace sampler from the configured "OpenTelemetry.RemoteTracer.SamplerMode" value.
+     *
+     * @return the configured {@link Sampler}.
+     */
+    private Sampler getConfiguredSampler() {
+
+        String configuredSampler = configuration.getFirstProperty(TelemetryConstants.OTLP_CONFIG_SAMPLER);
+        if (StringUtils.isEmpty(configuredSampler)) {
+            return Sampler.parentBased(Sampler.alwaysOn());
+        }
+        if (StringUtils.equalsIgnoreCase(configuredSampler, TelemetryConstants.SAMPLER_ALWAYS_ON)) {
+            return Sampler.alwaysOn();
+        } else if (StringUtils.equalsIgnoreCase(configuredSampler, TelemetryConstants.SAMPLER_ALWAYS_OFF)) {
+            return Sampler.alwaysOff();
+        } else if (StringUtils.equalsIgnoreCase(configuredSampler, TelemetryConstants.SAMPLER_PARENT_BASED)) {
+            return Sampler.parentBased(Sampler.alwaysOn());
+        }
+        log.warn("Unknown OpenTelemetry sampler '" + configuredSampler + "' configured. Falling back to the "
+                + "default parent-based (always-on) sampler.");
+        return Sampler.parentBased(Sampler.alwaysOn());
     }
 
 }

@@ -44,7 +44,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationResponse;
 import org.wso2.carbon.apimgt.gateway.handlers.security.Authenticator;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTDataHolder;
+import org.wso2.carbon.apimgt.impl.jwt.RevokedJWTDataHolder;
 import org.wso2.carbon.apimgt.gateway.utils.ApiKeyAuthenticatorUtils;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.utils.OpenAPIUtils;

@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket;
 
 import io.netty.channel.ChannelHandlerContext;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.SynapseConstants;
@@ -109,7 +110,8 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
     @Override
     public boolean isAnonymous() {
         AuthenticationContext authContext = getAuthenticationContext();
-        return isAuthenticated() && APIConstants.END_USER_ANONYMOUS.equalsIgnoreCase(authContext.getUsername());
+        return isAuthenticated() && APIConstants.END_USER_ANONYMOUS.equalsIgnoreCase(authContext.getUsername())
+                && StringUtils.isEmpty(authContext.getApplicationUUID());
     }
 
     @Override

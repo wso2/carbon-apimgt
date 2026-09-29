@@ -938,7 +938,11 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
             //In case of an error it is logged and the process is continued because we're setting a fault message in the payload.
             log.error("Error occurred while consuming and discarding the message", axisFault);
         }
-        Mediator sequence = messageContext.getSequence(APIThrottleConstants.API_THROTTLE_OUT_HANDLER);
+        // Publish the error flow type so any error sequence can branch on it.
+        messageContext.setProperty(APIMgtGatewayConstants.API_ERROR_TYPE,
+                APIMgtGatewayConstants.API_ERROR_TYPE_THROTTLE);
+        Mediator sequence = GatewayUtils.getErrorResponseFormatterSequence(messageContext,
+                APIThrottleConstants.API_THROTTLE_OUT_HANDLER);
 
         // Invoke the custom error handler specified by the user
         if (sequence != null && !sequence.mediate(messageContext)) {

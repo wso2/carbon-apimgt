@@ -46,7 +46,8 @@ DesignAssistantApiService delegate = new DesignAssistantApiServiceImpl();
     @ApiOperation(value = "Create API Payload with API Design Assistant", notes = "Creates an API payload using the stored specification. ", response = DesignAssistantAPIPayloadResponseDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
-            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:api_create_only", description = "Create new APIs")
         })
     }, tags={ "API Design Assistant",  })
     @ApiResponses(value = { 
@@ -64,7 +65,8 @@ DesignAssistantApiService delegate = new DesignAssistantApiServiceImpl();
     @ApiOperation(value = "Generate API Specifications with API Design Assistant", notes = "Generates API specifications based on natural language input.  Key features: - Converts text descriptions into structured API specifications - Provides QoS suggestions and other improvements - Supports session-based API generation ", response = DesignAssistantChatResponseDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
-            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:api_create_only", description = "Create new APIs")
         })
     }, tags={ "API Design Assistant" })
     @ApiResponses(value = { 

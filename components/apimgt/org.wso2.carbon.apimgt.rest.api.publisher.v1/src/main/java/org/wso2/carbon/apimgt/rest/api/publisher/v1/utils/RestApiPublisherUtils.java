@@ -51,6 +51,7 @@ import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.restapi.publisher.ApisApiServiceImplUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -656,6 +657,9 @@ public class RestApiPublisherUtils {
                         validateOpenAPIDefinition(definitionUrl, definition, fileDetail, inlineDefinition,
                                 true, isServiceAPI);
             } catch (APIManagementException e) {
+                if (e.getErrorHandler() != null && e.getErrorHandler().getHttpStatusCode() == 400) {
+                    throw RestApiUtil.buildBadRequestException(e.getErrorHandler().getErrorDescription());
+                }
                 RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
                 return null;
             }
@@ -693,6 +697,9 @@ public class RestApiPublisherUtils {
             } else {
                 String msg = StringUtils.defaultIfBlank(result.getErrorMessage(),
                         "MCP server validation failed for URL: " + definitionUrl);
+                if (log.isDebugEnabled()) {
+                    log.debug("MCP server validation failed for server URL: " + definitionUrl);
+                }
                 throw RestApiUtil.buildBadRequestException(msg);
             }
         }
@@ -745,6 +752,16 @@ public class RestApiPublisherUtils {
             throws APIManagementException {
         //validate inputs
         handleInvalidParams(fileInputStream, fileDetail, url, apiDefinition, isServiceAPI);
+        if (url != null) {
+            try {
+                APIUtil.validateRemoteURL(url, RestApiCommonUtil.getLoggedInUserTenantDomain());
+            } catch (APIManagementException e) {
+                if (e.getErrorHandler() != null && e.getErrorHandler().getHttpStatusCode() == 400) {
+                    throw RestApiUtil.buildBadRequestException(e.getErrorHandler().getErrorDescription());
+                }
+                throw e;
+            }
+        }
         String fileName = null;
 
         OpenAPIDefinitionValidationResponseDTO responseDTO;
