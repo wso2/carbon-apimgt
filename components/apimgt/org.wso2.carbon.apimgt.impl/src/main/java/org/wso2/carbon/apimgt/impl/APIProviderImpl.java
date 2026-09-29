@@ -8346,10 +8346,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * API of the tenant. Scopes which are still referenced are left untouched, so restoring a revision cannot
      * remove scopes another revision depends on.
      * <p>
-     * The Key Managers are updated only for scopes which were actually deleted. If any Key Manager fails, the local
-     * scope is added back and registered again in the Key Managers which had already removed it, so that the local
-     * database and the Key Managers do not drift apart; the scope then simply remains until it is cleaned up. A Key
-     * Manager failure never fails the restore itself, which has already been committed at this point.
+     * The Key Managers are updated only for scopes which were actually deleted. A failure in one Key Manager is logged
+     * and does not stop the removal from the other Key Managers; the scope then has to be removed from that Key
+     * Manager manually. A Key Manager failure never fails the restore itself, which has already been committed at
+     * this point.
      *
      * @param candidateScopeKeys local scope keys which were attached to the API before the restore
      * @param tenantId           tenant id
@@ -8365,29 +8365,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 continue;
             }
             try {
-                Scope scopeToRestore = scopesDAO.getScope(scopeKey, tenantId);
-                if (scopeToRestore == null || !scopesDAO.deleteScopeIfUnused(scopeKey, tenantId)) {
+                if (!scopesDAO.deleteScopeIfUnused(scopeKey, tenantId)) {
                     // Still attached to an API resource of some revision or API. Nothing to clean up.
                     continue;
                 }
-                List<KeyManager> removedFromKeyManagers = new ArrayList<>();
-                try {
-                    deleteScopeFromKeyManagers(scopeKey, scopeTenantDomain, removedFromKeyManagers);
-                } catch (Exception e) {
-                    // Catch broadly: the Key Manager client can throw unchecked exceptions when the Key Manager
-                    // is unreachable, and those must not fail an already committed restore.
-                    scopesDAO.addScopes(Collections.singleton(scopeToRestore), tenantId);
-                    registerScopeInKeyManagers(scopeToRestore, removedFromKeyManagers, scopeTenantDomain);
-                    log.error("Could not remove scope: " + scopeKey + " from the Key Managers of tenant: "
-                            + scopeTenantDomain + ". The local scope has been restored and remains registered.", e);
-                    continue;
-                }
+                deleteScopeFromKeyManagers(scopeKey, scopeTenantDomain);
                 APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SCOPE, scopeKey,
                         APIConstants.AuditLogConstants.DELETED, this.username);
                 ScopeEvent scopeEvent = new ScopeEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                         APIConstants.EventType.SCOPE_DELETE.name(), tenantId, scopeTenantDomain, scopeKey, null,
                         null);
-                APIUtil.sendNotification(scopeEvent, APIConstants.NotifierType.SCOPE.name());
+                APIUtil.sendNotification(scopeEvent, APIConstants.NotifierType.SCOPES.name());
                 if (log.isDebugEnabled()) {
                     log.debug("Removed orphaned local scope: " + scopeKey + " after restoring a revision.");
                 }
@@ -8399,43 +8387,30 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     /**
      * Removes the given scope from every Key Manager of the tenant which has it. A Key Manager which does not have
-     * the scope has nothing to remove and is skipped.
+     * the scope has nothing to remove and is skipped. A failure in one Key Manager is logged and does not stop the
+     * removal from the others.
      *
-     * @param scopeKey               scope key
-     * @param tenantDomain           tenant domain
-     * @param removedFromKeyManagers collects the Key Managers the scope has been removed from, so that the removal
-     *                               can be reverted if a later Key Manager fails
-     * @throws APIManagementException if a Key Manager fails to check or remove the scope
+     * @param scopeKey     scope key
+     * @param tenantDomain tenant domain
      */
-    private void deleteScopeFromKeyManagers(String scopeKey, String tenantDomain,
-                                            List<KeyManager> removedFromKeyManagers) throws APIManagementException {
+    private void deleteScopeFromKeyManagers(String scopeKey, String tenantDomain) {
 
         Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getGlobalAndTenantKeyManagers(tenantDomain);
         for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
             KeyManager keyManager = keyManagerDtoEntry.getValue().getKeyManager();
-            if (keyManager != null && keyManager.isScopeExists(scopeKey)) {
-                keyManager.deleteScope(scopeKey);
-                removedFromKeyManagers.add(keyManager);
+            if (keyManager == null) {
+                continue;
             }
-        }
-    }
-
-    /**
-     * Registers the given scope again in the Key Managers it was removed from. Failures are logged so that the
-     * remaining Key Managers are still attempted.
-     *
-     * @param scope        scope to register
-     * @param keyManagers  Key Managers to register the scope in
-     * @param tenantDomain tenant domain
-     */
-    private void registerScopeInKeyManagers(Scope scope, List<KeyManager> keyManagers, String tenantDomain) {
-
-        for (KeyManager keyManager : keyManagers) {
             try {
-                keyManager.registerScope(scope);
+                if (keyManager.isScopeExists(scopeKey)) {
+                    keyManager.deleteScope(scopeKey);
+                }
             } catch (Exception e) {
-                log.error("Error while registering scope: " + scope.getKey() + " again in a Key Manager of tenant: "
-                        + tenantDomain, e);
+                // Catch broadly: the Key Manager client can throw unchecked exceptions when the Key Manager is
+                // unreachable, and those must not stop the removal from the other Key Managers.
+                log.error("Could not remove unused scope: " + scopeKey + " of tenant: " + tenantDomain
+                        + " from Key Manager: " + keyManagerDtoEntry.getKey() + ". Remove the scope from this Key "
+                        + "Manager manually before creating a scope with the same name.", e);
             }
         }
     }
