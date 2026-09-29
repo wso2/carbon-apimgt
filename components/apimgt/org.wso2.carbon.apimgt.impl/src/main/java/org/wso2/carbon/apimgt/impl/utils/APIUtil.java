@@ -12841,10 +12841,13 @@ public final class APIUtil {
      *   <li>allow-mode hosts go to the allow-list - the intersection when both policies are allow-mode, otherwise the
      *       single allow-mode list;</li>
      *   <li>any denied host is removed from the allow-list so it cannot short-circuit the block-list;</li>
+     *   <li>when one policy is allow-mode and the other is a deny-mode or private-network-only policy, an allow-list
+     *       entry is kept only if that other policy also permits it, since the allow-list short-circuits the
+     *       resolver's private-network check as well; wildcard entries cannot be checked and are dropped;</li>
      *   <li>if either policy is allow-mode, a {@code "*"} entry is added to the block-list so everything not on the
      *       allow-list is denied - a restrictive whitelist, matching {@code applyAccessControlPolicy}.</li>
      * </ul>
-     * Private-network blocking is handled by the resolver itself and needs no list entry here.
+     * Private-network blocking for hosts not on the allow-list is handled by the resolver itself.
      *
      * @param base         base options to copy non-access-control settings from (may be null)
      * @param tenantDomain the tenant domain whose config should be merged in
@@ -12882,14 +12885,20 @@ public final class APIUtil {
                     + "proceeding with platform policy only.", e);
             tenantConfig = null;
         }
+        boolean tenantPolicyConfigured = false;
+        String tMode = null;
+        List<String> tHosts = new ArrayList<>();
+        boolean tBlockPrivate = false;
         if (tenantConfig != null) {
             Object nsac = tenantConfig.get(APIConstants.NetworkSecurityAccessControl.TENANT_CONFIG_KEY);
             if (nsac instanceof JSONObject) {
                 policyConfigured = true;
+                tenantPolicyConfigured = true;
                 JSONObject policy = (JSONObject) nsac;
-                String tMode = (String) policy.get(APIConstants.NetworkSecurityAccessControl.TENANT_MODE);
+                tMode = (String) policy.get(APIConstants.NetworkSecurityAccessControl.TENANT_MODE);
+                tBlockPrivate = Boolean.TRUE.equals(
+                        policy.get(APIConstants.NetworkSecurityAccessControl.TENANT_BLOCK_PRIVATE_NETWORK_ACCESS));
                 Object tHostsObj = policy.get(APIConstants.NetworkSecurityAccessControl.TENANT_HOSTS);
-                List<String> tHosts = new ArrayList<>();
                 if (tHostsObj instanceof JSONArray) {
                     for (Object h : (JSONArray) tHostsObj) {
                         tHosts.add(h.toString());
@@ -12909,6 +12918,16 @@ public final class APIUtil {
         // A denied host must never remain on the allow-list: the resolver's allow-list short-circuits to ALLOW and
         // would otherwise bypass the block-list for a host that another policy denies.
         allowList.removeAll(denyHosts);
+        // The allow-list also short-circuits the resolver's private-network check, so an entry allowed by one policy
+        // must still be permitted by the other policy when that one is a deny-mode or private-network-only policy.
+        if (networkSecurityEnabled
+                && !APIConstants.NetworkSecurityAccessControl.MODE_ALLOW.equalsIgnoreCase(networkSecurityMode)) {
+            retainHostsPermittedByPolicy(allowList, networkSecurityMode, networkSecurityHosts,
+                    networkSecurityBlockPrivateAccess);
+        }
+        if (tenantPolicyConfigured && !APIConstants.NetworkSecurityAccessControl.MODE_ALLOW.equalsIgnoreCase(tMode)) {
+            retainHostsPermittedByPolicy(allowList, tMode, tHosts, tBlockPrivate);
+        }
         List<String> blockList = new ArrayList<>(denyHosts);
         // Allow-mode is a restrictive whitelist (deny everything not explicitly allowed). The resolver's allow-list
         // only exempts hosts, so a wildcard deny is what enforces "block the rest".
@@ -12943,6 +12962,53 @@ public final class APIUtil {
             combined.retainAll(allowModeHostSets.get(i));
         }
         return combined;
+    }
+
+    /**
+     * Keeps only the allow-list entries that a deny-mode or private-network-only policy also permits, evaluated as
+     * {@code applyAccessControlPolicy} would evaluate them for a top-level URL. A policy that restricts nothing (no
+     * deny-mode hosts and private-network blocking off) leaves the list unchanged.
+     *
+     * @param allowList                 the remote-$ref allow-list to filter in place
+     * @param mode                      the policy mode ({@code deny}, or blank for the private-network-only policy)
+     * @param hosts                     the policy's host patterns
+     * @param blockPrivateNetworkAccess whether the policy blocks private network addresses
+     */
+    private static void retainHostsPermittedByPolicy(List<String> allowList, String mode, List<String> hosts,
+                                                     boolean blockPrivateNetworkAccess) {
+        boolean denyModeWithHosts = APIConstants.NetworkSecurityAccessControl.MODE_DENY.equalsIgnoreCase(mode)
+                && hosts != null && !hosts.isEmpty();
+        if (allowList.isEmpty() || (!denyModeWithHosts && !blockPrivateNetworkAccess)) {
+            return;
+        }
+        allowList.removeIf(host -> !isHostPermittedByPolicy(host, mode, hosts, blockPrivateNetworkAccess));
+    }
+
+    /**
+     * Checks whether a single allow-list entry is permitted by a deny-mode or private-network-only policy. A wildcard
+     * pattern names no single host and cannot be checked, so it is not permitted.
+     *
+     * @param host                      the allow-list entry
+     * @param mode                      the policy mode
+     * @param hosts                     the policy's host patterns
+     * @param blockPrivateNetworkAccess whether the policy blocks private network addresses
+     * @return {@code true} if the policy permits the entry
+     */
+    private static boolean isHostPermittedByPolicy(String host, String mode, List<String> hosts,
+                                                   boolean blockPrivateNetworkAccess) {
+        if (StringUtils.isBlank(host) || host.contains(APIConstants.NetworkSecurityAccessControl.MATCH_ALL_HOSTS)) {
+            log.warn("Allow-list entry '" + host + "' is blank or a wildcard pattern and is not applied to remote "
+                    + "$ref resolution while a deny-mode or private-network-only policy is also configured.");
+            return false;
+        }
+        try {
+            applyAccessControlPolicy(host, mode, hosts, blockPrivateNetworkAccess);
+            return true;
+        } catch (APIManagementException e) {
+            log.warn("Allow-list entry '" + host + "' is not permitted by the other network access-control policy "
+                    + "and is not applied to remote $ref resolution.");
+            return false;
+        }
     }
 
     /**
