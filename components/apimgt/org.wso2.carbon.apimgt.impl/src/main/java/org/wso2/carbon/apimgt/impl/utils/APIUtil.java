@@ -467,6 +467,10 @@ public final class APIUtil {
     private static List<String> networkSecurityHosts;
     private static boolean networkSecurityBlockPrivateAccess;
 
+    private static final Pattern URL_TEMPLATE_PATTERN = Pattern.compile("\\{[^{}]*}");
+    // Prefix of the per-call placeholder that stands in for a template segment while a URL is parsed.
+    private static final String URL_TEMPLATE_MARKER = "wso2urltemplatemarker";
+
     //constants for getting masked token
     private static final int MAX_LEN = 36;
     private static final int MAX_VISIBLE_LEN = 8;
@@ -12551,7 +12555,11 @@ public final class APIUtil {
 
     /**
      * Validates an outbound URL against platform and tenant network security access control policies.
-     * Blank URLs are silently skipped. Malformed URLs throw with {@code ExceptionCodes.MALFORMED_URL}.
+     * <p>
+     * Blank URLs, JMS and Consul URLs, and URLs whose host is parameterized are silently skipped. A URL that is
+     * parameterized anywhere else (scheme, user info, port, path, query or fragment) still has its concrete host
+     * validated, so a template cannot be used to opt a request out of the policy. When a policy is in force, a URL
+     * whose host cannot be determined is rejected with {@code ExceptionCodes.MALFORMED_URL} rather than skipped.
      *
      * @param url          URL to validate; null or blank values are silently skipped
      * @param tenantDomain tenant domain used to load tenant-level config
@@ -12570,19 +12578,6 @@ public final class APIUtil {
             return;
         }
 
-        // A parameterized (templated) host cannot be resolved, so skip it; a concrete host is still validated
-        // even when only the path/query is parameterized.
-        String host = null;
-        if (url.contains("{") || url.contains("}")) {
-            host = extractConcreteHost(url);
-            if (host == null) {
-                if (log.isDebugEnabled()) {
-                    log.debug("URL validation skipped - parameterized host: " + url);
-                }
-                return;
-            }
-        }
-
         JSONObject tenantConfig = getTenantConfig(tenantDomain);
         JSONObject tenantAccessControl = null;
         if (tenantConfig != null) {
@@ -12595,17 +12590,14 @@ public final class APIUtil {
             return;
         }
 
+        // A parameterized host cannot be resolved, so it is skipped. A concrete host is still validated even
+        // when the URL is parameterized elsewhere.
+        String host = extractConcreteHost(url);
         if (host == null) {
-            try {
-                host = new URI(url).getHost();
-                if (StringUtils.isBlank(host)) {
-                    throw new APIManagementException("Could not extract a valid host from the provided URL: " + url,
-                            ExceptionCodes.MALFORMED_URL);
-                }
-            } catch (URISyntaxException e) {
-                throw new APIManagementException("The provided URL is malformed: " + url,
-                        ExceptionCodes.MALFORMED_URL);
+            if (log.isDebugEnabled()) {
+                log.debug("URL validation skipped - parameterized host: " + url);
             }
+            return;
         }
 
         if (networkSecurityEnabled) {
@@ -12633,36 +12625,112 @@ public final class APIUtil {
     }
 
     /**
-     * Extracts the concrete host from a parameterized URL, ignoring a parameterized path or query. Returns
-     * {@code null} when the host (authority) is itself parameterized and therefore not resolvable.
+     * Extracts the host that an outbound request to {@code url} would actually contact.
+     * <p>
+     * Template segments ({@code {...}}) are substituted with a per-call marker before parsing, so that a parameterized
+     * scheme, user info, port, path, query or fragment does not prevent the concrete host from being found. Only a
+     * host that is itself parameterized is treated as unresolvable, because there is no host to apply a policy to.
+     * <p>
+     * A URL whose host cannot be determined at all is rejected rather than skipped: skipping would let a malformed
+     * or unparseable URL bypass the policy entirely.
      *
      * @param url the URL, which may contain '{'/'}' template markers
-     * @return the concrete host, or {@code null} if it cannot be determined
+     * @return the concrete host, or {@code null} if the host itself is parameterized
+     * @throws APIManagementException with {@code ExceptionCodes.MALFORMED_URL} if no host can be determined
      */
-    private static String extractConcreteHost(String url) {
-        int schemeSeparator = url.indexOf("://");
-        if (schemeSeparator < 0) {
-            return null;
-        }
-        int authorityEnd = url.length();
-        for (int i = schemeSeparator + 3; i < url.length(); i++) {
-            char c = url.charAt(i);
-            if (c == '/' || c == '?' || c == '#') {
-                authorityEnd = i;
-                break;
+    private static String extractConcreteHost(String url) throws APIManagementException {
+        // Standing in for template segments keeps the URL parseable, so the authority is split correctly
+        // no matter where a template sits. The marker is unique per call, so a host that already contains
+        // the marker text cannot pass itself off as a substituted template.
+        String marker = URL_TEMPLATE_MARKER + UUID.randomUUID().toString().replace("-", "");
+        String normalizedUrl = URL_TEMPLATE_PATTERN.matcher(url)
+                .replaceAll(Matcher.quoteReplacement(marker));
+        String host = null;
+        try {
+            URI uri = new URI(normalizedUrl);
+            host = uri.getHost();
+            if (StringUtils.isBlank(host)) {
+                String authority = uri.getAuthority();
+                // Only an authority made unreadable by a substituted template, such as one carrying a
+                // templated port, is split by hand. Any other unreadable authority stays unresolved.
+                if (authority != null && authority.contains(marker)) {
+                    host = extractHostFromAuthority(authority);
+                } else if (authority == null) {
+                    // A URL carrying no authority at all still names a parameterized host when a template
+                    // stands where the host would begin.
+                    String schemeSpecificPart = uri.getSchemeSpecificPart();
+                    if (schemeSpecificPart != null && schemeSpecificPart.startsWith(marker)) {
+                        host = marker;
+                    }
+                }
+            }
+        } catch (URISyntaxException e) {
+            // A substituted template inside the authority can leave the URL unparseable, so the authority
+            // is split by hand only when a template is what made it unreadable.
+            String authority = extractAuthority(normalizedUrl);
+            if (authority != null && authority.contains(marker)) {
+                host = extractHostFromAuthority(authority);
+            }
+            if (StringUtils.isBlank(host)) {
+                throw new APIManagementException("The provided URL is malformed: " + url,
+                        ExceptionCodes.MALFORMED_URL);
             }
         }
-        String authority = url.substring(schemeSeparator + 3, authorityEnd);
-        if (authority.isEmpty() || authority.contains("{") || authority.contains("}")) {
+        if (StringUtils.isBlank(host)) {
+            throw new APIManagementException("Could not extract a valid host from the provided URL: " + url,
+                    ExceptionCodes.MALFORMED_URL);
+        }
+        // The marker survives only when the host itself was parameterized.
+        return host.contains(marker) ? null : host;
+    }
+
+    /**
+     * Reads the authority component straight out of a URL string. Used only when the URL cannot be parsed
+     * at all, so the authority is still available for inspection.
+     *
+     * @param url the URL to read, may be null
+     * @return the authority component, or {@code null} if the URL carries none
+     */
+    private static String extractAuthority(String url) {
+        if (url == null) {
             return null;
         }
-        try {
-            // Parse only scheme://authority so a parameterized path/query does not break host resolution.
-            String host = new URI(url.substring(0, authorityEnd)).getHost();
-            return StringUtils.isBlank(host) ? null : host;
-        } catch (URISyntaxException e) {
+        int authorityStart = url.indexOf("://");
+        if (authorityStart < 0) {
             return null;
         }
+        authorityStart += 3;
+        for (int i = authorityStart; i < url.length(); i++) {
+            char delimiter = url.charAt(i);
+            if (delimiter == '/' || delimiter == '?' || delimiter == '#') {
+                return url.substring(authorityStart, i);
+            }
+        }
+        return url.substring(authorityStart);
+    }
+
+    /**
+     * Derives the host from a raw URL authority by removing any user info and port. Used only when
+     * {@link URI#getHost()} cannot parse the authority as server-based.
+     *
+     * @param authority the raw authority component, may be null
+     * @return the host portion, or {@code null} if none can be derived
+     */
+    private static String extractHostFromAuthority(String authority) {
+        if (StringUtils.isBlank(authority)) {
+            return null;
+        }
+        // User info is delimited by the last '@', so credentials containing '@' do not shift the host.
+        int userInfoEnd = authority.lastIndexOf('@');
+        String hostAndPort = userInfoEnd >= 0 ? authority.substring(userInfoEnd + 1) : authority;
+        if (hostAndPort.startsWith("[")) {
+            // IPv6 literal: the host ends at the closing bracket, before any port.
+            int bracketEnd = hostAndPort.indexOf(']');
+            return bracketEnd > 0 ? hostAndPort.substring(0, bracketEnd + 1) : null;
+        }
+        int portSeparator = hostAndPort.indexOf(':');
+        String host = portSeparator >= 0 ? hostAndPort.substring(0, portSeparator) : hostAndPort;
+        return StringUtils.isBlank(host) ? null : host;
     }
 
     /**

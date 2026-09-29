@@ -20,6 +20,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.xml.namespace.QName;
@@ -709,5 +710,46 @@ public class RegistryPersistenceUtilTestCase {
                 Mockito.eq(ActionConstants.GET));
         Mockito.verify(authManager).denyRole(Mockito.eq(APIConstants.ANONYMOUS_ROLE), anyString(),
                 Mockito.eq(ActionConstants.GET));
+    }
+
+    @Test
+    public void testGetAdditionalPropertiesFiltersAndStripsPrefix() {
+        Resource apiResource = new ResourceImpl();
+        apiResource.setProperty(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX + "dept", "finance");
+        apiResource.setProperty(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX + "owner__display", "jane");
+        apiResource.setProperty(APIConstants.ACCESS_CONTROL, "all");
+        apiResource.setProperty(APIConstants.PUBLISHER_ROLES, "internal/publisher");
+
+        Map<String, String> additionalProperties = RegistryPersistenceUtil.getAdditionalProperties(apiResource);
+
+        Assert.assertEquals("Only api_meta.* properties should be extracted", 2, additionalProperties.size());
+        Assert.assertEquals("finance", additionalProperties.get("dept"));
+        Assert.assertEquals("The __display suffix must be preserved", "jane",
+                additionalProperties.get("owner__display"));
+        Assert.assertFalse("The api_meta. prefix must be stripped",
+                additionalProperties.containsKey(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX + "dept"));
+        Assert.assertFalse("Non custom properties must not be extracted",
+                additionalProperties.containsKey(APIConstants.ACCESS_CONTROL));
+        Assert.assertFalse("Non custom properties must not be extracted",
+                additionalProperties.containsKey(APIConstants.PUBLISHER_ROLES));
+    }
+
+    @Test
+    public void testGetAdditionalPropertiesReturnsEmptyMapWhenNoCustomPropertiesPresent() {
+        Resource apiResource = new ResourceImpl();
+        apiResource.setProperty(APIConstants.ACCESS_CONTROL, "all");
+
+        Map<String, String> additionalProperties = RegistryPersistenceUtil.getAdditionalProperties(apiResource);
+
+        Assert.assertNotNull("An empty map is expected rather than null", additionalProperties);
+        Assert.assertTrue(additionalProperties.isEmpty());
+    }
+
+    @Test
+    public void testGetAdditionalPropertiesReturnsEmptyMapForResourceWithoutProperties() {
+        Map<String, String> additionalProperties = RegistryPersistenceUtil.getAdditionalProperties(new ResourceImpl());
+
+        Assert.assertNotNull("An empty map is expected rather than null", additionalProperties);
+        Assert.assertTrue(additionalProperties.isEmpty());
     }
 }

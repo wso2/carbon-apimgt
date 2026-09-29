@@ -144,7 +144,7 @@ public class AWSLambdaMediator extends AbstractMediator implements ManagedLifecy
             if (StringUtils.isEmpty(roleArn) && StringUtils.isEmpty(roleSessionName)
                     && StringUtils.isEmpty(roleRegion)) {
                 awsLambdaClient = LambdaClient.builder()
-                        .credentialsProvider(DefaultCredentialsProvider.create())
+                        .credentialsProvider(sharedCredentialsProvider())
                         .httpClientBuilder(getHttpClientBuilder())
                         .overrideConfiguration(clientConfig)
                         .build();
@@ -153,7 +153,7 @@ public class AWSLambdaMediator extends AbstractMediator implements ManagedLifecy
                     && StringUtils.isNotEmpty(roleRegion)) {
                 Region region = new DefaultAwsRegionProviderChain().getRegion();
                 assumeRoleCredentialsProvider = getStsAssumeRoleCredentialsProvider(
-                        DefaultCredentialsProvider.create(), region, roleArn, roleSessionName);
+                        sharedCredentialsProvider(), region, roleArn, roleSessionName);
                 awsLambdaClient = LambdaClient.builder()
                         .credentialsProvider(assumeRoleCredentialsProvider)
                         .httpClientBuilder(getHttpClientBuilder())
@@ -197,6 +197,26 @@ public class AWSLambdaMediator extends AbstractMediator implements ManagedLifecy
         } else {
             log.error("Missing AWS Credentials");
         }
+    }
+
+    /**
+     * Wraps the shared default credentials provider in a delegate that the AWS SDK cannot close.
+     * <p>
+     * {@link DefaultCredentialsProvider#create()} does not create a new object; it returns a
+     * JVM-wide singleton that owns the IRSA/web-identity STS client and its HTTP connection pool.
+     * The SDK closes a client's credentials provider along with the client, so passing the
+     * singleton itself to {@link #awsLambdaClient} or {@link #stsClient} would mean that
+     * {@link #destroy()} - invoked by Synapse whenever a Lambda backed API is redeployed - shuts
+     * that shared pool down for the whole server, breaking AWS credential resolution everywhere
+     * until a restart. The returned lambda exposes only {@code resolveCredentials()} and has no
+     * {@code close()}, so the SDK has nothing to close.
+     *
+     * @return a non-closeable view of the shared default credentials provider
+     */
+    private static AwsCredentialsProvider sharedCredentialsProvider() {
+
+        AwsCredentialsProvider shared = DefaultCredentialsProvider.create();
+        return shared::resolveCredentials;
     }
 
     /**

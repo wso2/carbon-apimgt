@@ -2779,10 +2779,7 @@ public class PublisherCommonUtils {
         extractURLsFromEndpointConfig(endpointConfigObj, APIConstants.ENDPOINT_SANDBOX_FAILOVERS, endpoints);
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         for (String endpoint : endpoints) {
-            if (!endpoint.startsWith("jms:") && !endpoint.startsWith("consul(")
-                    && !endpoint.contains("{") && !endpoint.contains("}")) {
-                APIUtil.validateRemoteURL(endpoint, tenantDomain);
-            }
+            APIUtil.validateRemoteURL(endpoint, tenantDomain);
         }
         return APIUtil.validateEndpointURLs(endpoints);
     }
@@ -4643,10 +4640,7 @@ public class PublisherCommonUtils {
             throw new APIManagementException("Invalid/Malformed endpoint URL detected",
                     ExceptionCodes.API_ENDPOINT_URL_INVALID);
         }
-        if (!endpointURL.startsWith("jms:") && !endpointURL.startsWith("consul(")
-                && !endpointURL.contains("{") && !endpointURL.contains("}")) {
-            APIUtil.validateRemoteURL(endpointURL, RestApiCommonUtil.getLoggedInUserTenantDomain());
-        }
+        APIUtil.validateRemoteURL(endpointURL, RestApiCommonUtil.getLoggedInUserTenantDomain());
 
         APIEndpointInfo apiEndpointUpdated = apiProvider.updateAPIEndpoint(apiId, apiEndpoint, organization);
         if (apiEndpointUpdated == null) {
@@ -4696,10 +4690,7 @@ public class PublisherCommonUtils {
             throw new APIManagementException("Invalid/Malformed endpoint URL detected",
                     ExceptionCodes.API_ENDPOINT_URL_INVALID);
         }
-        if (!endpointURL.startsWith("jms:") && !endpointURL.startsWith("consul(")
-                && !endpointURL.contains("{") && !endpointURL.contains("}")) {
-            APIUtil.validateRemoteURL(endpointURL, RestApiCommonUtil.getLoggedInUserTenantDomain());
-        }
+        APIUtil.validateRemoteURL(endpointURL, RestApiCommonUtil.getLoggedInUserTenantDomain());
 
         // validate endpoint name
         if (StringUtils.isBlank(apiEndpoint.getName())) {
