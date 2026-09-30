@@ -79,20 +79,23 @@ public class ScopesDAOTest {
     @Test
     public void testUnusedLocalScopeIsDeleted() throws Exception {
         String scopeName = newScope(TENANT_ID);
+        int scopeId = getScopeId(scopeName, TENANT_ID);
+        Assert.assertEquals(1, countBindings(scopeId));
 
         Assert.assertTrue(scopesDAO.deleteScopeIfUnused(scopeName, TENANT_ID));
         Assert.assertFalse(scopesDAO.isScopeExist(scopeName, TENANT_ID));
-        Assert.assertEquals("Role bindings must be removed with the scope", 0, countBindings(scopeName));
+        Assert.assertEquals("Role bindings must be removed with the scope", 0, countBindings(scopeId));
     }
 
     @Test
     public void testScopeUsedByWorkingCopyIsKept() throws Exception {
         String scopeName = newScope(TENANT_ID);
+        int scopeId = getScopeId(scopeName, TENANT_ID);
         attach(scopeName, API_ID, null, TENANT_ID);
 
         Assert.assertFalse(scopesDAO.deleteScopeIfUnused(scopeName, TENANT_ID));
         Assert.assertTrue(scopesDAO.isScopeExist(scopeName, TENANT_ID));
-        Assert.assertEquals(1, countBindings(scopeName));
+        Assert.assertEquals(1, countBindings(scopeId));
     }
 
     @Test
@@ -221,13 +224,25 @@ public class ScopesDAOTest {
         }
     }
 
-    private int countBindings(String scopeName) throws SQLException {
+    private int getScopeId(String scopeName, int tenantId) throws SQLException {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(
-                     "SELECT COUNT(*) FROM AM_SCOPE_BINDING B JOIN AM_SCOPE S ON B.SCOPE_ID = S.SCOPE_ID "
-                             + "WHERE S.NAME = ? AND S.TENANT_ID = ?")) {
+                     "SELECT SCOPE_ID FROM AM_SCOPE WHERE NAME = ? AND TENANT_ID = ?")) {
             statement.setString(1, scopeName);
-            statement.setInt(2, TENANT_ID);
+            statement.setInt(2, tenantId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                Assert.assertTrue(resultSet.next());
+                return resultSet.getInt(1);
+            }
+        }
+    }
+
+    // Counts by SCOPE_ID without joining AM_SCOPE, so binding rows left behind by a deleted scope are detected
+    private int countBindings(int scopeId) throws SQLException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(
+                     "SELECT COUNT(*) FROM AM_SCOPE_BINDING WHERE SCOPE_ID = ?")) {
+            statement.setInt(1, scopeId);
             try (ResultSet resultSet = statement.executeQuery()) {
                 resultSet.next();
                 return resultSet.getInt(1);
