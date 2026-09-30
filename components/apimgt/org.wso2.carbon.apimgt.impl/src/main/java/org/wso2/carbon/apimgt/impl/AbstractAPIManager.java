@@ -1641,7 +1641,13 @@ public abstract class AbstractAPIManager implements APIManager {
                 Scope resourceScope = (Scope) it.next();
                 String scopeKey = resourceScope.getKey();
                 if (!uniqueAPIProductScopeKeyMappings.containsKey(scopeKey)) {
-                    resourceScope = APIUtil.getScopeByName(scopeKey, organization);
+                    Scope scope = APIUtil.getScopeByName(scopeKey, organization);
+                    if (scope != null) {
+                        resourceScope = scope;
+                    } else {
+                        log.warn("Scope " + scopeKey + " attached to a resource of API Product " + uuid
+                                + " does not exist");
+                    }
                     uniqueAPIProductScopeKeyMappings.put(scopeKey, resourceScope);
                 } else {
                     resourceScope = uniqueAPIProductScopeKeyMappings.get(scopeKey);
