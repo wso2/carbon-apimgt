@@ -4521,6 +4521,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             String vhost = apiRevisionDeploymentDTO.getVhost();
             APIRevisionDeployment apiRevisionDeployment = ApisApiServiceImplUtils.mapAPIRevisionDeploymentWithValidation(revisionId,
                     environments, environment, displayOnDevportal, vhost, true);
+
+            APIDTO apiRevisionDto = getAPIByID(revisionId, apiProvider, organization);
+            validateEndpointsForGatewayEnvironmentType(environments.get(environment), apiRevisionDto);
             apiRevisionDeployments.add(apiRevisionDeployment);
         }
         Map<String, String> complianceResult = PublisherCommonUtils.checkGovernanceComplianceSync(apiId,
@@ -5397,6 +5400,86 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         // if apiProvider.getEnvironment(organization, envId) return null, it will throw an exception
         apiProvider.getEnvironment(organization, envId);
+    }
+
+    /**
+     * Rejects a revision deployment when the target gateway environment's type requires an endpoint the API does
+     * not define. Mirrors the guard in TemplateBuilderUtil#createAPIGatewayDTOtoPublishAPI, which would otherwise
+     * skip the API during synapse artifact generation and surface as "Storage returned null" on the gateway.
+     *
+     * @param environment target gateway environment
+     * @param apiDto      API being deployed
+     * @throws APIManagementException if the API does not define the endpoint required by the environment type
+     */
+    private void validateEndpointsForGatewayEnvironmentType(Environment environment, APIDTO apiDto)
+            throws APIManagementException {
+
+        if (environment == null || apiDto == null) {
+            return;
+        }
+        String environmentType = environment.getType();
+        boolean requiresProductionEndpoint =
+                APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environmentType);
+        boolean requiresSandboxEndpoint =
+                APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environmentType);
+        // 'hybrid' environments impose no endpoint requirement, matching the generation-time guard
+        if (!requiresProductionEndpoint && !requiresSandboxEndpoint) {
+            return;
+        }
+        if (!(apiDto.getEndpointConfig() instanceof Map)) {
+            return;
+        }
+        Map endpointConfigMap = (Map) apiDto.getEndpointConfig();
+        if (APIConstants.ENDPOINT_TYPE_AWSLAMBDA
+                .equals(endpointConfigMap.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+            return;
+        }
+        // APIUtil.isProductionEndpointsExists / isSandboxEndpointsExists dereference config members without
+        // null checks and catch only ParseException / ClassCastException, so several endpoint configurations
+        // make them throw. The try/catch around the calls below is what makes them safe; this cheap
+        // pre-check only skips the most common such shape without logging a stack trace for it.
+        if (!endpointConfigMap.containsKey(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)) {
+            return;
+        }
+        String endpointConfig;
+        try {
+            endpointConfig = new ObjectMapper().writeValueAsString(endpointConfigMap);
+        } catch (JsonProcessingException e) {
+            // Cannot evaluate the configuration; preserve the pre-existing behaviour rather than
+            // rejecting a deployment because of a serialization problem.
+            log.warn("Could not evaluate the endpoint configuration of API " + apiDto.getId()
+                    + " while validating deployment to gateway environment " + environment.getName(), e);
+            return;
+        }
+        boolean productionEndpointsExist;
+        boolean sandboxEndpointsExist;
+        try {
+            productionEndpointsExist = APIUtil.isProductionEndpointsExists(endpointConfig);
+            sandboxEndpointsExist = APIUtil.isSandboxEndpointsExists(endpointConfig);
+        } catch (RuntimeException e) {
+            // The configuration cannot be evaluated - for example a 'graphql' endpoint_type with no 'http'
+            // member, which makes the predicates dereference null. Preserve the pre-existing behaviour
+            // rather than rejecting a deployment on evidence we do not have.
+            log.warn("Could not evaluate the endpoint configuration of API " + apiDto.getId()
+                    + " while validating deployment to gateway environment " + environment.getName(), e);
+            return;
+        }
+        if (requiresProductionEndpoint && !productionEndpointsExist) {
+            log.warn("Rejecting deployment of API " + apiDto.getId() + " to gateway environment "
+                    + environment.getName() + " of type '" + environmentType
+                    + "': the API does not define a production endpoint.");
+            RestApiUtil.handleBadRequest(ExceptionCodes.from(
+                    ExceptionCodes.MISSING_ENDPOINT_FOR_GATEWAY_ENV_TYPE, environment.getName(),
+                    APIConstants.GATEWAY_ENV_TYPE_PRODUCTION), log);
+        }
+        if (requiresSandboxEndpoint && !sandboxEndpointsExist) {
+            log.warn("Rejecting deployment of API " + apiDto.getId() + " to gateway environment "
+                    + environment.getName() + " of type '" + environmentType
+                    + "': the API does not define a sandbox endpoint.");
+            RestApiUtil.handleBadRequest(ExceptionCodes.from(
+                    ExceptionCodes.MISSING_ENDPOINT_FOR_GATEWAY_ENV_TYPE, environment.getName(),
+                    APIConstants.GATEWAY_ENV_TYPE_SANDBOX), log);
+        }
     }
 
 }

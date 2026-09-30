@@ -1067,10 +1067,11 @@ public class TemplateBuilderUtil {
                         && !hasEndpoint(api, APIConstants.APIEndpoint.PRODUCTION, productionEndpoints)) || (
                         APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environment.getType())
                                 && !hasEndpoint(api, APIConstants.APIEndpoint.SANDBOX, sandboxEndpoints)))) {
-            if (log.isDebugEnabled()) {
-                log.debug("Not adding API to environment " + environment.getName() + " since its endpoint URL "
-                        + "cannot be found");
-            }
+            log.warn("Not adding API " + api.getUUID() + " (" + api.getId().getName() + ":"
+                    + api.getId().getVersion() + ") to gateway environment " + environment.getName()
+                    + " of type '" + environment.getType() + "' since a matching endpoint URL cannot be found. "
+                    + "An API deployed to a '" + environment.getType() + "' gateway environment must define a '"
+                    + environment.getType() + "' endpoint.");
             return null;
         }
         GatewayUtils.setCustomSequencesToBeRemoved(api, gatewayAPIDTO);

@@ -364,7 +364,11 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                         }
                     } else {
                         result.success = false;
-                        result.errorMessage = "Generated GatewayAPIDTO was null";
+                        result.errorMessage = "No gateway artifact was generated for API "
+                                + runTimeArtifact.getApiId() + " (" + runTimeArtifact.getName() + ":"
+                                + runTimeArtifact.getVersion() + ") targeting gateway environment "
+                                + label + "; this API will be absent from the artifact response. "
+                                + "See preceding warnings for the reason.";
                     }
                 } finally {
                     FileUtils.deleteQuietly(baseDirectory);
