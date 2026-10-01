@@ -124,6 +124,14 @@ public class TelemetryUtil {
         }
     }
 
+    public static void setTag(TelemetrySpan span, String key, long value) {
+
+        Object sp = span.getSpan();
+        if (sp instanceof Span) {
+            ((Span) sp).setAttribute(key, value);
+        }
+    }
+
     /**
      * Update operation to the span.
      *

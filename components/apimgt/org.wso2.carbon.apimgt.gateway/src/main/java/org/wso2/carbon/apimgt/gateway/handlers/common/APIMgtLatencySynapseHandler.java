@@ -103,7 +103,7 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
                         (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
                 TelemetrySpan backendLatencySpan = TelemetryUtil.startSpan(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN,
                         parentSpan, telemetryTracer, SpanKind.CLIENT);
-                GatewayUtils.setCommonHTTPAttributes(backendLatencySpan, messageContext);
+                GatewayUtils.setBackendHTTPAttributes(backendLatencySpan, messageContext);
                 messageContext.setProperty(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN, backendLatencySpan);
                 TelemetryUtil.inject(backendLatencySpan, tracerSpecificCarrier);
             }
@@ -124,7 +124,7 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
             TelemetrySpan backendLatencySpan =
                     (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN);
             if (backendLatencySpan != null) {
-                GatewayUtils.setCommonHTTPAttributes(backendLatencySpan, messageContext);
+                GatewayUtils.setBackendHTTPAttributes(backendLatencySpan, messageContext);
                 GatewayUtils.setEndpointRelatedInformation(backendLatencySpan, messageContext);
                 TelemetryUtil.finishSpan(backendLatencySpan);
             }
