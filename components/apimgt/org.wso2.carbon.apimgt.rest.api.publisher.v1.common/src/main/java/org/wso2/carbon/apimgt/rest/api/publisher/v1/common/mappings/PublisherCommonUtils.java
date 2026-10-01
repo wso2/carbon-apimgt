@@ -4099,6 +4099,11 @@ public class PublisherCommonUtils {
             apiProductDTO.setApiKeyHeader(APIConstants.API_KEY_HEADER_DEFAULT);
         }
 
+        //set the default version of the API Product
+        if (StringUtils.isBlank(apiProductDTO.getVersion())) {
+            apiProductDTO.setVersion(APIConstants.API_PRODUCT_VERSION_1_0_0);
+        }
+
         //isDefaultVersion is true for a new API Product.
         apiProductDTO.setIsDefaultVersion(true);
         checkDuplicateContext(apiProvider, apiProductDTO, username, organization);
