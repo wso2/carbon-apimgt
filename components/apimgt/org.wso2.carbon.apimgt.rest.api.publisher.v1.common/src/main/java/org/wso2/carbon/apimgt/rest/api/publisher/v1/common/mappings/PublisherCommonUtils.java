@@ -4009,6 +4009,10 @@ public class PublisherCommonUtils {
             }
         }
 
+        // The version of an API Product can't be changed. Set the original version so that it is used to build the
+        // context when the request doesn't have a version
+        apiProductDtoToUpdate.setVersion(originalAPIProduct.getId().getVersion());
+
         // The context of an API Product can't be changed
         APIInfo apiProductInfo = apiProvider.getAPIInfoByUUID(originalAPIProduct.getUuid());
         if (apiProductInfo != null && StringUtils.isNotBlank(apiProductInfo.getContextTemplate())) {
