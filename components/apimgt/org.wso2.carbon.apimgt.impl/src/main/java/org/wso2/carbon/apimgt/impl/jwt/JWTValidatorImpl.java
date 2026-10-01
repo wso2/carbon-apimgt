@@ -74,6 +74,7 @@ public class JWTValidatorImpl implements JWTValidator {
                         return jwtValidationInfo;
                     } else {
                         jwtValidationInfo.setValid(false);
+                        jwtValidationInfo.setExpired(true);
                         jwtValidationInfo.setValidationCode(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
                         return jwtValidationInfo;
                     }
