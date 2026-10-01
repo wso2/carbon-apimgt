@@ -57,7 +57,9 @@ public class OTLPTelemetry implements APIMOpenTelemetry {
         String headerKey = null;
         String headerValue = null;
 
-        String otlpProtocol = StringUtils.defaultIfBlank(configuration.getFirstProperty(TelemetryConstants.OTLP_CONFIG_PROTOCOL), TelemetryConstants.GRPC_PROTOCOL);
+        String otlpProtocol = StringUtils.defaultIfBlank(
+                configuration.getFirstProperty(TelemetryConstants.OTLP_CONFIG_PROTOCOL),
+                TelemetryConstants.GRPC_PROTOCOL);
 
         String headerProperty = getHeaderKeyProperty();
         String endPointURL = configuration.getFirstProperty(TelemetryConstants.OTLP_CONFIG_URL) != null ?
