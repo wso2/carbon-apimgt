@@ -61,6 +61,9 @@ public class ImportUtilsMCPServerTest {
     private static final String API_VERSION = "1.0.0";
     private static final String API_CONTEXT = "/test-mcp";
     private static final String EXTRACTED_PATH = "/tmp/test-mcp-import";
+    // Deliberately unlike the identity of the MCP Server itself, so that a lookup made with the wrong key shows up.
+    private static final String REFERENCED_API_NAME = "BackendPizzaAPI";
+    private static final String REFERENCED_API_VERSION = "2.5.0";
 
     private APIProvider apiProvider;
     private API targetApi;
@@ -482,5 +485,25 @@ public class ImportUtilsMCPServerTest {
             Assert.assertEquals("A reference that cannot be resolved is a bad request",
                     400, e.getErrorHandler().getHttpStatusCode());
         }
+    }
+
+    /**
+     * The key the referenced API is looked up by is its own name and version as carried by the artifact, not the
+     * identity of the MCP Server holding it. A lookup made with the wrong key resolves the mapping onto the wrong API,
+     * or onto nothing at all, and either way leaves behind a UUID that looks resolved.
+     */
+    @Test
+    public void testImportMCPServerLooksUpTheReferencedApiByItsOwnNameAndVersion() throws Exception {
+
+        withReferencedApi("uuid-of-the-source-environment", REFERENCED_API_NAME, REFERENCED_API_VERSION);
+        setupMCPServerDTOMock(mcpServerDTO);
+
+        ImportUtils.importMCPServer(EXTRACTED_PATH, mcpServerDTO, true, false, true,
+                false, false, tokenScopes, null, ORGANIZATION);
+
+        PowerMockito.verifyPrivate(ImportUtils.class).invoke("retrieveApiToOverwrite",
+                ArgumentMatchers.eq(REFERENCED_API_NAME), ArgumentMatchers.eq(REFERENCED_API_VERSION),
+                ArgumentMatchers.anyString(), ArgumentMatchers.any(APIProvider.class),
+                ArgumentMatchers.any(Boolean.class), ArgumentMatchers.anyString());
     }
 }

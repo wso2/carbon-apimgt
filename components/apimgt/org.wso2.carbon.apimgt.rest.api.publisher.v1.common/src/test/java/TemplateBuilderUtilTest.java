@@ -23,18 +23,24 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.dto.EndpointDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.SimplifiedEndpoint;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.WebSocketTopicMappingConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.TemplateBuilderUtil;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -325,5 +331,144 @@ public class TemplateBuilderUtilTest {
             Assert.assertEquals(httpSandboxUrl.replace(APIConstants.HTTP_PROTOCOL_URL_PREFIX,
                     APIConstants.WS_PROTOCOL_URL_PREFIX), wsSandboxUrl);
         }
+    }
+
+    private static final String NO_ENDPOINTS_IN_CONFIG = "{\"endpoint_type\":\"http\"}";
+    private static final String PRODUCTION_ENDPOINT_IN_CONFIG =
+            "{\"endpoint_type\":\"http\",\"production_endpoints\":{\"url\":\"https://production.com\"}}";
+    private static final String SANDBOX_ENDPOINT_IN_CONFIG =
+            "{\"endpoint_type\":\"http\",\"sandbox_endpoints\":{\"url\":\"https://sandbox.com\"}}";
+
+    /**
+     * Builds an API of the given subtype holding the given endpoint configuration.
+     *
+     * @param subtype        subtype of the API, {@link APIConstants#API_SUBTYPE_AI_API} or anything else
+     * @param endpointConfig the legacy endpoint configuration JSON the API carries
+     * @return the API
+     */
+    private static API apiOfSubtype(String subtype, String endpointConfig) {
+
+        API api = new API(new APIIdentifier("admin", "EndpointCheckAPI", "1.0.0"));
+        api.setSubtype(subtype);
+        api.setEndpointConfig(endpointConfig);
+        return api;
+    }
+
+    /**
+     * Builds the endpoint collection of a single named endpoint of the given deployment stage. These are the endpoints
+     * an AI API holds outside its endpoint configuration.
+     *
+     * @param deploymentStage {@link APIConstants.APIEndpoint#PRODUCTION} or {@link APIConstants.APIEndpoint#SANDBOX}
+     * @return a collection holding one endpoint of that stage
+     */
+    private static List<SimplifiedEndpoint> oneNamedEndpoint(String deploymentStage) {
+
+        EndpointDTO endpointDTO = new EndpointDTO();
+        endpointDTO.setId("f2c6d3a1-7b4e-4d90-9a11-6c8e5b2d7f43");
+        endpointDTO.setName("Named " + deploymentStage + " Endpoint");
+        endpointDTO.setDeploymentStage(deploymentStage);
+        List<SimplifiedEndpoint> endpoints = new ArrayList<>();
+        endpoints.add(new SimplifiedEndpoint(endpointDTO));
+        return endpoints;
+    }
+
+    /**
+     * Invokes the endpoint existence check that guards a deployment to a non-hybrid gateway.
+     *
+     * @param api             the API being deployed
+     * @param deploymentStage the deployment stage of the gateway being deployed to
+     * @param endpoints       the named endpoints of that stage
+     * @return true when an endpoint exists for that stage
+     */
+    private static boolean hasEndpoint(API api, String deploymentStage, List<SimplifiedEndpoint> endpoints)
+            throws Exception {
+
+        Method hasEndpoint = TemplateBuilderUtil.class.getDeclaredMethod("hasEndpoint", API.class, String.class,
+                List.class);
+        hasEndpoint.setAccessible(true);
+        return (boolean) hasEndpoint.invoke(null, api, deploymentStage, endpoints);
+    }
+
+    /**
+     * An AI API holds its endpoints as named endpoints outside the endpoint configuration. Its first endpoint having
+     * been removed empties the endpoint configuration while a named endpoint of that stage remains, and the deployment
+     * has to be allowed on the strength of that named endpoint.
+     */
+    @Test
+    public void testAiApiHasProductionEndpointFromItsNamedEndpoints() throws Exception {
+
+        Assert.assertTrue("An AI API holding a named production endpoint has a production endpoint, even though its "
+                        + "endpoint configuration carries none",
+                hasEndpoint(apiOfSubtype(APIConstants.API_SUBTYPE_AI_API, NO_ENDPOINTS_IN_CONFIG),
+                        APIConstants.APIEndpoint.PRODUCTION, oneNamedEndpoint(APIConstants.APIEndpoint.PRODUCTION)));
+    }
+
+    @Test
+    public void testAiApiHasSandboxEndpointFromItsNamedEndpoints() throws Exception {
+
+        Assert.assertTrue("An AI API holding a named sandbox endpoint has a sandbox endpoint, even though its "
+                        + "endpoint configuration carries none",
+                hasEndpoint(apiOfSubtype(APIConstants.API_SUBTYPE_AI_API, NO_ENDPOINTS_IN_CONFIG),
+                        APIConstants.APIEndpoint.SANDBOX, oneNamedEndpoint(APIConstants.APIEndpoint.SANDBOX)));
+    }
+
+    /**
+     * An AI API with no named endpoint of the stage being deployed to has no endpoint for it, and the deployment is
+     * refused. The check has to keep refusing these, otherwise an AI API reaches a gateway with no backend behind it.
+     */
+    @Test
+    public void testAiApiWithoutNamedProductionEndpointsHasNoProductionEndpoint() throws Exception {
+
+        Assert.assertFalse("An AI API holding no named production endpoint has no production endpoint",
+                hasEndpoint(apiOfSubtype(APIConstants.API_SUBTYPE_AI_API, NO_ENDPOINTS_IN_CONFIG),
+                        APIConstants.APIEndpoint.PRODUCTION, Collections.emptyList()));
+    }
+
+    @Test
+    public void testAiApiWithoutNamedSandboxEndpointsHasNoSandboxEndpoint() throws Exception {
+
+        Assert.assertFalse("An AI API holding no named sandbox endpoint has no sandbox endpoint",
+                hasEndpoint(apiOfSubtype(APIConstants.API_SUBTYPE_AI_API, NO_ENDPOINTS_IN_CONFIG),
+                        APIConstants.APIEndpoint.SANDBOX, Collections.emptyList()));
+    }
+
+    /**
+     * Every API that is not an AI API keeps its endpoints in its endpoint configuration, and is checked against it.
+     */
+    @Test
+    public void testNonAiApiHasProductionEndpointFromItsEndpointConfiguration() throws Exception {
+
+        Assert.assertTrue("An API carrying a production endpoint in its endpoint configuration has one",
+                hasEndpoint(apiOfSubtype(null, PRODUCTION_ENDPOINT_IN_CONFIG),
+                        APIConstants.APIEndpoint.PRODUCTION, Collections.emptyList()));
+    }
+
+    @Test
+    public void testNonAiApiHasSandboxEndpointFromItsEndpointConfiguration() throws Exception {
+
+        Assert.assertTrue("An API carrying a sandbox endpoint in its endpoint configuration has one",
+                hasEndpoint(apiOfSubtype(null, SANDBOX_ENDPOINT_IN_CONFIG),
+                        APIConstants.APIEndpoint.SANDBOX, Collections.emptyList()));
+    }
+
+    @Test
+    public void testNonAiApiWithoutEndpointsInItsEndpointConfigurationHasNoProductionEndpoint() throws Exception {
+
+        Assert.assertFalse("An API carrying no production endpoint in its endpoint configuration has none",
+                hasEndpoint(apiOfSubtype(null, NO_ENDPOINTS_IN_CONFIG),
+                        APIConstants.APIEndpoint.PRODUCTION, Collections.emptyList()));
+    }
+
+    /**
+     * The named endpoints are read for an AI API only. Reading them for every API would let an API whose endpoint
+     * configuration carries no endpoint of the stage being deployed to reach that gateway with no backend behind it,
+     * which is what the check exists to prevent.
+     */
+    @Test
+    public void testNonAiApiIsNotGivenAnEndpointByTheNamedEndpoints() throws Exception {
+
+        Assert.assertFalse("An API that is not an AI API is checked against its endpoint configuration alone",
+                hasEndpoint(apiOfSubtype(null, NO_ENDPOINTS_IN_CONFIG),
+                        APIConstants.APIEndpoint.PRODUCTION, oneNamedEndpoint(APIConstants.APIEndpoint.PRODUCTION)));
     }
 }
