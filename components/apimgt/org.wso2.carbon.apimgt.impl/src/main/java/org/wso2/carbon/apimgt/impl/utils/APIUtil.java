@@ -12886,29 +12886,29 @@ public final class APIUtil {
             tenantConfig = null;
         }
         boolean tenantPolicyConfigured = false;
-        String tMode = null;
-        List<String> tHosts = new ArrayList<>();
-        boolean tBlockPrivate = false;
+        String tenantMode = null;
+        List<String> tenantHosts = new ArrayList<>();
+        boolean tenantBlockPrivateNetworkAccess = false;
         if (tenantConfig != null) {
-            Object nsac = tenantConfig.get(APIConstants.NetworkSecurityAccessControl.TENANT_CONFIG_KEY);
-            if (nsac instanceof JSONObject) {
+            Object tenantPolicyValue = tenantConfig.get(APIConstants.NetworkSecurityAccessControl.TENANT_CONFIG_KEY);
+            if (tenantPolicyValue instanceof JSONObject) {
                 policyConfigured = true;
                 tenantPolicyConfigured = true;
-                JSONObject policy = (JSONObject) nsac;
-                tMode = (String) policy.get(APIConstants.NetworkSecurityAccessControl.TENANT_MODE);
-                tBlockPrivate = Boolean.TRUE.equals(
-                        policy.get(APIConstants.NetworkSecurityAccessControl.TENANT_BLOCK_PRIVATE_NETWORK_ACCESS));
-                Object tHostsObj = policy.get(APIConstants.NetworkSecurityAccessControl.TENANT_HOSTS);
-                if (tHostsObj instanceof JSONArray) {
-                    for (Object h : (JSONArray) tHostsObj) {
-                        tHosts.add(h.toString());
+                JSONObject tenantPolicy = (JSONObject) tenantPolicyValue;
+                tenantMode = (String) tenantPolicy.get(APIConstants.NetworkSecurityAccessControl.TENANT_MODE);
+                tenantBlockPrivateNetworkAccess = Boolean.TRUE.equals(tenantPolicy.get(
+                        APIConstants.NetworkSecurityAccessControl.TENANT_BLOCK_PRIVATE_NETWORK_ACCESS));
+                Object tenantHostsValue = tenantPolicy.get(APIConstants.NetworkSecurityAccessControl.TENANT_HOSTS);
+                if (tenantHostsValue instanceof JSONArray) {
+                    for (Object host : (JSONArray) tenantHostsValue) {
+                        tenantHosts.add(host.toString());
                     }
                 }
-                validateNetworkSecurityMode(tMode);
-                if (APIConstants.NetworkSecurityAccessControl.MODE_ALLOW.equalsIgnoreCase(tMode)) {
-                    allowModeHostSets.add(tHosts);
-                } else if (APIConstants.NetworkSecurityAccessControl.MODE_DENY.equalsIgnoreCase(tMode)) {
-                    denyHosts.addAll(tHosts);
+                validateNetworkSecurityMode(tenantMode);
+                if (APIConstants.NetworkSecurityAccessControl.MODE_ALLOW.equalsIgnoreCase(tenantMode)) {
+                    allowModeHostSets.add(tenantHosts);
+                } else if (APIConstants.NetworkSecurityAccessControl.MODE_DENY.equalsIgnoreCase(tenantMode)) {
+                    denyHosts.addAll(tenantHosts);
                 }
             }
         }
@@ -12920,13 +12920,16 @@ public final class APIUtil {
         allowList.removeAll(denyHosts);
         // The allow-list also short-circuits the resolver's private-network check, so an entry allowed by one policy
         // must still be permitted by the other policy when that one is a deny-mode or private-network-only policy.
-        if (networkSecurityEnabled
-                && !APIConstants.NetworkSecurityAccessControl.MODE_ALLOW.equalsIgnoreCase(networkSecurityMode)) {
-            retainHostsPermittedByPolicy(allowList, networkSecurityMode, networkSecurityHosts,
+        boolean platformRestrictsAllowList = networkSecurityEnabled
+                && !APIConstants.NetworkSecurityAccessControl.MODE_ALLOW.equalsIgnoreCase(networkSecurityMode);
+        boolean tenantRestrictsAllowList = tenantPolicyConfigured
+                && !APIConstants.NetworkSecurityAccessControl.MODE_ALLOW.equalsIgnoreCase(tenantMode);
+        if (platformRestrictsAllowList) {
+            retainEntriesPermittedByPolicy(allowList, networkSecurityMode, networkSecurityHosts,
                     networkSecurityBlockPrivateAccess);
         }
-        if (tenantPolicyConfigured && !APIConstants.NetworkSecurityAccessControl.MODE_ALLOW.equalsIgnoreCase(tMode)) {
-            retainHostsPermittedByPolicy(allowList, tMode, tHosts, tBlockPrivate);
+        if (tenantRestrictsAllowList) {
+            retainEntriesPermittedByPolicy(allowList, tenantMode, tenantHosts, tenantBlockPrivateNetworkAccess);
         }
         List<String> blockList = new ArrayList<>(denyHosts);
         // Allow-mode is a restrictive whitelist (deny everything not explicitly allowed). The resolver's allow-list
@@ -12971,42 +12974,43 @@ public final class APIUtil {
      *
      * @param allowList                 the remote-$ref allow-list to filter in place
      * @param mode                      the policy mode ({@code deny}, or blank for the private-network-only policy)
-     * @param hosts                     the policy's host patterns
+     * @param policyHosts               the policy's host patterns
      * @param blockPrivateNetworkAccess whether the policy blocks private network addresses
      */
-    private static void retainHostsPermittedByPolicy(List<String> allowList, String mode, List<String> hosts,
-                                                     boolean blockPrivateNetworkAccess) {
+    private static void retainEntriesPermittedByPolicy(List<String> allowList, String mode, List<String> policyHosts,
+                                                       boolean blockPrivateNetworkAccess) {
         boolean denyModeWithHosts = APIConstants.NetworkSecurityAccessControl.MODE_DENY.equalsIgnoreCase(mode)
-                && hosts != null && !hosts.isEmpty();
+                && policyHosts != null && !policyHosts.isEmpty();
         if (allowList.isEmpty() || (!denyModeWithHosts && !blockPrivateNetworkAccess)) {
             return;
         }
-        allowList.removeIf(host -> !isHostPermittedByPolicy(host, mode, hosts, blockPrivateNetworkAccess));
+        allowList.removeIf(entry -> !isEntryPermittedByPolicy(entry, mode, policyHosts, blockPrivateNetworkAccess));
     }
 
     /**
      * Checks whether a single allow-list entry is permitted by a deny-mode or private-network-only policy. A wildcard
      * pattern names no single host and cannot be checked, so it is not permitted.
      *
-     * @param host                      the allow-list entry
+     * @param allowListEntry            the allow-list entry
      * @param mode                      the policy mode
-     * @param hosts                     the policy's host patterns
+     * @param policyHosts               the policy's host patterns
      * @param blockPrivateNetworkAccess whether the policy blocks private network addresses
      * @return {@code true} if the policy permits the entry
      */
-    private static boolean isHostPermittedByPolicy(String host, String mode, List<String> hosts,
-                                                   boolean blockPrivateNetworkAccess) {
-        if (StringUtils.isBlank(host) || host.contains(APIConstants.NetworkSecurityAccessControl.MATCH_ALL_HOSTS)) {
-            log.warn("Allow-list entry '" + host + "' is blank or a wildcard pattern and is not applied to remote "
-                    + "$ref resolution while a deny-mode or private-network-only policy is also configured.");
+    private static boolean isEntryPermittedByPolicy(String allowListEntry, String mode, List<String> policyHosts,
+                                                    boolean blockPrivateNetworkAccess) {
+        if (StringUtils.isBlank(allowListEntry)
+                || allowListEntry.contains(APIConstants.NetworkSecurityAccessControl.MATCH_ALL_HOSTS)) {
+            log.warn("Allow-list entry '" + allowListEntry + "' is blank or a wildcard pattern and is not applied to "
+                    + "remote $ref resolution while a deny-mode or private-network-only policy is also configured.");
             return false;
         }
         try {
-            applyAccessControlPolicy(host, mode, hosts, blockPrivateNetworkAccess);
+            applyAccessControlPolicy(allowListEntry, mode, policyHosts, blockPrivateNetworkAccess);
             return true;
         } catch (APIManagementException e) {
-            log.warn("Allow-list entry '" + host + "' is not permitted by the other network access-control policy "
-                    + "and is not applied to remote $ref resolution.");
+            log.warn("Allow-list entry '" + allowListEntry + "' is not permitted by the other network access-control "
+                    + "policy and is not applied to remote $ref resolution.");
             return false;
         }
     }
