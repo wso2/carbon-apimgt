@@ -1279,9 +1279,6 @@ public class GatewayUtils {
             Object backendUrlObject =
                     messageContext.getProperty(APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS);
             String backendUrl = backendUrlObject != null ? (String) backendUrlObject : null;
-            if (StringUtils.isEmpty(backendUrl)) {
-                backendUrl = ApiUtils.getFullRequestPath(messageContext);
-            }
             if (StringUtils.isNotEmpty(backendUrl)) {
                 TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.HTTP_URL_FULL_ATTRIBUTE, backendUrl);
             }
