@@ -5140,12 +5140,14 @@ public final class APIUtil {
         try {
             config = (JSONObject) parser.parse(endpointConfig);
 
-            if (config.containsKey("sandbox_endpoints")) {
+            if (config.containsKey("sandbox_endpoints") && config.get("sandbox_endpoints") != null) {
                 return true;
             }
-            if (StringUtils.equals(config.get("endpoint_type").toString(), "graphql")) {
+            if (config.get("endpoint_type") != null
+                    && StringUtils.equals(config.get("endpoint_type").toString(), "graphql")
+                    && config.get("http") != null) {
                 JSONObject httpConfig = (JSONObject) parser.parse(config.get("http").toString());
-                if (httpConfig.containsKey("sandbox_endpoints")) {
+                if (httpConfig.containsKey("sandbox_endpoints") && httpConfig.get("sandbox_endpoints") != null) {
                     return true;
                 }
             }
@@ -5164,12 +5166,14 @@ public final class APIUtil {
         try {
             config = (JSONObject) parser.parse(endpointConfig);
 
-            if (config.containsKey("production_endpoints")) {
+            if (config.containsKey("production_endpoints") && config.get("production_endpoints") != null) {
                 return true;
             }
-            if (StringUtils.equals(config.get("endpoint_type").toString(), "graphql")) {
+            if (config.get("endpoint_type") != null
+                    && StringUtils.equals(config.get("endpoint_type").toString(), "graphql")
+                    && config.get("http") != null) {
                 JSONObject httpConfig = (JSONObject) parser.parse(config.get("http").toString());
-                if (httpConfig.containsKey("production_endpoints")) {
+                if (httpConfig.containsKey("production_endpoints") && httpConfig.get("production_endpoints") != null) {
                     return true;
                 }
             }
