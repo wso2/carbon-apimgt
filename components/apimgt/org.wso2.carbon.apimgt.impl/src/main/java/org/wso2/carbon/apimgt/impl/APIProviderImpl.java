@@ -8795,6 +8795,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     // Ignore since we set the default key type previously
                 }
             }
+        } else {
+            // Validate that the API Product belongs to the caller's organization.
+            if (log.isDebugEnabled()) {
+                log.debug("Validating organization ownership for API Product " + apiId
+                        + " against caller organization: " + organization);
+            }
+            getAPIProductbyUUID(apiId, organization);
         }
         jwtTokenInfoDTO.setSubscribedApiDTOList(subscribedApiDTOList);
         jwtTokenInfoDTO.setExpirationTime(60000l);
