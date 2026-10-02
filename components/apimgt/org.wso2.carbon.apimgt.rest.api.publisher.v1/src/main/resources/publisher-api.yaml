@@ -18578,6 +18578,12 @@ components:
           type: boolean
           description: This indicates whether the MCP support is enabled or not.
           default: true
+        perPolicySeverityFilteringEnabled:
+          type: boolean
+          description: |
+            Is per policy compliance affecting severity filtering enabled for governance policies. When enabled a
+            policy can declare which rule severities affect its compliance verdict.
+          example: false
         customProperties:
           type: array
           items:
