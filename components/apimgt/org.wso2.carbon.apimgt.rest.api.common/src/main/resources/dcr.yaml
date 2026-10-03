@@ -94,8 +94,7 @@ components:
           readOnly: true
           example: JWT
         userstoreDomainInSubject:
-          type: string
-          readOnly: true
+          type: boolean
           example: true
     DCRResult:
       title: DCRResult
