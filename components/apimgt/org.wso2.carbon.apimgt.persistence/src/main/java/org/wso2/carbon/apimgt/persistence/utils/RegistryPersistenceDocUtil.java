@@ -15,6 +15,8 @@
  */ 
 package org.wso2.carbon.apimgt.persistence.utils;
 
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -196,16 +198,39 @@ public class RegistryPersistenceDocUtil {
                 + APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR;
     }
 
-    /**
-     * Get file type content location from API source path.
-     *
-     * @param apiSourcePath the API source path
-     * @param fileName      file name
-     * @return document file path
-     */
+    @Deprecated
     public static String getDocumentFilePath(String apiSourcePath, String fileName) {
         return getDocumentBasePath(apiSourcePath) + APIConstants.DOCUMENT_FILE_DIR
                 + RegistryConstants.PATH_SEPARATOR + fileName;
+    }
+
+    /**
+     * Get file type content location from API source path, namespaced under the documentation id.
+     *
+     * @param apiSourcePath the API source path
+     * @param docId         documentation artifact id
+     * @param fileName      file name
+     * @return document file path
+     */
+    public static String getDocumentFilePath(String apiSourcePath, String docId, String fileName) {
+        return getDocumentBasePath(apiSourcePath) + APIConstants.DOCUMENT_FILE_DIR
+                + RegistryConstants.PATH_SEPARATOR + sanitizePathSegment(docId, "document id")
+                + RegistryConstants.PATH_SEPARATOR + sanitizePathSegment(fileName, "file name");
+    }
+
+    /**
+     * Restricts a value to a single, non-traversal path segment.
+     *
+     * @param value the untrusted value
+     * @param label label used in the error message if the value is invalid
+     * @return the sanitized value
+     */
+    private static String sanitizePathSegment(String value, String label) {
+        String sanitized = FilenameUtils.getName(value);
+        if (StringUtils.isBlank(sanitized) || "..".equals(sanitized) || ".".equals(sanitized)) {
+            throw new IllegalArgumentException("Invalid " + label + ": " + value);
+        }
+        return sanitized;
     }
 
     /**
@@ -287,8 +312,9 @@ public class RegistryPersistenceDocUtil {
     @Deprecated
     public static String getDocumentationFilePath(Identifier id, String fileName) {
 
-        return getDocumentFilePath(APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR
+        String apiSourcePath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR
                 + RegistryPersistenceUtil.replaceEmailDomain(id.getProviderName()) + RegistryConstants.PATH_SEPARATOR
-                + id.getName() + RegistryConstants.PATH_SEPARATOR + id.getVersion(), fileName);
+                + id.getName() + RegistryConstants.PATH_SEPARATOR + id.getVersion();
+        return getDocumentFilePath(apiSourcePath, fileName);
     }
 }
