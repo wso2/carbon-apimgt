@@ -3529,6 +3529,14 @@ public final class APIConstants {
         public static final String ENTITY_TYPE_USER_ID = "USER_ID";
     }
 
+    /**
+     * Constants related to API Product configurations
+     */
+    public static class APIProductConfigs {
+        public static final String API_PRODUCT = "APIProduct";
+        public static final String ENABLE_REVISION_BASED_RESOURCES = "EnableRevisionBasedResources";
+    }
+
     //Constants related to user password
     public static final String ENABLE_CHANGE_PASSWORD = "EnableChangePassword";
     public static final String IS_PASSWORD_POLICY_ENABLED_PROPERTY = "passwordPolicy.enable";
@@ -3832,6 +3840,7 @@ public final class APIConstants {
         public static final String SCHEDULER_QUEUE_SIZE = "QueueSize";
         public static final String SCHEDULER_TASK_CHECK_INTERVAL = "TaskCheckIntervalMinutes";
         public static final String SCHEDULER_TASK_CLEANUP_INTERVAL = "TaskCleanupIntervalMinutes";
+        public static final String PER_POLICY_SEVERITY_FILTERING_ENABLED = "PerPolicySeverityFilteringEnabled";
     }
 
     public static class MCP {

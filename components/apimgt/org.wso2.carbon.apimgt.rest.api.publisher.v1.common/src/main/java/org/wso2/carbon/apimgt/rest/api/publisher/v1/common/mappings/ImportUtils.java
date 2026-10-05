@@ -1428,6 +1428,7 @@ public class ImportUtils {
             String organization) throws APIManagementException {
 
         String apiUUID = api.getUuid();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         if (log.isDebugEnabled()) {
             log.debug("Populating API: " + apiUUID + " with endpoints");
         }
@@ -1451,6 +1452,10 @@ public class ImportUtils {
                         JsonObject endpointObj = endpointElement.getAsJsonObject();
                         APIEndpointInfo apiEndpointInfo = new Gson().fromJson(endpointObj, APIEndpointInfo.class);
                         String endpointUUID = apiEndpointInfo.getId();
+
+                        // An imported archive must meet the same policy as an endpoint created through the API.
+                        // Validated here so a rejection is not reported as an encryption failure.
+                        validateRemoteEndpointURLs(apiEndpointInfo.getEndpointConfig(), tenantDomain);
 
                         try {
                             if (log.isDebugEnabled()) {
@@ -1496,8 +1501,46 @@ public class ImportUtils {
             throw new APIManagementException("Error while reading API endpoints from path: " + extractedFolderPath, e,
                     ExceptionCodes.ERROR_READING_API_ENDPOINTS_FILE);
         } catch (APIManagementException e) {
-            throw new APIManagementException("Error while adding API endpoints to API: " + apiUUID, e,
-                    ExceptionCodes.ERROR_ADDING_API_ENDPOINTS);
+            // Carry the original error handler forward. Otherwise every failure is reported as a generic
+            // server error, hiding the actual reason (for example an endpoint URL refused by policy).
+            ErrorHandler errorHandler = e.getErrorHandler() != null
+                    ? e.getErrorHandler()
+                    : ExceptionCodes.ERROR_ADDING_API_ENDPOINTS;
+            throw new APIManagementException("Error while adding API endpoints to API: " + apiUUID, e, errorHandler);
+        }
+    }
+
+    /**
+     * Validates every production and sandbox URL in an endpoint configuration against the network access control
+     * policy. Templated hosts and non-resolvable schemes are skipped inside
+     * {@link APIUtil#validateRemoteURL(String, String)}.
+     *
+     * @param endpointConfig the endpoint configuration map, may be null
+     * @param tenantDomain   tenant domain used to load tenant-level policy
+     * @throws APIManagementException if a URL is malformed or blocked by an access control policy
+     */
+    private static void validateRemoteEndpointURLs(Map endpointConfig, String tenantDomain)
+            throws APIManagementException {
+
+        if (endpointConfig == null) {
+            return;
+        }
+        org.json.JSONObject endpointConfigObj = new org.json.JSONObject(endpointConfig);
+        if (APIConstants.ENDPOINT_TYPE_DEFAULT.equalsIgnoreCase(
+                endpointConfigObj.optString(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+            return;
+        }
+        ArrayList<String> endpointURLs = new ArrayList<>();
+        APIUtil.extractURLsFromEndpointConfig(endpointConfigObj, APIConstants.API_DATA_PRODUCTION_ENDPOINTS,
+                endpointURLs);
+        APIUtil.extractURLsFromEndpointConfig(endpointConfigObj, APIConstants.API_DATA_SANDBOX_ENDPOINTS,
+                endpointURLs);
+        APIUtil.extractURLsFromEndpointConfig(endpointConfigObj, APIConstants.ENDPOINT_PRODUCTION_FAILOVERS,
+                endpointURLs);
+        APIUtil.extractURLsFromEndpointConfig(endpointConfigObj, APIConstants.ENDPOINT_SANDBOX_FAILOVERS,
+                endpointURLs);
+        for (String endpointURL : endpointURLs) {
+            APIUtil.validateRemoteURL(endpointURL, tenantDomain);
         }
     }
 

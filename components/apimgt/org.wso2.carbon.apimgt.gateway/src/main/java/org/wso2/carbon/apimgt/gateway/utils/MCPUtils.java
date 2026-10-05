@@ -445,9 +445,10 @@ public class MCPUtils {
     public static void processRequestBody(MessageContext messageContext, ResolvedRequest resolvedRequest,
                                           boolean hasBody, String contentType) throws McpException {
 
+        org.apache.axis2.context.MessageContext axis2MessageContext =
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+
         if (hasBody) {
-            org.apache.axis2.context.MessageContext axis2MessageContext =
-                    ((Axis2MessageContext) messageContext).getAxis2MessageContext();
             JsonObject payload = resolvedRequest.getBody();
 
             String ct = contentType != null ? contentType : "";
@@ -469,6 +470,23 @@ public class MCPUtils {
                 throw new McpException(APIConstants.MCP.RpcConstants.INTERNAL_ERROR_CODE,
                         APIConstants.MCP.RpcConstants.INTERNAL_ERROR_MESSAGE,
                         "Unsupported content type: " + contentType);
+            }
+        } else {
+            // No requestBody declared for this tool - strip the inbound MCP JSON-RPC envelope
+            // instead of relaying it to the backend (RFC 9110: a POST body is optional). An empty
+            // JSON object is set, rather than leaving no payload at all, so the outbound message
+            // remains well-formed for the JSON message formatter.
+            try {
+                JsonUtil.removeJsonPayload(axis2MessageContext);
+                JsonUtil.getNewJsonPayload(axis2MessageContext, new Gson().toJson(new JsonObject()), true, true);
+                axis2MessageContext.setProperty(Constants.Configuration.MESSAGE_TYPE,
+                        APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+                axis2MessageContext.setProperty(Constants.Configuration.CONTENT_TYPE,
+                        APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+            } catch (AxisFault e) {
+                throw new McpException(APIConstants.MCP.RpcConstants.INTERNAL_ERROR_CODE,
+                        APIConstants.MCP.RpcConstants.INTERNAL_ERROR_MESSAGE,
+                        "Failed to clear request body: " + e.getMessage());
             }
         }
     }
