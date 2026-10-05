@@ -29,6 +29,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
+import org.mockito.InOrder;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
@@ -88,6 +89,7 @@ import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.Artifac
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.notifier.events.ScopeEvent;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.MCPUtils;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
@@ -135,6 +137,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -1339,6 +1342,166 @@ public class APIProviderImplTest {
         } catch (Exception e) {
             Assert.fail(e.getMessage());
         }
+    }
+
+    private static final String RESTORE_API_UUID = "63e1e37e-a5b8-4be6-86a5-d6ae0749f131";
+    private static final String RESTORE_REVISION_UUID = "b55e0fc3-9829-4432-b99e-02056dc91838";
+
+    /**
+     * Creates a provider whose restore reaches the scope cleanup, with the given Key Managers configured for the
+     * tenant and the given local scopes attached to the API before the restore.
+     */
+    private APIProviderImplWrapper prepareRestoreWithScopes(Set<String> scopesBeforeRestore,
+                                                           Map<String, KeyManager> keyManagers) throws Exception {
+
+        APIIdentifier apiId = new APIIdentifier("admin", "PizzaShackAPI", "1.0.0", RESTORE_API_UUID);
+        API revisionedApi = new API(new APIIdentifier("admin", "PizzaShackAPI", "1.0.0", RESTORE_REVISION_UUID));
+        revisionedApi.setUriTemplates(new HashSet<>());
+        APIRevision apiRevision = new APIRevision();
+        apiRevision.setApiUUID(RESTORE_API_UUID);
+        apiRevision.setRevisionUUID(RESTORE_REVISION_UUID);
+        apiRevision.setId(1);
+
+        Mockito.when(APIUtil.getAPIIdentifierFromUUID(RESTORE_API_UUID)).thenReturn(apiId);
+        Mockito.when(APIUtil.getTenantId(Mockito.anyString())).thenReturn(-1234);
+        Mockito.when(APIUtil.getTenantDomainFromTenantId(-1234)).thenReturn(superTenantDomain);
+        Mockito.when(apimgtDAO.getRevisionByRevisionUUID(RESTORE_REVISION_UUID)).thenReturn(apiRevision);
+        Mockito.when(apimgtDAO.getAllLocalScopeKeysForAPI(RESTORE_API_UUID, -1234)).thenReturn(scopesBeforeRestore);
+        PowerMockito.mockStatic(MCPUtils.class);
+
+        Map<String, KeyManagerDto> keyManagerDtos = new LinkedHashMap<>();
+        for (Map.Entry<String, KeyManager> entry : keyManagers.entrySet()) {
+            KeyManagerDto keyManagerDto = new KeyManagerDto();
+            keyManagerDto.setName(entry.getKey());
+            keyManagerDto.setKeyManager(entry.getValue());
+            keyManagerDtos.put(entry.getKey(), keyManagerDto);
+        }
+        PowerMockito.when(KeyManagerHolder.getGlobalAndTenantKeyManagers(superTenantDomain)).thenReturn(keyManagerDtos);
+
+        return new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO) {
+            @Override
+            public API getAPIbyUUID(String uuid, String org) {
+                return revisionedApi;
+            }
+
+            @Override
+            public List<APIResource> getUsedProductResources(String uuid) {
+                return new ArrayList<>();
+            }
+        };
+    }
+
+    /**
+     * A local scope which nothing uses after the restore is removed from every Key Manager that has it, audited and
+     * announced to the gateways. A scope which is still used is left untouched.
+     */
+    @Test
+    public void testRestoreAPIRevisionRemovesUnusedLocalScope() throws Exception {
+        Set<String> scopesBeforeRestore = new HashSet<>();
+        scopesBeforeRestore.add("unused_scope");
+        scopesBeforeRestore.add("used_scope");
+        KeyManager residentKeyManager = Mockito.mock(KeyManager.class);
+        Map<String, KeyManager> keyManagers = new LinkedHashMap<>();
+        keyManagers.put("Resident Key Manager", residentKeyManager);
+        APIProviderImplWrapper apiProvider = prepareRestoreWithScopes(scopesBeforeRestore, keyManagers);
+        Mockito.when(scopesDAO.deleteScopeIfUnused("unused_scope", -1234)).thenReturn(true);
+        Mockito.when(scopesDAO.deleteScopeIfUnused("used_scope", -1234)).thenReturn(false);
+        Mockito.when(residentKeyManager.isScopeExists("unused_scope")).thenReturn(true);
+
+        apiProvider.restoreAPIRevision(RESTORE_API_UUID, RESTORE_REVISION_UUID, superTenantDomain);
+
+        // The scopes are captured before the restore rewrites the resources, and released only after it
+        InOrder inOrder = Mockito.inOrder(apimgtDAO, scopesDAO);
+        inOrder.verify(apimgtDAO).getAllLocalScopeKeysForAPI(RESTORE_API_UUID, -1234);
+        inOrder.verify(apimgtDAO).restoreAPIRevision(Mockito.any(APIRevision.class), Mockito.eq(superTenantDomain));
+        inOrder.verify(scopesDAO, Mockito.atLeastOnce()).deleteScopeIfUnused(Mockito.anyString(), Mockito.eq(-1234));
+
+        Mockito.verify(residentKeyManager).deleteScope("unused_scope");
+        Mockito.verify(residentKeyManager, Mockito.never()).isScopeExists("used_scope");
+        Mockito.verify(residentKeyManager, Mockito.never()).deleteScope("used_scope");
+        Mockito.verify(scopesDAO, Mockito.never()).addScopes(Mockito.anySet(), Mockito.anyInt());
+        PowerMockito.verifyStatic(APIUtil.class, Mockito.times(1));
+        APIUtil.logAuditMessage(Mockito.eq(APIConstants.AuditLogConstants.SCOPE), Mockito.eq("unused_scope"),
+                Mockito.eq(APIConstants.AuditLogConstants.DELETED), Mockito.any());
+        PowerMockito.verifyStatic(APIUtil.class, Mockito.times(1));
+        APIUtil.sendNotification(Mockito.any(ScopeEvent.class), Mockito.eq(APIConstants.NotifierType.SCOPES.name()));
+    }
+
+    /**
+     * A Key Manager which fails does not stop the removal from the other Key Managers, does not put the scope back
+     * and does not fail the restore.
+     */
+    @Test
+    public void testRestoreAPIRevisionContinuesWhenAKeyManagerFails() throws Exception {
+        Set<String> scopesBeforeRestore = new HashSet<>();
+        scopesBeforeRestore.add("unused_scope");
+        KeyManager unreachableKeyManager = Mockito.mock(KeyManager.class);
+        KeyManager residentKeyManager = Mockito.mock(KeyManager.class);
+        Map<String, KeyManager> keyManagers = new LinkedHashMap<>();
+        keyManagers.put("UnreachableKM", unreachableKeyManager);
+        keyManagers.put("Resident Key Manager", residentKeyManager);
+        APIProviderImplWrapper apiProvider = prepareRestoreWithScopes(scopesBeforeRestore, keyManagers);
+        Mockito.when(scopesDAO.deleteScopeIfUnused("unused_scope", -1234)).thenReturn(true);
+        // The Key Manager client throws unchecked exceptions when the Key Manager cannot be reached
+        Mockito.when(unreachableKeyManager.isScopeExists("unused_scope"))
+                .thenThrow(new RuntimeException("Connection refused"));
+        Mockito.when(residentKeyManager.isScopeExists("unused_scope")).thenReturn(true);
+
+        apiProvider.restoreAPIRevision(RESTORE_API_UUID, RESTORE_REVISION_UUID, superTenantDomain);
+
+        Mockito.verify(unreachableKeyManager, Mockito.never()).deleteScope(Mockito.anyString());
+        Mockito.verify(residentKeyManager).deleteScope("unused_scope");
+        Mockito.verify(scopesDAO, Mockito.never()).addScopes(Mockito.anySet(), Mockito.anyInt());
+        PowerMockito.verifyStatic(APIUtil.class, Mockito.times(1));
+        APIUtil.sendNotification(Mockito.any(ScopeEvent.class), Mockito.eq(APIConstants.NotifierType.SCOPES.name()));
+    }
+
+    /**
+     * A Key Manager which does not have the scope (for example, one which rejected its name) is skipped instead of
+     * being asked to delete it.
+     */
+    @Test
+    public void testRestoreAPIRevisionSkipsKeyManagerWithoutScope() throws Exception {
+        Set<String> scopesBeforeRestore = new HashSet<>();
+        scopesBeforeRestore.add("unused_scope");
+        KeyManager residentKeyManager = Mockito.mock(KeyManager.class);
+        Map<String, KeyManager> keyManagers = new LinkedHashMap<>();
+        keyManagers.put("Resident Key Manager", residentKeyManager);
+        APIProviderImplWrapper apiProvider = prepareRestoreWithScopes(scopesBeforeRestore, keyManagers);
+        Mockito.when(scopesDAO.deleteScopeIfUnused("unused_scope", -1234)).thenReturn(true);
+        Mockito.when(residentKeyManager.isScopeExists("unused_scope")).thenReturn(false);
+
+        apiProvider.restoreAPIRevision(RESTORE_API_UUID, RESTORE_REVISION_UUID, superTenantDomain);
+
+        Mockito.verify(residentKeyManager, Mockito.never()).deleteScope(Mockito.anyString());
+        PowerMockito.verifyStatic(APIUtil.class, Mockito.times(1));
+        APIUtil.sendNotification(Mockito.any(ScopeEvent.class), Mockito.eq(APIConstants.NotifierType.SCOPES.name()));
+    }
+
+    /**
+     * Nothing is released when the restore itself fails.
+     */
+    @Test
+    public void testRestoreAPIRevisionFailureReleasesNothing() throws Exception {
+        Set<String> scopesBeforeRestore = new HashSet<>();
+        scopesBeforeRestore.add("unused_scope");
+        KeyManager residentKeyManager = Mockito.mock(KeyManager.class);
+        Map<String, KeyManager> keyManagers = new LinkedHashMap<>();
+        keyManagers.put("Resident Key Manager", residentKeyManager);
+        APIProviderImplWrapper apiProvider = prepareRestoreWithScopes(scopesBeforeRestore, keyManagers);
+        PowerMockito.doThrow(new APIPersistenceException("registry failure")).when(apiPersistenceInstance)
+                .restoreAPIRevision(any(Organization.class), Mockito.anyString(), Mockito.anyString(),
+                        Mockito.anyInt());
+
+        try {
+            apiProvider.restoreAPIRevision(RESTORE_API_UUID, RESTORE_REVISION_UUID, superTenantDomain);
+            Assert.fail("Restore should fail when the registry artifacts cannot be restored");
+        } catch (APIManagementException e) {
+            // expected
+        }
+
+        Mockito.verify(scopesDAO, Mockito.never()).deleteScopeIfUnused(Mockito.anyString(), Mockito.anyInt());
+        Mockito.verify(residentKeyManager, Mockito.never()).deleteScope(Mockito.anyString());
     }
 
     /**
