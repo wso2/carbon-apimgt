@@ -45,6 +45,34 @@ public class TemplateUtilContextTest {
     }
 
     @Test
+    public void testEscapeXmlWithNullThrowsIllegalArgumentException() {
+        TemplateUtilContext templateUtilContext = newTemplateUtilContext();
+        try {
+            templateUtilContext.escapeXml(null);
+            Assert.fail("escapeXml(null) must fail fast instead of throwing a NullPointerException");
+        } catch (IllegalArgumentException e) {
+            Assert.assertEquals("Value passed to escapeXml cannot be null when rendering the endpoint template",
+                    e.getMessage());
+        }
+    }
+
+    @Test
+    public void testEscapeXmlNonNullBehaviourUnchanged() {
+        TemplateUtilContext templateUtilContext = newTemplateUtilContext();
+        Assert.assertEquals("", templateUtilContext.escapeXml(""));
+        Assert.assertEquals("http://a/b?x=1&amp;y=2", templateUtilContext.escapeXml("http://a/b?x=1&y=2"));
+        Assert.assertEquals("http://a/b", templateUtilContext.escapeXml("  http://a/b  "));
+        Assert.assertEquals("&lt;tag&gt;", templateUtilContext.escapeXml("<tag>"));
+    }
+
+    private TemplateUtilContext newTemplateUtilContext() {
+        API api = new API(new APIIdentifier("admin", "TestAPI", "1.0.0"));
+        api.setStatus(APIConstants.CREATED);
+        api.setContextTemplate("/");
+        return new TemplateUtilContext(new APIConfigContextWrapper(api));
+    }
+
+    @Test
     public void testJsonStringToMap() {
         API api = new API(new APIIdentifier("admin", "TestAPI", "1.0.0"));
         api.setStatus(APIConstants.CREATED);
