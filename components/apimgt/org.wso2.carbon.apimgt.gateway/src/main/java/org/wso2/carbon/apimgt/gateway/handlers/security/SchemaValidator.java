@@ -55,6 +55,7 @@ public class SchemaValidator extends AbstractHandler {
                         LevelResolver.create()
                                 .withLevel("validation.schema.required", ValidationReport.Level.INFO)
                                 .withLevel("validation.response.body.missing", ValidationReport.Level.INFO)
+                                .withLevel("validation.response.body.unexpected", ValidationReport.Level.INFO)
                                 .withLevel("validation.schema.additionalProperties", ValidationReport.Level.IGNORE)
                                 .build())
                 .build();
@@ -78,7 +79,11 @@ public class SchemaValidator extends AbstractHandler {
             if (validationReport.hasErrors()) {
                 StringBuilder finalMessage = new StringBuilder();
                 for (ValidationReport.Message message : validationReport.getMessages()) {
-                    finalMessage.append(message.getMessage()).append(", ");
+                    finalMessage.append(getErrorMessage(message)).append(", ");
+                }
+                // Remove the last comma and space, if present
+                if (finalMessage.length() > 0) {
+                    finalMessage.setLength(finalMessage.length() - 2);
                 }
                 String errMessage = "Schema validation failed in the Request: ";
                 logger.error(errMessage);
@@ -101,7 +106,11 @@ public class SchemaValidator extends AbstractHandler {
             if (validationReport.hasErrors()) {
                 StringBuilder finalMessage = new StringBuilder();
                 for (ValidationReport.Message message : validationReport.getMessages()) {
-                    finalMessage.append(message.getMessage()).append(", ");
+                    finalMessage.append(getErrorMessage(message)).append(", ");
+                }
+                // Remove the last comma and space, if present
+                if (finalMessage.length() > 0) {
+                    finalMessage.setLength(finalMessage.length() - 2);
                 }
                 String errMessage = "Schema validation failed in the Response: ";
                 logger.error(errMessage);
@@ -109,5 +118,17 @@ public class SchemaValidator extends AbstractHandler {
             }
         }
         return true;
+    }
+
+    private String getErrorMessage(ValidationReport.Message message) {
+        if (message.getNestedMessages().isEmpty()) {
+            return message.getMessage();
+        }
+        StringBuilder combinedMessages = new StringBuilder();
+        combinedMessages.append(message.getMessage());
+        for (ValidationReport.Message nestedMessage : message.getNestedMessages()) {
+            combinedMessages.append(", ").append(getErrorMessage(nestedMessage));
+        }
+        return combinedMessages.toString().trim();
     }
 }

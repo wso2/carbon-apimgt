@@ -27,11 +27,14 @@ public class APIDefinitionContentSearchResult {
     private String name;
     private String apiUuid;
     private String apiName;
+    private String apiDisplayName;
     private String apiContext;
     private String apiVersion;
     private String apiProvider;
     private String apiType;
     private String associatedType;
+    private String createdTime;
+    private String updatedTime;
 
     public String getId() {
         return id;
@@ -49,6 +52,22 @@ public class APIDefinitionContentSearchResult {
         this.name = name;
     }
 
+    public String getCreatedTime() {
+        return createdTime;
+    }
+
+    public void setCreatedTime(String createdTime) {
+        this.createdTime = createdTime;
+    }
+
+    public String getUpdatedTime() {
+        return updatedTime;
+    }
+
+    public void setUpdatedTime(String updatedTime) {
+        this.updatedTime = updatedTime;
+    }
+
     public String getApiUuid() {
         return apiUuid;
     }
@@ -63,6 +82,14 @@ public class APIDefinitionContentSearchResult {
 
     public void setApiName(String apiName) {
         this.apiName = apiName;
+    }
+
+    public String getApiDisplayName() {
+        return apiDisplayName;
+    }
+
+    public void setApiDisplayName(String apiDisplayName) {
+        this.apiDisplayName = apiDisplayName;
     }
 
     public String getApiVersion() {

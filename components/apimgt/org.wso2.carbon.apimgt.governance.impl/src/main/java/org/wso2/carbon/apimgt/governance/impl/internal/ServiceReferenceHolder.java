@@ -18,8 +18,9 @@
 
 package org.wso2.carbon.apimgt.governance.impl.internal;
 
-import org.wso2.carbon.apimgt.governance.impl.config.GovernanceConfigurationService;
 import org.wso2.carbon.apimgt.governance.impl.validator.ValidationEngineService;
+import org.wso2.carbon.apimgt.impl.APIMDependencyConfigurationService;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 
 /**
  * This class represents the Governance Service Reference Holder
@@ -27,7 +28,8 @@ import org.wso2.carbon.apimgt.governance.impl.validator.ValidationEngineService;
 public class ServiceReferenceHolder {
 
     private static final ServiceReferenceHolder instance = new ServiceReferenceHolder();
-    private GovernanceConfigurationService govConfigurationService;
+    private APIManagerConfigurationService apiMgtConfigService;
+    private APIMDependencyConfigurationService dependencyConfigurationService;
     private ValidationEngineService validationEngineService;
 
     public static ServiceReferenceHolder getInstance() {
@@ -35,14 +37,14 @@ public class ServiceReferenceHolder {
         return instance;
     }
 
-    public GovernanceConfigurationService getGovernanceConfigurationService() {
+    public APIManagerConfigurationService getAPIMConfigurationService() {
 
-        return govConfigurationService;
+        return apiMgtConfigService;
     }
 
-    public void setGovernanceConfigurationService(GovernanceConfigurationService amConfigurationService) {
+    public void setAPIMConfigurationService(APIManagerConfigurationService apiMgtConfigService) {
 
-        this.govConfigurationService = amConfigurationService;
+        this.apiMgtConfigService = apiMgtConfigService;
     }
 
     public ValidationEngineService getValidationEngineService() {
@@ -51,5 +53,14 @@ public class ServiceReferenceHolder {
 
     public void setValidationEngineService(ValidationEngineService validationEngineService) {
         this.validationEngineService = validationEngineService;
+    }
+
+    public void setAPIMDependencyConfigurationService(
+            APIMDependencyConfigurationService dependencyConfigurationService) {
+        this.dependencyConfigurationService = dependencyConfigurationService;
+    }
+
+    public APIMDependencyConfigurationService getAPIMDependencyConfigurationService() {
+        return dependencyConfigurationService;
     }
 }

@@ -65,6 +65,10 @@ public class APIConsumerImplWrapper extends APIConsumerImpl {
         return new APIManagerConfiguration();
     }
 
+    protected WorkflowExecutor getWorkflowExecutor(String workflowType, String tenant) throws WorkflowException {
+        return new SampleWorkFlowExecutor();
+    }
+
     protected WorkflowExecutor getWorkflowExecutor(String workflowType) throws WorkflowException {
         return new SampleWorkFlowExecutor();
     }

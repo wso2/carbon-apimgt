@@ -38,6 +38,8 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.GatewayPoliciesApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.WorkflowsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.LabelsApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.DesignAssistantApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.AiServiceProvidersApi"/>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>
@@ -55,7 +57,7 @@
 
     <bean id="URLValidationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.URLValidationInterceptor">
         <property name="majorVersion" value="v4" />
-        <property name="latestVersion" value="v4.2" />
+        <property name="latestVersion" value="v4.5" />
     </bean>
     <bean id="PreAuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.PreAuthenticationInterceptor" />
     <bean id="TokenMergeInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.TokenMergeInterceptor" />
@@ -84,7 +86,9 @@
                   value="#{systemProperties['rest.api.publisher.allowed.origins'] != null ?
                       systemProperties['rest.api.publisher.allowed.origins'].split(',') : {}}"/>
     </bean>
-    <bean id="OrganizationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.OrganizationInterceptor"/>
+    <bean id="OrganizationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.OrganizationInterceptor">
+        <property name="allowTenantHeader" value="false" />
+    </bean>
     <bean id="ResourceQuotaLimitInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.quotalimit.ResourceQuotaLimitInterceptor"/>
 
     <!-- Out interceptors -->

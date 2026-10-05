@@ -20,24 +20,43 @@ import javax.validation.Valid;
 
 public class APIKeyGenerateRequestDTO   {
   
-    private Integer validityPeriod = null;
+    private String keyName = null;
+    private Long validityPeriod = null;
     private Object additionalProperties = null;
 
   /**
-   * Token validity period
+   * API Key name
    **/
-  public APIKeyGenerateRequestDTO validityPeriod(Integer validityPeriod) {
+  public APIKeyGenerateRequestDTO keyName(String keyName) {
+    this.keyName = keyName;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Test_Key", value = "API Key name")
+  @JsonProperty("keyName")
+  public String getKeyName() {
+    return keyName;
+  }
+  public void setKeyName(String keyName) {
+    this.keyName = keyName;
+  }
+
+  /**
+   * API key validity period
+   **/
+  public APIKeyGenerateRequestDTO validityPeriod(Long validityPeriod) {
     this.validityPeriod = validityPeriod;
     return this;
   }
 
   
-  @ApiModelProperty(example = "3600", value = "Token validity period")
+  @ApiModelProperty(example = "3600", value = "API key validity period")
   @JsonProperty("validityPeriod")
-  public Integer getValidityPeriod() {
+  public Long getValidityPeriod() {
     return validityPeriod;
   }
-  public void setValidityPeriod(Integer validityPeriod) {
+  public void setValidityPeriod(Long validityPeriod) {
     this.validityPeriod = validityPeriod;
   }
 
@@ -70,13 +89,14 @@ public class APIKeyGenerateRequestDTO   {
       return false;
     }
     APIKeyGenerateRequestDTO apIKeyGenerateRequest = (APIKeyGenerateRequestDTO) o;
-    return Objects.equals(validityPeriod, apIKeyGenerateRequest.validityPeriod) &&
+    return Objects.equals(keyName, apIKeyGenerateRequest.keyName) &&
+        Objects.equals(validityPeriod, apIKeyGenerateRequest.validityPeriod) &&
         Objects.equals(additionalProperties, apIKeyGenerateRequest.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(validityPeriod, additionalProperties);
+    return Objects.hash(keyName, validityPeriod, additionalProperties);
   }
 
   @Override
@@ -84,6 +104,7 @@ public class APIKeyGenerateRequestDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIKeyGenerateRequestDTO {\n");
     
+    sb.append("    keyName: ").append(toIndentedString(keyName)).append("\n");
     sb.append("    validityPeriod: ").append(toIndentedString(validityPeriod)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");

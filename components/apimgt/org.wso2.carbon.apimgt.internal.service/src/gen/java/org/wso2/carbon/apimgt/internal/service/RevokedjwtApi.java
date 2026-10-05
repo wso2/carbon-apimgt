@@ -26,7 +26,7 @@ import javax.validation.constraints.*;
 
 @Api(description = "the revokedjwt API")
 
-@Produces({ "application/json" })
+
 
 
 public class RevokedjwtApi  {

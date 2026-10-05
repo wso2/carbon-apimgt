@@ -16,25 +16,18 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security;
 
-import io.swagger.v3.oas.models.OpenAPI;
-import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
-import org.apache.http.HttpStatus;
 import org.apache.synapse.ManagedLifecycle;
-import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
-import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
-import org.apache.synapse.transport.passthru.PassThroughConstants;
-import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
@@ -49,10 +42,15 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.basicauth.BasicAuthAuthe
 import org.wso2.carbon.apimgt.gateway.handlers.security.oauth.OAuthAuthenticator;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
+import org.wso2.carbon.apimgt.gateway.utils.MCPUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
@@ -64,7 +62,6 @@ import org.wso2.carbon.metrics.manager.Timer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
@@ -97,14 +94,14 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     private SynapseEnvironment synapseEnvironment;
 
     private String authorizationHeader;
-    private Set<String> audiences = new HashSet<>();;
+    private Set<String> audiences = new HashSet<>();
     private String apiKeyHeader;
     private String apiSecurity;
     private String apiLevelPolicy;
     private String certificateInformation;
     private String apiUUID;
     private String apiType = String.valueOf(APIConstants.ApiTypes.API); // Default API Type
-    private OpenAPI openAPI;
+    private String subType;
     private String keyManagers;
     private final String type = ExtensionType.AUTHENTICATION.toString();
     private String securityContextHeader;
@@ -168,11 +165,28 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
      * @param apiType API Type
      */
     public void setApiType(String apiType) {
-        // Since we currently support only Product APIs as the alternative, set the value to "PRODUCT_API" only if
-        // the same value is provided as the type. Else the default value will remain as "API".
-        if (APIConstants.ApiTypes.PRODUCT_API.name().equalsIgnoreCase(apiType)) {
+        // Since we currently support Product APIs and MCP Servers as alternatives, set the value to "PRODUCT_API" only
+        // if the same value is provided as the type. Else the default value will remain as "API".
+        if (APIConstants.ApiTypes.PRODUCT_API.name().equalsIgnoreCase(apiType) ||
+                APIConstants.API_TYPE_MCP.equalsIgnoreCase(apiType)){
             this.apiType = apiType;
         }
+    }
+
+    /**
+     * Get subtype of the API
+     * @return API Subtype
+     */
+    public String getSubType() {
+        return subType;
+    }
+
+    /**
+     * Set subtype of the API
+     * @param subType API Subtype
+     */
+    public void setSubType(String subType) {
+        this.subType = subType;
     }
 
     private boolean removeOAuthHeadersFromOutMessage = true;
@@ -439,14 +453,64 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             }
 
             messageContext.setProperty(APIMgtGatewayConstants.API_TYPE, apiType);
+            messageContext.setProperty(APIMgtGatewayConstants.SUB_TYPE, subType);
+            if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(apiType)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Setting API type for MCP internal key authentication: " + apiType);
+                }
+                messageContext.setProperty(APIConstants.API_TYPE, apiType); // for MCP internal key auth
+            }
+            boolean isMCPNoAuthRequest = false;
+            if (messageContext.getProperty(APIMgtGatewayConstants.MCP_NO_AUTH_REQUEST) != null) {
+                isMCPNoAuthRequest = (boolean) messageContext.getProperty(APIMgtGatewayConstants.MCP_NO_AUTH_REQUEST);
+            }
+
+            if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(apiType) && isMCPNoAuthRequest) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Skipping authentication for MCP request"
+                            + ", method: " + messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD));
+                }
+                handleNoAuthentication(messageContext);
+                setAPIParametersToMessageContext(messageContext);
+
+                //remove authorization header if exists
+                try {
+                    org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
+                            getAxis2MessageContext();
+                    Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+                    String authHeader = APIUtil.getOAuthConfigurationFromAPIMConfig(APIConstants.AUTHORIZATION_HEADER);
+                    if (authHeader == null) {
+                        authHeader = HttpHeaders.AUTHORIZATION;
+                    }
+                    
+                    if (headers != null && headers.get(authHeader) != null) {
+                        headers.remove(authHeader);
+                    }
+                } catch (APIManagementException e) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Error while removing authorization header for MCP request", e);
+                    }
+                }
+
+                return ExtensionListenerUtil.postProcessRequest(messageContext, type);
+            }
+
             if (ExtensionListenerUtil.preProcessRequest(messageContext, type)) {
                 if (!isAuthenticatorsInitialized) {
                     initializeAuthenticators();
                 }
+                messageContext.setProperty(APIMgtGatewayConstants.AUTHENTICATORS_CHALLENGE_STRING, getAuthenticatorsChallengeString());
                 if (!isOauthParamsInitialized) {
                     initOAuthParams();
                 }
-                String authenticationScheme = getAPIKeyValidator().getResourceAuthenticationScheme(messageContext);
+
+                String authenticationScheme;
+                if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(apiType)) {
+                    authenticationScheme = MCPUtils.getResourceAuthenticationSchemeForMCP(messageContext, getAPIKeyValidator());
+                } else {
+                    authenticationScheme = getAPIKeyValidator().getResourceAuthenticationScheme(messageContext);
+                }
+
                 if(APIConstants.AUTH_NO_AUTHENTICATION.equals(authenticationScheme)) {
                     if(log.isDebugEnabled()){
                         log.debug("Found Authentication Scheme: ".concat(authenticationScheme));
@@ -680,68 +744,8 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     }
 
     private void handleAuthFailure(MessageContext messageContext, APISecurityException e) {
-        messageContext.setProperty(SynapseConstants.ERROR_CODE, e.getErrorCode());
-        messageContext.setProperty(SynapseConstants.ERROR_MESSAGE,
-                APISecurityConstants.getAuthenticationFailureMessage(e.getErrorCode()));
-        messageContext.setProperty(SynapseConstants.ERROR_EXCEPTION, e);
-
-        Mediator sequence = messageContext.getSequence(APISecurityConstants.API_AUTH_FAILURE_HANDLER);
-
-        //Setting error description which will be available to the handler
-        String errorDetail = APISecurityConstants.getFailureMessageDetailDescription(e.getErrorCode(), e.getMessage());
-        // if custom auth header is configured, the error message should specify its name instead of default value
-        if (e.getErrorCode() == APISecurityConstants.API_AUTH_MISSING_CREDENTIALS) {
-            errorDetail =
-                    APISecurityConstants.getFailureMessageDetailDescription(e.getErrorCode(), e.getMessage()) + "'"
-                            + authorizationHeader + " : Bearer ACCESS_TOKEN' or '" + authorizationHeader +
-                            " : Basic ACCESS_TOKEN' or '" + apiKeyHeader + " : API_KEY'";
-        }
-        messageContext.setProperty(SynapseConstants.ERROR_DETAIL, errorDetail);
-
-        // By default we send a 401 response back
-        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
-                getAxis2MessageContext();
-        // This property need to be set to avoid sending the content in pass-through pipe (request message)
-        // as the response.
-        axis2MC.setProperty(PassThroughConstants.MESSAGE_BUILDER_INVOKED, Boolean.TRUE);
-        try {
-            RelayUtils.consumeAndDiscardMessage(axis2MC);
-        } catch (AxisFault axisFault) {
-            //In case of an error it is logged and the process is continued because we're setting a fault message in the payload.
-            log.error("Error occurred while consuming and discarding the message", axisFault);
-        }
-        axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, "application/soap+xml");
-        int status;
-        if (e.getErrorCode() == APISecurityConstants.API_AUTH_GENERAL_ERROR ||
-                e.getErrorCode() == APISecurityConstants.API_AUTH_MISSING_OPEN_API_DEF) {
-            status = HttpStatus.SC_INTERNAL_SERVER_ERROR;
-        } else if (e.getErrorCode() == APISecurityConstants.API_AUTH_INCORRECT_API_RESOURCE ||
-                e.getErrorCode() == APISecurityConstants.API_AUTH_FORBIDDEN ||
-                e.getErrorCode() == APISecurityConstants.API_OAUTH_INVALID_AUDIENCES ||
-                e.getErrorCode() == APISecurityConstants.INVALID_SCOPE) {
-            status = HttpStatus.SC_FORBIDDEN;
-        } else {
-            status = HttpStatus.SC_UNAUTHORIZED;
-            Map<String, String> headers =
-                    (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-            if (headers != null) {
-                headers.put(HttpHeaders.WWW_AUTHENTICATE, getAuthenticatorsChallengeString() +
-                        " error=\"invalid_token\"" +
-                        ", error_description=\"The provided token is invalid\"");
-                axis2MC.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
-            }
-        }
-
-        messageContext.setProperty(APIMgtGatewayConstants.HTTP_RESPONSE_STATUS_CODE, status);
-
-        // Invoke the custom error handler specified by the user
-        if (sequence != null && !sequence.mediate(messageContext)) {
-            // If needed user should be able to prevent the rest of the fault handling
-            // logic from getting executed
-            return;
-        }
-
-        sendFault(messageContext, status);
+        GatewayUtils.handleAuthFailure(messageContext, e, this.authorizationHeader, this.apiKeyHeader,
+                getAuthenticatorsChallengeString(), apiType);
     }
 
     protected void sendFault(MessageContext messageContext, int status) {
@@ -879,5 +883,11 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
     public void setKeyManagers(String keyManagers) {
         this.keyManagers = keyManagers;
+    }
+
+    public boolean isMCPGetRequest(MessageContext messageContext) {
+        String path = (String) messageContext.getProperty(APIMgtGatewayConstants.API_ELECTED_RESOURCE);
+        String httpMethod = (String) messageContext.getProperty(APIMgtGatewayConstants.HTTP_METHOD);
+        return (APIConstants.MCP.MCP_RESOURCES_MCP.equals(path) && APIConstants.HTTP_GET.equalsIgnoreCase(httpMethod));
     }
 }

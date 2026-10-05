@@ -17,9 +17,15 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings;
 
+import org.apache.commons.lang3.StringUtils;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.GatewayVisibilityPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.PlatformGateway;
 import org.wso2.carbon.apimgt.api.model.VHost;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dto.PlatformGatewayConnectConfig;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AdditionalPropertyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentListDTO;
@@ -66,19 +72,120 @@ public class EnvironmentMappingUtil {
         envDTO.setProvider(env.getProvider());
         envDTO.setGatewayType(env.getGatewayType());
         envDTO.setIsReadOnly(env.isReadOnly());
+        envDTO.setMode(EnvironmentDTO.ModeEnum.valueOf(env.getMode()));
+        envDTO.setApiDiscoveryScheduledWindow(env.getApiDiscoveryScheduledWindow());
         envDTO.setVhosts(env.getVhosts().stream().map(EnvironmentMappingUtil::fromVHostToVHostDTO)
                 .collect(Collectors.toList()));
         envDTO.setAdditionalProperties(fromAdditionalPropertiesToAdditionalPropertiesDTO
                 (env.getAdditionalProperties()));
-        GatewayVisibilityPermissionConfigurationDTO permissions = env.getPermissions();
-        if (permissions != null) {
-            EnvironmentPermissionsDTO environmentPermissionsDTO = new EnvironmentPermissionsDTO();
-            environmentPermissionsDTO.setPermissionType(EnvironmentPermissionsDTO.PermissionTypeEnum
-                    .fromValue(permissions.getPermissionType()));
-            environmentPermissionsDTO.setRoles(permissions.getRoles());
-            envDTO.setPermissions(environmentPermissionsDTO);
-        }
+        envDTO.setPermissions(mapPermissionsToDTO(env.getPermissions()));
+        envDTO.setPlatformGatewayVersions(resolvePlatformGatewayVersions());
         return envDTO;
+    }
+
+    /**
+     * Convert a Platform Gateway to EnvironmentDTO so it can be included in the unified
+     * GET /environments list (deploy targets). UI can use gatewayType to distinguish from
+     * traditional gateway environments.
+     *
+     * @param gateway       PlatformGateway from AM_PLATFORM_GATEWAY
+     * @param gatewayType   gateway type constant (e.g. APIPlatform)
+     * @return EnvironmentDTO suitable for deploy-target list
+     */
+    public static EnvironmentDTO fromPlatformGatewayToEnvDTO(PlatformGateway gateway, String gatewayType,
+            GatewayVisibilityPermissionConfigurationDTO permissions) {
+        EnvironmentDTO envDTO = new EnvironmentDTO();
+        envDTO.setId(gateway.getId());
+        envDTO.setName(gateway.getName());
+        envDTO.setDisplayName(gateway.getDisplayName());
+        envDTO.setDescription(gateway.getDescription());
+        envDTO.setGatewayType(gatewayType);
+        // Allow delete in UI; server validates and returns 409 if API revisions are deployed
+        envDTO.setIsReadOnly(false);
+        envDTO.setMode(EnvironmentDTO.ModeEnum.WRITE_ONLY);
+        envDTO.setType("hybrid");
+
+        // Populate vhosts from platform gateway base URL
+        List<VHostDTO> vhosts = new ArrayList<>();
+        String baseUrl = gateway.getVhost();
+        if (StringUtils.isNotBlank(baseUrl)) {
+            try {
+                if (baseUrl.contains("://")) {
+                    VHost vhost = VHost.fromEndpointUrls(new String[]{baseUrl.trim()});
+                    vhosts.add(fromVHostToVHostDTO(vhost));
+                    envDTO.setVhost(java.net.URI.create(baseUrl.trim()));
+                } else {
+                    VHostDTO vhostDTO = new VHostDTO();
+                    vhostDTO.setHost(baseUrl.trim());
+                    vhostDTO.setHttpPort(VHost.DEFAULT_HTTP_PORT);
+                    vhostDTO.setHttpsPort(VHost.DEFAULT_HTTPS_PORT);
+                    vhostDTO.setWsPort(9099);
+                    vhostDTO.setWssPort(8099);
+                    vhosts.add(vhostDTO);
+                    envDTO.setVhost(java.net.URI.create(APIConstants.HTTPS_PROTOCOL_URL_PREFIX + baseUrl.trim()));
+                }
+            } catch (APIManagementException e) {
+                VHostDTO vhostDTO = new VHostDTO();
+                vhostDTO.setHost(baseUrl.trim());
+                vhostDTO.setHttpPort(VHost.DEFAULT_HTTP_PORT);
+                vhostDTO.setHttpsPort(VHost.DEFAULT_HTTPS_PORT);
+                vhostDTO.setWsPort(9099);
+                vhostDTO.setWssPort(8099);
+                vhosts.add(vhostDTO);
+            }
+        }
+        envDTO.setVhosts(vhosts);
+        envDTO.setEndpointURIs(new ArrayList<>());
+
+        // Include platform gateway metadata in additionalProperties for UI consumption
+        List<AdditionalPropertyDTO> additionalProps = new ArrayList<>();
+        AdditionalPropertyDTO isActiveProperty = new AdditionalPropertyDTO();
+        isActiveProperty.setKey("isActive");
+        isActiveProperty.setValue(String.valueOf(gateway.isActive()));
+        additionalProps.add(isActiveProperty);
+        AdditionalPropertyDTO platformGatewayIdProperty = new AdditionalPropertyDTO();
+        platformGatewayIdProperty.setKey("platformGatewayId");
+        platformGatewayIdProperty.setValue(gateway.getId());
+        additionalProps.add(platformGatewayIdProperty);
+        envDTO.setAdditionalProperties(additionalProps);
+
+        envDTO.setPermissions(mapPermissionsToDTO(permissions));
+        // Gateway connection status for GET /environments (Active/Inactive for platform gateways)
+        envDTO.setStatus(Boolean.TRUE.equals(gateway.isActive())
+                ? EnvironmentDTO.StatusEnum.ACTIVE
+                : EnvironmentDTO.StatusEnum.INACTIVE);
+        envDTO.setPlatformGatewayVersions(resolvePlatformGatewayVersions());
+        return envDTO;
+    }
+
+    /**
+     * Resolve Platform Gateway versions from config.
+     */
+    private static List<String> resolvePlatformGatewayVersions() {
+        PlatformGatewayConnectConfig config = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getPlatformGatewayConnectConfig();
+        if (config == null) {
+            return new ArrayList<>();
+        }
+        List<String> versions = config.getPlatformGatewayVersions();
+        return versions.isEmpty() ? new ArrayList<>() : versions;
+    }
+
+    /**
+     * Map internal permissions model to REST API DTO.
+     * Always returns a non-null DTO, defaulting to PUBLIC if permissions are null.
+     */
+    private static EnvironmentPermissionsDTO mapPermissionsToDTO(
+            GatewayVisibilityPermissionConfigurationDTO permissions) {
+        EnvironmentPermissionsDTO dto = new EnvironmentPermissionsDTO();
+        if (permissions == null || permissions.getPermissionType() == null) {
+            dto.setPermissionType(EnvironmentPermissionsDTO.PermissionTypeEnum.PUBLIC);
+            return dto;
+        }
+        dto.setPermissionType(EnvironmentPermissionsDTO.PermissionTypeEnum
+                .fromValue(permissions.getPermissionType()));
+        dto.setRoles(permissions.getRoles());
+        return dto;
     }
 
     /**
@@ -112,6 +219,8 @@ public class EnvironmentMappingUtil {
         vHostDTO.setHttpsPort(vHost.getHttpsPort());
         vHostDTO.setWsPort(vHost.getWsPort());
         vHostDTO.setWssPort(vHost.getWssPort());
+        vHostDTO.setWsHost(vHost.getWsHost());
+        vHostDTO.setWssHost(vHost.getWssHost());
         return vHostDTO;
     }
 
@@ -140,11 +249,19 @@ public class EnvironmentMappingUtil {
         env.setUuid(envDTO.getId());
         env.setName(envDTO.getName());
         env.setType(envDTO.getType());
-        env.setDisplayName(envDTO.getDisplayName());
+        // Backward compatibility: displayName is optional for gateway environments.
+        // If it's missing, default it to the environment `name` to avoid DB/validation failures.
+        String displayName = envDTO.getDisplayName();
+        if (displayName == null || displayName.trim().isEmpty()) {
+            displayName = envDTO.getName();
+        }
+        env.setDisplayName(displayName);
         env.setDescription(envDTO.getDescription());
         env.setProvider(envDTO.getProvider());
         env.setGatewayType(envDTO.getGatewayType());
-        env.setReadOnly(false);
+        env.setReadOnly(envDTO.isIsReadOnly());
+        env.setMode(envDTO.getMode().toString());
+        env.setApiDiscoveryScheduledWindow(envDTO.getApiDiscoveryScheduledWindow());
         env.setVhosts(envDTO.getVhosts().stream().map(EnvironmentMappingUtil::fromVHostDtoToVHost)
                 .collect(Collectors.toList()));
         env.setAdditionalProperties(fromAdditionalPropertiesDTOToAdditionalProperties
@@ -175,16 +292,8 @@ public class EnvironmentMappingUtil {
         vhost.setHttpsPort(vhostDTO.getHttpsPort());
         vhost.setWsPort(vhostDTO.getWsPort());
         vhost.setWssPort(vhostDTO.getWssPort());
-        if (vhostDTO.getWsHost() == null) {
-            vhost.setWsHost(vhostDTO.getHost());
-        } else {
-            vhost.setWsHost(vhostDTO.getWsHost());
-        }
-        if (vhostDTO.getWssHost() == null) {
-            vhost.setWssHost(vhostDTO.getHost());
-        } else {
-            vhost.setWssHost(vhostDTO.getWssHost());
-        }
+        vhost.setWsHost(vhostDTO.getWsHost());
+        vhost.setWssHost(vhostDTO.getWssHost());
         return vhost;
     }
 

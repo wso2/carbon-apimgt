@@ -43,7 +43,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Retrieve/Search APIs ", notes = "This operation provides you a list of available APIs qualifying under a given search condition. Each retrieved API is represented with a minimal amount of attributes. If you want to get complete details of an API, you need to use **Get details of an API** operation. ", response = SearchResultListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:api_provider_change", description = "Retrieve and manage applications")
+            @AuthorizationScope(scope = "apim:api_provider_change", description = "Retrieve and manage apis"),
+            @AuthorizationScope(scope = "apim:admin_api_view", description = "View Apis")
         })
     }, tags={ "APIs",  })
     @ApiResponses(value = { 
@@ -61,7 +62,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Update the api provider", notes = "Update the api provider ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:api_provider_change", description = "Retrieve and manage applications")
+            @AuthorizationScope(scope = "apim:api_provider_change", description = "Retrieve and manage apis")
         })
     }, tags={ "Api Provider Change" })
     @ApiResponses(value = { 

@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.util.interceptors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.message.Message;
@@ -23,15 +24,19 @@ import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.MethodStats;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Arrays;
 import javax.cache.Cache;
@@ -76,6 +81,11 @@ public class SubscriberRegistrationInterceptor extends AbstractPhaseInterceptor 
         // check the existence in the database
         String groupId = RestApiUtil.getLoggedInUserGroupId();
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        OrganizationInfo orgInfo = (OrganizationInfo) message.get(RestApiConstants.ORGANIZATION_INFO);
+        String organizationId = null;
+        if (orgInfo != null && !StringUtils.isEmpty(orgInfo.getOrganizationId())) {
+            organizationId = orgInfo.getOrganizationId();
+        }
         try {
             //takes a consumer object using the user set in thread local carbon context
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
@@ -98,7 +108,7 @@ public class SubscriberRegistrationInterceptor extends AbstractPhaseInterceptor 
                         if (!APIConstants.SUPER_TENANT_DOMAIN.equalsIgnoreCase(tenantDomain)) {
                             loadTenantRegistry();
                         }
-                        apiConsumer.addSubscriber(username, groupId);
+                        apiConsumer.addSubscriber(username, groupId, organizationId);
 
                         // The subscriber object added here is not a complete subscriber object. It will only contain
                         //  username
@@ -109,6 +119,22 @@ public class SubscriberRegistrationInterceptor extends AbstractPhaseInterceptor 
                     }
                 }
             } else {
+                if (organizationId != null && APIUtil.isDefaultApplicationCreationEnabled()
+                        && !APIUtil.isDefaultApplicationCreationDisabledForTenant(
+                                MultitenantUtils.getTenantDomain(username))) {
+                    Application defaultAPP = ApplicationUtils.retrieveApplication(APIConstants.DEFAULT_APPLICATION_NAME,
+                            username, groupId);
+                    if (defaultAPP.getSubOrganization() == null) {
+                        synchronized ((username + LOCK_POSTFIX).intern()) {
+                            defaultAPP = ApplicationUtils.retrieveApplication(APIConstants.DEFAULT_APPLICATION_NAME,
+                                    username, groupId);
+                            if (defaultAPP.getSubOrganization() == null) {
+                                defaultAPP.setSubOrganization(organizationId);
+                                apiConsumer.updateApplication(defaultAPP);
+                            }
+                        }
+                    }
+                }
                 subscriberCache.put(username, subscriber);
             }
         } catch (APIManagementException e) {

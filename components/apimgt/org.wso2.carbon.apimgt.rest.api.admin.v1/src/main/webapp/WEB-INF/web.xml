@@ -45,12 +45,14 @@
             org.wso2.carbon.apimgt.rest.api.admin.v1.SwaggerYamlApi,
             org.wso2.carbon.apimgt.rest.api.admin.v1.KeyManagersApi,
             org.wso2.carbon.apimgt.rest.api.admin.v1.TenantThemeApi,
+            org.wso2.carbon.apimgt.rest.api.admin.v1.OrgThemesApi,
             org.wso2.carbon.apimgt.rest.api.admin.v1.AlertTypesApi,
             org.wso2.carbon.apimgt.rest.api.admin.v1.AlertSubscriptionsApi,
             org.wso2.carbon.apimgt.rest.api.admin.v1.SystemScopesApi,
             org.wso2.carbon.apimgt.rest.api.admin.v1.BotDetectionDataApi,
             org.wso2.carbon.apimgt.rest.api.admin.v1.RolesApi,
             org.wso2.carbon.apimgt.rest.api.admin.v1.EnvironmentsApi,
+            org.wso2.carbon.apimgt.rest.api.admin.v1.GatewaysApi,
             org.wso2.carbon.apimgt.rest.api.admin.v1.LlmProvidersApi,
             org.wso2.carbon.apimgt.rest.api.admin.v1.TenantConfigApi,
             org.wso2.carbon.apimgt.rest.api.admin.v1.TenantConfigSchemaApi,
@@ -60,6 +62,9 @@
             org.wso2.carbon.apimgt.rest.api.admin.v1.OrganizationsApi,
             org.wso2.carbon.apimgt.rest.api.admin.v1.LabelsApi,
             org.wso2.carbon.apimgt.rest.api.admin.v1.MeApi,
+            org.wso2.carbon.apimgt.rest.api.admin.v1.AiServiceProvidersApi,
+            org.wso2.carbon.apimgt.rest.api.admin.v1.ApiKeysApi,
+            org.wso2.carbon.apimgt.rest.api.admin.v1.ExportConsumptionApi,
         </param-value>
     </init-param>
     <init-param>
@@ -78,14 +83,14 @@
     <init-param>
         <param-name>jaxrs.inInterceptors</param-name>
         <param-value>
-            org.wso2.carbon.apimgt.rest.api.util.interceptors.URLValidationInterceptor(majorVersion=v4 latestVersion=v4.2),
+            org.wso2.carbon.apimgt.rest.api.util.interceptors.URLValidationInterceptor(majorVersion=v4 latestVersion=v4.5),
             org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.TokenMergeInterceptor,
             org.wso2.carbon.apimgt.rest.api.util.interceptors.PreAuthenticationInterceptor,
             org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.OAuthAuthenticationInterceptor,
             org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.BasicAuthenticationInterceptor,
             org.wso2.carbon.apimgt.rest.api.util.interceptors.PostAuthenticationInterceptor,
             org.wso2.carbon.apimgt.rest.api.util.interceptors.validation.ValidationInInterceptor,
-            org.wso2.carbon.apimgt.rest.api.util.interceptors.OrganizationInterceptor
+            org.wso2.carbon.apimgt.rest.api.util.interceptors.OrganizationInterceptor(allowTenantHeader=false)
         </param-value>
     </init-param>
     <init-param>

@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -34,6 +35,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.zip.ZipEntry;
@@ -296,5 +298,81 @@ public class APIFileUtil {
             }
         }
         return false;
+    }
+
+    /**
+     * Returns the root WSDL file from the extracted WSDL archive directory. The first found WSDL file is considered the
+     * root, consistent with the assumption made in WSDL11ProcessorImpl and WSDL20ProcessorImpl.
+     *
+     * @param extractedArchivePath path to the extracted WSDL archive directory
+     * @return the root WSDL input stream
+     */
+    public static InputStream getRootWSDLFileFromExtractedArchive(String extractedArchivePath)
+            throws APIManagementException {
+        try {
+            File extractedDir = new File(extractedArchivePath);
+            if (!extractedDir.exists() || !extractedDir.isDirectory()) {
+                throw new APIManagementException(
+                        "Extracted WSDL archive path is not a directory.", ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT);
+            }
+            Collection<File> wsdlFiles = searchFilesWithMatchingExtension(extractedDir, WSDL_FILE_EXTENSION);
+            if (wsdlFiles == null || wsdlFiles.isEmpty()) {
+                log.warn("No WSDL files found in extracted archive path " + extractedArchivePath);
+                throw new APIManagementException("", ExceptionCodes.NO_WSDL_FOUND_IN_WSDL_ARCHIVE);
+            }
+            File rootWsdl = wsdlFiles.iterator().next();
+            if (log.isDebugEnabled()) {
+                log.debug("Root WSDL file found in the extracted archive: " + rootWsdl.getAbsolutePath());
+            }
+            return Files.newInputStream(rootWsdl.toPath());
+        } catch (IOException e) {
+            String errorMsg = "Error while getting content of the main WSDL file.";
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT);
+        }
+    }
+
+    /**
+     * Resolves an untrusted user-specified path against the base directory.
+     * Paths that try to escape the base directory are rejected.
+     * @param baseDirPathString the absolute path of the base directory that all
+     *                     user-specified paths should be within
+     * @param userPathString  the untrusted path provided by the user
+     * @return Resolved Path
+     * @throws APIManagementException if resolution fails.
+     */
+    public static Path resolveFilePath(final String baseDirPathString,
+            final String userPathString) throws APIManagementException {
+        Path baseDirPath = Paths.get(baseDirPathString);
+        Path userPath = Paths.get(userPathString);
+        if (!baseDirPath.isAbsolute()) {
+            throw new APIManagementException("Invalid base path provided." +
+                    " Base path must be absolute. Base Path: " + baseDirPath);
+        }
+
+        if (userPath.isAbsolute()) {
+            throw new APIManagementException("Invalid user path provided." +
+                    " User path should not be absolute. User Path: " + userPath);
+        }
+
+        /*
+         * Combines the absolute base directory path and the user-specified relative path.
+         * Then, normalizes the path to handle any ".." elements in the userPath.
+         * For example, if the baseDirPath is "/foo/bar/baz" and userPath is "../attack",
+         * the resulting resolvedPath will be "/foo/bar/attack".
+         */
+        final Path resolvedPath = baseDirPath.resolve(userPath).normalize();
+
+        /*
+         * Verifies that the resolved path is still within the expected base directory.
+         * If the resolved path does not start with the base directory path,
+         * it indicates an attempt to escape the intended directory structure.
+         */
+        if (!resolvedPath.startsWith(baseDirPath.normalize())) {
+            throw new APIManagementException("Error resolving path. The user path attempts" +
+                    " to escape the base directory.");
+        }
+
+        return resolvedPath;
     }
 }

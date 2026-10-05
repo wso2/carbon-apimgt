@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
+import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -155,7 +156,10 @@ public class JWTGenerator extends AbstractJWTGenerator {
 
         APIManagerConfiguration apiManagerConfiguration =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        ExtendedJWTConfigurationDto jwtConfigurationDto = apiManagerConfiguration.getJwtConfigurationDto();
+        boolean isBindFederatedUserClaims = jwtConfigurationDto.isBindFederatedUserClaimsForOpaque();
         if (apiManagerConfiguration.isJWTClaimCacheEnabled()) {
+            log.debug("JWT claim cache is enabled. Looking up claims in cache");
             String cacheKey = username.concat("_").concat(String.valueOf(tenantId));
             Object claims = CacheProvider.getJWTClaimCache().get(cacheKey);
             if (claims instanceof Map) {
@@ -167,24 +171,50 @@ public class JWTGenerator extends AbstractJWTGenerator {
                     if (claims instanceof Map) {
                         return (Map<String, String>) claims;
                     }
+                    log.debug("Claims not found in cache. Retrieving from key manager");
                     Map<String, String> claimsFromKeyManager = getClaimsFromKeyManager(username, accessToken,
-                            tenantId, dialectURI, keyManager);
+                            tenantId, dialectURI, keyManager, isBindFederatedUserClaims);
                     if (claimsFromKeyManager != null) {
+                        log.debug("Successfully retrieved claims from key manager. Caching the claims");
                         CacheProvider.getJWTClaimCache().put(cacheKey, claimsFromKeyManager);
                         return claimsFromKeyManager;
                     }
                 }
             }
         } else {
+            log.debug("JWT claim cache is disabled. Retrieving claims directly from key manager");
             Map<String, String> tempClaims = getClaimsFromKeyManager(username, accessToken, tenantId, dialectURI,
-                    keyManager);
-            if (tempClaims != null) return tempClaims;
+                    keyManager, isBindFederatedUserClaims);
+            if (tempClaims != null) {
+                log.debug("Successfully retrieved claims from key manager");
+                return tempClaims;
+            }
         }
         return new HashMap<>();
     }
 
+    /**
+     * Retrieves user claims from the Key Manager for a given user and tenant context.
+     *
+     * This method communicates with the configured Key Manager to obtain claims associated
+     * with the specified user.
+     *
+     * @param username                   The username of the user whose claims are to be retrieved.
+     * @param accessToken                The access token associated with the user.
+     * @param tenantId                   The tenant ID corresponding to the user.
+     * @param dialectURI                 The claim dialect URI used to format the claims.
+     * @param keyManager                 The name of the configured Key Manager.
+     * @param isBindFederatedUserClaims  A flag indicating whether federated user claims should be bound.
+     *
+     * @return A map of user claims if successfully retrieved from the Key Manager;
+     *         {@code null} if no claims are available or retrieval fails.
+     *
+     * @throws APIManagementException If an error occurs while retrieving claims from the Key Manager.
+     */
     private Map<String, String> getClaimsFromKeyManager(String username, String accessToken, int tenantId,
-                                                               String dialectURI, String keyManager) throws APIManagementException {
+                                                        String dialectURI, String keyManager,
+                                                        boolean isBindFederatedUserClaims)
+            throws APIManagementException {
 
         Map<String, Object> properties = new HashMap<>();
         if (accessToken != null) {
@@ -192,6 +222,7 @@ public class JWTGenerator extends AbstractJWTGenerator {
         }
         if (!StringUtils.isEmpty(dialectURI)) {
             properties.put(APIConstants.KeyManager.CLAIM_DIALECT, dialectURI);
+            properties.put(APIConstants.KeyManager.BINDING_FEDERATED_USER_CLAIMS, isBindFederatedUserClaims);
             KeyManager keymanager = KeyManagerHolder
                     .getKeyManagerInstance(APIUtil.getTenantDomainFromTenantId(tenantId), keyManager);
             if (keymanager != null) {

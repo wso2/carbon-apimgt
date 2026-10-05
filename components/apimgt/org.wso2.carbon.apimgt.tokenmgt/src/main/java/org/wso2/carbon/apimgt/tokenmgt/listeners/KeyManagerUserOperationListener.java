@@ -73,7 +73,7 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
     public boolean doPostUpdateCredential(String userName, Object credential, UserStoreManager userStoreManager)
             throws org.wso2.carbon.user.core.UserStoreException {
 
-        clearGatewayUsernameCache(userName);
+        clearGatewayUsernameCache(userName, getTenantDomain());
         return super.doPostUpdateCredential(userName, credential, userStoreManager);
     }
 
@@ -82,7 +82,7 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
                                                  UserStoreManager userStoreManager)
             throws org.wso2.carbon.user.core.UserStoreException {
 
-        clearGatewayUsernameCache(userName);
+        clearGatewayUsernameCache(userName,getTenantDomain());
         return super.doPostUpdateCredentialByAdmin(userName, credential, userStoreManager);
     }
 
@@ -91,7 +91,7 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
                                               UserStoreManager userStoreManager)
             throws org.wso2.carbon.user.core.UserStoreException {
 
-        clearGatewayUsernameCache(userName);
+        clearGatewayUsernameCache(userName,getTenantDomain());
         return super.doPostUpdateRoleListOfUser(userName, deletedRoles, newRoles, userStoreManager);
     }
 
@@ -100,7 +100,7 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
                                               UserStoreManager userStoreManager)
             throws org.wso2.carbon.user.core.UserStoreException {
 
-        clearGatewayUsernameCache((String[]) ArrayUtils.addAll(newUsers, deletedUsers));
+        clearGatewayUsernameCache((String[]) ArrayUtils.addAll(newUsers, deletedUsers),getTenantDomain());
         return super.doPostUpdateUserListOfRole(roleName, deletedUsers, newUsers, userStoreManager);
     }
 
@@ -109,7 +109,7 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
                                  String profile, UserStoreManager userStoreManager)
             throws org.wso2.carbon.user.core.UserStoreException {
 
-        clearGatewayUsernameCache(userName);
+        clearGatewayUsernameCache(userName,getTenantDomain());
         return super.doPostAddUser(userName, credential, roleList, claims, profile, userStoreManager);
     }
 
@@ -117,7 +117,7 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
     public boolean doPostDeleteUser(String userName, UserStoreManager userStoreManager)
             throws org.wso2.carbon.user.core.UserStoreException {
 
-        clearGatewayUsernameCache(userName);
+        clearGatewayUsernameCache(userName,getTenantDomain());
         return super.doPostDeleteUser(userName, userStoreManager);
     }
 
@@ -203,10 +203,10 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
      *
      * @param username The username to be cleared from the cache
      */
-    private void clearGatewayUsernameCache(String username) {
+    private void clearGatewayUsernameCache(String username,String tenantDomain) {
 
         APIAuthenticationAdminClient client = getApiAuthenticationAdminClient();
-        client.invalidateCachedUsername(getEndUserName(username));
+        client.invalidateCachedUsername(getEndUserName(username), tenantDomain);
 
     }
 
@@ -215,13 +215,13 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
      *
      * @param usernameList The list of username to be cleared from the cache
      */
-    private void clearGatewayUsernameCache(String[] usernameList) {
+    private void clearGatewayUsernameCache(String[] usernameList, String tenantDomain) {
 
         APIAuthenticationAdminClient client = getApiAuthenticationAdminClient();
         for (int i = 0; i < usernameList.length; i++) {
             usernameList[i] = getEndUserName(usernameList[i]);
         }
-        client.invalidateCachedUsernames(usernameList);
+        client.invalidateCachedUsernames(usernameList, tenantDomain);
 
         log.debug("Removed cached usernames of the Gateway.");
 

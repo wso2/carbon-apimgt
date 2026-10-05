@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.internal.service.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.internal.service.dto.RevokedJWTConsumerKeyDTO;
@@ -17,7 +19,11 @@ import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
+import javax.validation.Valid;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 
 public class RevokedEventsDTO   {
   
@@ -34,6 +40,7 @@ public class RevokedEventsDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("revokedJWTList")
   public List<RevokedJWTDTO> getRevokedJWTList() {
     return revokedJWTList;
@@ -51,6 +58,7 @@ public class RevokedEventsDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("revokedJWTSubjectEntityList")
   public List<RevokedJWTSubjectEntityDTO> getRevokedJWTSubjectEntityList() {
     return revokedJWTSubjectEntityList;
@@ -68,6 +76,7 @@ public class RevokedEventsDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("revokedJWTConsumerKeyList")
   public List<RevokedJWTConsumerKeyDTO> getRevokedJWTConsumerKeyList() {
     return revokedJWTConsumerKeyList;

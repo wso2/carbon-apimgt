@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.gateway;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
@@ -30,6 +31,7 @@ import org.apache.http.util.EntityUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.utils.TenantUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
@@ -50,15 +52,17 @@ public class EndpointCertificateDeployer {
 
     private static final Log log = LogFactory.getLog(EndpointCertificateDeployer.class);
     private String tenantDomain;
-    private final EventHubConfigurationDto eventHubConfigurationDto =
-            ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getEventHubConfigurationDto();
-    private String baseURL = eventHubConfigurationDto.getServiceUrl() + APIConstants.INTERNAL_WEB_APP_EP;
+    private final EventHubConfigurationDto eventHubConfigurationDto;
+    private final String baseURL;
 
     public EndpointCertificateDeployer() {
+        eventHubConfigurationDto =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getEventHubConfigurationDto();
+        baseURL = eventHubConfigurationDto.getServiceUrl() + APIConstants.INTERNAL_WEB_APP_EP;
     }
 
     public EndpointCertificateDeployer(String tenantDomain) {
-
+        this();
         this.tenantDomain = tenantDomain;
     }
 
@@ -168,7 +172,8 @@ public class EndpointCertificateDeployer {
         }
     }
 
-    private void retrieveAllTenantCertificatesAndDeploy(CloseableHttpResponse closeableHttpResponse) throws IOException {
+    private void retrieveAllTenantCertificatesAndDeploy(CloseableHttpResponse closeableHttpResponse)
+            throws IOException {
 
         boolean tenantFlowStarted = false;
         if (closeableHttpResponse.getStatusLine().getStatusCode() == 200) {
@@ -200,9 +205,28 @@ public class EndpointCertificateDeployer {
         certificateMetadataDTOList = new Gson().fromJson(content, listType);
         synchronized (certificateManager) {
             for (CertificateMetadataDTO certificateMetadataDTO : certificateMetadataDTOList) {
-                CertificateManagerImpl.getInstance()
-                        .addAllCertificateToGateway(certificateMetadataDTO.getCertificate(),
-                                certificateMetadataDTO.getAlias(), certificateMetadataDTO.getTenantId());
+                String organization = certificateMetadataDTO.getOrganization();
+                if (StringUtils.isNotEmpty(organization)) {
+                    if (TenantUtils.isTenantAvailable(organization)) {
+                        int tenantId = APIUtil.getTenantIdFromTenantDomain(organization);
+                        if (tenantId != -1) {
+                            CertificateManagerImpl.getInstance()
+                                    .addAllCertificateToGateway(certificateMetadataDTO.getCertificate(),
+                                            certificateMetadataDTO.getAlias(), tenantId);
+                        }
+                    } else {
+                        if (log.isDebugEnabled()) {
+                            log.debug(
+                                    "Skipping certificate deployment for alias: " + certificateMetadataDTO.getAlias() +
+                                            " as the tenant domain is not available or not valid: " + organization);
+                        }
+                    }
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Skipping certificate deployment for alias: " + certificateMetadataDTO.getAlias() +
+                                " as the tenant domain is not available or not valid: " + organization);
+                    }
+                }
             }
         }
     }

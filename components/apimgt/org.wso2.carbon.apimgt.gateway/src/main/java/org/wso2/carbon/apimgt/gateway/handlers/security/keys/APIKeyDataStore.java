@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security.keys;
 
+import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
@@ -127,4 +128,17 @@ public interface APIKeyDataStore {
     void cleanup();
 
     Map<String, Scope> retrieveScopes(String tenantDomain);
+
+    /**
+     * Validate API subscriptions for API key based authentication.
+     *
+     * @param apiContext Context of an API
+     * @param apiVersion A valid version of the API
+     * @param tenantDomain tenant domain of the API
+     * @param apiKeyInfo APIKeyInfo object containing information about the API key to be validated
+     * @return an APIKeyValidationInfoDTO instance containing key validation data
+     * @throws org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException on error
+     */
+    APIKeyValidationInfoDTO validateAPIKeySubscription(String apiContext, String apiVersion, String tenantDomain,
+                                                       APIKeyInfo apiKeyInfo) throws APISecurityException;
 }

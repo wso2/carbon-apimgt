@@ -107,8 +107,14 @@ public class JMSListener implements Runnable {
             } else {
                 log.error("JMS Provider is not yet started. Please start the JMS provider now.");
                 retryDuration = (long) (retryDuration * reconnectionProgressionFactor);
-                log.error("Connection attempt : " + (r++) + " for JMS Provider failed. Next retry in "
-                        + (retryDuration / 1000) + " seconds");
+                String logMessage = "Connection attempt : " + r + " for JMS Provider failed. Next retry in "
+                        + (retryDuration / 1000) + " seconds";
+                if (r >= 4) {
+                    log.error(logMessage);
+                } else if (r == 3) {
+                    log.warn(logMessage);
+                }
+                r++;
                 if (retryDuration > maxReconnectDuration) {
                     retryDuration = maxReconnectDuration;
                 }
@@ -153,9 +159,19 @@ public class JMSListener implements Runnable {
                 }
             }
         }
-        log.info("Connection successfully created towards the JMS provider for the listener: " +
-                stm.getJmsConsumerName() + "#" + stm.getDestinationJNDIName() + ". The connected JMS provider is " +
-                connection.toString().replace("\n", " | "));
+        if (connection != null) {
+            log.info(
+                    "Connection successfully created towards the JMS provider for the listener: "
+                            + stm.getJmsConsumerName() + "#" + stm.getDestinationJNDIName()
+                            + ". The connected JMS provider is " + connection.toString()
+                            .replace("\n", " | "));
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug(
+                        "Connection could not be created towards the JMS provider for the listener: " 
+                                + stm.getJmsConsumerName() + "#" + stm.getDestinationJNDIName());
+            }
+        }
         return (connection != null);
     }
 

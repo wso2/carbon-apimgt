@@ -25,10 +25,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.gateway.CredentialDto;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayPolicyDTO;
+import org.wso2.carbon.apimgt.gateway.notifiers.DeploymentStatusNotifier;
 import org.wso2.carbon.apimgt.gateway.utils.EndpointAdminServiceProxy;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.utils.LocalEntryServiceProxy;
@@ -39,11 +41,15 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.registry.core.Resource;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.rest.api.APIData;
 import org.wso2.carbon.rest.api.ResourceData;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,9 +58,20 @@ import javax.xml.stream.XMLStreamException;
 public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
 
     private static Log log = LogFactory.getLog(APIGatewayAdmin.class);
+    private static volatile DeploymentStatusNotifier deploymentStatusNotifier;
 
     public APIGatewayAdmin() {
 
+    }
+
+    /**
+     * Get the deployment status notifier instance (lazy initialization)
+     */
+    private static synchronized DeploymentStatusNotifier getDeploymentStatusNotifier() {
+        if (deploymentStatusNotifier == null) {
+            deploymentStatusNotifier = DeploymentStatusNotifier.getInstance();
+        }
+        return deploymentStatusNotifier;
     }
 
     /**
@@ -611,134 +628,202 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         return certificateManager.deleteClientCertificateFromGateway(alias);
     }
 
+    /**
+     * Checks if the registry should be updated with the new encrypted value.
+     *
+     * @param gatewayAPIDTO                      GatewayAPIDTO object
+     * @param propertyName                       Property to be updated in the secure vault
+     * @param mediationSecurityAdminServiceProxy MediationSecurityAdminServiceProxy object
+     * @param plainTextValue                     Newly encrypted value to be set in the registry
+     * @return true if the registry should be updated, false otherwise
+     * @throws APIManagementException When the registry cannot be accessed
+     */
+    private boolean shouldUpdateRegistry(GatewayAPIDTO gatewayAPIDTO, String propertyName,
+                                         MediationSecurityAdminServiceProxy mediationSecurityAdminServiceProxy,
+                                         String plainTextValue) throws APIManagementException {
+        String tenantDomain = gatewayAPIDTO.getTenantDomain();
+        UserRegistry registry = GatewayUtils.getRegistry(tenantDomain);
+        String path = APIConstants.API_SYSTEM_CONFIG_SECURE_VAULT_LOCATION;
+
+        PrivilegedCarbonContext.startTenantFlow();
+        if (tenantDomain != null && StringUtils.isNotEmpty(tenantDomain)) {
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+        } else {
+            PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                    .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+        }
+        try {
+            Resource resource = registry.get(path);
+            if (resource.getProperty(propertyName) != null) {
+                if (!plainTextValue.equals(
+                        mediationSecurityAdminServiceProxy.doDecryption(resource.getProperty(propertyName)))) {
+                    // Property plain text value has been changed. Should update the registry.
+                    return true;
+                } else {
+                    // Property plain text value has not been changed. No need to update the registry.
+                    return false;
+                }
+            } else {
+                // The secure vault property doesn't exist in the registry. Should update the registry.
+                return true;
+            }
+        } catch (RegistryException e) {
+            throw new APIManagementException("Error while reading registry resource " + path + " for tenant " +
+                    tenantDomain, e);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+    }
+
     public boolean deployAPI(GatewayAPIDTO gatewayAPIDTO) throws AxisFault {
+        try {
+            CertificateManager certificateManager = CertificateManagerImpl.getInstance();
+            SequenceAdminServiceProxy sequenceAdminServiceProxy = getSequenceAdminServiceClient(
+                    gatewayAPIDTO.getTenantDomain());
+            RESTAPIAdminServiceProxy restapiAdminServiceProxy = getRestapiAdminClient(gatewayAPIDTO.getTenantDomain());
+            LocalEntryServiceProxy localEntryServiceProxy = new LocalEntryServiceProxy(gatewayAPIDTO.getTenantDomain());
+            EndpointAdminServiceProxy endpointAdminServiceProxy = new EndpointAdminServiceProxy(
+                    gatewayAPIDTO.getTenantDomain());
+            MediationSecurityAdminServiceProxy mediationSecurityAdminServiceProxy =
+                    new MediationSecurityAdminServiceProxy(gatewayAPIDTO.getTenantDomain());
+            if (log.isDebugEnabled()) {
+                log.debug("Start to undeploy API" + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
+            }
 
-        CertificateManager certificateManager = CertificateManagerImpl.getInstance();
-        SequenceAdminServiceProxy sequenceAdminServiceProxy =
-                getSequenceAdminServiceClient(gatewayAPIDTO.getTenantDomain());
-        RESTAPIAdminServiceProxy restapiAdminServiceProxy = getRestapiAdminClient(gatewayAPIDTO.getTenantDomain());
-        LocalEntryServiceProxy localEntryServiceProxy = new LocalEntryServiceProxy(gatewayAPIDTO.getTenantDomain());
-        EndpointAdminServiceProxy endpointAdminServiceProxy =
-                new EndpointAdminServiceProxy(gatewayAPIDTO.getTenantDomain());
-        MediationSecurityAdminServiceProxy mediationSecurityAdminServiceProxy =
-                new MediationSecurityAdminServiceProxy(gatewayAPIDTO.getTenantDomain());
-        if (log.isDebugEnabled()) {
-            log.debug("Start to undeploy API" + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
-        }
-
-        unDeployAPI(sequenceAdminServiceProxy, restapiAdminServiceProxy, localEntryServiceProxy,
-                endpointAdminServiceProxy, gatewayAPIDTO, mediationSecurityAdminServiceProxy);
-        if (log.isDebugEnabled()) {
-            log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " undeployed");
-            log.debug("Start to deploy Local entries" + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
-        }
-        // Add Local Entries
-        if (gatewayAPIDTO.getLocalEntriesToBeAdd() != null) {
-            for (GatewayContentDTO localEntry : gatewayAPIDTO.getLocalEntriesToBeAdd()) {
-                if (localEntryServiceProxy.isEntryExists(localEntry.getName())) {
-                    localEntryServiceProxy.deleteEntry(localEntry.getName());
-                    localEntryServiceProxy.addLocalEntry(localEntry.getContent());
-                } else {
-                    localEntryServiceProxy.addLocalEntry(localEntry.getContent());
+            unDeployAPI(sequenceAdminServiceProxy, restapiAdminServiceProxy, localEntryServiceProxy,
+                        endpointAdminServiceProxy, gatewayAPIDTO, mediationSecurityAdminServiceProxy);
+            if (log.isDebugEnabled()) {
+                log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " undeployed");
+                log.debug("Start to deploy Local entries" + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
+            }
+            // Add Local Entries
+            if (gatewayAPIDTO.getLocalEntriesToBeAdd() != null) {
+                for (GatewayContentDTO localEntry : gatewayAPIDTO.getLocalEntriesToBeAdd()) {
+                    if (localEntryServiceProxy.isEntryExists(localEntry.getName())) {
+                        localEntryServiceProxy.deleteEntry(localEntry.getName());
+                        localEntryServiceProxy.addLocalEntry(localEntry.getContent());
+                    } else {
+                        localEntryServiceProxy.addLocalEntry(localEntry.getContent());
+                    }
                 }
             }
-        }
-        if (log.isDebugEnabled()) {
-            log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " Local Entries deployed");
-            log.debug("Start to deploy Endpoint entries" + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
-        }
+            if (log.isDebugEnabled()) {
+                log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " Local Entries deployed");
+                log.debug("Start to deploy Endpoint entries" + gatewayAPIDTO.getName() + ":"
+                                  + gatewayAPIDTO.getVersion());
+            }
 
-        // Add Endpoints
-        if (gatewayAPIDTO.getEndpointEntriesToBeAdd() != null) {
-            for (GatewayContentDTO endpointEntry : gatewayAPIDTO.getEndpointEntriesToBeAdd()) {
-                if (endpointAdminServiceProxy.isEndpointExist(endpointEntry.getName())) {
-                    endpointAdminServiceProxy.deleteEndpoint(endpointEntry.getName());
-                    endpointAdminServiceProxy.addEndpoint(endpointEntry.getContent());
-                } else {
-                    endpointAdminServiceProxy.addEndpoint(endpointEntry.getContent());
+            // Add Endpoints
+            if (gatewayAPIDTO.getEndpointEntriesToBeAdd() != null) {
+                for (GatewayContentDTO endpointEntry : gatewayAPIDTO.getEndpointEntriesToBeAdd()) {
+                    if (endpointAdminServiceProxy.isEndpointExist(endpointEntry.getName())) {
+                        endpointAdminServiceProxy.deleteEndpoint(endpointEntry.getName());
+                        endpointAdminServiceProxy.addEndpoint(endpointEntry.getContent());
+                    } else {
+                        endpointAdminServiceProxy.addEndpoint(endpointEntry.getContent());
+                    }
                 }
             }
-        }
 
-        if (log.isDebugEnabled()) {
-            log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " Endpoints deployed");
-            log.debug("Start to deploy Client certificates" + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
-        }
+            if (log.isDebugEnabled()) {
+                log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " Endpoints deployed");
+                log.debug("Start to deploy Client certificates" + gatewayAPIDTO.getName() + ":"
+                                  + gatewayAPIDTO.getVersion());
+            }
 
-        // Add Client Certificates
-        if (gatewayAPIDTO.getClientCertificatesToBeAdd() != null) {
-            synchronized (certificateManager) {
-                for (GatewayContentDTO certificate : gatewayAPIDTO.getClientCertificatesToBeAdd()) {
-                    certificateManager.addClientCertificateToGateway(certificate.getContent(), certificate.getName());
+            // Add Client Certificates
+            if (gatewayAPIDTO.getClientCertificatesToBeAdd() != null) {
+                synchronized (certificateManager) {
+                    for (GatewayContentDTO certificate : gatewayAPIDTO.getClientCertificatesToBeAdd()) {
+                        certificateManager.addClientCertificateToGateway(certificate.getContent(),
+                                                                         certificate.getName());
+                    }
                 }
             }
-        }
-        if (log.isDebugEnabled()) {
-            log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " client certificates deployed");
-            log.debug("Start to add vault entries " + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
-        }
+            if (log.isDebugEnabled()) {
+                log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " client certificates deployed");
+                log.debug("Start to add vault entries " + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
+            }
 
-        // Add vault entries
-        if (gatewayAPIDTO.getCredentialsToBeAdd() != null) {
-            for (CredentialDto certificate : gatewayAPIDTO.getCredentialsToBeAdd()) {
-                try {
-                    String encryptedValue = mediationSecurityAdminServiceProxy.doEncryption(certificate.getPassword());
-                    setRegistryProperty(gatewayAPIDTO.getTenantDomain(), certificate.getAlias(), encryptedValue);
-                } catch (APIManagementException e) {
-                    log.error("Exception occurred while encrypting password.", e);
-                    throw new AxisFault(e.getMessage());
+            // Add vault entries
+            if (gatewayAPIDTO.getCredentialsToBeAdd() != null) {
+                for (CredentialDto certificate : gatewayAPIDTO.getCredentialsToBeAdd()) {
+                    try {
+                        String plainTextValue = certificate.getPassword();
+                        String encryptedValue = mediationSecurityAdminServiceProxy.doEncryption(plainTextValue);
+                        if (shouldUpdateRegistry(gatewayAPIDTO, certificate.getAlias(),
+                                                 mediationSecurityAdminServiceProxy, plainTextValue)) {
+                            setRegistryProperty(gatewayAPIDTO.getTenantDomain(), certificate.getAlias(),
+                                                encryptedValue);
+                        }
+                    } catch (APIManagementException e) {
+                        log.error("Exception occurred while encrypting password.", e);
+                        throw new AxisFault(e.getMessage());
+                    }
                 }
             }
-        }
-        if (log.isDebugEnabled()) {
-            log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " Vault Entries Added successfully");
-            log.debug("Start to deploy custom sequences" + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
-        }
-
-        // Add Sequences
-        if (gatewayAPIDTO.getSequenceToBeAdd() != null) {
-            for (GatewayContentDTO sequence : gatewayAPIDTO.getSequenceToBeAdd()) {
-                OMElement element;
-                try {
-                    element = AXIOMUtil.stringToOM(sequence.getContent());
-                } catch (XMLStreamException e) {
-                    log.error("Exception occurred while converting String to an OM.", e);
-                    throw new AxisFault(e.getMessage());
-                }
-                if (sequenceAdminServiceProxy.isExistingSequence(sequence.getName())) {
-                    sequenceAdminServiceProxy.deleteSequence(sequence.getName());
-                    sequenceAdminServiceProxy.addSequence(element);
-                } else {
-                    sequenceAdminServiceProxy.addSequence(element);
-                }
-                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.OPERATION_POLICY, sequence.getName(),
-                        APIConstants.AuditLogConstants.DEPLOYED, APIConstants.AuditLogConstants.SYSTEM +
-                                ": " + gatewayAPIDTO.getTenantDomain());
+            if (log.isDebugEnabled()) {
+                log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion()
+                                  + " Vault Entries Added successfully");
+                log.debug("Start to deploy custom sequences" + gatewayAPIDTO.getName() + ":"
+                                  + gatewayAPIDTO.getVersion());
             }
-        }
 
-        if (log.isDebugEnabled()) {
-            log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " custom sequences deployed");
-            log.debug("Start to deploy API Definition" + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
-        }
-        // Add API
-        if (StringUtils.isNotEmpty(gatewayAPIDTO.getApiDefinition())) {
-            restapiAdminServiceProxy.addApi(gatewayAPIDTO.getApiDefinition());
-            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, gatewayAPIDTO.getApiId(),
-                    APIConstants.AuditLogConstants.DEPLOYED, APIConstants.AuditLogConstants.SYSTEM +
-                            ": " + gatewayAPIDTO.getTenantDomain());
-        }
-        if (log.isDebugEnabled()) {
-            log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " API Definition deployed");
-            log.debug("Start to deploy Default API Definition" + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
-        }
+            // Add Sequences
+            if (gatewayAPIDTO.getSequenceToBeAdd() != null) {
+                for (GatewayContentDTO sequence : gatewayAPIDTO.getSequenceToBeAdd()) {
+                    OMElement element;
+                    try {
+                        element = AXIOMUtil.stringToOM(sequence.getContent());
+                    } catch (XMLStreamException e) {
+                        log.error("Exception occurred while converting String to an OM.", e);
+                        throw new AxisFault(e.getMessage());
+                    }
+                    if (sequenceAdminServiceProxy.isExistingSequence(sequence.getName())) {
+                        sequenceAdminServiceProxy.deleteSequence(sequence.getName());
+                        sequenceAdminServiceProxy.addSequence(element);
+                    } else {
+                        sequenceAdminServiceProxy.addSequence(element);
+                    }
+                    APIUtil.logAuditMessage(APIConstants.AuditLogConstants.OPERATION_POLICY, sequence.getName(),
+                                            APIConstants.AuditLogConstants.DEPLOYED,
+                                            APIConstants.AuditLogConstants.SYSTEM + ": "
+                                                    + gatewayAPIDTO.getTenantDomain());
+                }
+            }
+            if (log.isDebugEnabled()) {
+                log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " custom sequences deployed");
+                log.debug(
+                        "Start to deploy API Definition" + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
+            }
+            // Add API
+            if (StringUtils.isNotEmpty(gatewayAPIDTO.getApiDefinition())) {
+                restapiAdminServiceProxy.addApi(gatewayAPIDTO.getApiDefinition());
+                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, gatewayAPIDTO.getApiId(),
+                                        APIConstants.AuditLogConstants.DEPLOYED,
+                                        APIConstants.AuditLogConstants.SYSTEM + ": " + gatewayAPIDTO.getTenantDomain());
+            }
+            if (log.isDebugEnabled()) {
+                log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " API Definition deployed");
+                log.debug("Start to deploy Default API Definition" + gatewayAPIDTO.getName() + ":"
+                                  + gatewayAPIDTO.getVersion());
+            }
 
-        if (log.isDebugEnabled()) {
-            log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " Default API Definition deployed");
-            log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + "Deployed successfully");
+            if (log.isDebugEnabled()) {
+                log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion()
+                                  + " Default API Definition deployed");
+                log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + "Deployed successfully");
+            }
+            getDeploymentStatusNotifier().submitDeploymentStatus(gatewayAPIDTO, true,
+                                                                 APIConstants.AuditLogConstants.DEPLOY, null, null);
+            return true;
+        } catch (AxisFault e) {
+            getDeploymentStatusNotifier().submitDeploymentStatus(gatewayAPIDTO, false,
+                                                                 APIConstants.AuditLogConstants.DEPLOY,
+                                                                 ExceptionCodes.INTERNAL_ERROR.getErrorCode(),
+                                                                 e.getMessage());
+            throw e;
         }
-
-        return true;
     }
 
     private void unDeployAPI(SequenceAdminServiceProxy sequenceAdminServiceProxy,
@@ -800,6 +885,14 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
             for (String endpoint : gatewayAPIDTO.getEndpointEntriesToBeRemove()) {
                 if (endpointAdminServiceProxy.isEndpointExist(endpoint)) {
                     endpointAdminServiceProxy.deleteEndpoint(endpoint);
+                } else if (endpoint.contains(AIAPIConstants.API_LLM_ENDPOINT + "*")) {
+                    String prefix = endpoint.replace("*", ".*");
+                    String[] allEndpoints = endpointAdminServiceProxy.getEndpoints();
+                    for (String existingEndpoint : allEndpoints) {
+                        if (existingEndpoint.matches(prefix)) {
+                            endpointAdminServiceProxy.deleteEndpoint(existingEndpoint);
+                        }
+                    }
                 }
             }
         }
@@ -857,19 +950,28 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
     }
 
     public boolean unDeployAPI(GatewayAPIDTO gatewayAPIDTO) throws AxisFault {
+        try {
+            SequenceAdminServiceProxy sequenceAdminServiceProxy =
+                    getSequenceAdminServiceClient(gatewayAPIDTO.getTenantDomain());
+            RESTAPIAdminServiceProxy restapiAdminServiceProxy = getRestapiAdminClient(gatewayAPIDTO.getTenantDomain());
+            LocalEntryServiceProxy localEntryServiceProxy = new LocalEntryServiceProxy(gatewayAPIDTO.getTenantDomain());
+            EndpointAdminServiceProxy endpointAdminServiceProxy =
+                    new EndpointAdminServiceProxy(gatewayAPIDTO.getTenantDomain());
+            MediationSecurityAdminServiceProxy mediationSecurityAdminServiceProxy =
+                    new MediationSecurityAdminServiceProxy(gatewayAPIDTO.getTenantDomain());
 
-        SequenceAdminServiceProxy sequenceAdminServiceProxy =
-                getSequenceAdminServiceClient(gatewayAPIDTO.getTenantDomain());
-        RESTAPIAdminServiceProxy restapiAdminServiceProxy = getRestapiAdminClient(gatewayAPIDTO.getTenantDomain());
-        LocalEntryServiceProxy localEntryServiceProxy = new LocalEntryServiceProxy(gatewayAPIDTO.getTenantDomain());
-        EndpointAdminServiceProxy endpointAdminServiceProxy =
-                new EndpointAdminServiceProxy(gatewayAPIDTO.getTenantDomain());
-        MediationSecurityAdminServiceProxy mediationSecurityAdminServiceProxy =
-                new MediationSecurityAdminServiceProxy(gatewayAPIDTO.getTenantDomain());
-
-        unDeployAPI(sequenceAdminServiceProxy, restapiAdminServiceProxy, localEntryServiceProxy,
-                endpointAdminServiceProxy, gatewayAPIDTO, mediationSecurityAdminServiceProxy);
-        return true;
+            unDeployAPI(sequenceAdminServiceProxy, restapiAdminServiceProxy, localEntryServiceProxy,
+                        endpointAdminServiceProxy, gatewayAPIDTO, mediationSecurityAdminServiceProxy);
+            getDeploymentStatusNotifier().submitDeploymentStatus(gatewayAPIDTO, true,
+                                                            APIConstants.AuditLogConstants.UNDEPLOY, null, null);
+            return true;
+        } catch (AxisFault e) {
+            getDeploymentStatusNotifier().submitDeploymentStatus(gatewayAPIDTO, false,
+                                                                 APIConstants.AuditLogConstants.UNDEPLOY,
+                                                                 ExceptionCodes.INTERNAL_ERROR.getErrorCode(),
+                                                                 e.getMessage());
+            throw e;
+        }
     }
 
     /**

@@ -26,8 +26,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernanceOptions;
 import org.wso2.carbon.apimgt.governance.api.model.Rule;
 import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
@@ -36,6 +37,7 @@ import org.wso2.carbon.apimgt.governance.api.model.RulesetContent;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
 import org.wso2.rule.validator.InvalidContentTypeException;
 import org.wso2.rule.validator.InvalidRulesetException;
+import org.wso2.rule.validator.validator.ValidationOptions;
 import org.wso2.rule.validator.validator.Validator;
 
 import java.nio.charset.StandardCharsets;
@@ -59,16 +61,30 @@ public class SpectralValidationEngine implements ValidationEngine {
      * Check if a ruleset is valid
      *
      * @param ruleset Ruleset
-     * @throws GovernanceException If an error occurs while validating the ruleset
+     * @throws APIMGovernanceException If an error occurs while validating the ruleset
      */
     @Override
-    public void validateRulesetContent(Ruleset ruleset) throws GovernanceException {
+    @Deprecated
+    public void validateRulesetContent(Ruleset ruleset) throws APIMGovernanceException {
+        validateRulesetContent(ruleset, null);
+    }
+
+    /**
+     * Check if a ruleset is valid using the provided parser options.
+     *
+     * @param ruleset           Ruleset
+     * @param governanceOptions Governance options
+     * @throws APIMGovernanceException If an error occurs while validating the ruleset
+     */
+    @Override
+    public void validateRulesetContent(Ruleset ruleset, APIMGovernanceOptions governanceOptions)
+            throws APIMGovernanceException {
         RulesetContent content = ruleset.getRulesetContent();
         String rulesetContentString = new String(content.getContent(),
                 StandardCharsets.UTF_8);
         String jsonString;
         try {
-            jsonString = Validator.validateRuleset(rulesetContentString);
+            jsonString = Validator.validateRuleset(rulesetContentString, getValidationOptions(governanceOptions));
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode rootNode = objectMapper.readTree(jsonString);
             boolean passed = rootNode.path("passed").asBoolean();
@@ -76,14 +92,21 @@ public class SpectralValidationEngine implements ValidationEngine {
                 return;
             }
             String message = rootNode.path("message").asText();
-            throw new GovernanceException(GovernanceExceptionCodes.INVALID_RULESET_CONTENT_DETAILED,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.INVALID_RULESET_CONTENT_DETAILED,
                     ruleset.getName(), message);
-        } catch (InvalidContentTypeException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.INVALID_RULESET_CONTENT, e, ruleset.getName());
-        } catch (JsonProcessingException e) {
-            log.error("Error while parsing rulseset validation result JSON string", e);
-            throw new GovernanceException("Error while parsing ruleset validation result JSON string", e);
+        } catch (InvalidContentTypeException | JsonProcessingException e) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.INVALID_RULESET_CONTENT, e, ruleset.getName());
+        } catch (Throwable e) {
+            throw new APIMGovernanceException("Unexpected error while validating ruleset content.", e);
         }
+    }
+
+    private ValidationOptions getValidationOptions(APIMGovernanceOptions governanceOptions) {
+        ValidationOptions validationOptions = ValidationOptions.defaults();
+        if (governanceOptions != null) {
+            validationOptions.setYamlCodePointLimit(governanceOptions.getYamlCodePointLimit());
+        }
+        return validationOptions;
     }
 
     /**
@@ -91,10 +114,10 @@ public class SpectralValidationEngine implements ValidationEngine {
      *
      * @param ruleset Ruleset
      * @return List of rules
-     * @throws GovernanceException If an error occurs while extracting rules
+     * @throws APIMGovernanceException If an error occurs while extracting rules
      */
     @Override
-    public List<Rule> extractRulesFromRuleset(Ruleset ruleset) throws GovernanceException {
+    public List<Rule> extractRulesFromRuleset(Ruleset ruleset) throws APIMGovernanceException {
         String ruleContentString = new String(ruleset.getRulesetContent().getContent(),
                 StandardCharsets.UTF_8);
 
@@ -111,10 +134,21 @@ public class SpectralValidationEngine implements ValidationEngine {
                 Map<String, Object> ruleDetails = entry.getValue();
 
                 String name = entry.getKey();
+                if (name != null && name.length() > 256) {
+                    throw new APIMGovernanceException(APIMGovExceptionCodes.BAD_REQUEST,
+                            "Rule name `" + name + "` exceeds the maximum allowed length of 256 characters.");
+                }
+
                 String description = (String) ruleDetails.get("description");
+                if (description != null && description.length() > 1024) {
+                    log.warn("Rule description of rule `" + name + "` exceeds 1024 characters." +
+                            " Truncating description.");
+                    description = description.substring(0, 1024);
+                }
 
                 String severityString = (String) ruleDetails.get("severity");
-                RuleSeverity severity = RuleSeverity.fromString(severityString);
+                RuleSeverity severity = severityString == null ? RuleSeverity.WARN :
+                        RuleSeverity.fromString(severityString);
 
                 ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
 
@@ -129,7 +163,7 @@ public class SpectralValidationEngine implements ValidationEngine {
                     rule.setContent(contentString);
                     rulesList.add(rule);
                 } catch (JsonProcessingException e) {
-                    throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_EXTRACTING_RULE_CONTENT, e);
+                    throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_EXTRACTING_RULE_CONTENT, e);
                 }
 
             }
@@ -144,26 +178,43 @@ public class SpectralValidationEngine implements ValidationEngine {
      * @param target  Target to be validated
      * @param ruleset Ruleset
      * @return List of rule violations
-     * @throws GovernanceException If an error occurs while validating the target
+     * @throws APIMGovernanceException If an error occurs while validating the target
      */
     @Override
-    public List<RuleViolation> validate(String target, Ruleset ruleset) throws GovernanceException {
+    @Deprecated
+    public List<RuleViolation> validate(String target, Ruleset ruleset) throws APIMGovernanceException {
+        return validate(target, ruleset, null);
+    }
+
+    /**
+     * Validate a target against a ruleset
+     *
+     * @param target            Target to be validated
+     * @param ruleset           Ruleset
+     * @param governanceOptions Governance options
+     * @return List of rule violations
+     * @throws APIMGovernanceException If an error occurs while validating the target
+     */
+    @Override
+    public List<RuleViolation> validate(String target, Ruleset ruleset, APIMGovernanceOptions governanceOptions)
+            throws APIMGovernanceException {
 
         try {
             RulesetContent rulesetContent = ruleset.getRulesetContent();
             String rulesetContentString = new String(rulesetContent.getContent(),
                     StandardCharsets.UTF_8);
 
-            String resultJson = Validator.validateDocument(target, rulesetContentString);
+            String resultJson = Validator.validateDocument(target, rulesetContentString,
+                    getValidationOptions(governanceOptions));
             if (log.isDebugEnabled()) {
                 log.debug("Validation success for target: " + target);
             }
             return getRuleViolationsFromJsonResponse(resultJson, ruleset);
         } catch (InvalidRulesetException | InvalidContentTypeException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.INVALID_RULESET_CONTENT, ruleset.getName());
+            throw new APIMGovernanceException(APIMGovExceptionCodes.INVALID_RULESET_CONTENT, ruleset.getName());
         } catch (Throwable e) {
             log.error("Error occurred while verifying governance compliance ", e);
-            throw new GovernanceException("Error occurred while verifying governance compliance ", e);
+            throw new APIMGovernanceException("Unexpected error occurred while verifying governance compliance ", e);
         }
     }
 
@@ -174,10 +225,10 @@ public class SpectralValidationEngine implements ValidationEngine {
      * @param resultJson JSON response
      * @param ruleset    Ruleset
      * @return List of Rule Violations
-     * @throws GovernanceException If an error occurs while getting the rule violations
+     * @throws APIMGovernanceException If an error occurs while getting the rule violations
      */
     private List<RuleViolation> getRuleViolationsFromJsonResponse(String resultJson, Ruleset ruleset)
-            throws GovernanceException {
+            throws APIMGovernanceException {
         ObjectMapper objectMapper = new ObjectMapper();
         List<RuleViolation> violations = new ArrayList<>();
         JsonNode jsonNode;
@@ -189,16 +240,27 @@ public class SpectralValidationEngine implements ValidationEngine {
             for (JsonNode node : jsonNode) {
                 RuleViolation violation = new RuleViolation();
                 violation.setRuleName(node.get("ruleName").asText());
-                violation.setViolatedPath(node.get("path").asText());
-                violation.setRuleMessage(node.get("message").asText());
+                String path = node.get("path").asText();
+                if (path != null && path.length() > 1024) {
+                    throw new APIMGovernanceException("Violated path `" + path + "` in rule `"
+                            + violation.getRuleName() +
+                            "` exceeds the maximum allowed length of 1024 characters.");
+                }
+                violation.setViolatedPath(path);
+                String message = node.get("message").asText();
+                if (message != null && message.length() > 1024) {
+                    log.warn("Rule message of rule `" + violation.getRuleName() + "` exceeds 1024 characters. " +
+                            "Truncating message.");
+                    message = message.substring(0, 1024);
+                }
+                violation.setRuleMessage(message);
                 violation.setSeverity(RuleSeverity.fromString(node.get("severity").asText()));
                 violation.setRulesetId(ruleset.getId());
                 violations.add(violation);
             }
             return violations;
         } catch (JsonProcessingException e) {
-            log.error("Error while parsing validation result JSON string", e);
-            throw new GovernanceException("Error while parsing validation result JSON string", e);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_READING_SPECTRAL_RESULTS, e);
         }
 
     }

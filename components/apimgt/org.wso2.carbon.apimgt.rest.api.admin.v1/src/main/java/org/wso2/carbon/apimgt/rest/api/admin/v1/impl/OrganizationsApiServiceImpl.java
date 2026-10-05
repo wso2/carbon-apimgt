@@ -107,7 +107,8 @@ public class OrganizationsApiServiceImpl implements OrganizationsApiService {
             if (orgInfo != null && orgInfo.getOrganizationId() != null) {
                 parentOrgId = orgInfo.getOrganizationId(); // assign current user org as the parent org.
             }
-            organizationInfoDTO.setName(organizationDTO.getDisplayName()); // only allow to change the name and desc
+            organizationInfoDTO.setExternalOrganizationReference(organizationDTO.getExternalOrganizationId());
+            organizationInfoDTO.setName(organizationDTO.getDisplayName());
             organizationInfoDTO.setDescription(organizationDTO.getDescription());
             OrganizationDetailsDTO updatedOrganizationInfoDTO = apiAdmin.updateOrganization(organizationInfoDTO,
                     parentOrgId, superOrganization);

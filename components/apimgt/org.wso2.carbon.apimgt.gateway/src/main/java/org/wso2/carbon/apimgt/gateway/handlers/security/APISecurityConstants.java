@@ -90,6 +90,13 @@ public class APISecurityConstants {
     public static final int CORS_ORIGIN_HEADER_VALIDATION_FAILED = 900425;
     public static final String CORS_ORIGIN_HEADER_VALIDATION_FAILED_MESSAGE = "CORS origin header validation failed";
 
+    // Raised when the gateway cannot obtain the AWS credentials needed to sign a backend request
+    // (missing runtime identity, denied STS AssumeRole, invalid role ARN or trust policy).
+    public static final int AWS_CREDENTIAL_RESOLUTION_ERROR = 900426;
+    public static final String AWS_CREDENTIAL_RESOLUTION_ERROR_MESSAGE = "Backend Authentication Failure";
+    public static final String AWS_CREDENTIAL_RESOLUTION_ERROR_DESCRIPTION =
+            "The gateway could not obtain AWS credentials to sign the backend request";
+
     // We have added this because we need to add an additional description to the original one and we need to
     // separate the 2 messages
     public static final String DESCRIPTION_SEPARATOR = ". ";

@@ -16,8 +16,10 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.util.Map;
@@ -46,10 +48,19 @@ public class APISecurityUtils {
         if (authContext.getIssuer() != null) {
             synCtx.setProperty(APIConstants.KeyManager.ISSUER, authContext.getIssuer());
         }
-        if (contextHeader != null && authContext.getCallerToken() != null) {
+        boolean isSetCallerToken = StringUtils.isNotBlank(contextHeader)
+                && StringUtils.isNotBlank(authContext.getCallerToken());
+        boolean isSetMcpUpstreamToken = StringUtils.isNotBlank(authContext.getMcpUpstreamToken());
+
+        if (isSetCallerToken || isSetMcpUpstreamToken) {
             Map transportHeaders = (Map) ((Axis2MessageContext) synCtx).getAxis2MessageContext()
                     .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-            transportHeaders.put(contextHeader, authContext.getCallerToken());
+            if (isSetCallerToken) {
+                transportHeaders.put(contextHeader, authContext.getCallerToken());
+            }
+            if (isSetMcpUpstreamToken) {
+                transportHeaders.put(APIMgtGatewayConstants.INTERNAL_KEY, authContext.getMcpUpstreamToken());
+            }
         }
     }
 

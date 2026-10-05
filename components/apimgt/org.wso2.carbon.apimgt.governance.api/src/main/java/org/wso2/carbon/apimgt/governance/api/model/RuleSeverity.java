@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.governance.api.model;
 
+import java.util.Locale;
+
 /**
  * This class represents a governance rule Severity
  */
@@ -27,13 +29,10 @@ public enum RuleSeverity {
     INFO;
 
     public static RuleSeverity fromString(String severityString) {
-        if ("error".equalsIgnoreCase(severityString)) {
-            return RuleSeverity.ERROR;
-        } else if ("warn".equalsIgnoreCase(severityString)) {
-            return RuleSeverity.WARN;
-        } else if ("info".equalsIgnoreCase(severityString)) {
-            return RuleSeverity.INFO;
+        try {
+            return RuleSeverity.valueOf(severityString.toUpperCase(Locale.ENGLISH));
+        } catch (IllegalArgumentException e) {
+            return null;
         }
-        return null;
     }
 }

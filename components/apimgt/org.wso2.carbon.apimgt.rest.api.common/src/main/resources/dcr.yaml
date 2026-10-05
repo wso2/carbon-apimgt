@@ -61,9 +61,8 @@ paths:
         401:
           $ref: '#/components/responses/Unauthorized'
       security:
-        - OAuth2Security:
-            - apim:dcr:app_manage
-            
+        - OAuth2Security: []
+
 components:
   schemas:
     DCR:
@@ -94,6 +93,10 @@ components:
           type: string
           readOnly: true
           example: JWT
+        userstoreDomainInSubject:
+          type: string
+          readOnly: true
+          example: true
     DCRResult:
       title: DCRResult
       type: object
@@ -201,5 +204,4 @@ components:
           tokenUrl: https://localhost:9443/oauth2/token
           scopes:
             openid: Authorize access to user details
-            apim:dcr:app_manage: create oauth app using dcr
 

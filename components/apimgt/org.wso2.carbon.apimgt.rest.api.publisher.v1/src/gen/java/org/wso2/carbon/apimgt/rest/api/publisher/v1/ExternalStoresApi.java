@@ -43,7 +43,8 @@ ExternalStoresApiService delegate = new ExternalStoresApiServiceImpl();
     @ApiOperation(value = "Retrieve External Stores List to Publish an API", notes = "Retrieve external stores list configured to publish an API ", response = ExternalStoreDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
-            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:api_metadata_view", description = "View API listing, configuration, and definition resources (swagger, wsdl, graphql, certificates, mediation policies, monetization). Excludes lifecycle, revisions, deployments, documents, comments, subscriptions, shared scopes, and common operation policies.")
         })
     }, tags={ "External Stores" })
     @ApiResponses(value = { 

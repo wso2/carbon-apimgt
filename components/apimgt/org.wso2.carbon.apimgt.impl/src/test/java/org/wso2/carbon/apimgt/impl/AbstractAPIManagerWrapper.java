@@ -127,6 +127,13 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
     }
 
     @Override
+    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String organization, String apiType)
+            throws APIManagementException {
+
+        return null;
+    }
+
+    @Override
     public API getLightweightAPIByUUID(String uuid, String organization) throws APIManagementException {
         // TODO Auto-generated method stub
         return null;

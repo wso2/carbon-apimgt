@@ -34,7 +34,8 @@ public class PolicyAdherenceWithRulesetsDTO   {
     public enum StatusEnum {
         FOLLOWED("FOLLOWED"),
         VIOLATED("VIOLATED"),
-        UNAPPLIED("UNAPPLIED");
+        UNAPPLIED("UNAPPLIED"),
+        PENDING("PENDING");
         private String value;
 
         StatusEnum (String v) {
@@ -61,7 +62,40 @@ return null;
         }
     } 
     private StatusEnum status = null;
-    private List<RulesetValidationResultWithoutRulesDTO> rulesetValidationResults = new ArrayList<RulesetValidationResultWithoutRulesDTO>();
+    private List<RulesetValidationResultWithoutRulesDTO> rulesetValidationResults = new ArrayList<RulesetValidationResultWithoutRulesDTO>(); 
+
+    @XmlType(name="ComplianceAffectingSeveritiesEnum")
+    @XmlEnum(String.class)
+    public enum ComplianceAffectingSeveritiesEnum {
+        ERROR("ERROR"),
+        WARN("WARN"),
+        INFO("INFO");
+        private String value;
+
+        ComplianceAffectingSeveritiesEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static ComplianceAffectingSeveritiesEnum fromValue(String v) {
+            for (ComplianceAffectingSeveritiesEnum b : ComplianceAffectingSeveritiesEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
+    private List<ComplianceAffectingSeveritiesEnum> complianceAffectingSeverities = new ArrayList<ComplianceAffectingSeveritiesEnum>();
 
   /**
    * UUID of the policy.
@@ -136,6 +170,24 @@ return null;
     this.rulesetValidationResults = rulesetValidationResults;
   }
 
+  /**
+   * Severities that a rule violation must have for it to fail this policy. Every severity applies when the policy has none configured, which is the default. 
+   **/
+  public PolicyAdherenceWithRulesetsDTO complianceAffectingSeverities(List<ComplianceAffectingSeveritiesEnum> complianceAffectingSeverities) {
+    this.complianceAffectingSeverities = complianceAffectingSeverities;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "[\"ERROR\",\"WARN\",\"INFO\"]", value = "Severities that a rule violation must have for it to fail this policy. Every severity applies when the policy has none configured, which is the default. ")
+  @JsonProperty("complianceAffectingSeverities")
+  public List<ComplianceAffectingSeveritiesEnum> getComplianceAffectingSeverities() {
+    return complianceAffectingSeverities;
+  }
+  public void setComplianceAffectingSeverities(List<ComplianceAffectingSeveritiesEnum> complianceAffectingSeverities) {
+    this.complianceAffectingSeverities = complianceAffectingSeverities;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -149,12 +201,13 @@ return null;
     return Objects.equals(id, policyAdherenceWithRulesets.id) &&
         Objects.equals(name, policyAdherenceWithRulesets.name) &&
         Objects.equals(status, policyAdherenceWithRulesets.status) &&
-        Objects.equals(rulesetValidationResults, policyAdherenceWithRulesets.rulesetValidationResults);
+        Objects.equals(rulesetValidationResults, policyAdherenceWithRulesets.rulesetValidationResults) &&
+        Objects.equals(complianceAffectingSeverities, policyAdherenceWithRulesets.complianceAffectingSeverities);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, status, rulesetValidationResults);
+    return Objects.hash(id, name, status, rulesetValidationResults, complianceAffectingSeverities);
   }
 
   @Override
@@ -166,6 +219,7 @@ return null;
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    rulesetValidationResults: ").append(toIndentedString(rulesetValidationResults)).append("\n");
+    sb.append("    complianceAffectingSeverities: ").append(toIndentedString(complianceAffectingSeverities)).append("\n");
     sb.append("}");
     return sb.toString();
   }

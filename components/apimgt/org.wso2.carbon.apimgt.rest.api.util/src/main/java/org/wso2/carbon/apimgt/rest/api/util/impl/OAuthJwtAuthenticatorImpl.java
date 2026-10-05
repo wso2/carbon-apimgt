@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants.JwtTokenConstants;
 import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidatorImpl;
+import org.wso2.carbon.apimgt.impl.jwt.RevokedJWTDataHolder;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.APIMConfigUtil;
@@ -101,6 +102,10 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
             String jwtTokenIdentifier = getJWTTokenIdentifier(signedJWTInfo);
             String maskedToken = message.get(RestApiConstants.MASKED_TOKEN).toString();
             URL basePath = new URL(message.get(APIConstants.BASE_PATH).toString());
+
+            if (isRevoked(signedJWTInfo, jwtTokenIdentifier, maskedToken)) {
+                return false;
+            }
 
             //Validate token
             log.debug("Starting JWT token validation " + maskedToken);
@@ -398,6 +403,65 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
         return signedJWTInfo.getSignedJWT().getSignature().toString();
     }
 
+
+    /**
+     * Checks whether the JWT token is revoked by consulting the in-memory {@link RevokedJWTDataHolder}.
+     * Covers four revocation scenarios: token signature, consumer key, subject entity app, and subject entity user.
+     *
+     * @param signedJWTInfo      signed JWT info object containing claims
+     * @param jwtTokenIdentifier jti or signature used as the cache/revocation key
+     * @param maskedToken        masked token string used for logging
+     * @return true if the token is revoked, false otherwise
+     */
+    private boolean isRevoked(SignedJWTInfo signedJWTInfo, String jwtTokenIdentifier, String maskedToken) {
+
+        RevokedJWTDataHolder holder = RevokedJWTDataHolder.getInstance();
+
+        // Check 1: Token signature revocation
+        if (StringUtils.isNotEmpty(jwtTokenIdentifier) &&
+                RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(jwtTokenIdentifier)) {
+            if (log.isDebugEnabled()) {
+                log.debug("JWT token found in revoked token signature map: " + maskedToken);
+            }
+            log.error("Attempted use of revoked JWT token: " + maskedToken);
+            return true;
+        }
+
+        // Checks 2-4: Consumer Key / Subject Entity revocations
+        JWTClaimsSet claimsSet = signedJWTInfo.getJwtClaimsSet();
+        Object authorizedPartyClaim = claimsSet.getClaim(APIConstants.JwtTokenConstants.AUTHORIZED_PARTY);
+        Object entityIdClaim = claimsSet.getClaim(APIConstants.JwtTokenConstants.ENTITY_ID);
+        long jwtGeneratedTime = claimsSet.getIssueTime() != null ? claimsSet.getIssueTime().getTime() : 0;
+
+        if (jwtGeneratedTime != 0 && authorizedPartyClaim instanceof String && entityIdClaim instanceof String) {
+            String authorizedParty = (String) authorizedPartyClaim;
+            String entityId = (String) entityIdClaim;
+            if (holder.isRevokedConsumerKeyExists(authorizedParty, jwtGeneratedTime)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("JWT token found in revoked consumer key map");
+                }
+                log.error("Attempted use of revoked JWT token: " + maskedToken);
+                return true;
+            }
+            if (entityId.equals(authorizedParty) &&
+                    holder.isRevokedSubjectEntityConsumerAppExists(entityId, jwtGeneratedTime)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("JWT token found in revoked subject entity consumer app map");
+                }
+                log.error("Attempted use of revoked JWT token: " + maskedToken);
+                return true;
+            }
+            if (!entityId.equals(authorizedParty) &&
+                    holder.isRevokedSubjectEntityUserExists(entityId, jwtGeneratedTime)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("JWT token found in revoked subject entity user map");
+                }
+                log.error("Attempted use of revoked JWT token: " + maskedToken);
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * Validate issuer and get resident Identity Provider.

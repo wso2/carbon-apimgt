@@ -23,6 +23,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.io.RandomAccessReadBuffer;
 import org.apache.pdfbox.pdfparser.PDFParser;
@@ -53,16 +54,24 @@ import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.ResourceImpl;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.indexing.AsyncIndexer;
+import org.wso2.carbon.registry.indexing.IndexingConstants;
 import org.wso2.carbon.registry.indexing.IndexingManager;
 import org.wso2.carbon.registry.indexing.solr.IndexDocument;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+
+import static org.wso2.carbon.apimgt.impl.APIConstants.OVERVIEW_PREFIX;
+import static org.wso2.carbon.apimgt.impl.APIConstants.VISIBLE_ORGANIZATION_PROPERTY;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * This is the document indexer introduced to index document artifacts for unified content search.
@@ -85,7 +94,6 @@ public class DocumentIndexer extends RXTIndexer {
         if (log.isDebugEnabled()) {
             log.debug("Executing document indexer for resource at " + documentResourcePath);
         }
-
         Resource documentResource = null;
         Map<String, List<String>> fields = indexDocument.getFields();
 
@@ -109,6 +117,25 @@ public class DocumentIndexer extends RXTIndexer {
                 newIndexDocument =
                         new IndexDocument(fileData.path, "", stringBuilder.toString(), indexDocument.getTenantId());
                 fields.put(APIConstants.DOCUMENT_INDEXER_INDICATOR, Arrays.asList("true"));
+                
+                Properties properties = documentResource.getProperties();
+                Enumeration propertyNames = properties.propertyNames();
+                boolean hasOrganizationProperty = false;
+                while (propertyNames.hasMoreElements()) {
+                    String property = (String) propertyNames.nextElement();
+                    if (log.isDebugEnabled()) {
+                        log.debug("Document at " + documentResourcePath + " has " + property + " property");
+                    }
+                    if (VISIBLE_ORGANIZATION_PROPERTY.equals(property)) {
+                        hasOrganizationProperty = true;
+                    }
+                }
+                if (!hasOrganizationProperty) {
+                    log.debug("Organization visibilty property missing. adding " + fileData.tenantDomain);
+                    List<String> orgProperties = new ArrayList<>();
+                    orgProperties.add(VISIBLE_ORGANIZATION_PROPERTY + "," + fileData.tenantDomain );
+                    fields.put(IndexingConstants.FIELD_PROPERTY_VALUES, orgProperties);
+                }
                 newIndexDocument.setFields(fields);
             } catch (APIManagementException e) {
                 //error occured while fetching details from API, but continuing document indexing
@@ -181,11 +208,11 @@ public class DocumentIndexer extends RXTIndexer {
                 inputStream = contentResource.getContentStream();
                 switch (extension) {
                 case APIConstants.PDF_EXTENSION:
-                    PDFParser pdfParser = new PDFParser(new RandomAccessReadBuffer(inputStream));
-                    pdfParser.parse();
-                    COSDocument cosDocument = pdfParser.parse().getDocument();
-                    PDFTextStripper stripper = new PDFTextStripper();
-                    contentString = stripper.getText(new PDDocument(cosDocument));
+                    // Use try-with-resources to ensure the PDDocument is closed automatically
+                    try (PDDocument document = Loader.loadPDF(new RandomAccessReadBuffer(inputStream))) {
+                        PDFTextStripper stripper = new PDFTextStripper();
+                        contentString = stripper.getText(document);
+                    }
                     break;
                 case APIConstants.DOC_EXTENSION: {
                     POIFSFileSystem pfs = new POIFSFileSystem(inputStream);

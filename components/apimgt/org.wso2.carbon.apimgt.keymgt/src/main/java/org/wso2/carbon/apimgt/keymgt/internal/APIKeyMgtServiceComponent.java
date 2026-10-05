@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.keymgt.handlers.KeyValidationHandler;
 import org.wso2.carbon.apimgt.keymgt.service.KeyManagerDataServiceImpl;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
+import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
 
@@ -236,5 +237,25 @@ public class APIKeyMgtServiceComponent {
             ServiceReferenceHolder.getInstance().removeKeyValidationHandler(tenantDomain);
         }
     }
+
+    @Reference(
+            name = "oauth.config.service",
+            service = OAuthServerConfiguration.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetOauthServerConfiguration")
+    protected void setOauthServerConfiguration(OAuthServerConfiguration oauthServerConfiguration) {
+        ServiceReferenceHolder.getInstance().setOauthServerConfiguration(oauthServerConfiguration);
+    }
+
+    /**
+     * De-reference the Oauth Server configuration Service dependency.
+     *
+     * @param oAuthServerConfiguration
+     */
+    protected void unsetOauthServerConfiguration(OAuthServerConfiguration oAuthServerConfiguration) {
+        ServiceReferenceHolder.getInstance().setOauthServerConfiguration(null);
+    }
+
 }
 

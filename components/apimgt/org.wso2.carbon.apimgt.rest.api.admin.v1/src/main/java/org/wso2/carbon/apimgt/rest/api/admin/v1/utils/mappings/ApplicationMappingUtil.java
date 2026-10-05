@@ -19,6 +19,8 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings;
 
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.ApplicationKeyManagerInfo;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationDTO;
@@ -26,6 +28,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
@@ -105,7 +108,29 @@ public class ApplicationMappingUtil {
         applicationInfoDTO.setName(application.getName());
         applicationInfoDTO.setGroupId(application.getGroupId());
         applicationInfoDTO.setOwner(application.getOwner());
+        applicationInfoDTO.setCreatedTime(application.getCreatedTime());
+        if (StringUtils.isNotEmpty(application.getTokenType()) && !APIConstants.DEFAULT_TOKEN_TYPE
+                .equals(application.getTokenType())) {
+            applicationInfoDTO.setTokenType(ApplicationInfoDTO.TokenTypeEnum.valueOf(application.getTokenType()));
+        }
+        // Only if it's ApplicationKeyManagerInfo
+        if (application instanceof ApplicationKeyManagerInfo) {
+            ApplicationKeyManagerInfo appKeyManagerInfo = (ApplicationKeyManagerInfo) application;
+            List<KeyManagerInfoDTO> keyManagers = new ArrayList<>();
+            for (KeyManagerConfiguration config : appKeyManagerInfo.getKeyManagers()) {
+                keyManagers.add(fromKeyManagerConfigurationToInfoDTO(config));
+            }
+            applicationInfoDTO.setKeyManagers(keyManagers);
+        }
         return applicationInfoDTO;
+    }
+
+    private static KeyManagerInfoDTO fromKeyManagerConfigurationToInfoDTO(
+            KeyManagerConfiguration keyManagerConfiguration) {
+        KeyManagerInfoDTO keyManagerInfoDTO = new KeyManagerInfoDTO();
+        keyManagerInfoDTO.setName(keyManagerConfiguration.getName());
+        keyManagerInfoDTO.setType(keyManagerConfiguration.getType());
+        return keyManagerInfoDTO;
     }
 
     public static ApplicationDTO fromApplicationtoDTO(Application application) {
@@ -133,15 +158,19 @@ public class ApplicationMappingUtil {
 
     public static List<ScopeInfoDTO> getScopeInfoDTO(Set<Scope> scopes) {
         List<ScopeInfoDTO> scopeDto = new ArrayList<ScopeInfoDTO>();
-        for (Scope scope : scopes) {
-            ScopeInfoDTO scopeInfoDTO = new ScopeInfoDTO();
-            scopeInfoDTO.setKey(scope.getKey());
-            scopeInfoDTO.setName(scope.getName());
-            scopeInfoDTO.setDescription(scope.getDescription());
-            if (StringUtils.isNotBlank(scope.getRoles())) {
-                scopeInfoDTO.setRoles(Arrays.asList(scope.getRoles().trim().split(",")));
+        if (scopes != null && !scopes.isEmpty()) {
+            for (Scope scope : scopes) {
+                if (scope != null) {
+                    ScopeInfoDTO scopeInfoDTO = new ScopeInfoDTO();
+                    scopeInfoDTO.setKey(scope.getKey());
+                    scopeInfoDTO.setName(scope.getName());
+                    scopeInfoDTO.setDescription(scope.getDescription());
+                    if (StringUtils.isNotBlank(scope.getRoles())) {
+                        scopeInfoDTO.setRoles(Arrays.asList(scope.getRoles().trim().split(",")));
+                    }
+                    scopeDto.add(scopeInfoDTO);
+                }
             }
-            scopeDto.add(scopeInfoDTO);
         }
         return scopeDto;
     }

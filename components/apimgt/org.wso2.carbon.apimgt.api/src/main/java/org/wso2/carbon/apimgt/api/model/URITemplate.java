@@ -17,7 +17,10 @@
 */
 package org.wso2.carbon.apimgt.api.model;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONValue;
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 
@@ -26,6 +29,7 @@ import java.util.*;
 
 public class URITemplate implements Serializable{
 
+    private static final Log log = LogFactory.getLog(URITemplate.class);
     private static final long serialVersionUID = 1L;
 
     private String uriTemplate;
@@ -50,6 +54,15 @@ public class URITemplate implements Serializable{
     private int amznResourceTimeout;
     private boolean amznResourceContentEncoded;
     private List<OperationPolicy> operationPolicies = new ArrayList<>();
+    /**
+     * Policy Hub policies at resource level (not persisted to AM_API_OPERATION_POLICY_MAPPING).
+     * Set from API definition when building platform gateway YAML (Option B).
+     */
+    private List<OperationPolicy> hubPolicies = new ArrayList<>();
+    private String description;
+    private String schemaDefinition = null;
+    private APIOperationMapping APIOperationMapping = null;
+    private BackendOperationMapping backendOperationMapping = null;
 
     public ConditionGroupDTO[] getConditionGroups() {
         return conditionGroups;
@@ -72,6 +85,7 @@ public class URITemplate implements Serializable{
         this.throttlingConditions = throttlingConditions;
     }
 
+    @UsedByMigrationClient
     public void setMediationScript(String mediationScript) {
         this.mediationScript = mediationScript;
     }
@@ -123,10 +137,12 @@ public class URITemplate implements Serializable{
         }
     }
 
+    @UsedByMigrationClient
     public String getThrottlingTier() {
         return throttlingTier;
     }
 
+    @UsedByMigrationClient
     public void setThrottlingTier(String throttlingTier) {
         this.throttlingTier = throttlingTier;
     }
@@ -139,18 +155,22 @@ public class URITemplate implements Serializable{
         this.throttlingTiers = throttlingTiers;
     }
 
+    @UsedByMigrationClient
     public String getHTTPVerb() {
         return httpVerb;
     }
 
+    @UsedByMigrationClient
     public void setHTTPVerb(String httpVerb) {
         this.httpVerb = httpVerb;
     }
 
+    @UsedByMigrationClient
     public String getAuthType() {
         return authType;
     }
 
+    @UsedByMigrationClient
     public void setAuthType(String authType) {
         this.authType = authType;
 
@@ -160,6 +180,7 @@ public class URITemplate implements Serializable{
         return resourceURI;
     }
 
+    @UsedByMigrationClient
     public void setResourceURI(String resourceURI) {
         this.resourceURI = resourceURI;
     }
@@ -172,6 +193,7 @@ public class URITemplate implements Serializable{
         return resourceSandboxURI;
     }
 
+    @UsedByMigrationClient
     public void setResourceSandboxURI(String resourceSandboxURI) {
         this.resourceSandboxURI = resourceSandboxURI;
     }
@@ -180,11 +202,14 @@ public class URITemplate implements Serializable{
         return this.resourceSandboxURI != null;
     }
 
+    @UsedByMigrationClient
     public String getUriTemplate() {
         return uriTemplate;
     }
 
+    @UsedByMigrationClient
     public void setUriTemplate(String template) {
+
         this.uriTemplate = template;
     }
 
@@ -266,17 +291,22 @@ public class URITemplate implements Serializable{
         return false;
     }
 
+    @UsedByMigrationClient
     public Scope getScope() {
         return scope;
     }
+
+    @UsedByMigrationClient
     public List<Scope> getScopes() {
         return scopes;
     }
 
+    @UsedByMigrationClient
     public void setScope(Scope scope) {
         this.scope = scope;
     }
 
+    @UsedByMigrationClient
     public void setScopes(Scope scope){
         this.scopes.add(scope);
     }
@@ -334,10 +364,13 @@ public class URITemplate implements Serializable{
                 .resourceSandboxURI != null) {
             return false;
         }
-        if (!httpVerb.equals(that.httpVerb)) {
+        if (httpVerb != null ? !httpVerb.equals(that.httpVerb) : that.httpVerb != null) {
             return false;
         }
-        if (!authType.equals(that.authType)) {
+        if (authType != null ? !authType.equals(that.authType) : that.authType != null) {
+            return false;
+        }
+        if (throttlingTier != null ? !throttlingTier.equals(that.throttlingTier) : that.throttlingTier != null) {
             return false;
         }
         if (!httpVerbs.equals(that.httpVerbs)) {
@@ -351,9 +384,6 @@ public class URITemplate implements Serializable{
             return false;
         }
         if (applicableLevel != null ? !applicableLevel.equals(that.applicableLevel) : that.applicableLevel != null) {
-            return false;
-        }
-        if (!throttlingTier.equals(that.throttlingTier)) {
             return false;
         }
         if (!throttlingTiers.equals(that.throttlingTiers)) {
@@ -372,13 +402,22 @@ public class URITemplate implements Serializable{
                 null) {
             return false;
         }
+        if (backendOperationMapping != null ? !backendOperationMapping.equals(that.backendOperationMapping) :
+                that.backendOperationMapping != null) {
+            return false;
+        }
+        if (APIOperationMapping != null ? !APIOperationMapping.equals(that.APIOperationMapping) :
+                that.APIOperationMapping != null) {
+            return false;
+        }
+
         // Probably incorrect - comparing Object[] arrays with Arrays.equals
         return Arrays.equals(conditionGroups, that.conditionGroups);
     }
 
     @Override
     public int hashCode() {
-        int result = uriTemplate.hashCode();
+        int result = uriTemplate != null ? uriTemplate.hashCode() : 0;
         result = 31 * result + (resourceURI != null ? resourceURI.hashCode() : 0);
         result = 31 * result + (resourceSandboxURI != null ? resourceSandboxURI.hashCode() : 0);
         result = 31 * result + (httpVerb != null ? httpVerb.hashCode() : 0);
@@ -393,22 +432,28 @@ public class URITemplate implements Serializable{
         result = 31 * result + (mediationScript != null ? mediationScript.hashCode() : 0);
         result = 31 * result + (scopes != null ? scopes.hashCode() : 0);
         result = 31 * result + (mediationScripts != null ? mediationScripts.hashCode() : 0);
+        result = 31 * result + (backendOperationMapping != null ? backendOperationMapping.hashCode() : 0);
+        result = 31 * result + (APIOperationMapping != null ? APIOperationMapping.hashCode() : 0);
         result = 31 * result + Arrays.hashCode(conditionGroups);
         return result;
     }
 
+    @UsedByMigrationClient
     public int getId() {
         return id;
     }
 
+    @UsedByMigrationClient
     public void setId(int id) {
         this.id = id;
     }
 
+    @UsedByMigrationClient
     public List<Scope> retrieveAllScopes() {
         return this.scopes;
     }
 
+    @UsedByMigrationClient
     public void addAllScopes(List<Scope> scopes) {
 
         this.scopes = scopes;
@@ -456,5 +501,66 @@ public class URITemplate implements Serializable{
 
     public void addOperationPolicy(OperationPolicy policy) {
         operationPolicies.add(policy);
+    }
+
+    public List<OperationPolicy> getHubPolicies() {
+        return hubPolicies;
+    }
+
+    public void setHubPolicies(List<OperationPolicy> hubPolicies) {
+        this.hubPolicies = hubPolicies != null ? hubPolicies : new ArrayList<>();
+        if (log.isDebugEnabled()) {
+            log.debug("Hub policies updated for URI template. Policy count: " + this.hubPolicies.size());
+        }
+    }
+
+    public String getDescription() {
+
+        return description;
+    }
+
+    public void setDescription(String description) {
+
+        this.description = description;
+    }
+
+    public String getSchemaDefinition() {
+
+        return schemaDefinition;
+    }
+
+    public void setSchemaDefinition(String schemaDefinition) {
+
+        this.schemaDefinition = schemaDefinition;
+    }
+
+    public APIOperationMapping getAPIOperationMapping() {
+
+        return APIOperationMapping;
+    }
+
+    public void setAPIOperationMapping(APIOperationMapping APIOperationMapping) {
+
+        this.APIOperationMapping = APIOperationMapping;
+    }
+
+    public BackendOperationMapping getBackendOperationMapping() {
+
+        return backendOperationMapping;
+    }
+
+    public void setBackendOperationMapping(BackendOperationMapping backendOperationMapping) {
+
+        this.backendOperationMapping = backendOperationMapping;
+    }
+
+    public String getHttpVerb() {
+
+        return httpVerb;
+    }
+
+    public void setHttpVerb(String httpVerb) {
+
+        this.httpVerb = httpVerb;
     }
 }

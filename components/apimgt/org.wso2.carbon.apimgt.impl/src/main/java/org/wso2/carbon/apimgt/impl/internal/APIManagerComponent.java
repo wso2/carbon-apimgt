@@ -23,7 +23,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.ssl.SSLContexts;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
@@ -38,8 +37,11 @@ import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
+import org.wso2.carbon.apimgt.api.FederatedAPIDiscoveryService;
 import org.wso2.carbon.apimgt.api.LLMProviderService;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
+import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.WorkflowTaskService;
 import org.wso2.carbon.apimgt.api.quotalimiter.ResourceQuotaLimiter;
@@ -48,7 +50,11 @@ import org.wso2.carbon.apimgt.common.gateway.http.BrowserHostnameVerifier;
 import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
 import org.wso2.carbon.apimgt.eventing.EventPublisherException;
 import org.wso2.carbon.apimgt.eventing.EventPublisherFactory;
+import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIMDependencyConfiguration;
+import org.wso2.carbon.apimgt.impl.APIMDependencyConfigurationServiceImpl;
+import org.wso2.carbon.apimgt.impl.APIMDependencyConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
@@ -57,9 +63,9 @@ import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
+import org.wso2.carbon.apimgt.impl.DependencyConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.ExternalEnvironment;
-import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
@@ -72,25 +78,13 @@ import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.issuers.SystemScopesIssuer;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationServiceImpl;
+import org.wso2.carbon.apimgt.impl.jwt.RevokedJWTMapCleaner;
+import org.wso2.carbon.apimgt.impl.token.RevokedTokenDataImpl;
+import org.wso2.carbon.apimgt.impl.token.RevokedTokenService;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationServiceImpl;
-import org.wso2.carbon.apimgt.impl.notifier.ApisNotifier;
-import org.wso2.carbon.apimgt.impl.notifier.ApplicationNotifier;
-import org.wso2.carbon.apimgt.impl.notifier.ApplicationRegistrationNotifier;
-import org.wso2.carbon.apimgt.impl.notifier.CertificateNotifier;
-import org.wso2.carbon.apimgt.impl.notifier.CorrelationConfigNotifier;
-import org.wso2.carbon.apimgt.impl.notifier.DeployAPIInGatewayNotifier;
-import org.wso2.carbon.apimgt.impl.notifier.ExternalGatewayNotifier;
-import org.wso2.carbon.apimgt.impl.notifier.ExternallyDeployedApiNotifier;
-import org.wso2.carbon.apimgt.impl.notifier.GatewayPolicyNotifier;
-import org.wso2.carbon.apimgt.impl.notifier.GoogleAnalyticsNotifier;
-import org.wso2.carbon.apimgt.impl.notifier.LLMProviderNotifier;
-import org.wso2.carbon.apimgt.impl.notifier.Notifier;
-import org.wso2.carbon.apimgt.impl.notifier.PolicyNotifier;
-import org.wso2.carbon.apimgt.impl.notifier.ScopesNotifier;
-import org.wso2.carbon.apimgt.impl.notifier.SubscriptionsNotifier;
-import org.wso2.carbon.apimgt.impl.notifier.KeyTemplateNotifier;
-import org.wso2.carbon.apimgt.impl.notifier.MarketplaceAssistantApiPublisherNotifier;
+import org.wso2.carbon.apimgt.impl.listeners.APIMTenantMgtListener;
+import org.wso2.carbon.apimgt.impl.notifier.*;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
 import org.wso2.carbon.apimgt.impl.observers.CommonConfigDeployer;
 import org.wso2.carbon.apimgt.impl.observers.KeyMgtConfigDeployer;
@@ -100,6 +94,7 @@ import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.GatewayArtifactsMgtDBUtil;
+import org.wso2.carbon.apimgt.impl.utils.GatewayManagementUtils;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.CarbonContext;
@@ -125,6 +120,8 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.AuthorizationUtils;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.registry.indexing.service.TenantIndexingLoader;
+import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
+import org.wso2.carbon.usage.data.exporter.ConsumptionDataExportService;
 import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserRealm;
@@ -141,7 +138,6 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -153,7 +149,6 @@ import java.util.List;
 import java.util.Map;
 import javax.cache.Cache;
 import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 
 import static org.wso2.carbon.apimgt.common.gateway.util.CommonAPIUtil.ALLOW_ALL;
@@ -174,6 +169,8 @@ public class APIManagerComponent {
     private static TenantRegistryLoader tenantRegistryLoader;
 
     private APIManagerConfiguration configuration = new APIManagerConfiguration();
+
+    private APIMDependencyConfiguration dependencyConfigurations = new APIMDependencyConfiguration();
 
     public static final String APPLICATION_ROOT_PERMISSION = "applications";
 
@@ -202,6 +199,7 @@ public class APIManagerComponent {
             String filePath = CarbonUtils.getCarbonConfigDirPath() + File.separator + "api-manager.xml";
             String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
             configuration.load(filePath);
+            dependencyConfigurations.load(DependencyConstants.DEPENDENCY_PROPERTIES_FILE);
 
             //Registering Notifiers
             bundleContext.registerService(Notifier.class.getName(), new SubscriptionsNotifier(), null);
@@ -210,25 +208,39 @@ public class APIManagerComponent {
             bundleContext.registerService(Notifier.class.getName(), new ApplicationRegistrationNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new PolicyNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new DeployAPIInGatewayNotifier(), null);
+            bundleContext.registerService(Notifier.class.getName(), new PlatformGatewayDeployNotifier(), null);
+            bundleContext.registerService(Notifier.class.getName(), new APIKeyNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new ScopesNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new CertificateNotifier(), null);
-            bundleContext.registerService(Notifier.class.getName(),new GoogleAnalyticsNotifier(),null);
-            bundleContext.registerService(Notifier.class.getName(),new ExternalGatewayNotifier(),null);
-            bundleContext.registerService(Notifier.class.getName(),new ExternallyDeployedApiNotifier(),null);
-            bundleContext.registerService(Notifier.class.getName(),new KeyTemplateNotifier(), null);
+            bundleContext.registerService(Notifier.class.getName(), new GoogleAnalyticsNotifier(), null);
+            bundleContext.registerService(Notifier.class.getName(), new ExternalGatewayNotifier(), null);
+            bundleContext.registerService(Notifier.class.getName(), new KeyTemplateNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new CorrelationConfigNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new GatewayPolicyNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new LLMProviderNotifier(), null);
+            bundleContext.registerService(Notifier.class.getName(), new LabelNotifier(), null);
+            if (!configuration.getGatewayArtifactSynchronizerProperties().isTenantLoading()) {
+                bundleContext.registerService(Notifier.class.getName(), new TenantNotifier(), null);
+            }
+            bundleContext.registerService(TenantMgtListener.class.getName(), new APIMTenantMgtListener(), null);
             if (configuration.getMarketplaceAssistantConfigurationDto().isKeyProvided() ||
                     configuration.getMarketplaceAssistantConfigurationDto().isAuthTokenProvided()) {
                 bundleContext.registerService(Notifier.class.getName(), new MarketplaceAssistantApiPublisherNotifier(), null);
             }
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(configuration);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
+            APIMDependencyConfigurationServiceImpl dependencyConfigurationService = new APIMDependencyConfigurationServiceImpl(
+                    dependencyConfigurations);
+            ServiceReferenceHolder.getInstance().setAPIMDependencyConfigurationService(dependencyConfigurationService);
+            bundleContext.registerService(APIMDependencyConfigurationService.class, dependencyConfigurationService,
+                    null);
             APIMgtDBUtil.initialize();
             APIUtil.init();
+            GatewayManagementUtils.performPlatformGatewayConnectFromConfigIfConfigured();
             String migrationEnabled = System.getProperty(APIConstants.MIGRATE);
             if (migrationEnabled == null) {
+                new RevokedJWTMapCleaner().startJWTRevokedMapCleaner();
+                bundleContext.registerService(RevokedTokenService.class, new RevokedTokenDataImpl(), null);
                 CommonConfigDeployer configDeployer = new CommonConfigDeployer();
                 bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), configDeployer, null);
                 TenantLoadMessageSender tenantLoadMessageSender = new TenantLoadMessageSender();
@@ -243,7 +255,6 @@ public class APIManagerComponent {
                 APIUtil.loadCommonOperationPolicies(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
                 APIManagerAnalyticsConfiguration analyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();
                 analyticsConfiguration.setAPIManagerConfiguration(configuration);
-                registration = componentContext.getBundleContext().registerService(APIManagerConfigurationService.class.getName(), configurationService, null);
                 KeyManagerConfigurationServiceImpl keyManagerConfigurationService = new KeyManagerConfigurationServiceImpl();
                 registration = componentContext.getBundleContext().registerService(KeyManagerConfigurationService.class,
                         keyManagerConfigurationService, null);
@@ -254,8 +265,6 @@ public class APIManagerComponent {
                 APIStatusObserverList.getInstance().init(configuration);
                 MonetizationDataHolder.getInstance().init();
             }
-            registration = componentContext.getBundleContext()
-                    .registerService(APIManagerConfigurationService.class.getName(), configurationService, null);
             log.debug("Reading Analytics Configuration from file...");
             // This method is called in two places. Mostly by the time activate hits,
             // ServiceDataPublisherAdmin is not activated. Therefore, this same method is run,
@@ -326,9 +335,10 @@ public class APIManagerComponent {
             CacheProvider.createGatewayBasicAuthResourceCache();
             CacheProvider.createGatewayUsernameCache();
             CacheProvider.createIntrospectionCache();
-            if(configuration.isJWTClaimCacheEnabled()){
+            if (configuration.isJWTClaimCacheEnabled()) {
                 CacheProvider.createJWTClaimCache();
             }
+            CacheProvider.createSynapseArtifactCache();
             //Initialize Recommendation wso2event output publisher
             configureRecommendationEventPublisherProperties();
             setupAccessTokenGenerator();
@@ -340,7 +350,16 @@ public class APIManagerComponent {
                     bundleContext.registerService(ArtifactRetriever.class.getName(), new DBRetriever(), null);
                 }
             }
+            if (!configuration.isRuntimeReadOnly() && migrationEnabled == null) {
+                initializeAPIDiscoveryTasks();
+            }
             bundleContext.registerService(ScopeValidator.class, new SystemScopesIssuer(), null);
+            /* The service registration was moved to the end because the HTTP client configuration was not available
+            with the previous placement, where the http client configuration was populated after registering the
+            APIManagerConfigurationService
+             */
+            registration = componentContext.getBundleContext()
+                    .registerService(APIManagerConfigurationService.class.getName(), configurationService, null);
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
         } catch (APIManagerDatabaseException e) {
@@ -816,18 +835,19 @@ public class APIManagerComponent {
     }
 
     @Reference(
-            name = "externalGatewayDeployer.component",
-            service = ExternalGatewayDeployer.class,
+            name = "external.gateway.connector.service",
+            service = GatewayAgentConfiguration.class,
             cardinality = ReferenceCardinality.MULTIPLE,
             policy = ReferencePolicy.DYNAMIC,
-            unbind = "removeExternalGatewayDeployers")
-    protected void addExternalGatewayDeployer(ExternalGatewayDeployer deployer) {
-        ServiceReferenceHolder.getInstance().addExternalGatewayDeployer(deployer.getType(), deployer);
+            unbind = "removeExternalGatewayConnectorConfigurations")
+    protected void addExternalGatewayConnectorConfiguration(GatewayAgentConfiguration gatewayConfiguration) {
+
+        ServiceReferenceHolder.getInstance().addExternalGatewayConnectorConfiguration(gatewayConfiguration.getType(), gatewayConfiguration);
     }
 
-    protected void removeExternalGatewayDeployers(ExternalGatewayDeployer deployer) {
+    protected void removeExternalGatewayConnectorConfigurations(GatewayAgentConfiguration gatewayConfiguration) {
 
-        ServiceReferenceHolder.getInstance().removeExternalGatewayDeployer(deployer.getType());
+        ServiceReferenceHolder.getInstance().removeExternalGatewayConnectorConfiguration(gatewayConfiguration.getType());
     }
 
     @Reference(
@@ -1033,6 +1053,8 @@ public class APIManagerComponent {
         int maxTotal = Integer.parseInt(configuration.getFirstProperty(APIConstants.HTTP_CLIENT_MAX_TOTAL));
         int defaultMaxPerRoute = Integer.parseInt(configuration.getFirstProperty(APIConstants.HTTP_CLIENT_DEFAULT_MAX_PER_ROUTE));
         int connectionTimeout = Integer.parseInt(configuration.getFirstProperty(APIConstants.HTTP_CLIENT_CONNECTION_TIMEOUT));
+        int connectionRequestTimeout = Integer.parseInt(configuration.getFirstProperty(
+                APIConstants.HTTP_CLIENT_CONNECTION_REQUEST_TIMEOUT));
 
         boolean proxyEnabled = Boolean.parseBoolean(configuration.getFirstProperty(APIConstants.PROXY_ENABLE));
 
@@ -1042,29 +1064,17 @@ public class APIManagerComponent {
             String proxyUsername = configuration.getFirstProperty(APIConstants.PROXY_USERNAME);
             String proxyPassword = configuration.getFirstProperty(APIConstants.PROXY_PASSWORD);
             String[] nonProxyHosts = getNonProxyHostsListByNonProxyHostsStringConfiguration(configuration);
+            String[] targetProxyHosts = getTargetProxyHostsListByTargetProxyHostsStringConfiguration(configuration);
             String proxyProtocol = configuration.getFirstProperty(APIConstants.PROXY_PROTOCOL);
             builder = builder.withProxy(proxyHost, proxyPort, proxyUsername, proxyPassword, proxyProtocol,
-                    nonProxyHosts);
+                    nonProxyHosts, targetProxyHosts);
         }
 
-        SSLContext sslContext = null;
-        try {
-            KeyStore trustStore = ServiceReferenceHolder.getInstance().getTrustStore();
-            sslContext = SSLContexts.custom().loadTrustMaterial(trustStore, null).build();
-        } catch ( KeyStoreException e) {
-            log.error("Failed to read from Key Store", e);
-        } catch (
-                NoSuchAlgorithmException e) {
-            log.error("Failed to load Key Store.", e);
-        } catch (
-                KeyManagementException e) {
-            log.error("Failed to load key from Key Store" , e);
-        }
         String hostnameVerifierOption = System.getProperty(HOST_NAME_VERIFIER);
         HostnameVerifier hostnameVerifier;
         switch(hostnameVerifierOption) {
             case ALLOW_ALL:
-                hostnameVerifier = NoopHostnameVerifier.INSTANCE;;
+                hostnameVerifier = NoopHostnameVerifier.INSTANCE;
                 break;
             case STRICT:
                 hostnameVerifier = new DefaultHostnameVerifier();
@@ -1083,8 +1093,39 @@ public class APIManagerComponent {
                 hostnameVerifier = new BrowserHostnameVerifier();
         }
         configuration.setHttpClientConfiguration(builder
-                .withConnectionParams(maxTotal, defaultMaxPerRoute, connectionTimeout)
-                .withSSLContext(sslContext, hostnameVerifier).build());
+                .withConnectionParams(maxTotal, defaultMaxPerRoute, connectionTimeout, connectionRequestTimeout)
+                .withHostnameVerifier(hostnameVerifier).build());
+    }
+
+    void initializeAPIDiscoveryTasks() {
+        try {
+            Map<String, List<Environment>> environmentMap = APIUtil.getAllEnvironments();
+            FederatedAPIDiscoveryService federatedAPIDiscoveryService = ServiceReferenceHolder
+                    .getInstance().getFederatedAPIDiscoveryService();
+            if (federatedAPIDiscoveryService == null) {
+                return;
+            }
+            APIAdminImpl apiAdmin = new APIAdminImpl();
+
+            environmentMap.forEach((organization, environments) -> {
+                for (Environment env : environments) {
+                    if (env.getProvider() != null && APIConstants.EXTERNAL_GATEWAY_VENDOR.equals(env.getProvider())) {
+                        try {
+                            Environment resolvedEnvironment = apiAdmin
+                                    .getEnvironmentWithoutPropertyMasking(organization, env.getUuid());
+                            resolvedEnvironment = apiAdmin.decryptGatewayConfigurationValues(resolvedEnvironment);
+                            federatedAPIDiscoveryService.scheduleDiscovery(resolvedEnvironment, organization);
+                        } catch (APIManagementException e) {
+                            log.error("Error while scheduling API Discovery for environment: "
+                                    + env.getName() + " in organization: " + organization, e);
+                        }
+                    }
+                }
+            });
+
+        } catch (APIManagementException e) {
+            log.error("Error while initializing API Discovery tasks: ", e);
+        }
     }
 
     /**
@@ -1096,6 +1137,11 @@ public class APIManagerComponent {
     String[] getNonProxyHostsListByNonProxyHostsStringConfiguration(APIManagerConfiguration config) {
         String nonProxyHostsString = config.getFirstProperty(APIConstants.NON_PROXY_HOSTS);
         return nonProxyHostsString != null ? nonProxyHostsString.split("\\|") : null;
+    }
+
+    String[] getTargetProxyHostsListByTargetProxyHostsStringConfiguration(APIManagerConfiguration config) {
+        String targetProxyHostsString = config.getFirstProperty(APIConstants.TARGET_PROXY_HOSTS);
+        return targetProxyHostsString != null ? targetProxyHostsString.split("\\|") : null;
     }
 
     @Reference(
@@ -1110,5 +1156,46 @@ public class APIManagerComponent {
 
     protected void unsetWorkflowTaskService(WorkflowTaskService workflowTaskService) {
         ServiceReferenceHolder.getInstance().setWorkflowTaskService(null);
+    }
+
+    @Reference(
+            name = "apim.gateway.federation.service",
+            service = org.wso2.carbon.apimgt.api.FederatedAPIDiscoveryService.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetFederatedAPIDiscovery")
+    protected void setFederatedAPIDiscovery(FederatedAPIDiscoveryService federatedAPIDiscoveryService) {
+        ServiceReferenceHolder.getInstance().setFederatedAPIDiscovery(federatedAPIDiscoveryService);
+    }
+    protected void unsetFederatedAPIDiscovery(FederatedAPIDiscoveryService federatedAPIDiscoveryService) {
+        ServiceReferenceHolder.getInstance().setFederatedAPIDiscovery(null);
+    }
+
+    @Reference(
+            name = "consumption.data.export.service",
+            service = ConsumptionDataExportService.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetConsumptionDataExportService")
+    protected void setConsumptionDataExportService(ConsumptionDataExportService consumptionDataExportService) {
+        ServiceReferenceHolder.getInstance().setConsumptionDataExportService(consumptionDataExportService);
+    }
+
+    protected void unsetConsumptionDataExportService(ConsumptionDataExportService consumptionDataExportService) {
+        ServiceReferenceHolder.getInstance().setConsumptionDataExportService(null);
+    }
+
+    @Reference(
+            name = "revoked.token.service",
+            service = RevokedTokenService.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "removeRevokedTokenService")
+    protected void addRevokedTokenService(RevokedTokenService revokedTokenService) {
+        ServiceReferenceHolder.getInstance().addRevokedTokenService(revokedTokenService);
+    }
+
+    protected void removeRevokedTokenService(RevokedTokenService revokedTokenService) {
+        ServiceReferenceHolder.getInstance().removeRevokedTokenService(revokedTokenService);
     }
 }

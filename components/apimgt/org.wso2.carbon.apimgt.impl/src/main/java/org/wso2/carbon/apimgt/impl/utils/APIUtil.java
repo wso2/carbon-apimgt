@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -27,6 +28,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import com.google.gson.internal.LinkedTreeMap;
 import feign.Feign;
 import feign.gson.GsonDecoder;
 import feign.gson.GsonEncoder;
@@ -61,9 +63,9 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.*;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
 import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.runtime.DeprecatedRuntimeConstants;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.xerces.util.SecurityManager;
 import org.everit.json.schema.Schema;
@@ -75,17 +77,24 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.apimgt.api.AIRequestContext;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.FaultyGatewayDeploymentException;
+import org.wso2.carbon.apimgt.api.FederatedAPIDiscoveryService;
+import org.wso2.carbon.apimgt.api.FileSizeLimitExceededException;
 import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
 import org.wso2.carbon.apimgt.api.PasswordResolver;
+import org.wso2.carbon.apimgt.api.PlatformGatewayService;
+import org.wso2.carbon.apimgt.api.SizeLimitedInputStream;
 import org.wso2.carbon.apimgt.api.doc.model.APIDefinition;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.doc.model.Operation;
@@ -100,8 +109,10 @@ import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIRevision;
+import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.api.model.ApiResult;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationInfoKeyManager;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
@@ -109,13 +120,22 @@ import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.GatewayAPIValidationResult;
+import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
+import org.wso2.carbon.apimgt.api.model.GatewayConfiguration;
+import org.wso2.carbon.apimgt.api.model.GatewayDeployer;
+import org.wso2.carbon.apimgt.api.model.GatewayPortalConfiguration;
+import org.wso2.carbon.apimgt.api.model.GatewayFeatureCatalog;
+import org.wso2.carbon.apimgt.api.model.GatewayMode;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.Mediation;
+import org.wso2.carbon.apimgt.api.model.OASParserOptions;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
+import org.wso2.carbon.apimgt.api.model.PlatformGateway;
 import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
@@ -154,9 +174,11 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIType;
 import org.wso2.carbon.apimgt.impl.ExternalEnvironment;
+import org.wso2.carbon.apimgt.impl.ExternalGatewayAPIValidationException;
 import org.wso2.carbon.apimgt.impl.IDPConfiguration;
 import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.CorrelationConfigDAO;
@@ -165,12 +187,16 @@ import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ConditionDto;
 import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.SolaceConfig;
 import org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionPolicyDTO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.ai.AIAPIConfigurationsDTO;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.DataLoadingException;
+import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
+import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.kmclient.ApacheFeignHttpClient;
@@ -206,6 +232,7 @@ import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.identity.core.util.IdentityCoreConstants;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.oauth.OAuthAdminService;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.registry.core.ActionConstants;
@@ -237,6 +264,10 @@ import org.wso2.carbon.user.mgt.UserMgtConstants;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -245,12 +276,16 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.NetworkInterface;
@@ -262,6 +297,9 @@ import java.net.URLDecoder;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.rmi.RemoteException;
 import java.security.*;
 import java.security.cert.Certificate;
@@ -272,6 +310,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.EnumMap;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -297,19 +336,35 @@ import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import javax.net.ssl.SSLContext;
 import java.security.cert.X509Certificate;
 import java.text.Normalizer;
 
 import javax.validation.constraints.NotNull;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
+import static org.apache.xerces.impl.Constants.DISALLOW_DOCTYPE_DECL_FEATURE;
+import static org.apache.xerces.impl.Constants.EXTERNAL_GENERAL_ENTITIES_FEATURE;
+import static org.apache.xerces.impl.Constants.EXTERNAL_PARAMETER_ENTITIES_FEATURE;
+import static org.apache.xerces.impl.Constants.LOAD_EXTERNAL_DTD_FEATURE;
+import static org.apache.xerces.impl.Constants.SAX_FEATURE_PREFIX;
+import static org.apache.xerces.impl.Constants.SECURITY_MANAGER_PROPERTY;
+import static org.apache.xerces.impl.Constants.XERCES_FEATURE_PREFIX;
+import static org.apache.xerces.impl.Constants.XERCES_PROPERTY_PREFIX;
 import static org.wso2.carbon.apimgt.impl.APIConstants.SHA_256;
+import static org.wso2.carbon.apimgt.impl.APIConstants.SWAGGER_DESCRIPTION;
+import static org.wso2.carbon.apimgt.impl.APIConstants.SWAGGER_INFO;
+import static org.wso2.carbon.apimgt.impl.APIConstants.SWAGGER_TITLE;
+import static org.wso2.carbon.apimgt.impl.APIConstants.SWAGGER_VER;
 
 /**
  * This class contains the utility methods used by the implementations of APIManager, APIProvider
@@ -361,9 +416,17 @@ public final class APIUtil {
     private static Schema operationPolicySpecSchema;
     private static final String contextRegex = "^[a-zA-Z0-9_${}/.;()-]+$";
     private static String hashingAlgorithm = SHA_256;
-    
+
     private static final Pattern NONLATIN = Pattern.compile("[^\\w-]");
     private static final Pattern WHITESPACE = Pattern.compile("[\\s]");
+    private static final int CONSUMER_SECRET_MASK_LENGTH = 16;
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+
+    private static final ThreadLocal<Boolean> skipSecretMasking = ThreadLocal.withInitial(() -> Boolean.FALSE);
+
+    private static final String RESTRICTED_SCOPE_PREFIX_APIM = "apim:";
+    private static final String RESTRICTED_SCOPE_PREFIX_APIM_ANALYTICS = "apim_analytics:";
+    private static final String RESTRICTED_SCOPE_PREFIX_SERVICE_CATALOG = "service_catalog:";
 
     private APIUtil() {
 
@@ -399,6 +462,14 @@ public final class APIUtil {
     private static double retryProgressionFactor;
     private static String gatewayTypes;
     private static int maxRetryCount;
+    private static boolean networkSecurityEnabled;
+    private static String networkSecurityMode;
+    private static List<String> networkSecurityHosts;
+    private static boolean networkSecurityBlockPrivateAccess;
+
+    private static final Pattern URL_TEMPLATE_PATTERN = Pattern.compile("\\{[^{}]*}");
+    // Prefix of the per-call placeholder that stands in for a template segment while a URL is parsed.
+    private static final String URL_TEMPLATE_MARKER = "wso2urltemplatemarker";
 
     //constants for getting masked token
     private static final int MAX_LEN = 36;
@@ -426,6 +497,14 @@ public final class APIUtil {
         retryProgressionFactor = apiManagerConfiguration.getGatewayArtifactSynchronizerProperties()
                 .getRetryProgressionFactor();
         gatewayTypes = apiManagerConfiguration.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
+        networkSecurityEnabled = Boolean.parseBoolean(apiManagerConfiguration
+                .getFirstProperty(APIConstants.NetworkSecurityAccessControl.ENABLED));
+        networkSecurityMode = apiManagerConfiguration
+                .getFirstProperty(APIConstants.NetworkSecurityAccessControl.MODE);
+        networkSecurityHosts = apiManagerConfiguration
+                .getProperty(APIConstants.NetworkSecurityAccessControl.HOSTS);
+        networkSecurityBlockPrivateAccess = Boolean.parseBoolean(apiManagerConfiguration
+                .getFirstProperty(APIConstants.NetworkSecurityAccessControl.BLOCK_PRIVATE_NETWORK_ACCESS));
         try {
             eventPublisherFactory = ServiceReferenceHolder.getInstance().getEventPublisherFactory();
             eventPublishers.putIfAbsent(EventPublisherType.ASYNC_WEBHOOKS,
@@ -438,6 +517,12 @@ public final class APIUtil {
                     eventPublisherFactory.getEventPublisher(EventPublisherType.NOTIFICATION));
             eventPublishers.putIfAbsent(EventPublisherType.TOKEN_REVOCATION,
                     eventPublisherFactory.getEventPublisher(EventPublisherType.TOKEN_REVOCATION));
+            eventPublishers.putIfAbsent(EventPublisherType.API_KEY_INFO,
+                    eventPublisherFactory.getEventPublisher(EventPublisherType.API_KEY_INFO));
+            eventPublishers.putIfAbsent(EventPublisherType.API_KEY_ASSOCIATION_INFO,
+                    eventPublisherFactory.getEventPublisher(EventPublisherType.API_KEY_ASSOCIATION_INFO));
+            eventPublishers.putIfAbsent(EventPublisherType.API_KEY_USAGE,
+                    eventPublisherFactory.getEventPublisher(EventPublisherType.API_KEY_USAGE));
             eventPublishers.putIfAbsent(EventPublisherType.BLOCKING_EVENT,
                     eventPublisherFactory.getEventPublisher(EventPublisherType.BLOCKING_EVENT));
             eventPublishers.putIfAbsent(EventPublisherType.KEY_TEMPLATE,
@@ -456,7 +541,7 @@ public final class APIUtil {
     /**
      * This method used to retrieve the api resource dependencies
      *
-     * @param api      api object
+     * @param api api object
      * @throws APIManagementException
      */
     public static void updateAPIProductDependencies(API api) throws APIManagementException {
@@ -474,8 +559,8 @@ public final class APIUtil {
     /**
      * This method is used to execute an HTTP request
      *
-     * @param method       HttpRequest Type
-     * @param httpClient   HttpClient
+     * @param method     HttpRequest Type
+     * @param httpClient HttpClient
      * @return HTTPResponse
      * @throws IOException
      */
@@ -510,17 +595,41 @@ public final class APIUtil {
 
     /**
      * This method is used to execute an HTTP request with retry parameters obtained from configuration parameters.
+     * <p>
+     * Use {@link #executeHTTPRequestWithRetries(HttpRequestBase, HttpClient, long, int, double)}
+     * to execute HTTP request with custom retry parameters.
      *
-     * @param method       HttpRequest Type
-     * @param httpClient   HttpClient
+     * @param method     HttpRequest Type
+     * @param httpClient HttpClient
      * @return CloseableHttpResponse
      */
     public static CloseableHttpResponse executeHTTPRequestWithRetries(HttpRequestBase method, HttpClient httpClient)
             throws IOException, APIManagementException {
 
+        // The logic is abstracted to a separate method to allow for custom retry parameters
+        return executeHTTPRequestWithRetries(
+                method, httpClient, retrievalTimeout, maxRetryCount, retryProgressionFactor
+        );
+    }
+
+    /**
+     * This method is used to execute an HTTP request with custom retry parameters.
+     *
+     * @param method                 HttpRequest Type
+     * @param httpClient             HttpClient
+     * @param retryDuration          Duration between retry in milliseconds
+     * @param maxRetryCount          Maximum number of retries
+     * @param retryProgressionFactor Progression factor for retry duration
+     * @return CloseableHttpResponse
+     * @throws IOException            if an I/O error occurs
+     * @throws APIManagementException if a processing error occurs
+     */
+    public static CloseableHttpResponse executeHTTPRequestWithRetries(
+            HttpRequestBase method, HttpClient httpClient, long retryDuration, int maxRetryCount,
+            double retryProgressionFactor) throws IOException, APIManagementException {
+
         CloseableHttpResponse httpResponse = null;
         String path = method.getURI().getPath();
-        long retryDuration = retrievalTimeout;
         int retryCount = 0;
         boolean retry;
         do {
@@ -538,9 +647,13 @@ public final class APIUtil {
                 retryCount++;
                 if (retryCount <= maxRetryCount) {
                     retry = true;
-                    log.error("Failed to retrieve " + path + " from remote endpoint: " + ex.getMessage()
-                            + ". Retry attempt " + retryCount + " in " + (retryDuration / 1000) +
-                            " seconds.");
+                    String logMessage = "Failed to retrieve " + path + " from remote endpoint: " + ex.getMessage()
+                            + ". Retry attempt " + retryCount + " in " + (retryDuration / 1000) + " seconds.";
+                    if (retryCount >= 4) {
+                        log.error(logMessage);
+                    } else if (retryCount == 3) {
+                        log.warn(logMessage);
+                    }
                     try {
                         Thread.sleep(retryDuration);
                         retryDuration = (long) (retryDuration * retryProgressionFactor);
@@ -567,7 +680,9 @@ public final class APIUtil {
      * @param notifierType eventType
      */
     public static void sendNotification(org.wso2.carbon.apimgt.impl.notifier.events.Event event, String notifierType) {
-
+        if (log.isDebugEnabled()) {
+            log.debug("Publishing event: " + event + " through notifier:" + notifierType);
+        }
         if (ServiceReferenceHolder.getInstance().getNotifiersMap().containsKey(notifierType)) {
             List<Notifier> notifierList = ServiceReferenceHolder.getInstance().getNotifiersMap().get(notifierType);
             notifierList.forEach((notifier) -> {
@@ -635,6 +750,7 @@ public final class APIUtil {
         return false;
     }
 
+    @UsedByMigrationClient
     public static API getAPI(GovernanceArtifact artifact)
             throws APIManagementException {
 
@@ -706,6 +822,7 @@ public final class APIUtil {
             api.setRedirectURL(artifact.getAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL));
             api.setApiOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_OWNER));
             api.setAdvertiseOnly(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
+            api.setDisplayName(artifact.getAttribute(APIConstants.API_OVERVIEW_DISPLAY_NAME));
 
             api.setEndpointConfig(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG));
 
@@ -846,6 +963,7 @@ public final class APIUtil {
             api.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
             api.setBusinessOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL));
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
+            api.setDisplayName(artifact.getAttribute(APIConstants.API_OVERVIEW_DISPLAY_NAME));
             api.setEnvironments(extractEnvironmentsForAPI(environments));
             api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
             try {
@@ -978,6 +1096,7 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE, api.getContextTemplate());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_TYPE, "context");
             artifact.setAttribute(APIConstants.API_OVERVIEW_TYPE, api.getType());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_DISPLAY_NAME, api.getDisplayName());
 
             StringBuilder policyBuilder = new StringBuilder();
             for (Tier tier : api.getAvailableTiers()) {
@@ -1160,6 +1279,7 @@ public final class APIUtil {
             // This is to support the pluggable version strategy.
             artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE, apiProduct.getContextTemplate());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_TYPE, "context");
+            artifact.setAttribute(APIConstants.API_OVERVIEW_DISPLAY_NAME, apiProduct.getDisplayName());
 
             //set monetization status (i.e - enabled or disabled)
             artifact.setAttribute(
@@ -1436,6 +1556,7 @@ public final class APIUtil {
 
     /**
      * Utility method to get the introspection query for GraphQL
+     *
      * @return introspection query
      * @throws APIManagementException
      */
@@ -1443,7 +1564,8 @@ public final class APIUtil {
         String introspectionQueryFilePath = APIConstants.GRAPHQL_INTROSPECTION_QUERY_FILE;
         try (InputStream fileStream = APIUtil.class.getClassLoader().getResourceAsStream(introspectionQueryFilePath)) {
             if (fileStream == null) {
-                throw new APIManagementException("Graphql introspection query file not found: " + introspectionQueryFilePath);
+                throw new APIManagementException(
+                        "Graphql introspection query file not found: " + introspectionQueryFilePath);
             }
             return IOUtils.toString(fileStream, StandardCharsets.UTF_8);
         } catch (IOException e) {
@@ -1501,6 +1623,7 @@ public final class APIUtil {
      * @param identifier APIIdentifier
      * @return API path
      */
+    @UsedByMigrationClient
     public static String getAPIPath(APIIdentifier identifier) {
 
         return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
@@ -1601,7 +1724,7 @@ public final class APIUtil {
     /**
      * Utility method to get documentation path of the revision
      *
-     * @param apiUUID  API UUID
+     * @param apiUUID    API UUID
      * @param revisionId revision id
      * @return Doc path
      */
@@ -1701,6 +1824,7 @@ public final class APIUtil {
      * @return GenericArtifactManager
      * @throws APIManagementException if failed to initialized GenericArtifactManager
      */
+    @UsedByMigrationClient
     public static GenericArtifactManager getArtifactManager(Registry registry, String key) throws APIManagementException {
 
         GenericArtifactManager artifactManager = null;
@@ -2102,7 +2226,7 @@ public final class APIUtil {
         // checking if Doc visibility levels enabled in api-manager.xml
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
                 getAPIManagerConfiguration().getFirstProperty(
-                APIConstants.API_PUBLISHER_ENABLE_API_DOC_VISIBILITY_LEVELS).equals("true");
+                        APIConstants.API_PUBLISHER_ENABLE_API_DOC_VISIBILITY_LEVELS).equals("true");
     }
 
     /**
@@ -2112,9 +2236,10 @@ public final class APIUtil {
      */
     public static boolean isPortalConfigurationOnlyModeEnabled() {
         // checking if API Read Only Mode is enabled in api-manager.xml
-        String isPortalConfigurationOnlyModeEnabled = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
-                        getAPIManagerConfiguration().getFirstProperty(
-                                APIConstants.API_PUBLISHER_ENABLE_PORTAL_CONFIGURATION_ONLY_MODE);
+        String isPortalConfigurationOnlyModeEnabled = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().
+                getAPIManagerConfiguration().getFirstProperty(
+                        APIConstants.API_PUBLISHER_ENABLE_PORTAL_CONFIGURATION_ONLY_MODE);
         if (StringUtils.isNotEmpty(isPortalConfigurationOnlyModeEnabled)) {
             return Boolean.parseBoolean(isPortalConfigurationOnlyModeEnabled);
         }
@@ -2169,7 +2294,7 @@ public final class APIUtil {
      * Returns an unfiltered map of API availability tiers as defined in the underlying governance
      * registry.
      *
-     * @return Map<String ,   Tier> an unfiltered Map of tier names and Tier objects - possibly empty
+     * @return Map<String, Tier> an unfiltered Map of tier names and Tier objects - possibly empty
      * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
     public static Map<String, Tier> getAllTiers() throws APIManagementException {
@@ -2181,7 +2306,7 @@ public final class APIUtil {
      * Returns an unfiltered map of API availability tiers of the tenant as defined in the underlying governance
      * registry.
      *
-     * @return Map<String ,   Tier> an unfiltered Map of tier names and Tier objects - possibly empty
+     * @return Map<String, Tier> an unfiltered Map of tier names and Tier objects - possibly empty
      * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
     public static Map<String, Tier> getAllTiers(int tenantId) throws APIManagementException {
@@ -2209,6 +2334,7 @@ public final class APIUtil {
      * @return a Map of tier names and Tier objects - possibly empty
      * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
+    @UsedByMigrationClient
     public static Map<String, Tier> getAdvancedSubsriptionTiers() throws APIManagementException {
 
         return getAdvancedSubsriptionTiers(MultitenantConstants.SUPER_TENANT_ID);
@@ -2242,7 +2368,7 @@ public final class APIUtil {
      * Returns a map of API availability tiers of the tenant as defined in the underlying governance
      * registry.
      *
-     * @param tierType type of the tiers
+     * @param tierType     type of the tiers
      * @param organization identifier of the organization
      * @return a Map of tier names and Tier objects - possibly empty
      * @throws APIManagementException if an error occurs when loading tiers from the registry
@@ -2265,7 +2391,7 @@ public final class APIUtil {
      * Result will contains all the tiers including unauthenticated tier which is
      * filtered out in   getTiers}
      *
-     * @param registry registry
+     * @param registry     registry
      * @param tierLocation registry location of tiers config
      * @return Map<String, Tier> containing all available tiers
      * @throws RegistryException      when registry action fails
@@ -2444,8 +2570,14 @@ public final class APIUtil {
             return authorized;
         }
 
-        if (APIConstants.Permissions.APIM_ADMIN.equals(permission)) {
-            Integer value = getValueFromCache(APIConstants.API_PUBLISHER_ADMIN_PERMISSION_CACHE, userNameWithoutChange);
+        if (!IdentityUtil.isUserStoreInUsernameCaseSensitive(userNameWithoutChange)) {
+            userNameWithoutChange = userNameWithoutChange.toLowerCase();
+        }
+
+        if (APIConstants.Permissions.APIM_ADMIN.equals(permission) || APIConstants.Permissions.API_CREATE.equals(permission)
+                || APIConstants.Permissions.API_PUBLISH.equals(permission)) {
+            String cacheKey = userNameWithoutChange + ":" + permission;
+            Integer value = getValueFromCache(APIConstants.API_PUBLISHER_ADMIN_PERMISSION_CACHE, cacheKey);
             if (value != null) {
                 return value == 1;
             }
@@ -2459,17 +2591,19 @@ public final class APIUtil {
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
                     getTenantId(tenantDomain);
 
-                org.wso2.carbon.user.api.AuthorizationManager manager =
-                        ServiceReferenceHolder.getInstance()
-                                .getRealmService()
-                                .getTenantUserRealm(tenantId)
-                                .getAuthorizationManager();
-                authorized =
-                        manager.isUserAuthorized(MultitenantUtils.getTenantAwareUsername(userNameWithoutChange), permission,
-                                CarbonConstants.UI_PERMISSION_ACTION);
-            if (APIConstants.Permissions.APIM_ADMIN.equals(permission)) {
-                addToRolesCache(APIConstants.API_PUBLISHER_ADMIN_PERMISSION_CACHE, userNameWithoutChange,
-                        authorized ? 1 : 2);
+            org.wso2.carbon.user.api.AuthorizationManager manager =
+                    ServiceReferenceHolder.getInstance()
+                            .getRealmService()
+                            .getTenantUserRealm(tenantId)
+                            .getAuthorizationManager();
+            authorized =
+                    manager.isUserAuthorized(MultitenantUtils.getTenantAwareUsername(userNameWithoutChange), permission,
+                            CarbonConstants.UI_PERMISSION_ACTION);
+            if (APIConstants.Permissions.APIM_ADMIN.equals(permission) ||
+                    APIConstants.Permissions.API_CREATE.equals(permission)
+                    || APIConstants.Permissions.API_PUBLISH.equals(permission)) {
+                String cacheKey = userNameWithoutChange + ":" + permission;
+                addToRolesCache(APIConstants.API_PUBLISHER_ADMIN_PERMISSION_CACHE, cacheKey, authorized ? 1 : 2);
             }
 
         } catch (UserStoreException e) {
@@ -2532,6 +2666,10 @@ public final class APIUtil {
             throw new APIManagementException(errMsg, errorHandler);
         }
 
+        if (!IdentityUtil.isUserStoreInUsernameCaseSensitive(username)) {
+            username = username.toLowerCase();
+        }
+
         String[] roles = getValueFromCache(APIConstants.API_USER_ROLE_CACHE, username);
         if (roles != null) {
             return roles;
@@ -2571,6 +2709,10 @@ public final class APIUtil {
         try {
             int tenantId =
                     ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
+            if (tenantId == -1) {
+                throw new APIManagementException("Tenant " + tenantDomain + " not found.",
+                        ExceptionCodes.INVALID_TENANT);
+            }
             UserStoreManager manager =
                     ServiceReferenceHolder.getInstance().getRealmService().getTenantUserRealm(tenantId)
                             .getUserStoreManager();
@@ -2690,6 +2832,8 @@ public final class APIUtil {
             api.setLastUpdated(registry.get(artifactPath).getLastModified());
             //set uuid
             api.setUUID(artifact.getId());
+            // set display name
+            api.setDisplayName(artifact.getAttribute(APIConstants.API_OVERVIEW_DISPLAY_NAME));
             // set url
             api.setStatus(getLcStateFromArtifact(artifact));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
@@ -2848,6 +2992,7 @@ public final class APIUtil {
      * @param input inputString
      * @return String modifiedString
      */
+    @UsedByMigrationClient
     public static String replaceEmailDomain(String input) {
 
         if (input != null && input.contains(APIConstants.EMAIL_DOMAIN_SEPARATOR)) {
@@ -2916,6 +3061,7 @@ public final class APIUtil {
      * @param input inputString
      * @return String modifiedString
      */
+    @UsedByMigrationClient
     public static String replaceEmailDomainBack(String input) {
 
         if (input != null && input.contains(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT)) {
@@ -2997,20 +3143,71 @@ public final class APIUtil {
     /**
      * This method is used to validate the endpoint configuration for API
      *
-     * @param endpointConfigObject Endpoint Configuratioj of the API
-     * @param apiType API Type
-     * @param apiName Name of the API
+     * @param endpointConfigObject Endpoint Configuration of the API
+     * @param apiType              API Type
+     * @param apiName              Name of the API
      * @throws APIManagementException Throws an error if endpoint configuration is not valid
      */
     public static void validateAPIEndpointConfig(Object endpointConfigObject, String apiType, String apiName)
             throws APIManagementException {
         if (endpointConfigObject != null) {
-            Map endpointConfigMap = (Map) endpointConfigObject;
+            @SuppressWarnings("unchecked")
+            Map<String, Object> endpointConfigMap = (Map<String, Object>) endpointConfigObject;
             if (endpointConfigMap != null && endpointConfigMap.containsKey("endpoint_type")
-                    && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
-                    endpointConfigMap.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))
+                    && APIConstants.ENDPOINT_TYPE_SEQUENCE.equalsIgnoreCase(
+                    (String) endpointConfigMap.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))
                     && !APIConstants.API_TYPE_HTTP.equalsIgnoreCase(apiType)) {
                 throw new APIManagementException("Invalid endpoint configuration provided for the API " + apiName);
+            }
+
+            // Validate security configurations for sandbox and production
+            if (endpointConfigMap.containsKey(APIConstants.ENDPOINT_SECURITY)) {
+                Object securityConfigObj = endpointConfigMap.get(APIConstants.ENDPOINT_SECURITY);
+                if (securityConfigObj instanceof Map) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Map<String, Object>> endpointSecurityMap =
+                            (Map<String, Map<String, Object>>) securityConfigObj;
+
+                    validateEndpointSecurityType(endpointSecurityMap.get(APIConstants.ENDPOINT_SECURITY_SANDBOX),
+                            APIConstants.ENDPOINT_SECURITY_SANDBOX);
+                    validateEndpointSecurityType(endpointSecurityMap.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION),
+                            APIConstants.ENDPOINT_SECURITY_PRODUCTION);
+                }
+            }
+        }
+    }
+
+    /**
+     * Validates the endpoint security type.
+     *
+     * @param securityConfig the security configuration map
+     * @param environment    the environment key ("sandbox" or "production")
+     * @throws APIManagementException if the security type is invalid
+     */
+    private static void validateEndpointSecurityType(Map<String, Object> securityConfig, String environment)
+            throws APIManagementException {
+        if (securityConfig == null || !securityConfig.containsKey(APIConstants.ENDPOINT_SECURITY_TYPE)) {
+            return; // No security type specified, skip validation
+        }
+
+        Object typeObj = securityConfig.get(APIConstants.ENDPOINT_SECURITY_TYPE);
+        if (typeObj instanceof String) {
+            String type = (String) typeObj;
+            Set<String> validTypes = Set.of(
+                    APIConstants.ENDPOINT_SECURITY_TYPE_NONE,
+                    APIConstants.ENDPOINT_SECURITY_TYPE_BASIC,
+                    APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST,
+                    APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH,
+                    APIConstants.ENDPOINT_SECURITY_TYPE_API_KEY,
+                    APIConstants.ENDPOINT_SECURITY_TYPE_AWS,
+                    APIConstants.ENDPOINT_SECURITY_TYPE_UMI
+            );
+            if (validTypes.stream().noneMatch(type::equalsIgnoreCase)) {
+                ErrorHandler errorHandler = ExceptionCodes.from(ExceptionCodes.INVALID_ENDPOINT_SECURITY_CONFIG,
+                        environment);
+                throw new APIManagementException(
+                        "Invalid endpoint security type '" + type + "' in '" + environment + "' configuration.",
+                        errorHandler);
             }
         }
     }
@@ -3079,7 +3276,7 @@ public final class APIUtil {
      * Load the External API Store Configuration  to the registry
      *
      * @param organization
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
 
     public static void loadTenantExternalStoreConfig(String organization) throws APIManagementException {
@@ -3167,7 +3364,7 @@ public final class APIUtil {
             }
 
             ServiceReferenceHolder.getInstance().getApimConfigService().addSelfSighupConfig(organization, IOUtils.toString(inputStream));
-        } catch (IOException  e) {
+        } catch (IOException e) {
             throw new APIManagementException("Error while reading Self signup configuration file content", e);
         }
     }
@@ -3196,14 +3393,14 @@ public final class APIUtil {
         }
     }
 
-    private static JsonElement getFileBaseTenantConfig() throws APIManagementException{
+    private static JsonElement getFileBaseTenantConfig() throws APIManagementException {
         try {
             byte[] localTenantConfFileData = getLocalTenantConfFileData();
             String tenantConfDataStr = new String(localTenantConfFileData, Charset.defaultCharset());
             JsonParser jsonParser = new JsonParser();
             return jsonParser.parse(tenantConfDataStr);
         } catch (IOException e) {
-            throw new APIManagementException("Error while retrieving file base tenant-config" , e);
+            throw new APIManagementException("Error while retrieving file base tenant-config", e);
         }
     }
 
@@ -3230,7 +3427,6 @@ public final class APIUtil {
         }
         return data;
     }
-
 
 
     /**
@@ -3359,13 +3555,192 @@ public final class APIUtil {
         return APIManagerAnalyticsConfiguration.getInstance().isAnalyticsEnabled();
     }
 
-    public static List<String> getGatewayTypes () {
+    public static List<String> getGatewayTypes() {
         // Get the gateway types from the deployment.toml
         List<String> gatewayTypesList = new ArrayList<>();
         if (gatewayTypes != null && !gatewayTypes.isEmpty()) {
-            gatewayTypesList = Arrays.asList(gatewayTypes.split(","));
+            gatewayTypesList = Arrays.asList(gatewayTypes.replace(" ", "").split(","));
         }
         return gatewayTypesList;
+    }
+
+    public static GatewayFeatureCatalog getGatewayFeatureCatalog() throws APIManagementException {
+
+        Gson gson = new Gson();
+        Type type = new TypeToken<Map<String, Object>>() {
+        }.getType();
+        Map<String, Object> gatewayConfigsMap = new HashMap<>();
+        Map<String, List<String>> apiData = new HashMap<>();
+        JsonObject synapseConfigJSON = null;
+        JsonObject apkConfigJSON = null;
+        JsonObject solaceConfigJSON = null;
+        JsonObject platformConfigJSON = null;
+        try (InputStream synapseInputStream = APIUtil.class.getClassLoader()
+                .getResourceAsStream("gatewayFeatureCatalog/synapse-gateway-feature-catalog.json")) {
+            if (synapseInputStream == null) {
+                throw new APIManagementException("Synapse Gateway Feature Catalog JSON not found");
+            }
+            InputStreamReader reader = new InputStreamReader(synapseInputStream, StandardCharsets.UTF_8);
+            synapseConfigJSON = JsonParser.parseReader(reader).getAsJsonObject();
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading Synapse Gateway Feature Catalog JSON", e);
+        }
+
+        try (InputStream apkInputStream = APIUtil.class.getClassLoader()
+                .getResourceAsStream("gatewayFeatureCatalog/apk-gateway-feature-catalog.json")) {
+            if (apkInputStream == null) {
+                throw new APIManagementException("APK Gateway Feature Catalog JSON not found");
+            }
+            InputStreamReader reader = new InputStreamReader(apkInputStream, StandardCharsets.UTF_8);
+            apkConfigJSON = JsonParser.parseReader(reader).getAsJsonObject();
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading APK Gateway Feature Catalog JSON", e);
+        }
+
+        try (InputStream solaceInputStream = APIUtil.class.getClassLoader()
+                .getResourceAsStream("gatewayFeatureCatalog/solace-feature-catalog.json")) {
+            if (solaceInputStream == null) {
+                throw new APIManagementException("Solace Feature Catalog JSON not found");
+            }
+            InputStreamReader reader = new InputStreamReader(solaceInputStream, StandardCharsets.UTF_8);
+            solaceConfigJSON = JsonParser.parseReader(reader).getAsJsonObject();
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading Solace Feature Catalog JSON", e);
+        }
+        try (InputStream platformInputStream = APIUtil.class.getClassLoader()
+                .getResourceAsStream("gatewayFeatureCatalog/platform-gateway-feature-catalog.json")) {
+            if (platformInputStream == null) {
+                throw new APIManagementException("Platform Gateway Feature Catalog JSON not found");
+            }
+            InputStreamReader reader = new InputStreamReader(platformInputStream, StandardCharsets.UTF_8);
+            platformConfigJSON = JsonParser.parseReader(reader).getAsJsonObject();
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading Platform Gateway Feature Catalog JSON", e);
+        }
+
+        if (synapseConfigJSON == null || apkConfigJSON == null || solaceConfigJSON == null
+                || platformConfigJSON == null) {
+            throw new APIManagementException("Error while reading Gateway Feature Catalog JSON");
+        }
+
+        JsonObject synapseConfigsJSONValue = synapseConfigJSON.getAsJsonObject(APIConstants.WSO2_SYNAPSE_GATEWAY);
+        JsonObject apkConfigsJSONValue = apkConfigJSON.getAsJsonObject(APIConstants.WSO2_APK_GATEWAY);
+        JsonObject solaceConfigsJSONValue = solaceConfigJSON.getAsJsonObject(APIConstants.SOLACE);
+        JsonObject platformConfigsJSONValue =
+                platformConfigJSON.getAsJsonObject(APIConstants.WSO2_API_PLATFORM_GATEWAY);
+
+        JsonObject synapseJSON = synapseConfigsJSONValue.getAsJsonObject("gatewayFeatures");
+        JsonObject apkJSON = apkConfigsJSONValue.getAsJsonObject("gatewayFeatures");
+        JsonObject solaceJSON = solaceConfigsJSONValue.getAsJsonObject("gatewayFeatures");
+        JsonObject platformJSON = platformConfigsJSONValue.getAsJsonObject("gatewayFeatures");
+
+        Map<String, Object> synapseMap = gson.fromJson(synapseJSON, type);
+        Map<String, Object> apkMap = gson.fromJson(apkJSON, type);
+        Map<String, Object> solaceMap = gson.fromJson(solaceJSON, type);
+        Map<String, Object> platformMap = gson.fromJson(platformJSON, type);
+
+        gatewayConfigsMap.put(APIConstants.WSO2_SYNAPSE_GATEWAY, synapseMap);
+        gatewayConfigsMap.put(APIConstants.WSO2_APK_GATEWAY, apkMap);
+        gatewayConfigsMap.put(APIConstants.SOLACE, solaceMap);
+        gatewayConfigsMap.put(APIConstants.WSO2_API_PLATFORM_GATEWAY, platformMap);
+
+        JsonArray synapseApiTypes = synapseConfigsJSONValue.getAsJsonArray("apiTypes");
+        JsonArray apkApiTypes = apkConfigsJSONValue.getAsJsonArray("apiTypes");
+        JsonArray solaceApiTypes = solaceConfigsJSONValue.getAsJsonArray("apiTypes");
+        for (String key : APIConstants.API_TYPES) {
+            apiData.put(key, new ArrayList<>());
+        }
+
+        Map<String, GatewayAgentConfiguration> externalGatewayConnectorConfigurationMap =
+                ServiceReferenceHolder.getInstance().getExternalGatewayConnectorConfigurations();
+
+        // Get the gateway types from the deployment.toml and process each external gateway type in the same order as
+        // they are defined in the deployment.toml.
+        List<String> gatewayTypes = APIUtil.getGatewayTypes();
+
+        // trim and deduplicate while preserving order
+        LinkedHashSet<String> orderedGatewayTypes = new LinkedHashSet<>();
+        if (gatewayTypes != null) {
+            for (String t : gatewayTypes) {
+                if (StringUtils.isNotBlank(t)) {
+                    orderedGatewayTypes.add(t.trim());
+                }
+            }
+        }
+
+        for (String gatewayType : orderedGatewayTypes) {
+            if (APIConstants.API_GATEWAY_TYPE_REGULAR.equalsIgnoreCase(gatewayType)) {
+                for (JsonElement element : synapseApiTypes) {
+                    String apiType = element.getAsString();
+                    if (apiData.containsKey(apiType)) {
+                        apiData.get(apiType).add(APIConstants.WSO2_SYNAPSE_GATEWAY);
+                    }
+                }
+            } else if (APIConstants.API_GATEWAY_TYPE_APK.equalsIgnoreCase(gatewayType)) {
+                for (JsonElement element : apkApiTypes) {
+                    String apiType = element.getAsString();
+                    if (apiData.containsKey(apiType)) {
+                        apiData.get(apiType).add(APIConstants.WSO2_APK_GATEWAY);
+                    }
+                }
+            } else if (APIConstants.SOLACE.equalsIgnoreCase(gatewayType)) {
+                for (JsonElement element : solaceApiTypes) {
+                    String apiType = element.getAsString();
+                    if (apiData.containsKey(apiType)) {
+                        apiData.get(apiType).add(APIConstants.SOLACE);
+                    }
+                }
+            } else if (APIConstants.WSO2_API_PLATFORM_GATEWAY.equalsIgnoreCase(gatewayType)) {
+                // api-platform uses registration token and internal API; no external gateway connector config.
+                // It is added to rest gateways below.
+            } else {
+                GatewayAgentConfiguration externalGatewayConfiguration = externalGatewayConnectorConfigurationMap.get(gatewayType);
+
+                if (externalGatewayConfiguration != null) {
+                    processExternalGatewayFeatureCatalogs(gatewayConfigsMap, apiData, externalGatewayConfiguration);
+                } else {
+                    log.warn("No configuration found for external gateway type: " +
+                            StringEscapeUtils.escapeJava(gatewayType));
+                }
+            }
+        }
+
+        // Platform gateway: support REST APIs by default (no toggle in gatewayTypes).
+        List<String> restGateways = apiData.get("rest");
+        if (restGateways != null && !restGateways.contains(APIConstants.WSO2_API_PLATFORM_GATEWAY)) {
+            restGateways.add(APIConstants.WSO2_API_PLATFORM_GATEWAY);
+        }
+
+        GatewayFeatureCatalog gatewayFeatureCatalog = new GatewayFeatureCatalog();
+        gatewayFeatureCatalog.setApiTypes(apiData);
+        gatewayFeatureCatalog.setGatewayFeatures(gatewayConfigsMap);
+
+        return gatewayFeatureCatalog;
+    }
+
+    private static void processExternalGatewayFeatureCatalogs(Map<String, Object> gatewayConfigsMap,
+                                                              Map<String, List<String>> apiData,
+                                                              GatewayAgentConfiguration gatewayConfiguration) {
+
+        GatewayPortalConfiguration config = null;
+        try {
+            config = gatewayConfiguration.getGatewayFeatureCatalog();
+        } catch (APIManagementException e) {
+            throw new RuntimeException(e);
+        }
+        if (config != null) {
+            LinkedTreeMap<String, Object> supportedFeaturesMap = new Gson().fromJson(
+                    (JsonObject) config.getSupportedFeatures(), LinkedTreeMap.class);
+            gatewayConfigsMap.put(config.getGatewayType(), supportedFeaturesMap);
+
+            List<String> types = config.getSupportedAPITypes();
+            for (int i = 0; i < types.size(); i++) {
+                String apiType = types.get(i);
+                if (apiData.containsKey(apiType)) {
+                    apiData.get(apiType).add(config.getGatewayType());
+                }
+            }
+        }
     }
 
     /**
@@ -3550,6 +3925,81 @@ public final class APIUtil {
         }
     }
 
+    /**
+     * Retrieves the retry attempts limit for failover configurations.
+     *
+     * @return The number of retry attempts allowed for failover.
+     * @throws APIManagementException If the configuration service or failover settings are unavailable.
+     */
+    public static int getRetryAttemptsForFailoverConfigurations() throws APIManagementException {
+
+        APIManagerConfigurationService configService =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
+
+        if (configService == null) {
+            log.error("API Manager Configuration Service is not available.");
+            throw new APIManagementException("API Manager Configuration Service is not initialized.");
+        }
+
+        AIAPIConfigurationsDTO aiConfig = configService.getAPIManagerConfiguration().getAiApiConfigurationsDTO();
+        if (aiConfig == null || aiConfig.getFailoverConfigurations() == null) {
+            log.warn("Missing AI API Failover configurations.");
+            throw new APIManagementException("Missing required AI API Failover configurations.");
+        }
+
+        return aiConfig.getFailoverConfigurations().getFailoverEndpointsLimit();
+    }
+
+    /**
+     * Retrieves the default request timeout for AI APIs.
+     *
+     * @return The default request timeout in milliseconds.
+     * @throws APIManagementException If the configuration service or failover settings are unavailable.
+     */
+    public static long getDefaultRequestTimeoutsForAIAPIs() throws APIManagementException {
+
+        APIManagerConfigurationService configService =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
+
+        if (configService == null) {
+            log.error("API Manager Configuration Service is not available.");
+            throw new APIManagementException("API Manager Configuration Service is not initialized.");
+        }
+
+        AIAPIConfigurationsDTO aiConfig = configService.getAPIManagerConfiguration().getAiApiConfigurationsDTO();
+        if (aiConfig == null || aiConfig.getFailoverConfigurations() == null) {
+            log.warn("Missing AI API Failover configurations.");
+            throw new APIManagementException("Missing required AI API Failover configurations.");
+        }
+
+        return aiConfig.getDefaultRequestTimeout();
+    }
+
+    /**
+     * Retrieves the default request timeout for failover configurations.
+     *
+     * @return The default request timeout in milliseconds.
+     * @throws APIManagementException If the configuration service or failover settings are unavailable.
+     */
+    public static long getDefaultRequestTimeoutForFailoverConfigurations() throws APIManagementException {
+
+        APIManagerConfigurationService configService =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
+
+        if (configService == null) {
+            log.error("API Manager Configuration Service is not available.");
+            throw new APIManagementException("API Manager Configuration Service is not initialized.");
+        }
+
+        AIAPIConfigurationsDTO aiConfig = configService.getAPIManagerConfiguration().getAiApiConfigurationsDTO();
+        if (aiConfig == null || aiConfig.getFailoverConfigurations() == null) {
+            log.warn("Missing AI API Failover configurations.");
+            throw new APIManagementException("Missing required AI API Failover configurations.");
+        }
+
+        return aiConfig.getFailoverConfigurations().getDefaultRequestTimeout();
+    }
+
     public void setupSelfRegistration(APIManagerConfiguration config, int tenantId) throws APIManagementException {
 
         boolean enabled = Boolean.parseBoolean(config.getFirstProperty(APIConstants.SELF_SIGN_UP_ENABLED));
@@ -3619,8 +4069,9 @@ public final class APIUtil {
 
     /**
      * Update available tiers in the DevPortalAPIInfo according to the organization.
-     * @param devPortalAPIInfo  DevPortalAPIInfo object
-     * @param organization      Organization ID
+     *
+     * @param devPortalAPIInfo DevPortalAPIInfo object
+     * @param organization     Organization ID
      */
     public static void updateAvailableTiersByOrganization(DevPortalAPIInfo devPortalAPIInfo, String organization) {
 
@@ -3646,6 +4097,7 @@ public final class APIUtil {
         }
     }
 
+    @UsedByMigrationClient
     public static List<Tenant> getAllTenantsWithSuperTenant() throws UserStoreException {
 
         Tenant[] tenants = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getAllTenants();
@@ -3920,7 +4372,8 @@ public final class APIUtil {
         }
         return resourceQuotaLimiter;
     }
-    
+
+    @UsedByMigrationClient
     public static int getInternalOrganizationId(String organization) throws APIManagementException {
         return getOrganizationResolver().getInternalId(organization);
     }
@@ -3953,7 +4406,7 @@ public final class APIUtil {
             return true;
         }
 
-        org.wso2.carbon.user.api.UserStoreManager userStoreManager;
+        UserStoreManager userStoreManager;
         try {
             RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
@@ -3966,7 +4419,7 @@ public final class APIUtil {
                     return false;
                 }
             }
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+        } catch (UserStoreException e) {
             log.error("Error when getting the list of roles", e);
             return false;
         }
@@ -4005,7 +4458,7 @@ public final class APIUtil {
      * Create API Definition in JSON
      *
      * @param api API
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to generate the content and save
+     * @throws APIManagementException if failed to generate the content and save
      * @deprecated
      */
 
@@ -4120,6 +4573,7 @@ public final class APIUtil {
      * @param userName user name
      * @return tenantId
      */
+    @UsedByMigrationClient
     public static int getTenantId(String userName) {
         //get tenant domain from user name
         String tenantDomain = MultitenantUtils.getTenantDomain(userName);
@@ -4155,6 +4609,7 @@ public final class APIUtil {
      * @param organization Organization
      * @return tenantId
      */
+    @UsedByMigrationClient
     public static int getInternalIdFromTenantDomainOrOrganization(String organization) {
         RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
         if (realmService == null || organization == null) {
@@ -4174,6 +4629,7 @@ public final class APIUtil {
      * @param tenantId tenant Id
      * @return tenantId
      */
+    @UsedByMigrationClient
     public static String getTenantDomainFromTenantId(int tenantId) {
 
         RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
@@ -4240,8 +4696,9 @@ public final class APIUtil {
 
     /**
      * Build OMElement from input stream with securely configured parser.
+     *
      * @param inputStream Input Stream
-     * @return  OMElement
+     * @return OMElement
      * @throws APIManagementException XMLStreamException while parsing the inputStream
      */
     public static OMElement buildSecuredOMElement(InputStream inputStream) throws APIManagementException {
@@ -4396,7 +4853,7 @@ public final class APIUtil {
      */
     public static boolean isSequenceDefined(String sequence) {
 
-        return sequence != null && !"none".equals(sequence) && !StringUtils.isEmpty(sequence) ;
+        return sequence != null && !"none".equals(sequence) && !StringUtils.isEmpty(sequence);
     }
 
     /**
@@ -4408,7 +4865,19 @@ public final class APIUtil {
      */
     public static String getSequenceExtensionName(API api) {
 
-        return api.getId().getApiName() + ":v" + api.getId().getVersion();
+        return APIConstants.SYNAPSE_API_NAME_PREFIX + "--" + api.getId().getApiName() + ":v" + api.getId().getVersion();
+    }
+
+    /**
+     * Return the endpoints sequence name.
+     * eg: OpenAIAPI--v2.3.0
+     *
+     * @param api
+     * @return
+     */
+    public static String getEndpointSequenceName(API api) {
+
+        return api.getId().getApiName() + "--" + api.getId().getVersion();
     }
 
     /**
@@ -4430,7 +4899,7 @@ public final class APIUtil {
      */
     public static String getSequenceExtensionName(String name, String version) {
 
-        return name + ":v" + version;
+        return APIConstants.SYNAPSE_API_NAME_PREFIX + "--" + name + ":v" + version;
     }
 
     /**
@@ -4510,6 +4979,52 @@ public final class APIUtil {
         return object.toString();
     }
 
+    public static String maskSecret(String secret) {
+
+        if (skipSecretMasking.get()) {
+            return secret;
+        }
+        boolean isHashingEnabled = OAuthServerConfiguration.getInstance().isClientSecretHashEnabled();
+        if (log.isDebugEnabled()) {
+            log.debug("Masking secret. Client Secret Hashing enabled: " + isHashingEnabled);
+        }
+        if (secret == null || secret.isEmpty() || isHashingEnabled) {
+            // Always return a fixed length mask value if secret is null or empty or if hashing is enabled
+            return generateMask(CONSUMER_SECRET_MASK_LENGTH);
+        }
+
+        // Show first 3 characters, mask the rest so total = 16
+        int visibleChars = Math.min(3, secret.length());
+        int maskedPartLength = Math.max(CONSUMER_SECRET_MASK_LENGTH - visibleChars, 0);
+        String visiblePart = secret.substring(0, visibleChars);
+        return visiblePart + generateMask(maskedPartLength);
+    }
+
+    /**
+     * Enable skipping of secret masking for the current thread.
+     * This should be used in scenarios like application export where the actual secrets need to be retrieved.
+     */
+    public static void enableSkipSecretMasking() {
+        skipSecretMasking.set(Boolean.TRUE);
+    }
+
+    /**
+     * Clear the skip secret masking ThreadLocal variable to prevent memory leaks.
+     * This should be called in a finally block after the operation is complete.
+     */
+    public static void clearSkipSecretMasking() {
+        skipSecretMasking.remove();
+    }
+
+    private static String generateMask(int length) {
+        // Generate mask dynamically for given length
+        StringBuilder sb = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            sb.append('*');
+        }
+        return sb.toString();
+    }
+
     private static String bytesToHex(byte[] bytes) {
 
         StringBuilder result = new StringBuilder();
@@ -4519,6 +5034,7 @@ public final class APIUtil {
         return result.toString();
     }
 
+    @UsedByMigrationClient
     public static void loadTenantRegistry(int tenantId) throws RegistryException {
 
         TenantRegistryLoader tenantRegistryLoader = APIManagerComponent.getTenantRegistryLoader();
@@ -4533,12 +5049,14 @@ public final class APIUtil {
         try {
             config = (JSONObject) parser.parse(endpointConfig);
 
-            if (config.containsKey("sandbox_endpoints")) {
+            if (config.containsKey("sandbox_endpoints") && config.get("sandbox_endpoints") != null) {
                 return true;
             }
-            if (StringUtils.equals(config.get("endpoint_type").toString(),"graphql")) {
-                JSONObject httpConfig =(JSONObject) parser.parse(config.get("http").toString());
-                if (httpConfig.containsKey("sandbox_endpoints")) {
+            if (config.get("endpoint_type") != null
+                    && StringUtils.equals(config.get("endpoint_type").toString(), "graphql")
+                    && config.get("http") != null) {
+                JSONObject httpConfig = (JSONObject) parser.parse(config.get("http").toString());
+                if (httpConfig.containsKey("sandbox_endpoints") && httpConfig.get("sandbox_endpoints") != null) {
                     return true;
                 }
             }
@@ -4557,12 +5075,14 @@ public final class APIUtil {
         try {
             config = (JSONObject) parser.parse(endpointConfig);
 
-            if (config.containsKey("production_endpoints")) {
+            if (config.containsKey("production_endpoints") && config.get("production_endpoints") != null) {
                 return true;
             }
-            if (StringUtils.equals(config.get("endpoint_type").toString(),"graphql")) {
-                JSONObject httpConfig =(JSONObject) parser.parse(config.get("http").toString());
-                if (httpConfig.containsKey("production_endpoints")) {
+            if (config.get("endpoint_type") != null
+                    && StringUtils.equals(config.get("endpoint_type").toString(), "graphql")
+                    && config.get("http") != null) {
+                JSONObject httpConfig = (JSONObject) parser.parse(config.get("http").toString());
+                if (httpConfig.containsKey("production_endpoints") && httpConfig.get("production_endpoints") != null) {
                     return true;
                 }
             }
@@ -4829,9 +5349,17 @@ public final class APIUtil {
      * @return whether the provided URL content contains the string to match
      */
     public static boolean isURLContentContainsString(URL url, String match, int maxLines) {
-
-        try (BufferedReader in =
-                     new BufferedReader(new InputStreamReader(url.openStream(), Charset.defaultCharset()))) {
+        String maxWSDLSizeStr = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration()
+                .getFirstProperty(org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_WSDL_FILE_SIZE_LIMIT);
+        if (maxWSDLSizeStr == null || maxWSDLSizeStr.trim().isEmpty()) {
+            maxWSDLSizeStr = org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_WSDL_FILE_SIZE_LIMIT_DEFAULT_MB;
+        }
+        long maxFileSize = Long.parseLong(maxWSDLSizeStr) * 1024L * 1024L;
+        try (BufferedInputStream bufferedStream = new BufferedInputStream(url.openStream(), 4096);
+                SizeLimitedInputStream limitedStream = new SizeLimitedInputStream(bufferedStream, maxFileSize);
+                BufferedReader in = new BufferedReader(
+                        new InputStreamReader(limitedStream, Charset.defaultCharset()))) {
             String inputLine;
             StringBuilder urlContent = new StringBuilder();
             while ((inputLine = in.readLine()) != null && maxLines > 0) {
@@ -4841,6 +5369,10 @@ public final class APIUtil {
                     return true;
                 }
             }
+        } catch (FileSizeLimitExceededException e) {
+            log.error(
+                    "Error Reading Input from Stream from " + url + ". The file size exceeds the maximum limit of " + maxFileSize + " bytes.",
+                    e);
         } catch (IOException e) {
             log.error("Error Reading Input from Stream from " + url, e);
 
@@ -4974,6 +5506,7 @@ public final class APIUtil {
      * @param path            default path of the registry
      * @return mounted path or path
      */
+    @UsedByMigrationClient
     public static String getMountedPath(RegistryContext registryContext, String path) {
 
         if (registryContext != null && path != null) {
@@ -4993,7 +5526,7 @@ public final class APIUtil {
      * Returns a map of gateway / store domains for the tenant
      *
      * @return a Map of domain names for tenant
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if an error occurs when loading tiers from the registry
+     * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
     public static Map<String, String> getDomainMappings(String tenantDomain, String appType)
             throws APIManagementException {
@@ -5079,7 +5612,7 @@ public final class APIUtil {
             userName = MultitenantUtils.getTenantAwareUsername(userName);
             registryType = ServiceReferenceHolder
                     .getInstance().
-                            getRegistryService().getGovernanceUserRegistry(userName, tenantId);
+                    getRegistryService().getGovernanceUserRegistry(userName, tenantId);
             if (registryType.resourceExists(resourceUrl)) {
                 apiDocResource = registryType.get(resourceUrl);
                 inStream = apiDocResource.getContentStream();
@@ -5144,7 +5677,7 @@ public final class APIUtil {
      * This method is used to check if gateway environment is allowed for user
      *
      * @param environment gateway environment
-     * @param username  username of the logged-in user
+     * @param username    username of the logged-in user
      * @return boolean returns if the gateway environment is allowed for the logged-in user
      * @throws APIManagementException if error occurred
      */
@@ -5177,11 +5710,11 @@ public final class APIUtil {
         Set<String> set = new HashSet<>();
 
         for (String element : arr1) {
-            set.add(element);
+            set.add(element.toLowerCase(Locale.ENGLISH));
         }
 
         for (String element : arr2) {
-            if (set.contains(element)) {
+            if (set.contains(element.toLowerCase(Locale.ENGLISH))) {
                 return true;
             }
         }
@@ -5455,7 +5988,7 @@ public final class APIUtil {
         }
     }
 
-    private static InetAddress getLocalAddress() {
+    public static InetAddress getLocalAddress() {
 
         Enumeration<NetworkInterface> ifaces = null;
         try {
@@ -5636,7 +6169,7 @@ public final class APIUtil {
     /**
      * Return a http client instance
      *
-     * @param url      - server url
+     * @param url - server url
      * @return
      */
 
@@ -5662,9 +6195,68 @@ public final class APIUtil {
 
         HttpClientConfigurationDTO configuration = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration().getHttpClientConfiguration();
-        return CommonAPIUtil.getHttpClient(protocol, configuration);
+
+        if (log.isDebugEnabled()) {
+            log.debug("Creating HTTP client with protocol: " + protocol + " port: " + port);
+        }
+
+        // Avoid unnecessary truststore work for plain HTTP
+        if (!APIConstants.HTTPS_PROTOCOL.equalsIgnoreCase(protocol)) {
+            log.debug("Using default SSL context for HTTP protocol");
+            return CommonAPIUtil.getHttpClient(protocol, configuration, SSLContexts.createDefault());
+        }
+
+        return CommonAPIUtil.getHttpClient(protocol, configuration, getSSLContext());
     }
 
+    /**
+     * Creates an SSLContext using the configured trust store. Falls back to the default SSLContext if the trust store
+     * path, password, or file is invalid, or if an error occurs while loading.
+     *
+     * @return SSLContext based on the trust store or the default SSLContext
+     */
+    private static SSLContext getSSLContext() {
+        String keyStorePath = System.getProperty(APIConstants.JAVAX_NET_SSL_TRUST_STORE);
+        char[] keyStorePassword = System.getProperty(APIConstants.JAVAX_NET_SSL_TRUST_STORE_PASSWORD) != null ?
+                System.getProperty(APIConstants.JAVAX_NET_SSL_TRUST_STORE_PASSWORD).toCharArray() : new char[0];
+        String trustStoreType = System.getProperty(APIConstants.JAVAX_NET_SSL_TRUST_STORE_TYPE,
+                APIConstants.DEFAULT_KEY_STORE_TYPE);
+
+        try {
+            // Basic validation and fast-fallback
+            if (StringUtils.isBlank(keyStorePath) || keyStorePassword.length == 0) {
+                log.error("Trust store path or password is not configured. Falling back to default SSLContext.");
+                return SSLContexts.createDefault();
+            }
+
+            Path path = Paths.get(keyStorePath);
+            if (!Files.exists(path)) {
+                log.error("Trust store file not found at the configured path. Falling back to default SSLContext.");
+                return SSLContexts.createDefault();
+            }
+
+            // Create SSL context dynamically to pick up certificate changes at runtime
+            KeyStore trustStore = KeyStore.getInstance(trustStoreType);
+            try (InputStream keyStoreStream = Files.newInputStream(path)) {
+                log.debug("Loading trust store for SSL context creation.");
+                trustStore.load(keyStoreStream, keyStorePassword);
+            }
+            return SSLContexts.custom().loadTrustMaterial(trustStore, null).build();
+        } catch (KeyStoreException e) {
+            log.error("Failed to create or access the trust store instance: " + e.getMessage());
+        } catch (IOException e) {
+            log.error("Unable to read the trust store file: " + e.getMessage());
+        } catch (NoSuchAlgorithmException e) {
+            log.error("The specified algorithm for trust store loading is not available: " + e.getMessage());
+        } catch (CertificateException e) {
+            log.error("Failed to read Certificate: " + e.getMessage());
+        } catch (KeyManagementException e) {
+            log.error("Failed to initialize SSLContext from the trust store: " + e.getMessage());
+        } finally {
+            Arrays.fill(keyStorePassword, '\0');
+        }
+        return SSLContexts.createDefault();
+    }
 
     /**
      * This method will return a relative URL for given registry resource which we can used to retrieve the resource
@@ -5794,7 +6386,6 @@ public final class APIUtil {
     }
 
 
-
     /**
      * Returns the tenant-conf.json in JSONObject format for the given tenant(id) from the registry.
      *
@@ -5810,14 +6401,14 @@ public final class APIUtil {
             return (JSONObject) tenantConfigCache.get(cacheName);
         } else {
             String tenantConfig =
-             ServiceReferenceHolder.getInstance().getApimConfigService().getTenantConfig(organization);
-            if (StringUtils.isNotEmpty(tenantConfig)){
+                    ServiceReferenceHolder.getInstance().getApimConfigService().getTenantConfig(organization);
+            if (StringUtils.isNotEmpty(tenantConfig)) {
                 try {
                     JSONObject jsonObject = (JSONObject) new JSONParser().parse(tenantConfig);
                     tenantConfigCache.put(cacheName, jsonObject);
                     return jsonObject;
                 } catch (ParseException e) {
-                    throw new APIManagementException("Error occurred while converting to json",e);
+                    throw new APIManagementException("Error occurred while converting to json", e);
                 }
             }
             return new JSONObject();
@@ -5874,7 +6465,7 @@ public final class APIUtil {
      */
     @SuppressWarnings("unchecked")
     public static Map<String, String> getRESTAPIScopesForTenantWithoutRoleMappings(String tenantDomain)
-            throws APIManagementException{
+            throws APIManagementException {
         return APIUtil.getRESTAPIScopesFromConfig(APIUtil.getTenantRESTAPIScopesConfig(tenantDomain), null);
     }
 
@@ -5908,6 +6499,7 @@ public final class APIUtil {
      * @param roleMappings JSON Configuration object with role mappings
      * @return Map of scopes which contains scope names and associated role list
      */
+    @UsedByMigrationClient
     public static Map<String, String> getRESTAPIScopesFromConfig(JSONObject scopesConfig, JSONObject roleMappings) {
 
         Map<String, String> scopes = new HashMap<String, String>();
@@ -6090,12 +6682,14 @@ public final class APIUtil {
      * @param jsonString json representation of CORS configuration
      * @return CORSConfiguration Object
      */
+    @UsedByMigrationClient
     public static CORSConfiguration getCorsConfigurationDtoFromJson(String jsonString) {
 
         return new Gson().fromJson(jsonString, CORSConfiguration.class);
 
     }
 
+    @UsedByMigrationClient
     public static WebsubSubscriptionConfiguration getWebsubSubscriptionConfigurationDtoFromJson(String jsonString) {
         return new Gson().fromJson(jsonString, WebsubSubscriptionConfiguration.class);
     }
@@ -6113,7 +6707,7 @@ public final class APIUtil {
 
     public static String getWebsubSubscriptionConfigurationJsonFromDto(
             WebsubSubscriptionConfiguration websubSubscriptionConfiguration) {
-            return new Gson().toJson(websubSubscriptionConfiguration);
+        return new Gson().toJson(websubSubscriptionConfiguration);
     }
 
     public static String getWsUriMappingJsonFromDto(Map<String, String> mappings) {
@@ -6477,7 +7071,7 @@ public final class APIUtil {
         long[] eventCountSubPolicyValues = new long[]{50000, 25000, 5000, 10000, Integer.MAX_VALUE};
         String[] eventCountSubPolicyNames = new String[]{APIConstants.DEFAULT_SUB_POLICY_ASYNC_GOLD,
                 APIConstants.DEFAULT_SUB_POLICY_ASYNC_SILVER, APIConstants.DEFAULT_SUB_POLICY_ASYNC_BRONZE,
-                APIConstants.DEFAULT_SUB_POLICY_ASYNC_SUBSCRIPTIONLESS,  APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED};
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_SUBSCRIPTIONLESS, APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED};
         String[] eventCountSubPolicyDescriptions = new String[]{
                 APIConstants.DEFAULT_SUB_POLICY_ASYNC_GOLD_DESC, APIConstants.DEFAULT_SUB_POLICY_ASYNC_SILVER_DESC,
                 APIConstants.DEFAULT_SUB_POLICY_ASYNC_BRONZE_DESC,
@@ -6529,7 +7123,7 @@ public final class APIUtil {
 
         //Adding AI API Quota based subscription level policies
         long[] totalTokenCountValues = new long[]{50000, 10000, 1000};
-        long[] aiPolicyRequestCount =  new long[]{500, 100, 10};
+        long[] aiPolicyRequestCount = new long[]{500, 100, 10};
         String[] aiApiQuotaSubPolicyNames = new String[]{APIConstants.DEFAULT_SUB_POLICY_AI_GOLD,
                 APIConstants.DEFAULT_SUB_POLICY_AI_SILVER, APIConstants.DEFAULT_SUB_POLICY_AI_BRONZE};
         String[] aiApiQuotaSubPolicyDescriptions = new String[]{
@@ -6579,7 +7173,7 @@ public final class APIUtil {
             SubscriptionPolicy retrievedPolicy = apiMgtDAO.getSubscriptionPolicy(policyName, tenantId);
             deployRetrievedSubscriptionPolicy(tenantId, retrievedPolicy);
         }
-        
+
         long tenThousandPerMinTier = defualtLimits.containsKey(APIConstants.DEFAULT_API_POLICY_TEN_THOUSAND_REQ_PER_MIN) ?
                 defualtLimits.get(APIConstants.DEFAULT_API_POLICY_TEN_THOUSAND_REQ_PER_MIN) : 10000;
         long twentyThousandPerMinTier = defualtLimits.containsKey(
@@ -6738,6 +7332,7 @@ public final class APIUtil {
      *
      * @return condition of enable unlimited tier
      */
+    @UsedByMigrationClient
     public static boolean isEnabledUnlimitedTier() {
 
         ThrottleProperties throttleProperties = ServiceReferenceHolder.getInstance()
@@ -6824,12 +7419,12 @@ public final class APIUtil {
                     RequestCountLimit countLimit = (RequestCountLimit) limit;
                     tier.setRequestsPerMin(countLimit.getRequestCount());
                     tier.setRequestCount(countLimit.getRequestCount());
-                } else if (limit instanceof BandwidthLimit){
+                } else if (limit instanceof BandwidthLimit) {
                     BandwidthLimit bandwidthLimit = (BandwidthLimit) limit;
                     tier.setRequestsPerMin(bandwidthLimit.getDataAmount());
                     tier.setRequestCount(bandwidthLimit.getDataAmount());
                     tier.setBandwidthDataUnit(bandwidthLimit.getDataUnit());
-                } else if (limit instanceof AIAPIQuotaLimit){
+                } else if (limit instanceof AIAPIQuotaLimit) {
                     AIAPIQuotaLimit AIAPIQuotaLimit = (AIAPIQuotaLimit) limit;
                     tier.setRequestsPerMin(AIAPIQuotaLimit.getRequestCount());
                     tier.setRequestCount(AIAPIQuotaLimit.getRequestCount());
@@ -7197,7 +7792,6 @@ public final class APIUtil {
      */
     public static DocumentBuilderFactory getSecuredDocumentBuilder() {
 
-        org.apache.xerces.impl.Constants Constants = null;
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         dbf.setNamespaceAware(true);
         dbf.setXIncludeAware(false);
@@ -7205,19 +7799,19 @@ public final class APIUtil {
         try {
             // Enable secure processing
             dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-            dbf.setFeature(Constants.XERCES_FEATURE_PREFIX + Constants.DISALLOW_DOCTYPE_DECL_FEATURE, true);
-            dbf.setFeature(Constants.SAX_FEATURE_PREFIX + Constants.EXTERNAL_GENERAL_ENTITIES_FEATURE, false);
-            dbf.setFeature(Constants.SAX_FEATURE_PREFIX + Constants.EXTERNAL_PARAMETER_ENTITIES_FEATURE, false);
-            dbf.setFeature(Constants.XERCES_FEATURE_PREFIX + Constants.LOAD_EXTERNAL_DTD_FEATURE, false);
+            dbf.setFeature(XERCES_FEATURE_PREFIX + DISALLOW_DOCTYPE_DECL_FEATURE, true);
+            dbf.setFeature(SAX_FEATURE_PREFIX + EXTERNAL_GENERAL_ENTITIES_FEATURE, false);
+            dbf.setFeature(SAX_FEATURE_PREFIX + EXTERNAL_PARAMETER_ENTITIES_FEATURE, false);
+            dbf.setFeature(XERCES_FEATURE_PREFIX + LOAD_EXTERNAL_DTD_FEATURE, false);
         } catch (ParserConfigurationException e) {
             log.error(
-                    "Failed to load XML Processor Feature " + Constants.EXTERNAL_GENERAL_ENTITIES_FEATURE + " or " +
-                            Constants.EXTERNAL_PARAMETER_ENTITIES_FEATURE + " or " + Constants.LOAD_EXTERNAL_DTD_FEATURE);
+                    "Failed to load XML Processor Feature " + EXTERNAL_GENERAL_ENTITIES_FEATURE + " or " +
+                            EXTERNAL_PARAMETER_ENTITIES_FEATURE + " or " + LOAD_EXTERNAL_DTD_FEATURE);
         }
 
         SecurityManager securityManager = new SecurityManager();
         securityManager.setEntityExpansionLimit(ENTITY_EXPANSION_LIMIT);
-        dbf.setAttribute(Constants.XERCES_PROPERTY_PREFIX + Constants.SECURITY_MANAGER_PROPERTY, securityManager);
+        dbf.setAttribute(XERCES_PROPERTY_PREFIX + SECURITY_MANAGER_PROPERTY, securityManager);
 
         return dbf;
     }
@@ -7332,7 +7926,7 @@ public final class APIUtil {
         }
 
         return Caching.getCacheManager(
-                cacheManagerName).createCacheBuilder(cacheName).
+                        cacheManagerName).createCacheBuilder(cacheName).
                 setExpiry(CacheConfiguration.ExpiryType.MODIFIED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
                         modifiedExp)).
                 setExpiry(CacheConfiguration.ExpiryType.ACCESSED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
@@ -7381,10 +7975,9 @@ public final class APIUtil {
      * @return true if the Array contains the role specified.
      */
     public static boolean compareRoleList(String[] userRoleList, String accessControlRole) {
-
         if (userRoleList != null) {
             for (String userRole : userRoleList) {
-                if (userRole.equalsIgnoreCase(accessControlRole)) {
+                if (userRole != null && userRole.equalsIgnoreCase(accessControlRole)) {
                     return true;
                 }
             }
@@ -7400,8 +7993,12 @@ public final class APIUtil {
     public static void clearRoleCache(String userName) {
 
         if (isPublisherRoleCacheEnabled) {
-            Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(
-                    APIConstants.API_PUBLISHER_ADMIN_PERMISSION_CACHE).remove(userName);
+            // Clear all the permissions for the user
+            Cache<String, ?> permissionCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(
+                    APIConstants.API_PUBLISHER_ADMIN_PERMISSION_CACHE);
+            permissionCache.remove(userName + ":" + APIConstants.Permissions.APIM_ADMIN);
+            permissionCache.remove(userName + ":" + APIConstants.Permissions.API_CREATE);
+            permissionCache.remove(userName + ":" + APIConstants.Permissions.API_PUBLISH);
             Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(
                     APIConstants.API_USER_ROLE_CACHE).remove(userName);
         }
@@ -7412,6 +8009,7 @@ public final class APIUtil {
      *
      * @return returns true if ENABLE_MULTIPLE_GROUPID is set to True
      */
+    @UsedByMigrationClient
     public static boolean isMultiGroupAppSharingEnabled() {
 
         if (multiGrpAppSharing == null) {
@@ -7466,6 +8064,7 @@ public final class APIUtil {
         return false;
 
     }
+
     /**
      * Used to check whether Provisioning Out-of-Band OAuth Clients feature is enabled
      *
@@ -7612,7 +8211,7 @@ public final class APIUtil {
      * config is not available in tenant registry
      *
      * @param organization The organization
-     * @param property The configuration to get from tenant registry or api-manager.xml
+     * @param property     The configuration to get from tenant registry or api-manager.xml
      * @return The configuration read from tenant registry or api-manager.xml
      * @throws APIManagementException Throws if the registry resource doesn't exist
      *                                or the content cannot be parsed to JSON
@@ -7631,8 +8230,8 @@ public final class APIUtil {
     /**
      * This method is used to get the authorization configurations from the tenant registry
      *
-     * @param organization  organization.
-     * @param property The configuration to get from tenant registry
+     * @param organization organization.
+     * @param property     The configuration to get from tenant registry
      * @return The configuration read from tenant registry or else null
      * @throws APIManagementException Throws if the registry resource doesn't exist
      *                                or the content cannot be parsed to JSON
@@ -7850,8 +8449,7 @@ public final class APIUtil {
         return toKeyManagerConfiguration(keyManagerConfigurationDTO);
     }
 
-    public static KeyManagerConfiguration toKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
-    {
+    public static KeyManagerConfiguration toKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO) {
 
         KeyManagerConfiguration keyManagerConfiguration = new KeyManagerConfiguration();
         keyManagerConfiguration.setName(keyManagerConfigurationDTO.getName());
@@ -7862,6 +8460,22 @@ public final class APIUtil {
         keyManagerConfiguration.setEnabled(keyManagerConfigurationDTO.isEnabled());
         keyManagerConfiguration.setType(keyManagerConfigurationDTO.getType());
         return keyManagerConfiguration;
+    }
+
+    public static GatewayConfiguration extractGatewayConfiguration(Environment environment, String organization)
+            throws APIManagementException {
+        GatewayConfiguration gatewayConfiguration = new GatewayConfiguration();
+        if (environment != null) {
+            gatewayConfiguration.setName(environment.getName());
+            gatewayConfiguration.setType(environment.getType());
+            gatewayConfiguration.setTenantDomain(organization);
+            Map<String, Object> configurations = new HashMap<>();
+            if (environment.getAdditionalProperties() != null) {
+                configurations.putAll(environment.getAdditionalProperties());
+            }
+            gatewayConfiguration.setConfiguration(configurations);
+        }
+        return gatewayConfiguration;
     }
 
     /**
@@ -8202,20 +8816,107 @@ public final class APIUtil {
         return allEnvironments;
     }
 
-    // Take organization as a parameter
+    /**
+     * Retrieves all available environments along with their respective details.
+     *
+     * @return A map where the key is the organization and the value is a list of Environment objects
+     *         associated with that organization.
+     * @throws APIManagementException If an error occurs while fetching the environments from the data source.
+     */
+    public static Map<String, List<Environment>> getAllEnvironments() throws APIManagementException {
+        return ApiMgtDAO.getInstance().getAllEnvironments();
+    }
+
+    // Take organization as a parameter. Returns read-only + dynamic environments from AM_GATEWAY_ENVIRONMENT.
     public static Map<String, Environment> getEnvironments(String organization) throws APIManagementException {
-        // get dynamic gateway environments read from database
         Map<String, Environment> envFromDB = ApiMgtDAO.getInstance().getAllEnvironments(organization).stream()
                 .collect(Collectors.toMap(Environment::getName, env -> env));
 
-        // clone and overwrite api-manager.xml environments with environments from DB if exists with same name
         Map<String, Environment> allEnvironments = new LinkedHashMap<>(getReadOnlyEnvironments());
         allEnvironments.putAll(envFromDB);
         return allEnvironments;
     }
 
     /**
+     * Get the list of environments that the API is deployed to
+     *
+     * @param apiUUID  API UUID
+     * @return set of environment names
+     * @throws APIManagementException Thrown if an error occurs while retrieving environments from the database
+     */
+    public static Set<String> getDeployedEnvironments(String apiUUID) throws APIManagementException {
+        return ApiMgtDAO.getInstance().getAPIRevisionDeploymentsByApiUUID(apiUUID)
+                .stream()
+                .map(APIRevisionDeployment::getDeployment)
+                .collect(Collectors.toSet());
+    }
+
+    // Federated Gateway related API Reference mapping methods
+    public static void addApiExternalApiMapping(String apiId, String environmentId, String referenceArtifact)
+            throws APIManagementException {
+
+        ApiMgtDAO.getInstance().addApiExternalApiMapping(apiId, environmentId, referenceArtifact);
+    }
+
+    public static void updateApiExternalApiMapping(String apiId, String environmentId, String referenceArtifact)
+            throws APIManagementException {
+
+        ApiMgtDAO.getInstance().updateApiExternalApiMapping(apiId, environmentId, referenceArtifact);
+    }
+
+    public static String getApiExternalApiMappingReferenceByApiId(String apiId, String environmentId)
+            throws APIManagementException {
+
+        return ApiMgtDAO.getInstance().getApiExternalApiMappingReference(apiId, environmentId);
+    }
+
+    /**
+     * Get all the external api mapping references of an API
+     *
+     * @param apiId UUID of the API
+     * @return Map of environmentId and referenceArtifact
+     * @throws APIManagementException if an error occurs while getting the mapping references
+     */
+    public static Map<String, String> getApiExternalApiMappingReferenceByApiId(String apiId)
+            throws APIManagementException {
+
+        return ApiMgtDAO.getInstance().getApiExternalApiMappingReferences(apiId);
+    }
+
+    public static void deleteApiExternalApiMapping(String apiId, String environmentId)
+            throws APIManagementException {
+
+        ApiMgtDAO.getInstance().deleteApiExternalApiMapping(apiId, environmentId);
+    }
+
+    public static void deleteApiExternalApiMappings(String apiId) throws APIManagementException {
+
+        ApiMgtDAO.getInstance().deleteApiExternalApiMappings(apiId);
+    }
+
+    /**
+     * Retrieves a list of APIs that are deployed in a specific gateway environment
+     * and belong to a specified organization.
+     *
+     * @param environmentName The name of the gateway environment to filter the deployed APIs.
+     * @param organization The organization to which the APIs belong.
+     * @param discoveredAPIs Flag indicating whether to include discovered APIs or APIs created from CP
+     * @return A list of ApiResult objects representing the APIs deployed in the specified
+     * gateway environment and belonging to the given organization.
+     * @throws APIManagementException If an error occurs while retrieving the APIs.
+     */
+    public static List<ApiResult> getAPIsDeployedInGatewayEnvironmentByOrg(String environmentName,
+                                                                           String organization,
+                                                                           boolean discoveredAPIs)
+            throws APIManagementException {
+
+        return ApiMgtDAO.getInstance().getAPIsDeployedInGatewayEnvironmentByOrg(environmentName, organization,
+                discoveredAPIs);
+    }
+
+    /**
      * Get gateway environments defined in the configuration: api-manager.xml
+     *
      * @return map of configured environments against environment name
      */
     public static Map<String, Environment> getReadOnlyEnvironments() {
@@ -8225,6 +8926,7 @@ public final class APIUtil {
 
     /**
      * Get default (first) vhost of the given read only environment
+     *
      * @param environmentName name of the read only environment
      * @return default vhost of environment
      */
@@ -8602,11 +9304,22 @@ public final class APIUtil {
         return apiKeySignKeyStoreName;
     }
 
+    public static boolean isLegacyApiKeysEnabled() {
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String legacyApiKeysEnabled = config.getFirstProperty(APIConstants.ENABLE_API_STORE_LEGACY_API_KEYS);
+        if (legacyApiKeysEnabled == null) {
+            return false;
+        }
+        return Boolean.parseBoolean(legacyApiKeysEnabled);
+    }
+
     /**
      * Get the workflow status information for the given api for the given workflow type
      *
-     * @param uuid Api uuid
-     * @param workflowType  workflow type
+     * @param uuid         Api uuid
+     * @param workflowType workflow type
      * @return WorkflowDTO
      * @throws APIManagementException
      */
@@ -8616,6 +9329,41 @@ public final class APIUtil {
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         int apiId = apiMgtDAO.getAPIID(uuid);
         return apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId), workflowType);
+    }
+
+    /**
+     * Generates the hash value using SHA-256 for a given API key.
+     *
+     * @param apiKey api key.
+     * @return the hashed api key.
+     */
+    public static String sha256Hash(String apiKey) throws APIManagementException {
+        if (StringUtils.isEmpty(apiKey)) {
+            throw new APIManagementException("API Key must not be null or empty.");
+        }
+        try {
+            MessageDigest digest = MessageDigest.getInstance(SHA_256);
+            byte[] hash = digest.digest(apiKey.getBytes(StandardCharsets.UTF_8));
+
+            // Convert hash to hex
+            String hashHex = convertBytesToHex(hash);
+
+            // Format: $sha256$<hash_hex>
+            return String.format("$sha256$%s", hashHex);
+
+        } catch (NoSuchAlgorithmException e) {
+            String msg = "Error in generating SHA-256 value";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+    }
+
+    public static String convertBytesToHex(byte[] bytes) {
+        StringBuilder hex = new StringBuilder(bytes.length * 2);
+        for (byte b : bytes) {
+            hex.append(String.format("%02x", b & 0xff));
+        }
+        return hex.toString();
     }
 
     /**
@@ -8693,7 +9441,7 @@ public final class APIUtil {
      */
     public static String getMaskedToken(String token) {
         StringBuilder maskedTokenBuilder = new StringBuilder();
-        if (token != null){
+        if (token != null) {
             int allowedVisibleLen = Math.min(token.length() / MIN_VISIBLE_LEN_RATIO, MAX_VISIBLE_LEN);
             if (token.length() > MAX_LEN) {
                 maskedTokenBuilder.append("...");
@@ -8846,7 +9594,7 @@ public final class APIUtil {
         String skipRolesByRegex = config.getFirstProperty(APIConstants.SKIP_ROLES_BY_REGEX);
         return skipRolesByRegex;
     }
-    
+
     public static Map<String, Object> getUserProperties(String userNameWithoutChange) throws APIManagementException {
         Map<String, Object> properties = new HashMap<String, Object>();
         if (APIUtil.hasPermission(userNameWithoutChange, APIConstants.Permissions.APIM_ADMIN)) {
@@ -8854,6 +9602,9 @@ public final class APIUtil {
         }
         properties.put(APIConstants.USER_CTX_PROPERTY_SKIP_ROLES, APIUtil.getSkipRolesByRegex());
 
+        if (APIUtil.areOrganizationsRegistered()) {
+            properties.put(APIConstants.USER_CTX_PROPERTY_ORGS_AVAILABLE, true);
+        }
         return properties;
     }
 
@@ -9199,7 +9950,7 @@ public final class APIUtil {
                 endpointSecurityMap.replace(APIConstants.ENDPOINT_SECURITY_SANDBOX, productionEndpointSecurity);
             } else if (!api.isAdvertiseOnly()) {
                 String endpointConfig = api.getEndpointConfig();
-                if (endpointConfig != null) {
+                if (StringUtils.isNotBlank(endpointConfig) && !"null".equals(endpointConfig)) {
                     JSONObject endpointConfigJson = (JSONObject) new JSONParser().parse(endpointConfig);
                     if (endpointConfigJson.get(APIConstants.ENDPOINT_SECURITY) != null) {
                         JSONObject endpointSecurity =
@@ -9241,7 +9992,7 @@ public final class APIUtil {
                 return true;
             } else {
                 try {
-                    org.json.simple.JSONObject tenantConfig = getTenantConfig(tenantDomain);
+                    JSONObject tenantConfig = getTenantConfig(tenantDomain);
                     Object value = tenantConfig.get(APIConstants.API_TENANT_CONF_ENABLE_RECOMMENDATION_KEY);
                     return Boolean.parseBoolean(value.toString());
                 } catch (APIManagementException e) {
@@ -9377,13 +10128,11 @@ public final class APIUtil {
             String keyManagerUrl;
             String enableTokenEncryption =
                     apiManagerConfiguration.getFirstProperty(APIConstants.ENCRYPT_TOKENS_ON_PERSISTENCE);
-            if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(APIConstants.AUTHSERVER_URL)) {
-                keyManagerConfigurationDTO.addProperty(APIConstants.AUTHSERVER_URL,
-                        apiManagerConfiguration.getFirstProperty(APIConstants.KEYMANAGER_SERVERURL));
-            }
+            keyManagerConfigurationDTO.addProperty(APIConstants.AUTHSERVER_URL,
+                    apiManagerConfiguration.getFirstProperty(APIConstants.KEYMANAGER_SERVERURL));
             keyManagerUrl =
                     (String) keyManagerConfigurationDTO.getAdditionalProperties().get(APIConstants.AUTHSERVER_URL);
-            if (StringUtils.isNotEmpty(keyManagerUrl)){
+            if (StringUtils.isNotEmpty(keyManagerUrl)) {
                 openIdConnectConfigurations = APIUtil.getOpenIdConnectConfigurations(
                         keyManagerUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
                                 .concat(getTenantAwareContext(keyManagerConfigurationDTO.getOrganization()))
@@ -9394,17 +10143,10 @@ public final class APIUtil {
                 keyManagerConfigurationDTO.addProperty(APIConstants.ENCRYPT_TOKENS_ON_PERSISTENCE,
                         Boolean.parseBoolean(enableTokenEncryption));
             }
-            if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(APIConstants.REVOKE_URL)) {
-                keyManagerConfigurationDTO.addProperty(APIConstants.REVOKE_URL,
-                        keyManagerUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
-                                .concat(APIConstants.IDENTITY_REVOKE_ENDPOINT));
-            }
-            if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(APIConstants.TOKEN_URL)) {
-                keyManagerConfigurationDTO.addProperty(APIConstants.TOKEN_URL,
-                        keyManagerUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
-                                .concat(APIConstants.IDENTITY_TOKEN_ENDPOINT_CONTEXT));
-            }
-
+            keyManagerConfigurationDTO.addProperty(APIConstants.REVOKE_URL, keyManagerUrl.split("/" +
+                    APIConstants.SERVICES_URL_RELATIVE_PATH)[0].concat(APIConstants.IDENTITY_REVOKE_ENDPOINT));
+            keyManagerConfigurationDTO.addProperty(APIConstants.TOKEN_URL, keyManagerUrl.split("/" +
+                    APIConstants.SERVICES_URL_RELATIVE_PATH)[0].concat(APIConstants.IDENTITY_TOKEN_ENDPOINT_CONTEXT));
             if (!keyManagerConfigurationDTO.getAdditionalProperties()
                     .containsKey(APIConstants.KeyManager.AVAILABLE_GRANT_TYPE)) {
                 keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.AVAILABLE_GRANT_TYPE,
@@ -9429,16 +10171,10 @@ public final class APIUtil {
                     .containsKey(APIConstants.KeyManager.ENABLE_TOKEN_GENERATION)) {
                 keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.ENABLE_TOKEN_GENERATION, true);
             }
-            if (!keyManagerConfigurationDTO.getAdditionalProperties()
-                    .containsKey(APIConstants.KeyManager.TOKEN_ENDPOINT)) {
-                keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.TOKEN_ENDPOINT,
-                        keyManagerConfigurationDTO.getAdditionalProperties().get(APIConstants.TOKEN_URL));
-            }
-            if (!keyManagerConfigurationDTO.getAdditionalProperties()
-                    .containsKey(APIConstants.KeyManager.REVOKE_ENDPOINT)) {
-                keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.REVOKE_ENDPOINT,
-                        keyManagerConfigurationDTO.getAdditionalProperties().get(APIConstants.REVOKE_URL));
-            }
+            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.TOKEN_ENDPOINT,
+                    keyManagerConfigurationDTO.getAdditionalProperties().get(APIConstants.TOKEN_URL));
+            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.REVOKE_ENDPOINT,
+                    keyManagerConfigurationDTO.getAdditionalProperties().get(APIConstants.REVOKE_URL));
             if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(
                     APIConstants.IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD)) {
                 keyManagerConfigurationDTO.addProperty(APIConstants.IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD,
@@ -9482,6 +10218,11 @@ public final class APIUtil {
                                     .concat(getTenantAwareContext(keyManagerConfigurationDTO.getOrganization()))
                                     .concat(APIConstants.KeyManager.DEFAULT_JWKS_ENDPOINT));
                 }
+            }
+            if (!keyManagerConfigurationDTO.getAdditionalProperties()
+                    .containsKey(APIConstants.KeyManager.ENABLE_APPLICATION_SCOPES)) {
+                keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.ENABLE_APPLICATION_SCOPES,
+                        APIUtil.isApplicationScopesEnabledForResidentKM());
             }
             String defaultKeyManagerType =
                     apiManagerConfiguration.getFirstProperty(APIConstants.DEFAULT_KEY_MANAGER_TYPE);
@@ -9572,7 +10313,7 @@ public final class APIUtil {
     /**
      * Get scopes attached to the API.
      *
-     * @param id   API uuid
+     * @param id           API uuid
      * @param organization Organization
      * @return Scope key to Scope object mapping
      * @throws APIManagementException if an error occurs while getting scope attached to API
@@ -9637,6 +10378,7 @@ public final class APIUtil {
     }
 
 
+    @UsedByMigrationClient
     public static String getX509certificateContent(String certificate) {
         String content = certificate.replaceAll(APIConstants.BEGIN_CERTIFICATE_STRING, "")
                 .replaceAll(APIConstants.END_CERTIFICATE_STRING, "");
@@ -9793,10 +10535,10 @@ public final class APIUtil {
 
         //append original role to the role mapping list
         Set<Map.Entry<String, JsonElement>> roleMappingEntries = newRoleMappingJson.entrySet();
-        for (Map.Entry<String, JsonElement> entry: roleMappingEntries) {
+        for (Map.Entry<String, JsonElement> entry : roleMappingEntries) {
             List<String> currentRoles = Arrays.asList(String.valueOf(entry.getValue()).split(","));
             boolean isOriginalRoleAlreadyInRoles = false;
-            for (String role: currentRoles) {
+            for (String role : currentRoles) {
                 if (role.equals(entry.getKey())) {
                     isOriginalRoleAlreadyInRoles = true;
                     break;
@@ -9843,6 +10585,7 @@ public final class APIUtil {
     /**
      * Copy of the getAPI(GovernanceArtifact artifact, Registry registry) method with reduced DB calls for api
      * publisher list view listing.
+     *
      * @param artifact
      * @param registry
      * @return
@@ -9927,6 +10670,7 @@ public final class APIUtil {
                     artifact.getAttribute(APIConstants.API_OVERVIEW_ENABLE_STORE)));
             api.setAsDefaultVersion(Boolean.parseBoolean(artifact.getAttribute(
                     APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION)));
+            api.setDisplayName(artifact.getAttribute(APIConstants.API_OVERVIEW_DISPLAY_NAME));
 
             api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
 
@@ -9956,6 +10700,18 @@ public final class APIUtil {
         return false;
     }
 
+    public static boolean isApplicationScopesEnabledForResidentKM() {
+
+        APIManagerConfiguration apiManagerConfiguration =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String enableApplicationScopesResidentKM =
+                apiManagerConfiguration.getFirstProperty(APIConstants.ENABLE_APPLICATION_SCOPES_RESIDENT_KM);
+        if (StringUtils.isNotEmpty(enableApplicationScopesResidentKM)) {
+            return Boolean.parseBoolean(enableApplicationScopesResidentKM);
+        }
+        return false;
+    }
+
     public static String retrieveDefaultReservedUsername() {
 
         APIManagerConfiguration apiManagerConfiguration =
@@ -9965,9 +10721,7 @@ public final class APIUtil {
         return defaultReservedUsername;
     }
 
-    public static JSONArray getCustomProperties(String userId) throws APIManagementException {
-
-        String tenantDomain = MultitenantUtils.getTenantDomain(userId);
+    public static JSONArray getCustomProperties(String tenantDomain) throws APIManagementException {
 
         JSONArray customPropertyAttributes = null;
         JSONObject propertyConfig = getMandatoryPropertyKeysFromRegistry(tenantDomain);
@@ -10009,10 +10763,10 @@ public final class APIUtil {
      * @param identifier
      * @param organization identifier of the organization
      * @return String uuid string
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public static String getUUIDFromIdentifier(APIIdentifier identifier, String organization)
-            throws APIManagementException{
+            throws APIManagementException {
         if (organization != null) {
             return ApiMgtDAO.getInstance().getUUIDFromIdentifier(identifier, organization);
         } else {
@@ -10026,7 +10780,7 @@ public final class APIUtil {
      * @param identifier
      * @param organization
      * @return String uuid string
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public static String getUUIDFromIdentifier(APIProductIdentifier identifier, String organization)
             throws APIManagementException {
@@ -10038,9 +10792,10 @@ public final class APIUtil {
      *
      * @param uuid UUID of the API
      * @return API Product Identifier
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
-    public static APIProductIdentifier getAPIProductIdentifierFromUUID(String uuid) throws APIManagementException{
+    @UsedByMigrationClient
+    public static APIProductIdentifier getAPIProductIdentifierFromUUID(String uuid) throws APIManagementException {
         return ApiMgtDAO.getInstance().getAPIProductIdentifierFromUUID(uuid);
     }
 
@@ -10049,12 +10804,12 @@ public final class APIUtil {
      *
      * @param uuid UUID of the API
      * @return API Identifier
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
-    public static APIIdentifier getAPIIdentifierFromUUID(String uuid) throws APIManagementException{
+    public static APIIdentifier getAPIIdentifierFromUUID(String uuid) throws APIManagementException {
         return ApiMgtDAO.getInstance().getAPIIdentifierFromUUID(uuid);
     }
-    
+
     public static String getconvertedId(Identifier apiId) {
         String id = null;
         if (apiId instanceof APIIdentifier) {
@@ -10063,6 +10818,18 @@ public final class APIUtil {
             id = APIType.API_PRODUCT + ":" + apiId.getProviderName() + ":" + apiId.getName() + ":" + apiId.getVersion();
         }
         return id;
+    }
+
+    /**
+     * Checks if the API with the given UUID and organization has been discovered from the gateway.
+     *
+     * @param uuid The unique identifier of the API.
+     * @param organization The organization associated with the API.
+     * @return true if the API is discovered from the gateway, false otherwise.
+     * @throws APIManagementException if an error occurs while fetching the information.
+     */
+    public static boolean isAPIDiscoveredFromGW(String uuid, String organization) throws APIManagementException {
+        return ApiMgtDAO.getInstance().getIsAPIInitiatedFromGateway(uuid, organization);
     }
 
     public static String[] getFilteredUserRoles(String username) throws APIManagementException {
@@ -10104,35 +10871,48 @@ public final class APIUtil {
     /**
      * Validate sandbox and production endpoint URLs.
      *
-     * @param endpoints sandbox and production endpoint URLs inclusive list
+     * @param endpoints list of endpoint URLs to validate
      * @return validity of given URLs
      */
     public static boolean validateEndpointURLs(ArrayList<String> endpoints) {
+        for (String endpoint : endpoints) {
+            if (!validateEndpointURL(endpoint)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Validate the given endpoint URL.
+     *
+     * @param endpoint endpoint URL to validate
+     * @return validity of the given URL
+     */
+    public static boolean validateEndpointURL(String endpoint) {
         long validatorOptions =
                 UrlValidator.ALLOW_2_SLASHES + UrlValidator.ALLOW_ALL_SCHEMES + UrlValidator.ALLOW_LOCAL_URLS;
         RegexValidator authorityValidator = new RegexValidator(".*");
         UrlValidator urlValidator = new UrlValidator(authorityValidator, validatorOptions);
 
-        for (String endpoint : endpoints) {
-            // If url is a JMS connection url or a Consul service discovery related url, or a parameterized URL
-            // validation is skipped. If not, validity is checked.
-            if (!endpoint.startsWith("jms:") && !endpoint.startsWith("consul(") && !endpoint.contains("{") &&
-                    !endpoint.contains("}") && !urlValidator.isValid(endpoint)) {
-                try {
-                    // If the url is not identified as valid from the above check,
-                    // next step is determine the validity of the encoded url (done through the URI constructor).
-                    URL endpointUrl = new URL(endpoint);
-                    URI endpointUri = new URI(endpointUrl.getProtocol(), endpointUrl.getAuthority(),
-                            endpointUrl.getPath(), endpointUrl.getQuery(), null);
+        // If url is a JMS connection url or a Consul service discovery related url, or a parameterized URL
+        // validation is skipped. If not, validity is checked.
+        if (!endpoint.startsWith("jms:") && !endpoint.startsWith("consul(") && !endpoint.contains("{") &&
+                !endpoint.contains("}") && !urlValidator.isValid(endpoint)) {
+            try {
+                // If the url is not identified as valid from the above check,
+                // next step is determine the validity of the encoded url (done through the URI constructor).
+                URL endpointUrl = new URL(endpoint);
+                URI endpointUri = new URI(endpointUrl.getProtocol(), endpointUrl.getAuthority(),
+                        endpointUrl.getPath(), endpointUrl.getQuery(), null);
 
-                    if (!urlValidator.isValid(endpointUri.toString())) {
-                        log.error("Invalid endpoint url " + endpointUrl);
-                        return false;
-                    }
-                } catch (URISyntaxException | MalformedURLException e) {
-                    log.error("Error while parsing the endpoint url " + endpoint);
+                if (!urlValidator.isValid(endpointUri.toString())) {
+                    log.error("Invalid endpoint url " + endpointUrl);
                     return false;
                 }
+            } catch (URISyntaxException | MalformedURLException e) {
+                log.error("Error while parsing the endpoint url " + endpoint);
+                return false;
             }
         }
         return true;
@@ -10140,6 +10920,7 @@ public final class APIUtil {
 
     /**
      * Check whether the file type is supported.
+     *
      * @param filename name
      * @return true if supported
      */
@@ -10160,11 +10941,12 @@ public final class APIUtil {
             String[] definedTypesArr = supportedTypes.trim().split("\\s*,\\s*");
             list = Arrays.asList(definedTypesArr);
         } else {
-            String[] defaultType = { "pdf", "txt", "doc", "docx", "xls", "xlsx", "odt", "ods", "json", "yaml", "md" };
+            String[] defaultType = {"pdf", "txt", "doc", "docx", "xls", "xlsx", "odt", "ods", "json", "yaml", "md"};
             list = Arrays.asList(defaultType);
         }
         return list.contains(fileType.toLowerCase());
     }
+
     public static void validateRestAPIScopes(String tenantConfig) throws APIManagementException {
         JsonObject fileBaseTenantConfig = (JsonObject) getFileBaseTenantConfig();
         Set<String> fileBaseScopes = getRestAPIScopes(fileBaseTenantConfig);
@@ -10200,11 +10982,12 @@ public final class APIUtil {
         }
         return scopes;
     }
-    public static Schema retrieveTenantConfigJsonSchema(){
+
+    public static Schema retrieveTenantConfigJsonSchema() {
         return tenantConfigJsonSchema;
     }
 
-    public static Schema retrieveOperationPolicySpecificationJsonSchema(){
+    public static Schema retrieveOperationPolicySpecificationJsonSchema() {
         return operationPolicySpecSchema;
     }
 
@@ -10229,13 +11012,43 @@ public final class APIUtil {
 
     /**
      * Get org access control enabled status
-     * 
+     *
      * @return true or false
      */
     public static boolean isOrganizationAccessControlEnabled() {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
                 .getOrgAccessControl().isEnabled();
     }
+
+    /**
+     * Check whether gateway notification is enabled
+     *
+     * @return true if enabled, false otherwise
+     */
+    public static boolean isGatewayNotificationEnabled() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                .getGatewayNotificationConfiguration().isEnabled();
+    }
+    /**
+     * Check whether organizations are available in the system
+     *
+     * @return
+     */
+    public static boolean areOrganizationsRegistered() {
+        if (ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                .getOrgAccessControl().isEnabled()) {
+            // check database if configs is enabled.
+            try {
+                return ApiMgtDAO.getInstance().areOrganizationsRegistered();
+            } catch (APIManagementException e) {
+                log.error("Error while checking existance of organization", e);
+                return false;
+            }
+
+        }
+        return false;
+    }
+
     /**
      * Get registered API Definition Parsers as a Map
      *
@@ -10248,16 +11061,20 @@ public final class APIUtil {
     /**
      * Check whether there are external environments registered
      */
-    public static boolean isAnyExternalGateWayProviderExists() {
-
-        Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
-        for (Environment environment : gatewayEnvironments.values()) {
-            if (!APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(environment.getProvider())) {
-                return true;
+    public static boolean isAnyExternalGateWayProviderExists(String tenantDomain) {
+        try {
+            Map<String, Environment> environments = getEnvironments(tenantDomain);
+            for (Environment environment : environments.values()) {
+                if (!APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(environment.getProvider())) {
+                    return true;
+                }
             }
+        } catch (APIManagementException e) {
+            throw new RuntimeException(e);
         }
         return false;
     }
+
     public static Tier findTier(Collection<Tier> tiers, String tierName) {
         for (Tier tier : tiers) {
             if (tier.getName() != null && tierName != null && tier.getName().equals(tierName)) {
@@ -10343,30 +11160,72 @@ public final class APIUtil {
      * @throws APIManagementException If an error occurs while reading, throws an error
      */
     public static String getCustomBackendSequence(String extractedFolderPath, String customBackendFileName,
-            String fileExtension) throws APIManagementException {
-        if (!StringUtils.isEmpty(customBackendFileName) && !customBackendFileName.contains(fileExtension)) {
+                                                  String fileExtension) throws APIManagementException {
+        if (!StringUtils.isEmpty(customBackendFileName) && !customBackendFileName.endsWith(fileExtension)) {
             customBackendFileName = customBackendFileName + fileExtension;
         }
-        String fileName = extractedFolderPath + File.separator + customBackendFileName;
-        if (checkFileExistence(fileName)) {
-            try {
-                try (InputStream inputStream = new FileInputStream(fileName)) {
-                    return IOUtils.toString(inputStream);
-                }
-            } catch (IOException ex) {
-                handleException("Error reading Custom Backend " + customBackendFileName);
+
+        try {
+            String safeFileName = Paths.get(customBackendFileName).getFileName().toString();
+            Path targetFile = APIFileUtil.resolveFilePath(extractedFolderPath, safeFileName);
+            String userPath = extractedFolderPath + File.separator + customBackendFileName;
+
+            if (!(checkFileExistence(targetFile.toString()) && targetFile.toString().equals(userPath))) {
+                return null;
             }
+
+            try (InputStream inputStream = Files.newInputStream(targetFile)) {
+                String content = IOUtils.toString(inputStream);
+                if (!validateXMLForSequenceBackend(content)) {
+                    throw new APIManagementException("Invalid XML content in Custom Backend " + safeFileName);
+                }
+                return content;
+            }
+        } catch (IOException e) {
+            handleException("Error reading Custom Backend " + customBackendFileName);
         }
+
         return null;
+    }
+
+    /**
+     * Method is used to write Custom Backend file to the Directory
+     *
+     * @param customBackendFileName Custom Backend file name
+     * @param sequence              Content of the Custom Backend
+     * @param archivePath           Archived path
+     * @throws APIImportExportException Import/Export error if exists
+     * @throws IOException              IO Error when reading/writing to the file
+     */
+    public static void exportCustomBackend(String customBackendFileName, String sequence, String archivePath)
+            throws APIImportExportException, IOException, APIManagementException {
+        if (!StringUtils.isEmpty(customBackendFileName) && !customBackendFileName.endsWith(
+                APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML)) {
+            customBackendFileName = customBackendFileName + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML;
+        }
+        try {
+            if (!validateXMLForSequenceBackend(sequence)) {
+                throw new APIImportExportException("Invalid XML content in Custom Backend " + customBackendFileName);
+            }
+            String sequenceDirectory = archivePath + File.separator + ImportExportConstants.CUSTOM_BACKEND_DIRECTORY;
+            String safeFileName = Paths.get(customBackendFileName).getFileName().toString();
+            Path targetFile = APIFileUtil.resolveFilePath(sequenceDirectory, safeFileName);
+            String userPath = sequenceDirectory + File.separator + customBackendFileName;
+            if (targetFile.toString().equals(userPath)) {
+                CommonUtil.writeFile(targetFile.toString(), sequence);
+            }
+        } catch (APIImportExportException | APIManagementException e) {
+            throw new APIManagementException("Error while exporting custom backend sequence " + customBackendFileName,
+                    e);
+        }
     }
 
     /**
      * Read the operation policy definition from the provided path and return the definition object
      *
-     * @param extractedFolderPath   Location of the policy definition
-     * @param definitionFileName    Name of the policy file
-     * @param fileExtension         Since there can be both synapse and choreo connect definitons, fileExtension is used
-     *
+     * @param extractedFolderPath Location of the policy definition
+     * @param definitionFileName  Name of the policy file
+     * @param fileExtension       Since there can be both synapse and choreo connect definitons, fileExtension is used
      * @return OperationPolicyDefinition
      */
     public static OperationPolicyDefinition getOperationPolicyDefinitionFromFile(String extractedFolderPath,
@@ -10406,19 +11265,20 @@ public final class APIUtil {
      * @throws APIManagementException Throws if an error occurs when reading the file
      */
     public static String getCustomBackendSequenceFromFile(String extractedFolderPath, String sequenceName,
-            String fileExtension) throws APIManagementException {
+                                                          String fileExtension) throws APIManagementException {
 
         String customBackendContent = null;
         try {
-            if(!StringUtils.isEmpty(sequenceName) && !sequenceName.contains(".xml")) {
+            if (!StringUtils.isEmpty(sequenceName) && !sequenceName.endsWith(fileExtension)) {
                 sequenceName = sequenceName + fileExtension;
             }
-            String fileName = extractedFolderPath + File.separator + sequenceName;
-            if (checkFileExistence(fileName)) {
+            String safeFileName = Paths.get(sequenceName).getFileName().toString();
+            Path targetFile = APIFileUtil.resolveFilePath(extractedFolderPath, safeFileName);
+            if (checkFileExistence(targetFile.toString())) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Found Sequence Backend file " + fileName);
+                    log.debug("Found Sequence Backend file " + targetFile);
                 }
-                customBackendContent = FileUtils.readFileToString(new File(fileName));
+                customBackendContent = FileUtils.readFileToString(targetFile.toFile());
             }
         } catch (IOException e) {
             throw new APIManagementException("Error while reading Custom Backend from path: " + extractedFolderPath, e,
@@ -10428,9 +11288,42 @@ public final class APIUtil {
     }
 
     /**
+     * This method will validate the given xml content for the syntactical correctness
+     *
+     * @param xmlContent string of xml content
+     * @return true if the xml content is valid, false otherwise
+     * @throws APIManagementException if an error occurs while parsing the xml content
+     */
+    public static boolean validateXMLSchema(String xmlContent) throws APIManagementException {
+        try {
+            DocumentBuilderFactory factory = getSecuredDocumentBuilder();
+            factory.setValidating(false);
+            factory.setNamespaceAware(false);
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            builder.parse(new InputSource(new StringReader(xmlContent)));
+        } catch (ParserConfigurationException | IOException | SAXException e) {
+            log.error("Error occurred while parsing the provided xml content.", e);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * This method will validate the given xml content in sequence backend for the syntactical correctness
+     *
+     * @param xmlContent string of xml content
+     * @return true if the xml content is valid, false otherwise
+     * @throws APIManagementException if an error occurs while parsing the xml content
+     */
+    public static boolean validateXMLForSequenceBackend(String xmlContent) throws APIManagementException {
+        String wrappedXmlContent = "<sequence>" + xmlContent + "</sequence>";
+        return validateXMLSchema(wrappedXmlContent);
+    }
+
+    /**
      * Check whether there exists a file for the provided location
      *
-     * @param fileLocation   Location of the file
+     * @param fileLocation Location of the file
      * @return True if file exists
      */
     public static boolean checkFileExistence(String fileLocation) {
@@ -10443,7 +11336,7 @@ public final class APIUtil {
      * Get the validated policy specification object from a provided policy string. Validation is done against the
      * policy schema
      *
-     * @param policySpecAsString  Policy specification as a string
+     * @param policySpecAsString Policy specification as a string
      * @return OperationPolicySpecification object
      * @throws APIManagementException If the policy schema validation fails
      */
@@ -10474,7 +11367,7 @@ public final class APIUtil {
     /**
      * Export the policy attribute object of the specification as a string
      *
-     * @param policySpecification  Policy specification
+     * @param policySpecification Policy specification
      * @return policy attributes string
      * @throws APIManagementException If the policy schema validation fails
      */
@@ -10494,7 +11387,7 @@ public final class APIUtil {
      * Return the hash value of the provided policy. To generate the hash, policy Specification and the
      * two definitions are used
      *
-     * @param policyData  Operation policy data
+     * @param policyData Operation policy data
      * @return hash
      */
     public static String getHashOfOperationPolicy(OperationPolicyData policyData)
@@ -10521,7 +11414,7 @@ public final class APIUtil {
     /**
      * Return the hash of the policy definition string
      *
-     * @param policyDefinition  Operation policy definition
+     * @param policyDefinition Operation policy definition
      * @return hash of the definition content
      */
     public static String getHashOfOperationPolicyDefinition(OperationPolicyDefinition policyDefinition)
@@ -10554,21 +11447,21 @@ public final class APIUtil {
             case APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST:
                 if (isSequenceDefined(api.getInSequence()) && api.getInSequenceMediation() != null) {
                     Mediation inSequenceMediation = api.getInSequenceMediation();
-                    policyData = generateOperationPolicyDataObject(api.getUuid(), organization,
+                    policyData = generateOperationPolicyDataObject(api, organization,
                             inSequenceMediation.getName(), inSequenceMediation.getConfig());
                 }
                 break;
             case APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE:
                 if (isSequenceDefined(api.getOutSequence()) && api.getOutSequenceMediation() != null) {
                     Mediation outSequenceMediation = api.getOutSequenceMediation();
-                    policyData = generateOperationPolicyDataObject(api.getUuid(), organization,
+                    policyData = generateOperationPolicyDataObject(api, organization,
                             outSequenceMediation.getName(), outSequenceMediation.getConfig());
                 }
                 break;
             case APIConstants.OPERATION_SEQUENCE_TYPE_FAULT:
                 if (isSequenceDefined(api.getFaultSequence()) && api.getFaultSequenceMediation() != null) {
                     Mediation faultSequenceMediation = api.getFaultSequenceMediation();
-                    policyData = generateOperationPolicyDataObject(api.getUuid(), organization,
+                    policyData = generateOperationPolicyDataObject(api, organization,
                             faultSequenceMediation.getName(), faultSequenceMediation.getConfig());
                 }
                 break;
@@ -10576,9 +11469,38 @@ public final class APIUtil {
         return policyData;
     }
 
+    @Deprecated
     public static OperationPolicyData generateOperationPolicyDataObject(String apiUuid, String organization,
                                                                         String policyName,
                                                                         String policyDefinitionString)
+            throws APIManagementException {
+
+        ArrayList<Object> supportedAPIList = new ArrayList<>();
+        APIRevision apiRevision = ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiUuid);
+        if (apiRevision != null && apiRevision.getApiUUID() != null) {
+            // If the API is a revision, fetch the API type using the revisioned API ID
+            supportedAPIList.add(ApiMgtDAO.getInstance().getAPITypeFromUUID(apiRevision.getApiUUID()));
+        } else {
+            supportedAPIList.add(ApiMgtDAO.getInstance().getAPITypeFromUUID(apiUuid));
+        }
+        return buildOperationPolicyData(apiUuid, supportedAPIList, organization, policyName, policyDefinitionString);
+    }
+
+    public static OperationPolicyData generateOperationPolicyDataObject(API api, String organization,
+                                                                        String policyName,
+                                                                        String policyDefinitionString)
+            throws APIManagementException {
+
+        String apiUuid = api.getUuid();
+        ArrayList<Object> supportedAPIList = new ArrayList<>();
+        supportedAPIList.add(api.getType());
+        return buildOperationPolicyData(apiUuid, supportedAPIList, organization, policyName, policyDefinitionString);
+
+    }
+
+    private static OperationPolicyData buildOperationPolicyData(String apiUuid, ArrayList<Object> supportedAPIList,
+                                                                String organization, String policyName,
+                                                                String policyDefinitionString)
             throws APIManagementException {
 
         OperationPolicySpecification policySpecification = new OperationPolicySpecification();
@@ -10591,11 +11513,6 @@ public final class APIUtil {
         gatewayList.add(APIConstants.OPERATION_POLICY_SUPPORTED_GATEWAY_SYNAPSE);
         policySpecification.setSupportedGateways(gatewayList);
 
-        ArrayList<String> supportedAPIList = new ArrayList<>();
-        supportedAPIList.add(APIConstants.OPERATION_POLICY_SUPPORTED_API_TYPE_HTTP);
-        supportedAPIList.add(APIConstants.OPERATION_POLICY_SUPPORTED_API_TYPE_SOAP);
-        supportedAPIList.add(APIConstants.OPERATION_POLICY_SUPPORTED_API_TYPE_SOAPTOREST);
-        supportedAPIList.add(APIConstants.OPERATION_POLICY_SUPPORTED_API_TYPE_GRAPHQL);
         policySpecification.setSupportedApiTypes(supportedAPIList);
 
         ArrayList<String> applicableFlows = new ArrayList<>();
@@ -10637,9 +11554,9 @@ public final class APIUtil {
         return apiUUID + "-" + endpointType;
     }
 
-    public static void initializeVelocityContext(VelocityEngine velocityEngine){
-        velocityEngine.setProperty(RuntimeConstants.OLD_CHECK_EMPTY_OBJECTS, false);
-        velocityEngine.setProperty(DeprecatedRuntimeConstants.OLD_SPACE_GOBBLING,"bc");
+    public static void initializeVelocityContext(VelocityEngine velocityEngine) {
+        velocityEngine.setProperty(RuntimeConstants.CHECK_EMPTY_OBJECTS, false);
+        velocityEngine.setProperty(RuntimeConstants.SPACE_GOBBLING, "bc");
         velocityEngine.setProperty("runtime.conversion.handler", "none");
     }
 
@@ -10652,7 +11569,7 @@ public final class APIUtil {
     public static String setSubscriptionValidationStatusBeforeInsert(Set<Tier> tiers) {
         if (tiers != null && tiers.size() == 1) {
             Tier tier = tiers.iterator().next();
-            if(tier.getName().contains(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS)) {
+            if (tier.getName().contains(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS)) {
                 return "DISABLED";
             }
         }
@@ -10667,10 +11584,8 @@ public final class APIUtil {
      * @return gateway vendor for the API
      */
     public static String setGatewayVendorBeforeInsertion(String gatewayVendorType, String gatewayType) {
-        if (gatewayType != null && APIConstants.WSO2_APK_GATEWAY.equals(gatewayType)) {
-            gatewayVendorType =  APIConstants.WSO2_APK_GATEWAY;
-        }
-        return gatewayVendorType;
+
+        return !APIConstants.WSO2_SYNAPSE_GATEWAY.equals(gatewayType) ? gatewayType : gatewayVendorType;
     }
 
     /**
@@ -10683,23 +11598,31 @@ public final class APIUtil {
         String gatewayType = null;
         if (APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(gatewayVendor)) {
             gatewayType = APIConstants.WSO2_SYNAPSE_GATEWAY;
-        } else if (APIConstants.WSO2_APK_GATEWAY.equals(gatewayVendor)) {
-            gatewayType = APIConstants.WSO2_APK_GATEWAY;
+        } else {
+            return gatewayVendor;
         }
         return gatewayType;
     }
 
     /**
      * Replaces wso2/apk gateway vendor type as wso2 after retrieving from db.
+     * For synapse gateway type it returns as "wso2"
+     * For other types it returns as "external"
      *
      * @param gatewayVendor Gateway vendor type
      * @return wso2 gateway vendor type
      */
     public static String handleGatewayVendorRetrieval(String gatewayVendor) {
-        if (APIConstants.WSO2_APK_GATEWAY.equals(gatewayVendor)) {
-            gatewayVendor = APIConstants.WSO2_GATEWAY_ENVIRONMENT;
+        if (gatewayVendor == null) {
+            return null; // Return null to handle this scenario while populating API information
         }
-        return  gatewayVendor;
+        if (APIConstants.WSO2_APK_GATEWAY.equals(gatewayVendor) ||
+                APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(gatewayVendor) ||
+                APIConstants.WSO2_API_PLATFORM_GATEWAY.equals(gatewayVendor)) {
+            return APIConstants.WSO2_GATEWAY_ENVIRONMENT;
+        } else {
+            return APIConstants.EXTERNAL_GATEWAY_VENDOR;
+        }
     }
 
     /**
@@ -10718,9 +11641,10 @@ public final class APIUtil {
 
     /**
      * Generate code verifier for PKCE
+     *
      * @return code verifier
      */
-    public static String generateCodeVerifier () {
+    public static String generateCodeVerifier() {
         SecureRandom secureRandom = new SecureRandom();
         byte[] codeVerifier = new byte[32];
         secureRandom.nextBytes(codeVerifier);
@@ -10729,6 +11653,7 @@ public final class APIUtil {
 
     /**
      * Generate code challenge for PKCE
+     *
      * @param codeVerifier verifier
      * @return code challenge
      */
@@ -10740,7 +11665,7 @@ public final class APIUtil {
         byte[] digest = messageDigest.digest();
         return java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(digest);
     }
-    
+
     /**
      * This method is used to get the default API level policy in a given tenant space
      *
@@ -10814,8 +11739,8 @@ public final class APIUtil {
     /**
      * This method is used to check whether a given policy is configured as default or not in a given tenant domain
      *
-     * @param policyName policy name
-     * @param policyLevel policy level
+     * @param policyName   policy name
+     * @param policyLevel  policy level
      * @param tenantDomain tenant domain name
      * @return default Subscription level policy for a given tenant
      */
@@ -10842,7 +11767,7 @@ public final class APIUtil {
      * Get configured value of a property in a given tenant domain
      *
      * @param propertyName property name
-     * @param tenantId tenant ID
+     * @param tenantId     tenant ID
      * @return default Subscription level policy for a given tenant
      */
     private static String getTenantConfigPropertyValue(String propertyName, int tenantId)
@@ -10883,13 +11808,14 @@ public final class APIUtil {
      * @throws APIManagementException if an error occurs while invoking the AI service
      */
     private static CloseableHttpResponse executeAIRequest(HttpRequestBase request, String endpoint,
-        String tokenEndpoint, String key, String requestId, String payload) throws APIManagementException {
+                                                          String tokenEndpoint, String key, String requestId,
+                                                          String payload) throws APIManagementException {
         try {
             if (tokenEndpoint != null) {
                 if (tokenGenerator == null) {
-                    tokenGenerator = new AccessTokenGenerator(tokenEndpoint, key);
+                    tokenGenerator = new AccessTokenGenerator();
                 }
-                String token = tokenGenerator.getAccessToken();
+                String token = tokenGenerator.getAccessToken(tokenEndpoint, key);
                 request.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
                         APIConstants.AUTHORIZATION_BEARER + token);
             } else {
@@ -10934,10 +11860,10 @@ public final class APIUtil {
      * @throws APIManagementException if an error occurs while invoking the AI service
      */
     public static String invokeAIService(String endpoint, String tokenEndpoint, String key, String resource,
-            String payload, String requestId) throws APIManagementException {
+                                         String payload, String requestId) throws APIManagementException {
         HttpPost preparePost = new HttpPost(endpoint + resource);
         try (CloseableHttpResponse response = executeAIRequest(preparePost, endpoint,
-                tokenEndpoint, key, requestId, payload)){
+                tokenEndpoint, key, requestId, payload)) {
             int statusCode = response.getStatusLine().getStatusCode();
             String responseStr = EntityUtils.toString(response.getEntity());
             if (statusCode == HttpStatus.SC_CREATED) {
@@ -10949,7 +11875,7 @@ public final class APIUtil {
             } else if (statusCode == HttpStatus.SC_TOO_MANY_REQUESTS) {
                 throw new APIManagementException("You have exceeded your quota. Please contact administrator.",
                         ExceptionCodes.AI_SERVICE_QUOTA_EXCEEDED);
-            } else if (statusCode == HttpStatus.SC_INTERNAL_SERVER_ERROR){
+            } else if (statusCode == HttpStatus.SC_INTERNAL_SERVER_ERROR) {
                 org.json.JSONObject responseJson = new org.json.JSONObject(responseStr);
                 if (responseJson.has("detail")) {
                     String errorMsg = (String) responseJson.get("detail");
@@ -10970,6 +11896,82 @@ public final class APIUtil {
     }
 
     /**
+     * Builds the context handed to the configured {@link org.wso2.carbon.apimgt.api.AIRequestPropertyEnricher} for an
+     * outbound AI service request. The invoking user is resolved from the carbon context.
+     * <p>
+     * User roles are deliberately not resolved here, since that would add a user store call to every AI request. A
+     * caller that has already resolved them should set them on the returned context with
+     * {@link AIRequestContext#setUserRoles(java.util.List)}.
+     *
+     * @param organization organization, that is the tenant domain, the request belongs to
+     * @param resource     AI service resource the request is dispatched to
+     * @param requestId    correlation id of the request, or null when the feature does not use one
+     * @return the request context
+     */
+    public static AIRequestContext buildAIRequestContext(String organization, String resource, String requestId) {
+        AIRequestContext context = new AIRequestContext();
+        context.setOrganization(organization);
+        context.setResource(resource);
+        context.setRequestId(requestId);
+        String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
+        context.setUsername(StringUtils.isEmpty(username) ? null : username);
+        return context;
+    }
+
+    /**
+     * Adds the given properties, resolved from the configured
+     * {@link org.wso2.carbon.apimgt.api.AIRequestPropertyEnricher}, to an AI service request payload.
+     * <p>
+     * This is purely additive. Attributes the product already placed in the payload are kept as they are and are never
+     * overridden, so an enricher can only contribute new attributes. It is also best effort: if the payload is not a
+     * JSON object, the original payload is returned unchanged rather than failing the request.
+     * <p>
+     * Property keys are trimmed and blank keys are skipped, so a key returned with surrounding whitespace resolves to
+     * the same attribute as its trimmed form rather than becoming a second, near identical attribute.
+     *
+     * @param payload              the payload built by the calling feature
+     * @param additionalProperties properties to add, typically obtained from
+     *                             {@code AIRequestPropertyEnricherHolder}. Null or empty leaves the payload untouched
+     * @return the payload to dispatch
+     */
+    public static String addAdditionalPropertiesToPayload(String payload, Map<String, Object> additionalProperties) {
+
+        if (additionalProperties == null || additionalProperties.isEmpty() || StringUtils.isBlank(payload)) {
+            return payload;
+        }
+
+        org.json.JSONObject payloadJson;
+        try {
+            payloadJson = new org.json.JSONObject(payload);
+        } catch (JSONException e) {
+            log.warn("AI service request payload is not a JSON object. Skipping the additional properties.", e);
+            return payload;
+        }
+
+        boolean propertiesAdded = false;
+        for (Map.Entry<String, Object> property : additionalProperties.entrySet()) {
+            String key = property.getKey();
+            if (StringUtils.isBlank(key)) {
+                continue;
+            }
+            key = key.trim();
+            if (payloadJson.has(key)) {
+                log.warn("Property '" + key + "' returned by the AI request property enricher is already present in "
+                        + "the AI service request payload. Retaining the existing value.");
+                continue;
+            }
+            try {
+                payloadJson.put(key, property.getValue());
+                propertiesAdded = true;
+            } catch (JSONException e) {
+                log.warn("Property '" + key + "' returned by the AI request property enricher could not be added to "
+                        + "the AI service request payload. Skipping the property.", e);
+            }
+        }
+        return propertiesAdded ? payloadJson.toString() : payload;
+    }
+
+    /**
      * This method is used to get the no of apis in the vector db for an organization
      *
      * @param endpoint      Endpoint to be invoked
@@ -10980,7 +11982,8 @@ public final class APIUtil {
      * @throws APIManagementException if an error occurs while retrieving API count
      */
     public static CloseableHttpResponse getMarketplaceChatApiCount(String endpoint, String tokenEndpoint,
-            String key, String resource) throws APIManagementException {
+                                                                   String key, String resource)
+            throws APIManagementException {
         HttpGet apiCountGet = new HttpGet(endpoint + resource);
         try {
             return executeAIRequest(apiCountGet, endpoint,
@@ -11001,7 +12004,7 @@ public final class APIUtil {
      * @throws APIManagementException if an error occurs while deleting the API
      */
     public static void marketplaceAssistantDeleteService(String endpoint, String tokenEndpoint, String key,
-            String resource, String uuid) throws APIManagementException {
+                                                         String resource, String uuid) throws APIManagementException {
         String resourceWithPathParam = endpoint + resource + "/{uuid}";
         resourceWithPathParam = resourceWithPathParam.replace("{uuid}", uuid);
         HttpDelete prepareDelete = new HttpDelete(resourceWithPathParam);
@@ -11042,13 +12045,14 @@ public final class APIUtil {
         }
         return applications.subList(offset, endIndex);
     }
-    
+
     public static String getAPIMVersion() {
         return CarbonUtils.getServerConfiguration().getFirstProperty("Version");
     }
 
     /**
      * This method will generate the hash value of the given byte[] payload
+     *
      * @param payload
      * @return
      * @throws APIManagementException
@@ -11113,7 +12117,7 @@ public final class APIUtil {
      * This method is used to verify the hash values of the service catalog entries
      *
      * @param existingService existing service catalog entry
-     * @param newService new service catalog entry
+     * @param newService      new service catalog entry
      * @return true if the hash values are equal
      */
     public static boolean verifyHashValues(ServiceEntry existingService, ServiceEntry newService)
@@ -11149,7 +12153,6 @@ public final class APIUtil {
     }
 
     /**
-     *
      * @param hashValue
      * @return
      */
@@ -11182,7 +12185,7 @@ public final class APIUtil {
      * @return true if the transaction counter is enabled, false otherwise
      */
     public static boolean getTransactionCounterEnable() {
-       return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration().getTransactionCounterProperties();
     }
 
@@ -11194,12 +12197,31 @@ public final class APIUtil {
      * If the property is not set, it returns false by default.
      *
      * @return {true} if organization-wide application updates are enabled;
-     *         {false} otherwise.
+     * {false} otherwise.
      */
     public static Boolean isOrgWideAppUpdateEnabled() {
 
         return Boolean.getBoolean(
                 APIConstants.ORGANIZATION_WIDE_APPLICATION_UPDATE_ENABLED);
+    }
+
+    /**
+     * Removes all trailing slashes from the given URL string.
+     *
+     * @param url the URL string to process
+     * @return the URL string without trailing slashes; returns the original string if no trailing slashes are present
+     * @throws NullPointerException if the input URL is null
+     */
+    public static String trimTrailingSlashes(String url) {
+        if (log.isDebugEnabled()) {
+            log.debug("Trimming trailing slashes from URL: " + url);
+        }
+        if (url.length() > 1) {
+            while (url.endsWith("/")) {
+                url = url.substring(0, url.length() - 1);
+            }
+        }
+        return url;
     }
 
     /**
@@ -11249,9 +12271,11 @@ public final class APIUtil {
             return new LinkedHashSet<>();
         }
     }
-    
+
     public static synchronized String getOrganizationIdFromExternalReference(String referenceId,
-            String organizationName, String rootOrganization) throws APIManagementException {
+                                                                             String organizationName,
+                                                                             String rootOrganization)
+            throws APIManagementException {
         String organizationId = null;
         OrganizationDetailsDTO orgDetails = ApiMgtDAO.getInstance().getOrganizationDetalsByExternalOrgId(referenceId,
                 rootOrganization);
@@ -11270,7 +12294,7 @@ public final class APIUtil {
         }
         return organizationId;
     }
-    
+
     public static String getOrganizationHandle(String name) {
         String sanatizedName = null;
         if (name == null) {
@@ -11283,4 +12307,780 @@ public final class APIUtil {
         sanatizedName = sanatizedName.toLowerCase(Locale.ENGLISH).replaceAll("^-+|-+$", "");
         return sanatizedName;
     }
+
+    /**
+     * Validate Api with the federated gateways
+     *
+     * @param api API Object
+     */
+    public static void validateApiWithFederatedGateway(API api) throws APIManagementException {
+
+        try {
+            GatewayAgentConfiguration gatewayConfiguration = org.wso2.carbon.apimgt.impl.internal.
+                    ServiceReferenceHolder.getInstance().
+                    getExternalGatewayConnectorConfiguration(api.getGatewayType());
+            if (gatewayConfiguration != null && gatewayConfiguration.getGatewayDeployerImplementation() != null) {
+                GatewayDeployer deployer = (GatewayDeployer) Class.forName(gatewayConfiguration
+                        .getGatewayDeployerImplementation()).getDeclaredConstructor().newInstance();
+                if (deployer != null) {
+                    GatewayAPIValidationResult errorList = null;
+                    errorList = deployer.validateApi(api);
+                    if (!errorList.getErrors().isEmpty()) {
+                        throw new ExternalGatewayAPIValidationException(
+                                "Error occurred while validating the API with the federated gateway: "
+                                        + api.getGatewayType(),
+                                ExceptionCodes.from(ExceptionCodes.FEDERATED_GATEWAY_VALIDATION_FAILED,
+                                        api.getGatewayType(), errorList.getErrors().toString()));
+                    }
+                }
+            }
+        } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException |
+                 IllegalAccessException | InvocationTargetException e) {
+            throw new APIManagementException(
+                    "Error occurred while validating the API with the federated gateway: "
+                            + api.getGatewayType(), e);
+        }
+    }
+
+    /**
+     * This method is used to validate the mandatory custom properties of an API
+     *
+     * @param customProperties        custom properties of the API
+     * @param additionalPropertiesMap additional properties to validate
+     * @return list of erroneous property names. returns an empty array if there are no errors.
+     */
+    public static List<String> validateMandatoryProperties(org.json.simple.JSONArray customProperties,
+                                                           JSONObject additionalPropertiesMap) {
+
+        List<String> errorPropertyNames = new ArrayList<>();
+
+        for (int i = 0; i < customProperties.size(); i++) {
+            JSONObject property = (JSONObject) customProperties.get(i);
+            String propertyName = (String) property.get(APIConstants.CustomPropertyAttributes.NAME);
+            boolean isRequired = (boolean) property.get(APIConstants.CustomPropertyAttributes.REQUIRED);
+            if (isRequired) {
+                String mapPropertyDisplay = (String) additionalPropertiesMap.get(propertyName + "__display");
+                String mapProperty = (String) additionalPropertiesMap.get(propertyName);
+
+                if (mapProperty == null && mapPropertyDisplay == null) {
+                    errorPropertyNames.add(propertyName);
+                    continue;
+                }
+                String propertyValue = "";
+                String propertyValueDisplay = "";
+                if (mapProperty != null) {
+                    propertyValue = mapProperty;
+                }
+                if (mapPropertyDisplay != null) {
+                    propertyValueDisplay = mapPropertyDisplay;
+                }
+                if (propertyValue.isEmpty() && propertyValueDisplay.isEmpty()) {
+                    errorPropertyNames.add(propertyName);
+                }
+            }
+        }
+        return errorPropertyNames;
+    }
+
+    /**
+     * Check whether multiple client secret support is enabled or not.
+     *
+     * @return Whether multiple client secret support is enabled or not.
+     */
+    public static boolean isMultipleClientSecretsEnabled() {
+
+        return ServiceReferenceHolder.getInstance().getOauthServerConfiguration().isMultipleClientSecretsEnabled();
+    }
+
+    /**
+     * Get the number of client secrets allowed for an OAuth client.
+     *
+     * @return Number of client secrets allowed for an OAuth client.
+     */
+    public static int getClientSecretCount() {
+
+        return ServiceReferenceHolder.getInstance().getOauthServerConfiguration().getClientSecretCount();
+    }
+
+    /**
+     * Validates the environment and schedules the federated gateway API discovery if applicable.
+     *
+     * @param environment   The environment to validate and schedule discovery for.
+     * @param organization  The organization to which the environment belongs.
+     */
+    public static void validateAndScheduleFederatedGatewayAPIDiscovery(Environment environment, String organization) {
+        FederatedAPIDiscoveryService federatedAPIDiscoveryService = ServiceReferenceHolder
+                .getInstance().getFederatedAPIDiscoveryService();
+        try {
+            APIAdminImpl apiAdmin = new APIAdminImpl();
+            environment = apiAdmin.getEnvironmentWithoutPropertyMasking(organization,
+                    environment.getUuid());
+            environment = apiAdmin.decryptGatewayConfigurationValues(environment);
+            if (environment.getProvider().equals(APIConstants.EXTERNAL_GATEWAY_VENDOR)) {
+                federatedAPIDiscoveryService.scheduleDiscovery(environment, organization);
+            }
+        } catch (APIManagementException e) {
+            log.error("Error while validating and scheduling federated gateway API discovery for environment: "
+                    + environment.getName() + " in organization: " + organization, e);
+        }
+    }
+
+    /**
+     * Stops the federated gateway API discovery for the given environment and organization.
+     *
+     * @param environment   The environment for which to stop the discovery.
+     * @param organization  The organization to which the environment belongs.
+     */
+    public static void stopFederatedGatewayAPIDiscovery(Environment environment, String organization) {
+        FederatedAPIDiscoveryService federatedAPIDiscoveryService = ServiceReferenceHolder
+                .getInstance().getFederatedAPIDiscoveryService();
+        if (APIConstants.EXTERNAL_GATEWAY_VENDOR.equals(environment.getProvider()) &&
+                federatedAPIDiscoveryService != null) {
+            try {
+                federatedAPIDiscoveryService.stopDiscovery(environment, organization);
+                if (log.isDebugEnabled()) {
+                    log.debug("Successfully stopped federated API discovery for environment: " +
+                            environment.getName());
+                }
+            } catch (Exception e) {
+                log.error("Error while stopping federated API discovery for environment: "
+                        + environment.getName(), e);
+            }
+        }
+    }
+
+    /**
+     * Converts an epoch time string to a Date object.
+     *
+     * @param epochMillis The epoch time in milliseconds as a string.
+     * @return The corresponding Date object, or null if the input is blank or invalid.
+     */
+    public static Date convertEpochStringToDate(String epochMillis) {
+        if (StringUtils.isBlank(epochMillis)) return null;
+        try {
+            return new Date(Long.parseLong(epochMillis));
+        } catch (NumberFormatException e) {
+            log.warn("Provided epoch time string: " + epochMillis + " is not valid.", e);
+            return null;
+        }
+    }
+
+    /**
+     * Validate and update the URI templates of an API.
+     *
+     * @param api                       API object.
+     * @param tenantId                  Tenant ID of the API.
+     * @throws APIManagementException   if an error occurs while validating or updating the URI templates.
+     */
+    public static void validateAndUpdateURITemplates(API api, int tenantId) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Validating and updating URI templates for API: " + api.getId().getApiName());
+        }
+        if (api.getUriTemplates() != null) {
+            for (URITemplate uriTemplate : api.getUriTemplates()) {
+                if (StringUtils.isEmpty(api.getApiLevelPolicy())) {
+                    // API level policy not attached.
+                    if (StringUtils.isEmpty(uriTemplate.getThrottlingTier())) {
+                        String defaultPolicy = APIUtil.getDefaultAPILevelPolicy(tenantId);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Setting default throttling tier: " + defaultPolicy + " for URI template: "
+                                    + uriTemplate.getUriTemplate());
+                        }
+                        uriTemplate.setThrottlingTier(defaultPolicy);
+                    }
+                } else {
+                    uriTemplate.setThrottlingTier(api.getApiLevelPolicy());
+                }
+                if (StringUtils.isEmpty(uriTemplate.getAuthType())) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Setting default auth type 'Any' for URI template: " + uriTemplate.getUriTemplate());
+                    }
+                    uriTemplate.setAuthType("Any");
+                }
+            }
+        }
+    }
+
+    /**
+     * Returns the Solace configuration object.
+     * @return  The Solace configuration object.
+     */
+    public static SolaceConfig getSolaceConfig() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getSolaceConfig();
+    }
+
+    /**
+     * Update the Swagger definition of an API with its version.
+     *
+     * @param api The API object whose Swagger definition needs to be updated.
+     */
+    public static void updateAPISwaggerWithVersion(API api) {
+        String swaggerDefinition = api.getSwaggerDefinition();
+
+        if (swaggerDefinition != null) {
+            JsonObject apiSpec = JsonParser.parseString(swaggerDefinition).getAsJsonObject();
+            JsonObject infoObject = apiSpec.has(SWAGGER_INFO) && apiSpec.get(SWAGGER_INFO).isJsonObject() ?
+                    apiSpec.getAsJsonObject(SWAGGER_INFO) : null;
+            if (infoObject != null) {
+                infoObject.addProperty(SWAGGER_VER, api.getId().getVersion());
+            } else {
+                JsonObject newInfoObject = new JsonObject();
+                newInfoObject.addProperty(SWAGGER_TITLE, api.getId().getApiName());
+                newInfoObject.addProperty(SWAGGER_VER, api.getId().getVersion());
+                newInfoObject.addProperty(SWAGGER_DESCRIPTION, api.getDescription());
+                apiSpec.add(SWAGGER_INFO, newInfoObject);
+            }
+            api.setSwaggerDefinition(apiSpec.toString());
+        } else {
+            log.error("Swagger definition is null for API: " + api.getId().getApiName());
+        }
+    }
+
+    /**
+     * Checks whether a scope name starts with a restricted/reserved prefix.
+     * This method performs an exact, case-sensitive prefix match to preserve existing behaviour.
+     *
+     * @param scopeName Scope name to check
+     * @return true if the scope name starts with a restricted prefix
+     */
+    public static boolean hasRestrictedScopePrefix(String scopeName) {
+        if (log.isDebugEnabled()) {
+            log.debug("Checking if scope has restricted prefix: " + scopeName);
+        }
+        boolean hasRestrictedPrefix = scopeName.startsWith(RESTRICTED_SCOPE_PREFIX_APIM)
+                || scopeName.startsWith(RESTRICTED_SCOPE_PREFIX_APIM_ANALYTICS)
+                || scopeName.startsWith(RESTRICTED_SCOPE_PREFIX_SERVICE_CATALOG);
+        if (hasRestrictedPrefix && log.isDebugEnabled()) {
+            log.debug("Scope has restricted prefix: " + scopeName);
+        }
+        return hasRestrictedPrefix;
+    }
+
+    /**
+     * Validates an outbound URL against platform and tenant network security access control policies.
+     * <p>
+     * Blank URLs, JMS and Consul URLs, and URLs whose host is parameterized are silently skipped. A URL that is
+     * parameterized anywhere else (scheme, user info, port, path, query or fragment) still has its concrete host
+     * validated, so a template cannot be used to opt a request out of the policy. When a policy is in force, a URL
+     * whose host cannot be determined is rejected with {@code ExceptionCodes.MALFORMED_URL} rather than skipped.
+     *
+     * @param url          URL to validate; null or blank values are silently skipped
+     * @param tenantDomain tenant domain used to load tenant-level config
+     * @throws APIManagementException if the URL is malformed or blocked by an access control policy
+     */
+    public static void validateRemoteURL(String url, String tenantDomain) throws APIManagementException {
+        if (StringUtils.isBlank(url)) {
+            if (log.isDebugEnabled()) {
+                log.debug("URL validation skipped - blank URL provided");
+            }
+            return;
+        }
+
+        // JMS and Consul endpoint URLs are not resolvable hosts and are validated elsewhere; skip them.
+        if (url.startsWith("jms:") || url.startsWith("consul(")) {
+            return;
+        }
+
+        JSONObject tenantConfig = getTenantConfig(tenantDomain);
+        JSONObject tenantAccessControl = null;
+        if (tenantConfig != null) {
+            tenantAccessControl = (JSONObject) tenantConfig.get(
+                    APIConstants.NetworkSecurityAccessControl.TENANT_CONFIG_KEY);
+        }
+        boolean tenantEnabled = tenantAccessControl != null;
+
+        if (!networkSecurityEnabled && !tenantEnabled) {
+            return;
+        }
+
+        // A parameterized host cannot be resolved, so it is skipped. A concrete host is still validated even
+        // when the URL is parameterized elsewhere.
+        String host = extractConcreteHost(url);
+        if (host == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("URL validation skipped - parameterized host: " + url);
+            }
+            return;
+        }
+
+        if (networkSecurityEnabled) {
+            applyAccessControlPolicy(host, networkSecurityMode, networkSecurityHosts,
+                    networkSecurityBlockPrivateAccess);
+        }
+
+        if (tenantEnabled) {
+            String tenantMode = (String) tenantAccessControl.get(
+                    APIConstants.NetworkSecurityAccessControl.TENANT_MODE);
+            boolean tenantBlockPrivate = Boolean.TRUE.equals(
+                    tenantAccessControl.get(
+                            APIConstants.NetworkSecurityAccessControl.TENANT_BLOCK_PRIVATE_NETWORK_ACCESS));
+            JSONArray tenantHostsArray = (JSONArray) tenantAccessControl.get(
+                    APIConstants.NetworkSecurityAccessControl.TENANT_HOSTS);
+            List<String> tenantHosts = null;
+            if (tenantHostsArray != null) {
+                tenantHosts = new ArrayList<>();
+                for (Object tenantHost : tenantHostsArray) {
+                    tenantHosts.add(tenantHost.toString());
+                }
+            }
+            applyAccessControlPolicy(host, tenantMode, tenantHosts, tenantBlockPrivate);
+        }
+    }
+
+    /**
+     * Extracts the host that an outbound request to {@code url} would actually contact.
+     * <p>
+     * Template segments ({@code {...}}) are substituted with a per-call marker before parsing, so that a parameterized
+     * scheme, user info, port, path, query or fragment does not prevent the concrete host from being found. Only a
+     * host that is itself parameterized is treated as unresolvable, because there is no host to apply a policy to.
+     * <p>
+     * A URL whose host cannot be determined at all is rejected rather than skipped: skipping would let a malformed
+     * or unparseable URL bypass the policy entirely.
+     *
+     * @param url the URL, which may contain '{'/'}' template markers
+     * @return the concrete host, or {@code null} if the host itself is parameterized
+     * @throws APIManagementException with {@code ExceptionCodes.MALFORMED_URL} if no host can be determined
+     */
+    private static String extractConcreteHost(String url) throws APIManagementException {
+        // Standing in for template segments keeps the URL parseable, so the authority is split correctly
+        // no matter where a template sits. The marker is unique per call, so a host that already contains
+        // the marker text cannot pass itself off as a substituted template.
+        String marker = URL_TEMPLATE_MARKER + UUID.randomUUID().toString().replace("-", "");
+        String normalizedUrl = URL_TEMPLATE_PATTERN.matcher(url)
+                .replaceAll(Matcher.quoteReplacement(marker));
+        String host = null;
+        try {
+            URI uri = new URI(normalizedUrl);
+            host = uri.getHost();
+            if (StringUtils.isBlank(host)) {
+                String authority = uri.getAuthority();
+                // Only an authority made unreadable by a substituted template, such as one carrying a
+                // templated port, is split by hand. Any other unreadable authority stays unresolved.
+                if (authority != null && authority.contains(marker)) {
+                    host = extractHostFromAuthority(authority);
+                } else if (authority == null) {
+                    // A URL carrying no authority at all still names a parameterized host when a template
+                    // stands where the host would begin.
+                    String schemeSpecificPart = uri.getSchemeSpecificPart();
+                    if (schemeSpecificPart != null && schemeSpecificPart.startsWith(marker)) {
+                        host = marker;
+                    }
+                }
+            }
+        } catch (URISyntaxException e) {
+            // A substituted template inside the authority can leave the URL unparseable, so the authority
+            // is split by hand only when a template is what made it unreadable.
+            String authority = extractAuthority(normalizedUrl);
+            if (authority != null && authority.contains(marker)) {
+                host = extractHostFromAuthority(authority);
+            }
+            if (StringUtils.isBlank(host)) {
+                throw new APIManagementException("The provided URL is malformed: " + url,
+                        ExceptionCodes.MALFORMED_URL);
+            }
+        }
+        if (StringUtils.isBlank(host)) {
+            throw new APIManagementException("Could not extract a valid host from the provided URL: " + url,
+                    ExceptionCodes.MALFORMED_URL);
+        }
+        // The marker survives only when the host itself was parameterized.
+        return host.contains(marker) ? null : host;
+    }
+
+    /**
+     * Reads the authority component straight out of a URL string. Used only when the URL cannot be parsed
+     * at all, so the authority is still available for inspection.
+     *
+     * @param url the URL to read, may be null
+     * @return the authority component, or {@code null} if the URL carries none
+     */
+    private static String extractAuthority(String url) {
+        if (url == null) {
+            return null;
+        }
+        int authorityStart = url.indexOf("://");
+        if (authorityStart < 0) {
+            return null;
+        }
+        authorityStart += 3;
+        for (int i = authorityStart; i < url.length(); i++) {
+            char delimiter = url.charAt(i);
+            if (delimiter == '/' || delimiter == '?' || delimiter == '#') {
+                return url.substring(authorityStart, i);
+            }
+        }
+        return url.substring(authorityStart);
+    }
+
+    /**
+     * Derives the host from a raw URL authority by removing any user info and port. Used only when
+     * {@link URI#getHost()} cannot parse the authority as server-based.
+     *
+     * @param authority the raw authority component, may be null
+     * @return the host portion, or {@code null} if none can be derived
+     */
+    private static String extractHostFromAuthority(String authority) {
+        if (StringUtils.isBlank(authority)) {
+            return null;
+        }
+        // User info is delimited by the last '@', so credentials containing '@' do not shift the host.
+        int userInfoEnd = authority.lastIndexOf('@');
+        String hostAndPort = userInfoEnd >= 0 ? authority.substring(userInfoEnd + 1) : authority;
+        if (hostAndPort.startsWith("[")) {
+            // IPv6 literal: the host ends at the closing bracket, before any port.
+            int bracketEnd = hostAndPort.indexOf(']');
+            return bracketEnd > 0 ? hostAndPort.substring(0, bracketEnd + 1) : null;
+        }
+        int portSeparator = hostAndPort.indexOf(':');
+        String host = portSeparator >= 0 ? hostAndPort.substring(0, portSeparator) : hostAndPort;
+        return StringUtils.isBlank(host) ? null : host;
+    }
+
+    /**
+     * Builds a per-request {@link OASParserOptions} carrying the remote-$ref allow/block lists derived from the
+     * platform and tenant network access-control policy, combined as a logical AND (defense-in-depth): a remote
+     * reference must be permitted by both the platform and the tenant policy. Never mutates {@code base} (may be a
+     * shared singleton).
+     * <p>
+     * The lists are mapped onto the resolver, whose allow-list short-circuits to ALLOW (bypassing the block-list) and
+     * whose block-list is a wildcard-capable denylist:
+     * <ul>
+     *   <li>deny-mode hosts (from either policy) are unioned into the block-list;</li>
+     *   <li>allow-mode hosts go to the allow-list - the intersection when both policies are allow-mode, otherwise the
+     *       single allow-mode list;</li>
+     *   <li>any denied host is removed from the allow-list so it cannot short-circuit the block-list;</li>
+     *   <li>if either policy is allow-mode, a {@code "*"} entry is added to the block-list so everything not on the
+     *       allow-list is denied - a restrictive whitelist, matching {@code applyAccessControlPolicy}.</li>
+     * </ul>
+     * Private-network blocking is handled by the resolver itself and needs no list entry here.
+     *
+     * @param base         base options to copy non-access-control settings from (may be null)
+     * @param tenantDomain the tenant domain whose config should be merged in
+     * @return a new {@link OASParserOptions} instance; never null
+     */
+    public static OASParserOptions buildRefResolutionOptions(OASParserOptions base, String tenantDomain)
+            throws APIManagementException {
+        OASParserOptions options = new OASParserOptions(base);
+        // Each allow-mode policy contributes one host set; deny-mode hosts from every policy are unioned. A remote ref
+        // must pass both policies (AND), so allow sets are intersected and deny sets are unioned (see combine below).
+        List<List<String>> allowModeHostSets = new ArrayList<>();
+        Set<String> denyHosts = new HashSet<>();
+        // Whether any network access-control policy is configured. With no policy (neither platform nor tenant),
+        // safe resolution stays off so the parser keeps resolving remote refs as before (backwards compatibility).
+        boolean policyConfigured = false;
+
+        // Platform policy (static fields populated in init()).
+        if (networkSecurityEnabled) {
+            policyConfigured = true;
+            validateNetworkSecurityMode(networkSecurityMode);
+            if (APIConstants.NetworkSecurityAccessControl.MODE_ALLOW.equalsIgnoreCase(networkSecurityMode)) {
+                allowModeHostSets.add(networkSecurityHosts != null ? networkSecurityHosts : new ArrayList<>());
+            } else if (APIConstants.NetworkSecurityAccessControl.MODE_DENY.equalsIgnoreCase(networkSecurityMode)
+                    && networkSecurityHosts != null) {
+                denyHosts.addAll(networkSecurityHosts);
+            }
+        }
+
+        // Tenant policy. Only the config read is guarded; a misconfigured tenant policy must surface, not be swallowed.
+        JSONObject tenantConfig;
+        try {
+            tenantConfig = getTenantConfig(tenantDomain);
+        } catch (APIManagementException e) {
+            log.warn("Could not read tenant network access-control policy for $ref resolution; "
+                    + "proceeding with platform policy only.", e);
+            tenantConfig = null;
+        }
+        if (tenantConfig != null) {
+            Object nsac = tenantConfig.get(APIConstants.NetworkSecurityAccessControl.TENANT_CONFIG_KEY);
+            if (nsac instanceof JSONObject) {
+                policyConfigured = true;
+                JSONObject policy = (JSONObject) nsac;
+                String tMode = (String) policy.get(APIConstants.NetworkSecurityAccessControl.TENANT_MODE);
+                Object tHostsObj = policy.get(APIConstants.NetworkSecurityAccessControl.TENANT_HOSTS);
+                List<String> tHosts = new ArrayList<>();
+                if (tHostsObj instanceof JSONArray) {
+                    for (Object h : (JSONArray) tHostsObj) {
+                        tHosts.add(h.toString());
+                    }
+                }
+                validateNetworkSecurityMode(tMode);
+                if (APIConstants.NetworkSecurityAccessControl.MODE_ALLOW.equalsIgnoreCase(tMode)) {
+                    allowModeHostSets.add(tHosts);
+                } else if (APIConstants.NetworkSecurityAccessControl.MODE_DENY.equalsIgnoreCase(tMode)) {
+                    denyHosts.addAll(tHosts);
+                }
+            }
+        }
+
+        // Intersect the allow-mode host sets (a host must be allowed by every allow-mode policy under the AND policy).
+        List<String> allowList = intersectAllowModeHostSets(allowModeHostSets);
+        // A denied host must never remain on the allow-list: the resolver's allow-list short-circuits to ALLOW and
+        // would otherwise bypass the block-list for a host that another policy denies.
+        allowList.removeAll(denyHosts);
+        List<String> blockList = new ArrayList<>(denyHosts);
+        // Allow-mode is a restrictive whitelist (deny everything not explicitly allowed). The resolver's allow-list
+        // only exempts hosts, so a wildcard deny is what enforces "block the rest".
+        if (!allowModeHostSets.isEmpty()) {
+            blockList.add(APIConstants.NetworkSecurityAccessControl.MATCH_ALL_HOSTS);
+        }
+
+        if (!allowList.isEmpty()) {
+            options.setRemoteRefAllowList(allowList);
+        }
+        if (!blockList.isEmpty()) {
+            options.setRemoteRefBlockList(blockList);
+        }
+        options.setNetworkAccessControlEnabled(policyConfigured);
+        return options;
+    }
+
+    /**
+     * Intersects the allow-mode host sets collected from the platform and tenant policies for the remote-$ref
+     * resolver. With both policies in allow mode the result is their intersection (a host must be allowed by both
+     * under the AND policy); with a single allow-mode policy it is that policy's list; with none it is empty.
+     *
+     * @param allowModeHostSets one host set per allow-mode policy (may be empty)
+     * @return a new, mutable list holding the intersection of the given sets; empty if none were provided
+     */
+    private static List<String> intersectAllowModeHostSets(List<List<String>> allowModeHostSets) {
+        if (allowModeHostSets.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<String> combined = new ArrayList<>(allowModeHostSets.get(0));
+        for (int i = 1; i < allowModeHostSets.size(); i++) {
+            combined.retainAll(allowModeHostSets.get(i));
+        }
+        return combined;
+    }
+
+    /**
+     * Validates the configured network access-control mode for an enabled policy. A blank mode is permitted (it means
+     * private-network blocking only, with no host allow/deny list). Any non-blank value other than
+     * {@code allow}/{@code deny} is a misconfiguration and is rejected, mirroring {@code applyAccessControlPolicy}.
+     *
+     * @param mode the configured mode, or {@code null}/blank for the private-network-only policy
+     * @throws APIManagementException with {@code NETWORK_SECURITY_ACCESS_CONTROL_MISCONFIGURED} if the mode is invalid
+     */
+    private static void validateNetworkSecurityMode(String mode) throws APIManagementException {
+        // Blank mode is valid (private-network-only) and handled by applyAccessControlPolicy; not a misconfiguration.
+        if (StringUtils.isBlank(mode)) {
+            return;
+        }
+        if (!APIConstants.NetworkSecurityAccessControl.MODE_ALLOW.equalsIgnoreCase(mode)
+                && !APIConstants.NetworkSecurityAccessControl.MODE_DENY.equalsIgnoreCase(mode)) {
+            APIManagementException ex = new APIManagementException(
+                    ExceptionCodes.NETWORK_SECURITY_ACCESS_CONTROL_MISCONFIGURED.getErrorMessage(),
+                    ExceptionCodes.NETWORK_SECURITY_ACCESS_CONTROL_MISCONFIGURED);
+            log.error("Network security access control misconfiguration: mode='" + mode + "' is not a valid value "
+                    + "(expected 'allow' or 'deny').", ex);
+            throw ex;
+        }
+    }
+
+    /**
+     * Extract endpoint URLs from endpoint config object.
+     *
+     * @param endpointConfigObj Endpoint config JSON object
+     * @param endpointType      Indicating which endpoint to be extracted
+     * @param endpoints         List of URLs. Extracted URL(s), if any, are added to this list.
+     */
+    public static void extractURLsFromEndpointConfig(org.json.JSONObject endpointConfigObj, String endpointType,
+                                                     ArrayList<String> endpoints) throws APIManagementException {
+        if (!endpointConfigObj.isNull(endpointType)) {
+            org.json.JSONObject endpointObj = endpointConfigObj.optJSONObject(endpointType);
+            if (endpointObj != null) {
+                String url = endpointObj.optString(APIConstants.API_DATA_URL, null);
+                if (StringUtils.isNotBlank(url)) {
+                    endpoints.add(url);
+                }
+            } else {
+                org.json.JSONArray endpointArray = endpointConfigObj.optJSONArray(endpointType);
+                if (endpointArray != null) {
+                    for (int i = 0; i < endpointArray.length(); i++) {
+                        org.json.JSONObject endpointEntry = endpointArray.optJSONObject(i);
+                        if (endpointEntry == null) {
+                            // Skip malformed (non-object) entries instead of failing the request.
+                            continue;
+                        }
+                        String url = endpointEntry.optString(APIConstants.API_DATA_URL, null);
+                        if (StringUtils.isNotBlank(url)) {
+                            endpoints.add(url);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private static void applyAccessControlPolicy(String host, String mode, List<String> hosts,
+                                                 boolean blockPrivateNetworkAccess) throws APIManagementException {
+
+        if (StringUtils.isBlank(mode)) {
+            if (hosts != null && !hosts.isEmpty()) {
+                log.warn("Network security access control has hosts configured but no mode is set. "
+                        + "The hosts list will be ignored. Set mode to 'allow' or 'deny'.");
+            }
+            // fall through to blank-mode private network check below
+        } else if (APIConstants.NetworkSecurityAccessControl.MODE_ALLOW.equalsIgnoreCase(mode)) {
+            if (hosts == null || hosts.isEmpty()) {
+                log.warn("Network security access control is configured with mode 'allow' but no hosts are defined. "
+                        + "All outbound requests will be blocked.");
+                throw buildURLBlockedException(host);
+            }
+            // hostname match → ALLOW immediately, DNS resolution skipped
+            if (isHostInList(host, hosts)) {
+                return;
+            }
+            // hostname did not match — resolve and check resolved IPs against allow list.
+            // hosts list is authoritative: blockPrivateNetworkAccess does not apply in allow mode.
+            InetAddress[] addresses;
+            try {
+                addresses = InetAddress.getAllByName(host);
+            } catch (UnknownHostException e) {
+                log.warn("Blocking outbound request to host: '" + host + "' — hostname could not be resolved.");
+                throw buildURLBlockedException(host);
+            }
+            if (isAnyResolvedIpInList(addresses, hosts)) {
+                return;
+            }
+            throw buildURLBlockedException(host);
+
+        } else if (APIConstants.NetworkSecurityAccessControl.MODE_DENY.equalsIgnoreCase(mode)) {
+            if (isHostInList(host, hosts)) {
+                throw buildURLBlockedException(host);
+            }
+            // hostname did not match — resolve once, reused for IP deny list check and private network check
+            InetAddress[] addresses;
+            try {
+                addresses = InetAddress.getAllByName(host);
+            } catch (UnknownHostException e) {
+                log.warn("Blocking outbound request to host: '" + host + "' — hostname could not be resolved.");
+                throw buildURLBlockedException(host);
+            }
+            if (isAnyResolvedIpInList(addresses, hosts)) {
+                log.warn("Blocking outbound request to host: '" + host + "' — a resolved IP is in the deny list.");
+                throw buildURLBlockedException(host);
+            }
+            if (blockPrivateNetworkAccess) {
+                for (InetAddress address : addresses) {
+                    if (isPrivateNetworkAddress(address)) {
+                        log.warn("Blocking private network access attempt to host: '" + host
+                                + "' (" + address.getHostAddress() + ")");
+                        throw buildURLBlockedException(host);
+                    }
+                }
+            }
+            return; // deny mode fully handled — do not fall through
+
+        } else {
+            APIManagementException ex = new APIManagementException(
+                    ExceptionCodes.NETWORK_SECURITY_ACCESS_CONTROL_MISCONFIGURED.getErrorMessage(),
+                    ExceptionCodes.NETWORK_SECURITY_ACCESS_CONTROL_MISCONFIGURED);
+            log.error("Network security access control misconfiguration: mode='" + mode + "' is not a valid value "
+                    + "(expected 'allow' or 'deny').", ex);
+            throw ex;
+        }
+
+        // Blank mode: hosts ignored, only blockPrivateNetworkAccess applies
+        if (blockPrivateNetworkAccess) {
+            try {
+                InetAddress[] addresses = InetAddress.getAllByName(host);
+                for (InetAddress address : addresses) {
+                    if (isPrivateNetworkAddress(address)) {
+                        log.warn("Blocking private network access attempt to host: '" + host
+                                + "' (" + address.getHostAddress() + ")");
+                        throw buildURLBlockedException(host);
+                    }
+                }
+            } catch (UnknownHostException e) {
+                log.warn("Blocking outbound request to host: '" + host + "' — hostname could not be resolved.");
+                throw buildURLBlockedException(host);
+            }
+        }
+    }
+
+    private static boolean isAnyResolvedIpInList(InetAddress[] addresses, List<String> hosts) {
+        if (hosts == null || addresses == null) {
+            return false;
+        }
+        for (InetAddress address : addresses) {
+            if (isHostInList(address.getHostAddress(), hosts)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isHostInList(String host, List<String> hosts) {
+        if (hosts == null) {
+            return false;
+        }
+        String normalizedHost = host.toLowerCase(Locale.ROOT);
+        for (String pattern : hosts) {
+            if (StringUtils.isBlank(pattern)) {
+                continue;
+            }
+            if (normalizedHost.matches(toWildcardRegex(pattern.toLowerCase(Locale.ROOT)))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks whether the given IP address belongs to a private, local, or otherwise
+     * non-public network range that should be blocked for outbound requests.
+     *
+     * This includes:
+     * <ul>
+     *     <li>Loopback addresses (e.g., 127.0.0.1, ::1)</li>
+     *     <li>Link-local addresses</li>
+     *     <li>Site-local/private addresses</li>
+     *     <li>Wildcard/any-local addresses</li>
+     *     <li>Multicast addresses</li>
+     *     <li>IPv6 Unique Local Addresses (fc00::/7)</li>
+     * </ul>
+     *
+     * @param address The resolved IP address to validate
+     * @return {@code true} if the address belongs to a blocked private or local
+     *         network range, {@code false} otherwise
+     */
+    private static boolean isPrivateNetworkAddress(InetAddress address) {
+        if (address instanceof Inet6Address) {
+            byte[] bytes = address.getAddress();
+            if ((bytes[0] & 0xFE) == 0xFC) {
+                return true; // IPv6 Unique Local Address (fc00::/7)
+            }
+        }
+        return address.isLoopbackAddress()
+                || address.isLinkLocalAddress()
+                || address.isSiteLocalAddress()
+                || address.isAnyLocalAddress()
+                || address.isMulticastAddress();
+    }
+
+    private static APIManagementException buildURLBlockedException(String host) {
+        APIManagementException ex = new APIManagementException(
+                "Outbound request blocked by network security access control policy.",
+                ExceptionCodes.UNTRUSTED_URL);
+        log.error("Outbound request to host '" + host + "' blocked by network security access control policy.", ex);
+        return ex;
+    }
+
+    /**
+     * Converts a simple wildcard host pattern into a safe Java regex.
+     * Uses Pattern.quote() to safely escape all literal parts so that users can
+     * write plain host patterns such as *.wso2.com or 169.254.* without needing
+     * to know regex syntax. Only '*' is treated as a wildcard.
+     *
+     * @param pattern wildcard host pattern (e.g. *.wso2.com, 169.254.*, *)
+     * @return equivalent anchored regex string
+     */
+    private static String toWildcardRegex(String pattern) {
+        return "^" + Arrays.stream(pattern.trim().split("\\*", -1))
+                .map(Pattern::quote)
+                .collect(Collectors.joining(".*")) + "$";
+    }
+
 }

@@ -55,7 +55,41 @@ return null;
         }
     } 
     private TypeEnum type = null;
+
+          @XmlType(name="ExtendedTypeEnum")
+    @XmlEnum(String.class)
+    public enum ExtendedTypeEnum {
+        REST_API("REST_API"),
+        ASYNC_API("ASYNC_API"),
+        MCP("MCP");
+        private String value;
+
+        ExtendedTypeEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static ExtendedTypeEnum fromValue(String v) {
+            for (ExtendedTypeEnum b : ExtendedTypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    } 
+    private ExtendedTypeEnum extendedType = null;
     private String version = null;
+    private String owner = null;
 
   /**
    * Name of the artifact.
@@ -66,7 +100,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "API1", value = "Name of the artifact.")
+  @ApiModelProperty(example = "Test API", value = "Name of the artifact.")
   @JsonProperty("name")
   public String getName() {
     return name;
@@ -94,6 +128,24 @@ return null;
   }
 
   /**
+   * Extended type of the artifact.
+   **/
+  public ArtifactInfoDTO extendedType(ExtendedTypeEnum extendedType) {
+    this.extendedType = extendedType;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "REST_API", value = "Extended type of the artifact.")
+  @JsonProperty("extendedType")
+  public ExtendedTypeEnum getExtendedType() {
+    return extendedType;
+  }
+  public void setExtendedType(ExtendedTypeEnum extendedType) {
+    this.extendedType = extendedType;
+  }
+
+  /**
    * Version of the artifact.
    **/
   public ArtifactInfoDTO version(String version) {
@@ -111,6 +163,24 @@ return null;
     this.version = version;
   }
 
+  /**
+   * Owner of the artifact.
+   **/
+  public ArtifactInfoDTO owner(String owner) {
+    this.owner = owner;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "admin", value = "Owner of the artifact.")
+  @JsonProperty("owner")
+  public String getOwner() {
+    return owner;
+  }
+  public void setOwner(String owner) {
+    this.owner = owner;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -123,12 +193,14 @@ return null;
     ArtifactInfoDTO artifactInfo = (ArtifactInfoDTO) o;
     return Objects.equals(name, artifactInfo.name) &&
         Objects.equals(type, artifactInfo.type) &&
-        Objects.equals(version, artifactInfo.version);
+        Objects.equals(extendedType, artifactInfo.extendedType) &&
+        Objects.equals(version, artifactInfo.version) &&
+        Objects.equals(owner, artifactInfo.owner);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, type, version);
+    return Objects.hash(name, type, extendedType, version, owner);
   }
 
   @Override
@@ -138,7 +210,9 @@ return null;
     
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
+    sb.append("    extendedType: ").append(toIndentedString(extendedType)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
+    sb.append("    owner: ").append(toIndentedString(owner)).append("\n");
     sb.append("}");
     return sb.toString();
   }

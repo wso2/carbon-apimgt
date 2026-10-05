@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDefinitionSearchResultDTO;
@@ -62,6 +63,7 @@ public class SearchResultMappingUtil {
         apiResultDTO.setId(api.getUUID());
         APIIdentifier apiId = api.getId();
         apiResultDTO.setName(apiId.getApiName());
+        apiResultDTO.setDisplayName(api.getDisplayName() != null ? api.getDisplayName() : apiId.getApiName());
         apiResultDTO.setVersion(apiId.getVersion());
         apiResultDTO.setProvider(APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
         String context = api.getContextTemplate();
@@ -76,8 +78,17 @@ public class SearchResultMappingUtil {
         apiBusinessInformationDTO.setTechnicalOwner(api.getTechnicalOwner());
         apiBusinessInformationDTO.setTechnicalOwnerEmail(api.getTechnicalOwnerEmail());
         apiResultDTO.setBusinessInformation(apiBusinessInformationDTO);
-        apiResultDTO.setType(SearchResultDTO.TypeEnum.API);
-        apiResultDTO.setTransportType(api.getType());
+        if (APIConstants.API_TYPE_MCP.equals(api.getType())) {
+            apiResultDTO.setType(SearchResultDTO.TypeEnum.MCP);
+            apiResultDTO.setTransportType(APIConstants.API_TYPE_HTTP);
+        } else if (APIConstants.API_TYPE_PRODUCT.equals(api.getType())) {
+            // In API search, the API Products are also returned as APIs. Hence, we need to handle this case as well.
+            apiResultDTO.setType(SearchResultDTO.TypeEnum.APIPRODUCT);
+            apiResultDTO.setTransportType(APIConstants.API_TYPE_HTTP);
+        } else {
+            apiResultDTO.setType(SearchResultDTO.TypeEnum.API);
+            apiResultDTO.setTransportType(api.getType());
+        }
         apiResultDTO.setDescription(api.getDescription());
         apiResultDTO.setStatus(api.getStatus());
         apiResultDTO.setThumbnailUri(api.getThumbnailUrl());
@@ -98,6 +109,8 @@ public class SearchResultMappingUtil {
         apiResultDTO.setId(apiProduct.getUuid());
         APIProductIdentifier apiId = apiProduct.getId();
         apiResultDTO.setName(apiId.getName());
+        apiResultDTO.setDisplayName(
+                apiProduct.getDisplayName() != null ? apiProduct.getDisplayName() : apiId.getName());
         apiResultDTO.setVersion(apiId.getVersion());
         apiResultDTO.setProvider(APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
         String context = apiProduct.getContextTemplate();
@@ -113,7 +126,7 @@ public class SearchResultMappingUtil {
         apiBusinessInformationDTO.setTechnicalOwnerEmail(apiProduct.getTechnicalOwnerEmail());
         apiResultDTO.setBusinessInformation(apiBusinessInformationDTO);
         apiResultDTO.setType(SearchResultDTO.TypeEnum.APIPRODUCT);
-        apiResultDTO.setTransportType(apiProduct.getType());
+        apiResultDTO.setTransportType(APIConstants.API_TYPE_HTTP);
         apiResultDTO.setDescription(apiProduct.getDescription());
         apiResultDTO.setStatus(apiProduct.getState());
         apiResultDTO.setThumbnailUri(apiProduct.getThumbnailUrl());
@@ -137,9 +150,11 @@ public class SearchResultMappingUtil {
         docResultDTO.setOtherTypeName(document.getOtherTypeName());
         APIIdentifier apiId = api.getId();
         docResultDTO.setApiName(apiId.getApiName());
+        docResultDTO.setApiDisplayName(api.getDisplayName() != null ? api.getDisplayName() : apiId.getApiName());
         docResultDTO.setApiVersion(apiId.getVersion());
         docResultDTO.setApiProvider(apiId.getProviderName());
         docResultDTO.setApiUUID(api.getUUID());
+        docResultDTO.setAssociatedType(api.getType());
         return docResultDTO;
     }
 
@@ -194,6 +209,9 @@ public class SearchResultMappingUtil {
         apiDefSearchResultDTO.setType(SearchResultDTO.TypeEnum.DEFINITION);
         apiDefSearchResultDTO.setApiUUID(apiDefResult.getApiUuid());
         apiDefSearchResultDTO.setApiName(apiDefResult.getApiName());
+        apiDefSearchResultDTO.setApiDisplayName(apiDefResult.getApiDisplayName() != null ?
+                apiDefResult.getApiDisplayName() :
+                apiDefResult.getApiName());
         apiDefSearchResultDTO.setApiContext(apiDefResult.getApiContext());
         apiDefSearchResultDTO.setApiVersion(apiDefResult.getApiVersion());
         apiDefSearchResultDTO.setApiProvider(apiDefResult.getApiProvider());

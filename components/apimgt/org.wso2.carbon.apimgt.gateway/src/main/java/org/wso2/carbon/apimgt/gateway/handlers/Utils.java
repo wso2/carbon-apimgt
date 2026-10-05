@@ -497,6 +497,11 @@ public class Utils {
         String certificate = (String) headers.get(Utils.getClientCertificateHeader());
         byte[] bytes;
         if (certificate != null) {
+            if (!isForwardClientCertificateHeaderEnabled()) {
+                // Remove the client certificate header to avoid forwarding to the backend services
+                headers.remove(Utils.getClientCertificateHeader());
+            }
+
             if (!isClientCertificateEncoded()) {
                 // Remove invalid characters, restructure line separators, and reconstruct the certificate
                 certificate = certificate
@@ -517,7 +522,7 @@ public class Utils {
                 bytes = certificate.getBytes();
             } else {
                 try {
-                    certificate = URLDecoder.decode(certificate, "UTF-8");
+                    certificate = URLDecoder.decode(certificate.replace("+", "%2B"), "UTF-8");
                 } catch (UnsupportedEncodingException e) {
                     String msg = "Error while URL decoding certificate";
                     throw new APIManagementException(msg, e);
@@ -581,6 +586,21 @@ public class Utils {
             }
         }
         return true;
+    }
+
+    /**
+     * Checks whether forwarding client certificate header is enabled or not from API-M configurations.
+     * @return Boolean indicating forwarding client certificate header enable/disable state
+     */
+    public static boolean isForwardClientCertificateHeaderEnabled() {
+        APIManagerConfiguration apiManagerConfiguration =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+        if (apiManagerConfiguration != null) {
+            String firstProperty = apiManagerConfiguration
+                    .getFirstProperty(APIConstants.MutualSSL.FORWARD_CLIENT_CERTIFICATE_HEADER);
+            return Boolean.parseBoolean(firstProperty);
+        }
+        return false;
     }
 
 
@@ -727,6 +747,26 @@ public class Utils {
     }
 
     /**
+     * Returns the updated API from the tenant subscription store using its context and version.
+     *
+     * @param tenantDomain the tenant domain
+     * @param electedAPI the API to look up
+     * @return the matching API if found; otherwise, the provided API
+     */
+    public static org.wso2.carbon.apimgt.keymgt.model.entity.API getAPI(
+            String tenantDomain,
+            org.wso2.carbon.apimgt.keymgt.model.entity.API electedAPI) {
+        SubscriptionDataStore tenantSubscriptionStore =
+                SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
+        if (tenantSubscriptionStore != null) {
+            org.wso2.carbon.apimgt.keymgt.model.entity.API updatedApi =
+                    tenantSubscriptionStore.getApiByContextAndVersion(electedAPI.getContext(), electedAPI.getVersion());
+            return updatedApi != null ? updatedApi : electedAPI;
+        }
+        return electedAPI;
+    }
+
+    /**
      * Get the security scheme of the given API
      *
      * @param context      API context
@@ -771,6 +811,19 @@ public class Utils {
         return (APIConstants.WS_PROTOCOL.equals(axis2MC.getIncomingTransportName()) ||
                 APIConstants.WSS_PROTOCOL.equals(axis2MC.getIncomingTransportName())
                         && (boolean) messageContext.getProperty(APIConstants.GRAPHQL_SUBSCRIPTION_REQUEST));
+    }
+
+    /**
+     * Evaluate current request transport and message context to check if it is a MCP request execution path.
+     *
+     * @param messageContext MessageContext
+     * @return true if MCP request execution path
+     */
+    public static boolean isMCPRequest(MessageContext messageContext) {
+        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
+                getAxis2MessageContext();
+        String apiType = (String) messageContext.getProperty(APIMgtGatewayConstants.API_TYPE);
+        return APIConstants.API_TYPE_MCP.equals(apiType);
     }
 
     /**
@@ -834,21 +887,62 @@ public class Utils {
      *
      * @return set of acceptable resources
      */
+    @Deprecated // Use getAcceptableResources(Resource[], String, String, MessageContext) instead
     public static Set<Resource> getAcceptableResources(Resource[] allAPIResources,
-                                                       String httpMethod, String corsRequestMethod) {
+                                                       String httpMethod,
+                                                       String corsRequestMethod) {
+        return getAcceptableResources(allAPIResources, httpMethod, corsRequestMethod, null);
+    }
+
+    /**
+     * Select acceptable resources from the set of all resources based on requesting methods.
+     *
+     * @return set of acceptable resources
+     */
+    public static Set<Resource> getAcceptableResources(Resource[] allAPIResources, String httpMethod,
+                                                       String corsRequestMethod, MessageContext messageContext) {
+        if (messageContext != null) {
+            Object cachedResources = messageContext.getProperty("ACCEPTABLE_RESOURCES");
+            if (cachedResources instanceof Set) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Returning cached acceptable resources for method: " + httpMethod);
+                }
+                return (Set<Resource>) cachedResources;
+            }
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Computing acceptable resources for method: " + httpMethod + ", CORS method: "
+                    + corsRequestMethod);
+        }
         List<Resource> acceptableResourcesList = new LinkedList<>();
+        List<Resource> optionsResourcesList = new LinkedList<>();
+        boolean isOptionsRequest = RESTConstants.METHOD_OPTIONS.equals(httpMethod);
+
         for (Resource resource : allAPIResources) {
-            //If the requesting method is OPTIONS or if the Resource contains the requesting method
-            if (resource.getMethods() != null && Arrays.asList(resource.getMethods()).contains(httpMethod) &&
-                    RESTConstants.METHOD_OPTIONS.equals(httpMethod)) {
-                acceptableResourcesList.add(0, resource);
-            } else if ((RESTConstants.METHOD_OPTIONS.equals(httpMethod) && resource.getMethods() != null &&
-                    Arrays.asList(resource.getMethods()).contains(corsRequestMethod)) ||
-                    (resource.getMethods() != null && Arrays.asList(resource.getMethods()).contains(httpMethod))) {
+            log.debug("Evaluating resource for acceptable methods");
+            String[] methods = resource.getMethods();
+            if (methods == null) {
+                continue;
+            }
+
+            List<String> methodList = Arrays.asList(methods);
+
+            // Handle OPTIONS request with single OPTIONS method defined
+            if (isOptionsRequest && methods.length == 1 && methodList.contains(httpMethod)) {
+                optionsResourcesList.add(resource);
+            } else if ((isOptionsRequest && methodList.contains(corsRequestMethod)) ||
+                    methodList.contains(httpMethod)) {
                 acceptableResourcesList.add(resource);
             }
         }
-        return new LinkedHashSet<>(acceptableResourcesList);
+
+        Set<Resource> result = new LinkedHashSet<>();
+        result.addAll(optionsResourcesList);
+        result.addAll(acceptableResourcesList);
+        if (log.isDebugEnabled()) {
+            log.debug("Found " + result.size() + " acceptable resources for method: " + httpMethod);
+        }
+        return result;
     }
 
     /**
@@ -868,5 +962,4 @@ public class Utils {
         }
         return selectedResource;
     }
-
 }

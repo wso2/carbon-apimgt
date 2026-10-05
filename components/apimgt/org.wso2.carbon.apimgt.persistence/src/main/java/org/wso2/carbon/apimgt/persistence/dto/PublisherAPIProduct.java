@@ -56,8 +56,6 @@ public class PublisherAPIProduct extends PublisherAPIProductInfo {
     private String definition;
     private boolean enableStore;
     private String thumbnail;
-    private String createdTime;
-    private String lastUpdated;
     private Set<String> tags = new LinkedHashSet<>();
     private String accessControl; // publisher accessControl : 'restricted', 'all'
     private Set<String> accessControlRoles; // reg has a just String
@@ -225,18 +223,6 @@ public class PublisherAPIProduct extends PublisherAPIProductInfo {
     }
     public void setThumbnail(String thumbnail) {
         this.thumbnail = thumbnail;
-    }
-    public String getCreatedTime() {
-        return createdTime;
-    }
-    public void setCreatedTime(String createdTime) {
-        this.createdTime = createdTime;
-    }
-    public String getLastUpdated() {
-        return lastUpdated;
-    }
-    public void setLastUpdated(String lastUpdated) {
-        this.lastUpdated = lastUpdated;
     }
     public Set<String> getTags() {
         return tags;

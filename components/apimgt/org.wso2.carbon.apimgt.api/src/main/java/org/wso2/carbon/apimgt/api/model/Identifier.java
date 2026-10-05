@@ -17,6 +17,8 @@
  */
 package org.wso2.carbon.apimgt.api.model;
 
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
+
 /**
  * Interface for All Identifiers
  */
@@ -25,6 +27,7 @@ public interface Identifier {
      * Name of provider 
      * @return name
      */
+    @UsedByMigrationClient
     String getProviderName();
     
     /**
@@ -44,12 +47,14 @@ public interface Identifier {
      * Name of the identifier
      * @return name
      */
+    @UsedByMigrationClient
     String getName();
     
     /**
      * Version of the identifier
      * @return version
      */
+    @UsedByMigrationClient
     String getVersion();
     
     /**

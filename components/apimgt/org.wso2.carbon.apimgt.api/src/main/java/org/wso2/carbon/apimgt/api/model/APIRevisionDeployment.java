@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.api.WorkflowStatus;
 
 import java.io.Serializable;
@@ -32,6 +33,9 @@ public class APIRevisionDeployment implements Serializable {
     private boolean isDisplayOnDevportal;
     private String deployedTime;
     private String successDeployedTime;
+    private int deployedGatewayCount;
+    private int failedGatewayCount;
+    private int liveGatewayCount;
 
     public int getId() {
         return id;
@@ -45,6 +49,7 @@ public class APIRevisionDeployment implements Serializable {
         return revisionUUID;
     }
 
+    @UsedByMigrationClient
     public void setRevisionUUID(String revisionUUID) {
         this.revisionUUID = revisionUUID;
     }
@@ -53,6 +58,7 @@ public class APIRevisionDeployment implements Serializable {
         return deployment;
     }
 
+    @UsedByMigrationClient
     public void setDeployment(String deployment) {
         this.deployment = deployment;
     }
@@ -61,6 +67,7 @@ public class APIRevisionDeployment implements Serializable {
         return vhost;
     }
 
+    @UsedByMigrationClient
     public void setVhost(String vhost) {
         this.vhost = vhost;
     }
@@ -69,6 +76,7 @@ public class APIRevisionDeployment implements Serializable {
         return isDisplayOnDevportal;
     }
 
+    @UsedByMigrationClient
     public void setDisplayOnDevportal(boolean displayOnDevportal) {
         isDisplayOnDevportal = displayOnDevportal;
     }
@@ -95,5 +103,29 @@ public class APIRevisionDeployment implements Serializable {
 
     public void setStatus(WorkflowStatus status) {
         this.status = status;
+    }
+
+    public int getDeployedGatewayCount() {
+        return deployedGatewayCount;
+    }
+
+    public void setDeployedGatewayCount(int deployedGatewayCount) {
+        this.deployedGatewayCount = deployedGatewayCount;
+    }
+
+    public int getFailedGatewayCount() {
+        return failedGatewayCount;
+    }
+
+    public void setFailedGatewayCount(int failedGatewayCount) {
+        this.failedGatewayCount = failedGatewayCount;
+    }
+
+    public int getLiveGatewayCount() {
+        return liveGatewayCount;
+    }
+
+    public void setLiveGatewayCount(int liveGatewayCount) {
+        this.liveGatewayCount = liveGatewayCount;
     }
 }

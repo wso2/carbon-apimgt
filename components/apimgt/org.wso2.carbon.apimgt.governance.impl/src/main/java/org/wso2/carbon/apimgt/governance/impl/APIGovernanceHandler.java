@@ -1,0 +1,772 @@
+/*
+ * Copyright (c) 2025, WSO2 LLC. (http://www.wso2.com).
+ *
+ * WSO2 LLC. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+package org.wso2.carbon.apimgt.governance.impl;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.model.ApiResult;
+import org.wso2.carbon.apimgt.governance.api.ArtifactGovernanceHandler;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
+import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
+import org.wso2.carbon.apimgt.governance.api.model.RuleType;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dao.LabelsDAO;
+import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
+import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
+import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIDTOTypeWrapper;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ExportUtils;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerDTO;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
+/**
+ * This class implements the ArtifactGovernanceHandler interface to provide the governance capabilities for the APIs
+ */
+public class APIGovernanceHandler implements ArtifactGovernanceHandler {
+
+    private static final Log log = LogFactory.getLog(APIGovernanceHandler.class);
+    private static final int UNZIP_BUFFER_SIZE = 1024;
+    private static final long UNZIP_SIZE_LIMIT = 0x6400000; // Max size of inflated data per archive, 100MB
+    private static final int UNZIP_MAX_ENTRY_COUNT = 1024;
+
+    /**
+     * This method is used to get all the apis of a given type in a given organization
+     *
+     * @param organization organization name
+     * @return List of api ids
+     * @throws APIMGovernanceException if an error occurs while getting the apis
+     */
+    @Override
+    public List<String> getAllArtifacts(String organization) throws APIMGovernanceException {
+        List<String> apiIds = new ArrayList<>();
+        List<ApiResult> apis;
+        try {
+            apis = ApiMgtDAO.getInstance().getAllAPIs(organization);
+            for (ApiResult api : apis) {
+                apiIds.add(api.getId());
+            }
+            return apiIds;
+        } catch (APIManagementException e) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_API_LIST, e, organization);
+        }
+
+    }
+
+    /**
+     * This method is used to get all the artifacts visible to a given user in a given organization
+     *
+     * @param username     username of logged-in user
+     * @param organization organization name
+     * @return List of artifact ids
+     * @throws APIMGovernanceException if an error occurs while getting the artifacts
+     */
+    @Override
+    public List<String> getAllArtifacts(String username, String organization) throws APIMGovernanceException {
+        List<String> apiIds = new ArrayList<>();
+        try {
+            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(username);
+            List<API> apis = apiProvider.getAllAPIs();
+            for (API api : apis) {
+                apiIds.add(api.getUuid());
+            }
+            return apiIds;
+        } catch (APIManagementException e) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_API_LIST, e, organization);
+        }
+    }
+
+    /**
+     * This method is used to get all the apis attached to a given label in a given organization
+     *
+     * @param label label id
+     * @return List of api ids
+     * @throws APIMGovernanceException if an error occurs while getting the apis
+     */
+    @Override
+    public List<String> getArtifactsByLabel(String label) throws APIMGovernanceException {
+        List<String> apiIds = new ArrayList<>();
+        try {
+            List<ApiResult> apis = LabelsDAO.getInstance().getMappedApisForLabel(label);
+
+            for (ApiResult api : apis) {
+                apiIds.add(api.getId());
+            }
+            return apiIds;
+
+        } catch (APIManagementException e) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_APIS_FOR_LABEL, e, label);
+        }
+    }
+
+    /**
+     * This method is used to get all the labels attached to a given api in a given organization
+     *
+     * @param apiId api uuid
+     * @return List of label ids
+     * @throws APIMGovernanceException if an error occurs while getting the labels
+     */
+    @Override
+    public List<String> getLabelsForArtifact(String apiId) throws APIMGovernanceException {
+        try {
+            return LabelsDAO.getInstance().getMappedLabelIDsForApi(apiId);
+        } catch (APIManagementException e) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_LABELS_FOR_API, e, apiId);
+        }
+    }
+
+    /**
+     * This method checks whether an api is available in the given organization
+     *
+     * @param apiId        api uuid
+     * @param organization organization name
+     * @return true if the api is available, false otherwise
+     * @throws APIMGovernanceException if an error occurs while checking the availability
+     */
+    @Override
+    public boolean isArtifactAvailable(String apiId, String organization) throws APIMGovernanceException {
+        try {
+            APIIdentifier apiIdentifier = ApiMgtDAO.getInstance().getAPIIdentifierFromUUID(apiId);
+            if (apiIdentifier != null) {
+                return true;
+            }
+        } catch (APIManagementException e) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_CHECKING_API_AVAILABILITY, e,
+                    apiId);
+        }
+        return false;
+    }
+
+    /**
+     * This method checks whether an artifact is visible to a given user in the given organization
+     *
+     * @param artifactRefId artifact reference id (uuid on APIM side)
+     * @param username      username of logged-in user
+     * @param organization  organization name
+     * @return true if the artifact is visible, false otherwise
+     * @throws APIMGovernanceException if an error occurs while checking the visibility
+     */
+    @Override
+    public boolean isArtifactVisibleToUser(String artifactRefId, String username,
+                                           String organization) throws APIMGovernanceException {
+
+        APIProvider apiProvider;
+        try {
+            apiProvider = APIManagerFactory.getInstance().getAPIProvider(username);
+            API api = apiProvider.getAPIbyUUID(artifactRefId, organization);
+            return api != null;
+        } catch (APIManagementException e) {
+            // Provider will throw unauthorized error if the user is not authorized to view the API.
+            // Hence, catching the exception and returning false.
+            if (ExceptionCodes.UN_AUTHORIZED_TO_VIEW_MODIFY_API.getErrorCode() ==
+                    (e.getErrorHandler().getErrorCode())) {
+                return false;
+            }
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_CHECKING_API_VISIBILITY, e,
+                    artifactRefId);
+        }
+    }
+
+    /**
+     * Given a list of governable states, this method checks whether the api is governable considering
+     * apis current state on the APIM side
+     *
+     * @param apiId            api uuid
+     * @param governableStates list of governable states
+     * @return true if the api is governable, false otherwise
+     * @throws APIMGovernanceException if an error occurs while checking the governability
+     */
+    @Override
+    public boolean isArtifactGovernable(String apiId, List<APIMGovernableState> governableStates)
+            throws APIMGovernanceException {
+
+        String lcStatus = getAPIStatus(apiId);
+        // If the lifecycle status is null or empty, return false
+        if (!APIStatus.contains(lcStatus)) {
+            return false;
+        }
+        boolean isDeployed = isAPIDeployed(apiId);
+
+        // If API is in any state we need to run created and update policies
+        boolean isGovernable = governableStates.contains(APIMGovernableState.API_CREATE)
+                || governableStates.contains(APIMGovernableState.API_UPDATE);
+
+        // If the API is deployed, we need to run deploy policies
+        if (isDeployed) {
+            isGovernable |= governableStates.contains(APIMGovernableState.API_DEPLOY);
+        }
+
+        // If the API is in published, deprecated or blocked state, we need to run publish policies
+        if (APIStatus.PUBLISHED.equals(APIStatus.valueOf(lcStatus)) ||
+                APIStatus.DEPRECATED.equals(APIStatus.valueOf(lcStatus)) ||
+                APIStatus.BLOCKED.equals(APIStatus.valueOf(lcStatus))) {
+            isGovernable |= governableStates.contains(APIMGovernableState.API_PUBLISH);
+        }
+
+        return isGovernable;
+    }
+
+
+    /**
+     * Get the lifecycle status of an API
+     *
+     * @param apiId API ID
+     * @return API status
+     * @throws APIMGovernanceException If an error occurs while getting the status of the API
+     */
+    private String getAPIStatus(String apiId) throws APIMGovernanceException {
+
+        try {
+            return ApiMgtDAO.getInstance().getAPIStatusFromAPIUUID(apiId);
+        } catch (APIManagementException e) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_LC_STATUS_OF_API, e,
+                    apiId);
+        }
+    }
+
+    /**
+     * Check if the API is deployed
+     *
+     * @param apiId API ID
+     * @return True if the API is deployed
+     */
+    private boolean isAPIDeployed(String apiId) throws APIMGovernanceException {
+        try {
+            List<APIRevisionDeployment> deployedAPIRevisionList =
+                    ApiMgtDAO.getInstance().getAPIRevisionDeploymentByApiUUID(apiId);
+            if (deployedAPIRevisionList != null && !deployedAPIRevisionList.isEmpty()) {
+                return true;
+            }
+        } catch (APIManagementException e) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes
+                    .ERROR_WHILE_CHECKING_API_DEPLOYMENT_STATUS, e, apiId);
+        }
+        return false;
+    }
+
+    /**
+     * This method checks whether the api is governable considering the apis type
+     * For now, we do not support governance for SOAP and GraphQL APIs. Hence, we return false for those types.
+     *
+     * @param apiId api uuid
+     * @return true if the api is governable, false otherwise
+     * @throws APIMGovernanceException if an error occurs while checking the governability
+     */
+    @Override
+    public boolean isArtifactGovernable(String apiId) throws APIMGovernanceException {
+        ExtendedArtifactType extendedArtifactType = getExtendedArtifactType(apiId);
+        return extendedArtifactType != null;
+    }
+
+    /**
+     * This method is used to get the name of an api
+     *
+     * @param apiId        api uuid
+     * @param organization organization name
+     * @return name of the api
+     * @throws APIMGovernanceException if an error occurs while getting the name
+     */
+    @Override
+    public String getName(String apiId, String organization) throws APIMGovernanceException {
+        try {
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+            return apiIdentifier.getApiName();
+        } catch (APIManagementException e) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_API_INFO, e,
+                    apiId);
+        }
+    }
+
+    /**
+     * This method is used to get the version of an api
+     *
+     * @param apiId        api uuid
+     * @param organization organization name
+     * @return version of the api
+     * @throws APIMGovernanceException if an error occurs while getting the version
+     */
+    @Override
+    public String getVersion(String apiId, String organization) throws APIMGovernanceException {
+        try {
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+            return apiIdentifier.getVersion();
+        } catch (APIManagementException e) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_API_INFO, e,
+                    apiId);
+        }
+    }
+
+    /**
+     * This method is used to get the owner of an api
+     *
+     * @param apiId        api uuid
+     * @param organization organization name
+     * @return owner of the api
+     * @throws APIMGovernanceException if an error occurs while getting the owner
+     */
+    @Override
+    public String getOwner(String apiId, String organization) throws APIMGovernanceException {
+        try {
+            APIProvider apiProvider = APIManagerFactory.getInstance()
+                    .getAPIProvider(RestApiCommonUtil.getLoggedInUsername());
+            API api = apiProvider.getAPIbyUUID(apiId, organization);
+            String techOwner = api.getTechnicalOwnerEmail();
+            String apiOwner = api.getApiOwner();
+            return techOwner != null ? techOwner : apiOwner;
+        } catch (APIManagementException e) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_API_INFO, e,
+                    apiId);
+        }
+    }
+
+    /**
+     * This method is used to convert the apis type on APIM side to the ExtendedArtifactType
+     * for the operations in the governance side
+     *
+     * @param apiId api uuid
+     * @return ExtendedArtifactType
+     * @throws APIMGovernanceException if an error occurs while getting the extended api type
+     */
+    @Override
+    public ExtendedArtifactType getExtendedArtifactType(String apiId) throws APIMGovernanceException {
+        String apiType;
+        try {
+            apiType = ApiMgtDAO.getInstance().getAPITypeFromUUID(apiId);
+        } catch (APIManagementException e) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_API_TYPE, e, apiId);
+        }
+
+        if (apiType == null) {
+            log.error("API type is null for API with ID: " + apiId);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_API_TYPE, apiId);
+        }
+
+        return getExtendedArtifactTypeFromAPIType(apiType);
+    }
+
+    /**
+     * This method is used to convert the apis type on APIM side to the ExtendedArtifactType
+     *
+     * @param apiType api type
+     * @return ExtendedArtifactType
+     */
+    private ExtendedArtifactType getExtendedArtifactTypeFromAPIType(String apiType) {
+        switch (apiType.toUpperCase(Locale.ENGLISH)) {
+            case "REST":
+            case "HTTP":
+                return ExtendedArtifactType.REST_API;
+            case "WS":
+            case "SSE":
+            case "WEBSUB":
+            case "WEBHOOK":
+            case "ASYNC":
+                return ExtendedArtifactType.ASYNC_API;
+            case "MCP":
+                return ExtendedArtifactType.MCP;
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * This method is used to get the api project zip
+     *
+     * @param apiId        api uuid
+     * @param revisionId   revision number of the api
+     * @param organization organization name
+     * @return api content
+     * @throws APIMGovernanceException if an error occurs while getting the api zip
+     */
+    @Override
+    public byte[] getArtifactProject(String apiId, String revisionId, String organization)
+            throws APIMGovernanceException {
+        synchronized (apiId.intern()) {
+            try {
+                if (log.isDebugEnabled()) {
+                    log.debug("Exporting API with id " + apiId + " in organization " 
+                        + organization + " with revision " + revisionId);     
+                }
+                String tenantAdminUsername = RestApiCommonUtil.getLoggedInUsername();
+                APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+
+                APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(tenantAdminUsername);
+                if (revisionId != null) {
+                    apiId = revisionId;
+                }
+
+                API api = apiProvider.getAPIbyUUID(apiId, organization);
+                if (api == null) {
+                    log.error("API not found for ID: " + apiId + " in organization " + organization);
+                    throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_API_INFO, apiId);
+                }
+                api.setUuid(apiId);
+                apiIdentifier.setUuid(apiId);
+                APIDTOTypeWrapper apiDtoTypeWrapper;
+                boolean isMCPServer;
+                if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(api.getType())) {
+                    MCPServerDTO mcpServerDtoToReturn = APIMappingUtil.fromAPItoMCPServerDTO(api, true, apiProvider);
+                    apiDtoTypeWrapper = new APIDTOTypeWrapper(mcpServerDtoToReturn);
+                    isMCPServer = true;
+                } else {
+                    APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, true, apiProvider);
+                    apiDtoTypeWrapper = new APIDTOTypeWrapper(apiDtoToReturn);
+                    isMCPServer = false;
+                }
+                File apiProject = ExportUtils.exportAPI(
+                        apiProvider, apiIdentifier, apiDtoTypeWrapper, api,
+                        apiIdentifier.getProviderName(), ExportFormat.YAML, true, true,
+                        StringUtils.EMPTY, organization, false, false
+                ); // returns zip file
+                if (log.isDebugEnabled()) {
+                    if (!isMCPServer) {
+                        log.debug("Successfully exported API with id " + apiId + " in organization "
+                                + organization + " with revision " + revisionId);
+                    } else {
+                        log.debug("Successfully exported MCP Server with id " + apiId + " in organization "
+                                + organization + " with revision " + revisionId);
+                    }
+                }
+                return Files.readAllBytes(apiProject.toPath());
+            } catch (APIManagementException | APIImportExportException | IOException e) {
+                throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_APIM_PROJECT, e,
+                        apiId, organization);
+            }
+        }
+    }
+
+    /**
+     * This method is used to extract the api project in to a map of RuleType and the content for governance operations
+     *
+     * @param apiProject api project zip
+     * @return Map of RuleType and the content
+     * @throws APIMGovernanceException if an error occurs while extracting the api project
+     */
+    @Override
+    public Map<RuleType, String> extractArtifactProject(byte[] apiProject) throws APIMGovernanceException {
+        Map<RuleType, String> apiProjectContentMap = new HashMap<>();
+
+        String apiMetadata = extractAPIMetadata(apiProject);
+        ExtendedArtifactType extendedArtifactType = getExtendedArtifactTypeFromAPIMetadata(apiMetadata);
+        String apiDefinition = extractAPIDefinition(apiProject, extendedArtifactType);
+        String docData = extractDocData(apiProject);
+
+        if (apiMetadata == null) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.API_DETAILS_NOT_FOUND);
+        } else {
+            apiProjectContentMap.put(RuleType.API_METADATA, apiMetadata);
+        }
+        if (apiDefinition == null) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.API_DEFINITION_NOT_FOUND);
+        } else {
+            apiProjectContentMap.put(RuleType.API_DEFINITION, apiDefinition);
+        }
+        if (docData == null) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.API_DOCUMENT_DATA_NOT_FOUND);
+        } else {
+            apiProjectContentMap.put(RuleType.API_DOCUMENTATION, docData);
+        }
+
+        return apiProjectContentMap;
+    }
+
+    /**
+     * Extracts API metadata from the project ZIP file, guarding against zip bombs.
+     *
+     * @param apiProjectZip Byte array representing the API project ZIP file.
+     * @return The extracted API metadata as a string.
+     * @throws APIMGovernanceException if an error occurs while extracting metadata content, or if the archive
+     *                                 exceeds the unzip limits.
+     */
+    public static String extractAPIMetadata(byte[] apiProjectZip) throws APIMGovernanceException {
+        try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(apiProjectZip))) {
+            long remainingBytes = UNZIP_SIZE_LIMIT;
+            int entryCount = 0;
+            ZipEntry entry;
+            while ((entry = zipInputStream.getNextEntry()) != null) {
+                validateEntryCount(++entryCount);
+                String pathWithinProject = getPathWithinProject(entry.getName());
+                boolean isMetadataEntry = APIMGovernanceConstants.API_FILE_NAME.equals(pathWithinProject)
+                        || APIMGovernanceConstants.MCP_FILE_NAME.equals(pathWithinProject);
+                ByteArrayOutputStream outputStream = isMetadataEntry ? new ByteArrayOutputStream() : null;
+                remainingBytes -= readZipEntry(zipInputStream, outputStream, remainingBytes);
+                if (isMetadataEntry) {
+                    return new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
+                }
+            }
+        } catch (IOException e) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_EXTRACTING_API_METADATA, e);
+        }
+        return null; // Return null if no matching metadata is found
+    }
+
+    /**
+     * Reads the current entry of the given ZIP stream, bounding the amount of data inflated from the archive.
+     * <p>
+     * Every entry the caller reads is passed through this method, including the ones that are not of interest,
+     * because {@link ZipInputStream#getNextEntry()} inflates and discards the remainder of the current entry without
+     * accounting for its size. Draining unwanted entries here keeps a single extraction from inflating more than
+     * {@link #UNZIP_SIZE_LIMIT} bytes, no matter which of the entries it reads holds the oversized data. Entries
+     * beyond the one the caller is looking for are never inflated, so they need no accounting.
+     *
+     * @param zipInputStream Stream positioned at the entry to read.
+     * @param sink           Stream the inflated bytes are written to, or null to drain the entry without keeping it.
+     * @param remainingBytes Number of inflated bytes still allowed for this extraction.
+     * @return The number of bytes inflated from the entry.
+     * @throws IOException if the entry does not fit within the remaining budget, or the stream cannot be read.
+     */
+    private static long readZipEntry(ZipInputStream zipInputStream, OutputStream sink, long remainingBytes)
+            throws IOException {
+        byte[] buffer = new byte[UNZIP_BUFFER_SIZE];
+        long entrySize = 0;
+        int length;
+        while ((length = zipInputStream.read(buffer)) != -1) {
+            if (entrySize + length > remainingBytes) {
+                throw new IOException("File being unzipped is too big.");
+            }
+            entrySize += length;
+            if (sink != null) {
+                sink.write(buffer, 0, length);
+            }
+        }
+        return entrySize;
+    }
+
+    /**
+     * Resolves the path of a ZIP entry relative to the project folder the archive wraps its content in.
+     * <p>
+     * The files of interest sit at known locations below that folder, so they are matched on this path rather than
+     * with a substring check on the whole entry name. A substring check would also accept lookalike entries such as
+     * {@code Docs/MyDoc/api.yaml} or {@code Definitions/swagger.yaml.bak}, which would let an unrelated file, whose
+     * name a user controls through a document name or an uploaded file name, decide what governance evaluates.
+     *
+     * Both separators are accepted, as {@link org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil} does when
+     * it resolves the project folder of an archive it extracts.
+     *
+     * @param entryName Name of the ZIP entry.
+     * @return The path below the project folder, or null if the entry does not sit inside one.
+     */
+    private static String getPathWithinProject(String entryName) {
+        String normalizedName = entryName.replace(ImportExportConstants.WIN_ZIP_FILE_SEPARATOR,
+                ImportExportConstants.ZIP_FILE_SEPARATOR);
+        int projectFolderEnd = normalizedName.indexOf(ImportExportConstants.ZIP_FILE_SEPARATOR);
+        if (projectFolderEnd < 0) {
+            return null;
+        }
+        return normalizedName.substring(projectFolderEnd + 1);
+    }
+
+    /**
+     * Checks whether the given path is the metadata file of a document, which lives one folder below the docs folder.
+     *
+     * @param pathWithinProject Path of the entry relative to the project folder, or null.
+     * @param docsFolder        Docs folder prefix, ending with a path separator.
+     * @param docMetadataFile   Document metadata file name, starting with a path separator.
+     * @return true if the path is {@code <docsFolder><document>/<docMetadataFile>}.
+     */
+    private static boolean isDocumentMetadata(String pathWithinProject, String docsFolder, String docMetadataFile) {
+        if (pathWithinProject == null || !pathWithinProject.startsWith(docsFolder)
+                || !pathWithinProject.endsWith(docMetadataFile)) {
+            return false;
+        }
+        // Reject nested paths: the only separator after the docs folder must be the one before the metadata file
+        return pathWithinProject.indexOf(ImportExportConstants.ZIP_FILE_SEPARATOR, docsFolder.length())
+                == pathWithinProject.length() - docMetadataFile.length();
+    }
+
+    /**
+     * Guards against archives holding an excessive number of entries.
+     *
+     * @param entryCount Number of entries read from the archive so far.
+     * @throws IOException if the archive holds more entries than {@link #UNZIP_MAX_ENTRY_COUNT}.
+     */
+    private static void validateEntryCount(int entryCount) throws IOException {
+        if (entryCount > UNZIP_MAX_ENTRY_COUNT) {
+            throw new IOException("Too many files to unzip.");
+        }
+    }
+
+    /**
+     * This method is used to get the extended artifact type from the API metadata
+     *
+     * @param apiMetadata API metadata
+     * @return ExtendedArtifactType
+     * @throws APIMGovernanceException if an error occurs while getting the extended artifact type
+     */
+    private ExtendedArtifactType getExtendedArtifactTypeFromAPIMetadata(String apiMetadata)
+            throws APIMGovernanceException {
+        ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
+        JsonNode rootNode;
+        try {
+            rootNode = yamlMapper.readTree(apiMetadata);
+            if (rootNode == null || rootNode.isMissingNode()) {
+                return null;
+            }
+            JsonNode topLevelTypeNode = rootNode.path("type");
+            if (!topLevelTypeNode.isMissingNode()) {
+                String topLevelType = topLevelTypeNode.asText();
+                if ("mcp_server".equalsIgnoreCase(topLevelType)) {
+                    return ExtendedArtifactType.MCP;
+                }
+            }
+            JsonNode dataNode = rootNode.path("data"); // Get the 'data' node
+            if (dataNode != null && dataNode.has("type")) {
+                String type = dataNode.path("type").asText();
+                return getExtendedArtifactTypeFromAPIType(type);
+            }
+        } catch (JsonProcessingException e) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_API_TYPE_FROM_PROJECT, e);
+        }
+        return null;
+    }
+
+
+    /**
+     * Extracts API definition from the project ZIP file, guarding against zip bombs.
+     *
+     * @param apiProjectZip        Byte array representing the API project ZIP file.
+     * @param extendedArtifactType Extended artifact type of the API
+     * @return The extracted API definition as a string.
+     * @throws APIMGovernanceException if an error occurs while extracting swagger content, or if the archive
+     *                                 exceeds the unzip limits.
+     */
+    public static String extractAPIDefinition(byte[] apiProjectZip, ExtendedArtifactType extendedArtifactType)
+            throws APIMGovernanceException {
+        String rootFolder = APIMGovernanceConstants.DEFINITIONS_FOLDER;
+        String swaggerPath = rootFolder + APIMGovernanceConstants.SWAGGER_FILE_NAME;
+        String asyncAPIPath = rootFolder + APIMGovernanceConstants.ASYNC_API_FILE_NAME;
+
+        try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(apiProjectZip))) {
+            long remainingBytes = UNZIP_SIZE_LIMIT;
+            int entryCount = 0;
+            ZipEntry entry;
+            while ((entry = zipInputStream.getNextEntry()) != null) {
+                validateEntryCount(++entryCount);
+                String pathWithinProject = getPathWithinProject(entry.getName());
+                boolean isDefinitionEntry = (swaggerPath.equals(pathWithinProject)
+                        && ExtendedArtifactType.REST_API.equals(extendedArtifactType))
+                        || (asyncAPIPath.equals(pathWithinProject) &&
+                        ExtendedArtifactType.ASYNC_API.equals(extendedArtifactType))
+                        || (APIMGovernanceConstants.MCP_FILE_NAME.equals(pathWithinProject) &&
+                        ExtendedArtifactType.MCP.equals(extendedArtifactType));
+                ByteArrayOutputStream outputStream = isDefinitionEntry ? new ByteArrayOutputStream() : null;
+                remainingBytes -= readZipEntry(zipInputStream, outputStream, remainingBytes);
+                if (isDefinitionEntry) {
+                    return new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
+                }
+            }
+        } catch (IOException e) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_EXTRACTING_API_DEFINITION, e);
+        }
+        return null; // Return null if no matching swagger content is found
+    }
+
+    /**
+     * Extracts the document data from the API project ZIP file, guarding against zip bombs.
+     *
+     * @param apiProjectZip API project ZIP file as a byte array
+     * @return Document data as a YAML string
+     * @throws APIMGovernanceException If an error occurs while extracting the document data, or if the archive
+     *                                exceeds the unzip limits
+     */
+    public static String extractDocData(byte[] apiProjectZip) throws APIMGovernanceException {
+        ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
+
+        String docsFolder = APIMGovernanceConstants.DOCS_FOLDER + ImportExportConstants.ZIP_FILE_SEPARATOR;
+        String docMetadataFile = ImportExportConstants.ZIP_FILE_SEPARATOR
+                + APIMGovernanceConstants.DOC_META_DATA_FILE_NAME;
+        List<Object> docsList = new ArrayList<>();
+        int count = 0;
+
+        try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(apiProjectZip))) {
+            long remainingBytes = UNZIP_SIZE_LIMIT;
+            int entryCount = 0;
+            ZipEntry entry;
+            while ((entry = zipInputStream.getNextEntry()) != null) {
+                validateEntryCount(++entryCount);
+                String pathWithinProject = getPathWithinProject(entry.getName());
+                boolean isDocMetadataEntry = isDocumentMetadata(pathWithinProject, docsFolder, docMetadataFile);
+                ByteArrayOutputStream outputStream = isDocMetadataEntry ? new ByteArrayOutputStream() : null;
+                remainingBytes -= readZipEntry(zipInputStream, outputStream, remainingBytes);
+                if (isDocMetadataEntry) {
+                    String yamlContent = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
+                    Object parsedYamlContent = yamlMapper.readTree(yamlContent);
+                    if (parsedYamlContent != null) {
+                        count++;
+                        docsList.add(parsedYamlContent);
+                    }
+                }
+            }
+            // Create the final YAML structure with a root element "docs", "count"
+            HashMap<String, Object> root = new HashMap<>();
+            root.put("count", count);
+            if (docsList.size() > 0) {
+                root.put("docs", docsList);
+            }
+            return yamlMapper.writeValueAsString(root);
+        } catch (IOException e) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_EXTRACTING_DOC_DATA, e);
+        }
+    }
+
+    /**
+     * This method is used to get the extended artifact type from the artifact project
+     *
+     * @param artifactProject artifact project zip
+     * @return ExtendedArtifactType
+     * @throws APIMGovernanceException if an error occurs while getting the extended artifact type
+     */
+    @Override
+    public ExtendedArtifactType getExtendedArtifactTypeFromProject(byte[] artifactProject)
+            throws APIMGovernanceException {
+        String apiMetadata = extractAPIMetadata(artifactProject);
+        return getExtendedArtifactTypeFromAPIMetadata(apiMetadata);
+    }
+}

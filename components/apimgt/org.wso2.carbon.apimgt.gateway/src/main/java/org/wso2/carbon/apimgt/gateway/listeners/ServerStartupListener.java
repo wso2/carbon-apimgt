@@ -23,7 +23,6 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.service.APIThrottleDataServiceImpl;
 import org.wso2.carbon.apimgt.impl.caching.CacheInvalidationServiceImpl;
-import org.wso2.carbon.apimgt.gateway.service.RevokedTokenDataImpl;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
 import org.wso2.carbon.apimgt.gateway.webhooks.SubscriptionsDataServiceImpl;
@@ -49,7 +48,6 @@ public class ServerStartupListener implements ServerStartupObserver {
         // Register APIThrottleDataService so that ThrottleData maps are available to other components.
         ServiceReferenceHolder.getInstance().setCacheInvalidationService(cacheInvalidationService);
         ServiceReferenceHolder.getInstance().setAPIThrottleDataService(throttleDataServiceImpl);
-        ServiceReferenceHolder.getInstance().setRevokedTokenService(new RevokedTokenDataImpl());
         SubscriptionsDataService subscriptionsDataService = new SubscriptionsDataServiceImpl();
         ServiceReferenceHolder.getInstance().setSubscriptionsDataService(subscriptionsDataService);
         log.debug("APIThrottleDataService Registered...");

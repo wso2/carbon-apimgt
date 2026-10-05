@@ -26,5 +26,6 @@ public interface LlmProvidersApiService {
       public Response getLLMProvider(String llmProviderId, MessageContext messageContext) throws APIManagementException;
       public Response getLLMProviderApiDefinition(String llmProviderId, MessageContext messageContext) throws APIManagementException;
       public Response getLLMProviderEndpointConfiguration(String llmProviderId, MessageContext messageContext) throws APIManagementException;
+      public Response getLLMProviderModels(String llmProviderId, MessageContext messageContext) throws APIManagementException;
       public Response getLLMProviders(MessageContext messageContext) throws APIManagementException;
 }

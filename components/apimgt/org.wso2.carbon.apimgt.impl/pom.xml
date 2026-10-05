@@ -12,7 +12,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>9.31.23-SNAPSHOT</version>
+        <version>9.33.193-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -255,7 +255,7 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.io.swagger</groupId>
-            <artifactId>swagger-inflector-oas3</artifactId>
+            <artifactId>swagger-inflector-oas3-jdk21</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.io.swagger.v3</groupId>
@@ -353,12 +353,15 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>${fasterxml.jackson.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.analytics-common</groupId>
             <artifactId>org.wso2.carbon.event.stream.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.multitenancy</groupId>
+            <artifactId>org.wso2.carbon.tenant.mgt.stub</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
@@ -386,7 +389,6 @@
         <dependency>
             <groupId>io.apicurio</groupId>
             <artifactId>apicurio-data-models</artifactId>
-            <version>1.1.5</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
@@ -406,8 +408,8 @@
             <artifactId>velocity-engine-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.orbit.com.amazonaws</groupId>
-            <artifactId>awslambda</artifactId>
+            <groupId>org.wso2.orbit.software.amazon.awssdk</groupId>
+            <artifactId>aws-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -420,6 +422,16 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.spec.parser</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.usage.data.exporter</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
     <build>
@@ -509,6 +521,8 @@
                         --add-opens java.base/sun.security.x509=ALL-UNNAMED
                         --add-opens java.base/java.security.cert=ALL-UNNAMED
                         --add-exports java.base/sun.security.x509=ALL-UNNAMED
+                        --add-opens java.base/java.util.regex=ALL-UNNAMED
+                        --add-opens java.base/java.lang=ALL-UNNAMED
                     </argLine>
                     <systemProperties>
                         <property>
@@ -571,15 +585,16 @@
                             org.wso2.carbon.apimgt.keymgt.client.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.apimgt.api.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.apimgt.api.model.xsd.*;version="${carbon.apimgt.imp.pkg.version}",
-                            org.wso2.carbon.apimgt.persistence.*;version="${carbon.apimgt.version}",
+                            org.wso2.carbon.apimgt.persistence.*;version="${carbon.apimgt.imp.pkg.version}",
                             !org.wso2.carbon.apimgt.api.model.xsd.*,
-                            org.wso2.carbon.apimgt.persistence.*;version="${carbon.apimgt.version}",
                             javax.servlet;version="${javax.servlet.imp.pkg.version}",
                             javax.servlet.http;version="${javax.servlet.imp.pkg.version}",
                             javax.servlet.resources;version="${javax.servlet.imp.pkg.version}",
-                            org.eclipse.equinox.http.helper,
                             com.google.gson,
-                            com.amazonaws.*; version="${com.amazonaws.version}",
+                            software.amazon.awssdk.services.sts.*; version="${org.wso2.orbit.com.amazonaws.version.range}"; resolution:=optional,
+                            software.amazon.awssdk.services.lambda.*; version="${org.wso2.orbit.com.amazonaws.version.range}"; resolution:=optional,
+                            software.amazon.awssdk.core.*; version="${org.wso2.orbit.com.amazonaws.version.range}"; resolution:=optional,
+                            software.amazon.awssdk.awscore.*; version="${org.wso2.orbit.com.amazonaws.version.range}"; resolution:=optional,
                             org.apache.axis2.*; version="${imp.pkg.version.axis2}",
                             org.apache.commons.io.*;version="${import.package.version.commons.io}",
                             org.apache.commons.codec.*;version="${import.package.version.commons.codec}",
@@ -634,6 +649,7 @@
                             org.wso2.carbon.user.api;version="${imp.pkg.version.org.wso2.carbon.user.api}",
                             org.wso2.carbon.user.mgt.stub.*;version="${carbon.identity.imp.pkg.version}",
                             org.wso2.carbon.user.mgt.*;version="${carbon.identity.imp.pkg.version}",
+                            org.wso2.carbon.tenant.mgt.stub.*,
                             org.xml.sax,
                             org.wso2.carbon.um.ws.api.stub,
                             org.wso2.securevault.*,
@@ -643,6 +659,13 @@
                             *;resolution:=optional
                         </Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
+                        <Provide-Capability>
+                            osgi.service;objectClass=org.wso2.carbon.apimgt.impl.APIManagerConfigurationService,
+                            osgi.service;objectClass=org.wso2.carbon.apimgt.impl.jwt.JWTValidationService,
+                            osgi.service;objectClass=org.wso2.carbon.apimgt.impl.keymgt.KeyManagerDataService,
+                            osgi.service;objectClass=org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService,
+                            osgi.service;objectClass=org.wso2.carbon.apimgt.impl.APIMDependencyConfigurationService
+                        </Provide-Capability>
                     </instructions>
                 </configuration>
             </plugin>
@@ -654,7 +677,26 @@
                     <target>9</target>
                 </configuration>
             </plugin>
-
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>1.2.1</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>set-system-properties</goal>
+                        </goals>
+                        <configuration>
+                            <properties>
+                                <property>
+                                    <name>org.aspectj.weaver.openarchives</name>
+                                    <value>${org.aspectj.weaver.openarchives.limit}</value>
+                                </property>
+                            </properties>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>

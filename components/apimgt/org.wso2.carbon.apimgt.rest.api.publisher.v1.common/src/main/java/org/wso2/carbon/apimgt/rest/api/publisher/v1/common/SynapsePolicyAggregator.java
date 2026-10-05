@@ -18,8 +18,10 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common;
 
 import com.hubspot.jinjava.Jinjava;
+import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -30,6 +32,7 @@ import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.OperationPolicyComparator;
@@ -47,6 +50,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.xml.namespace.QName;
+
+import static org.wso2.carbon.apimgt.impl.utils.APIUtil.trimTrailingSlashes;
 
 /**
  * This class used to generate Synapse Artifact.
@@ -86,8 +92,22 @@ public class SynapsePolicyAggregator {
         String operationPolicyTemplate = FileUtil.readFileToString(POLICY_SEQUENCE_TEMPLATE_LOCATION)
                 .replace("\\", ""); //Removing escape characters from the template
         configMap.put("sequence_name", sequenceName);
+
+        if (api != null) {
+            configMap.put("api_type", api.getType());
+        }
+
         if (APIConstants.OPERATION_SEQUENCE_TYPE_FAULT.equals(flow)) {
             configMap.put("fault_sequence", true);
+            // For AI APIs, use the configured custom error response sequence as the
+            // operation-policy fault sequence when AI custom error formatting is enabled.
+            if (api != null && APIConstants.API_SUBTYPE_AI_API.equals(api.getSubtype())) {
+                String customErrorResponseSequence = APIManagerConfiguration.getAiApiConfigurationsDTO()
+                        .getCustomErrorResponseSequence();
+                if (StringUtils.isNotEmpty(customErrorResponseSequence)) {
+                    configMap.put("fault_sequence_name", customErrorResponseSequence);
+                }
+            }
         }
 
         if (!operationPolicyCaseList.isEmpty()) {
@@ -114,7 +134,7 @@ public class SynapsePolicyAggregator {
                 .replace("\\", "");
         // change sequence name from the upper function
         configMap.put("sequence_name", prodSeq);
-        String sanitizedSequence = renderCustomBackendSequence(seqName, pathToArchive);
+        String sanitizedSequence = renderCustomBackendSequence(seqName, pathToArchive, prodSeq);
         if (sanitizedSequence == null) {
             return null;
         }
@@ -125,18 +145,11 @@ public class SynapsePolicyAggregator {
 
     public static String generateBackendSequenceForCustomSequence(String fileName, String pathToArchive,
             String endpointType, String apiSeqName) throws APIManagementException, IOException {
-        Map<String, Object> configMap = new HashMap<>();
-        String customBackendTemplate = FileUtil.readFileToString(CUSTOM_BACKEND_SEQUENCE_TEMPLATE_LOCATION)
-                .replace("\\", "");
-        // change sequence name from the upper function
-        configMap.put("sequence_name", apiSeqName);
-        String sanitizedSequence = renderCustomBackendSequence(fileName, pathToArchive);
+        String sanitizedSequence = renderCustomBackendSequence(fileName, pathToArchive, apiSeqName);
         if (sanitizedSequence == null) {
             return null;
         }
-        configMap.put("custom_sequence", sanitizedSequence);
-        configMap.put("endpoint_type", endpointType);
-        return renderPolicyTemplate(customBackendTemplate, configMap);
+        return sanitizedSequence;
     }
 
     /**
@@ -154,8 +167,16 @@ public class SynapsePolicyAggregator {
 
         Map<String, Object> caseMap = new HashMap<>();
         String uriTemplateString = template.getUriTemplate();
+        uriTemplateString = trimTrailingSlashes(uriTemplateString);
         String method = template.getHTTPVerb();
-        String key = method + "_" + uriTemplateString.replaceAll("[\\W]", "\\\\$0");
+        String key;
+        if (APIConstants.HTTP_VERB_SUBSCRIBE.equalsIgnoreCase(
+                method) || APIConstants.HTTP_VERB_PUBLISH.equalsIgnoreCase(method)) {
+            // For WebSocket APIs, ignore the method
+            key = uriTemplateString.replaceAll("[\\W]", "\\\\$0");
+        } else {
+            key = method + "_" + uriTemplateString.replaceAll("[\\W]", "\\\\$0");
+        }
 
         // This will replace & with &amp; for query params
         key = StringEscapeUtils.escapeXml(StringEscapeUtils.unescapeXml(key));
@@ -195,11 +216,20 @@ public class SynapsePolicyAggregator {
                         policy.getPolicyVersion(), policy.getPolicyType());
                 OperationPolicySpecification policySpecification = ImportUtils
                         .getOperationPolicySpecificationFromFile(policyDirectory, policyFileName);
+                if (policySpecification == null) {
+                    policySpecification = ImportUtils.getOperationPolicySpecificationFromFile(policyDirectory,
+                            policyFileName.replaceAll(APIConstants.POLICY_FILENAME_INVALID_CHARS_REGEX, ""));
+                }
                 if (policySpecification.getSupportedGateways()
                         .contains(APIConstants.OPERATION_POLICY_SUPPORTED_GATEWAY_SYNAPSE)) {
                     OperationPolicyDefinition policyDefinition =
                             APIUtil.getOperationPolicyDefinitionFromFile(policyDirectory, policyFileName,
                                     APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
+                    if (policyDefinition == null) {
+                        policyDefinition = APIUtil.getOperationPolicyDefinitionFromFile(policyDirectory,
+                                policyFileName.replaceAll(APIConstants.POLICY_FILENAME_INVALID_CHARS_REGEX, ""),
+                                APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
+                    }
                     if (policyDefinition != null) {
                         try {
                             String renderedTemplate =
@@ -237,15 +267,20 @@ public class SynapsePolicyAggregator {
         return renderedPolicyMappingList;
     }
 
-    private static String renderCustomBackendSequence(String sequenceName, String pathToArchive)
+    private static String renderCustomBackendSequence(String fileName, String pathToArchive, String sequenceName)
             throws APIManagementException {
         String policyDirectory = pathToArchive + File.separator + ImportExportConstants.CUSTOM_BACKEND_DIRECTORY;
-        String sequence = APIUtil.getCustomBackendSequenceFromFile(policyDirectory, sequenceName,
+        String sequence = APIUtil.getCustomBackendSequenceFromFile(policyDirectory, fileName,
                 APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML);
         if (sequence == null) {
             return null;
         }
-        return renderPolicyTemplate(sequence, new HashMap<>());
+        try {
+            sequence = updateSequenceName(sequence, sequenceName);
+        } catch (Exception ex) {
+            throw new APIManagementException("Error when updating the sequence name: " + sequenceName, ex);
+        }
+        return sequence;
     }
 
     /**
@@ -263,6 +298,64 @@ public class SynapsePolicyAggregator {
              childElements.hasNext(); ) {
             OMElement element = (OMElement) childElements.next();
             filteredTemplate.append(element.toString());
+        }
+        return filteredTemplate.toString();
+    }
+
+    /**
+     * Update the Sequence name of the xml if provided
+     *
+     * @param xmlString Sequence content
+     * @param name      Sequence name
+     * @return Updated XML as a string
+     * @throws Exception If an error occurs
+     */
+    private static String updateSequenceName(String xmlString, String name) throws Exception {
+        String updatedXmlString = "<root>" + xmlString + "</root>";
+        OMElement sanitizedPolicyElement = APIUtil.buildSecuredOMElement(
+                new ByteArrayInputStream(updatedXmlString.getBytes()));
+        StringBuilder filteredTemplate = new StringBuilder();
+        boolean isFound = false;
+        int count = 0;
+        for (Iterator childElements = sanitizedPolicyElement.getChildElements(); childElements.hasNext(); ) {
+            OMElement element = (OMElement) childElements.next();
+            if (element != null && "sequence".equals(element.getLocalName())) {
+                isFound = true;
+                OMAttribute nameAttribute = element.getAttribute(new QName("name"));
+                if (nameAttribute != null) {
+                    nameAttribute.setAttributeValue(name);
+                } else {
+                    element.addAttribute("name", name, null);
+                }
+            }
+
+            // break the loop if there's no <sequence> tag exists
+            if (count == 0 && !isFound) {
+                break;
+            }
+            filteredTemplate.append(element.toString());
+            count += 1;
+        }
+
+        // if <sequence> tag is not found, then attach it and build the OMElement
+        if (!isFound) {
+            updatedXmlString =
+                    "<root><sequence xmlns=\"http://ws.apache.org/ns/synapse\">\n" + xmlString + "\n</sequence></root>";
+            sanitizedPolicyElement = APIUtil.buildSecuredOMElement(
+                    new ByteArrayInputStream(updatedXmlString.getBytes()));
+            filteredTemplate = new StringBuilder();
+            for (Iterator childElements = sanitizedPolicyElement.getChildElements(); childElements.hasNext(); ) {
+                OMElement element = (OMElement) childElements.next();
+                if (element != null && "sequence".equals(element.getLocalName())) {
+                    OMAttribute nameAttribute = element.getAttribute(new QName("name"));
+                    if (nameAttribute != null) {
+                        nameAttribute.setAttributeValue(name);
+                    } else {
+                        element.addAttribute("name", name, null);
+                    }
+                }
+                filteredTemplate.append(element.toString());
+            }
         }
         return filteredTemplate.toString();
     }

@@ -21,6 +21,7 @@ import javax.validation.Valid;
 public class APIInfoDTO   {
   
     private String name = null;
+    private String displayName = null;
     private String version = null;
     private String provider = null;
 
@@ -40,6 +41,24 @@ public class APIInfoDTO   {
   }
   public void setName(String name) {
     this.name = name;
+  }
+
+  /**
+   * Display name of the API. This is the name that will be displayed in the Publisher and DevPortal. If not provided, the name will be used as the display name. 
+   **/
+  public APIInfoDTO displayName(String displayName) {
+    this.displayName = displayName;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "PizzaShack API", value = "Display name of the API. This is the name that will be displayed in the Publisher and DevPortal. If not provided, the name will be used as the display name. ")
+  @JsonProperty("displayName")
+  public String getDisplayName() {
+    return displayName;
+  }
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
   }
 
   /**
@@ -89,13 +108,14 @@ public class APIInfoDTO   {
     }
     APIInfoDTO apIInfo = (APIInfoDTO) o;
     return Objects.equals(name, apIInfo.name) &&
+        Objects.equals(displayName, apIInfo.displayName) &&
         Objects.equals(version, apIInfo.version) &&
         Objects.equals(provider, apIInfo.provider);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, version, provider);
+    return Objects.hash(name, displayName, version, provider);
   }
 
   @Override
@@ -104,6 +124,7 @@ public class APIInfoDTO   {
     sb.append("class APIInfoDTO {\n");
     
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("}");

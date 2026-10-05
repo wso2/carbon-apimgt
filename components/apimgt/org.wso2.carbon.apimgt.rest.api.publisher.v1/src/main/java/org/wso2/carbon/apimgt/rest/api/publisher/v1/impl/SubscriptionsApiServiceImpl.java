@@ -27,9 +27,12 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.APIRevision;
+import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.SubscriptionsApiService;
@@ -63,12 +66,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
-            // validates the subscriptionId if it exists
-            SubscribedAPI currentSubscription = apiProvider.getSubscriptionByUUID(subscriptionId);
-
-            if (currentSubscription == null) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);
-            }
+            validateAndGetSubscription(subscriptionId, apiProvider, messageContext);
 
             SubscribedAPI subscribedAPI = new SubscribedAPI(subscriptionId);
             subscribedAPI.setSubStatus(blockState);
@@ -165,6 +163,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         }
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            validateAndGetSubscription(subscriptionId, apiProvider, messageContext);
             Monetization monetizationImplementation = apiProvider.getMonetizationImplClass();
             Map<String, String> billingEngineUsageData = monetizationImplementation.
                     getCurrentUsageForSubscription(subscriptionId, apiProvider);
@@ -197,12 +196,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
-
-            // validates the subscriptionId if it exists
-            SubscribedAPI currentSubscription = apiProvider.getSubscriptionByUUID(subscriptionId);
-            if (currentSubscription == null) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);
-            }
+            validateAndGetSubscription(subscriptionId, apiProvider, messageContext);
 
             SubscribedAPI subscribedAPI = new SubscribedAPI(subscriptionId);
             subscribedAPI.setSubStatus(APIConstants.SubscriptionStatus.UNBLOCKED);
@@ -229,6 +223,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         }
         String username = RestApiCommonUtil.getLoggedInUsername();
         APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
+        validateAndGetSubscription(subscriptionId, apiProvider, messageContext);
         String subscriberName = apiProvider.getSubscriber(subscriptionId);
         Map subscriberClaims = apiProvider.getSubscriberClaims(subscriberName);
         SubscriberInfoDTO subscriberInfoDTO = SubscriptionMappingUtil.fromSubscriberClaimsToDTO(subscriberClaims,
@@ -263,6 +258,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
 
         String username = RestApiCommonUtil.getLoggedInUsername();
         APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
+        validateAndGetSubscription(subscriptionId, apiProvider, messageContext);
 
         // Update the subscription with the new business plan and retrieve the updated subscription
         SubscribedAPI updatedSubscription = apiProvider.updateSubscriptionTier(subscriptionId, businessPlan);
@@ -270,5 +266,47 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         // Return the updated subscription as the response
         SubscriptionDTO subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(updatedSubscription);
         return Response.ok().entity(subscriptionDTO).build();
+    }
+
+    /**
+     * Loads a subscription by UUID and ensures it belongs to the caller's organization.
+     * Returns 404 for missing or cross-organization subscriptions to avoid revealing existence.
+     *
+     * @param subscriptionId subscription UUID
+     * @param apiProvider    API provider for the logged-in user
+     * @param messageContext request message context
+     * @return subscription when it exists in the caller's organization
+     * @throws APIManagementException if organization cannot be resolved from the request
+     */
+    private SubscribedAPI validateAndGetSubscription(String subscriptionId, APIProvider apiProvider,
+            MessageContext messageContext) throws APIManagementException {
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        SubscribedAPI subscribedAPI = apiProvider.getSubscriptionByUUID(subscriptionId);
+        if (subscribedAPI == null
+                || !StringUtils.equals(organization, resolveSubscriptionOrganization(subscribedAPI))) {
+            RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);
+        }
+        return subscribedAPI;
+    }
+
+    /**
+     * Resolves the organization that owns the subscribed API.
+     * Prefers AM_API.ORGANIZATION; for legacy rows where that value is null/blank, derives the
+     * tenant domain from the API (or API product) provider so callers are not rejected incorrectly
+     * and cross-tenant access is still denied.
+     *
+     * @param subscribedAPI loaded subscription
+     * @return organization / tenant domain, or null if it cannot be resolved
+     */
+    private String resolveSubscriptionOrganization(SubscribedAPI subscribedAPI) {
+        if (StringUtils.isNotBlank(subscribedAPI.getOrganization())) {
+            return subscribedAPI.getOrganization();
+        }
+        Identifier identifier = subscribedAPI.getAPIIdentifier() != null
+                ? subscribedAPI.getAPIIdentifier() : subscribedAPI.getProductId();
+        if (identifier == null || StringUtils.isBlank(identifier.getProviderName())) {
+            return null;
+        }
+        return MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
     }
 }

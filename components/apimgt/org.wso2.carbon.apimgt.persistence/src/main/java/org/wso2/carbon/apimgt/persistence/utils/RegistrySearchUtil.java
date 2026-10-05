@@ -29,6 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.util.ClientUtils;
+import org.wso2.carbon.apimgt.api.APIConstants.UnifiedSearchConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.persistence.APIConstants;
 import org.wso2.carbon.apimgt.persistence.RegistryPersistenceImpl;
@@ -81,6 +82,8 @@ public class RegistrySearchUtil {
     public static final String SOAP_DEFINITION_WSDL_FILE_MEDIA_TYPE = "application/octet-stream";
 
     public static final String API_OVERVIEW_STATUS = "overview_status";
+    private static final String DISPLAY_NAME_SEARCH_TYPE_PREFIX = "display-name";
+    private static final String API_DISPLAY_NAME_SEARCH_PREFIX = "displayName";
     public static final String API_RELATED_CUSTOM_PROPERTIES_PREFIX = "api_meta.";
     public static final String API_RELATED_CUSTOM_PROPERTIES_DISPLAY_DEV = "__display";
     public static final String LABEL_SEARCH_TYPE_PREFIX = "label";
@@ -88,6 +91,8 @@ public class RegistrySearchUtil {
     private static final String PROVIDER_SEARCH_TYPE_PREFIX = "provider";
     private static final String VERSION_SEARCH_TYPE_PREFIX = "version";
     private static final String CONTEXT_SEARCH_TYPE_PREFIX = "context";
+    private static final String VENDOR_SEARCH_TYPE_PREFIX = "vendor";
+    private static final String GATEWAY_VENDOR_SEARCH_PREFIX = "gatewayVendor";
     private static final String CONTEXT_TEMPLATE_SEARCH_TYPE_PREFIX = "contextTemplate";
     public static final String API_DESCRIPTION = "Description";
     public static final String TYPE_SEARCH_TYPE_PREFIX = "type";
@@ -99,13 +104,14 @@ public class RegistrySearchUtil {
     public static final String NULL_USER_ROLE_LIST = "null";
     public static final String GET_API_PRODUCT_QUERY  = "type=APIProduct";
     public static final String ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX  = "endpointConfig";
-    public static final String[] API_SEARCH_PREFIXES = { ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX.toLowerCase(), DOCUMENTATION_SEARCH_TYPE_PREFIX, TAGS_SEARCH_TYPE_PREFIX,
-            NAME_TYPE_PREFIX, PROVIDER_SEARCH_TYPE_PREFIX, CONTEXT_SEARCH_TYPE_PREFIX,
-            CONTEXT_TEMPLATE_SEARCH_TYPE_PREFIX.toLowerCase(), VERSION_SEARCH_TYPE_PREFIX,
+    public static final String[] API_SEARCH_PREFIXES = { ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX.toLowerCase(),
+            DOCUMENTATION_SEARCH_TYPE_PREFIX, TAGS_SEARCH_TYPE_PREFIX, NAME_TYPE_PREFIX, PROVIDER_SEARCH_TYPE_PREFIX,
+            CONTEXT_SEARCH_TYPE_PREFIX, CONTEXT_TEMPLATE_SEARCH_TYPE_PREFIX.toLowerCase(), VERSION_SEARCH_TYPE_PREFIX,
             LCSTATE_SEARCH_KEY.toLowerCase(), API_DESCRIPTION.toLowerCase(), API_STATUS.toLowerCase(),
             CONTENT_SEARCH_TYPE_PREFIX, TYPE_SEARCH_TYPE_PREFIX, LABEL_SEARCH_TYPE_PREFIX, CATEGORY_SEARCH_TYPE_PREFIX,
-            ENABLE_STORE.toLowerCase() , ADVERTISE_ONLY_SEARCH_TYPE_PREFIX.toLowerCase(), "sort", "group", "group.sort"
-            , "group.field", "group.ngroups", "group.format" };
+            ENABLE_STORE.toLowerCase(), VENDOR_SEARCH_TYPE_PREFIX, DISPLAY_NAME_SEARCH_TYPE_PREFIX,
+            ADVERTISE_ONLY_SEARCH_TYPE_PREFIX.toLowerCase(), "sort", "group", "group.sort", "group.field",
+            "group.ngroups", "group.format" };
     
 
     private static final Log log = LogFactory.getLog(RegistryPersistenceImpl.class);
@@ -457,8 +463,11 @@ public class RegistrySearchUtil {
                         searchKeys[1] = searchKeys[1].replace("*", "");
                     } else if (searchKeys[0].equals(ADVERTISE_ONLY_SEARCH_TYPE_PREFIX)) {
                         searchKeys[0] = ADVERTISE_ONLY_ADVERTISED_PROPERTY;
+                    } else if (VENDOR_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchKeys[0])) {
+                        searchKeys[0] = GATEWAY_VENDOR_SEARCH_PREFIX;
+                    } else if (DISPLAY_NAME_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchKeys[0])) {
+                        searchKeys[0] = API_DISPLAY_NAME_SEARCH_PREFIX;
                     }
-
                     if (filteredQuery.length() == 0) {
                         filteredQuery.append(searchKeys[0]).append("=").append(searchKeys[1]);
                     } else {
@@ -523,18 +532,21 @@ public class RegistrySearchUtil {
         return criteria;
     }
 
-    private static String getOrganizationVisibilityWrappedQuery(String query, UserContext context) {
+    private static String getOrganizationVisibilityWrappedQuery(String query, UserContext context, String userTenantDomain) {
         if (PersistenceUtil.isAdminUser(context)) {
             log.debug("Admin user. no modifications to the query");
             return query;
         }
+        String criteria;
+        String orgId = context.getOrganization().getId();
 
-        String orgName = context.getOrganization().getName();
-        if (orgName != null && orgName.contains(" ")) {
-            orgName = orgName.replace(" ", "+");
+        if (userTenantDomain.equals(context.getOrganization().getName())) {
+            criteria = VISIBLE_ORGANIZATIONS + "=" + "(" + APIConstants.DEFAULT_VISIBLE_ORG + " OR " + orgId + " OR "
+                    + userTenantDomain + ")";
+        } else {
+            criteria = VISIBLE_ORGANIZATIONS + "=" + "(" + APIConstants.DEFAULT_VISIBLE_ORG + " OR " + orgId + ")";
         }
-
-        String criteria = VISIBLE_ORGANIZATIONS + "=" + "(" + APIConstants.DEFAULT_VISIBLE_ORG + " OR " + orgName + ")";
+        
         if (query != null && !query.trim().isEmpty()) {
             criteria = criteria + "&" + query;
         }
@@ -626,7 +638,10 @@ public class RegistrySearchUtil {
                 statusList = new String[] { APIConstants.PUBLISHED, APIConstants.PROTOTYPED,
                         APIConstants.DEPRECATED };
             }
-            if (StringUtils.isEmpty(searchQuery)) { // normal listing
+            // Normal Listing
+            if (StringUtils.isEmpty(searchQuery)
+                    || UnifiedSearchConstants.QUERY_API_TYPE_APIS_DEVPORTAL.equals(searchQuery)
+                    || UnifiedSearchConstants.QUERY_API_TYPE_MCP.equals(searchQuery)) {
                 String enableStoreCriteria = APIConstants.ENABLE_STORE_SEARCH_TYPE_KEY;
                 if (isAllowDisplayMultipleVersions) {
                     modifiedQuery = modifiedQuery + APIConstants.SEARCH_AND_TAG + enableStoreCriteria;
@@ -697,7 +712,7 @@ public class RegistrySearchUtil {
 
     
     public static Map<String, String> getDevPortalSearchAttributes(String searchQuery, UserContext ctx,
-           boolean isCrossTenant, boolean displayMultipleStatus) throws APIPersistenceException {
+           boolean isCrossTenant, boolean displayMultipleStatus, String userTenantDomain) throws APIPersistenceException {
         String modifiedQuery = RegistrySearchUtil.constructNewSearchQuery(searchQuery);
 
         if (!(StringUtils.containsIgnoreCase(modifiedQuery, APIConstants.API_STATUS))) {
@@ -715,7 +730,9 @@ public class RegistrySearchUtil {
             modifiedQuery = StringUtils.replaceIgnoreCase(modifiedQuery, searchString,
                     APIConstants.LCSTATE_SEARCH_TYPE_KEY);
         }
-        modifiedQuery = RegistrySearchUtil.getOrganizationVisibilityWrappedQuery(modifiedQuery, ctx);
+        if (PersistenceUtil.areOrganizationsRegistered(ctx)) {
+            modifiedQuery = RegistrySearchUtil.getOrganizationVisibilityWrappedQuery(modifiedQuery, ctx, userTenantDomain);
+        }
         modifiedQuery = RegistrySearchUtil.getDevPortalRolesWrappedQuery(modifiedQuery, ctx);
         modifiedQuery = RegistrySearchUtil.getDevPortalVisibilityWrappedQuery(modifiedQuery, isCrossTenant);
         Map<String, String> attributes = RegistrySearchUtil.getSearchAttributes(modifiedQuery);

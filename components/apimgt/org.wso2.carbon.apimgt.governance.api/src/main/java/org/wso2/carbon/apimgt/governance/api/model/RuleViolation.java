@@ -25,6 +25,7 @@ public class RuleViolation {
     private String artifactRefId; // Artifact which contains the violation
     private ArtifactType artifactType; // Type of the artifact (API)
     private String rulesetId; // Ruleset which contains the violated rule
+    private RuleType ruleType; // Type of the violated rule
     private String ruleName;  // Code of the violated rule
     private String violatedPath; // Path in which the violation occurred
     private RuleSeverity severity; // Severity of the violation
@@ -93,5 +94,13 @@ public class RuleViolation {
 
     public void setOrganization(String organization) {
         this.organization = organization;
+    }
+
+    public RuleType getRuleType() {
+        return ruleType;
+    }
+
+    public void setRuleType(RuleType ruleType) {
+        this.ruleType = ruleType;
     }
 }

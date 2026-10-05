@@ -38,6 +38,7 @@ public final class RestApiConstants {
     public static final String APPLICATION_XML = "application/xml";
     public static final String AUTHENTICATION_REQUIRED = "authentication_required";
     public static final String HEADER_X_WSO2_TENANT = "x-wso2-tenant";
+    public static final String QUERY_PARAM_X_WSO2_TENANT = "X-WSO2-Tenant-Q";
     public static final String ORGANIZATION = "organization";
     public static final String ORGANIZATION_INFO = "organization_info";
     public static final String SUB_ORGANIZATION = "sub_organization";
@@ -47,6 +48,8 @@ public final class RestApiConstants {
     public static final String OPAQUE_AUTHENTICATION = "oauth2";
     public static final String BASIC_AUTHENTICATION = "basic_auth";
     public static final String JWT_AUTHENTICATION = "jwt";
+    /** Set when request is authenticated via platform gateway api-key (Internal Data Service only). */
+    public static final String PLATFORM_GATEWAY_API_KEY = "platform_gateway_apikey";
     public static final String JWT_TOKEN = "JWT_TOKEN";
     public static final String DOT = ".";
     public static final long TIMESTAMP_SKEW_INSECONDS = 0;
@@ -58,12 +61,22 @@ public final class RestApiConstants {
     public static final String CREATOR_SCOPE = "apim:api_create";
     public static final String ADMIN_SCOPE = "apim:admin";
     public static final String PUBLISHER_SCOPE = "apim:api_publish";
+    public static final String API_LIFECYCLE_MANAGE_SCOPE = "apim:api_lifecycle_manage";
+    public static final String MCP_SERVER_PUBLISHER_SCOPE = "apim:mcp_server_publish";
+    public static final String MCP_SERVER_IMPORT_EXPORT_SCOPE = "apim:mcp_server_import_export";
+    public static final String MCP_SERVER_MANAGE_SCOPE = "apim:mcp_server_manage";
+    public static final String MCP_SERVER_LIFECYCLE_MANAGE_SCOPE = "apim:mcp_server_lifecycle_manage";
+    public static final String MCP_SERVER_CREATE_SCOPE = "apim:mcp_server_create";
+    public static final String MCP_SERVER_CREATE_ONLY_SCOPE = "apim:mcp_server_create_only";
+    public static final String API_PRODUCT_IMPORT_EXPORT_SCOPE = "apim:api_product_import_export";
+    public static final String API_PRODUCT_LIFECYCLE_MANAGE_SCOPE = "apim:api_product_lifecycle_manage";
 
 
     public static final String DEFAULT_RESPONSE_CONTENT_TYPE = APPLICATION_JSON;
 
     public static final String RESOURCE = "resource";
     public static final String RESOURCE_API = "API";
+    public static final String RESOURCE_MCP_SERVER = "MCP_SERVER";
     public static final String RESOURCE_API_PRODUCT = "API Product";
     public static final String RESOURCE_PRODUCT_DOCUMENTATION = "product documentation";
     public static final String RESOURCE_RATING = "Rating";
@@ -104,6 +117,7 @@ public final class RestApiConstants {
     public static final String APIPRODUCTID_PARAM = "{apiProductId}";
     public static final String APPLICATIONID_PARAM = "{applicationId}";
     public static final String DOCUMENTID_PARAM = "{documentId}";
+    public static final String MCP_SERVER_ID_PARAM = "{mcpServerId}";
     public static final String APICATEGORYID_PARAM = "{apiCategoryId}";
     public static final String API_VERSION_PARAM="{version}";
     public static final String SHARED_SCOPE_ID_PARAM = "{scopeId}";
@@ -112,12 +126,14 @@ public final class RestApiConstants {
 
     //todo better to take from cxf level
     public static final String RESOURCE_PATH_APIS = "/apis";
+    public static final String RESOURCE_PATH_MCP_SERVERS = "/mcp-servers";
     public static final String RESOURCE_PATH_ENDPOINT_CERTIFICATE_USAGE = "/endpoint-certificates/"
             + ALIAS_PARAM + "/usage";
     public static final String RESOURCE_PATH_API_PRODUCTS = "/api-products";
     public static final String RESOURCE_PATH_APPLICATIONS = "/applications";
     public static final String RESOURCE_PATH_THROTTLING = "/throttling";
     public static final String RESOURCE_PATH_ENVIRONMENT = "/environments";
+    public static final String RESOURCE_PATH_PLATFORM_GATEWAYS = "/gateways";
     public static final String RESOURCE_PATH_SHARED_SCOPES =  "/scopes";
     public static final String RESOURCE_PATH_REVISIONS = "/revisions";
     public static final String RESOURCE_PATH_SHARED_SCOPES_SCOPE_ID =
@@ -152,19 +168,28 @@ public final class RestApiConstants {
     public static final String RESOURCE_PATH_TAGS = "/tags";
     public static final String RESOURCE_PATH_RATINGS = "/ratings";
     public static final String RESOURCE_PATH_THUMBNAIL = RESOURCE_PATH_APIS + "/" + APIID_PARAM + "/thumbnail";
+    public static final String RESOURCE_PATH_MCP_SERVER_THUMBNAIL = RESOURCE_PATH_MCP_SERVERS + "/"
+            + MCP_SERVER_ID_PARAM + "/thumbnail";
     public static final String RESOURCE_PATH_API_MEDIATION = RESOURCE_PATH_APIS + "/" + APIID_PARAM + "/mediation-policies";
     public static final String RESOURCE_PATH_DOCUMENTS = RESOURCE_PATH_APIS + "/" + APIID_PARAM + "/documents";
+    public static final String RESOURCE_PATH_MCP_SERVER_DOCUMENTS =
+            RESOURCE_PATH_MCP_SERVERS + "/" + MCP_SERVER_ID_PARAM + "/documents";
     public static final String RESOURCE_PATH_PRODUCT_DOCUMENTS = RESOURCE_PATH_API_PRODUCTS + "/" + APIPRODUCTID_PARAM + "/documents";
     public static final String RESOURCE_PATH_THUMBNAIL_API_PRODUCT = RESOURCE_PATH_API_PRODUCTS + "/"
             + APIPRODUCTID_PARAM + "/thumbnail";
     public static final String RESOURCE_PATH_DOCUMENTS_API_PRODUCT = RESOURCE_PATH_API_PRODUCTS + "/"
             + APIPRODUCTID_PARAM + "/documents";
     public static final String RESOURCE_PATH_DOCUMENTS_DOCUMENT_ID = RESOURCE_PATH_DOCUMENTS + "/" + DOCUMENTID_PARAM;
+    public static final String RESOURCE_PATH_MCP_SERVER_DOCUMENTS_DOCUMENT_ID =
+            RESOURCE_PATH_MCP_SERVER_DOCUMENTS + "/" + DOCUMENTID_PARAM;
     public static final String RESOURCE_PATH_PRODUCT_DOCUMENTS_DOCUMENT_ID = RESOURCE_PATH_PRODUCT_DOCUMENTS + "/" + DOCUMENTID_PARAM;
     public static final String RESOURCE_PATH_DOCUMENT_CONTENT = RESOURCE_PATH_DOCUMENTS_DOCUMENT_ID + "/content";
+    public static final String RESOURCE_PATH_MCP_SERVER_DOCUMENT_CONTENT =
+            RESOURCE_PATH_MCP_SERVER_DOCUMENTS_DOCUMENT_ID + "/content";
     public static final String RESOURCE_PATH_PRODUCT_DOCUMENT_CONTENT = RESOURCE_PATH_PRODUCT_DOCUMENTS_DOCUMENT_ID + "/content";
     public static final String RESOURCE_PATH_RESOURCE_PATHS = "/resource-paths";
     public static final String RESOURCE_PATH_COMMENTS = "/comments";
+    public static final String RESOURCE_PATH_API_ENDPOINT = "/endpoints";
     public static final String RESOURCE_PATH_SWAGGER= "/swagger.yaml";
     public static final String REST_API_STORE_VERSION_0 ="v0.16";
     public static final String RESOURCE_PATH_API_CATEGORIES = "/api-categories";
@@ -353,12 +378,15 @@ public final class RestApiConstants {
             Arrays.asList("image/jpeg", "image/png", "image/gif", "image/svg+xml"));
 
     public static final String SVG_MEDIA_TYPE = "image/svg+xml";
+    public static final String JPEG_MEDIA_TYPE = "image/jpeg";
+    public static final String PNG_MEDIA_TYPE = "image/png";
+    public static final String GIF_MEDIA_TYPE = "image/gif";
 
     public static final int TAG_LIMIT_DEFAULT = 1000;
     public static final int TAG_OFFSET_DEFAULT = 0;
 
     public static final String RESOURCE_PATH_OPERATION_POLICIES = "operation-policies";
-
+    public static final String RESOURCE_PATH_API_ENDPOINTS = "api-endpoints";
     public static final String RESOURCE_PATH_GATEWAY_POLICIES = "gateway-policies";
 
     public static final String AUTH_TOKEN_INFO = "AUTH_TOKEN_INFO";

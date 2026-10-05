@@ -129,7 +129,8 @@ public class CORSRequestHandlerTestCase {
         Set<Resource> acceptableResources = new LinkedHashSet<>();
         acceptableResources.add(resource);
         String httpMethod = "GET";
-        Mockito.when(Utils.getAcceptableResources(resources, httpMethod, null)).thenReturn(acceptableResources);
+        Mockito.when(Utils.getAcceptableResources(resources, httpMethod, null,
+                messageContext)).thenReturn(acceptableResources);
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS)).thenReturn(transportHeaders);
         Assert.assertTrue(corsRequestHandler.handleRequest(messageContext));
 
@@ -148,7 +149,8 @@ public class CORSRequestHandlerTestCase {
         Assert.assertFalse(corsRequestHandler.handleRequest(messageContext));
         //test for OPTIONS request when OPTIONS is supported by SupportedHTTPVerbs
         String[] methodsWithOptions = {"GET", "POST", "OPTIONS"};
-        Mockito.when(Utils.getAcceptableResources(resources, httpMethod, null)).thenReturn(acceptableResources);
+        Mockito.when(Utils.getAcceptableResources(resources, httpMethod, null,
+                messageContext)).thenReturn(acceptableResources);
         Mockito.when(resource.getMethods()).thenReturn(methodsWithOptions);
         Assert.assertTrue(corsRequestHandler.handleRequest(messageContext));
 

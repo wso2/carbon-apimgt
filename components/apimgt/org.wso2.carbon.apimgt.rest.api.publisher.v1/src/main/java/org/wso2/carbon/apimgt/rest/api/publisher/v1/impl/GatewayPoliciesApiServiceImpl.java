@@ -328,8 +328,8 @@ public class GatewayPoliciesApiServiceImpl implements GatewayPoliciesApiService 
                         gatewayPolicyMappingsDTO.getPolicyMapping());
                 String mappingDescription = gatewayPolicyMappingsDTO.getDescription();
                 String displayName = gatewayPolicyMappingsDTO.getDisplayName();
-                String mappingID = apiProvider.updateGatewayGlobalPolicies(gatewayPolicyList, mappingDescription,
-                        displayName, tenantDomain, gatewayPolicyMappingId);
+                String mappingID = apiProvider.updateGatewayGlobalPolicies(gatewayPolicyList,
+                        mappingDescription, displayName, tenantDomain, gatewayPolicyMappingId);
                 gatewayPolicyMappingsDTO.id(mappingID);
             } else {
                 RestApiUtil.handleResourceNotFoundError(

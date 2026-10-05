@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.rest.api.util.MethodStats;
 import org.wso2.carbon.apimgt.rest.api.common.RestAPIAuthenticationManager;
 import org.wso2.carbon.apimgt.rest.api.common.RestAPIAuthenticator;
 import org.wso2.carbon.apimgt.rest.api.util.authenticators.AbstractOAuthAuthenticator;
+import org.wso2.carbon.apimgt.rest.api.util.exception.OAuthAuthenticationInterceptorException;
 import org.wso2.carbon.apimgt.rest.api.util.impl.OAuthJwtAuthenticatorImpl;
 import org.wso2.carbon.apimgt.rest.api.util.impl.OAuthOpaqueAuthenticatorImpl;
 import org.wso2.carbon.apimgt.rest.api.util.utils.JWTAuthenticationUtils;
@@ -106,8 +107,9 @@ public class OAuthAuthenticationInterceptor extends AbstractPhaseInterceptor {
                     throw new AuthenticationException("Unauthenticated request");
                 }
             } catch (APIManagementException e) {
-                logger.error("Authentication Failure " +  e.getMessage());
-                return;
+                String errorMsg = "Error while authenticating incoming request";
+                logger.error(errorMsg, e);
+                throw new OAuthAuthenticationInterceptorException(errorMsg, e);
             }
         }
 
@@ -145,7 +147,9 @@ public class OAuthAuthenticationInterceptor extends AbstractPhaseInterceptor {
                     throw new AuthenticationException("Unauthenticated request");
                 }
             } catch (APIManagementException e) {
-                logger.error("Error while authenticating incoming request to API Manager REST API", e);
+                String errorMsg = "Error while authenticating incoming request to API Manager REST API";
+                logger.error(errorMsg, e);
+                throw new OAuthAuthenticationInterceptorException(errorMsg, e);
             }
         }
     }

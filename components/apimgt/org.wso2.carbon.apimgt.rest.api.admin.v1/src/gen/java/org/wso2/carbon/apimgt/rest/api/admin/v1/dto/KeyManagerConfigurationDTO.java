@@ -31,6 +31,7 @@ public class KeyManagerConfigurationDTO   {
     private String tooltip = null;
     private Object _default = null;
     private List<Object> values = new ArrayList<Object>();
+    private Boolean updateDisabled = false;
 
   /**
    **/
@@ -186,6 +187,24 @@ public class KeyManagerConfigurationDTO   {
     this.values = values;
   }
 
+  /**
+   * Indicates that this configuration field cannot be modified once the Key Manager is created.
+   **/
+  public KeyManagerConfigurationDTO updateDisabled(Boolean updateDisabled) {
+    this.updateDisabled = updateDisabled;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "true", value = "Indicates that this configuration field cannot be modified once the Key Manager is created.")
+  @JsonProperty("updateDisabled")
+  public Boolean isUpdateDisabled() {
+    return updateDisabled;
+  }
+  public void setUpdateDisabled(Boolean updateDisabled) {
+    this.updateDisabled = updateDisabled;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -204,12 +223,13 @@ public class KeyManagerConfigurationDTO   {
         Objects.equals(multiple, keyManagerConfiguration.multiple) &&
         Objects.equals(tooltip, keyManagerConfiguration.tooltip) &&
         Objects.equals(_default, keyManagerConfiguration._default) &&
-        Objects.equals(values, keyManagerConfiguration.values);
+        Objects.equals(values, keyManagerConfiguration.values) &&
+        Objects.equals(updateDisabled, keyManagerConfiguration.updateDisabled);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, label, type, required, mask, multiple, tooltip, _default, values);
+    return Objects.hash(name, label, type, required, mask, multiple, tooltip, _default, values, updateDisabled);
   }
 
   @Override
@@ -226,6 +246,7 @@ public class KeyManagerConfigurationDTO   {
     sb.append("    tooltip: ").append(toIndentedString(tooltip)).append("\n");
     sb.append("    _default: ").append(toIndentedString(_default)).append("\n");
     sb.append("    values: ").append(toIndentedString(values)).append("\n");
+    sb.append("    updateDisabled: ").append(toIndentedString(updateDisabled)).append("\n");
     sb.append("}");
     return sb.toString();
   }

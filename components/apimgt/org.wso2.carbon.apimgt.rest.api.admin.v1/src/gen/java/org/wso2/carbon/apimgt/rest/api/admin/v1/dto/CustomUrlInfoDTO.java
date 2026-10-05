@@ -19,8 +19,8 @@ import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
-
 @ApiModel(description = "The custom url information of the tenant domain")
+
 
 public class CustomUrlInfoDTO   {
   

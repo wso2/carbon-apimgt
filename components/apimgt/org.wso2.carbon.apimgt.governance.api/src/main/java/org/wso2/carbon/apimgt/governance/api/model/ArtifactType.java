@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.governance.api.model;
 
+import java.util.Locale;
+
 /**
  * This class represents different types of artifacts available for Governing
  */
@@ -25,10 +27,11 @@ public enum ArtifactType {
     API; // Represent all types of APIs
 
     public static ArtifactType fromString(String text) {
-        if ("api".equalsIgnoreCase(text)) {
-            return API;
+        try {
+            return ArtifactType.valueOf(text.toUpperCase(Locale.ENGLISH));
+        } catch (IllegalArgumentException e) {
+            return null;
         }
-        return null;
     }
 }
 

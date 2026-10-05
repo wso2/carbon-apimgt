@@ -31,11 +31,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.wso2.carbon.apimgt.api.APIConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.exceptions.APIMgtWSDLException;
@@ -98,14 +100,22 @@ public class WSDL20ProcessorImpl extends AbstractWSDLProcessor {
         WSDLReader reader;
         try {
             reader = WSDLFactory.newInstance().newWSDLReader();
+            reader.setFeature(WSDLReader.FEATURE_VALIDATION, false);
+            reader.setURIResolver(new AccessControlledUriResolver(resolveTenantDomain()));
         } catch (WSDLException e) {
             throw new APIMgtWSDLException("Error while initializing the WSDL reader", e);
         }
 
-        reader.setFeature(WSDLReader.FEATURE_VALIDATION, false);
-        Document document = getSecuredParsedDocumentFromURL(url);
-        WSDLSource wsdlSource = getWSDLSourceFromDocument(document, reader);
         try {
+            String maxWSDLSizeStr = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                    .getAPIManagerConfiguration()
+                    .getFirstProperty(APIConstants.API_PUBLISHER_IMPORT_WSDL_FILE_SIZE_LIMIT);
+            if (maxWSDLSizeStr == null || maxWSDLSizeStr.trim().isEmpty()) {
+                maxWSDLSizeStr = APIConstants.API_PUBLISHER_IMPORT_WSDL_FILE_SIZE_LIMIT_DEFAULT_MB;
+            }
+            long maxFileSize = Long.parseLong(maxWSDLSizeStr) * 1024L * 1024L;
+            Document document = getSecuredParsedDocumentFromURL(url, maxFileSize);
+            WSDLSource wsdlSource = getWSDLSourceFromDocument(document, reader);
             wsdlDescription = reader.readWSDL(wsdlSource);
         } catch (WSDLException e) {
             //This implementation class cannot process the WSDL.
@@ -114,6 +124,7 @@ public class WSDL20ProcessorImpl extends AbstractWSDLProcessor {
                     ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getErrorCode(),
                     ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getHttpStatusCode()));
         }
+        reportBlockedReferencesIfAny(reader);
         return !hasError;
     }
 
@@ -123,11 +134,12 @@ public class WSDL20ProcessorImpl extends AbstractWSDLProcessor {
         WSDLReader reader;
         try {
             reader = getWsdlFactoryInstance().newWSDLReader();
+            reader.setFeature(WSDLReader.FEATURE_VALIDATION, false);
+            reader.setURIResolver(new AccessControlledUriResolver(resolveTenantDomain()));
         } catch (WSDLException e) {
             throw new APIMgtWSDLException("Error while initializing the WSDL reader", e);
         }
 
-        reader.setFeature(WSDLReader.FEATURE_VALIDATION, false);
         Document document = getSecuredParsedDocumentFromContent(wsdlContent);
         WSDLSource wsdlSource = getWSDLSourceFromDocument(document, reader);
         try {
@@ -143,6 +155,7 @@ public class WSDL20ProcessorImpl extends AbstractWSDLProcessor {
                     ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getErrorCode(),
                     ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getHttpStatusCode()));
         }
+        reportBlockedReferencesIfAny(reader);
         return !hasError;
     }
 
@@ -154,11 +167,12 @@ public class WSDL20ProcessorImpl extends AbstractWSDLProcessor {
         WSDLReader reader;
         try {
             reader = getWsdlFactoryInstance().newWSDLReader();
+            reader.setFeature(WSDLReader.FEATURE_VALIDATION, false);
+            reader.setURIResolver(new AccessControlledUriResolver(resolveTenantDomain()));
         } catch (WSDLException e) {
             throw new APIMgtWSDLException("Error while initializing the WSDL reader", e);
         }
 
-        reader.setFeature(WSDLReader.FEATURE_VALIDATION, false);
         File folderToImport = new File(path);
         Collection<File> foundWSDLFiles = APIFileUtil.searchFilesWithMatchingExtension(folderToImport, "wsdl");
         if (log.isDebugEnabled()) {
@@ -189,6 +203,7 @@ public class WSDL20ProcessorImpl extends AbstractWSDLProcessor {
                     ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getErrorCode(),
                     ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getHttpStatusCode()));
         }
+        reportBlockedReferencesIfAny(reader);
         return !hasError;
     }
 
@@ -382,6 +397,21 @@ public class WSDL20ProcessorImpl extends AbstractWSDLProcessor {
         return serviceEndpointMap;
     }
 
+    private String resolveTenantDomain() {
+        return WsdlTenantResolver.resolveTenantDomain();
+    }
+
+    /**
+     * If the resolver blocked any remote nested reference by the network-security policy, report it to
+     * the user as {@link ExceptionCodes#UNTRUSTED_URL_IN_DEFINITION} (parity with the OpenAPI $ref case).
+     */
+    private void reportBlockedReferencesIfAny(WSDLReader reader) {
+        if (reader.getURIResolver() instanceof AccessControlledUriResolver
+                && ((AccessControlledUriResolver) reader.getURIResolver()).hasBlockedReferences()) {
+            setError(ExceptionCodes.UNTRUSTED_URL_IN_DEFINITION);
+        }
+    }
+
     private void setError(ErrorHandler error) {
         this.hasError = true;
         this.error = error;
@@ -391,6 +421,16 @@ public class WSDL20ProcessorImpl extends AbstractWSDLProcessor {
         endpoint.setAddress(uri);
     }
 
+    /*
+     * Network access-control note (WSDL 2.0 nested schema-import vector): this builds Woden's WSDLSource from a raw DOM
+     * element and never calls wsdlSource.setBaseURI(...). With a null document base URI, Woden aborts
+     * inline-schema parsing (WSDL521, "missing base URI") before it ever walks into <types> to discover
+     * a nested <xsd:import>/<xsd:include> schemaLocation -- so, unlike WSDL 1.1 (where WSDL4J DID fetch
+     * such nested locations, gated via AccessControlledWSDLLocator), an untrusted nested
+     * schemaLocation here is never dereferenced. Absolute <wsdl:import>/<wsdl:include> is a separate,
+     * still-reachable vector and remains gated by AccessControlledUriResolver (see
+     * WSDL20ProcessorImplResolverTest). Regression-locked by WSDL20SchemaImportNonReachableTest.
+     */
     private WSDLSource getWSDLSourceFromDocument(Document document, WSDLReader reader) {
         Element domElement = document.getDocumentElement();
         WSDLSource wsdlSource = reader.createWSDLSource();

@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.internal.service.ApiLoggingConfigsApiService;
 import org.wso2.carbon.apimgt.internal.service.dto.APILoggingConfigDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.APILoggingConfigListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.internal.service.utils.SubscriptionValidationDataUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,15 +44,12 @@ public class ApiLoggingConfigsApiServiceImpl implements ApiLoggingConfigsApiServ
 
     private static final Log log = LogFactory.getLog(ApiLoggingConfigsApiServiceImpl.class);
 
-    public Response apiLoggingConfigsGet(MessageContext messageContext) {
-        ErrorDTO errorObject = new ErrorDTO();
-        Response.Status status  = Response.Status.NOT_IMPLEMENTED;
-        errorObject.setCode(200);
-        errorObject.setMessage(status.toString());
+    public Response apiLoggingConfigsGet(String xWSO2Tenant, MessageContext messageContext) {
+        String tenantDomain = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
 
         List<APILoggingConfigDTO> loggingAPIDTOList = new ArrayList<>();
         try {
-            List<APILogInfoDTO> apiLoggerList = LoggingMgtDAO.getInstance().retrieveAllAPILoggerList();
+            List<APILogInfoDTO> apiLoggerList = LoggingMgtDAO.getInstance().retrieveAllAPILoggerList(tenantDomain);
             for (APILogInfoDTO apiLogInfo : apiLoggerList) {
                 APILoggingConfigDTO apiLoggingConfigDTO = new APILoggingConfigDTO();
                 apiLoggingConfigDTO.setContext(apiLogInfo.getContext());

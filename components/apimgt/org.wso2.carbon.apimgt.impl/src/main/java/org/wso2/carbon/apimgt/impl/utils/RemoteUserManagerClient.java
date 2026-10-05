@@ -1,6 +1,7 @@
 package org.wso2.carbon.apimgt.impl.utils;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.user.core.UserRealm;
@@ -28,6 +29,7 @@ public class RemoteUserManagerClient {
      * @return - A user list
      * @throws APIManagementException
      */
+    @UsedByMigrationClient
     public String[] getUserList(String claim, String claimValue) throws APIManagementException {
 
         int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();

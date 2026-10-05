@@ -72,6 +72,7 @@ public class APIKeyValidationInfoDTO implements Serializable {
     private String applicationUUID;
     private Set<String> applicationGroupIds = new HashSet<>();
     private Map<String, String> appAttributes;
+    private boolean isExpired = false;
 
     public List<String> getThrottlingDataList() {
         return throttlingDataList;
@@ -414,6 +415,14 @@ public class APIKeyValidationInfoDTO implements Serializable {
     public void setAppAttributes(Map<String, String> appAttributes) {
 
         this.appAttributes = appAttributes;
+    }
+
+    public boolean isExpired() {
+        return isExpired;
+    }
+
+    public void setExpired(boolean expired) {
+        isExpired = expired;
     }
 }
 

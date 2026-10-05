@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.keymgt.handlers;
 
+import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
@@ -70,4 +71,10 @@ public interface KeyValidationHandler {
      */
     boolean generateConsumerToken(TokenValidationContext tokenValidationContext)
             throws APIKeyMgtException;
+
+    default APIKeyValidationInfoDTO validateAPISubscription(String apiContext, String apiVersion,
+                                                               APIKeyInfo apiKeyInfo) throws APIKeyMgtException {
+        return validateSubscription(apiContext, apiVersion, apiKeyInfo.getAppId(), apiKeyInfo.getKeyType());
+    }
+
 }

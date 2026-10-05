@@ -34,6 +34,7 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
+import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsCustomDataProvider;
 import org.wso2.carbon.apimgt.common.analytics.collectors.impl.GenericRequestDataCollector;
 import org.wso2.carbon.apimgt.common.analytics.exceptions.AnalyticsException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
@@ -124,14 +125,26 @@ public class WebhooksUtils {
      */
     public static String generateAPIKey(MessageContext messageContext, String tenantDomain)
             throws DataNotFoundException {
+        return generateAPI(messageContext, tenantDomain).getUuid();
+    }
+
+    /**
+     * Generates an API object based on the provided message context and tenant domain.
+     *
+     * @param messageContext The message context containing properties such as API context and version.
+     * @param tenantDomain   The tenant domain to retrieve the subscription store.
+     * @return The API object corresponding to the given context and version.
+     * @throws DataNotFoundException If the API information cannot be found for the given context and version.
+     */
+    public static API generateAPI(MessageContext messageContext, String tenantDomain) throws DataNotFoundException {
         String context = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
-        API api = SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain).
-                getApiByContextAndVersion(context, apiVersion);
+        API api = SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain)
+                .getApiByContextAndVersion(context, apiVersion);
         if (api == null) {
             throw new DataNotFoundException("Error occurred when getting API information");
         }
-        return api.getUuid();
+        return api;
     }
 
     /**
@@ -219,7 +232,14 @@ public class WebhooksUtils {
         org.apache.axis2.context.MessageContext axisCtx =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
         axisCtx.setProperty(PassThroughConstants.SYNAPSE_ARTIFACT_TYPE, APIConstants.API_TYPE_WEBSUB);
-        WebhooksAnalyticsDataProvider provider = new WebhooksAnalyticsDataProvider(messageContext);
+        AnalyticsCustomDataProvider analyticsCustomDataProvider = ServiceReferenceHolder.getInstance()
+                .getAnalyticsCustomDataProvider();
+        WebhooksAnalyticsDataProvider provider;
+        if (analyticsCustomDataProvider != null) {
+            provider = new WebhooksAnalyticsDataProvider(messageContext, analyticsCustomDataProvider);
+        } else {
+            provider = new WebhooksAnalyticsDataProvider(messageContext);
+        }
         GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
         try {
             dataCollector.collectData();

@@ -46,6 +46,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.Authenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
+import org.wso2.carbon.apimgt.gateway.utils.MCPUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
@@ -136,7 +137,8 @@ public class OAuthAuthenticator implements Authenticator {
         config = getApiManagerConfiguration();
         removeOAuthHeadersFromOutMessage = isRemoveOAuthHeadersFromOutMessage();
         securityContextHeader = getSecurityContextHeader();
-
+        boolean includeTokenInfoInMsgCtx = Boolean.parseBoolean(
+                System.getProperty(APIMgtGatewayConstants.INCLUDE_TOKEN_INFO_IN_MSG_CTX));
         if (headers != null) {
             requestOrigin = (String) headers.get("Origin");
 
@@ -162,10 +164,13 @@ public class OAuthAuthenticator implements Authenticator {
                             boolean isConsumerKeyHeaderAvailable = false;
                             for (String element : elements) {
                                 if (!"".equals(element.trim())) {
-                                    if (consumerKeyHeaderSegment.equals(elements[j].trim())) {
+                                    if (consumerKeyHeaderSegment.equalsIgnoreCase(elements[j].trim())) {
                                         isConsumerKeyHeaderAvailable = true;
                                     } else if (isConsumerKeyHeaderAvailable) {
                                         accessToken = removeLeadingAndTrailing(elements[j].trim());
+                                        if (includeTokenInfoInMsgCtx) {
+                                            synCtx.setProperty(APIMgtGatewayConstants.ACCESS_TOKEN, accessToken);
+                                        }
                                         consumerkeyFound = true;
                                     }
                                 }
@@ -193,7 +198,8 @@ public class OAuthAuthenticator implements Authenticator {
             log.debug("Default Version API invoked");
         }
 
-        if (removeOAuthHeadersFromOutMessage) {
+        String apiType = (String) synCtx.getProperty(APIMgtGatewayConstants.API_TYPE);
+        if (removeOAuthHeadersFromOutMessage && !APIConstants.API_TYPE_MCP.equals(apiType)) {
             //Remove authorization headers sent for authentication at the gateway and pass others to the backend
             if (StringUtils.isNotBlank(remainingAuthHeader.get())) {
                 if (log.isDebugEnabled()) {
@@ -217,6 +223,11 @@ public class OAuthAuthenticator implements Authenticator {
         String httpMethod = (String)((Axis2MessageContext) synCtx).getAxis2MessageContext().
                 getProperty(Constants.Configuration.HTTP_METHOD);
         String matchingResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
+
+        if (StringUtils.equals(APIConstants.API_TYPE_MCP, apiType)) {
+            httpMethod = synCtx.getProperty(APIMgtGatewayConstants.MCP_HTTP_METHOD_KEY).toString();
+            matchingResource = (String) synCtx.getProperty(APIMgtGatewayConstants.MCP_API_ELECTED_RESOURCE_KEY);
+        }
         SignedJWTInfo signedJWTInfo = null;
 
         //If the matching resource does not require authentication
@@ -232,56 +243,57 @@ public class OAuthAuthenticator implements Authenticator {
             if (StringUtils.isNotEmpty(accessToken) && accessToken.contains(APIConstants.DOT)) {
                 try {
                     String[] JWTElements = accessToken.split("\\.");
-                    if (JWTElements.length != 3){
-                        log.debug("Invalid JWT token. The expected token format is <header.payload.signature>");
-                        throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                                "Invalid JWT token");
-                    }
 
-                    signedJWTInfo = getSignedJwt(accessToken);
-                    if (GatewayUtils.isInternalKey(signedJWTInfo.getJwtClaimsSet())
-                            || GatewayUtils.isAPIKey(signedJWTInfo.getJwtClaimsSet())) {
-                        log.debug("Invalid Token Provided");
-                        return new AuthenticationResponse(false, isMandatory, true,
-                                APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                                APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
-                    }
-                    String keyManager = ServiceReferenceHolder.getInstance().getJwtValidationService()
-                            .getKeyManagerNameIfJwtValidatorExist(signedJWTInfo);
-                    if (StringUtils.isNotEmpty(keyManager)) {
-                        if (log.isDebugEnabled()){
-                            log.debug("KeyManager " + keyManager + "found for authenticate token " + GatewayUtils.getMaskedToken(accessToken));
-                        }
-                        if (keyManagerList.contains(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS) ||
-                                keyManagerList.contains(keyManager)) {
-                            if (log.isDebugEnabled()) {
-                                log.debug("Elected KeyManager " + keyManager + "found in API level list " + String.join(",", keyManagerList));
-                            }
-                            isJwtToken = true;
-                        } else {
-                            if (log.isDebugEnabled()) {
-                                log.debug("Elected KeyManager " + keyManager + " not found in API level list " + String.join(",", keyManagerList));
-                            }
+                    if (JWTElements.length == 3) {
+                        signedJWTInfo = getSignedJwt(accessToken);
+                        if (GatewayUtils.isInternalKey(signedJWTInfo.getJwtClaimsSet())
+                                || GatewayUtils.isAPIKey(signedJWTInfo.getJwtClaimsSet())) {
+                            log.debug("Invalid Token Provided");
                             return new AuthenticationResponse(false, isMandatory, true,
                                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
                         }
-                    }else{
-                        if (log.isDebugEnabled()) {
-                            log.debug("KeyManager not found for accessToken " + GatewayUtils.getMaskedToken(accessToken));
+                        String keyManager = ServiceReferenceHolder.getInstance().getJwtValidationService()
+                                .getKeyManagerNameIfJwtValidatorExist(signedJWTInfo);
+                        if (StringUtils.isNotEmpty(keyManager)) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("KeyManager " + keyManager + " found for authenticate token " + GatewayUtils.getMaskedToken(accessToken));
+                            }
+                            if (keyManagerList.contains(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS) ||
+                                    keyManagerList.contains(keyManager)) {
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Elected KeyManager " + keyManager + "found in API level list " + String.join(",", keyManagerList));
+                                }
+                                isJwtToken = true;
+                            } else {
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Elected KeyManager " + keyManager + " not found in API level list " + String.join(",", keyManagerList));
+                                }
+                                return new AuthenticationResponse(false, isMandatory, true,
+                                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+                            }
+                        } else {
+                            if (log.isDebugEnabled()) {
+                                log.debug("KeyManager not found for accessToken " + GatewayUtils.getMaskedToken(accessToken));
+                            }
                         }
                     }
-                } catch ( ParseException | IllegalArgumentException e) {
+                } catch (ParseException | IllegalArgumentException e) {
                     log.debug("Not a JWT token. Failed to decode the token header.", e);
                 } catch (APIManagementException e) {
-                    log.error("error while check validation of JWt", e);
+                    log.error("Error while validating JWT token. ", e);
                     return new AuthenticationResponse(false, isMandatory, true,
                             APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                             APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
                 }
             }
 
-            authenticationScheme = getAPIKeyValidator().getResourceAuthenticationScheme(synCtx);
+            if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(apiType)) {
+                authenticationScheme = MCPUtils.getResourceAuthenticationSchemeForMCP(synCtx, getAPIKeyValidator());
+            } else {
+                authenticationScheme = getAPIKeyValidator().getResourceAuthenticationScheme(synCtx);
+            }
         } catch (APISecurityException ex) {
             return new AuthenticationResponse(false, isMandatory, true, ex.getErrorCode(), ex.getMessage());
         }
@@ -300,6 +312,9 @@ public class OAuthAuthenticator implements Authenticator {
                 } else {
                     log.debug("Could not find api version");
                 }
+            }
+            if (includeTokenInfoInMsgCtx) {
+                synCtx.setProperty(APIMgtGatewayConstants.ACCESS_TOKEN_INVALID_REASON, "Access token invalid");
             }
             return new AuthenticationResponse(false, isMandatory, true,
                     APISecurityConstants.API_AUTH_MISSING_CREDENTIALS, "Required OAuth credentials not provided");
@@ -331,6 +346,9 @@ public class OAuthAuthenticator implements Authenticator {
                 info = getAPIKeyValidator().getKeyValidationInfo(apiContext, accessToken, apiVersion, authenticationScheme,
                         matchingResource, httpMethod, defaultVersionInvoked,keyManagerList);
             } catch (APISecurityException ex) {
+                if (includeTokenInfoInMsgCtx) {
+                    synCtx.setProperty(APIMgtGatewayConstants.ACCESS_TOKEN_INVALID_REASON, "Access token invalid");
+                }
                 return new AuthenticationResponse(false, isMandatory, true, ex.getErrorCode(), ex.getMessage());
             }
             context.stop();
@@ -391,6 +409,13 @@ public class OAuthAuthenticator implements Authenticator {
         } else {
             if(log.isDebugEnabled()){
                 log.debug("User is NOT authorized to access the Resource");
+            }
+            if (includeTokenInfoInMsgCtx) {
+                if (info.isExpired()) {
+                    synCtx.setProperty(APIMgtGatewayConstants.ACCESS_TOKEN_INVALID_REASON, "Access token expired");
+                } else {
+                    synCtx.setProperty(APIMgtGatewayConstants.ACCESS_TOKEN_INVALID_REASON, "Access token invalid");
+                }
             }
             return new AuthenticationResponse(false, isMandatory, true, info.getValidationStatus(),
                     "Access failure for API: " + apiContext +

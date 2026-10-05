@@ -66,8 +66,27 @@ public class LLMProviderRegistrationService {
             }
         }
         for (String connectorType : llmProviderServiceConnectorTypes) {
-            if (!llmProviderConnectorTypes.contains(connectorType)) {
-                LLMProviderService llmProviderService = llmProviderServiceMap.get(connectorType);
+            LLMProviderService llmProviderService = llmProviderServiceMap.get(connectorType);
+            if (llmProviderService.isDeprecated() && llmProviderConnectorTypes.contains(connectorType)) {
+                    LLMProvider retrievedProvider = apiAdmin
+                            .getLLMProvider(organization, llmProviderMap.get(connectorType));
+                if (retrievedProvider != null) {
+                    String configurations = retrievedProvider.getConfigurations();
+                    if (configurations != null) {
+                        org.json.JSONObject configJson = new org.json.JSONObject(configurations);
+                        boolean isDeprecatedInConfig = configJson.optBoolean(
+                                APIConstants.AIAPIConstants.LLM_PROVIDER_DEPRECATED, false);
+                        if (!isDeprecatedInConfig) {
+                            configJson.put(APIConstants.AIAPIConstants.LLM_PROVIDER_DEPRECATED, true);
+                            retrievedProvider.setConfigurations(configJson.toString());
+                            apiAdmin.updateLLMProvider(organization, retrievedProvider);
+                            if (log.isDebugEnabled()) {
+                                log.debug("Updated deprecated status for LLM provider: " + connectorType);
+                            }
+                        }
+                    }
+                }
+            } else if (!llmProviderConnectorTypes.contains(connectorType)) {
                 if (llmProviderService instanceof BuiltInLLMProviderService) {
                     LLMProvider llmProvider = llmProviderService
                             .getLLMProvider();

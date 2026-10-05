@@ -27,16 +27,20 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.BlockConditionNotFoundException;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
+import org.wso2.carbon.apimgt.api.doc.model.APIResource;
+import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -57,6 +61,7 @@ import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
+import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -74,7 +79,6 @@ import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
-import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
@@ -85,6 +89,7 @@ import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.MCPUtils;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
@@ -100,6 +105,7 @@ import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.MediationPolicyPersistenceException;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
+import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
@@ -122,6 +128,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -153,8 +160,8 @@ import static org.wso2.carbon.apimgt.impl.token.ClaimsRetriever.DEFAULT_DIALECT_
         APIProviderImpl.class, APIManagerFactory.class, RegistryUtils.class,
         Caching.class, PaginationContext.class, MultitenantUtils.class, AbstractAPIManager.class, OASParserUtil.class,
         KeyManagerHolder.class, CertificateManagerImpl.class , PublisherAPI.class, Organization.class,
-        APIPersistence.class, GatewayArtifactsMgtDAO.class, RegistryPersistenceUtil.class})
-
+        APIPersistence.class, GatewayArtifactsMgtDAO.class, RegistryPersistenceUtil.class, MCPUtils.class})
+@PowerMockIgnore({"javax.security.*", "javax.naming.*"})
 public class APIProviderImplTest {
 
     private ApiMgtDAO apimgtDAO;
@@ -544,6 +551,7 @@ public class APIProviderImplTest {
         PowerMockito.when(realmService.getTenantUserRealm(-1234)).thenReturn(userRealm);
         PowerMockito.when(userRealm.getUserStoreManager()).thenReturn(userStoreManager);
         PowerMockito.when(userStoreManager.isExistingUser("admin")).thenReturn(true);
+        PowerMockito.when(MultitenantUtils.getTenantAwareUsername("admin")).thenReturn("admin");
 
         SortedMap<String, String> claimValues = new TreeMap<String, String>();
         claimValues.put("claim1", "http://wso2.org/claim1");
@@ -1161,6 +1169,7 @@ public class APIProviderImplTest {
         Mockito.when(apimgtDAO.getMostRecentRevisionId(Mockito.anyString())).thenReturn(0);
         Mockito.when(APIUtil.getAPIIdentifierFromUUID(Mockito.anyString())).thenReturn(apiId);
         Mockito.when(APIUtil.getAPIPath(apiId)).thenReturn(apiPath);
+        Mockito.when(apimgtDAO.getAPITypeFromUUID(Mockito.anyString())).thenReturn(APIConstants.API_TYPE_HTTP);
         PowerMockito.when(apiPersistenceInstance.addAPIRevision(any(Organization.class), Mockito.anyString(), Mockito.anyInt()))
                 .thenReturn("b55e0fc3-9829-4432-b99e-02056dc91838");
         Mockito.when(APIUtil.getTenantConfig(Mockito.anyString())).thenReturn(new JSONObject());
@@ -1197,6 +1206,7 @@ public class APIProviderImplTest {
         Mockito.when(apimgtDAO.getMostRecentRevisionId(Mockito.anyString())).thenReturn(0);
         Mockito.when(APIUtil.getAPIIdentifierFromUUID(Mockito.anyString())).thenReturn(apiId);
         Mockito.when(APIUtil.getAPIPath(apiId)).thenReturn(apiPath);
+        Mockito.when(apimgtDAO.getAPITypeFromUUID(Mockito.anyString())).thenReturn(APIConstants.API_TYPE_HTTP);
 
         PowerMockito.when(apiPersistenceInstance.addAPIRevision(any(Organization.class), Mockito.anyString(), Mockito.anyInt()))
                 .thenReturn("b55e0fc3-9829-4432-b99e-02056dc91838");
@@ -1237,6 +1247,7 @@ public class APIProviderImplTest {
         Mockito.when(APIUtil.getAPIIdentifierFromUUID(Mockito.anyString())).thenReturn(apiId);
         Mockito.when(APIUtil.getAPIPath(apiId)).thenReturn(apiPath);
         Mockito.when(APIUtil.getTenantConfig(Mockito.anyString())).thenReturn(new JSONObject());
+        Mockito.when(apimgtDAO.getAPITypeFromUUID(Mockito.anyString())).thenReturn(APIConstants.API_TYPE_HTTP);
         PowerMockito.when(apiPersistenceInstance.addAPIRevision(any(Organization.class), Mockito.anyString(), Mockito.anyInt()))
                 .thenReturn("b55e0fc3-9829-4432-b99e-02056dc91838");
         try {
@@ -1258,24 +1269,54 @@ public class APIProviderImplTest {
     public void testRestoreAPIRevision() throws APIManagementException, APIPersistenceException {
         ImportExportAPI importExportAPI = Mockito.mock(ImportExportAPI.class);
         ArtifactSaver artifactSaver = Mockito.mock(ArtifactSaver.class);
-        APIProviderImplWrapper apiProvider =
-                new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, importExportAPI, gatewayArtifactsMgtDAO,
-                        artifactSaver);
         APIIdentifier apiId = new APIIdentifier("admin", "PizzaShackAPI", "1.0.0",
                 "63e1e37e-a5b8-4be6-86a5-d6ae0749f131");
+        APIIdentifier revisionedApiId = new APIIdentifier("admin", "PizzaShackAPI", "1.0.0",
+                "b55e0fc3-9829-4432-b99e-02056dc91838");
         API api = new API(apiId);
         api.setContext("/test");
         api.setStatus(APIConstants.CREATED);
         String apiPath = "/apimgt/applicationdata/provider/admin/PizzaShackAPI/1.0.0/api";
 
+        Set<URITemplate> uriTemplates = new HashSet<URITemplate>();
+
+        URITemplate uriTemplate1 = new URITemplate();
+        uriTemplate1.setHTTPVerb("POST");
+        uriTemplate1.setAuthType("Application");
+        uriTemplate1.setUriTemplate("/add");
+        uriTemplate1.setThrottlingTier("Gold");
+        uriTemplates.add(uriTemplate1);
+
+        List<APIResource> productResources = new ArrayList<>();
+
+        API revisionedApi = new API(revisionedApiId);
+        revisionedApi.setRevisionedApiId("63e1e37e-a5b8-4be6-86a5-d6ae0749f131");
+        revisionedApi.setRevision(true);
+        revisionedApi.setUriTemplates(uriTemplates);
+
         APIRevision apiRevision = new APIRevision();
         apiRevision.setApiUUID("63e1e37e-a5b8-4be6-86a5-d6ae0749f131");
         apiRevision.setDescription("test description revision 1");
+
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO,
+                importExportAPI, gatewayArtifactsMgtDAO, artifactSaver) {
+            @Override
+            public API getAPIbyUUID(String uuid, String org) {
+                return revisionedApi;
+            }
+
+            @Override
+            public List<APIResource> getUsedProductResources(String uuid) {
+                return productResources;
+            }
+        };
+
         Mockito.when(apimgtDAO.getRevisionCountByAPI(Mockito.anyString())).thenReturn(0);
         Mockito.when(apimgtDAO.getMostRecentRevisionId(Mockito.anyString())).thenReturn(0);
         Mockito.when(APIUtil.getAPIIdentifierFromUUID(Mockito.anyString())).thenReturn(apiId);
         Mockito.when(APIUtil.getAPIPath(apiId)).thenReturn(apiPath);
         Mockito.when(APIUtil.getTenantConfig(Mockito.anyString())).thenReturn(new JSONObject());
+        Mockito.when(apimgtDAO.getAPITypeFromUUID(Mockito.anyString())).thenReturn(APIConstants.API_TYPE_HTTP);
         PowerMockito.when(apiPersistenceInstance.addAPIRevision(any(Organization.class), Mockito.anyString(), Mockito.anyInt()))
                 .thenReturn("b55e0fc3-9829-4432-b99e-02056dc91838");
         try {
@@ -1284,6 +1325,10 @@ public class APIProviderImplTest {
             Assert.fail(e.getMessage());
         }
         Mockito.when(apimgtDAO.getRevisionByRevisionUUID(Mockito.anyString())).thenReturn(apiRevision);
+        Mockito.when(apimgtDAO.getAPIOperationMappingsReferencedByAPIID(Mockito.anyInt())).thenReturn(new HashMap<>());
+        PowerMockito.mockStatic(MCPUtils.class);
+        PowerMockito.doNothing().when(MCPUtils.class);
+        MCPUtils.validateMCPResources(Mockito.anyString(), Mockito.anyString(), Mockito.anySet());
         PowerMockito.doNothing().when(apiPersistenceInstance).restoreAPIRevision(any(Organization.class),
                 Mockito.anyString(), Mockito.anyString(), Mockito.anyInt());
         try {
@@ -1321,6 +1366,7 @@ public class APIProviderImplTest {
         Mockito.when(APIUtil.getAPIIdentifierFromUUID(Mockito.anyString())).thenReturn(apiId);
         Mockito.when(APIUtil.getAPIPath(apiId)).thenReturn(apiPath);
         Mockito.when(APIUtil.getTenantConfig(Mockito.anyString())).thenReturn(new JSONObject());
+        Mockito.when(apimgtDAO.getAPITypeFromUUID(Mockito.anyString())).thenReturn(APIConstants.API_TYPE_HTTP);
         PowerMockito.when(apiPersistenceInstance.addAPIRevision(any(Organization.class), Mockito.anyString(), Mockito.anyInt()))
                 .thenReturn("b55e0fc3-9829-4432-b99e-02056dc91838");
         try {
@@ -1489,6 +1535,12 @@ public class APIProviderImplTest {
 
         OperationPolicyData policyData = new OperationPolicyData();
         policyData.setPolicyId("11111");
+        OperationPolicySpecification policySpecification = new OperationPolicySpecification();
+        policySpecification.setCategory(OperationPolicySpecification.PolicyCategory.Mediation);
+        policySpecification.setName("in-policy");
+        policySpecification.setDisplayName("in-policy");
+        policySpecification.setDescription("This is a mediation policy migrated to an operation policy.");
+        policyData.setSpecification(policySpecification);
 
         PowerMockito.when(apiPersistenceInstance.getAllMediationPolicies(any(Organization.class), any(String.class))).thenReturn(localPolicies);
         PowerMockito.when(apiPersistenceInstance.getMediationPolicy(any(Organization.class), any(String.class), any(String.class))).thenReturn(mediationPolicy);
@@ -1630,8 +1682,8 @@ public class APIProviderImplTest {
     @Test
     public void testSearchPaginatedAPIsByFQDNWithCorrectInputs() throws APIManagementException, APIPersistenceException {
 
-        int API_COUNT = 10;
-        int TOTAL_API_COUNT = API_COUNT + 5;
+        int apiCount = 10;
+        int totalApiCount = apiCount + 5;
 
         String[] returnRoles = {
                 "Internal/subscriber",
@@ -1647,10 +1699,10 @@ public class APIProviderImplTest {
         Mockito.when(APIUtil.getUserProperties(Mockito.anyString())).thenReturn(returnProperties);
 
         PublisherAPISearchResult returnSearchAPIs = new PublisherAPISearchResult();
-        List<PublisherAPIInfo> list = createMockPublisherAPIInfoList(API_COUNT);
+        List<PublisherAPIInfo> list = createMockPublisherAPIInfoList(apiCount);
         returnSearchAPIs.setPublisherAPIInfoList(list);
-        returnSearchAPIs.setReturnedAPIsCount(API_COUNT);
-        returnSearchAPIs.setTotalAPIsCount(TOTAL_API_COUNT);
+        returnSearchAPIs.setReturnedAPIsCount(apiCount);
+        returnSearchAPIs.setTotalAPIsCount(totalApiCount);
 
         Mockito.when(apiPersistenceInstance.searchAPIsForPublisher(
                 Mockito.any(Organization.class),
@@ -1665,8 +1717,8 @@ public class APIProviderImplTest {
                 "carbon.super", 1 , 6);
 
         Assert.assertNotNull(response);
-        Assert.assertEquals(response.getApiCount(), TOTAL_API_COUNT);
-        Assert.assertEquals(response.getApis().size(), API_COUNT);
+        Assert.assertEquals(response.getApiCount(), totalApiCount);
+        Assert.assertEquals(response.getApis().size(), apiCount);
     }
 
     @Test
@@ -1709,6 +1761,225 @@ public class APIProviderImplTest {
                 "carbon.super", 1 , 6);
     }
 
+    @Test
+    public void testDeriveApiSecurityFromHubPoliciesForHeaderApiKeyPolicy() throws Exception {
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        API api = new API(new APIIdentifier("admin", "SampleAPI", "1.0.0"));
+        api.setGatewayType(APIConstants.WSO2_API_PLATFORM_GATEWAY);
+
+        List<OperationPolicy> hubPolicies = new ArrayList<>();
+        hubPolicies.add(createApiKeyAuthPolicy("header", "X-API-Key"));
+        api.setHubPolicies(hubPolicies);
+
+        invokeDeriveApiSecurityFromHubPolicies(apiProvider, api);
+
+        assertEquals(APIConstants.API_SECURITY_API_KEY, api.getApiSecurity());
+        assertEquals("X-API-Key", api.getApiKeyHeader());
+    }
+
+    @Test
+    public void testDeriveApiSecurityFromHubPoliciesForQueryApiKeyPolicy() throws Exception {
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        API api = new API(new APIIdentifier("admin", "SampleAPI", "1.0.0"));
+        api.setGatewayType(APIConstants.WSO2_API_PLATFORM_GATEWAY);
+
+        List<OperationPolicy> hubPolicies = new ArrayList<>();
+        hubPolicies.add(createApiKeyAuthPolicy("query", "api_key"));
+        api.setHubPolicies(hubPolicies);
+
+        invokeDeriveApiSecurityFromHubPolicies(apiProvider, api);
+
+        assertEquals(APIConstants.API_SECURITY_API_KEY, api.getApiSecurity());
+        assertNull(api.getApiKeyHeader());
+    }
+
+    @Test
+    public void testDeriveApiSecurityFromHubPoliciesDefaultsApiKeyHeaderForHeaderPolicyWithoutKey() throws Exception {
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        API api = new API(new APIIdentifier("admin", "SampleAPI", "1.0.0"));
+        api.setGatewayType(APIConstants.WSO2_API_PLATFORM_GATEWAY);
+
+        List<OperationPolicy> hubPolicies = new ArrayList<>();
+        hubPolicies.add(createApiKeyAuthPolicy("header", null));
+        api.setHubPolicies(hubPolicies);
+
+        invokeDeriveApiSecurityFromHubPolicies(apiProvider, api);
+
+        assertEquals(APIConstants.API_SECURITY_API_KEY, api.getApiSecurity());
+        assertEquals(APIConstants.API_KEY_HEADER_DEFAULT, api.getApiKeyHeader());
+    }
+
+    @Test
+    public void testDeriveApiSecurityFromHubPoliciesIgnoresInvalidApiKeyHeader() throws Exception {
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        API api = new API(new APIIdentifier("admin", "SampleAPI", "1.0.0"));
+        api.setGatewayType(APIConstants.WSO2_API_PLATFORM_GATEWAY);
+
+        List<OperationPolicy> hubPolicies = new ArrayList<>();
+        hubPolicies.add(createApiKeyAuthPolicy("header", "X API Key"));
+        api.setHubPolicies(hubPolicies);
+
+        invokeDeriveApiSecurityFromHubPolicies(apiProvider, api);
+
+        assertEquals(APIConstants.API_SECURITY_API_KEY, api.getApiSecurity());
+        assertEquals(APIConstants.API_KEY_HEADER_DEFAULT, api.getApiKeyHeader());
+    }
+
+    // Certificate with wildcard SAN *.example.com and exact SANs api1.hello.com, api2.hello.com
+    private static final String CERT_WITH_DNS_SANS =
+            "MIIDdTCCAl2gAwIBAgIUQmUApCllap+dKaaXsTk7dR0gDsQwDQYJKoZIhvcNAQELBQAwLDEbMBkG" +
+            "A1UEAwwSc2ltcGxlLmV4YW1wbGUuY29tMQ0wCwYDVQQKDARUZXN0MB4XDTI2MDYwNTA1NTcxMloX" +
+            "DTM2MDYwMjA1NTcxMlowLDEbMBkGA1UEAwwSc2ltcGxlLmV4YW1wbGUuY29tMQ0wCwYDVQQKDARU" +
+            "ZXN0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA8ur/uoiIoZ8yW4D0FZOAwaPmH8sk" +
+            "MZje4vW3ILxkLtgD8PjjiA4XQihrYuxrMBBS5Jlna8EmEjnP4ygg1mZ2AfHFQCMwJ4RlInxKEfr3" +
+            "ElFLLpPtBzFYjrlUzA7ZRxWrX9upeDOrsTytIxAvpdPbWrUsFKcYL3tq1GB4hE6GICs9VCkBTF58" +
+            "9loYZ3bH6T6epijAP0vRrSMIMD1CZrrvFilV0W6IohY56CF84mQWn3JqZbj2/FqkpMJ/VO0bJ6fK" +
+            "sup6nn0GqY7DNG6MglrvS+pkturYAXA26f5uh34YEuRnAzAdVLFtogJYrUWgk4yVB+7b0H4FEGTF" +
+            "DKQlBvErJQIDAQABo4GOMIGLMB0GA1UdDgQWBBTAXsL6ojyS6e42f69OIXTOzKt0ijAfBgNVHSME" +
+            "GDAWgBTAXsL6ojyS6e42f69OIXTOzKt0ijAPBgNVHRMBAf8EBTADAQH/MDgGA1UdEQQxMC+CDSou" +
+            "ZXhhbXBsZS5jb22CDmFwaTEuaGVsbG8uY29tgg5hcGkyLmhlbGxvLmNvbTANBgkqhkiG9w0BAQsF" +
+            "AAOCAQEATjPCm++GvSkY5IoBeZqAN3pIpjtZqTGj+tAHy2X+veRpUda9PEajV1kKpfB34ZoOcHrS" +
+            "Gb5y5VYojaAZotOZp+2ilmLqujfT2Q8+XQ0EHjpEPzuDq9koUeSJPY0w8m/TToldd1MtdDWXk0V9" +
+            "vdV41Gi/+VyOajdOtzdGKbEciJsq5sd5gyFRBxjo5gSPqqJi+L09Ig3g+c6faUJ/JI5e2Fbv53cc" +
+            "rBTc2XgsY2eKQLbIcgiEu/LjXyZ1mUvFv7LyzXRnWj3+w+ek3EPiRggQcbBPOHuPGaNrTzkwLIll" +
+            "chF2eAlffVjpWA3NzL/Q5tRXTFitbBozfHGl7nzN8QxtKQ==";
+
+    // Certificate with no SANs, CN=backend.example.com
+    private static final String CERT_CN_ONLY =
+            "MIIDOzCCAiOgAwIBAgIUFB8gC/GSC04yMpVppR2GSbQuEd8wDQYJKoZIhvcNAQELBQAwLTEcMBoG" +
+            "A1UEAwwTYmFja2VuZC5leGFtcGxlLmNvbTENMAsGA1UECgwEVGVzdDAeFw0yNjA2MDUwNTU3MjBa" +
+            "Fw0zNjA2MDIwNTU3MjBaMC0xHDAaBgNVBAMME2JhY2tlbmQuZXhhbXBsZS5jb20xDTALBgNVBAoM" +
+            "BFRlc3QwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCjfoX3PHePUrDlEQ78szKEhw8l" +
+            "8PHk1JgNPm/u1CtNz+JT/8zrfBw/+xZWCeNZ2fxgVN1wnl0h4LJogmSsQwYQe7naURxhomwQ+6Y" +
+            "rOXpCUSUYVvAI0ZsKUzDWFmssvo7QQ3lGpCC/nvjGtUBoE9Gjwbv45SYbzCWmCl1yRs4RxUMd5UC" +
+            "WF9GmrhiWnfAYpu825NEiT/yVlQBuHu/KoL7054WewQjsAX86HdNFS0r35wXp/qdk5pqauD0Jnff" +
+            "f8PZf/asrBoMA3Lx0bIlHX2KfgAN+PyXzDksK/y2CqiDdA0h5x/+FBSuh9d0rlK/v3nfPzF7VYfr" +
+            "xbLfkuRSf+ZY1AgMBAAGjUzBRMB0GA1UdDgQWBBTDJjRTndFSqtc0ydL5tdDexBqe4zAfBgNVHSME" +
+            "GDAWgBTDJjRTndFSqtc0ydL5tdDexBqe4zAPBgNVHRMBAf8EBTADAQH/MA0GCSqGSIb3DQEBCwUA" +
+            "A4IBAQCJAX2GciKCBtq8turwKXPxFuzlwwq44aqXMzQ2SxbQ/Z9hoLlpyGgQXeCQsL1KT4XWAvqf" +
+            "DrDuN+HyX6lnLfjnx/pU5z62fOg54UbpX++8Qz0/buYbMzh/BlvqW8B1HQ2OhUVaj1FMTCF984Rs" +
+            "AQgu1iP2xtatHbdVzjt7KmLot9CQzxTIIo0z75MqcqM+0az8VW+e2TDAEtzfSay3rh5X+YBJipk5" +
+            "V2+DWlF7yc8U3QSF/1rRmbefnIdfzaAoFkH6G5u8TUjYE/Tt3cSQiylPlhUiIwPgG1XyaVu9i2YM" +
+            "gv+Kp/g3ROxKCpqMv98hRw6MhzITCI5WUsd4dSfv5atg";
+
+    @Test
+    public void testSearchPaginatedAPIsByCertificateWithSANs()
+            throws APIManagementException, APIPersistenceException {
+        int apiCount = 5;
+        int totalApiCount = 8;
+
+        String[] returnRoles = {"Internal/publisher", "admin"};
+        Map<String, Object> returnProperties = new HashMap<>();
+        returnProperties.put("isAdmin", true);
+        returnProperties.put("skipRoles", null);
+
+        Mockito.when(APIUtil.getTenantAdminUserName(Mockito.anyString())).thenReturn("admin");
+        Mockito.when(APIUtil.getFilteredUserRoles(Mockito.anyString())).thenReturn(returnRoles);
+        Mockito.when(APIUtil.getUserProperties(Mockito.anyString())).thenReturn(returnProperties);
+
+        PublisherAPISearchResult returnSearchAPIs = new PublisherAPISearchResult();
+        returnSearchAPIs.setPublisherAPIInfoList(createMockPublisherAPIInfoList(apiCount));
+        returnSearchAPIs.setReturnedAPIsCount(apiCount);
+        returnSearchAPIs.setTotalAPIsCount(totalApiCount);
+
+        ArgumentCaptor<String> queryCaptor = ArgumentCaptor.forClass(String.class);
+        Mockito.when(apiPersistenceInstance.searchAPIsForPublisher(
+                Mockito.any(Organization.class),
+                queryCaptor.capture(),
+                Mockito.anyInt(),
+                Mockito.anyInt(),
+                Mockito.any(UserContext.class))).thenReturn(returnSearchAPIs);
+
+        CertificateMetadataDTO certDTO = new CertificateMetadataDTO();
+        certDTO.setCertificate(CERT_WITH_DNS_SANS);
+        certDTO.setEndpoint("https://simple.example.com/api");
+
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO);
+        APISearchResult response = apiProvider.searchPaginatedAPIsByCertificate(certDTO, "carbon.super", 0, 10);
+
+        Assert.assertNotNull(response);
+        Assert.assertEquals(totalApiCount, response.getApiCount());
+        Assert.assertEquals(apiCount, response.getApis().size());
+
+        String capturedQuery = queryCaptor.getValue();
+        Assert.assertTrue("Query must contain .example.com term from wildcard SAN",
+                capturedQuery.contains(".example.com"));
+        Assert.assertTrue("Query must contain api1.hello.com term from exact SAN",
+                capturedQuery.contains("api1.hello.com"));
+        Assert.assertTrue("Query must contain api2.hello.com term from exact SAN",
+                capturedQuery.contains("api2.hello.com"));
+    }
+
+    @Test
+    public void testSearchPaginatedAPIsByCertificateWhenSolrReturnsNull()
+            throws APIManagementException, APIPersistenceException {
+        String[] returnRoles = {"admin"};
+        Map<String, Object> returnProperties = new HashMap<>();
+        returnProperties.put("isAdmin", true);
+        returnProperties.put("skipRoles", null);
+
+        Mockito.when(APIUtil.getTenantAdminUserName(Mockito.anyString())).thenReturn("admin");
+        Mockito.when(APIUtil.getFilteredUserRoles(Mockito.anyString())).thenReturn(returnRoles);
+        Mockito.when(APIUtil.getUserProperties(Mockito.anyString())).thenReturn(returnProperties);
+
+        Mockito.when(apiPersistenceInstance.searchAPIsForPublisher(
+                Mockito.any(Organization.class),
+                Mockito.anyString(),
+                Mockito.anyInt(),
+                Mockito.anyInt(),
+                Mockito.any(UserContext.class))).thenReturn(null);
+
+        CertificateMetadataDTO certDTO = new CertificateMetadataDTO();
+        certDTO.setCertificate(CERT_WITH_DNS_SANS);
+        certDTO.setEndpoint("https://simple.example.com/api");
+
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO);
+        APISearchResult response = apiProvider.searchPaginatedAPIsByCertificate(certDTO, "carbon.super", 0, 10);
+
+        Assert.assertNotNull(response);
+        Assert.assertEquals(0, response.getApiCount());
+        Assert.assertTrue(response.getApis().isEmpty());
+    }
+
+    @Test
+    public void testSearchPaginatedAPIsByCertificateUsesEndpointFallbackWhenNoCertContent()
+            throws APIManagementException, APIPersistenceException {
+        String[] returnRoles = {"admin"};
+        Map<String, Object> returnProperties = new HashMap<>();
+        returnProperties.put("isAdmin", true);
+        returnProperties.put("skipRoles", null);
+
+        Mockito.when(APIUtil.getTenantAdminUserName(Mockito.anyString())).thenReturn("admin");
+        Mockito.when(APIUtil.getFilteredUserRoles(Mockito.anyString())).thenReturn(returnRoles);
+        Mockito.when(APIUtil.getUserProperties(Mockito.anyString())).thenReturn(returnProperties);
+
+        PublisherAPISearchResult returnSearchAPIs = new PublisherAPISearchResult();
+        returnSearchAPIs.setPublisherAPIInfoList(createMockPublisherAPIInfoList(2));
+        returnSearchAPIs.setReturnedAPIsCount(2);
+        returnSearchAPIs.setTotalAPIsCount(2);
+
+        ArgumentCaptor<String> queryCaptor = ArgumentCaptor.forClass(String.class);
+        Mockito.when(apiPersistenceInstance.searchAPIsForPublisher(
+                Mockito.any(Organization.class),
+                queryCaptor.capture(),
+                Mockito.anyInt(),
+                Mockito.anyInt(),
+                Mockito.any(UserContext.class))).thenReturn(returnSearchAPIs);
+
+        CertificateMetadataDTO certDTO = new CertificateMetadataDTO();
+        certDTO.setCertificate(CERT_CN_ONLY); // cert with CN=backend.example.com, no SANs
+        certDTO.setEndpoint("https://backend.example.com/api");
+
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO);
+        APISearchResult response = apiProvider.searchPaginatedAPIsByCertificate(certDTO, "carbon.super", 0, 10);
+
+        Assert.assertNotNull(response);
+        Assert.assertEquals(2, response.getApiCount());
+        String capturedQuery = queryCaptor.getValue();
+        Assert.assertTrue("Query must contain backend.example.com from the stored endpoint / CN",
+                capturedQuery.contains("backend.example.com"));
+    }
+
     private List<PublisherAPIInfo> createMockPublisherAPIInfoList(int num) {
         List<PublisherAPIInfo> list = new ArrayList<>();
         for(int i = 0; i < num; i++) {
@@ -1721,5 +1992,150 @@ public class APIProviderImplTest {
             list.add(publisherAPIInfo);
         }
         return list;
+    }
+
+    private void invokeDeriveApiSecurityFromHubPolicies(APIProviderImpl apiProvider, API api) throws Exception {
+        Method method = APIProviderImpl.class.getDeclaredMethod("deriveApiSecurityFromHubPolicies", API.class);
+        method.setAccessible(true);
+        method.invoke(apiProvider, api);
+    }
+
+    private OperationPolicy createApiKeyAuthPolicy(String in, String key) {
+        OperationPolicy policy = new OperationPolicy();
+        policy.setPolicyName("api-key-auth");
+        Map<String, Object> params = new HashMap<>();
+        if (in != null) {
+            params.put("in", in);
+        }
+        if (key != null) {
+            params.put("key", key);
+        }
+        policy.setParameters(params);
+        return policy;
+    }
+
+    @Test
+    public void testGetRemovedProductResourcesWhenResourceIsUnchanged() throws APIManagementException {
+
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        API existingAPI = createAPIWithResources(true, "GET:/hello", "POST:/hello");
+
+        List<APIResource> removedResources = apiProvider
+                .getRemovedProductResources(createURITemplates("GET:/hello", "POST:/hello"), existingAPI);
+
+        Assert.assertTrue("An unchanged product used resource was reported as removed: " + removedResources,
+                removedResources.isEmpty());
+    }
+
+    /**
+     * Resource paths of an API are case-sensitive, therefore changing only the letter case of a resource path
+     * removes the original resource. This has to be reported when the resource is used by one or more API Products,
+     * otherwise the product to resource mapping of the API Product is left dangling.
+     */
+    @Test
+    public void testGetRemovedProductResourcesWhenResourcePathLetterCaseChanged() throws APIManagementException {
+
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        API existingAPI = createAPIWithResources(true, "GET:/hello");
+
+        List<APIResource> removedResources = apiProvider
+                .getRemovedProductResources(createURITemplates("GET:/Hello"), existingAPI);
+
+        Assert.assertEquals("A letter case only change of a product used resource path was not detected as a "
+                + "removed resource", 1, removedResources.size());
+        Assert.assertEquals(new APIResource("GET", "/hello"), removedResources.get(0));
+    }
+
+    /**
+     * Path parameter names are part of the URL template stored against the API Product, hence a letter case change
+     * of a path parameter has to be treated the same way as any other resource path change.
+     */
+    @Test
+    public void testGetRemovedProductResourcesWhenPathParameterLetterCaseChanged() throws APIManagementException {
+
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        API existingAPI = createAPIWithResources(true, "GET:/pizza/{orderId}");
+
+        List<APIResource> removedResources = apiProvider
+                .getRemovedProductResources(createURITemplates("GET:/pizza/{orderid}"), existingAPI);
+
+        Assert.assertEquals("A letter case only change of a path parameter was not detected as a removed resource",
+                1, removedResources.size());
+        Assert.assertEquals(new APIResource("GET", "/pizza/{orderId}"), removedResources.get(0));
+    }
+
+    /**
+     * HTTP verbs are persisted in upper case and are written to the API definition in lower case, therefore the verb
+     * comparison has to stay case-insensitive.
+     */
+    @Test
+    public void testGetRemovedProductResourcesWhenHttpVerbLetterCaseChanged() throws APIManagementException {
+
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        API existingAPI = createAPIWithResources(true, "GET:/hello");
+
+        List<APIResource> removedResources = apiProvider
+                .getRemovedProductResources(createURITemplates("get:/hello"), existingAPI);
+
+        Assert.assertTrue("A product used resource was reported as removed for an HTTP verb letter case difference: "
+                + removedResources, removedResources.isEmpty());
+    }
+
+    @Test
+    public void testGetRemovedProductResourcesWhenNonProductResourcePathLetterCaseChanged()
+            throws APIManagementException {
+
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        API existingAPI = createAPIWithResources(false, "GET:/hello");
+
+        List<APIResource> removedResources = apiProvider
+                .getRemovedProductResources(createURITemplates("GET:/Hello"), existingAPI);
+
+        Assert.assertTrue("A resource which is not used by any API Product was reported as removed: "
+                + removedResources, removedResources.isEmpty());
+    }
+
+    @Test
+    public void testGetRemovedProductResourcesWhenResourcePathChanged() throws APIManagementException {
+
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        API existingAPI = createAPIWithResources(true, "GET:/v1/hello");
+
+        List<APIResource> removedResources = apiProvider
+                .getRemovedProductResources(createURITemplates("GET:/v3/hello"), existingAPI);
+
+        Assert.assertEquals("A removed product used resource was not detected", 1, removedResources.size());
+        Assert.assertEquals(new APIResource("GET", "/v1/hello"), removedResources.get(0));
+    }
+
+    private API createAPIWithResources(boolean usedByProducts, String... verbAndPaths) {
+        API api = new API(new APIIdentifier("admin", "PizzaShackAPI", "1.0.0"));
+        api.setUuid(apiUUID);
+        api.setUriTemplates(createURITemplates(usedByProducts, verbAndPaths));
+        return api;
+    }
+
+    private Set<URITemplate> createURITemplates(String... verbAndPaths) {
+        return createURITemplates(false, verbAndPaths);
+    }
+
+    private Set<URITemplate> createURITemplates(boolean usedByProducts, String... verbAndPaths) {
+        Set<URITemplate> uriTemplates = new HashSet<>();
+        for (String verbAndPath : verbAndPaths) {
+            uriTemplates.add(createURITemplate(verbAndPath, usedByProducts));
+        }
+        return uriTemplates;
+    }
+
+    private URITemplate createURITemplate(String verbAndPath, boolean usedByProducts) {
+        String[] verbAndPathParts = verbAndPath.split(":", 2);
+        URITemplate uriTemplate = new URITemplate();
+        uriTemplate.setHTTPVerb(verbAndPathParts[0]);
+        uriTemplate.setUriTemplate(verbAndPathParts[1]);
+        uriTemplate.setResourceURI(verbAndPathParts[1]);
+        if (usedByProducts) {
+            uriTemplate.addUsedByProduct(new APIProductIdentifier("admin", "PizzaShackProduct", "1.0.0"));
+        }
+        return uriTemplate;
     }
 }

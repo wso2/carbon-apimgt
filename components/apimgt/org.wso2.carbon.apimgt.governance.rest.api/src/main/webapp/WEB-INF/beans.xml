@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
- ~ Copyright (c) 2025, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ ~ Copyright (c) 2025, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  ~
  ~ Licensed under the Apache License, Version 2.0 (the "License");
  ~ you may not use this file except in compliance with the License.
@@ -38,12 +38,11 @@
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>
-            <bean class="org.wso2.carbon.apimgt.governance.rest.api.util.GovernanceExceptionMapper,"/>
-            <bean class="org.wso2.carbon.apimgt.rest.api.util.exception.GlobalThrowableMapper"/>
+            <bean class="org.wso2.carbon.apimgt.governance.rest.api.util.APIMGovernanceExceptionMapper"/>
             <ref bean="cors-filter"/>
         </jaxrs:providers>
         <jaxrs:properties>
-            <!-- This is added to catch interceptor level exceptions in GlobalThrowableMapper. -->
+            <!-- This is added to catch interceptor level exceptions in APIMGovernanceExceptionMapper. -->
             <entry key="map.cxf.interceptor.fault" value="true"/>
             <!-- This is added to restrict the size of attachments sent through the requests. -->
             <entry key="attachment-max-size" value="#{systemProperties['rest.api.admin.attachment.max.size'] != null ?
@@ -54,7 +53,7 @@
     <bean id="URLValidationInterceptor"
           class="org.wso2.carbon.apimgt.rest.api.util.interceptors.URLValidationInterceptor">
         <property name="majorVersion" value="v1"/>
-        <property name="latestVersion" value="v1.1"/>
+        <property name="latestVersion" value="v1.2"/>
     </bean>
     <bean id="PreAuthenticationInterceptor"
           class="org.wso2.carbon.apimgt.rest.api.util.interceptors.PreAuthenticationInterceptor"/>

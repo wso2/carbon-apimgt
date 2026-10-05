@@ -39,6 +39,8 @@ public class MonetizationConfigurationDto {
 
     private byte[] analyticsPassword;
 
+    private String analyticsProtocol;
+
     public String getAnalyticsIndexName() {
         return analyticsIndexName;
     }
@@ -170,5 +172,13 @@ public class MonetizationConfigurationDto {
 
     public void setAnalyticsPassword(byte[] analyticsPassword) {
         this.analyticsPassword = analyticsPassword;
+    }
+
+    public String getAnalyticsProtocol() {
+        return analyticsProtocol;
+    }
+
+    public void setAnalyticsProtocol(String analyticsProtocol) {
+        this.analyticsProtocol = analyticsProtocol;
     }
 }

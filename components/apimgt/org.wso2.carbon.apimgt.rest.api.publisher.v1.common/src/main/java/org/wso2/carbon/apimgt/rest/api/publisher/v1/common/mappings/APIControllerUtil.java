@@ -43,6 +43,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerDTO;
 
 import java.io.File;
 import java.io.IOException;
@@ -184,6 +185,59 @@ public class APIControllerUtil {
         JsonElement additionalProperties = envParams.get(ImportExportConstants.ADDITIONAL_PROPERTIES_FIELD);
         if (additionalProperties != null && !additionalProperties.isJsonNull()) {
             handleAdditionalProperties(additionalProperties, importedApiDto, null);
+        }
+        return importedApiDto;
+    }
+
+    public static MCPServerDTO injectEnvParamsToMCPServer(MCPServerDTO importedApiDto, JsonObject envParams)
+            throws APIManagementException {
+
+        if (envParams == null || envParams.isJsonNull()) {
+            return importedApiDto;
+        }
+
+        JsonElement policies = envParams.get(ImportExportConstants.POLICIES_FIELD);
+        if (policies != null && !policies.isJsonNull()) {
+            JsonArray definedPolicies = policies.getAsJsonArray();
+            List<String> policiesListToAdd = new ArrayList<>();
+            for (JsonElement definedPolicy : definedPolicies) {
+                if (!definedPolicy.isJsonNull()) {
+                    String policyToAdd = definedPolicy.getAsString();
+                    if (!StringUtils.isEmpty(policyToAdd)) {
+                        policiesListToAdd.add(definedPolicy.getAsString());
+                    }
+                }
+            }
+            if (!policiesListToAdd.isEmpty()) {
+                    importedApiDto.setPolicies(policiesListToAdd);
+            }
+        }
+
+        // handle available additional properties
+        JsonElement additionalProperties = envParams.get(ImportExportConstants.ADDITIONAL_PROPERTIES_FIELD);
+        if (additionalProperties != null && !additionalProperties.isJsonNull()) {
+            JsonArray definedAdditionalProperties = additionalProperties.getAsJsonArray();
+            Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap = new HashMap<>();
+            for (JsonElement definedAdditionalProperty : definedAdditionalProperties) {
+                if (!definedAdditionalProperty.isJsonNull()) {
+                    JsonElement propertyName = (((JsonObject) definedAdditionalProperty).get("name"));
+                    JsonElement propertyValue = (((JsonObject) definedAdditionalProperty).get("value"));
+                    JsonElement propertyDisplay = (((JsonObject) definedAdditionalProperty).get("display"));
+                    if (propertyName != null && propertyValue != null && propertyDisplay != null
+                            && !propertyName.isJsonNull() && !propertyValue.isJsonNull() &&
+                            !propertyDisplay.isJsonNull()) {
+                        APIInfoAdditionalPropertiesMapDTO apiInfoAdditionalPropertiesMapDTO =
+                                new APIInfoAdditionalPropertiesMapDTO();
+                        apiInfoAdditionalPropertiesMapDTO.setName(propertyName.getAsString());
+                        apiInfoAdditionalPropertiesMapDTO.setValue(propertyValue.getAsString());
+                        apiInfoAdditionalPropertiesMapDTO.setDisplay(propertyDisplay.getAsBoolean());
+                        additionalPropertiesMap.put(propertyName.getAsString(), apiInfoAdditionalPropertiesMapDTO);
+                    }
+                }
+            }
+            if (!additionalPropertiesMap.isEmpty()) {
+                importedApiDto.setAdditionalPropertiesMap(additionalPropertiesMap);
+            }
         }
         return importedApiDto;
     }
@@ -348,10 +402,24 @@ public class APIControllerUtil {
                             endpointSecurityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_TYPE,
                                     APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH.toUpperCase());
                             validateEndpointSecurityOauth(endpointSecurityDetails);
+                        } else if (StringUtils.equals(endpointSecurityType.toLowerCase(),
+                                APIConstants.ENDPOINT_SECURITY_TYPE_API_KEY)) {
+                            endpointSecurityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_TYPE,
+                                    APIConstants.ENDPOINT_SECURITY_TYPE_API_KEY);
+                            // Default the identifier type to HEADER when not specified (mirrors the Publisher UI).
+                            if (!endpointSecurityDetails.has(APIConstants.ENDPOINT_SECURITY_API_KEY_IDENTIFIER_TYPE)
+                                    || endpointSecurityDetails
+                                    .get(APIConstants.ENDPOINT_SECURITY_API_KEY_IDENTIFIER_TYPE).isJsonNull()) {
+                                endpointSecurityDetails.addProperty(
+                                        APIConstants.ENDPOINT_SECURITY_API_KEY_IDENTIFIER_TYPE,
+                                        org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants
+                                                .API_KEY_IDENTIFIER_TYPE_HEADER);
+                            }
+                            validateEndpointSecurityApiKey(endpointSecurityDetails);
                         } else {
-                            // If the type is not either basic or digest, return an error
+                            // If the type is not either basic, digest, oauth or apikey, return an error
                             throw new APIManagementException("Invalid endpoint security type found in the params file. "
-                                    + "Should be either basic, digest or oauth. "
+                                    + "Should be either basic, digest, oauth or apikey. "
                                     + "Please specify correct security types field and continue...",
                                     ExceptionCodes.ERROR_READING_PARAMS_FILE);
                         }
@@ -373,6 +441,30 @@ public class APIControllerUtil {
             }
         }
         endpointConfig.add(APIConstants.ENDPOINT_SECURITY, security);
+    }
+    /**
+     * Check whether the apiKeyIdentifier and apiKeyValue fields have set in the params file
+     *
+     * @param endpointSecurityDetails Endpoint security details per endpoint type
+     * @throws APIManagementException If an error occurs when reading the security env parameters
+     */
+    private static void validateEndpointSecurityApiKey(JsonObject endpointSecurityDetails)
+            throws APIManagementException {
+
+        if (!endpointSecurityDetails.has(APIConstants.ENDPOINT_SECURITY_API_KEY_IDENTIFIER)
+                || endpointSecurityDetails.get(APIConstants.ENDPOINT_SECURITY_API_KEY_IDENTIFIER) == null
+                || endpointSecurityDetails.get(APIConstants.ENDPOINT_SECURITY_API_KEY_IDENTIFIER).isJsonNull()) {
+            throw new APIManagementException("You have enabled endpoint security but the apiKeyIdentifier is not "
+                    + "found in the params file. Please specify apiKeyIdentifier field and continue...",
+                    ExceptionCodes.ERROR_READING_PARAMS_FILE);
+        }
+        if (!endpointSecurityDetails.has(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE)
+                || endpointSecurityDetails.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE) == null
+                || endpointSecurityDetails.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE).isJsonNull()) {
+            throw new APIManagementException("You have enabled endpoint security but the apiKeyValue is not found "
+                    + "in the params file. Please specify apiKeyValue field and continue...",
+                    ExceptionCodes.ERROR_READING_PARAMS_FILE);
+        }
     }
 
     /**
@@ -428,6 +520,25 @@ public class APIControllerUtil {
             throw new APIManagementException("You have enabled oauth endpoint security but the grant type is not found "
                     + "in the params file. Please specify grantType field and continue...",
                     ExceptionCodes.ERROR_READING_PARAMS_FILE);
+        }
+
+        // Validate custom parameters
+        if (endpointSecurityDetails.has(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS)) {
+            JsonElement customParamsElement = endpointSecurityDetails.get(
+                    APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+            if (customParamsElement != null && !customParamsElement.isJsonNull()) {
+                JsonObject customParams = customParamsElement.getAsJsonObject();
+                for (Map.Entry<String, JsonElement> entry : customParams.entrySet()) {
+                    JsonElement value = entry.getValue();
+                    if (value != null && value.isJsonObject() && !value.getAsJsonObject()
+                            .has(APIConstants.OAuthConstants.CUSTOM_PARAMETERS_VALUE)) {
+                        throw new APIManagementException(
+                                "Error parsing custom parameters. Parameter '"
+                                        + entry.getKey() + "' has invalid format.",
+                                ExceptionCodes.ERROR_READING_PARAMS_FILE);
+                    }
+                }
+            }
         }
 
         if (!endpointSecurityDetails.has(APIConstants.OAuthConstants.OAUTH_CLIENT_ID)
@@ -530,15 +641,15 @@ public class APIControllerUtil {
         }
 
         // if endpoint type is HTTP/REST
-        if (StringUtils.equals(endpointType, ImportExportConstants.HTTP_TYPE_ENDPOINT) || StringUtils
-                .equals(endpointType, ImportExportConstants.REST_TYPE_ENDPOINT)) {
+        if (StringUtils.equalsIgnoreCase(endpointType, ImportExportConstants.HTTP_TYPE_ENDPOINT) || StringUtils
+                .equalsIgnoreCase(endpointType, ImportExportConstants.REST_TYPE_ENDPOINT)) {
             //add REST endpoint configs as endpoint configs
             multipleEndpointsConfig = handleRestEndpoints(routingPolicy, envParams, defaultProductionEndpoint,
                     defaultSandboxEndpoint);
         }
 
         // if endpoint type is HTTP/SOAP
-        if (ImportExportConstants.SOAP_TYPE_ENDPOINT.equals(endpointType)) {
+        if (ImportExportConstants.SOAP_TYPE_ENDPOINT.equalsIgnoreCase(endpointType)) {
             //add SOAP endpoint configs as endpoint configs
             multipleEndpointsConfig = handleSoapEndpoints(routingPolicy, envParams, defaultProductionEndpoint,
                     defaultSandboxEndpoint);
@@ -565,12 +676,13 @@ public class APIControllerUtil {
             endpointsObject = envParams.get(ImportExportConstants.ENDPOINTS_FIELD).getAsJsonObject();
         }
         // if the endpoint type is REST or SOAP return null
-        if (ImportExportConstants.REST_TYPE_ENDPOINT.equals(endpointType) || ImportExportConstants.SOAP_TYPE_ENDPOINT
-                .equals(endpointType) || ImportExportConstants.HTTP_TYPE_ENDPOINT.equals(endpointType)) {
+        if (ImportExportConstants.REST_TYPE_ENDPOINT.equalsIgnoreCase(endpointType) ||
+                ImportExportConstants.SOAP_TYPE_ENDPOINT.equalsIgnoreCase(endpointType) ||
+                ImportExportConstants.HTTP_TYPE_ENDPOINT.equalsIgnoreCase(endpointType)) {
             return null;
         }
         // if endpoint type is Dynamic
-        if (ImportExportConstants.DYNAMIC_TYPE_ENDPOINT.equals(endpointType)) {
+        if (ImportExportConstants.DYNAMIC_TYPE_ENDPOINT.equalsIgnoreCase(endpointType)) {
             JsonObject updatedDynamicEndpointParams = new JsonObject();
             //replace url property in dynamic endpoints
             defaultProductionEndpoint.addProperty(ImportExportConstants.ENDPOINT_URL,
@@ -587,7 +699,7 @@ public class APIControllerUtil {
             return updatedDynamicEndpointParams;
 
             // if endpoint type is AWS Lambda
-        } else if (ImportExportConstants.AWS_TYPE_ENDPOINT.equals(endpointType)) {
+        } else if (ImportExportConstants.AWS_TYPE_ENDPOINT.equalsIgnoreCase(endpointType)) {
             //if aws config is not provided
             if (envParams.get(ImportExportConstants.AWS_LAMBDA_ENDPOINT_JSON_PROPERTY) == null) {
                 throw new APIManagementException(

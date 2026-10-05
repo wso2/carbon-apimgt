@@ -24,16 +24,31 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
+import org.wso2.carbon.apimgt.api.model.ConsumerSecretInfo;
+import org.wso2.carbon.apimgt.api.model.ConsumerSecretRequest;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIAPIKeyInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyAssociationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyAssociationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIWithKeyInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ConsumerSecretDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ConsumerSecretCreationRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ConsumerSecretDeletionRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ConsumerSecretListDTO;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Utility class for application key generation related operations
@@ -118,6 +133,12 @@ public class ApplicationKeyMappingUtil {
         applicationKeyDTO.setKeyType(ApplicationKeyDTO.KeyTypeEnum.valueOf(apiKey.getType()));
         applicationKeyDTO.setConsumerKey(apiKey.getConsumerKey());
         applicationKeyDTO.setConsumerSecret(apiKey.getConsumerSecret());
+        if (apiKey.getConsumerSecrets() != null) {
+            List<ConsumerSecretDTO> consumerSecretDTOs = apiKey.getConsumerSecrets().stream()
+                    .map(ApplicationKeyMappingUtil::fromConsumerSecretToDTO)
+                    .collect(Collectors.toList());
+            applicationKeyDTO.setConsumerSecrets(consumerSecretDTOs);
+        }
         applicationKeyDTO.setKeyState(apiKey.getState());
         applicationKeyDTO.setMode(ApplicationKeyDTO.ModeEnum.valueOf(apiKey.getCreateMode()));
         applicationKeyDTO.setKeyManager(apiKey.getKeyManager());
@@ -140,10 +161,210 @@ public class ApplicationKeyMappingUtil {
         return applicationKeyDTO;
     }
 
-    public static APIKeyDTO formApiKeyToDTO(String apiKey, int validityTime){
+    @Deprecated
+    public static APIKeyDTO formApiKeyToDTO(String apiKey, long validityTime){
         APIKeyDTO apiKeyDto = new APIKeyDTO();
         apiKeyDto.setApikey(apiKey);
-        apiKeyDto.setValidityTime(validityTime);
+        apiKeyDto.setValidityPeriod(validityTime);
         return apiKeyDto;
+    }
+
+    public static APIKeyDTO formApiKeyToDTO(String apiKey, long validityTime, String keyName){
+        APIKeyDTO apiKeyDto = new APIKeyDTO();
+        apiKeyDto.setApikey(apiKey);
+        apiKeyDto.setValidityPeriod(validityTime);
+        if (keyName != null) {
+            apiKeyDto.setKeyName(keyName);
+        } else {
+            apiKeyDto.setKeyName("N/A");
+        }
+        return apiKeyDto;
+    }
+
+    public static APIKeyAssociationDTO formApiAssociationToDTO(String apiName, String appName, String keyName){
+        APIKeyAssociationDTO apiKeyAssociationDTO = new APIKeyAssociationDTO();
+        apiKeyAssociationDTO.setKeyName(keyName);
+        apiKeyAssociationDTO.setApiName(apiName);
+        apiKeyAssociationDTO.setApplicationName(appName);
+        return apiKeyAssociationDTO;
+    }
+
+    /**
+     * Convert ConsumerSecretCreationRequestDTO to ConsumerSecretRequest
+     *
+     * @param clientId                          Client ID
+     * @param consumerSecretCreationRequestDTO  ConsumerSecretCreationRequestDTO object
+     * @return ConsumerSecretRequest object
+     */
+    public static ConsumerSecretRequest fromDTOtoConsumerSecretRequest(String clientId,
+                                                                       ConsumerSecretCreationRequestDTO consumerSecretCreationRequestDTO) {
+
+        return buildConsumerSecretRequest(clientId, consumerSecretCreationRequestDTO.getAdditionalProperties());
+    }
+
+    /**
+     * Convert ConsumerSecretDeletionRequestDTO to ConsumerSecretRequest
+     *
+     * @param clientId                          Client ID
+     * @param consumerSecretDeletionRequestDTO  ConsumerSecretDeletionRequestDTO object
+     * @return ConsumerSecretRequest object
+     */
+    public static ConsumerSecretRequest fromDTOtoConsumerSecretRequest(String clientId,
+                                                                       ConsumerSecretDeletionRequestDTO consumerSecretDeletionRequestDTO) {
+
+        return buildConsumerSecretRequest(clientId, consumerSecretDeletionRequestDTO.getAdditionalProperties());
+    }
+
+    /**
+     * Build ConsumerSecretRequest object
+     *
+     * @param clientId                  Client ID
+     * @param additionalProperties      Additional properties map
+     * @return ConsumerSecretRequest object
+     */
+    public static ConsumerSecretRequest buildConsumerSecretRequest(String clientId,
+                                                                   Map<String, Object> additionalProperties) {
+
+        ConsumerSecretRequest consumerSecretRequest = new ConsumerSecretRequest();
+        consumerSecretRequest.setClientId(clientId);
+        if (additionalProperties != null) {
+            consumerSecretRequest.putAll(additionalProperties);
+        }
+        return consumerSecretRequest;
+    }
+
+    /**
+     * Convert ConsumerSecretInfo to ConsumerSecretDTO
+     *
+     * @param consumerSecret  ConsumerSecretInfo object
+     * @return ConsumerSecretDTO object
+     */
+    public static ConsumerSecretDTO fromConsumerSecretToDTO(ConsumerSecretInfo consumerSecret) {
+
+        if (consumerSecret == null) {
+            return null;
+        }
+        ConsumerSecretDTO consumerSecretDTO = new ConsumerSecretDTO();
+        consumerSecretDTO.setSecretId(consumerSecret.getSecretId());
+        consumerSecretDTO.secretValue(consumerSecret.getClientSecret());
+        consumerSecretDTO.setAdditionalProperties(consumerSecret.getParameters());
+        return consumerSecretDTO;
+    }
+
+    /**
+     * Convert List of ConsumerSecretInfo to ConsumerSecretListDTO
+     *
+     * @param consumerSecrets  List of ConsumerSecretInfo objects
+     * @return ConsumerSecretListDTO object
+     */
+    public static ConsumerSecretListDTO fromConsumerSecretListToDTO(List<ConsumerSecretInfo> consumerSecrets) {
+
+        ConsumerSecretListDTO consumerSecretListDTO = new ConsumerSecretListDTO();
+        if (consumerSecrets == null) {
+            consumerSecretListDTO.setCount(0);
+            consumerSecretListDTO.setList(new ArrayList<>());
+            return consumerSecretListDTO;
+        }
+        List<ConsumerSecretDTO> consumerSecretDTOs = new ArrayList<>();
+        for (ConsumerSecretInfo consumerSecret : consumerSecrets) {
+            consumerSecretDTOs.add(fromConsumerSecretToDTO(consumerSecret));
+        }
+        consumerSecretListDTO.setCount(consumerSecretDTOs.size());
+        consumerSecretListDTO.setList(consumerSecretDTOs);
+        return consumerSecretListDTO;
+    }
+
+    /**
+     * Insert the api key related details to a DTO Object
+     *
+     * @param apiKeyInfoList A list of API keys
+     * @return A list of DTO objects with api key related details
+     */
+    public static List<APIKeyInfoDTO> formApiKeyListToDTOList(List<APIKeyInfo> apiKeyInfoList){
+        List<APIKeyInfoDTO> apiKeyInfoDTOList = apiKeyInfoList.stream()
+                .map(src -> {
+                    APIKeyInfoDTO dto = new APIKeyInfoDTO();
+                    dto.setKeyUUID(src.getKeyUUID());
+                    dto.setKeyName(src.getKeyName());
+                    dto.setIssuedOn(src.getCreatedTime());
+                    dto.setValidityPeriod(src.getValidityPeriod());
+                    dto.setLastUsed(src.getLastUsedTime());
+                    return dto;
+                })
+                .collect(Collectors.toList());
+        return apiKeyInfoDTOList;
+    }
+
+    /**
+     * Insert the api key related details to a DTO Object
+     *
+     * @param apiKeyInfoList A list of API keys
+     * @return A list of DTO objects with api key association related details
+     */
+    public static List<APIKeyAssociationInfoDTO> formApiKeyAssociationListToDTOList(List<APIKeyInfo> apiKeyInfoList){
+        List<APIKeyAssociationInfoDTO> apiKeyAssociationInfoDTOList = apiKeyInfoList.stream()
+                .map(src -> {
+                    APIKeyAssociationInfoDTO dto = new APIKeyAssociationInfoDTO();
+                    dto.setKeyUUID(src.getKeyUUID());
+                    dto.setKeyName(src.getKeyName());
+                    dto.setApiName(src.getApiName());
+                    dto.setApiUUID(src.getApiUUId());
+                    dto.setIssuedOn(src.getCreatedTime());
+                    dto.setValidityPeriod(toSafeValidityPeriod(src.getValidityPeriod()));
+                    dto.setLastUsed(src.getLastUsedTime());
+                    return dto;
+                })
+                .collect(Collectors.toList());
+        return apiKeyAssociationInfoDTOList;
+    }
+
+    /**
+     * Insert the api key related details to a DTO Object
+     *
+     * @param apiKeyInfoList A list of API keys
+     * @return A list of DTO objects with api key related details
+     */
+    public static List<APIAPIKeyInfoDTO> formApiApiKeyListToDTOList(List<APIKeyInfo> apiKeyInfoList){
+        List<APIAPIKeyInfoDTO> apiKeyInfoDTOList = apiKeyInfoList.stream()
+                .map(src -> {
+                    APIAPIKeyInfoDTO dto = new APIAPIKeyInfoDTO();
+                    dto.setKeyUUID(src.getKeyUUID());
+                    dto.setKeyName(src.getKeyName());
+                    dto.setIssuedOn(src.getCreatedTime());
+                    dto.setValidityPeriod(src.getValidityPeriod());
+                    dto.setLastUsed(src.getLastUsedTime());
+                    dto.setAssociatedApp(src.getApplicationName());
+                    return dto;
+                })
+                .collect(Collectors.toList());
+        return apiKeyInfoDTOList;
+    }
+
+    /**
+     * Insert the api key related details to a DTO Object
+     *
+     * @param apiKeyInfoList A list of API keys
+     * @return A list of DTO objects with apis with api key related details
+     */
+    public static List<APIWithKeyInfoDTO> formApiWithApiKeyListToDTOList(List<APIKeyInfo> apiKeyInfoList){
+        List<APIWithKeyInfoDTO> apiApiKeyInfoDTOList = apiKeyInfoList.stream()
+                .map(src -> {
+                    APIWithKeyInfoDTO dto = new APIWithKeyInfoDTO();
+                    dto.setKeyUUID(src.getKeyUUID());
+                    dto.setKeyName(src.getKeyName());
+                    dto.setApiUUID(src.getApiUUId());
+                    dto.setApiName(src.getApiName());
+                    return dto;
+                })
+                .collect(Collectors.toList());
+        return apiApiKeyInfoDTOList;
+    }
+
+    private static String getLastUsedTimeOrDefault(Long lastUsedTime) {
+        return lastUsedTime == null ? "NOT_USED" : lastUsedTime.toString();
+    }
+
+    private static long toSafeValidityPeriod(long validityPeriod) {
+        return (long) Math.min(validityPeriod, Long.MAX_VALUE);
     }
 }

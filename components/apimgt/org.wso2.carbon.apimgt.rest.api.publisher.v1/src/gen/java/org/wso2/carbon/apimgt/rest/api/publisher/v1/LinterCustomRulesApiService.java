@@ -20,5 +20,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface LinterCustomRulesApiService {
-      public Response getLinterCustomRules(MessageContext messageContext) throws APIManagementException;
+      public Response getLinterCustomRules(String apiId, String apiType, MessageContext messageContext) throws APIManagementException;
 }

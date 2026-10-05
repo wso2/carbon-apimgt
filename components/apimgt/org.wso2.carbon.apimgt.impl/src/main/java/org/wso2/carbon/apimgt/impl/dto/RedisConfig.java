@@ -28,9 +28,11 @@ public class RedisConfig {
     private int port;
     private String user;
     private char[] password;
-    private int databaseId;
+    private int databaseId = 0;
     private int connectionTimeout;
+    private int socketTimeout;
     private boolean isSslEnabled;
+    private long maxWaitMillis = -1;
     private int maxTotal = 8;
     private int maxIdle = 8;
     private int minIdle = 0;
@@ -42,7 +44,7 @@ public class RedisConfig {
     private long timeBetweenEvictionRunsMillis = 30000L;
     private int numTestsPerEvictionRun = -1;
     private String gatewayId;
-    private int minGatewayCount;
+    private long minGatewayCount;
     private long keyLockRetrievalTimeout;
     private String hybridThrottleProcessorType;
     public int getMaxTotal() {
@@ -222,6 +224,22 @@ public class RedisConfig {
         this.connectionTimeout = connectionTimeout;
     }
 
+    public int getSocketTimeout() {
+        return socketTimeout;
+    }
+
+    public void setSocketTimeout(int socketTimeout) {
+        this.socketTimeout = socketTimeout;
+    }
+
+    public long getMaxWaitMillis() {
+        return maxWaitMillis;
+    }
+
+    public void setMaxWaitMillis(long maxWaitMillis) {
+        this.maxWaitMillis = maxWaitMillis;
+    }
+
     public boolean isSslEnabled() {
 
         return isSslEnabled;
@@ -240,10 +258,10 @@ public class RedisConfig {
         return gatewayId;
     }
 
-    public void setMinGatewayCount(int minGatewayCount) {
+    public void setMinGatewayCount(long minGatewayCount) {
         this.minGatewayCount = minGatewayCount;
     }
-    public int getMinGatewayCount() {
+    public long getMinGatewayCount() {
         return minGatewayCount;
     }
 

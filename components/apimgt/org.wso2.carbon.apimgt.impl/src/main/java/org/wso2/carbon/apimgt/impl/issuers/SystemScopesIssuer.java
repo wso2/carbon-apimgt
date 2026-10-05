@@ -337,14 +337,21 @@ public class SystemScopesIssuer implements ScopeValidator {
             String isSAML2Enabled = System.getProperty(APIConstants.SystemScopeConstants.CHECK_ROLES_FROM_SAML_ASSERTION);
             String isRetrieveRolesFromUserStoreForScopeValidation = System
                     .getProperty(APIConstants.SystemScopeConstants.RETRIEVE_ROLES_FROM_USERSTORE_FOR_SCOPE_VALIDATION);
-            if (GrantType.SAML20_BEARER.toString().equals(grantType) && Boolean.parseBoolean(isSAML2Enabled)) {
+            if (APIConstants.OAuthConstants.TOKEN_EXCHANGE.equals(grantType)) {
+                configureForJWTGrantOrExchangeGrant(tokReqMsgCtx, true);
+                Map<ClaimMapping, String> userAttributes = authenticatedUser.getUserAttributes();
+                if (tokReqMsgCtx.getProperty(APIConstants.SystemScopeConstants.ROLE_CLAIM) != null) {
+                    userRoles = getRolesFromUserAttribute(userAttributes,
+                            tokReqMsgCtx.getProperty(APIConstants.SystemScopeConstants.ROLE_CLAIM).toString());
+                }
+            } else if (GrantType.SAML20_BEARER.toString().equals(grantType) && Boolean.parseBoolean(isSAML2Enabled)) {
                 authenticatedUser.setUserStoreDomain("FEDERATED");
                 tokReqMsgCtx.setAuthorizedUser(authenticatedUser);
                 Assertion assertion = (Assertion) tokReqMsgCtx.getProperty(APIConstants.SystemScopeConstants.SAML2_ASSERTION);
                 userRoles = getRolesFromAssertion(assertion);
             } else if (APIConstants.SystemScopeConstants.OAUTH_JWT_BEARER_GRANT_TYPE.equals(grantType) && !(Boolean
                     .parseBoolean(isRetrieveRolesFromUserStoreForScopeValidation))) {
-                configureForJWTGrant(tokReqMsgCtx);
+                configureForJWTGrantOrExchangeGrant(tokReqMsgCtx, false);
                 Map<ClaimMapping, String> userAttributes = authenticatedUser.getUserAttributes();
                 if (tokReqMsgCtx.getProperty(APIConstants.SystemScopeConstants.ROLE_CLAIM) != null) {
                     userRoles = getRolesFromUserAttribute(userAttributes,
@@ -454,6 +461,12 @@ public class SystemScopesIssuer implements ScopeValidator {
                 if (!roleList.isEmpty()) {
                     authorizedScopes.add(scope);
                 }
+            } else if (roles == null && checkForProductRestAPIScopes(scope)) {
+                // Scope is not registered in tenant-conf.json and uses a product REST API scope prefix.
+                // Block issuance to prevent unauthorized use of unregistered system scopes.
+                if (log.isDebugEnabled()) {
+                    log.debug("Blocking unregistered system scope '" + scope + "' from being issued.");
+                }
             } else {
                 authorizedScopes.add(scope);
             }
@@ -559,13 +572,18 @@ public class SystemScopesIssuer implements ScopeValidator {
         return SystemScopeUtils.getRolesFromAssertion(assertion);
     }
 
-    protected void configureForJWTGrant(OAuthTokenReqMessageContext tokReqMsgCtx) {
+    protected void configureForJWTGrantOrExchangeGrant(OAuthTokenReqMessageContext tokReqMsgCtx,
+                                                       boolean isExchangeGrant) {
 
         SignedJWT signedJWT = null;
         JWTClaimsSet claimsSet = null;
         String[] roles = null;
         try {
-            signedJWT = getSignedJWT(tokReqMsgCtx);
+            if (isExchangeGrant) {
+                signedJWT = getSignedJWTFromSubjectToken(tokReqMsgCtx);
+            } else {
+                signedJWT = getSignedJWT(tokReqMsgCtx);
+            }
         } catch (IdentityOAuth2Exception e) {
             log.error("Couldn't retrieve signed JWT", e);
         }
@@ -575,20 +593,40 @@ public class SystemScopesIssuer implements ScopeValidator {
         String jwtIssuer = claimsSet != null ? claimsSet.getIssuer() : null;
         String tenantDomain = tokReqMsgCtx.getOauth2AccessTokenReqDTO().getTenantDomain();
 
+        if (StringUtils.isBlank(jwtIssuer)) {
+            log.error("Couldn't resolve JWT issuer from the token claims.");
+            return;
+        }
+
         try {
-            identityProvider = IdentityProviderManager.getInstance().getIdPByName(jwtIssuer, tenantDomain);
-            if (identityProvider != null) {
-                if (StringUtils.equalsIgnoreCase(identityProvider.getIdentityProviderName(), "default")) {
-                    identityProvider = this.getResidentIDPForIssuer(tenantDomain, jwtIssuer);
-                    if (identityProvider == null) {
-                        log.error("No Registered IDP found for the JWT with issuer name : " + jwtIssuer);
-                    }
+            if (log.isDebugEnabled()) {
+                log.debug("Attempting to retrieve IDP using metadata property: "
+                        + IdentityApplicationConstants.IDP_ISSUER_NAME + " with value: " + jwtIssuer);
+            }
+            identityProvider = IdentityProviderManager.getInstance()
+                    .getIdPByMetadataProperty(IdentityApplicationConstants.IDP_ISSUER_NAME, jwtIssuer, tenantDomain,
+                            false);
+
+            if (identityProvider == null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("IDP not found when retrieving for IDP using property: "
+                            + IdentityApplicationConstants.IDP_ISSUER_NAME + " with value: " + jwtIssuer
+                            + ". Attempting to retrieve IDP using IDP Name as issuer.");
                 }
-            } else {
-                log.error("No Registered IDP found for the JWT with issuer name : " + jwtIssuer);
+                identityProvider = IdentityProviderManager.getInstance().getIdPByName(jwtIssuer, tenantDomain);
+            }
+
+            if (identityProvider != null
+                    && StringUtils.equalsIgnoreCase(identityProvider.getIdentityProviderName(), "default")) {
+                identityProvider = this.getResidentIDPForIssuer(tenantDomain, jwtIssuer);
             }
         } catch (IdentityProviderManagementException | IdentityOAuth2Exception e) {
             log.error("Couldn't initiate identity provider instance", e);
+        }
+
+        if (identityProvider == null) {
+            log.error("No registered IDP found for the JWT issuer: " + jwtIssuer);
+            return;
         }
 
         try {
@@ -616,7 +654,7 @@ public class SystemScopesIssuer implements ScopeValidator {
         if (roleClaim != null) {
             userAttributes
                     .put(ClaimMapping.build(roleClaim, roleClaim, null, false),
-                            updatedRoles.toString().replace(" ", ""));
+                            StringUtils.join(updatedRoles, FrameworkUtils.getMultiAttributeSeparator()));
             tokReqMsgCtx.addProperty(APIConstants.SystemScopeConstants.ROLE_CLAIM, roleClaim);
         }
         user.setUserAttributes(userAttributes);
@@ -648,6 +686,41 @@ public class SystemScopesIssuer implements ScopeValidator {
 
         try {
             signedJWT = SignedJWT.parse(assertion);
+            if (log.isDebugEnabled()) {
+                log.debug(signedJWT);
+            }
+        } catch (ParseException e) {
+            String errorMessage = "Error while parsing the JWT.";
+            throw new IdentityOAuth2Exception(errorMessage, e);
+        }
+        return signedJWT;
+    }
+
+    /**
+     * Method to parse the subject token and retrieve the signed JWT
+     *
+     * @param tokReqMsgCtx request
+     * @return SignedJWT object
+     * @throws IdentityOAuth2Exception exception thrown due to a parsing error
+     */
+    private SignedJWT getSignedJWTFromSubjectToken(OAuthTokenReqMessageContext tokReqMsgCtx) throws IdentityOAuth2Exception {
+
+        RequestParameter[] params = tokReqMsgCtx.getOauth2AccessTokenReqDTO().getRequestParameters();
+        String subjectToken = null;
+        SignedJWT signedJWT;
+        for (RequestParameter param : params) {
+            if (param.getKey().equals(APIConstants.OAuthConstants.SUBJECT_TOKEN)) {
+                subjectToken = param.getValue()[0];
+                break;
+            }
+        }
+        if (StringUtils.isEmpty(subjectToken)) {
+            String errorMessage = "Error while retrieving subjectToken";
+            throw new IdentityOAuth2Exception(errorMessage);
+        }
+
+        try {
+            signedJWT = SignedJWT.parse(subjectToken);
             if (log.isDebugEnabled()) {
                 log.debug(signedJWT);
             }
@@ -837,5 +910,16 @@ public class SystemScopesIssuer implements ScopeValidator {
     protected int getTenantIdOfUser(String username) {
         return IdentityTenantUtil.getTenantIdOfUser(username);
     }
-}
 
+    /**
+     * This method is used to check whether a given scope is a product REST API scope or not.
+     * Product REST API scopes are identified by their prefixes.
+     *
+     * @param scope scope
+     * @return true if it is a product REST API scope
+     */
+    private boolean checkForProductRestAPIScopes(String scope) {
+        return scope.startsWith("apim:") || scope.startsWith("apim_analytics:") ||
+                scope.startsWith("service_catalog:");
+    }
+}

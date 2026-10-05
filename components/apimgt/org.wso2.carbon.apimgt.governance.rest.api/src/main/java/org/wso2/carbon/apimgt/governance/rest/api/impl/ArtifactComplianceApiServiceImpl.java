@@ -1,15 +1,15 @@
 package org.wso2.carbon.apimgt.governance.rest.api.impl;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.rest.api.ArtifactComplianceApiService;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceDetailsDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceListDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceSummaryDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetValidationResultDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.util.APIMGovernanceAPIUtil;
 import org.wso2.carbon.apimgt.governance.rest.api.util.ComplianceAPIUtil;
-import org.wso2.carbon.apimgt.governance.rest.api.util.GovernanceAPIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
 import javax.ws.rs.core.Response;
@@ -26,13 +26,14 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
      * @param messageContext The message context.
      * @return The compliance details for the specified API.
      */
-    public Response getComplianceByAPIId(String apiId, MessageContext messageContext) throws GovernanceException {
+    public Response getComplianceByAPIId(String apiId, MessageContext messageContext) throws APIMGovernanceException {
 
         ArtifactType artifactType = ArtifactType.API;
-        String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
+        String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
+        String username = APIMGovernanceAPIUtil.getLoggedInUsername();
 
         ArtifactComplianceDetailsDTO detailsDTO = ComplianceAPIUtil.getArtifactComplianceDetailsDTO
-                (apiId, artifactType, organization);
+                (apiId, artifactType, username, organization);
 
         return Response.ok().entity(detailsDTO).build();
     }
@@ -46,16 +47,16 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
      * @return The compliance status for the list of APIs.
      */
     public Response getComplianceStatusListOfAPIs(Integer limit, Integer offset, MessageContext messageContext)
-            throws GovernanceException {
+            throws APIMGovernanceException {
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
 
         ArtifactType artifactType = ArtifactType.API;
-        String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
-
+        String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
+        String username = APIMGovernanceAPIUtil.getLoggedInUsername();
         ArtifactComplianceListDTO complianceListDTO = ComplianceAPIUtil
-                .getArtifactComplianceListDTO(artifactType, organization, limit, offset);
+                .getArtifactComplianceListDTO(artifactType, username, organization, limit, offset);
 
         return Response.ok().entity(complianceListDTO).build();
     }
@@ -65,15 +66,16 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
      *
      * @param messageContext message context
      * @return Response
-     * @throws GovernanceException if an error occurs while getting the artifact compliance summary
+     * @throws APIMGovernanceException if an error occurs while getting the artifact compliance summary
      */
-    public Response getComplianceSummaryForAPIs(MessageContext messageContext) throws GovernanceException {
+    public Response getComplianceSummaryForAPIs(MessageContext messageContext) throws APIMGovernanceException {
 
-        String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
+        String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
+        String username = APIMGovernanceAPIUtil.getLoggedInUsername();
         ArtifactType artifactType = ArtifactType.API;
 
         ArtifactComplianceSummaryDTO summaryDTO = ComplianceAPIUtil.getArtifactComplianceSummary(artifactType,
-                organization);
+                username, organization);
 
         return Response.ok().entity(summaryDTO).build();
     }
@@ -85,16 +87,17 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
      * @param rulesetId      ruleset ID
      * @param messageContext message context
      * @return Response
-     * @throws GovernanceException if an error occurs while getting the ruleset validation results
+     * @throws APIMGovernanceException if an error occurs while getting the ruleset validation results
      */
     public Response getRulesetValidationResultsByAPIId(String apiId, String rulesetId, MessageContext messageContext)
-            throws GovernanceException {
+            throws APIMGovernanceException {
 
-        String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
+        String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
+        String username = APIMGovernanceAPIUtil.getLoggedInUsername();
         ArtifactType artifactType = ArtifactType.API;
 
         RulesetValidationResultDTO rulesetValidationResultDTO = ComplianceAPIUtil
-                .getRulesetValidationResultDTO(apiId, artifactType, rulesetId, organization);
+                .getRulesetValidationResultDTO(apiId, artifactType, rulesetId, username, organization);
 
         return Response.ok().entity(rulesetValidationResultDTO).build();
     }

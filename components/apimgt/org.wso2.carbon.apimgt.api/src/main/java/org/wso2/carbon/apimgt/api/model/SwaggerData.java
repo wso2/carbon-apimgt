@@ -41,6 +41,7 @@ public class SwaggerData {
         private String amznResourceName;
         private int amznResourceTimeout;
         private boolean amznResourceContentEncoded;
+        private BackendOperationMapping backendOperationMapping;
 
         public String getPath() {
             return path;
@@ -116,6 +117,15 @@ public class SwaggerData {
             this.scopes = scopes;
         }
 
+        public BackendOperationMapping getBackendOperationMapping() {
+
+            return backendOperationMapping;
+        }
+
+        public void setBackendOperationMapping(BackendOperationMapping backendOperationMapping) {
+
+            this.backendOperationMapping = backendOperationMapping;
+        }
     }
 
     private String title;
@@ -128,6 +138,7 @@ public class SwaggerData {
     private String apiLevelPolicy;
     private Set<Resource> resources = new LinkedHashSet<>();
     private Set<Scope> scopes = new HashSet<>();
+    private String subtype;
 
     public SwaggerData(API api) {
         title = api.getId().getName();
@@ -154,6 +165,7 @@ public class SwaggerData {
             resource.amznResourceName = uriTemplate.getAmznResourceName();
             resource.amznResourceTimeout = uriTemplate.getAmznResourceTimeout();
             resource.amznResourceContentEncoded = uriTemplate.getAmznResourceContentEncoded();
+            resource.backendOperationMapping = uriTemplate.getBackendOperationMapping();
             resources.add(resource);
         }
 
@@ -164,6 +176,7 @@ public class SwaggerData {
         if (scopes != null) {
             this.scopes.addAll(scopes);
         }
+        subtype = api.getSubtype();
     }
 
     public SwaggerData(APIProduct apiProduct) {
@@ -241,4 +254,6 @@ public class SwaggerData {
     public String getApiLevelPolicy() {
         return apiLevelPolicy;
     }
+
+    public String getSubtype() { return subtype; }
 }

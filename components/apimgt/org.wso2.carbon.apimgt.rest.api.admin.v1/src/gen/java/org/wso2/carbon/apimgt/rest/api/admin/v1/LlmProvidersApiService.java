@@ -23,9 +23,9 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface LlmProvidersApiService {
-      public Response addLLMProvider(String name, String apiVersion, String description, String configurations, InputStream apiDefinitionInputStream, Attachment apiDefinitionDetail, MessageContext messageContext) throws APIManagementException;
+      public Response addLLMProvider(String name, String apiVersion, String description, String configurations, InputStream apiDefinitionInputStream, Attachment apiDefinitionDetail, String modelList, MessageContext messageContext) throws APIManagementException;
       public Response deleteLLMProvider(String llmProviderId, MessageContext messageContext) throws APIManagementException;
       public Response getLLMProvider(String llmProviderId, MessageContext messageContext) throws APIManagementException;
       public Response getLLMProviders(MessageContext messageContext) throws APIManagementException;
-      public Response updateLLMProvider(String llmProviderId, String name, String apiVersion, String description, String configurations, InputStream apiDefinitionInputStream, Attachment apiDefinitionDetail, MessageContext messageContext) throws APIManagementException;
+      public Response updateLLMProvider(String llmProviderId, String name, String apiVersion, String description, String configurations, InputStream apiDefinitionInputStream, Attachment apiDefinitionDetail, String modelList, MessageContext messageContext) throws APIManagementException;
 }

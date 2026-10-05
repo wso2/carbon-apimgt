@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl.workflow;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -44,6 +45,9 @@ public class APIRevisionDeploymentApprovalWorkflowExecutor extends WorkflowExecu
     private static final String USERNAME_PROPERTY = "userName";
     private static final String API_PROVIDER_PROPERTY = "apiProvider";
     private static final String API_ID_PROPERTY = "apiId";
+    private static final String INVOKER_PROPERTY = "invoker";
+    private static final String REVISION_DESCRIPTION_PROPERTY = "revisionDescription";
+    private static final String TENANT_DOMAIN_PROPERTY = "tenantDomain";
 
     @Override
     public String getWorkflowType() {
@@ -59,25 +63,35 @@ public class APIRevisionDeploymentApprovalWorkflowExecutor extends WorkflowExecu
      */
     @Override
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Executing API revision deployment approval workflow. Workflow reference: " + workflowDTO.getWorkflowReference());
+        }
+
         APIRevisionWorkflowDTO revisionWorkFlowDTO = (APIRevisionWorkflowDTO) workflowDTO;
         APIRevision revision = revisionWorkFlowDTO.getAPIRevision();
 
-        if (log.isDebugEnabled()) {
-            log.debug("Executing API Revision Deployment Workflow: " + revisionWorkFlowDTO.getWorkflowReference());
-        }
-
-        String message = "Approve revision " + revision.getId() + " deployment request from the user "
-                + revisionWorkFlowDTO.getUserName() + " for the environment " + revisionWorkFlowDTO.getEnvironment()
-                + " of the API " + revisionWorkFlowDTO.getApiName();
+        String message = String.format(
+                "Approve revision %s deployment request from the user %s for the environment %s of the API %s",
+                revision.getId(),
+                revisionWorkFlowDTO.getUserName(),
+                revisionWorkFlowDTO.getEnvironment(),
+                revisionWorkFlowDTO.getApiName()
+        );
         workflowDTO.setWorkflowDescription(message);
 
         // set properties for Admin UI rendering
-        workflowDTO.setProperties(REVISION_ID_PROPERTY, String.valueOf(revision.getId()));
         workflowDTO.setProperties(API_NAME_PROPERTY, revisionWorkFlowDTO.getApiName());
         workflowDTO.setProperties(API_VERSION_PROPERTY, revisionWorkFlowDTO.getApiVersion());
+        workflowDTO.setProperties(API_PROVIDER_PROPERTY, revisionWorkFlowDTO.getApiProvider());
+        workflowDTO.setProperties(INVOKER_PROPERTY, revisionWorkFlowDTO.getInvoker());
         workflowDTO.setProperties(ENVIRONMENT_PROPERTY, revisionWorkFlowDTO.getEnvironment());
-        workflowDTO.setProperties(USERNAME_PROPERTY, revisionWorkFlowDTO.getUserName());
+        workflowDTO.setProperties(REVISION_ID_PROPERTY, revisionWorkFlowDTO.getRevisionId());
+        workflowDTO.setProperties(TENANT_DOMAIN_PROPERTY, revisionWorkFlowDTO.getTenantDomain());
 
+        if (StringUtils.isNotBlank(revision.getDescription())) {
+            workflowDTO.setProperties(REVISION_DESCRIPTION_PROPERTY, revision.getDescription());
+        }
         // set properties for Admin backend logic
         workflowDTO.setMetadata(REVISION_ID_PROPERTY, revisionWorkFlowDTO.getRevisionId());
         workflowDTO.setMetadata(ENVIRONMENT_PROPERTY, revisionWorkFlowDTO.getEnvironment());
@@ -86,6 +100,10 @@ public class APIRevisionDeploymentApprovalWorkflowExecutor extends WorkflowExecu
         workflowDTO.setMetadata(API_ID_PROPERTY, revision.getApiUUID());
 
         super.execute(workflowDTO);
+        if (log.isDebugEnabled()) {
+            log.debug("API revision deployment approval workflow executed successfully. Workflow reference: "
+                    + workflowDTO.getWorkflowReference());
+        }
 
         return new GeneralWorkflowResponse();
     }

@@ -20,6 +20,8 @@ package org.wso2.carbon.apimgt.gateway.mediators.webhooks;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
@@ -31,6 +33,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
 import org.wso2.carbon.apimgt.gateway.utils.WebhooksUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.io.IOException;
@@ -43,6 +46,7 @@ import static org.wso2.carbon.apimgt.impl.APIConstants.AsyncApi.ASYNC_MESSAGE_TY
 public class DeliveryStatusUpdater extends AbstractMediator {
 
     private static final int deliveryDataPersisRetries = 15;
+    private static final Log log = LogFactory.getLog(DeliveryStatusUpdater.class);
 
     @Override
     public boolean mediate(MessageContext messageContext) {
@@ -65,10 +69,30 @@ public class DeliveryStatusUpdater extends AbstractMediator {
             if (tenantDomain == null) {
                 tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(true);
             }
-            String apiKey = WebhooksUtils.generateAPIKey(messageContext, tenantDomain);
-            String applicationID = (String) messageContext.getProperty(APIConstants.Webhooks.
-                    SUBSCRIBER_APPLICATION_ID_PROPERTY);
-            String requestBody = generateRequestBody(apiKey, applicationID, tenantDomain, callback, topicName, status);
+
+            API api = (API) messageContext.getProperty(APIMgtGatewayConstants.API_OBJECT);
+            if (api == null) {
+                api = WebhooksUtils.generateAPI(messageContext, tenantDomain);
+            }
+            String applicationID =
+                    (String) messageContext.getProperty(APIConstants.Webhooks.SUBSCRIBER_APPLICATION_ID_PROPERTY);
+
+            String apiUUID = api.getUuid();
+            String apiName = api.getApiName();
+
+            messageContext.setProperty(APIConstants.Webhooks.API_UUID, apiUUID);
+            messageContext.setProperty(APIConstants.Webhooks.API_NAME, apiName);
+
+            if (log.isDebugEnabled()) {
+                log.debug(String.format("Delivery Status: %s, HTTP Status Code: %s, Callback URL: %s, " +
+                                "Topic Name: %s, Tenant Domain: %s, Application ID: %s, API UUID: %s, API Name: %s",
+                        (status == 1 ? "Success" : "Failure"), (statusCode != null ? statusCode.toString() : "N/A"),
+                        (callback != null ? callback : "N/A"), (topicName != null ? topicName : "N/A"), tenantDomain,
+                        (applicationID != null ? applicationID : "N/A"), (apiUUID != null ? apiUUID : "N/A"),
+                        (apiName != null ? apiName : "N/A")));
+            }
+
+            String requestBody = generateRequestBody(apiUUID, applicationID, tenantDomain, callback, topicName, status);
             boolean isSubscribeRequest = messageContext.getProperty(ASYNC_MESSAGE_TYPE) != null;
             if (APIUtil.isAnalyticsEnabled() && !isSubscribeRequest) {
                 WebhooksUtils.publishAnalyticsData(messageContext);

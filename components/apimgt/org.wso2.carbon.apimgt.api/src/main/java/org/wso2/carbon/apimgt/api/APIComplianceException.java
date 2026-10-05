@@ -20,14 +20,16 @@
 
 package org.wso2.carbon.apimgt.api;
 
-import static org.wso2.carbon.apimgt.api.ExceptionCodes.COMPLIANCE_VIOLATION_ERROR;
-
 public class APIComplianceException extends APIManagementException {
     private ErrorHandler errorHandler;
 
 
     public APIComplianceException(String message) {
-        super(message, ExceptionCodes.from(COMPLIANCE_VIOLATION_ERROR, message));
+        super(message, ExceptionCodes.from(ExceptionCodes.COMPLIANCE_VIOLATION_ERROR, message));
+    }
+
+    public APIComplianceException(String message, ExceptionCodes code) {
+        super(message, ExceptionCodes.from(code, message));
     }
 
     public APIComplianceException(String message, Throwable e) {

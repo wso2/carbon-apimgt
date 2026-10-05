@@ -1,3 +1,22 @@
+/*
+ *
+ * Copyright (c) 2025 WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 LLC. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ *
+ */
 package org.wso2.carbon.apimgt.rest.api.util.servlet.impl;
 
 import java.lang.reflect.Constructor;
@@ -42,8 +61,12 @@ import org.apache.cxf.rs.security.cors.CrossOriginResourceSharingFilter;
 import org.apache.cxf.service.invoker.Invoker;
 import org.apache.cxf.transport.http.DestinationRegistry;
 import org.apache.cxf.transport.servlet.CXFNonSpringServlet;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 
+/**
+ * Custom CXFNonSpringJaxrsServlet to support system properties in CORS allowed origins.
+ */
 public class CustomCXFNonSpringJaxrsServlet extends CXFNonSpringServlet {
     private static final long serialVersionUID = -8916352798780577499L;
     private static final Logger LOG = LogUtils.getL7dLogger(CustomCXFNonSpringJaxrsServlet.class);
@@ -70,6 +93,11 @@ public class CustomCXFNonSpringJaxrsServlet extends CXFNonSpringServlet {
     private static final String DEFAULT_PARAMETER_SPLIT_CHAR = ",";
     private static final String SPACE_PARAMETER_SPLIT_CHAR = "space";
     private static final String JAXRS_APPLICATION_PARAM = "javax.ws.rs.Application";
+    private static final String MCP_RESOURCE_CLASS_PUBLISHER =
+            "org.wso2.carbon.apimgt.rest.api.publisher.v1.McpServersApi";
+    private static final String MCP_RESOURCE_CLASS_DEVPORTAL =
+            "org.wso2.carbon.apimgt.rest.api.store.v1.McpServersApi";
+    private static Boolean enableMcpSupport;
     private static final String CORS_SYSTEM_PROPERTIES_PREFIX = "{systemProperties['";
     private static final String CORS_SYSTEM_PROPERTIES_PATTERN = "^\\{systemProperties\\['|'\\]\\}$";
     private static Map<String, String> systemPropMap = new HashMap();
@@ -326,6 +354,12 @@ public class CustomCXFNonSpringJaxrsServlet extends CXFNonSpringServlet {
                 String cName = var7[var9];
                 Map<String, List<String>> props = new HashMap();
                 String theName = this.getClassNameAndProperties(cName, props);
+                // Skip MCP resources when disabled
+                if (!isMcpEnabled() && (MCP_RESOURCE_CLASS_PUBLISHER.equals(theName)
+                        || MCP_RESOURCE_CLASS_DEVPORTAL.equals(theName))) {
+                    LOG.info("Skipping MCP resource class: " + theName + " as MCP is disabled");
+                    continue;
+                }
                 if (!theName.isEmpty()) {
                     Class<?> cls = this.loadClass(theName);
                     map.put(cls, props);
@@ -495,13 +529,10 @@ public class CustomCXFNonSpringJaxrsServlet extends CXFNonSpringServlet {
                 this.configureSingleton(instance);
                 return isApplication ? provider : instance;
             } catch (InstantiationException var8) {
-                var8.printStackTrace();
                 throw new ServletException("Resource class " + cls.getName() + " can not be instantiated");
             } catch (IllegalAccessException var9) {
-                var9.printStackTrace();
                 throw new ServletException("Resource class " + cls.getName() + " can not be instantiated due to IllegalAccessException");
             } catch (InvocationTargetException var10) {
-                var10.printStackTrace();
                 throw new ServletException("Resource class " + cls.getName() + " can not be instantiated due to InvocationTargetException");
             }
         }
@@ -674,5 +705,13 @@ public class CustomCXFNonSpringJaxrsServlet extends CXFNonSpringServlet {
         public Set<Object> getSingletons() {
             return this.applicationSingletons;
         }
+    }
+
+    private static boolean isMcpEnabled() {
+
+        if (enableMcpSupport == null) {
+            enableMcpSupport = Boolean.parseBoolean(System.getProperty(APIConstants.ENABLE_MCP_SUPPORT));
+        }
+        return enableMcpSupport;
     }
 }

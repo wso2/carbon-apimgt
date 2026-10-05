@@ -21,7 +21,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.model.subscription.CacheableEntity;
+import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheInvalidationServiceImpl;
@@ -47,6 +49,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -71,7 +74,23 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     private boolean apisInitialized;
     private boolean apiPoliciesInitialized;
     private String tenantDomain;
-    private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(LOADING_POOL_SIZE);
+
+    private static final AtomicInteger POOL_NUMBER = new AtomicInteger(1);
+    private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(LOADING_POOL_SIZE,
+            new ThreadFactory() {
+                final AtomicInteger threadNumber = new AtomicInteger(1);
+                final ThreadGroup group = (System.getSecurityManager() != null) ?
+                        System.getSecurityManager().getThreadGroup() :
+                        Thread.currentThread().getThreadGroup();
+                final String namePrefix = "SubscriptionDataStore-pool-" + POOL_NUMBER.getAndIncrement() + "-thread-";
+
+                @Override
+                public Thread newThread(Runnable r) {
+
+                    return new Thread(group, r, namePrefix + threadNumber.getAndIncrement(), 0);
+                }
+            });
+
     private final ExecutorService subscriptionExecutorService = Executors.newFixedThreadPool(10,
             new InternalSubscriptionThreadFactory());
 
@@ -156,15 +175,48 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     @Override
     public ApplicationKeyMapping getKeyMappingByKeyAndKeyManager(String key, String keyManager,
                                                                  boolean validationDisabled) {
-        ApplicationKeyMapping applicationKeyMapping;
-        if (validationDisabled) {
-            try {
-                applicationKeyMapping = getKeyMappingByKeyAndKeyManager(key, keyManager);
-            } catch (Exception e) {
-                applicationKeyMapping = null;
+
+        APIManagerConfiguration config =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        boolean disableRetrieveKeyMappings =
+                Boolean.parseBoolean(config.getFirstProperty(APIConstants.DISABLE_RETRIEVE_KEY_MAPPING));
+        ApplicationKeyMappingCacheKey applicationKeyMappingCacheKey = new ApplicationKeyMappingCacheKey(key,
+                keyManager);
+        String synchronizeKey = "SubscriptionDataStoreImpl-KeyMapping-" + applicationKeyMappingCacheKey;
+
+        ApplicationKeyMapping applicationKeyMapping = applicationKeyMappingMap.get(applicationKeyMappingCacheKey);
+        if (applicationKeyMapping == null) {
+            synchronized (synchronizeKey.intern()) {
+                applicationKeyMapping = applicationKeyMappingMap.get(applicationKeyMappingCacheKey);
+                if (applicationKeyMapping != null) {
+                    return applicationKeyMapping;
+                }
+                try {
+                    if (!validationDisabled || !disableRetrieveKeyMappings) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Attempting to load key mapping from internal API");
+                        }
+                        applicationKeyMapping = new SubscriptionDataLoaderImpl()
+                                .getKeyMapping(key, keyManager, tenantDomain);
+                    }
+                } catch (DataLoadingException e) {
+                    log.error("Error while Loading KeyMapping Information from Internal API.", e);
+                }
+                if (applicationKeyMapping != null && !StringUtils.isEmpty(applicationKeyMapping.getConsumerKey())) {
+                    // load to the memory
+                    log.debug("Loading Keymapping to the in-memory datastore.");
+                    addOrUpdateApplicationKeyMapping(applicationKeyMapping);
+                }
             }
-        } else {
-            return getKeyMappingByKeyAndKeyManager(key, keyManager);
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving Application information with Consumer Key : " + key + " and keymanager : " + keyManager);
+            if (applicationKeyMapping != null) {
+                log.debug("Retrieved Application information with Consumer Key : " + key + " and keymanager : " + keyManager + " is " + applicationKeyMapping.toString());
+            } else {
+                log.debug("Retrieving Application information with Consumer Key : " + key + " and keymanager : " + keyManager + " is empty");
+            }
         }
         return applicationKeyMapping;
     }
@@ -214,6 +266,14 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         if (context == null) {
             if (log.isDebugEnabled()) {
                 log.debug("Cannot retrieve API information with null context");
+            }
+            return null;
+        }
+        if (JWTConstants.GATEWAY_JWKS_API_CONTEXT.equals(context) && StringUtils.isEmpty(version)
+                && ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getJwtConfigurationDto().isJWKSApiEnabled()) {
+            if (log.isDebugEnabled()) {
+                log.debug("Cannot retrieve API information for JWKS API");
             }
             return null;
         }
@@ -746,7 +806,24 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
     @Override
     public void destroy() {
-        executorService.shutdown();
+
+        shutdownExecutor(executorService);
+        shutdownExecutor(subscriptionExecutorService);
+    }
+
+    private void shutdownExecutor(ExecutorService executor) {
+
+        if (executor != null) {
+            executor.shutdown();
+            try {
+                if (!executor.awaitTermination(30, TimeUnit.SECONDS)) {
+                    executor.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                executor.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
+        }
     }
 
     @Override
@@ -796,9 +873,6 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
         try {
             API api = apiMap.get(event.getContext() + ":" + event.getVersion());
-            if (api != null) {
-                clearResourceCache(api, event.getTenantDomain());
-            }
             if (APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(event.getType())) {
                 if (api != null) {
                     removeAPI(api);
@@ -808,6 +882,9 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                 if (newAPI != null) {
                     addOrUpdateAPI(newAPI);
                 }
+            }
+            if (api != null) {
+                clearResourceCache(api, event.getTenantDomain());
             }
         } catch (DataLoadingException e) {
             log.error("Exception while loading api for " + event.getContext() + " " + event.getVersion(), e);
@@ -884,6 +961,45 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         @Override
         public Thread newThread(Runnable r) {
             return new Thread(r, "InternalSubscriptionThread-thread-" + count++);
+        }
+    }
+
+    /**
+     * Updates API properties in the data store using the given {@link GatewayAPIDTO}.
+     * Synchronizes on API context/version key, loads API if missing, and updates its properties.
+     *
+     * @param gatewayAPIDTO DTO with API context, version, and properties.
+     */
+    @Override
+    public void updateAPIPropertiesFromGatewayDTO(GatewayAPIDTO gatewayAPIDTO) {
+        String key = gatewayAPIDTO.getApiContext() + DELEM_PERIOD + gatewayAPIDTO.getVersion();
+        String synchronizeKey = "SubscriptionDataStoreImpl-API-" + key;
+        synchronized (synchronizeKey.intern()) {
+            // Direct map access to avoid nested synchronization
+            API subscriptionAPI = apiMap.get(key);
+            if (subscriptionAPI == null) {
+                // If API not found, try to load it without nested synchronization
+                try {
+                    subscriptionAPI = new SubscriptionDataLoaderImpl().getApi(gatewayAPIDTO.getApiContext(),
+                            gatewayAPIDTO.getVersion());
+                    if (subscriptionAPI != null && subscriptionAPI.getApiId() != 0) {
+                        // load to the memory
+                        addOrUpdateAPI(subscriptionAPI);
+                    }
+                } catch (DataLoadingException e) {
+                    log.error("Error while Retrieving Data From Internal Rest API", e);
+                }
+            }
+            if (subscriptionAPI != null) {
+                subscriptionAPI.setApiProperties(gatewayAPIDTO.getAdditionalProperties());
+                if (log.isDebugEnabled()) {
+                    log.debug("Updated API properties in SubscriptionDataStore for API: " + subscriptionAPI.getName() +
+                            " (Context: " + subscriptionAPI.getContext() + ", Version: " +
+                            subscriptionAPI.getVersion() + ")");
+                }
+            } else if (log.isDebugEnabled()) {
+                log.debug("API not found in SubscriptionDataStore for key: " + key);
+            }
         }
     }
 }

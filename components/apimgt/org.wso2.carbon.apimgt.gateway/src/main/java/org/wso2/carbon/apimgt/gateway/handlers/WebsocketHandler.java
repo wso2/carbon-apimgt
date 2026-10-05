@@ -38,6 +38,8 @@ import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketUtil
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContextDataHolder;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponseDTO;
+import org.wso2.carbon.apimgt.gateway.inbound.websocket.utils.InboundWebsocketProcessorUtil;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 public class WebsocketHandler extends CombinedChannelDuplexHandler<WebsocketInboundHandler, WebsocketOutboundHandler> {
@@ -101,6 +103,15 @@ public class WebsocketHandler extends CombinedChannelDuplexHandler<WebsocketInbo
         } else if (msg instanceof WebSocketFrame) {
             InboundProcessorResponseDTO responseDTO = inboundHandler().getWebSocketProcessor().handleResponse(
                     (WebSocketFrame) msg, inboundMessageContext);
+            InboundWebsocketProcessorUtil.setLatestElectedAPI(inboundMessageContext.getTenantDomain(), inboundMessageContext);
+            if (inboundMessageContext.getElectedAPI() != null
+                    && APIConstants.BLOCKED.equalsIgnoreCase(inboundMessageContext.getElectedAPI().getStatus())) {
+                responseDTO = InboundWebsocketProcessorUtil.getFrameErrorDTO(
+                        WebSocketApiConstants.FrameErrorConstants.API_BLOCKED,
+                        WebSocketApiConstants.FrameErrorConstants.API_BLOCKED_MESSAGE,
+                        true
+                );
+            }
             if (responseDTO.isError()) {
                 // Release WebsocketFrame
                 ReferenceCountUtil.release(msg);
@@ -126,7 +137,6 @@ public class WebsocketHandler extends CombinedChannelDuplexHandler<WebsocketInbo
                     log.debug(channelId + " -- Websocket API request [outbound] : Sending Outbound Websocket frame." +
                             ctx.channel().toString());
                 }
-                outboundHandler().write(ctx, msg, promise);
                 if (APIUtil.isAnalyticsEnabled()) {
                     WebSocketUtils.setApiPropertyToChannel(ctx, Constants.BACKEND_END_TIME_PROPERTY,
                             System.currentTimeMillis());
@@ -135,6 +145,7 @@ public class WebsocketHandler extends CombinedChannelDuplexHandler<WebsocketInbo
                                 ((TextWebSocketFrame) msg).text().length());
                     }
                 }
+                outboundHandler().write(ctx, msg, promise);
                 // publish analytics events if analytics is enabled
                 publishSubscribeEvent(ctx);
             }

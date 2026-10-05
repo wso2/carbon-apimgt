@@ -43,6 +43,7 @@ public class JWTValidationInfo implements Serializable {
     private String rawPayload;
     private String keyManager;
     private Boolean isAppToken;
+    private boolean isExpired = false;
 
     public JWTValidationInfo() {
 
@@ -192,5 +193,13 @@ public class JWTValidationInfo implements Serializable {
     public void setKeyManager(String keyManager) {
 
         this.keyManager = keyManager;
+    }
+
+    public boolean isExpired() {
+        return isExpired;
+    }
+
+    public void setExpired(boolean expired) {
+        isExpired = expired;
     }
 }

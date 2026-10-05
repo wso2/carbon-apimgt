@@ -16,11 +16,14 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
+
 /**
  * Service interface for retrieving the current APIManagerConfiguration.
  */
 public interface APIManagerConfigurationService {
 
+    @UsedByMigrationClient
     APIManagerConfiguration getAPIManagerConfiguration();
 
     APIManagerAnalyticsConfiguration getAPIAnalyticsConfiguration();

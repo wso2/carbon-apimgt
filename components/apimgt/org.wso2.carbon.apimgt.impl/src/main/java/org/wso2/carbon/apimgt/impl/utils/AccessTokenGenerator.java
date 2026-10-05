@@ -41,18 +41,10 @@ import java.util.concurrent.ConcurrentHashMap;
 public class AccessTokenGenerator {
 
     private static final Log log = LogFactory.getLog(AccessTokenGenerator.class);
-
-    private String tokenEndpoint;
-    private String authKey;
     private Map<String, AccessTokenInfo> accessTokenInfoMap = new ConcurrentHashMap<>();
 
-    public AccessTokenGenerator(String tokenEndpoint, String authKey) {
-        this.tokenEndpoint = tokenEndpoint;
-        this.authKey = authKey;
-    }
-
-    public String getAccessToken() {
-        AccessTokenInfo accessTokenInfo = accessTokenInfoMap.get(tokenEndpoint);
+    public String getAccessToken(String tokenEndpoint, String authKey) {
+        AccessTokenInfo accessTokenInfo = accessTokenInfoMap.get(authKey);
         if (accessTokenInfo != null) {
             long expiryTime = accessTokenInfo.getIssuedTime() + accessTokenInfo.getValidityPeriod();
             long buffer = 20000;
@@ -61,9 +53,9 @@ public class AccessTokenGenerator {
                 if (log.isDebugEnabled()) {
                     log.debug("Access token expired. New token requested");
                 }
-                accessTokenInfoMap.remove(tokenEndpoint);
-                accessTokenInfo = generateNewAccessToken();
-                accessTokenInfoMap.put(tokenEndpoint, accessTokenInfo);
+                accessTokenInfoMap.remove(authKey);
+                accessTokenInfo = generateNewAccessToken(tokenEndpoint, authKey);
+                accessTokenInfoMap.put(authKey, accessTokenInfo);
                 assert accessTokenInfo != null;
                 return accessTokenInfo.getAccessToken();
             } else {
@@ -73,16 +65,17 @@ public class AccessTokenGenerator {
                 return accessTokenInfo.getAccessToken();
             }
         } else {
-            accessTokenInfo = generateNewAccessToken();
+            accessTokenInfo = generateNewAccessToken(tokenEndpoint, authKey);
             if (accessTokenInfo != null) {
-                accessTokenInfoMap.put(tokenEndpoint, accessTokenInfo);
+                accessTokenInfoMap.put(authKey, accessTokenInfo);
                 return accessTokenInfo.getAccessToken();
             }
         }
         return null;
+
     }
 
-    private AccessTokenInfo generateNewAccessToken() {
+    private AccessTokenInfo generateNewAccessToken(String tokenEndpoint, String authKey) {
         try {
             URL oauthURL = new URL(tokenEndpoint);
             HttpPost request = new HttpPost(tokenEndpoint);

@@ -25,7 +25,7 @@ import javax.validation.constraints.*;
 
 @Api(description = "the block API")
 
-@Produces({ "application/json" })
+
 
 
 public class BlockApi  {

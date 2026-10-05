@@ -17,9 +17,13 @@
  */
 package org.wso2.carbon.apimgt.api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.HashMap;
 import java.util.Map;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class EndpointSecurity {
 
     private String uniqueIdentifier = null;
@@ -46,6 +50,28 @@ public class EndpointSecurity {
 
     private String apiKeyIdentifierType = null;
 
+    private String accessKey = null;
+    private String secretKey = null;
+    private String region = null;
+    private String service = null;
+
+    // Serialized only when set. API#getEndpointConfig() migrates legacy endpoint configs by
+    // constructing a bare EndpointSecurity and serializing it into endpoint_security; without
+    // NON_NULL these AWS-only fields would be written into every migrated basic/digest endpoint,
+    // changing the stored config of APIs that have nothing to do with AWS. The fields above predate
+    // this and are left as-is so existing stored configs keep their current shape.
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String roleArn = null;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String roleRegion = null;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String roleExternalId = null;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String authType = null;
+
     private String customParameters = null;
 
     private Map additionalProperties = new HashMap();
@@ -57,6 +83,10 @@ public class EndpointSecurity {
     private int socketTimeoutDuration = -1;
 
     private ProxyConfigs proxyConfigs;
+
+    private TokenEndpointConnectionConfigType connectionTimeoutConfigType;
+
+    private TokenEndpointConnectionConfigType proxyConfigType;
 
     public EndpointSecurity(EndpointSecurity endpointSecurity) {
 
@@ -75,6 +105,8 @@ public class EndpointSecurity {
         this.connectionRequestTimeoutDuration = endpointSecurity.connectionRequestTimeoutDuration;
         this.socketTimeoutDuration = endpointSecurity.socketTimeoutDuration;
         this.proxyConfigs = endpointSecurity.proxyConfigs;
+        this.connectionTimeoutConfigType = endpointSecurity.connectionTimeoutConfigType;
+        this.proxyConfigType = endpointSecurity.proxyConfigType;
     }
 
     public EndpointSecurity() {
@@ -251,6 +283,87 @@ public class EndpointSecurity {
         this.socketTimeoutDuration = socketTimeoutDuration;
     }
 
+    public TokenEndpointConnectionConfigType getConnectionTimeoutConfigType() {
+        return connectionTimeoutConfigType;
+    }
+
+    public void setConnectionTimeoutConfigType(TokenEndpointConnectionConfigType connectionTimeoutConfigType) {
+        this.connectionTimeoutConfigType = connectionTimeoutConfigType;
+    }
+
+    public TokenEndpointConnectionConfigType getProxyConfigType() {
+        return proxyConfigType;
+    }
+
+    public void setProxyConfigType(TokenEndpointConnectionConfigType proxyConfigType) {
+        this.proxyConfigType = proxyConfigType;
+    }
+
+    public String getAccessKey() {
+        return accessKey;
+    }
+
+    public void setAccessKey(String accessKey) {
+        this.accessKey = accessKey;
+    }
+
+    public String getSecretKey() {
+        return secretKey;
+    }
+
+    public void setSecretKey(String secretKey) {
+        this.secretKey = secretKey;
+    }
+
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
+    }
+
+    public String getService() {
+        return service;
+    }
+
+    public void setService(String service) {
+        this.service = service;
+    }
+
+    public String getRoleArn() {
+        return roleArn;
+    }
+
+    public void setRoleArn(String roleArn) {
+        this.roleArn = roleArn;
+    }
+
+    public String getRoleRegion() {
+        return roleRegion;
+    }
+
+    public void setRoleRegion(String roleRegion) {
+        this.roleRegion = roleRegion;
+    }
+
+    public String getRoleExternalId() {
+        return roleExternalId;
+    }
+
+    public void setRoleExternalId(String roleExternalId) {
+        this.roleExternalId = roleExternalId;
+    }
+
+    public String getAuthType() {
+        return authType;
+    }
+
+    public void setAuthType(String authType) {
+        this.authType = authType;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ProxyConfigs {
         private boolean proxyEnabled;
         private String proxyHost;
@@ -258,6 +371,7 @@ public class EndpointSecurity {
         private String proxyProtocol;
         private String proxyUsername;
         private String proxyPassword;
+        private String proxyPasswordAlias;
 
         public boolean isProxyEnabled() {
             return proxyEnabled;
@@ -306,6 +420,14 @@ public class EndpointSecurity {
         public void setProxyPassword(String proxyPassword) {
             this.proxyPassword = proxyPassword;
         }
+        
+        public String getProxyPasswordAlias() {
+            return proxyPasswordAlias;
+        }
+
+        public void setProxyPasswordAlias(String proxyPasswordAlias) {
+            this.proxyPasswordAlias = proxyPasswordAlias;
+        }
     }
 
     @Override
@@ -329,6 +451,8 @@ public class EndpointSecurity {
                 ", connectionTimeoutDuration=" + connectionTimeoutDuration +
                 ", connectionRequestTimeoutDuration=" + connectionRequestTimeoutDuration +
                 ", socketTimeoutDuration=" + socketTimeoutDuration +
+                ", connectionTimeoutConfigType=" + connectionTimeoutConfigType + '\'' +
+                ", proxyConfigType=" + proxyConfigType + '\'' +
                 '}';
     }
 }

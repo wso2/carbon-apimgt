@@ -1,0 +1,4470 @@
+openapi: 3.0.0
+info:
+  title: Anthropic APIs
+  version: '1'
+
+servers:
+  - url: https://api.anthropic.com
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: Your unique API key for authentication. Required in the header of all API requests to authenticate your account and access Anthropic's services. Get your API key through the Console. Each key is scoped to a Workspace.
+
+  parameters:
+    AnthropicVersionHeader:
+      in: header
+      name: anthropic-version
+      description: The version of the Anthropic API you want to use. Required header for all API requests. Must be set to "2023-06-01".
+      required: true
+      schema:
+        type: string
+        enum:
+          - "2023-06-01"
+
+    AnthropicBetaHeader:
+      in: header
+      name: anthropic-beta
+      description: Optional header to specify beta feature(s) you want to use. Multiple betas can be specified using a comma-separated list or by including the header multiple times.
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+          enum:
+            - "computer-use-2024-10-22"
+            - "computer-use-2025-01-24"
+            - "output-128k-2025-02-19"
+            - "token-efficient-tools-2025-02-19"
+            - "prompt-tools-2025-04-02"
+            - "interleaved-thinking-2025-05-14"
+            - "files-api-2025-04-14"
+
+    AnthropicDangerousDirectBrowserAccessHeader:
+      in: header
+      name: anthropic-dangerous-direct-browser-access
+      description: This header must be set to "true" to enable direct client-side (browser) access to the API. This acknowledges the security risks of exposing your API key and is not recommended for production environments.
+      required: false
+      schema:
+        type: boolean
+
+    BeforeId:
+      name: before_id
+      in: query
+      schema:
+        type: string
+      description: ID of the object to use as a cursor for pagination. When provided, returns the page of results immediately before this object.
+
+    AfterId:
+      name: after_id
+      in: query
+      schema:
+        type: string
+      description: ID of the object to use as a cursor for pagination. When provided, returns the page of results immediately after this object.
+
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        default: 20
+        minimum: 1
+        maximum: 1000
+      description: Number of items to return per page.
+
+    BatchId:
+      name: message_batch_id
+      in: path
+      required: true
+      schema:
+        type: string
+
+    FileId:
+      name: file_id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: ID of the File.
+
+    UserId:
+      name: user_id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: ID of the User.
+
+    InviteId:
+      name: invite_id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: ID of the Invite.
+
+    WorkspaceId:
+      name: workspace_id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: ID of the Workspace.
+
+    ApiKeyId:
+      name: api_key_id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: ID of the API key.
+
+  headers:
+    RequestId:
+      description: A unique identifier for the request.
+      schema:
+        type: string
+
+    AnthropicOrganizationId:
+      description: The ID of the organization that the request belongs to.
+      schema:
+        type: string
+
+    RetryAfter:
+      description: The number of seconds until you can retry the request.
+      schema:
+        type: integer
+
+    AnthropicRateLimitRequestsLimit:
+      description: The maximum number of requests allowed within any rate limit period.
+      schema:
+        type: integer
+
+    AnthropicRateLimitRequestsRemaining:
+      description: The number of requests remaining before being rate limited.
+      schema:
+        type: integer
+
+    AnthropicRateLimitRequestsReset:
+      description: The time when the request rate limit will reset, provided in RFC 3339 format.
+      schema:
+        type: string
+        format: date-time
+
+    AnthropicRateLimitTokensLimit:
+      description: The maximum number of tokens allowed within any rate limit period.
+      schema:
+        type: integer
+
+    AnthropicRateLimitTokensRemaining:
+      description: The number of tokens remaining (rounded to the nearest thousand) before being rate limited.
+      schema:
+        type: integer
+
+    AnthropicRateLimitTokensReset:
+      description: The time when the token rate limit will reset, provided in RFC 3339 format.
+      schema:
+        type: string
+        format: date-time
+
+    AnthropicRateLimitInputTokensLimit:
+      description: The maximum number of input tokens allowed within any rate limit period.
+      schema:
+        type: integer
+
+    AnthropicRateLimitInputTokensRemaining:
+      description: The number of input tokens remaining (rounded to the nearest thousand) before being rate limited.
+      schema:
+        type: integer
+
+    AnthropicRateLimitInputTokensReset:
+      description: The time when the input token rate limit will reset, provided in RFC 3339 format.
+      schema:
+        type: string
+        format: date-time
+
+    AnthropicRateLimitOutputTokensLimit:
+      description: The maximum number of output tokens allowed within any rate limit period.
+      schema:
+        type: integer
+
+    AnthropicRateLimitOutputTokensRemaining:
+      description: The number of output tokens remaining (rounded to the nearest thousand) before being rate limited.
+      schema:
+        type: integer
+
+    AnthropicRateLimitOutputTokensReset:
+      description: The time when the output token rate limit will reset, provided in RFC 3339 format.
+      schema:
+        type: string
+        format: date-time
+
+    AnthropicPriorityInputTokensLimit:
+      description: The maximum number of Priority Tier input tokens allowed within any rate limit period. (Priority Tier only)
+      schema:
+        type: integer
+
+    AnthropicPriorityInputTokensRemaining:
+      description: The number of Priority Tier input tokens remaining (rounded to the nearest thousand) before being rate limited. (Priority Tier only)
+      schema:
+        type: integer
+
+    AnthropicPriorityInputTokensReset:
+      description: The time when the Priority Tier input token rate limit will be fully replenished, provided in RFC 3339 format. (Priority Tier only)
+      schema:
+        type: string
+        format: date-time
+
+    AnthropicPriorityOutputTokensLimit:
+      description: The maximum number of Priority Tier output tokens allowed within any rate limit period. (Priority Tier only)
+      schema:
+        type: integer
+
+    AnthropicPriorityOutputTokensRemaining:
+      description: The number of Priority Tier output tokens remaining (rounded to the nearest thousand) before being rate limited. (Priority Tier only)
+      schema:
+        type: integer
+
+    AnthropicPriorityOutputTokensReset:
+      description: The time when the Priority Tier output token rate limit will be fully replenished, provided in RFC 3339 format. (Priority Tier only)
+      schema:
+        type: string
+        format: date-time
+
+  schemas:
+    CacheControl:
+      type: object
+      nullable: true
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum: [ephemeral]
+        ttl:
+          type: string
+          enum: [5m, 1h]
+      description: Controls caching behavior for this content
+
+    CharacterLocation:
+      type: object
+      required:
+        - cited_text
+        - document_index
+        - document_title
+        - end_char_index
+        - start_char_index
+        - type
+      properties:
+        cited_text:
+          type: string
+          description: The text being cited
+        document_index:
+          type: integer
+          description: Should be greater than 0
+          minimum: 1
+        document_title:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 256
+        end_char_index:
+          type: integer
+        start_char_index:
+          type: integer
+          description: Should be greater than 0
+          minimum: 1
+        type:
+          type: string
+          enum: [char_location]
+          default: char_location
+
+    PageLocation:
+      type: object
+      required:
+        - cited_text
+        - document_index
+        - document_title
+        - end_page_number
+        - start_page_number
+        - type
+      properties:
+        cited_text:
+          type: string
+          description: The text being cited
+        document_index:
+          type: integer
+          description: Should be greater than 0
+          minimum: 1
+        document_title:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 256
+        end_page_number:
+          type: integer
+        start_page_number:
+          type: integer
+          description: Should be greater than 0
+          minimum: 1
+        type:
+          type: string
+          enum: [page_location]
+          default: page_location
+
+    ContentBlockLocation:
+      type: object
+      required:
+        - cited_text
+        - document_index
+        - document_title
+        - end_block_index
+        - start_block_index
+        - type
+      properties:
+        cited_text:
+          type: string
+          description: The text being cited
+        document_index:
+          type: integer
+          description: Should be greater than 0
+          minimum: 1
+        document_title:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 256
+        end_block_index:
+          type: integer
+        start_block_index:
+          type: integer
+          description: Should be greater than 0
+          minimum: 1
+        type:
+          type: string
+          enum: [content_block_location]
+
+    RequestWebSearchResultLocationCitation:
+      type: object
+      required:
+        - cited_text
+        - encrypted_index
+        - title
+        - type
+        - url
+      properties:
+        cited_text:
+          type: string
+        encrypted_index:
+          type: string
+        title:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 256
+        type:
+          type: string
+          enum: [web_search_result_location]
+        url:
+          type: string
+          minLength: 1
+          maxLength: 2048
+
+    Citations:
+      type: array
+      nullable: true
+      description: Citations supporting the text block.
+      items:
+        oneOf:
+          - $ref: '#/components/schemas/CharacterLocation'
+          - $ref: '#/components/schemas/PageLocation'
+          - $ref: '#/components/schemas/ContentBlockLocation'
+          - $ref: '#/components/schemas/RequestWebSearchResultLocationCitation'
+
+    ServerToolUse:
+      type: object
+      required:
+        - id
+        - input
+        - name
+        - type
+      properties:
+        id:
+          type: string
+        input:
+          type: object
+        name:
+          type: string
+          enum: [web_search, code_execution]
+        cache_control:
+          $ref: '#/components/schemas/CacheControl'
+
+    WebSearchToolResultObject:
+      type: object
+      required:
+        - error_code
+        - type
+      properties:
+        error_code:
+          type: string
+          enum: [invalid_tool_input, unavailable, max_uses_exceeded, too_many_requests, query_too_long]
+        type:
+          type: string
+          enum: [web_search_tool_result_error]
+
+    WebSearchToolResultObjectArray:
+      type: array
+      items:
+        type: object
+        required:
+          - encrypted_content
+          - page_age
+          - title
+          - type
+          - url
+        properties:
+          encrypted_content:
+            type: string
+          page_age:
+            type: string
+            nullable: true
+          title:
+            type: string
+            minLength: 1
+          type:
+            type: string
+            enum: [web_search_result]
+          url:
+            type: string
+            minLength: 1
+
+    WebSearchToolResult:
+      type: object
+      required:
+        - content
+        - tool_use_id
+        - type
+      properties:
+        content:
+          oneOf:
+            - $ref: '#/components/schemas/WebSearchToolResultObject'
+            - $ref: '#/components/schemas/WebSearchToolResultObjectArray'
+        tool_use_id:
+          type: string
+        type:
+          type: string
+          enum: [web_search_tool_result]
+        cache_control:
+          $ref: '#/components/schemas/CacheControl'
+
+    RequestCodeExecutionToolResultBlockErrorContent:
+      type: object
+      required:
+        - error_code
+        - type
+      properties:
+        error_code:
+          type: string
+          enum: [invalid_tool_input, unavailable, max_uses_exceeded, too_many_requests, execution_time_exceeded]
+        type:
+          type: string
+          enum: [code_execution_tool_result_error]
+
+    RequestCodeExecutionToolResultBlockContent:
+      type: object
+      required:
+        - content
+        - return_code
+        - stderr
+        - stdout
+        - type
+      properties:
+        content:
+          type: array
+          items:
+            type: object
+            required:
+              - file_id
+              - type
+            properties:
+              file_id:
+                type: string
+              type:
+                type: string
+                enum: [code_execution_output]
+        return_code:
+          type: integer
+        stderr:
+          type: string
+        stdout:
+          type: string
+        type:
+          type: string
+          enum: [code_execution_result]
+
+    RequestCodeExecutionToolResultBlock:
+      type: object
+      required:
+        - content
+        - tool_use_id
+        - type
+      properties:
+        content:
+          type: object
+          oneOf:
+            - $ref: '#/components/schemas/RequestCodeExecutionToolResultBlockErrorContent'
+            - $ref: '#/components/schemas/RequestCodeExecutionToolResultBlockContent'
+        tool_use_id:
+          type: string
+        type:
+          type: string
+          enum: [code_execution_tool_result]
+        cache_control:
+          $ref: '#/components/schemas/CacheControl'
+
+    RequestMCPToolUseBlock:
+      type: object
+      required:
+        - id
+        - input
+        - name
+        - server_name
+        - type
+      properties:
+        id:
+          type: string
+        input:
+          type: object
+        name:
+          type: string
+        server_name:
+          type: string
+        type:
+          type: string
+          enum: [mcp_tool_use]
+        cache_control:
+          $ref: '#/components/schemas/CacheControl'
+
+    RequestMCPToolResultBlockContentObject:
+      type: object
+      required:
+        - text
+        - type
+      properties:
+        text:
+          type: string
+          minLength: 1
+        type:
+          type: string
+          enum: [text]
+        cache_control:
+          $ref: '#/components/schemas/CacheControl'
+        citations:
+          $ref: '#/components/schemas/Citations'
+
+    RequestMCPToolResultBlock:
+      type: object
+      required:
+        - tool_use_id
+        - type
+      properties:
+        tool_use_id:
+          type: string
+        type:
+          type: string
+          enum: [mcp_tool_result]
+        cache_control:
+          $ref: '#/components/schemas/CacheControl'
+        content:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                $ref: '#/components/schemas/RequestMCPToolResultBlockContentObject'
+        is_error:
+          type: boolean
+
+    Text:
+      type: object
+      required:
+        - text
+        - type
+      properties:
+        text:
+          type: string
+          minLength: 1
+        type:
+          type: string
+          enum: [text]
+        cache_control:
+          $ref: '#/components/schemas/CacheControl'
+        citations:
+          $ref: '#/components/schemas/Citations'
+
+    ImageBase64:
+      type: object
+      required:
+        - data
+        - media_type
+        - type
+      properties:
+        data:
+          type: string
+        media_type:
+          type: string
+          enum: [image/jpeg, image/png, image/gif, image/webp]
+        type:
+          type: string
+          enum: [base64]
+
+    URL:
+      type: object
+      required:
+        - type
+        - url
+      properties:
+        type:
+          type: string
+          enum: [url]
+        url:
+          type: string
+
+    File:
+      type: object
+      required:
+        - file_id
+        - type
+      properties:
+        file_id:
+          type: string
+        type:
+          type: string
+          enum: [file]
+
+    Image:
+      type: object
+      required:
+        - source
+        - type
+      properties:
+        source:
+          oneOf:
+            - $ref: '#/components/schemas/ImageBase64'
+            - $ref: '#/components/schemas/URL'
+            - $ref: '#/components/schemas/File'
+        type:
+          type: string
+          enum: [image]
+        cache_control:
+          $ref: '#/components/schemas/CacheControl'
+
+    ToolUse:
+      type: object
+      required:
+        - id
+        - input
+        - name
+        - type
+      properties:
+        id:
+          type: string
+        input:
+          type: object
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        type:
+          type: string
+          enum: [tool_use]
+        cache_control:
+          $ref: '#/components/schemas/CacheControl'
+
+    ToolResult:
+      type: object
+      required:
+        - tool_use_id
+        - type
+      properties:
+        tool_use_id:
+          type: string
+        type:
+          type: string
+          enum: [tool_result]
+        cache_control:
+          $ref: '#/components/schemas/CacheControl'
+        content:
+          oneOf:
+            - type: string
+            - type: object
+              oneOf:
+                - $ref: '#/components/schemas/Text'
+                - $ref: '#/components/schemas/Image'
+        is_error:
+          type: boolean
+
+    Base64PDF:
+      type: object
+      required:
+        - data
+        - media_type
+        - type
+      properties:
+        data:
+          type: string
+        media_type:
+          type: string
+          enum: [application/pdf]
+        type:
+          type: string
+          enum: [base64]
+
+    PlainTextPDF:
+      type: object
+      required:
+        - data
+        - media_type
+        - type
+      properties:
+        data:
+          type: string
+        media_type:
+          type: string
+          enum: [text/plain]
+        type:
+          type: string
+          enum: [text]
+
+    ContentBlockPDF:
+      type: object
+      required:
+        - content
+        - type
+      properties:
+        content:
+          oneOf:
+            - type: string
+            - type: object
+              oneOf:
+                - $ref: '#/components/schemas/Text'
+                - $ref: '#/components/schemas/Image'
+        type:
+          type: string
+          enum: [content]
+
+    Document:
+      type: object
+      required:
+        - source
+        - type
+      properties:
+        source:
+          type: object
+          oneOf:
+            - $ref: '#/components/schemas/Base64PDF'
+            - $ref: '#/components/schemas/PlainTextPDF'
+            - $ref: '#/components/schemas/ContentBlockPDF'
+            - $ref: '#/components/schemas/URL'
+            - $ref: '#/components/schemas/File'
+        type:
+          type: string
+          enum: [document]
+        cache_control:
+          $ref: '#/components/schemas/CacheControl'
+        citations:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+        context:
+          type: string
+          nullable: true
+          minLength: 1
+        title:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 500
+
+    Thinking:
+      type: object
+      required:
+        - signature
+        - thinking
+        - type
+      properties:
+        signature:
+          type: string
+        thinking:
+          type: string
+        type:
+          type: string
+          enum: [thinking]
+
+    RedactedThinking:
+      type: object
+      required:
+        - data
+        - type
+      properties:
+        data:
+          type: string
+        type:
+          type: string
+          enum: [redacted_thinking]
+
+    RequestContainerUploadBlock:
+      type: object
+      required:
+        - file_id
+        - type
+      properties:
+        file_id:
+          type: string
+        type:
+          type: string
+          enum: [container_upload]
+        cache_control:
+          $ref: '#/components/schemas/CacheControl'
+
+    Message:
+      type: object
+      required:
+        - role
+        - content
+      properties:
+        role:
+          type: string
+          enum: [user, assistant]
+        content:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: object
+                required:
+                  - type
+                oneOf:
+                  - $ref: '#/components/schemas/ServerToolUse'
+                  - $ref: '#/components/schemas/WebSearchToolResult'
+                  - $ref: '#/components/schemas/RequestCodeExecutionToolResultBlock'
+                  - $ref: '#/components/schemas/RequestMCPToolUseBlock'
+                  - $ref: '#/components/schemas/Text'
+                  - $ref: '#/components/schemas/Image'
+                  - $ref: '#/components/schemas/ToolUse'
+                  - $ref: '#/components/schemas/ToolResult'
+                  - $ref: '#/components/schemas/Document'
+                  - $ref: '#/components/schemas/Thinking'
+                  - $ref: '#/components/schemas/RedactedThinking'
+                  - $ref: '#/components/schemas/RequestContainerUploadBlock'
+
+    ToolConfiguration:
+      type: object
+      nullable: true
+      properties:
+        allowed_tools:
+          type: array
+          nullable: true
+          items:
+            type: string
+        enabled:
+          type: boolean
+          nullable: true
+
+    MCPServers:
+      type: object
+      required:
+        - name
+        - type
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum: [url]
+        url:
+          type: string
+        authorization_token:
+          type: string
+          nullable: true
+        tool_configuration:
+          $ref: '#/components/schemas/ToolConfiguration'
+
+    ThinkingEnabled:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum: [enabled]
+        budget_tokens:
+          type: integer
+          minimum: 1024
+          description: Tokens allocated for Claude's internal reasoning. Must be at least 1024 and cannot exceed max_tokens value.
+
+    ThinkingDisabled:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum: [disabled]
+
+    ToolChoiceAuto:
+      type: object
+      description: Automatically choose whether and which tool to use
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum: [auto]
+        disable_parallel_tool_use:
+          type: boolean
+          default: false
+          description: Whether to disable parallel tool use
+
+    ToolChoiceAny:
+      type: object
+      description: Automatically choose whether and which tool to use
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum: [any]
+        disable_parallel_tool_use:
+          type: boolean
+          default: false
+          description: Whether to disable parallel tool use
+
+    ToolChoiceTool:
+      type: object
+      description: Automatically choose whether and which tool to use
+      required:
+        - name
+        - type
+      properties:
+        name:
+          type: string
+          description: The name of the tool to use
+        type:
+          type: string
+          enum: [tool]
+        disable_parallel_tool_use:
+          type: boolean
+          default: false
+          description: Whether to disable parallel tool use
+
+    ToolChoiceNone:
+      type: object
+      description: Do not use any tools
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum: [none]
+
+    ToolInputSchema:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum: [object]
+        properties:
+          type: object
+          nullable: true
+
+    Tool:
+      type: object
+      required:
+        - input_schema
+        - name
+      properties:
+        input_schema:
+          $ref: '#/components/schemas/ToolInputSchema'
+        name:
+          type: string
+          minLength: 1
+          maxLength: 64
+        cache_control:
+          $ref: '#/components/schemas/CacheControl'
+        description:
+          type: string
+        type:
+          type: string
+          nullable: true
+          enum: [custom]
+
+    ComputerUseTool20241022:
+      type: object
+      required:
+        - display_height_px
+        - display_width_px
+        - name
+        - type
+      properties:
+        display_height_px:
+          type: integer
+          minimum: 2
+        display_width_px:
+          type: integer
+          minimum: 2
+        name:
+          type: string
+          enum: [computer]
+        type:
+          type: string
+          enum: [computer_20241022]
+        cache_control:
+          $ref: '#/components/schemas/CacheControl'
+        display_number:
+          type: integer
+          nullable: true
+          minimum: 1
+
+    BashTool20241022:
+      type: object
+      required:
+        - name
+        - type
+      properties:
+        name:
+          type: string
+          enum: [bash]
+        type:
+          type: string
+          enum: [bash_20241022]
+        cache_control:
+          $ref: '#/components/schemas/CacheControl'
+
+    TextEditorTool20241022:
+      type: object
+      required:
+        - name
+        - type
+      properties:
+        name:
+          type: string
+          enum: [str_replace_editor]
+        type:
+          type: string
+          enum: [text_editor_20241022]
+        cache_control:
+          $ref: '#/components/schemas/CacheControl'
+
+    ComputerUseTool20250124:
+      type: object
+      required:
+        - display_height_px
+        - display_width_px
+        - name
+        - type
+      properties:
+        display_height_px:
+          type: integer
+          minimum: 2
+        display_width_px:
+          type: integer
+          minimum: 2
+        name:
+          type: string
+          enum: [computer]
+        type:
+          type: string
+          enum: [computer_20250124]
+        cache_control:
+          $ref: '#/components/schemas/CacheControl'
+        display_number:
+          type: integer
+          nullable: true
+          minimum: 1
+
+    BashTool20250124:
+      type: object
+      required:
+        - name
+        - type
+      properties:
+        name:
+          type: string
+          enum: [bash]
+        type:
+          type: string
+          enum: [bash_20250124]
+        cache_control:
+          $ref: '#/components/schemas/CacheControl'
+
+    TextEditorTool20250124:
+      type: object
+      required:
+        - name
+        - type
+      properties:
+        name:
+          type: string
+          enum: [str_replace_editor]
+        type:
+          type: string
+          enum: [text_editor_20250124]
+        cache_control:
+          $ref: '#/components/schemas/CacheControl'
+
+    TextEditor20250429:
+      type: object
+      required:
+        - name
+        - type
+      properties:
+        name:
+          type: string
+          enum: [str_replace_based_edit_tool]
+        type:
+          type: string
+          enum: [text_editor_20250429]
+        cache_control:
+          $ref: '#/components/schemas/CacheControl'
+
+    UserLocation:
+      type: object
+      nullable: true
+      properties:
+        type:
+          type: string
+          enum: [approximate]
+        city:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 256
+        country:
+          type: string
+          nullable: true
+          minLength: 2
+          maxLength: 2
+          description: ISO Code of the country.
+        region:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 256
+        timezone:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 256
+          description: IANA timezone of the user.
+
+    WebSearchTool20250305:
+      type: object
+      required:
+        - name
+        - type
+      properties:
+        name:
+          type: string
+          enum: [web_search]
+        type:
+          type: string
+          enum: [web_search_20250305]
+        allowed_domains:
+          type: array
+          nullable: true
+          items:
+            type: string
+          description: If provided, only these domains will be included in results. Cannot be used alongside blocked_domains.
+        blocked_domains:
+          type: array
+          nullable: true
+          items:
+            type: string
+          description: If provided, these domains will never appear in results. Cannot be used alongside allowed_domains.
+        cache_control:
+          $ref: '#/components/schemas/CacheControl'
+        max_uses:
+          type: integer
+          nullable: true
+          minimum: 1
+        user_location:
+          $ref: '#/components/schemas/UserLocation'
+
+    CodeExecutionTool20250522:
+      type: object
+      required:
+        - name
+        - type
+      properties:
+        name:
+          type: string
+          enum: [code_execution]
+        type:
+          type: string
+          enum: [code_execution_20250522]
+        cache_control:
+          $ref: '#/components/schemas/CacheControl'
+
+    Container:
+      type: object
+      nullable: true
+      required:
+        - expires_at
+        - id
+      properties:
+        expires_at:
+          type: string
+          format: date-time
+        id:
+          type: string
+
+    TextResponse:
+      type: object
+      required:
+        - citations
+        - text
+        - type
+      properties:
+        citations:
+          $ref: '#/components/schemas/Citations'
+        text:
+          type: string
+          maxLength: 5000000
+        type:
+          type: string
+          enum: [text]
+
+    ToolUseResponse:
+      type: object
+      required:
+        - id
+        - input
+        - name
+        - type
+      properties:
+        id:
+          type: string
+        input:
+          type: object
+        name:
+          type: string
+          minLength: 1
+        type:
+          type: string
+          enum: [tool_use]
+
+    ResponseServerToolUseBlock:
+      type: object
+      required:
+        - id
+        - input
+        - name
+        - type
+      properties:
+        id:
+          type: string
+        input:
+          type: object
+        name:
+          type: string
+          minLength: 1
+        type:
+          type: string
+          enum: [server_tool_use]
+
+    ResponseWebSearchToolResultBlock:
+      type: object
+      required:
+        - content
+        - tool_use_id
+        - type
+      properties:
+        content:
+          oneOf:
+            - $ref: '#/components/schemas/WebSearchToolResultObject'
+            - $ref: '#/components/schemas/WebSearchToolResultObjectArray'
+        tool_use_id:
+          type: string
+        type:
+          type: string
+          enum: [web_search_tool_result]
+
+    ResponseCodeExecutionToolResultBlock:
+      type: object
+      required:
+        - content
+        - tool_use_id
+        - type
+      properties:
+        content:
+          type: object
+          oneOf:
+            - $ref: '#/components/schemas/RequestCodeExecutionToolResultBlockErrorContent'
+            - $ref: '#/components/schemas/RequestCodeExecutionToolResultBlockContent'
+        tool_use_id:
+          type: string
+        type:
+          type: string
+          enum: [code_execution_tool_result]
+
+    ResponseMCPToolUseBlock:
+      type: object
+      required:
+        - id
+        - input
+        - name
+        - server_name
+        - type
+      properties:
+        id:
+          type: string
+        input:
+          type: object
+        name:
+          type: string
+        server_name:
+          type: string
+        type:
+          type: string
+          enum: [mcp_tool_use]
+
+    ResponseMCPToolResultBlock:
+      type: object
+      required:
+        - content
+        - is_error
+        - tool_use_id
+        - type
+      properties:
+        content:
+          oneOf:
+            - type: string
+            - $ref: '#/components/schemas/TextResponse'
+        is_error:
+          type: boolean
+          default: false
+        tool_use_id:
+          type: string
+        type:
+          type: string
+          enum: [mcp_tool_result]
+
+    ResponseContainerUploadBlock:
+      type: object
+      required:
+        - file_id
+        - type
+      properties:
+        file_id:
+          type: string
+        type:
+          type: string
+          enum: [container_upload]
+
+    CacheCreationUsage:
+      type: object
+      nullable: true
+      required:
+        - ephemeral_1h_input_tokens
+        - ephemeral_5m_input_tokens
+      properties:
+        ephemeral_1h_input_tokens:
+          type: integer
+          default: 0
+          minimum: 1
+        ephemeral_5m_input_tokens:
+          type: integer
+          default: 0
+          minimum: 1
+
+    ServerToolUseUsage:
+      type: object
+      nullable: true
+      required:
+        - web_search_requests
+      properties:
+        web_search_requests:
+          type: integer
+          default: 0
+          minimum: 1
+          description: The number of web search tool requests.
+
+    Usage:
+      type: object
+      required:
+        - cache_creation
+        - cache_creation_input_tokens
+        - cache_read_input_tokens
+        - input_tokens
+        - output_tokens
+        - server_tool_use
+      description: |
+        Billing and rate-limit usage.
+      properties:
+        cache_creation:
+          $ref: '#/components/schemas/CacheCreationUsage'
+        cache_creation_input_tokens:
+          type: integer
+          nullable: true
+          minimum: 1
+        cache_read_input_tokens:
+          type: integer
+          nullable: true
+          minimum: 1
+        input_tokens:
+          type: integer
+          minimum: 1
+        output_tokens:
+          type: integer
+          minimum: 1
+        server_tool_use:
+          $ref: '#/components/schemas/ServerToolUseUsage'
+        service_tier:
+          type: string
+          nullable: true
+          enum: [standard, priority, batch]
+
+    MessageRequest:
+      type: array
+      description: A list of messages comprising the conversation so far.
+      items:
+        $ref: '#/components/schemas/Message'
+      maxItems: 100000
+
+    ModelRequest:
+      type: string
+      minLength: 1
+      maxLength: 256
+      description: The model that will complete your prompt. Must be between 1 and 256 characters.
+
+    SystemRequest:
+      oneOf:
+        - type: string
+        - type: object # Move to Content
+          required:
+            - text
+            - type
+          properties:
+            text:
+              type: string
+              minLength: 1
+            type:
+              type: string
+              enum: [text]
+            cache_control:
+              $ref: '#/components/schemas/CacheControl'
+            citations:
+              $ref: '#/components/schemas/Citations'
+      description: A system prompt providing context and instructions to Claude, such as specifying a particular goal or role. Can be provided either as a simple string or as a structured object with cache control options.
+
+    ThinkingRequest:
+      oneOf:
+        - $ref: '#/components/schemas/ThinkingEnabled'
+        - $ref: '#/components/schemas/ThinkingDisabled'
+
+    ToolChoiceRequest:
+      oneOf:
+        - $ref: '#/components/schemas/ToolChoiceAuto'
+        - $ref: '#/components/schemas/ToolChoiceAny'
+        - $ref: '#/components/schemas/ToolChoiceTool'
+        - $ref: '#/components/schemas/ToolChoiceNone'
+
+    ToolsRequest:
+      type: array
+      items:
+        oneOf:
+          - $ref: '#/components/schemas/Tool'
+          - $ref: '#/components/schemas/ComputerUseTool20241022'
+          - $ref: '#/components/schemas/BashTool20241022'
+          - $ref: '#/components/schemas/TextEditorTool20241022'
+          - $ref: '#/components/schemas/ComputerUseTool20250124'
+          - $ref: '#/components/schemas/BashTool20250124'
+          - $ref: '#/components/schemas/TextEditorTool20250124'
+          - $ref: '#/components/schemas/TextEditor20250429'
+          - $ref: '#/components/schemas/WebSearchTool20250305'
+          - $ref: '#/components/schemas/CodeExecutionTool20250522'
+      description: List of tools that the model may use during the conversation
+
+    MessageRequestBody:
+      type: object
+      required:
+        - max_tokens
+        - messages
+        - model
+      properties:
+        max_tokens:
+          type: integer
+          minimum: 1
+          description: The maximum number of tokens to generate before stopping. Models may stop before reaching this maximum.
+        messages:
+          $ref: '#/components/schemas/MessageRequest'
+        model:
+          $ref: '#/components/schemas/ModelRequest'
+        container:
+          type: string
+          nullable: true
+          description: Container identifier for reuse across requests.
+        mcp_servers:
+          $ref: '#/components/schemas/MCPServers'
+        metadata:
+          type: object
+          properties:
+            user_id:
+              type: string
+              nullable: true
+              description: A user identifier for tracing the request.
+              maxLength: 256
+          description: An object describing metadata about the request. Can include user_id for tracking purposes.
+        service_tier:
+          type: string
+          enum: [auto, standard_only]
+          description: Determines whether to use priority capacity (if available) or standard capacity for this request. Anthropic offers different levels of service for your API requests. See service-tiers for details.
+        stop_sequences:
+          type: array
+          items:
+            type: string
+          description: Custom text sequences that will cause the model to stop generating. The model will stop when it encounters any of these sequences.
+        stream:
+          type: boolean
+          description: Whether to incrementally stream the response using server-sent events.
+        system:
+          $ref: '#/components/schemas/SystemRequest'
+        temperature:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Amount of randomness injected into the response. Defaults to 1.0. Use lower values for analytical tasks and higher values for creative tasks.
+        thinking:
+          $ref: '#/components/schemas/ThinkingRequest'
+        tool_choice:
+          $ref: '#/components/schemas/ToolChoiceRequest'
+        tools:
+          $ref: '#/components/schemas/ToolsRequest'
+        top_k:
+          type: integer
+          minimum: 0
+          description: Only sample from the top K options for each subsequent token
+        top_p:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Only sample from tokens with cumulative probability less than this value
+
+    MessageResponse:
+      type: object
+      required:
+        - container
+        - content
+        - id
+        - model
+        - role
+        - stop_reason
+        - stop_sequence
+        - type
+        - usage
+      properties:
+        container:
+          $ref: '#/components/schemas/Container'
+        content:
+          type: array
+          description: Content generated by the model. This is an array of content blocks, each of which has a type that determines its shape.
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/TextResponse'
+              - $ref: '#/components/schemas/ToolUseResponse'
+              - $ref: '#/components/schemas/ResponseServerToolUseBlock'
+              - $ref: '#/components/schemas/ResponseWebSearchToolResultBlock'
+              - $ref: '#/components/schemas/ResponseCodeExecutionToolResultBlock'
+              - $ref: '#/components/schemas/ResponseMCPToolResultBlock'
+              - $ref: '#/components/schemas/ResponseContainerUploadBlock'
+              - $ref: '#/components/schemas/Thinking'
+              - $ref: '#/components/schemas/RedactedThinking'
+        id:
+          type: string
+          description: Unique object identifier. The format and length of IDs may change over time.
+        model:
+          type: string
+          minLength: 1
+          maxLength: 256
+          description: The model that handled the request.
+        role:
+          type: string
+          enum: [assistant]
+          default: assistant
+          description: Conversational role of the generated message. This will always be "assistant".
+        stop_reason:
+          type: string
+          nullable: true
+          enum: [end_turn, max_tokens, stop_sequence, tool_use, pause_turn, refusal]
+          description: |
+            The reason that we stopped. This may be one of the following values:
+            - "end_turn": the model reached a natural stopping point
+            - "max_tokens": we exceeded the requested max_tokens or the model's maximum
+            - "stop_sequence": one of your provided custom stop_sequences was generated
+            - "tool_use": the model invoked one or more tools
+            
+            In non-streaming mode this value is always non-null. In streaming mode, it is null in the message_start event and non-null otherwise.
+        stop_sequence:
+          type: string
+          nullable: true
+          description: Which custom stop sequence was generated, if any. This value will be a non-null string if one of your custom stop sequences was generated.
+        type:
+          type: string
+          enum: [message]
+          default: message
+          description: Object type. For Messages, this is always "message".
+        usage:
+          $ref: '#/components/schemas/Usage'
+
+    ModelResponseData:
+      type: object
+      required:
+        - created_at
+        - display_name
+        - id
+        - type
+      properties:
+        created_at:
+          type: string
+          format: date-time
+          description: RFC 3339 datetime string representing the time at which the model was released. May be set to an epoch value if the release date is unknown.
+        display_name:
+          type: string
+          description: A human-readable name for the model.
+        id:
+          type: string
+          description: Unique model identifier.
+        type:
+          type: string
+          enum: [model]
+          default: model
+          description: Object type. For Models, this is always "model".
+
+    FirstId:
+      type: string
+      nullable: true
+      description: First ID in the data list. Can be used as the before_id for the previous page.
+
+    HasMore:
+      type: boolean
+      description: Indicates if there are more results in the requested page direction.
+
+    LastId:
+      type: string
+      nullable: true
+      description: Last ID in the data list. Can be used as the after_id for the next page.
+
+    RequestsCount:
+      type: object
+      required:
+        - canceled
+        - errored
+        - expired
+        - processing
+        - succeeded
+      properties:
+        canceled:
+          type: integer
+          default: 0
+        errored:
+          type: integer
+          default: 0
+        expired:
+          type: integer
+          default: 0
+        processing:
+          type: integer
+          default: 0
+        succeeded:
+          type: integer
+          default: 0
+
+    MessageBatchResponse:
+      type: object
+      required:
+        - archived_at
+        - cancel_initiated_at
+        - created_at
+        - ended_at
+        - expires_at
+        - id
+        - processing_status
+        - request_counts
+        - results_url
+        - type
+      properties:
+        archived_at:
+          type: string
+          format: date-time
+          nullable: true
+        cancel_initiated_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        ended_at:
+          type: string
+          format: date-time
+          nullable: true
+        expires_at:
+          type: string
+          format: date-time
+        id:
+          type: string
+        processing_status:
+          type: string
+          enum: [in_progress, canceling, ended]
+        request_counts:
+          $ref: '#/components/schemas/RequestsCount'
+        results_url:
+          type: string
+          nullable: true
+        type:
+          type: string
+          enum: [message_batch]
+          default: message_batch
+
+    MessageBatchSucceededResult:
+      type: object
+      required:
+        - message
+        - type
+      properties:
+        message:
+          $ref: '#/components/schemas/MessageResponse'
+        type:
+          type: string
+          enum: [succeeded]
+
+    MessageBatchError:
+      type: object
+      required:
+        - type
+        - error
+      properties:
+        type:
+          type: string
+          enum: [error]
+        error:
+          type: object
+          required:
+            - message
+            - type
+          properties:
+            message:
+              type: string            # TODO: IN THE FUTURE THIS WILL BE A "oneOf" of defined error types to specify the error messages
+            type:
+              type: string
+              enum:
+                - invalid_request_error
+                - authentication_error
+                - billing_error
+                - permission_error
+                - not_found_error
+                - rate_limit_error
+                - timeout_error
+                - internal_server_error
+                - overloaded_error
+
+    MessageBatchErroredResult:
+      type: object
+      required:
+        - error
+        - type
+      properties:
+        type:
+          type: string
+          enum: [errored]
+        error:
+          $ref: '#/components/schemas/MessageBatchError'
+
+    MessageBatchCanceledResult:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum: [canceled]
+
+    MessageBatchExpiredResult:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum: [expired]
+
+    FileData:
+      type: object
+      required:
+        - created_at
+        - filename
+        - id
+        - mime_type
+        - size_bytes
+        - type
+      properties:
+        created_at:
+          type: string
+          format: date-time
+          description: RFC 3339 datetime string representing when the file was created
+        filename:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: Original filename of the uploaded file
+        id:
+          type: string
+          description: |
+            Unique object identifier.
+            The format and length of IDs may change over time.
+        mime_type:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: MIME type of the file
+        size_bytes:
+          type: integer
+          minimum: 0
+          description: Size of the file in bytes
+        type:
+          type: string
+          enum: [ "file" ]
+        downloadable:
+          type: boolean
+          default: false
+          description: Whether the file can be downloaded
+
+    AdminMemberManagementUserData:
+      type: object
+      required:
+        - added_at
+        - email
+        - id
+        - name
+        - role
+        - type
+      properties:
+        added_at:
+          type: string
+          format: date-time
+          description: RFC 3339 datetime string indicating when the User joined the Organization.
+        email:
+          type: string
+          description: Email of the User.
+        id:
+          type: string
+          description: ID of the User.
+        name:
+          type: string
+          description: Name of the User.
+        role:
+          type: string
+          enum: [user, developer, billing, admin]
+          description: Organization role of the User.
+        type:
+          type: string
+          enum: [user]
+          default: user
+          description: Object type. For Users, this is always "user".
+
+    AdminInviteData:
+      type: object
+      required:
+        - email
+        - expires_at
+        - id
+        - invited_at
+        - role
+        - status
+        - type
+      properties:
+        email:
+          type: string
+          description: Email of the User.
+        expires_at:
+          type: string
+          description: RFC 3339 datetime string indicating when the invite expires.
+        id:
+          type: string
+          description: ID of the User.
+        invited_at:
+          type: string
+          description: RFC 3339 datetime string indicating when the invite was created.
+        role:
+          type: string
+          enum: [user, developer, billing, admin]
+          description: Organization role of the User.
+        status:
+          type: string
+          enum: [accepted, expired, deleted, pending]
+          description: Status of the invite.
+        type:
+          type: string
+          enum: [invite]
+          default: invite
+          description: Object type. For Invites, this is always "invite".
+
+    AdminWorkspaceData:
+      type: object
+      required:
+        - archived_at
+        - created_at
+        - display_color
+        - id
+        - name
+        - type
+      properties:
+        archived_at:
+          type: string
+          nullable: true
+          description: RFC 3339 datetime string indicating when the Workspace was archived.
+        created_at:
+          type: string
+        display_color:
+          type: string
+          description: Hexadecimal color code for the Workspace.
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+          enum: [workspace]
+          default: workspace
+
+    AdminWorkspaceMemberData:
+      type: object
+      required:
+        - type
+        - user_id
+        - workspace_id
+        - workspace_role
+      properties:
+        type:
+          type: string
+          enum: [workspace_member]
+          default: workspace_member
+          description: Object type. For Workspace Members, this is always "workspace_member".
+        user_id:
+          type: string
+          description: ID of the User.
+        workspace_id:
+          type: string
+          description: ID of the Workspace.
+        workspace_role:
+          type: string
+          enum: [workspace_user, workspace_developer, workspace_admin, workspace_billing]
+          description: Role of the Workspace Member.
+
+    AdminAPIKeyData:
+      type: object
+      required:
+        - created_at
+        - created_by
+        - id
+        - name
+        - partial_key_hint
+        - status
+        - type
+        - workspace_id
+      properties:
+        created_at:
+          type: string
+          description: RFC 3339 datetime string indicating when the API Key was created.
+        created_by:
+          type: object
+          required:
+            - id
+            - type
+          properties:
+            id:
+              type: string
+              description: ID of the actor that created the object.
+            type:
+              type: string
+              description: Type of the actor that created the object.
+          description: The ID and type of the actor that created the API Key.
+        id:
+          type: string
+          description: ID of the API key.
+        name:
+          type: string
+          description: Name of the API key.
+        partial_key_hint:
+          type: string
+          nullable: true
+          description: Partially redacted hint for the API key.
+        status:
+          type: string
+          enum: [active, inactive, archived]
+          description: Status of the API key.
+        type:
+          type: string
+          enum: [api_key]
+          default: api_key
+          description: Object type. For API Keys, this is always "api_key".
+        workspace_id:
+          type: string
+          nullable: true
+          description: ID of the Workspace associated with the API key, or null if the API key belongs to the default Workspace.
+
+    Error:
+      type: object
+      required:
+        - type
+        - error
+      properties:
+        type:
+          type: string
+          enum: [error]
+        error:
+          type: object
+          required:
+            - type
+            - message
+          properties:
+            type:
+              type: string
+              enum:
+                - invalid_request_error
+                - authentication_error
+                - permission_error
+                - not_found_error
+                - request_too_large
+                - rate_limit_error
+                - api_error
+                - overloaded_error
+            message:
+              type: string
+
+  responses:
+    Error400:
+      description: Invalid Request Error - There was an issue with the format or content of your request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Error401:
+      description: Authentication Error - There's an issue with your API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Error403:
+      description: Permission Error - Your API key does not have permission to use the specified resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Error404:
+      description: Not Found Error - The requested resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Error413:
+      description: Request Too Large - Request exceeds the maximum allowed number of bytes
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Error429:
+      description: Rate Limit Error - Your account has hit a rate limit
+      headers:
+        retry-after:
+          $ref: '#/components/headers/RetryAfter'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Error500:
+      description: API Error - An unexpected error has occurred internal to Anthropic's systems
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Error529:
+      description: Overloaded Error - Anthropic's API is temporarily overloaded
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+paths:
+  /v1/messages:
+    post:
+      tags:
+        - Messages
+      summary: Create a chat completion
+      description: Creates a chat completion with the specified model and parameters. The response is generated based on the provided messages and system prompt.
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AnthropicVersionHeader'
+        - $ref: '#/components/parameters/AnthropicBetaHeader'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessageRequestBody'
+      responses:
+        '200':
+          description: Successful response
+          headers:
+            request-id:
+              $ref: '#/components/headers/RequestId'
+            anthropic-organization-id:
+              $ref: '#/components/headers/AnthropicOrganizationId'
+            retry-after:
+              $ref: '#/components/headers/RetryAfter'
+            anthropic-ratelimit-requests-limit:
+              $ref: '#/components/headers/AnthropicRateLimitRequestsLimit'
+            anthropic-ratelimit-requests-remaining:
+              $ref: '#/components/headers/AnthropicRateLimitRequestsRemaining'
+            anthropic-ratelimit-requests-reset:
+              $ref: '#/components/headers/AnthropicRateLimitRequestsReset'
+            anthropic-ratelimit-tokens-limit:
+              $ref: '#/components/headers/AnthropicRateLimitTokensLimit'
+            anthropic-ratelimit-tokens-remaining:
+              $ref: '#/components/headers/AnthropicRateLimitTokensRemaining'
+            anthropic-ratelimit-tokens-reset:
+              $ref: '#/components/headers/AnthropicRateLimitTokensReset'
+            anthropic-ratelimit-input-tokens-limit:
+              $ref: '#/components/headers/AnthropicRateLimitInputTokensLimit'
+            anthropic-ratelimit-input-tokens-remaining:
+              $ref: '#/components/headers/AnthropicRateLimitInputTokensRemaining'
+            anthropic-ratelimit-input-tokens-reset:
+              $ref: '#/components/headers/AnthropicRateLimitInputTokensReset'
+            anthropic-ratelimit-output-tokens-limit:
+              $ref: '#/components/headers/AnthropicRateLimitOutputTokensLimit'
+            anthropic-ratelimit-output-tokens-remaining:
+              $ref: '#/components/headers/AnthropicRateLimitOutputTokensRemaining'
+            anthropic-ratelimit-output-tokens-reset:
+              $ref: '#/components/headers/AnthropicRateLimitOutputTokensReset'
+            anthropic-priority-input-tokens-limit:
+              $ref: '#/components/headers/AnthropicPriorityInputTokensLimit'
+            anthropic-priority-input-tokens-remaining:
+              $ref: '#/components/headers/AnthropicPriorityInputTokensRemaining'
+            anthropic-priority-input-tokens-reset:
+              $ref: '#/components/headers/AnthropicPriorityInputTokensReset'
+            anthropic-priority-output-tokens-limit:
+              $ref: '#/components/headers/AnthropicPriorityOutputTokensLimit'
+            anthropic-priority-output-tokens-remaining:
+              $ref: '#/components/headers/AnthropicPriorityOutputTokensRemaining'
+            anthropic-priority-output-tokens-reset:
+              $ref: '#/components/headers/AnthropicPriorityOutputTokensReset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '413':
+          $ref: '#/components/responses/Error413'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '529':
+          $ref: '#/components/responses/Error529'
+  /v1/messages/count_tokens:
+    post:
+      tags:
+        - Messages
+      summary: Count tokens for a chat completion
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AnthropicVersionHeader'
+        - $ref: '#/components/parameters/AnthropicBetaHeader'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - messages
+                - model
+              properties:
+                messages:
+                  $ref: '#/components/schemas/MessageRequest'
+                model:
+                  $ref: '#/components/schemas/ModelRequest'
+                mcp_servers:
+                  $ref: '#/components/schemas/MCPServers'
+                system:
+                  $ref: '#/components/schemas/SystemRequest'
+                thinking:
+                  $ref: '#/components/schemas/ThinkingRequest'
+                tool_choice:
+                  $ref: '#/components/schemas/ToolChoiceRequest'
+                tools:
+                  $ref: '#/components/schemas/ToolsRequest'
+      responses:
+        '200':
+          description: Successful response
+          headers:
+            request-id:
+              $ref: '#/components/headers/RequestId'
+            anthropic-organization-id:
+              $ref: '#/components/headers/AnthropicOrganizationId'
+            retry-after:
+              $ref: '#/components/headers/RetryAfter'
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - input_tokens
+                properties:
+                  input_tokens:
+                    type: integer
+                    description: The total number of tokens across the provided list of messages, system prompt, and tools.
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '413':
+          $ref: '#/components/responses/Error413'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '529':
+          $ref: '#/components/responses/Error529'
+  /v1/models:
+    get:
+      tags:
+        - Models
+      summary: List Models
+      description: List available models. The Models API response can be used to determine which models are available for use in the API. More recently released models are listed first.
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AnthropicVersionHeader'
+        - $ref: '#/components/parameters/BeforeId'
+        - $ref: '#/components/parameters/AfterId'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
+      responses:
+        '200':
+          description: Successfully retrieved models
+          headers:
+            request-id:
+              $ref: '#/components/headers/RequestId'
+            anthropic-organization-id:
+              $ref: '#/components/headers/AnthropicOrganizationId'
+            retry-after:
+              $ref: '#/components/headers/RetryAfter'
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                  - first_id
+                  - has_more
+                  - last_id
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ModelResponseData'
+                  first_id:
+                    $ref: '#/components/schemas/FirstId'
+                  has_more:
+                    $ref: '#/components/schemas/HasMore'
+                  last_id:
+                    $ref: '#/components/schemas/LastId'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '413':
+          $ref: '#/components/responses/Error413'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '529':
+          $ref: '#/components/responses/Error529'
+  /v1/models/{model_id}:
+    get:
+      tags:
+        - Models
+      summary: Get a Model
+      description: Get a specific model. The Models API response can be used to determine information about a specific model or resolve a model alias to a model ID.
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AnthropicVersionHeader'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
+        - name: model_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Model identifier or alias.
+      responses:
+        '200':
+          description: Successfully retrieved model
+          headers:
+            request-id:
+              $ref: '#/components/headers/RequestId'
+            anthropic-organization-id:
+              $ref: '#/components/headers/AnthropicOrganizationId'
+            retry-after:
+              $ref: '#/components/headers/RetryAfter'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelResponseData'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '413':
+          $ref: '#/components/responses/Error413'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '529':
+          $ref: '#/components/responses/Error529'
+  /v1/messages/batches:
+    post:
+      tags:
+        - Message Batches
+      summary: Create multiple chat completions in a batch
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AnthropicVersionHeader'
+        - $ref: '#/components/parameters/AnthropicBetaHeader'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - requests
+              properties:
+                requests:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - custom_id
+                      - params
+                    properties:
+                      custom_id:
+                        type: string
+                        minLength: 1
+                        maxLength: 64
+                      params:
+                        $ref: '#/components/schemas/MessageRequestBody'
+      responses:
+        '200':
+          description: Successfully created message batch
+          headers:
+            request-id:
+              $ref: '#/components/headers/RequestId'
+            anthropic-organization-id:
+              $ref: '#/components/headers/AnthropicOrganizationId'
+            retry-after:
+              $ref: '#/components/headers/RetryAfter'
+            anthropic-ratelimit-requests-limit:
+              $ref: '#/components/headers/AnthropicRateLimitRequestsLimit'
+            anthropic-ratelimit-requests-remaining:
+              $ref: '#/components/headers/AnthropicRateLimitRequestsRemaining'
+            anthropic-ratelimit-requests-reset:
+              $ref: '#/components/headers/AnthropicRateLimitRequestsReset'
+            anthropic-ratelimit-tokens-limit:
+              $ref: '#/components/headers/AnthropicRateLimitTokensLimit'
+            anthropic-ratelimit-tokens-remaining:
+              $ref: '#/components/headers/AnthropicRateLimitTokensRemaining'
+            anthropic-ratelimit-tokens-reset:
+              $ref: '#/components/headers/AnthropicRateLimitTokensReset'
+            anthropic-ratelimit-input-tokens-limit:
+              $ref: '#/components/headers/AnthropicRateLimitInputTokensLimit'
+            anthropic-ratelimit-input-tokens-remaining:
+              $ref: '#/components/headers/AnthropicRateLimitInputTokensRemaining'
+            anthropic-ratelimit-input-tokens-reset:
+              $ref: '#/components/headers/AnthropicRateLimitInputTokensReset'
+            anthropic-ratelimit-output-tokens-limit:
+              $ref: '#/components/headers/AnthropicRateLimitOutputTokensLimit'
+            anthropic-ratelimit-output-tokens-remaining:
+              $ref: '#/components/headers/AnthropicRateLimitOutputTokensRemaining'
+            anthropic-ratelimit-output-tokens-reset:
+              $ref: '#/components/headers/AnthropicRateLimitOutputTokensReset'
+            anthropic-priority-input-tokens-limit:
+              $ref: '#/components/headers/AnthropicPriorityInputTokensLimit'
+            anthropic-priority-input-tokens-remaining:
+              $ref: '#/components/headers/AnthropicPriorityInputTokensRemaining'
+            anthropic-priority-input-tokens-reset:
+              $ref: '#/components/headers/AnthropicPriorityInputTokensReset'
+            anthropic-priority-output-tokens-limit:
+              $ref: '#/components/headers/AnthropicPriorityOutputTokensLimit'
+            anthropic-priority-output-tokens-remaining:
+              $ref: '#/components/headers/AnthropicPriorityOutputTokensRemaining'
+            anthropic-priority-output-tokens-reset:
+              $ref: '#/components/headers/AnthropicPriorityOutputTokensReset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageBatchResponse'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '413':
+          $ref: '#/components/responses/Error413'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '529':
+          $ref: '#/components/responses/Error529'
+    get:
+      tags:
+        - Message Batches
+      summary: List Message Batches
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AnthropicVersionHeader'
+        - $ref: '#/components/parameters/BeforeId'
+        - $ref: '#/components/parameters/AfterId'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
+      responses:
+        '200':
+          description: Successfully retrieved message batches
+          headers:
+            request-id:
+              $ref: '#/components/headers/RequestId'
+            anthropic-organization-id:
+              $ref: '#/components/headers/AnthropicOrganizationId'
+            retry-after:
+              $ref: '#/components/headers/RetryAfter'
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                  - first_id
+                  - has_more
+                  - last_id
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MessageBatchResponse'
+                  has_more:
+                    type: boolean
+                    description: Indicates if there are more results in the requested page direction.
+                  first_id:
+                    type: string
+                    nullable: true
+                    description: First ID in the data list. Can be used as the before_id for the previous page.
+                  last_id:
+                    type: string
+                    nullable: true
+                    description: Last ID in the data list. Can be used as the after_id for the next page.
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '413':
+          $ref: '#/components/responses/Error413'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '529':
+          $ref: '#/components/responses/Error529'
+  /v1/messages/batches/{message_batch_id}:
+    get:
+      tags:
+        - Message Batches
+      summary: Retrieve a Message Batch
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AnthropicVersionHeader'
+        - $ref: '#/components/parameters/BatchId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
+      responses:
+        '200':
+          description: Successfully retrieved message batch
+          headers:
+            request-id:
+              $ref: '#/components/headers/RequestId'
+            anthropic-organization-id:
+              $ref: '#/components/headers/AnthropicOrganizationId'
+            retry-after:
+              $ref: '#/components/headers/RetryAfter'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageBatchResponse'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '413':
+          $ref: '#/components/responses/Error413'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '529':
+          $ref: '#/components/responses/Error529'
+    delete:
+      tags:
+        - Message Batches
+      summary: Delete a Message Batch
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AnthropicVersionHeader'
+        - $ref: '#/components/parameters/BatchId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
+      responses:
+        '200':
+          description: Successfully deleted message batch
+          headers:
+            request-id:
+              $ref: '#/components/headers/RequestId'
+            anthropic-organization-id:
+              $ref: '#/components/headers/AnthropicOrganizationId'
+            retry-after:
+              $ref: '#/components/headers/RetryAfter'
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                  - type
+                properties:
+                  id:
+                    type: string
+                  type:
+                    type: string
+                    enum: [message_batch_deleted]
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '413':
+          $ref: '#/components/responses/Error413'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '529':
+          $ref: '#/components/responses/Error529'
+  /v1/messages/batches/{message_batch_id}/results:
+    get:
+      tags:
+        - Message Batches
+      summary: Retrieve Message Batch Results. The path for retrieving Message Batch results should be pulled from the batch's results_url. This path should not be assumed and may change.
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AnthropicVersionHeader'
+        - $ref: '#/components/parameters/BatchId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
+      responses:
+        '200':
+          description: Successfully retrieved batch results
+          headers:
+            request-id:
+              $ref: '#/components/headers/RequestId'
+            anthropic-organization-id:
+              $ref: '#/components/headers/AnthropicOrganizationId'
+            retry-after:
+              $ref: '#/components/headers/RetryAfter'
+          content:
+            application/x-jsonl:
+              schema:
+                required:
+                  - custom_id
+                  - result
+                properties:
+                  custom_id:
+                    type: string
+                    description: Developer-provided ID created for each request in a Message Batch. Useful for matching results to requests, as results may be given out of request order. Must be unique for each request within the Message Batch.
+                  result:
+                    type: object
+                    oneOf:
+                      - $ref: '#/components/schemas/MessageBatchSucceededResult'
+                      - $ref: '#/components/schemas/MessageBatchErroredResult'
+                      - $ref: '#/components/schemas/MessageBatchCanceledResult'
+                      - $ref: '#/components/schemas/MessageBatchExpiredResult'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '413':
+          $ref: '#/components/responses/Error413'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '529':
+          $ref: '#/components/responses/Error529'
+  /v1/messages/batches/{message_batch_id}/cancel:
+    post:
+      tags:
+        - Message Batches
+      summary: Cancel a Message Batch
+      description: Cancels an in-progress message batch. Non-interruptible requests may complete before cancellation is finalized.
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AnthropicVersionHeader'
+        - $ref: '#/components/parameters/BatchId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
+      responses:
+        '200':
+          description: Successfully initiated batch cancellation
+          headers:
+            request-id:
+              $ref: '#/components/headers/RequestId'
+            anthropic-organization-id:
+              $ref: '#/components/headers/AnthropicOrganizationId'
+            retry-after:
+              $ref: '#/components/headers/RetryAfter'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageBatchResponse'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '413':
+          $ref: '#/components/responses/Error413'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '529':
+          $ref: '#/components/responses/Error529'
+  /v1/files:       # Currently in beta, Beta headers will be removed in the future
+    post:
+      tags:
+        - Files
+      summary: Upload a File
+      description: The Files API allows you to upload and manage files to use with the Anthropic API without having to re-upload content with each request.
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AnthropicVersionHeader'
+        - $ref: '#/components/parameters/AnthropicBetaHeader'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The file to upload
+      responses:
+        '200':
+          description: Users retrieved successfully
+          headers:
+            request-id:
+              $ref: '#/components/headers/RequestId'
+            anthropic-organization-id:
+              $ref: '#/components/headers/AnthropicOrganizationId'
+            retry-after:
+              $ref: '#/components/headers/RetryAfter'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileData'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '413':
+          $ref: '#/components/responses/Error413'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '529':
+          $ref: '#/components/responses/Error529'
+    get:
+      tags:
+        - Files
+      summary: List Files
+      description: Retrieves a list of all files
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AnthropicVersionHeader'
+        - $ref: '#/components/parameters/AnthropicBetaHeader'
+        - $ref: '#/components/parameters/BeforeId'
+        - $ref: '#/components/parameters/AfterId'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
+      responses:
+        '200':
+          description: Files retrieved successfully
+          headers:
+            request-id:
+              $ref: '#/components/headers/RequestId'
+            anthropic-organization-id:
+              $ref: '#/components/headers/AnthropicOrganizationId'
+            retry-after:
+              $ref: '#/components/headers/RetryAfter'
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FileData'
+                  first_id:
+                    $ref: '#/components/schemas/FirstId'
+                  has_more:
+                    $ref: '#/components/schemas/HasMore'
+                  last_id:
+                    $ref: '#/components/schemas/LastId'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '413':
+          $ref: '#/components/responses/Error413'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '529':
+          $ref: '#/components/responses/Error529'
+  /v1/files/{file_id}:
+    get:
+      tags:
+        - Files
+      summary: Get a File
+      description: Retrieves a file by its ID
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AnthropicVersionHeader'
+        - $ref: '#/components/parameters/AnthropicBetaHeader'
+        - $ref: '#/components/parameters/FileId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
+      responses:
+        '200':
+          description: File retrieved successfully
+          headers:
+            request-id:
+              $ref: '#/components/headers/RequestId'
+            anthropic-organization-id:
+              $ref: '#/components/headers/AnthropicOrganizationId'
+            retry-after:
+              $ref: '#/components/headers/RetryAfter'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileData'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '413':
+          $ref: '#/components/responses/Error413'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '529':
+          $ref: '#/components/responses/Error529'
+    delete:
+      tags:
+        - Files
+      summary: Delete a File
+      description: Deletes a file by its ID
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AnthropicVersionHeader'
+        - $ref: '#/components/parameters/AnthropicBetaHeader'
+        - $ref: '#/components/parameters/FileId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
+      responses:
+        '200':
+          description: File deleted successfully
+          headers:
+            request-id:
+              $ref: '#/components/headers/RequestId'
+            anthropic-organization-id:
+              $ref: '#/components/headers/AnthropicOrganizationId'
+            retry-after:
+              $ref: '#/components/headers/RetryAfter'
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                properties:
+                  id:
+                    type: string
+                    description: ID of the deleted File.
+                  type:
+                    type: string
+                    enum: ["file_deleted"]
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '413':
+          $ref: '#/components/responses/Error413'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '529':
+          $ref: '#/components/responses/Error529'
+  /v1/files/{file_id}/content:
+    get:
+      tags:
+        - Files
+      summary: Get a File Content
+      description: Retrieves a file content by its ID
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AnthropicVersionHeader'
+        - $ref: '#/components/parameters/AnthropicBetaHeader'
+        - $ref: '#/components/parameters/FileId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
+      responses:
+        '200':
+          description: File content retrieved successfully
+          headers:
+            request-id:
+              $ref: '#/components/headers/RequestId'
+            anthropic-organization-id:
+              $ref: '#/components/headers/AnthropicOrganizationId'
+            retry-after:
+              $ref: '#/components/headers/RetryAfter'
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '413':
+          $ref: '#/components/responses/Error413'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '529':
+          $ref: '#/components/responses/Error529'
+  /v1/organizations/users:
+    get:
+      tags:
+        - Admin - Organization Member Management
+      summary: List Users
+      description: Retrieves a list of all users
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AnthropicVersionHeader'
+        - $ref: '#/components/parameters/BeforeId'
+        - $ref: '#/components/parameters/AfterId'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
+        - name: email
+          in: query
+          schema:
+            type: string
+          description: Filter by user email.
+      responses:
+        '200':
+          description: Users retrieved successfully
+          headers:
+            request-id:
+              $ref: '#/components/headers/RequestId'
+            anthropic-organization-id:
+              $ref: '#/components/headers/AnthropicOrganizationId'
+            retry-after:
+              $ref: '#/components/headers/RetryAfter'
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                  - first_id
+                  - has_more
+                  - last_id
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AdminMemberManagementUserData'
+                  first_id:
+                    $ref: '#/components/schemas/FirstId'
+                  has_more:
+                    $ref: '#/components/schemas/HasMore'
+                  last_id:
+                    $ref: '#/components/schemas/LastId'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '413':
+          $ref: '#/components/responses/Error413'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '529':
+          $ref: '#/components/responses/Error529'
+  /v1/organizations/users/{user_id}:
+    get:
+      tags:
+        - Admin - Organization Member Management
+      summary: Get User
+      description: Retrieves details for a specific user
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AnthropicVersionHeader'
+        - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
+      responses:
+        '200':
+          description: User details retrieved successfully
+          headers:
+            request-id:
+              $ref: '#/components/headers/RequestId'
+            anthropic-organization-id:
+              $ref: '#/components/headers/AnthropicOrganizationId'
+            retry-after:
+              $ref: '#/components/headers/RetryAfter'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminMemberManagementUserData'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '413':
+          $ref: '#/components/responses/Error413'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '529':
+          $ref: '#/components/responses/Error529'
+    post:
+      tags:
+        - Admin - Organization Member Management
+      summary: Update User
+      description: Updates details for a specific user
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AnthropicVersionHeader'
+        - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - role
+              properties:
+                role:
+                  type: string
+                  enum: [user, developer, billing]
+                  description: New role for the User. Cannot be "admin".
+      responses:
+        '200':
+          description: User updated successfully
+          headers:
+            request-id:
+              $ref: '#/components/headers/RequestId'
+            anthropic-organization-id:
+              $ref: '#/components/headers/AnthropicOrganizationId'
+            retry-after:
+              $ref: '#/components/headers/RetryAfter'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminMemberManagementUserData'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '413':
+          $ref: '#/components/responses/Error413'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '529':
+          $ref: '#/components/responses/Error529'
+    delete:
+      tags:
+        - Admin - Organization Member Management
+      summary: Remove User
+      description: Removes a user from the organization
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AnthropicVersionHeader'
+        - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
+      responses:
+        '200':
+          description: User successfully removed
+          headers:
+            request-id:
+              $ref: '#/components/headers/RequestId'
+            anthropic-organization-id:
+              $ref: '#/components/headers/AnthropicOrganizationId'
+            retry-after:
+              $ref: '#/components/headers/RetryAfter'
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                  - type
+                properties:
+                  id:
+                    type: string
+                    description: ID of the deleted User.
+                  type:
+                    type: string
+                    enum: [user_deleted]
+                    default: user_deleted
+                    description: Object type. For deleted Users, this is always "user_deleted".
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '413':
+          $ref: '#/components/responses/Error413'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '529':
+          $ref: '#/components/responses/Error529'
+  /v1/organizations/invites:
+    get:
+      tags:
+        - Admin - Organization Invites
+      summary: List Invites
+      description: Retrieves a list of all organization invites
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AnthropicVersionHeader'
+        - $ref: '#/components/parameters/BeforeId'
+        - $ref: '#/components/parameters/AfterId'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
+      responses:
+        '200':
+          description: Invites retrieved successfully
+          headers:
+            request-id:
+              $ref: '#/components/headers/RequestId'
+            anthropic-organization-id:
+              $ref: '#/components/headers/AnthropicOrganizationId'
+            retry-after:
+              $ref: '#/components/headers/RetryAfter'
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                  - first_id
+                  - has_more
+                  - last_id
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AdminInviteData'
+                  first_id:
+                    $ref: '#/components/schemas/FirstId'
+                  has_more:
+                    $ref: '#/components/schemas/HasMore'
+                  last_id:
+                    $ref: '#/components/schemas/LastId'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '413':
+          $ref: '#/components/responses/Error413'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '529':
+          $ref: '#/components/responses/Error529'
+    post:
+      tags:
+        - Admin - Organization Invites
+      summary: Create Invite
+      description: Creates a new organization invite
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - role
+              properties:
+                email:
+                  type: string
+                  description: Email of the User.
+                role:
+                  type: string
+                  enum: [user, developer, billing]
+                  description: Role for the invited User. Cannot be "admin".
+      responses:
+        '200':
+          description: Invite created successfully
+          headers:
+            request-id:
+              $ref: '#/components/headers/RequestId'
+            anthropic-organization-id:
+              $ref: '#/components/headers/AnthropicOrganizationId'
+            retry-after:
+              $ref: '#/components/headers/RetryAfter'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminInviteData'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '413':
+          $ref: '#/components/responses/Error413'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '529':
+          $ref: '#/components/responses/Error529'
+  /v1/organizations/invites/{invite_id}:
+    get:
+      tags:
+        - Admin - Organization Invites
+      summary: Get Invite
+      description: Retrieves details for a specific invite
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AnthropicVersionHeader'
+        - $ref: '#/components/parameters/InviteId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
+      responses:
+        '200':
+          description: Invite details retrieved successfully
+          headers:
+            request-id:
+              $ref: '#/components/headers/RequestId'
+            anthropic-organization-id:
+              $ref: '#/components/headers/AnthropicOrganizationId'
+            retry-after:
+              $ref: '#/components/headers/RetryAfter'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminInviteData'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '413':
+          $ref: '#/components/responses/Error413'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '529':
+          $ref: '#/components/responses/Error529'
+    delete:
+      tags:
+        - Admin - Organization Invites
+      summary: Delete Invite
+      description: Deletes an existing organization invite
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AnthropicVersionHeader'
+        - $ref: '#/components/parameters/InviteId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
+      responses:
+        '200':
+          description: Invite deleted successfully
+          headers:
+            request-id:
+              $ref: '#/components/headers/RequestId'
+            anthropic-organization-id:
+              $ref: '#/components/headers/AnthropicOrganizationId'
+            retry-after:
+              $ref: '#/components/headers/RetryAfter'
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                  - type
+                properties:
+                  id:
+                    type: string
+                    description: ID of the deleted Invite.
+                  type:
+                    type: string
+                    enum: [invite_deleted]
+                    default: invite_deleted
+                    description: Deleted object type. For Invites, this is always "invite_deleted".
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '413':
+          $ref: '#/components/responses/Error413'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '529':
+          $ref: '#/components/responses/Error529'
+  /v1/organizations/workspaces:
+    get:
+      tags:
+        - Admin - Workspace Management
+      summary: List Workspaces
+      description: Retrieves a list of all workspaces
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AnthropicVersionHeader'
+        - name: include_archived
+          in: query
+          schema:
+            type: boolean
+            default: false
+          description: Whether to include Workspaces that have been archived in the response
+        - $ref: '#/components/parameters/BeforeId'
+        - $ref: '#/components/parameters/AfterId'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
+      responses:
+        '200':
+          description: Workspaces retrieved successfully
+          headers:
+            request-id:
+              $ref: '#/components/headers/RequestId'
+            anthropic-organization-id:
+              $ref: '#/components/headers/AnthropicOrganizationId'
+            retry-after:
+              $ref: '#/components/headers/RetryAfter'
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                  - first_id
+                  - has_more
+                  - last_id
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AdminWorkspaceData'
+                  first_id:
+                    $ref: '#/components/schemas/FirstId'
+                  has_more:
+                    $ref: '#/components/schemas/HasMore'
+                  last_id:
+                    $ref: '#/components/schemas/LastId'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '413':
+          $ref: '#/components/responses/Error413'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '529':
+          $ref: '#/components/responses/Error529'
+    post:
+      tags:
+        - Admin - Workspace Management
+      summary: Create Workspace
+      description: Creates a new workspace
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 40
+                  description: Name of the Workspace.
+      responses:
+        '200':
+          description: Workspace created successfully
+          headers:
+            request-id:
+              $ref: '#/components/headers/RequestId'
+            anthropic-organization-id:
+              $ref: '#/components/headers/AnthropicOrganizationId'
+            retry-after:
+              $ref: '#/components/headers/RetryAfter'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminWorkspaceData'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '413':
+          $ref: '#/components/responses/Error413'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '529':
+          $ref: '#/components/responses/Error529'
+  /v1/organizations/workspaces/{workspace_id}:
+    get:
+      tags:
+        - Admin - Workspace Management
+      summary: Get Workspace
+      description: Retrieves details for a specific workspace
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AnthropicVersionHeader'
+        - $ref: '#/components/parameters/WorkspaceId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
+      responses:
+        '200':
+          description: Workspace details retrieved successfully
+          headers:
+            request-id:
+              $ref: '#/components/headers/RequestId'
+            anthropic-organization-id:
+              $ref: '#/components/headers/AnthropicOrganizationId'
+            retry-after:
+              $ref: '#/components/headers/RetryAfter'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminWorkspaceData'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '413':
+          $ref: '#/components/responses/Error413'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '529':
+          $ref: '#/components/responses/Error529'
+    post:
+      tags:
+        - Admin - Workspace Management
+      summary: Update Workspace
+      description: Updates details for a specific workspace
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AnthropicVersionHeader'
+        - $ref: '#/components/parameters/WorkspaceId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 40
+                  description: Name of the Workspace.
+      responses:
+        '200':
+          description: Workspace updated successfully
+          headers:
+            request-id:
+              $ref: '#/components/headers/RequestId'
+            anthropic-organization-id:
+              $ref: '#/components/headers/AnthropicOrganizationId'
+            retry-after:
+              $ref: '#/components/headers/RetryAfter'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminWorkspaceData'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '413':
+          $ref: '#/components/responses/Error413'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '529':
+          $ref: '#/components/responses/Error529'
+  /v1/organizations/workspaces/{workspace_id}/archive:
+    post:
+      tags:
+        - Admin - Workspace Management
+      summary: Archive Workspace
+      description: Archives a specific workspace
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AnthropicVersionHeader'
+        - $ref: '#/components/parameters/WorkspaceId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
+      responses:
+        '200':
+          description: Workspace archived successfully
+          headers:
+            request-id:
+              $ref: '#/components/headers/RequestId'
+            anthropic-organization-id:
+              $ref: '#/components/headers/AnthropicOrganizationId'
+            retry-after:
+              $ref: '#/components/headers/RetryAfter'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminWorkspaceData'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '413':
+          $ref: '#/components/responses/Error413'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '529':
+          $ref: '#/components/responses/Error529'
+  /v1/organizations/workspaces/{workspace_id}/members:
+    get:
+      tags:
+        - Admin - Workspace Member Management
+      summary: List Workspace Members
+      description: Retrieves a list of all members in a workspace
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AnthropicVersionHeader'
+        - $ref: '#/components/parameters/WorkspaceId'
+        - $ref: '#/components/parameters/BeforeId'
+        - $ref: '#/components/parameters/AfterId'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
+      responses:
+        '200':
+          description: Workspace members retrieved successfully
+          headers:
+            request-id:
+              $ref: '#/components/headers/RequestId'
+            anthropic-organization-id:
+              $ref: '#/components/headers/AnthropicOrganizationId'
+            retry-after:
+              $ref: '#/components/headers/RetryAfter'
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                  - first_id
+                  - has_more
+                  - last_id
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AdminWorkspaceMemberData'
+                  first_id:
+                    $ref: '#/components/schemas/FirstId'
+                  has_more:
+                    $ref: '#/components/schemas/HasMore'
+                  last_id:
+                    $ref: '#/components/schemas/LastId'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '413':
+          $ref: '#/components/responses/Error413'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '529':
+          $ref: '#/components/responses/Error529'
+    post:
+      tags:
+        - Admin - Workspace Member Management
+      summary: Create Workspace Member
+      description: Creates a new workspace member
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AnthropicVersionHeader'
+        - $ref: '#/components/parameters/WorkspaceId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user_id
+                - workspace_role
+              properties:
+                user_id:
+                  type: string
+                  description: ID of the User.
+                workspace_role:
+                  type: string
+                  enum: [workspace_user, workspace_developer, workspace_admin]
+                  description: Role of the new Workspace Member. Cannot be "workspace_billing".
+      responses:
+        '200':
+          description: Workspace member created successfully
+          headers:
+            request-id:
+              $ref: '#/components/headers/RequestId'
+            anthropic-organization-id:
+              $ref: '#/components/headers/AnthropicOrganizationId'
+            retry-after:
+              $ref: '#/components/headers/RetryAfter'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminWorkspaceMemberData'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '413':
+          $ref: '#/components/responses/Error413'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '529':
+          $ref: '#/components/responses/Error529'
+  /v1/organizations/workspaces/{workspace_id}/members/{user_id}:
+    get:
+      tags:
+        - Admin - Workspace Member Management
+      summary: Get Workspace Member
+      description: Retrieves details for a specific workspace member
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AnthropicVersionHeader'
+        - $ref: '#/components/parameters/WorkspaceId'
+        - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
+      responses:
+        '200':
+          description: Workspace member details retrieved successfully
+          headers:
+            request-id:
+              $ref: '#/components/headers/RequestId'
+            anthropic-organization-id:
+              $ref: '#/components/headers/AnthropicOrganizationId'
+            retry-after:
+              $ref: '#/components/headers/RetryAfter'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminWorkspaceMemberData'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '413':
+          $ref: '#/components/responses/Error413'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '529':
+          $ref: '#/components/responses/Error529'
+    post:
+      tags:
+        - Admin - Workspace Member Management
+      summary: Update Workspace Member
+      description: Updates details for a specific workspace member
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AnthropicVersionHeader'
+        - $ref: '#/components/parameters/WorkspaceId'
+        - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - workspace_role
+              properties:
+                workspace_role:
+                  type: string
+                  enum: [workspace_user, workspace_developer, workspace_admin, workspace_billing]
+                  description: New workspace role for the User.
+      responses:
+        '200':
+          description: Workspace member updated successfully
+          headers:
+            request-id:
+              $ref: '#/components/headers/RequestId'
+            anthropic-organization-id:
+              $ref: '#/components/headers/AnthropicOrganizationId'
+            retry-after:
+              $ref: '#/components/headers/RetryAfter'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminWorkspaceMemberData'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '413':
+          $ref: '#/components/responses/Error413'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '529':
+          $ref: '#/components/responses/Error529'
+    delete:
+      tags:
+        - Admin - Workspace Member Management
+      summary: Delete Workspace Member
+      description: Removes a member from the workspace
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AnthropicVersionHeader'
+        - $ref: '#/components/parameters/WorkspaceId'
+        - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
+      responses:
+        '200':
+          description: Workspace member successfully removed
+          headers:
+            request-id:
+              $ref: '#/components/headers/RequestId'
+            anthropic-organization-id:
+              $ref: '#/components/headers/AnthropicOrganizationId'
+            retry-after:
+              $ref: '#/components/headers/RetryAfter'
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - type
+                  - user_id
+                  - workspace_id
+                properties:
+                  type:
+                    type: string
+                    enum: [workspace_member_deleted]
+                    default: workspace_member_deleted
+                    description: Deleted object type. For Workspace Members, this is always "workspace_member_deleted".
+                  user_id:
+                    type: string
+                    description: ID of the User.
+                  workspace_id:
+                    type: string
+                    description: ID of the Workspace.
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '413':
+          $ref: '#/components/responses/Error413'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '529':
+          $ref: '#/components/responses/Error529'
+  /v1/organizations/api_keys:
+    get:
+      tags:
+        - Admin - API Keys
+      summary: List Api Keys
+      description: Retrieves a list of all API keys
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AnthropicVersionHeader'
+        - $ref: '#/components/parameters/BeforeId'
+        - $ref: '#/components/parameters/AfterId'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
+        - name: status
+          in: query
+          schema:
+            type: string
+            nullable: true
+            enum: [active, inactive, archived]
+          description: Filter by API key status.
+        - name: workspace_id
+          in: query
+          schema:
+            type: string
+            nullable: true
+          description: Filter by Workspace ID.
+        - name: created_by_user_id
+          in: query
+          schema:
+            type: string
+            nullable: true
+          description: Filter by the ID of the User who created the object.
+      responses:
+        '200':
+          description: API keys retrieved successfully
+          headers:
+            request-id:
+              $ref: '#/components/headers/RequestId'
+            anthropic-organization-id:
+              $ref: '#/components/headers/AnthropicOrganizationId'
+            retry-after:
+              $ref: '#/components/headers/RetryAfter'
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                  - first_id
+                  - has_more
+                  - last_id
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AdminAPIKeyData'
+                  first_id:
+                    $ref: '#/components/schemas/FirstId'
+                  has_more:
+                    $ref: '#/components/schemas/HasMore'
+                  last_id:
+                    $ref: '#/components/schemas/LastId'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '413':
+          $ref: '#/components/responses/Error413'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '529':
+          $ref: '#/components/responses/Error529'
+  /v1/organizations/api_keys/{api_key_id}:
+    get:
+      tags:
+        - Admin - API Keys
+      summary: Get Api Key
+      description: Retrieves details for a specific API key
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AnthropicVersionHeader'
+        - $ref: '#/components/parameters/ApiKeyId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
+      responses:
+        '200':
+          description: API key details retrieved successfully
+          headers:
+            request-id:
+              $ref: '#/components/headers/RequestId'
+            anthropic-organization-id:
+              $ref: '#/components/headers/AnthropicOrganizationId'
+            retry-after:
+              $ref: '#/components/headers/RetryAfter'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminAPIKeyData'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '413':
+          $ref: '#/components/responses/Error413'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '529':
+          $ref: '#/components/responses/Error529'
+    post:
+      tags:
+        - Admin - API Keys
+      summary: Update Api Key
+      description: Updates details for a specific API key
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AnthropicVersionHeader'
+        - $ref: '#/components/parameters/ApiKeyId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 500
+                  description: Name of the API key.
+                status:
+                  type: string
+                  nullable: true
+                  enum: [active, inactive, archived]
+                  description: Status of the API key.
+      responses:
+        '200':
+          description: API key updated successfully
+          headers:
+            request-id:
+              $ref: '#/components/headers/RequestId'
+            anthropic-organization-id:
+              $ref: '#/components/headers/AnthropicOrganizationId'
+            retry-after:
+              $ref: '#/components/headers/RetryAfter'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminAPIKeyData'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '413':
+          $ref: '#/components/responses/Error413'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '529':
+          $ref: '#/components/responses/Error529'
+  /v1/experimental/generate_prompt:
+    post:
+      tags:
+        - Experimental - Prompt Tools
+      summary: Generate Prompt
+      description: Generates a prompt for a given input
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AnthropicBetaHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - task
+              properties:
+                task:
+                  type: string
+                  description: Description of the prompt's purpose.
+                target_model:
+                  type: string
+                  nullable: true
+                  description: The model this prompt will be used for.
+                  minLength: 1
+                  maxLength: 256
+      responses:
+        '200':
+          description: Successful response
+          headers:
+            request-id:
+              $ref: '#/components/headers/RequestId'
+            anthropic-organization-id:
+              $ref: '#/components/headers/AnthropicOrganizationId'
+            retry-after:
+              $ref: '#/components/headers/RetryAfter'
+            anthropic-ratelimit-requests-limit:
+              $ref: '#/components/headers/AnthropicRateLimitRequestsLimit'
+            anthropic-ratelimit-requests-remaining:
+              $ref: '#/components/headers/AnthropicRateLimitRequestsRemaining'
+            anthropic-ratelimit-requests-reset:
+              $ref: '#/components/headers/AnthropicRateLimitRequestsReset'
+            anthropic-ratelimit-tokens-limit:
+              $ref: '#/components/headers/AnthropicRateLimitTokensLimit'
+            anthropic-ratelimit-tokens-remaining:
+              $ref: '#/components/headers/AnthropicRateLimitTokensRemaining'
+            anthropic-ratelimit-tokens-reset:
+              $ref: '#/components/headers/AnthropicRateLimitTokensReset'
+            anthropic-ratelimit-input-tokens-limit:
+              $ref: '#/components/headers/AnthropicRateLimitInputTokensLimit'
+            anthropic-ratelimit-input-tokens-remaining:
+              $ref: '#/components/headers/AnthropicRateLimitInputTokensRemaining'
+            anthropic-ratelimit-input-tokens-reset:
+              $ref: '#/components/headers/AnthropicRateLimitInputTokensReset'
+            anthropic-ratelimit-output-tokens-limit:
+              $ref: '#/components/headers/AnthropicRateLimitOutputTokensLimit'
+            anthropic-ratelimit-output-tokens-remaining:
+              $ref: '#/components/headers/AnthropicRateLimitOutputTokensRemaining'
+            anthropic-ratelimit-output-tokens-reset:
+              $ref: '#/components/headers/AnthropicRateLimitOutputTokensReset'
+            anthropic-priority-input-tokens-limit:
+              $ref: '#/components/headers/AnthropicPriorityInputTokensLimit'
+            anthropic-priority-input-tokens-remaining:
+              $ref: '#/components/headers/AnthropicPriorityInputTokensRemaining'
+            anthropic-priority-input-tokens-reset:
+              $ref: '#/components/headers/AnthropicPriorityInputTokensReset'
+            anthropic-priority-output-tokens-limit:
+              $ref: '#/components/headers/AnthropicPriorityOutputTokensLimit'
+            anthropic-priority-output-tokens-remaining:
+              $ref: '#/components/headers/AnthropicPriorityOutputTokensRemaining'
+            anthropic-priority-output-tokens-reset:
+              $ref: '#/components/headers/AnthropicPriorityOutputTokensReset'
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - message
+                  - system
+                  - usage
+                properties:
+                  messages:
+                    type: array
+                    description: The response contains a list of message objects in the same format used by the Messages API. Typically includes a user message with the complete generated prompt text, and may include an assistant message with a prefill to guide the model's initial response. These messages can be used directly in a Messages API request to start a conversation with the generated prompt.
+                    items:
+                      $ref: '#/components/schemas/Message'
+                  system:
+                    type: string
+                    default: ""
+                    description: Currently, the system field is always returned as an empty string (""). In future iterations, this field may contain generated system prompts. Directions similar to what would normally be included in a system prompt are included in messages when generating a prompt.
+                  usage:
+                    $ref: '#/components/schemas/Usage'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '413':
+          $ref: '#/components/responses/Error413'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '529':
+          $ref: '#/components/responses/Error529'
+  /v1/experimental/improve_prompt:
+    post:
+      tags:
+        - Experimental - Prompt Tools
+      summary: Improve Prompt
+      description: Improves a prompt for a given input
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AnthropicBetaHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - message
+              properties:
+                messages:
+                  type: array
+                  description: The response contains a list of message objects in the same format used by the Messages API. Typically includes a user message with the complete generated prompt text, and may include an assistant message with a prefill to guide the model's initial response. These messages can be used directly in a Messages API request to start a conversation with the generated prompt.
+                  items:
+                    $ref: '#/components/schemas/Message'
+                feedback:
+                  type: string
+                  nullable: true
+                system:
+                  type: string
+                  nullable: true
+                target_model:
+                  type: string
+                  nullable: true
+                  description: The model this prompt will be used for.
+                  minLength: 1
+                  maxLength: 256
+      responses:
+        '200':
+          description: Successful response
+          headers:
+            request-id:
+              $ref: '#/components/headers/RequestId'
+            anthropic-organization-id:
+              $ref: '#/components/headers/AnthropicOrganizationId'
+            retry-after:
+              $ref: '#/components/headers/RetryAfter'
+            anthropic-ratelimit-requests-limit:
+              $ref: '#/components/headers/AnthropicRateLimitRequestsLimit'
+            anthropic-ratelimit-requests-remaining:
+              $ref: '#/components/headers/AnthropicRateLimitRequestsRemaining'
+            anthropic-ratelimit-requests-reset:
+              $ref: '#/components/headers/AnthropicRateLimitRequestsReset'
+            anthropic-ratelimit-tokens-limit:
+              $ref: '#/components/headers/AnthropicRateLimitTokensLimit'
+            anthropic-ratelimit-tokens-remaining:
+              $ref: '#/components/headers/AnthropicRateLimitTokensRemaining'
+            anthropic-ratelimit-tokens-reset:
+              $ref: '#/components/headers/AnthropicRateLimitTokensReset'
+            anthropic-ratelimit-input-tokens-limit:
+              $ref: '#/components/headers/AnthropicRateLimitInputTokensLimit'
+            anthropic-ratelimit-input-tokens-remaining:
+              $ref: '#/components/headers/AnthropicRateLimitInputTokensRemaining'
+            anthropic-ratelimit-input-tokens-reset:
+              $ref: '#/components/headers/AnthropicRateLimitInputTokensReset'
+            anthropic-ratelimit-output-tokens-limit:
+              $ref: '#/components/headers/AnthropicRateLimitOutputTokensLimit'
+            anthropic-ratelimit-output-tokens-remaining:
+              $ref: '#/components/headers/AnthropicRateLimitOutputTokensRemaining'
+            anthropic-ratelimit-output-tokens-reset:
+              $ref: '#/components/headers/AnthropicRateLimitOutputTokensReset'
+            anthropic-priority-input-tokens-limit:
+              $ref: '#/components/headers/AnthropicPriorityInputTokensLimit'
+            anthropic-priority-input-tokens-remaining:
+              $ref: '#/components/headers/AnthropicPriorityInputTokensRemaining'
+            anthropic-priority-input-tokens-reset:
+              $ref: '#/components/headers/AnthropicPriorityInputTokensReset'
+            anthropic-priority-output-tokens-limit:
+              $ref: '#/components/headers/AnthropicPriorityOutputTokensLimit'
+            anthropic-priority-output-tokens-remaining:
+              $ref: '#/components/headers/AnthropicPriorityOutputTokensRemaining'
+            anthropic-priority-output-tokens-reset:
+              $ref: '#/components/headers/AnthropicPriorityOutputTokensReset'
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - message
+                  - system
+                  - usage
+                properties:
+                  messages:
+                    type: array
+                    description: The response contains a list of message objects in the same format used by the Messages API. Typically includes a user message with the complete generated prompt text, and may include an assistant message with a prefill to guide the model's initial response. These messages can be used directly in a Messages API request to start a conversation with the generated prompt.
+                    items:
+                      $ref: '#/components/schemas/Message'
+                  system:
+                    type: string
+                    default: ""
+                    description: Currently, the system field is always returned as an empty string (""). In future iterations, this field may contain generated system prompts. Directions similar to what would normally be included in a system prompt are included in messages when generating a prompt.
+                  usage:
+                    $ref: '#/components/schemas/Usage'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '413':
+          $ref: '#/components/responses/Error413'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '529':
+          $ref: '#/components/responses/Error529'
+  /v1/experimental/templatize_prompt:
+    post:
+      tags:
+        - Experimental - Prompt Tools
+      summary: Templatize Prompt
+      description: Templatizes a prompt for a given input
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AnthropicBetaHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - message
+              properties:
+                messages:
+                  type: array
+                  description: The response contains a list of message objects in the same format used by the Messages API. Typically includes a user message with the complete generated prompt text, and may include an assistant message with a prefill to guide the model's initial response. These messages can be used directly in a Messages API request to start a conversation with the generated prompt.
+                  items:
+                    $ref: '#/components/schemas/Message'
+                system:
+                  type: string
+                  nullable: true
+      responses:
+        '200':
+          description: Successful response
+          headers:
+            request-id:
+              $ref: '#/components/headers/RequestId'
+            anthropic-organization-id:
+              $ref: '#/components/headers/AnthropicOrganizationId'
+            retry-after:
+              $ref: '#/components/headers/RetryAfter'
+            anthropic-ratelimit-requests-limit:
+              $ref: '#/components/headers/AnthropicRateLimitRequestsLimit'
+            anthropic-ratelimit-requests-remaining:
+              $ref: '#/components/headers/AnthropicRateLimitRequestsRemaining'
+            anthropic-ratelimit-requests-reset:
+              $ref: '#/components/headers/AnthropicRateLimitRequestsReset'
+            anthropic-ratelimit-tokens-limit:
+              $ref: '#/components/headers/AnthropicRateLimitTokensLimit'
+            anthropic-ratelimit-tokens-remaining:
+              $ref: '#/components/headers/AnthropicRateLimitTokensRemaining'
+            anthropic-ratelimit-tokens-reset:
+              $ref: '#/components/headers/AnthropicRateLimitTokensReset'
+            anthropic-ratelimit-input-tokens-limit:
+              $ref: '#/components/headers/AnthropicRateLimitInputTokensLimit'
+            anthropic-ratelimit-input-tokens-remaining:
+              $ref: '#/components/headers/AnthropicRateLimitInputTokensRemaining'
+            anthropic-ratelimit-input-tokens-reset:
+              $ref: '#/components/headers/AnthropicRateLimitInputTokensReset'
+            anthropic-ratelimit-output-tokens-limit:
+              $ref: '#/components/headers/AnthropicRateLimitOutputTokensLimit'
+            anthropic-ratelimit-output-tokens-remaining:
+              $ref: '#/components/headers/AnthropicRateLimitOutputTokensRemaining'
+            anthropic-ratelimit-output-tokens-reset:
+              $ref: '#/components/headers/AnthropicRateLimitOutputTokensReset'
+            anthropic-priority-input-tokens-limit:
+              $ref: '#/components/headers/AnthropicPriorityInputTokensLimit'
+            anthropic-priority-input-tokens-remaining:
+              $ref: '#/components/headers/AnthropicPriorityInputTokensRemaining'
+            anthropic-priority-input-tokens-reset:
+              $ref: '#/components/headers/AnthropicPriorityInputTokensReset'
+            anthropic-priority-output-tokens-limit:
+              $ref: '#/components/headers/AnthropicPriorityOutputTokensLimit'
+            anthropic-priority-output-tokens-remaining:
+              $ref: '#/components/headers/AnthropicPriorityOutputTokensRemaining'
+            anthropic-priority-output-tokens-reset:
+              $ref: '#/components/headers/AnthropicPriorityOutputTokensReset'
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - message
+                  - system
+                  - usage
+                  - variable_values
+                properties:
+                  messages:
+                    type: array
+                    description: The response contains a list of message objects in the same format used by the Messages API. Typically includes a user message with the complete generated prompt text, and may include an assistant message with a prefill to guide the model's initial response. These messages can be used directly in a Messages API request to start a conversation with the generated prompt.
+                    items:
+                      $ref: '#/components/schemas/Message'
+                  system:
+                    type: string
+                    default: ""
+                    description: Currently, the system field is always returned as an empty string (""). In future iterations, this field may contain generated system prompts. Directions similar to what would normally be included in a system prompt are included in messages when generating a prompt.
+                  usage:
+                    $ref: '#/components/schemas/Usage'
+                  variable_values:
+                    type: object
+                    description: A mapping of template variable names to their original values, as extracted from the input prompt during templatization. Each key represents a variable name identified in the templatized prompt, and each value contains the corresponding content from the original prompt that was replaced by that variable.
+                    additionalProperties:
+                      type: string
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '413':
+          $ref: '#/components/responses/Error413'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '529':
+          $ref: '#/components/responses/Error529'
+x-wso2-cors:
+  corsConfigurationEnabled: true
+  accessControlAllowOrigins:
+    - '*'
+  accessControlAllowCredentials: false
+  accessControlAllowHeaders:
+    - authorization
+    - Access-Control-Allow-Origin
+    - Content-Type
+    - SOAPAction
+    - apikey
+    - Internal-Key
+    - anthropic-version
+    - anthropic-beta
+    - anthropic-dangerous-direct-browser-access
+  accessControlAllowMethods:
+    - GET
+    - PUT
+    - POST
+    - DELETE
+    - PATCH
+    - OPTIONS

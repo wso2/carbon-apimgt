@@ -22,7 +22,10 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.APIOperationMapping;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
+import org.wso2.carbon.apimgt.api.model.BackendOperation;
+import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -33,6 +36,7 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
+import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
@@ -177,7 +181,21 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
                 List<URLMapping> resources = api.getResources();
                 URLMapping urlMapping = null;
                 for (URLMapping mapping : resources) {
-                    if (Objects.equals(mapping.getHttpMethod(), httpVerb) || "WS".equalsIgnoreCase(api.getApiType())) {
+                    String httpMethodFromMapping = mapping.getHttpMethod();
+                    if (StringUtils.equals(APIConstants.API_TYPE_MCP, api.getApiType())) {
+                        BackendOperationMapping backendAPIOperationMapping = mapping.getBackendOperationMapping();
+                        APIOperationMapping apiOperationMapping = mapping.getApiOperationMapping();
+                        BackendOperation backendOperation = null;
+                        if (backendAPIOperationMapping != null) {
+                            backendOperation = backendAPIOperationMapping.getBackendOperation();
+                        } else if (apiOperationMapping != null) {
+                            backendOperation = apiOperationMapping.getBackendOperation();
+                        }
+                        if (backendOperation != null) {
+                            httpMethodFromMapping = backendOperation.getVerb().toString();
+                        }
+                    }
+                    if (Objects.equals(httpMethodFromMapping, httpVerb) || "WS".equalsIgnoreCase(api.getApiType())) {
                         if (isResourcePathMatching(resource, mapping)) {
                             urlMapping = mapping;
                             break;
@@ -212,14 +230,53 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
         return scopesValidated;
     }
 
+    private boolean isAccessTokenExpired(long validityPeriod, long issuedTime) {
+
+        long timestampSkew =
+                ServiceReferenceHolder.getInstance().getOauthServerConfiguration().getTimeStampSkewInSeconds() * 1000;
+        long currentTime = System.currentTimeMillis();
+
+        //If the validity period is not an never expiring value
+        if (validityPeriod != Long.MAX_VALUE &&
+                // For cases where validityPeriod is closer to Long.MAX_VALUE (then issuedTime + validityPeriod would spill
+                // over and would produce a negative value)
+                (currentTime - timestampSkew) > validityPeriod) {
+            //check the validity of cached OAuth2AccessToken Response
+
+            if ((currentTime - timestampSkew) > (issuedTime + validityPeriod)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
     private AccessTokenInfo getAccessTokenInfo(TokenValidationContext validationContext)
             throws APIManagementException {
 
         Object cachedAccessTokenInfo =
                 CacheProvider.createIntrospectionCache().get(validationContext.getAccessToken());
-        if (cachedAccessTokenInfo != null) {
-            log.debug("AccessToken available in introspection Cache.");
-            return (AccessTokenInfo) cachedAccessTokenInfo;
+        AccessTokenInfo cachedAccessTokenInfoObject = null;
+
+        if (cachedAccessTokenInfo instanceof AccessTokenInfo) {
+            cachedAccessTokenInfoObject = (AccessTokenInfo) cachedAccessTokenInfo;
+
+            // Since validationInfoDTO object is not passed into isAccessTokenExpired(),
+            // validation status need to be set explicitly.
+            if (isAccessTokenExpired(cachedAccessTokenInfoObject.getValidityPeriod(),
+                    cachedAccessTokenInfoObject.getIssuedTime())) {
+
+                if (log.isDebugEnabled()) {
+                    log.debug("Invalid OAuth Token in Introspect Cache : Access Token " +
+                            APIUtil.getMaskedToken(validationContext.getAccessToken()) + " has been expired.");
+                }
+                // if token is expired  remove cache entry from introspection cache
+                CacheProvider.getGatewayIntrospectCache().remove(validationContext.getAccessToken());
+                cachedAccessTokenInfoObject.setErrorcode(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
+                cachedAccessTokenInfoObject.setTokenValid(false);
+            }
+                return cachedAccessTokenInfoObject;
         }
         String electedKeyManager = null;
         // Obtaining details about the token.
@@ -308,6 +365,19 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
 
         String resource = resourceString.trim();
         String urlPattern = urlMapping.getUrlPattern().trim();
+
+
+        BackendOperationMapping backendAPIOperationMapping = urlMapping.getBackendOperationMapping();
+        APIOperationMapping apiOperationMapping = urlMapping.getApiOperationMapping();
+        BackendOperation backendOperation = null;
+        if (backendAPIOperationMapping != null) {
+            backendOperation = backendAPIOperationMapping.getBackendOperation();
+        } else if (apiOperationMapping != null) {
+            backendOperation = apiOperationMapping.getBackendOperation();
+        }
+        if (backendOperation != null) {
+            urlPattern = backendOperation.getTarget().trim();
+        }
 
         if (resource.equalsIgnoreCase(urlPattern)) {
             return true;

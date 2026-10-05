@@ -57,6 +57,7 @@ public class AuthenticationContext {
     private int graphQLMaxComplexity;
     private String accessToken;
     private Set<String> applicationGroupIds;
+    private String mcpUpstreamToken;
 
     public List<String> getRequestTokenScopes() {
         return requestTokenScopes;
@@ -318,5 +319,13 @@ public class AuthenticationContext {
 
     public void setApplicationGroupIds(Set<String> applicationGroupIds) {
         this.applicationGroupIds = applicationGroupIds;
+    }
+
+    public String getMcpUpstreamToken() {
+        return mcpUpstreamToken;
+    }
+
+    public void setMcpUpstreamToken(String mcpUpstreamToken) {
+        this.mcpUpstreamToken = mcpUpstreamToken;
     }
 }

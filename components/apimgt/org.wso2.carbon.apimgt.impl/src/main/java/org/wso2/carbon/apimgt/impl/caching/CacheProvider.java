@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl.caching;
 
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -162,6 +163,7 @@ public class CacheProvider {
     /**
      * @return Tenant Config cache
      */
+    @UsedByMigrationClient
     public static Cache getTenantConfigCache() {
         return getCache(APIConstants.TENANT_CONFIG_CACHE_NAME);
     }
@@ -178,6 +180,13 @@ public class CacheProvider {
      */
     public static Cache getRecommendationsCache() {
         return getCache(APIConstants.RECOMMENDATIONS_CACHE_NAME);
+    }
+
+    /**
+     * @return Synapse Artifact Cache.
+     */
+    public static Cache getSynapseArtifactCache() {
+        return getCache(APIConstants.SYNAPSE_ARTIFACT_CACHE);
     }
 
     /**
@@ -559,6 +568,24 @@ public class CacheProvider {
         } else {
             long defaultCacheTimeout = getDefaultCacheTimeout();
             return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.RECOMMENDATIONS_CACHE_NAME,
+                    defaultCacheTimeout, defaultCacheTimeout);
+        }
+    }
+
+    /**
+     * Creates and returns the Synapse Artifact Cache with configured expiry.
+     *
+     * @return Synapse Artifact Cache
+     */
+    public static Cache createSynapseArtifactCache() {
+        String synapseArtifactCacheExpiry = getApiManagerConfiguration()
+                .getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
+        if (synapseArtifactCacheExpiry != null) {
+            return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.SYNAPSE_ARTIFACT_CACHE,
+                    Long.parseLong(synapseArtifactCacheExpiry), Long.parseLong(synapseArtifactCacheExpiry));
+        } else {
+            long defaultCacheTimeout = getDefaultCacheTimeout();
+            return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.SYNAPSE_ARTIFACT_CACHE,
                     defaultCacheTimeout, defaultCacheTimeout);
         }
     }

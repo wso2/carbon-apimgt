@@ -3,6 +3,7 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.GatewayInstanceListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.EnvironmentsApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.impl.EnvironmentsApiServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -44,14 +45,53 @@ EnvironmentsApiService delegate = new EnvironmentsApiServiceImpl();
     @ApiOperation(value = "Delete an Environment", notes = "Delete a Environment by Environment Id ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:environment_manage", description = "Manage gateway environments")
+            @AuthorizationScope(scope = "apim:environment_manage", description = "Manage gateway environments"),
+            @AuthorizationScope(scope = "apim:environment_delete", description = "Delete gateway environments")
         })
     }, tags={ "Environments",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Environment successfully deleted. ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response environmentsEnvironmentIdDelete(@ApiParam(value = "Environment UUID (or Environment name defined in config) ",required=true) @PathParam("environmentId") String environmentId) throws APIManagementException{
+    public Response environmentsEnvironmentIdDelete(@ApiParam(value = "Environment UUID (or Environment name defined in config), in case the ID contains special characters it should be base64 encoded ",required=true) @PathParam("environmentId") String environmentId) throws APIManagementException{
         return delegate.environmentsEnvironmentIdDelete(environmentId, securityContext);
+    }
+
+    @GET
+    @Path("/{environmentId}/gateways")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get Gateway Instances in a Gateway Environment", notes = "Retrieve list of gateway Instances in the gateway environment. ", response = GatewayInstanceListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:environment_read", description = "Retrieve gateway environments")
+        })
+    }, tags={ "Environments",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. List of gateway Instances in the gateway environment returned ", response = GatewayInstanceListDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
+    public Response environmentsEnvironmentIdGatewaysGet(@ApiParam(value = "Environment UUID (or Environment name defined in config), in case the ID contains special characters it should be base64 encoded ",required=true) @PathParam("environmentId") String environmentId) throws APIManagementException{
+        return delegate.environmentsEnvironmentIdGatewaysGet(environmentId, securityContext);
+    }
+
+    @GET
+    @Path("/{environmentId}")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get a Gateway Environment Configuration", notes = "Retrieve a single Gateway Environment Configuration. We should provide the Id of the Environment as a path parameter. ", response = EnvironmentDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:environment_manage", description = "Manage gateway environments"),
+            @AuthorizationScope(scope = "apim:environment_read", description = "Retrieve gateway environments")
+        })
+    }, tags={ "Environments",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Gateway Environment Configuration returned ", response = EnvironmentDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
+    public Response environmentsEnvironmentIdGet(@ApiParam(value = "Environment UUID (or Environment name defined in config), in case the ID contains special characters it should be base64 encoded ",required=true) @PathParam("environmentId") String environmentId) throws APIManagementException{
+        return delegate.environmentsEnvironmentIdGet(environmentId, securityContext);
     }
 
     @PUT
@@ -61,14 +101,15 @@ EnvironmentsApiService delegate = new EnvironmentsApiServiceImpl();
     @ApiOperation(value = "Update an Environment", notes = "Update a gateway Environment by environment Id ", response = EnvironmentDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:environment_manage", description = "Manage gateway environments")
+            @AuthorizationScope(scope = "apim:environment_manage", description = "Manage gateway environments"),
+            @AuthorizationScope(scope = "apim:environment_update", description = "Update gateway environments")
         })
     }, tags={ "Environments",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Environment updated. ", response = EnvironmentDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response environmentsEnvironmentIdPut(@ApiParam(value = "Environment UUID (or Environment name defined in config) ",required=true) @PathParam("environmentId") String environmentId, @ApiParam(value = "Environment object with updated information " ,required=true) EnvironmentDTO environmentDTO) throws APIManagementException{
+    public Response environmentsEnvironmentIdPut(@ApiParam(value = "Environment UUID (or Environment name defined in config), in case the ID contains special characters it should be base64 encoded ",required=true) @PathParam("environmentId") String environmentId, @ApiParam(value = "Environment object with updated information " ,required=true) EnvironmentDTO environmentDTO) throws APIManagementException{
         return delegate.environmentsEnvironmentIdPut(environmentId, environmentDTO, securityContext);
     }
 
@@ -95,7 +136,8 @@ EnvironmentsApiService delegate = new EnvironmentsApiServiceImpl();
     @ApiOperation(value = "Add an Environment", notes = "Add a new gateway environment ", response = EnvironmentDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:environment_manage", description = "Manage gateway environments")
+            @AuthorizationScope(scope = "apim:environment_manage", description = "Manage gateway environments"),
+            @AuthorizationScope(scope = "apim:environment_create", description = "Create gateway environments")
         })
     }, tags={ "Environments" })
     @ApiResponses(value = { 

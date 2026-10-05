@@ -28,6 +28,7 @@ public class APIInfoDTO   {
   
     private String id = null;
     private String name = null;
+    private String displayName = null;
     private String description = null;
     private String context = null;
     private List<APIInfoAdditionalPropertiesDTO> additionalProperties = new ArrayList<APIInfoAdditionalPropertiesDTO>();
@@ -85,6 +86,7 @@ return null;
     private String technicalOwner = null;
     private String technicalOwnerEmail = null;
     private Boolean egress = false;
+    private Boolean initiatedFromGateway = false;
 
   /**
    **/
@@ -118,6 +120,24 @@ return null;
   }
   public void setName(String name) {
     this.name = name;
+  }
+
+  /**
+   * Display name of the API. This is the name that will be displayed in the Publisher and DevPortal. If not provided, the name will be used as the display name. 
+   **/
+  public APIInfoDTO displayName(String displayName) {
+    this.displayName = displayName;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Calculator API", value = "Display name of the API. This is the name that will be displayed in the Publisher and DevPortal. If not provided, the name will be used as the display name. ")
+  @JsonProperty("displayName")
+  public String getDisplayName() {
+    return displayName;
+  }
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
   }
 
   /**
@@ -571,6 +591,24 @@ return null;
     this.egress = egress;
   }
 
+  /**
+   * Whether the API is initiated from the gateway or not. This is used to identify whether the API is created from the Publisher or from the Gateway. 
+   **/
+  public APIInfoDTO initiatedFromGateway(Boolean initiatedFromGateway) {
+    this.initiatedFromGateway = initiatedFromGateway;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "true", value = "Whether the API is initiated from the gateway or not. This is used to identify whether the API is created from the Publisher or from the Gateway. ")
+  @JsonProperty("initiatedFromGateway")
+  public Boolean isInitiatedFromGateway() {
+    return initiatedFromGateway;
+  }
+  public void setInitiatedFromGateway(Boolean initiatedFromGateway) {
+    this.initiatedFromGateway = initiatedFromGateway;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -583,6 +621,7 @@ return null;
     APIInfoDTO apIInfo = (APIInfoDTO) o;
     return Objects.equals(id, apIInfo.id) &&
         Objects.equals(name, apIInfo.name) &&
+        Objects.equals(displayName, apIInfo.displayName) &&
         Objects.equals(description, apIInfo.description) &&
         Objects.equals(context, apIInfo.context) &&
         Objects.equals(additionalProperties, apIInfo.additionalProperties) &&
@@ -608,12 +647,13 @@ return null;
         Objects.equals(businessOwnerEmail, apIInfo.businessOwnerEmail) &&
         Objects.equals(technicalOwner, apIInfo.technicalOwner) &&
         Objects.equals(technicalOwnerEmail, apIInfo.technicalOwnerEmail) &&
-        Objects.equals(egress, apIInfo.egress);
+        Objects.equals(egress, apIInfo.egress) &&
+        Objects.equals(initiatedFromGateway, apIInfo.initiatedFromGateway);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, additionalProperties, additionalPropertiesMap, version, provider, type, subtype, audience, audiences, lifeCycleStatus, workflowStatus, hasThumbnail, securityScheme, createdTime, updatedTime, updatedBy, gatewayVendor, gatewayType, advertiseOnly, monetizedInfo, businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail, egress);
+    return Objects.hash(id, name, displayName, description, context, additionalProperties, additionalPropertiesMap, version, provider, type, subtype, audience, audiences, lifeCycleStatus, workflowStatus, hasThumbnail, securityScheme, createdTime, updatedTime, updatedBy, gatewayVendor, gatewayType, advertiseOnly, monetizedInfo, businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail, egress, initiatedFromGateway);
   }
 
   @Override
@@ -623,6 +663,7 @@ return null;
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
@@ -649,6 +690,7 @@ return null;
     sb.append("    technicalOwner: ").append(toIndentedString(technicalOwner)).append("\n");
     sb.append("    technicalOwnerEmail: ").append(toIndentedString(technicalOwnerEmail)).append("\n");
     sb.append("    egress: ").append(toIndentedString(egress)).append("\n");
+    sb.append("    initiatedFromGateway: ").append(toIndentedString(initiatedFromGateway)).append("\n");
     sb.append("}");
     return sb.toString();
   }

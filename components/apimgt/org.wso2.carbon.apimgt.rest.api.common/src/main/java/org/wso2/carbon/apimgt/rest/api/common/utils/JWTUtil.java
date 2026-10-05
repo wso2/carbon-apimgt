@@ -162,7 +162,7 @@ public class JWTUtil {
                 for (String scope : scopes) {
                     Scope scp = ((URITemplate) template).getScope();
                     if (scp != null) {
-                        if (scope.equalsIgnoreCase(scp.getKey())) {
+                        if (scope.equals(scp.getKey())) {
                             //we found scopes matches
                             if (log.isDebugEnabled()) {
                                 log.debug("Scope validation successful for access token: " +
@@ -174,7 +174,7 @@ public class JWTUtil {
                     } else if (!((URITemplate) template).retrieveAllScopes().isEmpty()) {
                         List<Scope> scopesList = ((URITemplate) template).retrieveAllScopes();
                         for (Scope scpObj : scopesList) {
-                            if (scope.equalsIgnoreCase(scpObj.getKey())) {
+                            if (scope.equals(scpObj.getKey())) {
                                 //we found scopes matches
                                 if (log.isDebugEnabled()) {
                                     log.debug("Scope validation successful for access token: " +

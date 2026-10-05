@@ -15,12 +15,15 @@
  */
 package org.wso2.carbon.apimgt.gateway.internal;
 
+import java.io.File;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.commons.throttle.core.DistributedCounterManager;
 import org.apache.synapse.commons.throttle.core.internal.DistributedThrottleProcessor;
 import org.apache.synapse.commons.throttle.core.internal.ThrottleServiceDataHolder;
+
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
@@ -30,21 +33,42 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+
+import org.wso2.carbon.apimgt.api.AILLMProviderService;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.EmbeddingProviderService;
+import org.wso2.carbon.apimgt.api.GuardrailProviderService;
+import org.wso2.carbon.apimgt.api.LLMProviderService;
+import org.wso2.carbon.apimgt.api.VectorDBProviderService;
+import org.wso2.carbon.apimgt.api.dto.EmbeddingProviderConfigurationDTO;
+import org.wso2.carbon.apimgt.api.dto.GuardrailProviderConfigurationDTO;
+import org.wso2.carbon.apimgt.api.dto.LLMProviderConfigurationDTO;
+import org.wso2.carbon.apimgt.api.dto.VectorDBProviderConfigurationDTO;
 import org.wso2.carbon.apimgt.common.analytics.AnalyticsCommonConfiguration;
 import org.wso2.carbon.apimgt.common.analytics.AnalyticsServiceReferenceHolder;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayJWTGeneratorImpl;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayUrlSafeJWTGeneratorImpl;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.AWSBedrockGuardrailProviderServiceImpl;
+import org.wso2.carbon.apimgt.gateway.AzureContentSafetyGuardrailProviderServiceImpl;
+import org.wso2.carbon.apimgt.gateway.AzureOpenAIEmbeddingProviderServiceImpl;
+import org.wso2.carbon.apimgt.gateway.AzureOpenAILLMProviderServiceImpl;
+import org.wso2.carbon.apimgt.gateway.ElastiCacheVectorDBProviderServiceImpl;
 import org.wso2.carbon.apimgt.gateway.HybridThrottleProcessor;
+import org.wso2.carbon.apimgt.gateway.MistralEmbeddingProviderServiceImpl;
+import org.wso2.carbon.apimgt.gateway.MistralLLMProviderServiceImpl;
+import org.wso2.carbon.apimgt.gateway.OpenAIEmbeddingProviderServiceImpl;
+import org.wso2.carbon.apimgt.gateway.OpenAILLMProviderServiceImpl;
 import org.wso2.carbon.apimgt.gateway.RedisBaseDistributedCountManager;
+import org.wso2.carbon.apimgt.gateway.ZillizVectorDBProviderServiceImpl;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClientPool;
-import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTMapCleaner;
+import org.wso2.carbon.apimgt.gateway.inbound.websocket.WebSocketProcessor;
 import org.wso2.carbon.apimgt.gateway.listeners.GatewayStartupListener;
 import org.wso2.carbon.apimgt.gateway.listeners.ServerStartupListener;
+import org.wso2.carbon.apimgt.gateway.service.GatewayRevokedTokenDataImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.apimgt.api.LLMProviderService;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.dto.RedisConfig;
@@ -52,6 +76,7 @@ import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever
 import org.wso2.carbon.apimgt.impl.jms.listener.JMSListenerShutDownService;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerDataService;
+import org.wso2.carbon.apimgt.impl.token.RevokedTokenService;
 import org.wso2.carbon.apimgt.tracing.TracingService;
 import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryService;
@@ -66,13 +91,14 @@ import org.wso2.carbon.mediation.initializer.services.SynapseConfigurationServic
 import org.wso2.carbon.mediation.security.vault.MediationSecurityAdminService;
 import org.wso2.carbon.rest.api.service.RestApiAdmin;
 import org.wso2.carbon.sequences.services.SequenceAdmin;
+import org.wso2.carbon.tenant.mgt.services.TenantMgtService;
+import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
-
-import java.io.File;
+import redis.clients.jedis.Protocol;
 
 @Component(
         name = "org.wso2.carbon.apimgt.handlers",
@@ -83,6 +109,7 @@ public class APIHandlerServiceComponent {
 
     private APIKeyValidatorClientPool clientPool;
     private ServiceRegistration registration;
+    private VectorDBProviderService vectorDBProviderService;
 
     @Activate
     protected void activate(ComponentContext context) {
@@ -107,7 +134,7 @@ public class APIHandlerServiceComponent {
         TenantServiceCreator listener = new TenantServiceCreator();
         bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), listener, null);
         bundleContext.registerService(ServerStartupObserver.class.getName(), new ServerStartupListener(), null);
-
+        bundleContext.registerService(RevokedTokenService.class, new GatewayRevokedTokenDataImpl(), null);
         // Set APIM Gateway JWT Generator
 
         registration =
@@ -116,9 +143,6 @@ public class APIHandlerServiceComponent {
         registration =
                 context.getBundleContext().registerService(AbstractAPIMgtGatewayJWTGenerator.class.getName(),
                         new APIMgtGatewayUrlSafeJWTGeneratorImpl(), null);
-        // Start JWT revoked map cleaner.
-        RevokedJWTMapCleaner revokedJWTMapCleaner = new RevokedJWTMapCleaner();
-        revokedJWTMapCleaner.startJWTRevokedMapCleaner();
         if (TelemetryUtil.telemetryEnabled()) {
             ServiceReferenceHolder.getInstance().setTelemetry(ServiceReferenceHolder.getInstance().getTelemetryService
                     ().buildTelemetryTracer(APIMgtGatewayConstants.SERVICE_NAME));
@@ -149,6 +173,142 @@ public class APIHandlerServiceComponent {
             }
         }
 
+        // Register Azure content safety services
+        GuardrailProviderConfigurationDTO azureContentSafetyDto =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
+                .getGuardrailProvider(APIConstants.AI.GUARDRAIL_PROVIDER_AZURE_CONTENTSAFETY_TYPE);
+        if (azureContentSafetyDto != null) {
+            try {
+                AzureContentSafetyGuardrailProviderServiceImpl azureContentSafetyGuardrailProviderService =
+                        new AzureContentSafetyGuardrailProviderServiceImpl();
+                azureContentSafetyGuardrailProviderService.init(azureContentSafetyDto);
+                context.getBundleContext().registerService(
+                        GuardrailProviderService.class.getName(),
+                        azureContentSafetyGuardrailProviderService,
+                        null
+                );
+            } catch (APIManagementException e) {
+                // TODO: Notify ACP
+                log.error("Error initializing Azure Content Safety guardrail provider service", e);
+            }
+        }
+
+        // Register AWS Bedrock guardrail services
+        GuardrailProviderConfigurationDTO awsBedrockGuardrailDto =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
+                        .getGuardrailProvider(APIConstants.AI.GUARDRAIL_PROVIDER_AWSBEDROCK_TYPE);
+        if (awsBedrockGuardrailDto != null) {
+            try {
+                AWSBedrockGuardrailProviderServiceImpl awsBedrockGuardrailProviderService =
+                        new AWSBedrockGuardrailProviderServiceImpl();
+                awsBedrockGuardrailProviderService.init(awsBedrockGuardrailDto);
+                context.getBundleContext().registerService(
+                        GuardrailProviderService.class.getName(),
+                        awsBedrockGuardrailProviderService,
+                        null
+                );
+            } catch (APIManagementException e) {
+                // TODO: Notify ACP
+                log.error("Error initializing AWS Bedrock Guardrail provider service", e);
+            }
+        }
+
+        // Register the embedding provider services
+        EmbeddingProviderConfigurationDTO embeddingProviderConfigurationDTO =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getEmbeddingProvider();
+        if (embeddingProviderConfigurationDTO.getType() != null) {
+            try {
+                String embeddingProviderType = embeddingProviderConfigurationDTO.getType();
+                EmbeddingProviderService embeddingProviderService;
+                switch (embeddingProviderType) {
+                    case APIConstants.AI.OPENAI_EMBEDDING_PROVIDER_TYPE:
+                        embeddingProviderService = new OpenAIEmbeddingProviderServiceImpl();
+                        break;
+                    case APIConstants.AI.MISTRAL_EMBEDDING_PROVIDER_TYPE:
+                        embeddingProviderService = new MistralEmbeddingProviderServiceImpl();
+                        break;
+                    case APIConstants.AI.AZURE_OPENAI_EMBEDDING_PROVIDER_TYPE:
+                        embeddingProviderService = new AzureOpenAIEmbeddingProviderServiceImpl();
+                        break;
+                    default:
+                        throw new APIManagementException("Unsupported embedding provider type: "
+                                + embeddingProviderType);
+                }
+                embeddingProviderService.init(embeddingProviderConfigurationDTO);
+                context.getBundleContext().registerService(
+                        EmbeddingProviderService.class.getName(),
+                        embeddingProviderService,
+                        null
+                );
+            } catch (APIManagementException e) {
+                // TODO: Notify ACP
+                log.error("Error initializing Embedding provider service", e);
+            }
+        }
+
+        // Register the LLM provider services for chat completion
+        LLMProviderConfigurationDTO llmProviderConfigurationDTO =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getLLMProvider();
+        if (llmProviderConfigurationDTO.getType() != null) {
+            log.info("Initializing LLM provider service for type: " + llmProviderConfigurationDTO.getType());
+            try {
+                String llmProviderType = llmProviderConfigurationDTO.getType();
+                AILLMProviderService llmProviderService;
+                switch (llmProviderType) {
+                    case APIConstants.AI.OPENAI_LLM_PROVIDER_TYPE:
+                        llmProviderService = new OpenAILLMProviderServiceImpl();
+                        break;
+                    case APIConstants.AI.MISTRAL_LLM_PROVIDER_TYPE:
+                        llmProviderService = new MistralLLMProviderServiceImpl();
+                        break;
+                    case APIConstants.AI.AZURE_OPENAI_LLM_PROVIDER_TYPE:
+                        llmProviderService = new AzureOpenAILLMProviderServiceImpl();
+                        break;
+                    default:
+                        throw new APIManagementException("Unsupported LLM provider type: "
+                                + llmProviderType);
+                }
+                llmProviderService.init(llmProviderConfigurationDTO);
+                context.getBundleContext().registerService(
+                        AILLMProviderService.class.getName(),
+                        llmProviderService,
+                        null
+                );
+            } catch (APIManagementException e) {
+                // TODO: Notify ACP
+                log.error("Error initializing LLM provider service", e);
+            }
+        }
+
+        // Register the vector db provider services
+        VectorDBProviderConfigurationDTO vectorDBProviderConfigurationDTO =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getVectorDBProvider();
+        if (vectorDBProviderConfigurationDTO.getType() != null) {
+            try {
+                String vectorDBProviderType = vectorDBProviderConfigurationDTO.getType();
+                switch (vectorDBProviderType) {
+                    case APIConstants.AI.VECTOR_DB_PROVIDER_ZILLIZ_TYPE:
+                        vectorDBProviderService = new ZillizVectorDBProviderServiceImpl();
+                        break;
+                    case ElastiCacheVectorDBProviderServiceImpl.VECTOR_DB_PROVIDER_ELASTICACHE_TYPE:
+                        vectorDBProviderService = new ElastiCacheVectorDBProviderServiceImpl();
+                        break;
+                    default:
+                        throw new APIManagementException("Unsupported vector DB provider type: "
+                                + vectorDBProviderType);
+                }
+                vectorDBProviderService.init(vectorDBProviderConfigurationDTO);
+                context.getBundleContext().registerService(
+                        VectorDBProviderService.class.getName(),
+                        vectorDBProviderService,
+                        null
+                );
+            } catch (APIManagementException e) {
+                // TODO: Notify ACP
+                log.error("Error initializing Vector DB provider service", e);
+            }
+        }
+
         // Create caches for the super tenant
         ServerConfiguration.getInstance().overrideConfigurationProperty("Cache.ForceLocalCache", "true");
         CacheProvider.createGatewayKeyCache();
@@ -175,7 +335,7 @@ public class APIHandlerServiceComponent {
         if (log.isDebugEnabled()) {
             log.debug("API handlers component deactivated");
         }
-            clientPool.cleanup();
+        clientPool.cleanup();
         if (registration != null) {
             log.debug("Unregistering ThrottleDataService...");
             registration.unregister();
@@ -183,6 +343,13 @@ public class APIHandlerServiceComponent {
         if (ServiceReferenceHolder.getInstance().getRedisPool() != null &&
                 !ServiceReferenceHolder.getInstance().getRedisPool().isClosed()) {
             ServiceReferenceHolder.getInstance().getRedisPool().destroy();
+        }
+        if (vectorDBProviderService != null) {
+            try {
+                vectorDBProviderService.close();
+            } catch (APIManagementException e) {
+                log.error("Error closing Vector DB provider service", e);
+            }
         }
     }
 
@@ -497,28 +664,44 @@ public class APIHandlerServiceComponent {
         ServiceReferenceHolder.getInstance().setKeyManagerDataService(null);
     }
 
-    private JedisPool getJedisPool(RedisConfig redisConfig){
+    private JedisPool getJedisPool(RedisConfig redisConfig) {
 
+        int connectionTimeout = redisConfig.getConnectionTimeout() != 0
+                ? redisConfig.getConnectionTimeout() : Protocol.DEFAULT_TIMEOUT;
+        int socketTimeout = redisConfig.getSocketTimeout() != 0
+                ? redisConfig.getSocketTimeout() : Protocol.DEFAULT_TIMEOUT;
         JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
         jedisPoolConfig.setMaxTotal(redisConfig.getMaxTotal());
         jedisPoolConfig.setMaxIdle(redisConfig.getMaxIdle());
         jedisPoolConfig.setMinIdle(redisConfig.getMinIdle());
         jedisPoolConfig.setTestOnBorrow(redisConfig.isTestOnBorrow());
         jedisPoolConfig.setBlockWhenExhausted(redisConfig.isBlockWhenExhausted());
+        jedisPoolConfig.setMaxWaitMillis(redisConfig.getMaxWaitMillis());
         jedisPoolConfig.setMinEvictableIdleTimeMillis(redisConfig.getMinEvictableIdleTimeMillis());
         jedisPoolConfig.setTimeBetweenEvictionRunsMillis(redisConfig.getTimeBetweenEvictionRunsMillis());
         jedisPoolConfig.setNumTestsPerEvictionRun(redisConfig.getNumTestsPerEvictionRun());
         JedisPool jedisPool;
         if (StringUtils.isNotEmpty(redisConfig.getUser()) && redisConfig.getPassword() != null) {
             jedisPool = new JedisPool(jedisPoolConfig, redisConfig.getHost(), redisConfig.getPort(),
-                    redisConfig.getConnectionTimeout(), redisConfig.getUser(),
-                    String.valueOf(redisConfig.getPassword()), redisConfig.isSslEnabled());
+                    connectionTimeout, socketTimeout,
+                    redisConfig.getUser(), String.valueOf(redisConfig.getPassword()),
+                    redisConfig.getDatabaseId(), null, redisConfig.isSslEnabled());
         } else if (redisConfig.getPassword() != null) {
             jedisPool = new JedisPool(jedisPoolConfig, redisConfig.getHost(), redisConfig.getPort(),
-                    redisConfig.getConnectionTimeout(), String.valueOf(redisConfig.getPassword()), redisConfig.isSslEnabled());
+                    connectionTimeout, socketTimeout,
+                    String.valueOf(redisConfig.getPassword()), redisConfig.getDatabaseId(), null,
+                    redisConfig.isSslEnabled());
         } else {
             jedisPool = new JedisPool(jedisPoolConfig, redisConfig.getHost(), redisConfig.getPort(),
-                    redisConfig.getConnectionTimeout(), redisConfig.isSslEnabled());
+                    connectionTimeout, socketTimeout,
+                    null, redisConfig.getDatabaseId(), null, redisConfig.isSslEnabled());
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Redis connection pool initialized with connection timeout: "
+                    + connectionTimeout + "ms, socket timeout: "
+                    + socketTimeout + "ms, max wait: "
+                    + jedisPoolConfig.getMaxWaitMillis() + "ms, block when exhausted: "
+                    + redisConfig.isBlockWhenExhausted());
         }
         return jedisPool;
     }
@@ -545,11 +728,66 @@ public class APIHandlerServiceComponent {
         ServiceReferenceHolder.getInstance().setSynapseConfigurationService(null);
     }
 
+    @Reference(
+            name = "api.manager.websocket.processor",
+            service = org.wso2.carbon.apimgt.gateway.inbound.websocket.WebSocketProcessor.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetWebSocketProcessor")
+    protected void setWebSocketProcessor(WebSocketProcessor websocketprocessor) {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Inbound websocket processor bound to the API handlers");
+        }
+        ServiceReferenceHolder.getInstance().setWebsocketProcessor(websocketprocessor);
+    }
+
+    protected void unsetWebSocketProcessor(WebSocketProcessor websocketprocessor) {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Inbound websockeet processor unbound to the API handlers");
+        }
+        ServiceReferenceHolder.getInstance().setWebsocketProcessor(null);
+    }
+
     private void setTransportHttpsPort() {
         ConfigurationContextService configurationContextService =
                 ServiceReferenceHolder.getInstance().getConfigurationContextService();
         System.setProperty(APIConstants.HTTPS_TRANSPORT_PORT,
                 Integer.toString(CarbonUtils.getTransportPort(configurationContextService, APIConstants.HTTPS_PROTOCOL)));
+    }
+
+    @Reference(
+            name = "tenant.mgt.service",
+            service = org.wso2.carbon.tenant.mgt.services.TenantMgtService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetTenantMgtService")
+    protected void setTenantMgtService(TenantMgtService tenantMgtService) {
+        if (tenantMgtService != null && log.isDebugEnabled()) {
+            log.debug("Tenantmgt service initialized");
+        }
+        ServiceReferenceHolder.getInstance().setTenantMgtService(tenantMgtService);
+    }
+
+    protected void unsetTenantMgtService(TenantMgtService tenantMgtService) {
+        ServiceReferenceHolder.getInstance().setTenantMgtService(null);
+    }
+    @Reference(
+            name = "realm.service",
+            service = RealmService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetRealmService")
+    protected void setRealmService(RealmService realmService) {
+        if (realmService != null && log.isDebugEnabled()) {
+            log.debug("realmService service initialized");
+        }
+        ServiceReferenceHolder.getInstance().setRealmService(realmService);
+    }
+
+    protected void unsetRealmService(RealmService realmService) {
+        ServiceReferenceHolder.getInstance().setRealmService(null);
     }
 }
 

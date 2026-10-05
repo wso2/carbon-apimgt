@@ -34,6 +34,7 @@
       * @return id representing the organization
       * @throws APIManagementException 
       */
+     @UsedByMigrationClient
      public int getInternalId(String organization) throws APIManagementException;
  
  }

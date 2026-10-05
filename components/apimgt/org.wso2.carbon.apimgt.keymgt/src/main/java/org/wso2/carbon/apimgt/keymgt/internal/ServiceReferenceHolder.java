@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.handlers.DefaultKeyValidationHandler;
 import org.wso2.carbon.apimgt.keymgt.handlers.KeyValidationHandler;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
+import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.user.core.service.RealmService;
 
 import java.util.Map;
@@ -38,6 +39,7 @@ public class ServiceReferenceHolder {
     private OutputEventAdapterService outputEventAdapterService;
     private Map<String, KeyValidationHandler> keyValidationHandlerMap = new ConcurrentHashMap<>();
     private RealmService realmService;
+    private OAuthServerConfiguration oauthServerConfiguration;
 
     private ServiceReferenceHolder() {
 
@@ -102,4 +104,14 @@ public class ServiceReferenceHolder {
     public void setRealmService(RealmService realmService) {
         this.realmService = realmService;
     }
+
+    public void setOauthServerConfiguration(OAuthServerConfiguration oauthServerConfiguration) {
+        this.oauthServerConfiguration = oauthServerConfiguration;
+    }
+
+    public OAuthServerConfiguration getOauthServerConfiguration() {
+
+        return oauthServerConfiguration;
+    }
+
 }

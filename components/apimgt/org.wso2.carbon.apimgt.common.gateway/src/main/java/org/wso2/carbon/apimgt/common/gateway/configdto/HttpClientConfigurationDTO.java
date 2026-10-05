@@ -17,11 +17,8 @@
  */
 package org.wso2.carbon.apimgt.common.gateway.configdto;
 
-import org.apache.http.ssl.SSLContexts;
-
 import java.util.Arrays;
 import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLContext;
 
 /**
  * Configuration related to Http Clients within gateway.
@@ -31,14 +28,15 @@ public class HttpClientConfigurationDTO {
     private int connectionLimit;
     private int maximumConnectionsPerRoute;
     private int connectionTimeout;
+    private int connectionRequestTimeout;
     private boolean proxyEnabled;
     private String proxyHost;
     private int proxyPort;
     private String proxyUsername;
     private char[] proxyPassword = new char[]{};
     private String[] nonProxyHosts = new String[]{};
+    private String[] targetProxyHosts = new String[]{};
     private String proxyProtocol;
-    private SSLContext sslContext;
     private HostnameVerifier hostnameVerifier;
 
     public HostnameVerifier getHostnameVerifier() {
@@ -84,12 +82,16 @@ public class HttpClientConfigurationDTO {
         return proxyProtocol;
     }
 
-    public SSLContext getSslContext() {
-        return sslContext;
-    }
-
     public int getConnectionTimeout() {
         return connectionTimeout;
+    }
+
+    public int getConnectionRequestTimeout() {
+        return connectionRequestTimeout;
+    }
+    
+    public String[] getTargetProxyHosts() {
+        return Arrays.copyOf(targetProxyHosts, targetProxyHosts.length);
     }
 
     /**
@@ -100,26 +102,40 @@ public class HttpClientConfigurationDTO {
         private int connectionLimit;
         private int maximumConnectionsPerRoute;
         private int connectionTimeout;
+        private int connectionRequestTimeout;
         private boolean proxyEnabled;
         private String proxyHost;
         private int proxyPort;
         private String proxyUsername;
         private char[] proxyPassword = new char[]{};
         private String[] nonProxyHosts = new String[]{};
+        private String[] targetProxyHosts = new String[]{};
         private String proxyProtocol;
-        private SSLContext sslContext;
         private HostnameVerifier hostnameVerifier;
 
         public Builder withConnectionParams(int connectionLimit, int maximumConnectionsPerRoute,
-                                            int connectionTimeout) {
+                int connectionTimeout) {
+            return withConnectionParams(connectionLimit, maximumConnectionsPerRoute, connectionTimeout, -1);
+        }
+
+        public Builder withConnectionParams(int connectionLimit, int maximumConnectionsPerRoute, int connectionTimeout,
+                int connectionRequestTimeout) {
             this.connectionLimit = connectionLimit;
             this.maximumConnectionsPerRoute = maximumConnectionsPerRoute;
             this.connectionTimeout = connectionTimeout;
+            this.connectionRequestTimeout = connectionRequestTimeout;
             return this;
         }
 
+        @Deprecated
         public Builder withProxy(String proxyHost, int proxyPort, String proxyUsername, String proxyPassword,
-                                 String proxyProtocol, String[] nonProxyHosts) {
+                String proxyProtocol, String[] nonProxyHosts) {
+            return withProxy(proxyHost, proxyPort, proxyUsername, proxyPassword, proxyProtocol, nonProxyHosts,
+                    new String[] {});
+        }
+
+        public Builder withProxy(String proxyHost, int proxyPort, String proxyUsername, String proxyPassword,
+                String proxyProtocol, String[] nonProxyHosts, String[] targetProxyHosts) {
             this.proxyEnabled = true;
             this.proxyHost = proxyHost;
             this.proxyPort = proxyPort;
@@ -128,16 +144,12 @@ public class HttpClientConfigurationDTO {
             this.proxyProtocol = proxyProtocol;
             this.nonProxyHosts = nonProxyHosts != null ?
                     Arrays.copyOf(nonProxyHosts, nonProxyHosts.length) : new String[]{};
+            this.targetProxyHosts = targetProxyHosts != null ?
+                    Arrays.copyOf(targetProxyHosts, targetProxyHosts.length) : new String[]{};
             return this;
         }
 
-        public Builder withSSLContext(SSLContext sslContext) {
-            this.sslContext = sslContext;
-            return this;
-        }
-
-        public Builder withSSLContext(SSLContext sslContext, HostnameVerifier hostnameVerifier) {
-            this.sslContext = sslContext;
+        public Builder withHostnameVerifier(HostnameVerifier hostnameVerifier) {
             this.hostnameVerifier = hostnameVerifier;
             return this;
         }
@@ -147,6 +159,7 @@ public class HttpClientConfigurationDTO {
             configuration.connectionLimit = this.connectionLimit;
             configuration.maximumConnectionsPerRoute = this.maximumConnectionsPerRoute;
             configuration.connectionTimeout = this.connectionTimeout;
+            configuration.connectionRequestTimeout = this.connectionRequestTimeout;
             configuration.proxyEnabled = this.proxyEnabled;
             configuration.proxyHost = this.proxyHost;
             configuration.proxyPort = this.proxyPort;
@@ -154,12 +167,8 @@ public class HttpClientConfigurationDTO {
             configuration.proxyPassword = this.proxyPassword;
             configuration.proxyProtocol = this.proxyProtocol;
             configuration.nonProxyHosts = this.nonProxyHosts;
+            configuration.targetProxyHosts = this.targetProxyHosts;
             configuration.hostnameVerifier = this.hostnameVerifier;
-            if (this.sslContext != null) {
-                configuration.sslContext = this.sslContext;
-            } else {
-                configuration.sslContext = SSLContexts.createDefault();
-            }
             return configuration;
         }
     }

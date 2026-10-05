@@ -11,6 +11,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationUpdateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.WorkflowResponseDTO;
 
@@ -27,4 +28,5 @@ public interface ApplicationsApiService {
       public Response applicationsApplicationIdDelete(String applicationId, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdGet(String applicationId, MessageContext messageContext) throws APIManagementException;
       public Response applicationsGet(String user, Integer limit, Integer offset, String accept, String name, String tenantDomain, String sortBy, String sortOrder, MessageContext messageContext) throws APIManagementException;
+      public Response updateApplicationSettings(String applicationId, ApplicationUpdateRequestDTO applicationUpdateRequestDTO, MessageContext messageContext) throws APIManagementException;
 }

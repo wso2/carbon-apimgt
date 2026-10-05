@@ -415,16 +415,15 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                             if (isHardLimitThrottled(synCtx, authContext, apiContext, apiVersion)) {
                                                 isThrottled = true;
 
-                                            } else if (((Axis2MessageContext)synCtx).getAxis2MessageContext()
-                                                    .getProperty(AI_API_REQUEST_METADATA) == null) {
-                                                ServiceReferenceHolder.getInstance().getThrottleDataPublisher().
-                                                        publishNonThrottledEvent(applicationLevelThrottleKey,
+                                            } else if (!AI_API_SUB_TYPE.equals(
+                                                    synCtx.getProperty(APIMgtGatewayConstants.SUB_TYPE))) {
+                                                ServiceReferenceHolder.getInstance().getThrottleDataPublisher()
+                                                        .publishNonThrottledEvent(applicationLevelThrottleKey,
                                                                 applicationLevelTier, apiLevelThrottleKey, apiLevelTier,
                                                                 subscriptionLevelThrottleKey, subscriptionLevelTier,
                                                                 resourceLevelThrottleKey, resourceLevelTier,
-                                                                authorizedUser, apiContext,
-                                                                apiVersion, subscriberTenantDomain, apiTenantDomain,
-                                                                applicationId,
+                                                                authorizedUser, apiContext, apiVersion,
+                                                                subscriberTenantDomain, apiTenantDomain, applicationId,
                                                                 synCtx, authContext);
                                             }
                                         } else {
@@ -624,6 +623,17 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
             return true;
         }
 
+        String apiType = (String) messageContext.getProperty(APIMgtGatewayConstants.API_TYPE);
+        if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(apiType)) {
+            String mcpMethod = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD);
+            if (!APIConstants.MCP.METHOD_TOOL_CALL.equalsIgnoreCase(mcpMethod)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Skipping MCP call request throttling.");
+                }
+                return true;
+            }
+        }
+
         if (ServiceReferenceHolder.getInstance().getThrottleDataPublisher() == null) {
             log.error("Cannot publish events to traffic manager because ThrottleDataPublisher " +
                     "has not been initialised");
@@ -691,7 +701,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
     @MethodStats
     public boolean handleResponse(MessageContext messageContext) {
 
-        if (((Axis2MessageContext) messageContext).getAxis2MessageContext().getProperty(AI_API_RESPONSE_METADATA) != null) {
+        if (messageContext.getProperty(AI_API_RESPONSE_METADATA) != null) {
             Timer timer3 = getTimer(MetricManager.name(
                     APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), THROTTLE_MAIN));
             Timer.Context context3 = timer3.start();
@@ -928,7 +938,11 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
             //In case of an error it is logged and the process is continued because we're setting a fault message in the payload.
             log.error("Error occurred while consuming and discarding the message", axisFault);
         }
-        Mediator sequence = messageContext.getSequence(APIThrottleConstants.API_THROTTLE_OUT_HANDLER);
+        // Publish the error flow type so any error sequence can branch on it.
+        messageContext.setProperty(APIMgtGatewayConstants.API_ERROR_TYPE,
+                APIMgtGatewayConstants.API_ERROR_TYPE_THROTTLE);
+        Mediator sequence = GatewayUtils.getErrorResponseFormatterSequence(messageContext,
+                APIThrottleConstants.API_THROTTLE_OUT_HANDLER);
 
         // Invoke the custom error handler specified by the user
         if (sequence != null && !sequence.mediate(messageContext)) {
@@ -1418,9 +1432,8 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         }
 
         try {
-            org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) synCtx).getAxis2MessageContext();
             String throttleKey = generateThrottleKey(apiContext, apiVersion, authContext.getKeyType());
-            Map<String, String> llmMetadata = (Map<String, String>) axis2MC.getProperty(AI_API_RESPONSE_METADATA);
+            Map<String, String> llmMetadata = (Map<String, String>) synCtx.getProperty(AI_API_RESPONSE_METADATA);
 
             if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(authContext.getKeyType())) {
                 return checkProductionLimit(synCtx, throttleKey, llmMetadata);

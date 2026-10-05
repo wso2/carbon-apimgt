@@ -2,6 +2,7 @@ package org.wso2.carbon.apimgt.impl;
 
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMException;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -98,13 +99,15 @@ public class GlobalMediationPolicyImpl {
                                     mediation.setType(resourceType);
                                     //Add mediation to the mediation list
                                     mediationList.add(mediation);
-                                } catch (XMLStreamException e) {
+                                } catch (XMLStreamException | OMException e) {
                                     //If any exception been caught flow may continue with the next mediation policy
                                     log.error("Error occurred while getting omElement out of " +
                                             "mediation content from " + sequence, e);
                                 } catch (IOException e) {
                                     log.error("Error occurred while converting resource " +
                                             "contentStream in to string in " + sequence, e);
+                                } catch (Exception e) {
+                                    log.error("An unexpected error occurred during mediation in " + sequence, e);
                                 }
                             }
                         }

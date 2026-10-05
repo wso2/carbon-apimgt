@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.governance.impl.dao;
 
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.ComplianceEvaluationRequest;
@@ -39,58 +39,59 @@ public interface ComplianceMgtDAO {
      * @param artifactType  Artifact Type
      * @param policyIds     List of Policy IDs
      * @param organization  Organization
-     * @throws GovernanceException If an error occurs while adding the artifact
-     *                             compliance evaluation request event
+     * @throws APIMGovernanceException If an error occurs while adding the artifact
+     *                                 compliance evaluation request event
      */
     void addComplianceEvalRequest(String artifactRefId, ArtifactType artifactType,
                                   List<String> policyIds, String organization)
-            throws GovernanceException;
+            throws APIMGovernanceException;
 
     /**
      * Get pending evaluation requests
      *
      * @return List of pending evaluation requests
-     * @throws GovernanceException If an error occurs while getting the pending evaluation requests
+     * @throws APIMGovernanceException If an error occurs while getting the pending evaluation requests
      */
-    List<ComplianceEvaluationRequest> getPendingComplianceEvalRequests() throws GovernanceException;
+    List<ComplianceEvaluationRequest> getPendingComplianceEvalRequests() throws APIMGovernanceException;
 
     /**
-     * Add an artifact compliance evaluation request event
+     * Get compliance pending artifacts
      *
-     * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
-     * @param artifactType  Artifact Type
-     * @param organization  Organization
-     * @return Request ID
-     * @throws GovernanceException If an error occurs while adding the artifact compliance evaluation
-     *                             request
+     * @param artifactType Artifact Type
+     * @param organization Organization
+     * @return List of compliance pending artifacts
+     * @throws APIMGovernanceException If an error occurs while getting the compliance pending artifacts
      */
-    String getPendingEvalRequest(String artifactRefId, ArtifactType artifactType, String organization)
-            throws GovernanceException;
+    List<String> getCompliancePendingArtifacts(ArtifactType artifactType, String organization)
+            throws APIMGovernanceException;
 
 
     /**
      * Update the evaluation status of a pending request to processing
      *
-     * @param requestId Request ID
+     * @param request Evaluation request
      * @return True if the request is updated successfully
-     * @throws GovernanceException If an error occurs while updating the evaluation status
+     * @throws APIMGovernanceException If an error occurs while updating the evaluation status
      */
-    boolean updatePendingRequestToProcessing(String requestId) throws GovernanceException;
+    boolean updatePendingRequestToProcessing(ComplianceEvaluationRequest request)
+            throws APIMGovernanceException;
 
     /**
-     * Update the evaluation status of all processing requests to pending
+     * Delete long lasting processing requests
      *
-     * @throws GovernanceException If an error occurs while updating the evaluation status
+     * @param taskCleanupInterval Task cleanup interval in minutes
+     * @return List of deleted request IDs
+     * @throws APIMGovernanceException If an error occurs while deleting the long-lasting processing requests
      */
-    void updateProcessingRequestToPending() throws GovernanceException;
+    List<String> deleteLongLastingProcessingReqs(int taskCleanupInterval) throws APIMGovernanceException;
 
     /**
      * Delete an evaluation request
      *
      * @param requestId Evaluation request ID
-     * @throws GovernanceException If an error occurs while deleting the evaluation request
+     * @throws APIMGovernanceException If an error occurs while deleting the evaluation request
      */
-    void deleteComplianceEvalRequest(String requestId) throws GovernanceException;
+    void deleteComplianceEvalRequest(String requestId) throws APIMGovernanceException;
 
     /**
      * Delete evaluation requests for an artifact
@@ -98,10 +99,10 @@ public interface ComplianceMgtDAO {
      * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
      * @param artifactType  Artifact Type
      * @param organization  Organization
-     * @throws GovernanceException If an error occurs while deleting the evaluation request
+     * @throws APIMGovernanceException If an error occurs while deleting the evaluation request
      */
     void deleteComplianceEvalReqsForArtifact(String artifactRefId, ArtifactType artifactType,
-                                             String organization) throws GovernanceException;
+                                             String organization) throws APIMGovernanceException;
 
 
     /**
@@ -112,77 +113,77 @@ public interface ComplianceMgtDAO {
      * @param policyId             Policy ID
      * @param rulesetViolationsMap Map of Rulesets to Rule Violations
      * @param organization         Organization
-     * @throws GovernanceException If an error occurs while adding the compliance evaluation results
+     * @throws APIMGovernanceException If an error occurs while adding the compliance evaluation results
      */
     void addComplianceEvalResults(String artifactRefId, ArtifactType artifactType, String policyId,
                                   Map<String, List<RuleViolation>> rulesetViolationsMap, String organization)
-            throws GovernanceException;
+            throws APIMGovernanceException;
 
     /**
      * Get the rule violations
      *
-     * @param artifactRefId   Artifact Reference ID (ID of the artifact on APIM side)
-     * @param artifactType Artifact Type
-     * @param rulesetId    Ruleset ID
-     * @param organization Organization
+     * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
+     * @param artifactType  Artifact Type
+     * @param rulesetId     Ruleset ID
+     * @param organization  Organization
      * @return List of rule violations
-     * @throws GovernanceException If an error occurs while getting the rule violations
+     * @throws APIMGovernanceException If an error occurs while getting the rule violations
      */
     List<RuleViolation> getRuleViolations(String artifactRefId, ArtifactType artifactType, String rulesetId,
                                           String organization)
-            throws GovernanceException;
+            throws APIMGovernanceException;
 
     /**
      * Get the rule violations for an artifact
      *
-     * @param artifactRefId   Artifact Reference ID (ID of the artifact on APIM side)
-     * @param artifactType Artifact Type
-     * @param organization Organization
+     * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
+     * @param artifactType  Artifact Type
+     * @param organization  Organization
      * @return List of Rule Violations
-     * @throws GovernanceException If an error occurs while getting the rule violations
+     * @throws APIMGovernanceException If an error occurs while getting the rule violations
      */
     List<RuleViolation> getRuleViolationsForArtifact(String artifactRefId, ArtifactType artifactType,
-                                                     String organization) throws GovernanceException;
+                                                     String organization) throws APIMGovernanceException;
 
 
     /**
      * Get policy evaluations for an artifact
      *
-     * @param artifactRefId   Artifact Reference ID (ID of the artifact on APIM side)
-     * @param artifactType Artifact Type
-     * @param organization Organization
+     * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
+     * @param artifactType  Artifact Type
+     * @param organization  Organization
      * @return List of evaluated policies
-     * @throws GovernanceException If an error occurs while getting the compliance evaluation results
+     * @throws APIMGovernanceException If an error occurs while getting the compliance evaluation results
      */
     List<String> getEvaluatedPoliciesForArtifact(String artifactRefId, ArtifactType artifactType,
-                                                 String organization) throws GovernanceException;
+                                                 String organization) throws APIMGovernanceException;
 
     /**
      * Get ruleset runs for an artifact
      *
-     * @param artifactRefId   Artifact Reference ID (ID of the artifact on APIM side)
-     * @param artifactType Artifact Type
-     * @param organization Organization
+     * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
+     * @param artifactType  Artifact Type
+     * @param organization  Organization
      * @return List of evaluated rulesets
-     * @throws GovernanceException If an error occurs while getting the compliance evaluation results
+     * @throws APIMGovernanceException If an error occurs while getting the compliance evaluation results
      */
     List<String> getEvaluatedRulesetsForArtifact(String artifactRefId, ArtifactType artifactType,
                                                  String organization)
-            throws GovernanceException;
+            throws APIMGovernanceException;
 
     /**
      * Check if a ruleset is evaluated for an artifact
      *
-     * @param artifactRefId   Artifact Reference ID (ID of the artifact on APIM side)
-     * @param artifactType Artifact Type
-     * @param rulesetId    Ruleset ID
-     * @param organization Organization
+     * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
+     * @param artifactType  Artifact Type
+     * @param rulesetId     Ruleset ID
+     * @param organization  Organization
      * @return True if the ruleset is evaluated for the artifact
-     * @throws GovernanceException If an error occurs while getting the compliance evaluation results
+     * @throws APIMGovernanceException If an error occurs while getting the compliance evaluation results
      */
     boolean isRulesetEvaluatedForArtifact(String artifactRefId,
                                           ArtifactType artifactType, String rulesetId, String organization)
-            throws GovernanceException;
+            throws APIMGovernanceException;
 
     /**
      * Get list of all compliance evaluated artifacts
@@ -190,10 +191,10 @@ public interface ComplianceMgtDAO {
      * @param artifactType Artifact Type
      * @param organization Organization
      * @return List of all compliance evaluated artifacts
-     * @throws GovernanceException If an error occurs while getting the list of all compliance evaluated artifacts
+     * @throws APIMGovernanceException If an error occurs while getting the list of all compliance evaluated artifacts
      */
     List<String> getAllComplianceEvaluatedArtifacts(ArtifactType artifactType,
-                                                    String organization) throws GovernanceException;
+                                                    String organization) throws APIMGovernanceException;
 
     /**
      * Get list of non-compliant artifacts
@@ -201,10 +202,10 @@ public interface ComplianceMgtDAO {
      * @param artifactType Artifact Type
      * @param organization Organization
      * @return List of non-compliant artifacts
-     * @throws GovernanceException If an error occurs while getting the list of non-compliant artifacts
+     * @throws APIMGovernanceException If an error occurs while getting the list of non-compliant artifacts
      */
     List<String> getNonCompliantArtifacts(ArtifactType artifactType,
-                                          String organization) throws GovernanceException;
+                                          String organization) throws APIMGovernanceException;
 
 
     /**
@@ -212,53 +213,105 @@ public interface ComplianceMgtDAO {
      *
      * @param organization Organization
      * @return List of all compliance evaluated policies
-     * @throws GovernanceException If an error occurs while getting the list of all compliance evaluated policies
+     * @throws APIMGovernanceException If an error occurs while getting the list of all compliance evaluated policies
      */
-    List<String> getAllComplianceEvaluatedPolicies(String organization) throws GovernanceException;
+    List<String> getAllComplianceEvaluatedPolicies(String organization) throws APIMGovernanceException;
+
+    /**
+     * Get list of rulesets an artifact violates under one policy's severity selection
+     * <p>
+     * Only the given policy's selection is consulted, unlike a query that unions the selections of every policy
+     * governing the artifact. A policy must not be reported as violated because a different policy governing the
+     * same artifact counts a severity this one excluded.
+     *
+     * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
+     * @param artifactType  Artifact Type
+     * @param organization  Organization
+     * @param policyId      Policy whose severity selection decides the verdict
+     * @return List of rulesets this policy counts as violated for the artifact
+     * @throws APIMGovernanceException If an error occurs while getting the list
+     */
+    List<String> getViolatedRulesetsForArtifactAndPolicy(String artifactRefId, ArtifactType artifactType,
+                                                         String organization, String policyId)
+            throws APIMGovernanceException;
+
+    /**
+     * Get the policies the organization is violating
+     * <p>
+     * Answers for every policy at once what {@link #getViolatedRulesetsForArtifactAndPolicy} answers for one
+     * artifact under one policy, so a summary does not have to walk every artifact of every policy to find out.
+     * Each policy is judged on its own severity selection.
+     *
+     * @param organization Organization
+     * @return IDs of the policies with at least one violation that affects their compliance
+     * @throws APIMGovernanceException If an error occurs while getting the list
+     */
+    List<String> getViolatedPolicies(String organization) throws APIMGovernanceException;
 
     /**
      * Get list of all violated rulesets
+     * <p>
+     * Retained for source and binary compatibility. Unions the severities of every policy governing a ruleset
+     * rather than scoping to one policy, which is what {@link #getViolatedPolicies} does instead.
      *
      * @param organization Organization
      * @return List of all violated rulesets
-     * @throws GovernanceException If an error occurs while getting the list of all violated rulesets
+     * @throws APIMGovernanceException If an error occurs while getting the list of all violated rulesets
      */
-    List<String> getViolatedRulesets(String organization) throws GovernanceException;
+    List<String> getViolatedRulesets(String organization) throws APIMGovernanceException;
 
     /**
      * Get list of all violated rulesets for an artifact
+     * <p>
+     * Retained for source and binary compatibility. Unions the severities of every policy governing the artifact
+     * rather than scoping to one policy, which is what {@link #getViolatedRulesetsForArtifactAndPolicy} does
+     * instead.
      *
-     * @param artifactRefId   Artifact Reference ID (ID of the artifact on APIM side)
-     * @param artifactType Artifact Type
-     * @param organization Organization
+     * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
+     * @param artifactType  Artifact Type
+     * @param organization  Organization
      * @return List of all violated rulesets for an artifact
-     * @throws GovernanceException If an error occurs while getting the list of all
-     *                             violated rulesets for an artifact
+     * @throws APIMGovernanceException If an error occurs while getting the list of all
+     *                                 violated rulesets for an artifact
      */
     List<String> getViolatedRulesetsForArtifact(String artifactRefId, ArtifactType artifactType,
                                                 String organization)
-            throws GovernanceException;
+            throws APIMGovernanceException;
 
     /**
      * Get list of all evaluated artifacts for a policy
      *
-     * @param policyId Policy ID
+     * @param policyId     Policy ID
+     * @param organization Organization
      * @return List of all evaluated artifacts for a policy
-     * @throws GovernanceException If an error occurs while getting the list of all
-     *                             evaluated artifacts for a policy
+     * @throws APIMGovernanceException If an error occurs while getting the list of all
+     *                                 evaluated artifacts for a policy
      */
-    List<ArtifactInfo> getEvaluatedArtifactsForPolicy(String policyId)
-            throws GovernanceException;
+    List<ArtifactInfo> getEvaluatedArtifactsForPolicy(String policyId, String organization)
+            throws APIMGovernanceException;
+
+
+    /**
+     * Get pending policies for an artifact
+     *
+     * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
+     * @param artifactType  Artifact Type
+     * @param organization  Organization
+     * @return List of pending policies
+     * @throws APIMGovernanceException If an error occurs while getting the pending policies
+     */
+    List<String> getPendingPoliciesForArtifact(String artifactRefId, ArtifactType artifactType,
+                                               String organization) throws APIMGovernanceException;
 
     /**
      * Delete all governance data related to the artifact
      *
-     * @param artifactRefId   Artifact Reference ID (ID of the artifact on APIM side)
-     * @param artifactType Artifact Type
-     * @param organization Organization
-     * @throws GovernanceException If an error occurs while deleting the governance data
+     * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
+     * @param artifactType  Artifact Type
+     * @param organization  Organization
+     * @throws APIMGovernanceException If an error occurs while deleting the governance data
      */
     void deleteArtifact(String artifactRefId, ArtifactType artifactType,
-                        String organization) throws GovernanceException;
+                        String organization) throws APIMGovernanceException;
 
 }

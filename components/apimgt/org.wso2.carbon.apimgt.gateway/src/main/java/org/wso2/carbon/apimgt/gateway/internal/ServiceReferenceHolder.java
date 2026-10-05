@@ -22,6 +22,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsCustomDataProvider;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
+import org.wso2.carbon.apimgt.gateway.inbound.websocket.WebSocketProcessor;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
 import org.wso2.carbon.apimgt.gateway.utils.redis.RedisCacheUtils;
@@ -51,6 +52,8 @@ import org.wso2.carbon.mediation.initializer.services.SynapseConfigurationServic
 import org.wso2.carbon.mediation.security.vault.MediationSecurityAdminService;
 import org.wso2.carbon.rest.api.service.RestApiAdmin;
 import org.wso2.carbon.sequences.services.SequenceAdmin;
+import org.wso2.carbon.tenant.mgt.services.TenantMgtService;
+import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import redis.clients.jedis.JedisPool;
@@ -102,12 +105,16 @@ public class ServiceReferenceHolder {
 
     private Set<String> activeTenants = new ConcurrentSkipListSet<>();
     private JedisPool redisPool;
+    private TenantMgtService tenantMgtService;
+    private RealmService realmService;
 
     public ThrottleDataHolder getThrottleDataHolder() {
         return throttleDataHolder;
     }
     private ArtifactRetriever artifactRetriever;
-    private int gatewayCount = 1;
+    private long gatewayCount = 1L;
+
+    private WebSocketProcessor websocketprocessor = null;
 
     private ServiceReferenceHolder() {
 
@@ -454,11 +461,11 @@ public class ServiceReferenceHolder {
         this.synapseConfigurationService = synapseConfigurationService;
     }
 
-    public int getGatewayCount() {
+    public long getGatewayCount() {
         return gatewayCount;
     }
 
-    public void setGatewayCount(int gatewayCount) {
+    public void setGatewayCount(long gatewayCount) {
         this.gatewayCount = gatewayCount;
     }
 
@@ -475,5 +482,29 @@ public class ServiceReferenceHolder {
     public LLMProviderService getLLMProviderService(String type) {
 
         return llmProviderServiceMap.get(type);
+    }
+
+    public void setWebsocketProcessor(WebSocketProcessor websocketprocessor) {
+        this.websocketprocessor = websocketprocessor;
+    }
+
+    public WebSocketProcessor getWebsocketProcessor() {
+        return websocketprocessor;
+    }
+
+    public void setTenantMgtService(TenantMgtService tenantMgtService) {
+        this.tenantMgtService= tenantMgtService;
+    }
+
+    public TenantMgtService getTenantMgtService() {
+        return tenantMgtService;
+    }
+
+    public RealmService getRealmService() {
+        return realmService;
+    }
+
+    public void setRealmService(RealmService realmService) {
+        this.realmService = realmService;
     }
 }

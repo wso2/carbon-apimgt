@@ -29,7 +29,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.FileInputStream;
 
-
 public class URLMappingFilter implements Filter {
 
     private FilterConfig filterConfig;

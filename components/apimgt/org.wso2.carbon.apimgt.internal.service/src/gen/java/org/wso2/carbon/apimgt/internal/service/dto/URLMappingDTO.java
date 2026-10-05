@@ -2,8 +2,12 @@ package org.wso2.carbon.apimgt.internal.service.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.carbon.apimgt.internal.service.dto.APIOperationMappingDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.BackendOperationMappingDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.OperationPolicyDTO;
 import javax.validation.constraints.*;
 
@@ -15,7 +19,11 @@ import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
+import javax.validation.Valid;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 
 public class URLMappingDTO   {
   
@@ -24,6 +32,10 @@ public class URLMappingDTO   {
     private String httpMethod = null;
     private String urlPattern = null;
     private List<String> scopes = new ArrayList<>();
+    private String description = null;
+    private String schemaDefinition = null;
+    private BackendOperationMappingDTO backendOperationMapping = null;
+    private APIOperationMappingDTO apiOperationMapping = null;
     private List<OperationPolicyDTO> operationPolicies = new ArrayList<>();
 
   /**
@@ -113,6 +125,76 @@ public class URLMappingDTO   {
 
   /**
    **/
+  public URLMappingDTO description(String description) {
+    this.description = description;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("description")
+  public String getDescription() {
+    return description;
+  }
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  /**
+   **/
+  public URLMappingDTO schemaDefinition(String schemaDefinition) {
+    this.schemaDefinition = schemaDefinition;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("schemaDefinition")
+  public String getSchemaDefinition() {
+    return schemaDefinition;
+  }
+  public void setSchemaDefinition(String schemaDefinition) {
+    this.schemaDefinition = schemaDefinition;
+  }
+
+  /**
+   **/
+  public URLMappingDTO backendOperationMapping(BackendOperationMappingDTO backendOperationMapping) {
+    this.backendOperationMapping = backendOperationMapping;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("backendOperationMapping")
+  public BackendOperationMappingDTO getBackendOperationMapping() {
+    return backendOperationMapping;
+  }
+  public void setBackendOperationMapping(BackendOperationMappingDTO backendOperationMapping) {
+    this.backendOperationMapping = backendOperationMapping;
+  }
+
+  /**
+   **/
+  public URLMappingDTO apiOperationMapping(APIOperationMappingDTO apiOperationMapping) {
+    this.apiOperationMapping = apiOperationMapping;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("apiOperationMapping")
+  public APIOperationMappingDTO getApiOperationMapping() {
+    return apiOperationMapping;
+  }
+  public void setApiOperationMapping(APIOperationMappingDTO apiOperationMapping) {
+    this.apiOperationMapping = apiOperationMapping;
+  }
+
+  /**
+   **/
   public URLMappingDTO operationPolicies(List<OperationPolicyDTO> operationPolicies) {
     this.operationPolicies = operationPolicies;
     return this;
@@ -120,6 +202,7 @@ public class URLMappingDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("operationPolicies")
   public List<OperationPolicyDTO> getOperationPolicies() {
     return operationPolicies;
@@ -143,12 +226,16 @@ public class URLMappingDTO   {
         Objects.equals(httpMethod, urLMapping.httpMethod) &&
         Objects.equals(urlPattern, urLMapping.urlPattern) &&
         Objects.equals(scopes, urLMapping.scopes) &&
+        Objects.equals(description, urLMapping.description) &&
+        Objects.equals(schemaDefinition, urLMapping.schemaDefinition) &&
+        Objects.equals(backendOperationMapping, urLMapping.backendOperationMapping) &&
+        Objects.equals(apiOperationMapping, urLMapping.apiOperationMapping) &&
         Objects.equals(operationPolicies, urLMapping.operationPolicies);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(authScheme, throttlingPolicy, httpMethod, urlPattern, scopes, operationPolicies);
+    return Objects.hash(authScheme, throttlingPolicy, httpMethod, urlPattern, scopes, description, schemaDefinition, backendOperationMapping, apiOperationMapping, operationPolicies);
   }
 
   @Override
@@ -161,6 +248,10 @@ public class URLMappingDTO   {
     sb.append("    httpMethod: ").append(toIndentedString(httpMethod)).append("\n");
     sb.append("    urlPattern: ").append(toIndentedString(urlPattern)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
+    sb.append("    description: ").append(toIndentedString(description)).append("\n");
+    sb.append("    schemaDefinition: ").append(toIndentedString(schemaDefinition)).append("\n");
+    sb.append("    backendOperationMapping: ").append(toIndentedString(backendOperationMapping)).append("\n");
+    sb.append("    apiOperationMapping: ").append(toIndentedString(apiOperationMapping)).append("\n");
     sb.append("    operationPolicies: ").append(toIndentedString(operationPolicies)).append("\n");
     sb.append("}");
     return sb.toString();

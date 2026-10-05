@@ -18,11 +18,11 @@
 
 package org.wso2.carbon.apimgt.governance.api.model;
 
-import static org.wso2.carbon.apimgt.governance.api.GovernanceAPIConstants.DELEM_UNDERSCORE;
-import static org.wso2.carbon.apimgt.governance.api.GovernanceAPIConstants.JSON_FILE_TYPE;
-import static org.wso2.carbon.apimgt.governance.api.GovernanceAPIConstants.PATH_SEPARATOR;
-import static org.wso2.carbon.apimgt.governance.api.GovernanceAPIConstants.YAML_FILE_TYPE;
-import static org.wso2.carbon.apimgt.governance.api.GovernanceAPIConstants.YML_FILE_TYPE;
+import static org.wso2.carbon.apimgt.governance.api.APIMGovernanceAPIConstants.DELEM_UNDERSCORE;
+import static org.wso2.carbon.apimgt.governance.api.APIMGovernanceAPIConstants.JSON_FILE_TYPE;
+import static org.wso2.carbon.apimgt.governance.api.APIMGovernanceAPIConstants.PATH_SEPARATOR;
+import static org.wso2.carbon.apimgt.governance.api.APIMGovernanceAPIConstants.YAML_FILE_TYPE;
+import static org.wso2.carbon.apimgt.governance.api.APIMGovernanceAPIConstants.YML_FILE_TYPE;
 
 /**
  * This class represents the Ruleset Content

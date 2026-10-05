@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.api.model;
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIConstants;
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.api.dto.GatewayVisibilityPermissionConfigurationDTO;
 
 import java.io.Serializable;
@@ -51,6 +52,8 @@ public class Environment implements Serializable {
     private String displayName;
     private String description;
     private boolean isReadOnly;
+    private String mode = GatewayMode.WRITE_ONLY.getMode();
+    private int apiDiscoveryScheduledWindow = 0;
     private List<VHost> vhosts = new ArrayList<>();
     private String provider;
     private String gatewayType;
@@ -59,6 +62,34 @@ public class Environment implements Serializable {
     private String[] visibilityRoles;
     private String visibility;
 
+    public Environment() {
+    }
+
+    public Environment(Environment environment) {
+        this.type = environment.type;
+        this.serverURL = environment.serverURL;
+        this.userName = environment.userName;
+        this.password = environment.password;
+        this.apiGatewayEndpoint = environment.apiGatewayEndpoint;
+        this.websocketGatewayEndpoint = environment.websocketGatewayEndpoint;
+        this.webSubGatewayEndpoint = environment.webSubGatewayEndpoint;
+        this.isDefault = environment.isDefault;
+        this.id = environment.id;
+        this.uuid = environment.uuid;
+        this.name = environment.name;
+        this.displayName = environment.displayName;
+        this.description = environment.description;
+        this.isReadOnly = environment.isReadOnly;
+        this.vhosts = new ArrayList<>(environment.vhosts);
+        this.provider = environment.provider;
+        this.gatewayType = environment.gatewayType;
+        this.mode = environment.mode;
+        this.apiDiscoveryScheduledWindow = environment.apiDiscoveryScheduledWindow;
+        this.additionalProperties = new HashMap<>(environment.additionalProperties);
+        this.visibilityRoles = environment.visibilityRoles;
+        this.visibility = environment.visibility;
+        this.permissions = environment.permissions;
+    }
     private GatewayVisibilityPermissionConfigurationDTO permissions = new GatewayVisibilityPermissionConfigurationDTO();
 
     public boolean isDefault() {
@@ -151,6 +182,7 @@ public class Environment implements Serializable {
         this.uuid = uuid;
     }
 
+    @UsedByMigrationClient
     public String getName() {
         return name;
     }
@@ -239,7 +271,8 @@ public class Environment implements Serializable {
     public void setVhosts(List<VHost> vhosts) {
         this.vhosts = vhosts;
         // set gateway endpoint if it is empty
-        if (StringUtils.isEmpty(apiGatewayEndpoint) && StringUtils.isEmpty(websocketGatewayEndpoint) && !vhosts.isEmpty()) {
+        if (StringUtils.isEmpty(apiGatewayEndpoint) && StringUtils.isEmpty(websocketGatewayEndpoint)
+                && !vhosts.isEmpty()) {
             VHost vhost = vhosts.get(0);
             String endpointFormat = "%s%s:%s%s"; // {protocol}://{host}:{port}/{context}
 
@@ -308,5 +341,20 @@ public class Environment implements Serializable {
     public int hashCode() {
         int result = type.hashCode();
         return  31 * result + getName().hashCode();
+    }
+    public String getMode() {
+        return StringUtils.defaultIfBlank(mode, GatewayMode.WRITE_ONLY.getMode());
+    }
+
+    public void setMode(String mode) {
+        this.mode = StringUtils.defaultIfBlank(mode, GatewayMode.WRITE_ONLY.getMode());
+    }
+
+    public int getApiDiscoveryScheduledWindow() {
+        return apiDiscoveryScheduledWindow;
+    }
+
+    public void setApiDiscoveryScheduledWindow(int apiDiscoveryScheduledWindow) {
+        this.apiDiscoveryScheduledWindow = apiDiscoveryScheduledWindow;
     }
 }

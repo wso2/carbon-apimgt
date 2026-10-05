@@ -1,0 +1,77 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "FileUploaderTestAPI",
+    "version" : "1.0.0"
+  },
+  "servers" : [ {
+    "url" : "/"
+  } ],
+  "security" : [ {
+    "default" : [ ]
+  } ],
+  "paths" : {
+    "/upload" : {
+      "post" : {
+        "requestBody" : {
+          "content" : {
+            "multipart/form-data" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "file" : {
+                    "type" : "string",
+                    "format" : "binary"
+                  },
+                  "metadata" : {
+                    "type" : "object"
+                  }
+                }
+              },
+              "encoding" : {
+                "file" : {
+                  "contentType" : "application/octet-stream"
+                },
+                "metadata" : {
+                  "contentType" : "application/json"
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        },
+        "x-wso2-application-security" : {
+          "security-types" : [ "oauth2" ],
+          "optional" : true
+        }
+      }
+    }
+  },
+  "components" : {
+    "securitySchemes" : {
+      "default" : {
+        "type" : "oauth2",
+        "flows" : {
+          "implicit" : {
+            "authorizationUrl" : "https://test.com",
+            "scopes" : { }
+          }
+        }
+      }
+    }
+  },
+  "x-wso2-cors" : null,
+  "x-wso2-basePath" : null,
+  "x-wso2-application-security" : {
+    "security-types" : [ "oauth2" ],
+    "optional" : true
+  },
+  "x-wso2-response-cache" : {
+    "enabled" : false,
+    "cacheTimeoutInSeconds" : 0
+  }
+}

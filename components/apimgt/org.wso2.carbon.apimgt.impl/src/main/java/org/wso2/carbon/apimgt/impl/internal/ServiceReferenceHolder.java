@@ -17,29 +17,43 @@
 package org.wso2.carbon.apimgt.impl.internal;
 
 import org.wso2.carbon.apimgt.api.APIDefinition;
+import org.wso2.carbon.apimgt.api.FederatedAPIDiscoveryService;
+import org.wso2.carbon.apimgt.api.PlatformGatewayArtifactService;
+import org.wso2.carbon.apimgt.api.PlatformGatewayDeploymentEventService;
+import org.wso2.carbon.apimgt.api.PlatformGatewayService;
 import org.wso2.carbon.apimgt.api.LLMProviderService;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
+import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.WorkflowTaskService;
 import org.wso2.carbon.apimgt.api.quotalimiter.ResourceQuotaLimiter;
 import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
 import org.wso2.carbon.apimgt.eventing.EventPublisherFactory;
+import org.wso2.carbon.apimgt.impl.APIMDependencyConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.ExternalEnvironment;
 import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
 import org.wso2.carbon.apimgt.impl.config.APIMConfigServiceImpl;
-import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
+import org.wso2.carbon.apimgt.impl.service.PlatformGatewayArtifactServiceImpl;
+import org.wso2.carbon.apimgt.impl.service.PlatformGatewayDeploymentEventServiceImpl;
+import org.wso2.carbon.apimgt.impl.service.PlatformGatewayServiceImpl;
+import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayAPIKeyEventService;
+import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayDeploymentDispatcher;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.GatewayArtifactGenerator;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
+import org.wso2.carbon.apimgt.impl.token.OpaqueAPIKeyNotifier;
+import org.wso2.carbon.apimgt.impl.token.RevokedTokenService;
 import org.wso2.carbon.apimgt.impl.workflow.DefaultWorkflowTaskService;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.indexing.service.TenantIndexingLoader;
+import org.wso2.carbon.usage.data.exporter.ConsumptionDataExportService;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
@@ -47,6 +61,7 @@ import org.wso2.carbon.utils.ConfigurationContextService;
 import java.security.KeyStore;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.Map;
 import java.util.Set;
 
@@ -57,6 +72,7 @@ public class ServiceReferenceHolder {
     private static ConfigurationContextService contextService;
     private RegistryService registryService;
     private APIManagerConfigurationService amConfigurationService;
+    private APIMDependencyConfigurationService dependencyConfigurationService;
     private RealmService realmService;
     private TenantIndexingLoader indexLoader;
     private OutputEventAdapterService outputEventAdapterService;
@@ -75,12 +91,22 @@ public class ServiceReferenceHolder {
     private ResourceQuotaLimiter resourceQuotaLimiter;
     private EventPublisherFactory eventPublisherFactory;
     private APIMConfigService apimConfigService;
-    private Map<String, ExternalGatewayDeployer> externalGatewayDeployers = new HashMap<>();
+    private Map<String, GatewayAgentConfiguration> gatewayConnectorConfigurationMap = new HashMap<>();
     private Map<String, ExternalEnvironment> externalEnvironmentsMap = new HashMap<>();
     private Map<String, APIDefinition> apiDefinitionMap = new HashMap<>();
     private WorkflowTaskService workflowTaskService;
+    private FederatedAPIDiscoveryService federatedAPIDiscoveryService;
+    private OpaqueAPIKeyNotifier opaqueApiKeyNotifier;
+    private ConsumptionDataExportService consumptionDataExportService;
+    private final List<RevokedTokenService> revokedTokenServices = new CopyOnWriteArrayList<>();
 
     private Map<String, LLMProviderService> llmProviderServiceMap = new HashMap();
+
+    /** Optional dispatcher for platform gateway deploy/undeploy; when null, platform notifier no-ops. */
+    private PlatformGatewayDeploymentDispatcher platformGatewayDeploymentDispatcher;
+
+    /** Optional service to broadcast API key lifecycle events to connected platform gateways. */
+    private PlatformGatewayAPIKeyEventService platformGatewayAPIKeyEventService;
 
     private ServiceReferenceHolder() {
 
@@ -111,6 +137,7 @@ public class ServiceReferenceHolder {
         this.registryService = registryService;
     }
 
+    @UsedByMigrationClient
     public APIManagerConfigurationService getAPIManagerConfigurationService() {
 
         return amConfigurationService;
@@ -121,6 +148,15 @@ public class ServiceReferenceHolder {
         this.amConfigurationService = amConfigurationService;
     }
 
+    public void setAPIMDependencyConfigurationService(APIMDependencyConfigurationService dependencyConfigurationService) {
+        this.dependencyConfigurationService = dependencyConfigurationService;
+    }
+
+    public APIMDependencyConfigurationService getAPIMDependencyConfigurationService() {
+        return dependencyConfigurationService;
+    }
+
+    @UsedByMigrationClient
     public RealmService getRealmService() {
 
         return realmService;
@@ -234,6 +270,22 @@ public class ServiceReferenceHolder {
         return notifiersMap;
     }
 
+    public PlatformGatewayDeploymentDispatcher getPlatformGatewayDeploymentDispatcher() {
+        return platformGatewayDeploymentDispatcher;
+    }
+
+    public void setPlatformGatewayDeploymentDispatcher(PlatformGatewayDeploymentDispatcher platformGatewayDeploymentDispatcher) {
+        this.platformGatewayDeploymentDispatcher = platformGatewayDeploymentDispatcher;
+    }
+
+    public PlatformGatewayAPIKeyEventService getPlatformGatewayAPIKeyEventService() {
+        return platformGatewayAPIKeyEventService;
+    }
+
+    public void setPlatformGatewayAPIKeyEventService(PlatformGatewayAPIKeyEventService platformGatewayAPIKeyEventService) {
+        this.platformGatewayAPIKeyEventService = platformGatewayAPIKeyEventService;
+    }
+
     public ArtifactSaver getArtifactSaver() {
 
         return artifactSaver;
@@ -316,6 +368,7 @@ public class ServiceReferenceHolder {
         this.apimConfigService = apimConfigService;
     }
 
+    @UsedByMigrationClient
     public APIMConfigService getApimConfigService() {
         if (apimConfigService != null){
             return apimConfigService;
@@ -324,19 +377,24 @@ public class ServiceReferenceHolder {
     }
 
 
-    public void addExternalGatewayDeployer(String type, ExternalGatewayDeployer deployer) {
+    public void addExternalGatewayConnectorConfiguration(String type, GatewayAgentConfiguration gatewayConfiguration) {
 
-        externalGatewayDeployers.put(type, deployer);
+        gatewayConnectorConfigurationMap.put(type, gatewayConfiguration);
     }
 
-    public void removeExternalGatewayDeployer(String type) {
+    public void removeExternalGatewayConnectorConfiguration(String type) {
 
-        externalGatewayDeployers.remove(type);
+        gatewayConnectorConfigurationMap.remove(type);
     }
 
-    public ExternalGatewayDeployer getExternalGatewayDeployer(String type) {
+    public GatewayAgentConfiguration getExternalGatewayConnectorConfiguration(String type) {
 
-        return externalGatewayDeployers.get(type);
+        return gatewayConnectorConfigurationMap.get(type);
+    }
+
+    public Map<String, GatewayAgentConfiguration> getExternalGatewayConnectorConfigurations() {
+
+            return gatewayConnectorConfigurationMap;
     }
 
     public void addExternalEnvironment(String type, ExternalEnvironment externalEnvironment) {
@@ -399,6 +457,71 @@ public class ServiceReferenceHolder {
     public Map<String, LLMProviderService> getLLMProviderServiceMap() {
 
         return this.llmProviderServiceMap;
+    }
+
+    public static UserRealm getUserRealm() {
+        return userRealm;
+    }
+
+    public void setFederatedAPIDiscovery(FederatedAPIDiscoveryService federatedAPIDiscoveryService) {
+
+        this.federatedAPIDiscoveryService = federatedAPIDiscoveryService;
+    }
+
+    public FederatedAPIDiscoveryService getFederatedAPIDiscoveryService() {
+
+        return federatedAPIDiscoveryService;
+    }
+
+    public OpaqueAPIKeyNotifier getOpaqueApiKeyNotifier() {
+        return opaqueApiKeyNotifier;
+    }
+
+    public void setOpaqueApiKeyNotifier(OpaqueAPIKeyNotifier opaqueApiKeyNotifier) {
+        this.opaqueApiKeyNotifier = opaqueApiKeyNotifier;
+    }
+
+    public PlatformGatewayService getPlatformGatewayService() {
+
+        return PlatformGatewayServiceImpl.getInstance();
+    }
+
+    public PlatformGatewayArtifactService getPlatformGatewayArtifactService() {
+        return PlatformGatewayArtifactServiceImpl.getInstance();
+    }
+
+    public PlatformGatewayDeploymentEventService getPlatformGatewayDeploymentEventService() {
+        return PlatformGatewayDeploymentEventServiceImpl.getInstance();
+    }
+
+    public ConsumptionDataExportService getConsumptionDataExportService() {
+        return consumptionDataExportService;
+    }
+
+    public void setConsumptionDataExportService(ConsumptionDataExportService consumptionDataExportService) {
+        this.consumptionDataExportService = consumptionDataExportService;
+    }
+
+    public void addRevokedTokenService(RevokedTokenService revokedTokenService) {
+        revokedTokenServices.add(revokedTokenService);
+    }
+
+    public void removeRevokedTokenService(RevokedTokenService revokedTokenService) {
+        revokedTokenServices.remove(revokedTokenService);
+    }
+
+    public RevokedTokenService getRevokedTokenService() {
+        return new RevokedTokenService() {
+            public void addRevokedJWTIntoMap(String revokedToken, Long expiryTime) {
+                revokedTokenServices.forEach(s -> s.addRevokedJWTIntoMap(revokedToken, expiryTime));
+            }
+            public void removeTokenFromGatewayCache(String accessToken, boolean isJwtToken) {
+                revokedTokenServices.forEach(s -> s.removeTokenFromGatewayCache(accessToken, isJwtToken));
+            }
+            public void removeApiKeyFromGatewayCache(String tokenIdentifier) {
+                revokedTokenServices.forEach(s -> s.removeApiKeyFromGatewayCache(tokenIdentifier));
+            }
+        };
     }
 
 }

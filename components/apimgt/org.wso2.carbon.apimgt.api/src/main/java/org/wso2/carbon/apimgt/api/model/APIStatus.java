@@ -17,6 +17,8 @@
 */
 package org.wso2.carbon.apimgt.api.model;
 
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
+
 /**
  * Status of an API can be anyone from following list.
  */
@@ -31,7 +33,24 @@ public enum APIStatus {
         this.status = status;
     }
 
+    @UsedByMigrationClient
     public String getStatus() {
         return status;
+    }
+
+    /**
+     * Check whether the given status is valid or not.
+     *
+     * @param status API status
+     * @return true if the status is valid, false otherwise
+     */
+    public static boolean contains(String status) {
+        if (status == null) return false;
+        for (APIStatus s : values()) {
+            if (s.getStatus().equalsIgnoreCase(status.trim())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

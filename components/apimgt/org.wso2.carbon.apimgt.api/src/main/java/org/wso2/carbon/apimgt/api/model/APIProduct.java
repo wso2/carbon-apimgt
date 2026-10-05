@@ -29,11 +29,13 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 
 public class APIProduct implements Serializable {
     // TODO add rest of the properties
     private APIProductIdentifier id;
     private String uuid;
+    private String displayName;
     private String type;
     private int productId;
     private String context;
@@ -149,6 +151,7 @@ public class APIProduct implements Serializable {
     public void setID(APIProductIdentifier id) {
         this.id = id;
     }
+    @UsedByMigrationClient
     public APIProductIdentifier getId() {
         return id;
     }
@@ -181,6 +184,12 @@ public class APIProduct implements Serializable {
     }
     public void setSubscriptionAvailability(String subscriptionAvailability) {
         this.subscriptionAvailability = subscriptionAvailability;
+    }
+    public String getDisplayName() {
+        return displayName;
+    }
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
     public String getState() {
         return state;

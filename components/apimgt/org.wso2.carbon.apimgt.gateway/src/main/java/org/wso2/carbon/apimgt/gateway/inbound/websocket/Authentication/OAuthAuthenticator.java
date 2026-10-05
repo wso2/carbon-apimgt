@@ -194,6 +194,10 @@ public class OAuthAuthenticator implements Authenticator {
                     if (info == null || !info.isAuthorized()) {
                         info.setAuthorized(false);
                     }
+                    // set anonymous user if the username is null
+                    if (info.getEndUserName() == null) {
+                        info.setEndUserName(APIConstants.END_USER_ANONYMOUS);
+                    }
                     if (WebsocketUtil.isGatewayTokenCacheEnabled()) {
                         cacheKey = WebsocketUtil.getAccessTokenCacheKey(apiKey,
                                 inboundMessageContext.getApiContext(), inboundMessageContext.getMatchingResource());

@@ -26,6 +26,7 @@ public class SettingsDTO   {
     private List<String> grantTypes = new ArrayList<String>();
     private List<String> scopes = new ArrayList<String>();
     private Boolean applicationSharingEnabled = false;
+    private Boolean isLegacyApiKeysEnabled = false;
     private Boolean mapExistingAuthApps = false;
     private String apiGatewayEndpoint = null;
     private Boolean monetizationEnabled = false;
@@ -44,6 +45,39 @@ public class SettingsDTO   {
     private Boolean aiAuthTokenProvided = false;
     private Boolean marketplaceAssistantEnabled = true;
     private Boolean orgWideAppUpdateEnabled = false;
+
+    @XmlType(name="DevportalModeEnum")
+    @XmlEnum(String.class)
+    public enum DevportalModeEnum {
+        HYBRID("HYBRID"),
+        MCP_ONLY("MCP_ONLY"),
+        API_ONLY("API_ONLY");
+        private String value;
+
+        DevportalModeEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static DevportalModeEnum fromValue(String v) {
+            for (DevportalModeEnum b : DevportalModeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
+    private DevportalModeEnum devportalMode = DevportalModeEnum.HYBRID;
 
   /**
    **/
@@ -94,6 +128,23 @@ public class SettingsDTO   {
   }
   public void setApplicationSharingEnabled(Boolean applicationSharingEnabled) {
     this.applicationSharingEnabled = applicationSharingEnabled;
+  }
+
+  /**
+   **/
+  public SettingsDTO isLegacyApiKeysEnabled(Boolean isLegacyApiKeysEnabled) {
+    this.isLegacyApiKeysEnabled = isLegacyApiKeysEnabled;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("IsLegacyApiKeysEnabled")
+  public Boolean isIsLegacyApiKeysEnabled() {
+    return isLegacyApiKeysEnabled;
+  }
+  public void setIsLegacyApiKeysEnabled(Boolean isLegacyApiKeysEnabled) {
+    this.isLegacyApiKeysEnabled = isLegacyApiKeysEnabled;
   }
 
   /**
@@ -411,6 +462,24 @@ public class SettingsDTO   {
     this.orgWideAppUpdateEnabled = orgWideAppUpdateEnabled;
   }
 
+  /**
+   * This indicates the mode of the Developer Portal. Possible values are: - HYBRID: Both MCP and API portals are enabled. - MCP_ONLY: Only the MCP portal is enabled. - API_ONLY: Only the API portal is enabled. 
+   **/
+  public SettingsDTO devportalMode(DevportalModeEnum devportalMode) {
+    this.devportalMode = devportalMode;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "This indicates the mode of the Developer Portal. Possible values are: - HYBRID: Both MCP and API portals are enabled. - MCP_ONLY: Only the MCP portal is enabled. - API_ONLY: Only the API portal is enabled. ")
+  @JsonProperty("devportalMode")
+  public DevportalModeEnum getDevportalMode() {
+    return devportalMode;
+  }
+  public void setDevportalMode(DevportalModeEnum devportalMode) {
+    this.devportalMode = devportalMode;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -424,6 +493,7 @@ public class SettingsDTO   {
     return Objects.equals(grantTypes, settings.grantTypes) &&
         Objects.equals(scopes, settings.scopes) &&
         Objects.equals(applicationSharingEnabled, settings.applicationSharingEnabled) &&
+        Objects.equals(isLegacyApiKeysEnabled, settings.isLegacyApiKeysEnabled) &&
         Objects.equals(mapExistingAuthApps, settings.mapExistingAuthApps) &&
         Objects.equals(apiGatewayEndpoint, settings.apiGatewayEndpoint) &&
         Objects.equals(monetizationEnabled, settings.monetizationEnabled) &&
@@ -441,12 +511,13 @@ public class SettingsDTO   {
         Objects.equals(apiChatEnabled, settings.apiChatEnabled) &&
         Objects.equals(aiAuthTokenProvided, settings.aiAuthTokenProvided) &&
         Objects.equals(marketplaceAssistantEnabled, settings.marketplaceAssistantEnabled) &&
-        Objects.equals(orgWideAppUpdateEnabled, settings.orgWideAppUpdateEnabled);
+        Objects.equals(orgWideAppUpdateEnabled, settings.orgWideAppUpdateEnabled) &&
+        Objects.equals(devportalMode, settings.devportalMode);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(grantTypes, scopes, applicationSharingEnabled, mapExistingAuthApps, apiGatewayEndpoint, monetizationEnabled, recommendationEnabled, isUnlimitedTierPaid, identityProvider, isAnonymousModeEnabled, isPasswordChangeEnabled, isJWTEnabledForLoginTokens, orgAccessControlEnabled, userStorePasswordPattern, passwordPolicyPattern, passwordPolicyMinLength, passwordPolicyMaxLength, apiChatEnabled, aiAuthTokenProvided, marketplaceAssistantEnabled, orgWideAppUpdateEnabled);
+    return Objects.hash(grantTypes, scopes, applicationSharingEnabled, isLegacyApiKeysEnabled, mapExistingAuthApps, apiGatewayEndpoint, monetizationEnabled, recommendationEnabled, isUnlimitedTierPaid, identityProvider, isAnonymousModeEnabled, isPasswordChangeEnabled, isJWTEnabledForLoginTokens, orgAccessControlEnabled, userStorePasswordPattern, passwordPolicyPattern, passwordPolicyMinLength, passwordPolicyMaxLength, apiChatEnabled, aiAuthTokenProvided, marketplaceAssistantEnabled, orgWideAppUpdateEnabled, devportalMode);
   }
 
   @Override
@@ -457,6 +528,7 @@ public class SettingsDTO   {
     sb.append("    grantTypes: ").append(toIndentedString(grantTypes)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    applicationSharingEnabled: ").append(toIndentedString(applicationSharingEnabled)).append("\n");
+    sb.append("    isLegacyApiKeysEnabled: ").append(toIndentedString(isLegacyApiKeysEnabled)).append("\n");
     sb.append("    mapExistingAuthApps: ").append(toIndentedString(mapExistingAuthApps)).append("\n");
     sb.append("    apiGatewayEndpoint: ").append(toIndentedString(apiGatewayEndpoint)).append("\n");
     sb.append("    monetizationEnabled: ").append(toIndentedString(monetizationEnabled)).append("\n");
@@ -475,6 +547,7 @@ public class SettingsDTO   {
     sb.append("    aiAuthTokenProvided: ").append(toIndentedString(aiAuthTokenProvided)).append("\n");
     sb.append("    marketplaceAssistantEnabled: ").append(toIndentedString(marketplaceAssistantEnabled)).append("\n");
     sb.append("    orgWideAppUpdateEnabled: ").append(toIndentedString(orgWideAppUpdateEnabled)).append("\n");
+    sb.append("    devportalMode: ").append(toIndentedString(devportalMode)).append("\n");
     sb.append("}");
     return sb.toString();
   }

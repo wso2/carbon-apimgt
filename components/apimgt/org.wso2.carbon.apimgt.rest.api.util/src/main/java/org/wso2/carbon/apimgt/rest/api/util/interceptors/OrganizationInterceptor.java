@@ -35,23 +35,35 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 public class OrganizationInterceptor extends AbstractPhaseInterceptor {
 
     private static final Log logger = LogFactory.getLog(OrganizationInterceptor.class);
+    private boolean allowTenantHeader;
 
     public OrganizationInterceptor() {
         // We will use PRE_INVOKE phase as we need to process message before hit actual
         // service
         super(Phase.PRE_INVOKE);
+        this.allowTenantHeader = true;
     }
 
     @Override
     public void handleMessage(Message message) throws Fault {
 
         try {
+            // Preserve organization already set by platform gateway api-key auth (Internal Data Service).
+            if (RestApiConstants.PLATFORM_GATEWAY_API_KEY.equals(message.get(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME))) {
+                Object existing = message.get(RestApiConstants.ORGANIZATION);
+                if (existing != null && org.apache.commons.lang3.StringUtils.isNotBlank(existing.toString())) {
+                    logger.debug("Organization already set by platform gateway api-key");
+                    return;
+                }
+            }
+
             OrganizationResolver resolver = APIUtil.getOrganizationResolver();
             
             // populate properties needed for the resolver.
             HashMap<String, Object> properties = new HashMap<String, Object>();
             properties.put(APIConstants.PROPERTY_HEADERS_KEY, message.get(Message.PROTOCOL_HEADERS));
             properties.put(APIConstants.PROPERTY_QUERY_KEY, message.get(Message.QUERY_STRING));
+            properties.put(APIConstants.PROPERTY_ALLOW_TENANT_HEADER_KEY, allowTenantHeader);
             
             String organization = resolver.resolve(properties);
             message.put(RestApiConstants.ORGANIZATION, organization);
@@ -62,7 +74,13 @@ public class OrganizationInterceptor extends AbstractPhaseInterceptor {
                 RestApiUtil.handleInternalServerError("Error while resolving the organization resolver", e, logger);
             }
         }
-        logger.debug("Organization :" + message.get(RestApiConstants.ORGANIZATION));
+        if (logger.isDebugEnabled()) {
+            logger.debug("Organization resolved by OrganizationInterceptor");
+        }
+    }
+
+    public void setAllowTenantHeader(boolean allowTenantHeader) {
+        this.allowTenantHeader = allowTenantHeader;
     }
 
 }

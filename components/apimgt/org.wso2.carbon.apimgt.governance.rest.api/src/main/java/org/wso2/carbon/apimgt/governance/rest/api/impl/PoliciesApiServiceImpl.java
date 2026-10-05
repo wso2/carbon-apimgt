@@ -19,26 +19,29 @@
 
 package org.wso2.carbon.apimgt.governance.rest.api.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
-import org.wso2.carbon.apimgt.governance.api.GovernanceAPIConstants;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
-import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
-import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyList;
+import org.wso2.carbon.apimgt.governance.api.APIMGovernanceAPIConstants;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernancePolicy;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernancePolicyList;
 import org.wso2.carbon.apimgt.governance.impl.ComplianceManager;
 import org.wso2.carbon.apimgt.governance.impl.PolicyManager;
+import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
 import org.wso2.carbon.apimgt.governance.rest.api.PoliciesApiService;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernancePolicyDTO;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernancePolicyListDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.APIMGovernancePolicyDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.APIMGovernancePolicyListDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.mappings.PolicyMappingUtil;
-import org.wso2.carbon.apimgt.governance.rest.api.util.GovernanceAPIUtil;
+import org.wso2.carbon.apimgt.governance.rest.api.util.APIMGovernanceAPIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.Response;
@@ -54,38 +57,50 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
      * @param governancePolicyDTO Governance Policy  with Ruleset Ids
      * @param messageContext      Message Context
      * @return Response
-     * @throws GovernanceException If an error occurs while creating the policy
+     * @throws APIMGovernanceException If an error occurs while creating the policy
      */
-    public Response createGovernancePolicy(GovernancePolicyDTO governancePolicyDTO,
-                                           MessageContext messageContext) throws GovernanceException {
+    public Response createGovernancePolicy(APIMGovernancePolicyDTO governancePolicyDTO,
+                                           MessageContext messageContext) throws APIMGovernanceException {
 
-        GovernancePolicyDTO createdPolicyDTO;
+        APIMGovernancePolicyDTO createdPolicyDTO;
         URI createdPolicyURI;
 
         try {
             PolicyManager policyManager = new PolicyManager();
-            GovernancePolicy governancePolicy =
+            APIMGovernancePolicy governancePolicy =
                     PolicyMappingUtil.fromDTOtoGovernancePolicy(governancePolicyDTO);
 
-            String username = GovernanceAPIUtil.getLoggedInUsername();
-            String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
+            String username = APIMGovernanceAPIUtil.getLoggedInUsername();
+            String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
+
+            // Reject a selection the deployment won't store, rather than silently dropping it.
+            rejectSeveritiesWhenFilteringDisabled(policyManager,
+                    governancePolicyDTO.getComplianceAffectingSeverities(), false);
+
+            // Validated before anything is written, so an undefined severity costs a 400, not a bad policy.
+            governancePolicy.setComplianceAffectingSeverities(APIMGovernanceUtil
+                    .validateComplianceAffectingSeverities(governancePolicy.getComplianceAffectingSeverities()));
 
             governancePolicy.setCreatedBy(username);
+            // The severity selection travels on the policy, written by the same insert.
             governancePolicy = policyManager.createGovernancePolicy(organization,
                     governancePolicy);
 
-            // Access policy compliance in the background
+            // Queued once the severities have landed with the insert above, before anything response-only.
             new ComplianceManager().handlePolicyChangeEvent(governancePolicy.getId(), organization);
+
+            setComplianceAffectingSeverities(policyManager, governancePolicy, governancePolicy.getId(),
+                    organization);
 
             createdPolicyDTO = PolicyMappingUtil.
                     fromGovernancePolicyToGovernancePolicyDTO(governancePolicy);
             createdPolicyURI = new URI(
-                    GovernanceAPIConstants.POLICY_PATH + "/" + createdPolicyDTO.getId());
+                    APIMGovernanceAPIConstants.POLICY_PATH + "/" + createdPolicyDTO.getId());
 
         } catch (URISyntaxException e) {
             String error = String.format("Error while creating URI for new Governance Policy %s",
                     governancePolicyDTO.getName());
-            throw new GovernanceException(error, e, GovernanceExceptionCodes.INTERNAL_SERVER_ERROR);
+            throw new APIMGovernanceException(error, e, APIMGovExceptionCodes.INTERNAL_SERVER_ERROR);
         }
         return Response.created(createdPolicyURI).entity(createdPolicyDTO).build();
     }
@@ -97,27 +112,38 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
      * @param governancePolicyDTO Governance Policy  with Ruleset Ids
      * @param messageContext      Message Context
      * @return Response
-     * @throws GovernanceException If an error occurs while updating the policy
+     * @throws APIMGovernanceException If an error occurs while updating the policy
      */
-    public Response updateGovernancePolicyById(String policyId, GovernancePolicyDTO
-            governancePolicyDTO, MessageContext messageContext) throws GovernanceException {
+    public Response updateGovernancePolicyById(String policyId, APIMGovernancePolicyDTO
+            governancePolicyDTO, MessageContext messageContext) throws APIMGovernanceException {
         PolicyManager policyManager = new PolicyManager();
-        String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
-        String username = GovernanceAPIUtil.getLoggedInUsername();
+        String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
+        String username = APIMGovernanceAPIUtil.getLoggedInUsername();
 
-        GovernancePolicy governancePolicy =
+        APIMGovernancePolicy governancePolicy =
                 PolicyMappingUtil.
                         fromDTOtoGovernancePolicy(governancePolicyDTO);
 
         governancePolicy.setUpdatedBy(username);
-        GovernancePolicy updatedPolicy = policyManager.updateGovernancePolicy
-                (policyId, governancePolicy);
 
-        GovernancePolicyDTO updatedPolicyDTO = PolicyMappingUtil.
-                fromGovernancePolicyToGovernancePolicyDTO(updatedPolicy);
+        // Checked before the update, since that transaction also clears the policy's stored results.
+        rejectSeveritiesWhenFilteringDisabled(policyManager, governancePolicyDTO.getComplianceAffectingSeverities(),
+                true);
 
-        // Re-access policy compliance in the background
+        governancePolicy.setComplianceAffectingSeverities(APIMGovernanceUtil
+                .validateComplianceAffectingSeverities(governancePolicy.getComplianceAffectingSeverities()));
+
+        // One transaction: omitting the field preserves what's stored, sending it blank clears it.
+        APIMGovernancePolicy updatedPolicy = policyManager.updateGovernancePolicy
+                (policyId, governancePolicy, organization);
+
+        // Queued before anything response-only, to replace the stored results the update above just cleared.
         new ComplianceManager().handlePolicyChangeEvent(policyId, organization);
+
+        setComplianceAffectingSeverities(policyManager, updatedPolicy, policyId, organization);
+
+        APIMGovernancePolicyDTO updatedPolicyDTO = PolicyMappingUtil.
+                fromGovernancePolicyToGovernancePolicyDTO(updatedPolicy);
 
         return Response.status(Response.Status.OK).entity(updatedPolicyDTO).build();
     }
@@ -128,11 +154,15 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
      * @param policyId       Policy ID
      * @param messageContext Message Context
      * @return Response
-     * @throws GovernanceException If an error occurs while deleting the policy
+     * @throws APIMGovernanceException If an error occurs while deleting the policy
      */
-    public Response deleteGovernancePolicy(String policyId, MessageContext messageContext) throws GovernanceException {
+    public Response deleteGovernancePolicy(String policyId, MessageContext messageContext)
+            throws APIMGovernanceException {
         PolicyManager policyManager = new PolicyManager();
-        policyManager.deletePolicy(policyId);
+        String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
+        String username = APIMGovernanceAPIUtil.getLoggedInUsername();
+
+        policyManager.deletePolicy(policyId, username, organization);
         return Response.status(Response.Status.NO_CONTENT).build();
     }
 
@@ -142,13 +172,16 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
      * @param policyId       Policy ID
      * @param messageContext Message Context
      * @return Response
-     * @throws GovernanceException If an error occurs while retrieving the policy
+     * @throws APIMGovernanceException If an error occurs while retrieving the policy
      */
-    public Response getGovernancePolicyById(String policyId, MessageContext messageContext) throws GovernanceException {
+    public Response getGovernancePolicyById(String policyId, MessageContext messageContext)
+            throws APIMGovernanceException {
         PolicyManager policyManager = new PolicyManager();
+        String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
 
-        GovernancePolicy policy = policyManager.getGovernancePolicyByID(policyId);
-        GovernancePolicyDTO policyDTO = PolicyMappingUtil.fromGovernancePolicyToGovernancePolicyDTO(policy);
+        APIMGovernancePolicy policy = policyManager.getGovernancePolicyByID(policyId, organization);
+        setComplianceAffectingSeverities(policyManager, policy, policyId, organization);
+        APIMGovernancePolicyDTO policyDTO = PolicyMappingUtil.fromGovernancePolicyToGovernancePolicyDTO(policy);
         return Response.status(Response.Status.OK).entity(policyDTO).build();
     }
 
@@ -160,25 +193,26 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
      * @param query          Query for filtering
      * @param messageContext Message Context
      * @return Response
-     * @throws GovernanceException If an error occurs while retrieving the policies
+     * @throws APIMGovernanceException If an error occurs while retrieving the policies
      */
     public Response getGovernancePolicies(Integer limit, Integer offset, String query, MessageContext messageContext)
-            throws GovernanceException {
+            throws APIMGovernanceException {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         query = query != null ? query : "";
 
         PolicyManager policyManager = new PolicyManager();
-        String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
+        String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
 
-        GovernancePolicyList policyList;
+        APIMGovernancePolicyList policyList;
         if (!query.isEmpty()) {
             policyList = policyManager.searchGovernancePolicies(query, organization);
         } else {
             policyList = policyManager.getGovernancePolicies(organization);
         }
 
-        GovernancePolicyListDTO policyListDTO = getPaginatedPolicyList(policyList, limit, offset, query);
+        APIMGovernancePolicyListDTO policyListDTO = getPaginatedPolicyList(policyList, limit, offset, query,
+                policyManager, organization);
 
         return Response.status(Response.Status.OK).entity(policyListDTO).build();
     }
@@ -192,11 +226,21 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
      * @param query      Query for filtering
      * @return Paginated Governance Policy List
      */
-    private GovernancePolicyListDTO getPaginatedPolicyList(GovernancePolicyList policyList, int limit, int offset,
-                                                           String query) {
+    private APIMGovernancePolicyListDTO getPaginatedPolicyList(APIMGovernancePolicyList policyList, int limit,
+                                                               int offset,
+                                                               String query, PolicyManager policyManager,
+                                                               String organization)
+            throws APIMGovernanceException {
         int policyCount = policyList.getCount();
-        List<GovernancePolicyDTO> policies = new ArrayList<>();
-        GovernancePolicyListDTO paginatedPolicyListDTO = new GovernancePolicyListDTO();
+
+        // Must agree with the single policy response on whether the feature is offered. Read in one query
+        // rather than per row; a policy absent from the map has not narrowed its severities.
+        boolean severityFilteringEnabled = policyManager.isComplianceAffectingSeverityFilteringEnabled();
+        Map<String, String> severitiesByPolicy = severityFilteringEnabled
+                ? policyManager.getComplianceAffectingSeverities(organization) : Collections.emptyMap();
+
+        List<APIMGovernancePolicyDTO> policies = new ArrayList<>();
+        APIMGovernancePolicyListDTO paginatedPolicyListDTO = new APIMGovernancePolicyListDTO();
         paginatedPolicyListDTO.setCount(Math.min(policyCount, limit));
 
         // If the provided offset value exceeds the offset, reset the offset to default.
@@ -208,8 +252,11 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
         int start = offset;
         int end = Math.min(policyCount, start + limit);
         for (int i = start; i < end; i++) {
-            GovernancePolicy policy = policyList.getGovernancePolicyList().get(i);
-            GovernancePolicyDTO policyDTO = PolicyMappingUtil.fromGovernancePolicyToGovernancePolicyDTO(policy);
+            APIMGovernancePolicy policy = policyList.getGovernancePolicyList().get(i);
+            APIMGovernancePolicyDTO policyDTO = PolicyMappingUtil.fromGovernancePolicyToGovernancePolicyDTO(policy);
+            policyDTO.setComplianceAffectingSeverities(
+                    severityFilteringEnabled ? severitiesByPolicy.getOrDefault(policy.getId(), StringUtils.EMPTY)
+                            : null);
             policies.add(policyDTO);
         }
         paginatedPolicyListDTO.setList(policies);
@@ -226,19 +273,68 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
         String paginatedNext = "";
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
-            paginatedPrevious = GovernanceAPIUtil.getPaginatedURLWithQuery(GovernanceAPIConstants.POLICIES_GET_URL,
-                    paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
-                    paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), query);
+            paginatedPrevious = APIMGovernanceAPIUtil.getPaginatedURLWithQuery
+                    (APIMGovernanceAPIConstants.POLICIES_GET_URL,
+                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), query);
         }
         if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
-            paginatedNext = GovernanceAPIUtil.getPaginatedURLWithQuery(GovernanceAPIConstants.POLICIES_GET_URL,
-                    paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
-                    paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), query);
+            paginatedNext = APIMGovernanceAPIUtil.getPaginatedURLWithQuery
+                    (APIMGovernanceAPIConstants.POLICIES_GET_URL,
+                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), query);
         }
 
         paginationDTO.setPrevious(paginatedPrevious);
         paginationDTO.setNext(paginatedNext);
 
         return paginatedPolicyListDTO;
+    }
+
+    /**
+     * Refuse a request which asks for a severity selection while the feature is switched off, rather than
+     * silently discarding it.
+     *
+     * @param policyManager                 Manager used to read the configuration
+     * @param complianceAffectingSeverities Value from the request, null when the field was not sent
+     * @param blankClearsTheValue           True on update, where a blank value clears the stored one and so is
+     *                                      still a write; false on create, where there is nothing to clear
+     * @throws APIMGovernanceException If a selection was asked for while the feature is off
+     */
+    private void rejectSeveritiesWhenFilteringDisabled(PolicyManager policyManager,
+                                                       String complianceAffectingSeverities,
+                                                       boolean blankClearsTheValue) throws APIMGovernanceException {
+
+        boolean writeRequested = blankClearsTheValue ? complianceAffectingSeverities != null
+                : StringUtils.isNotBlank(complianceAffectingSeverities);
+        if (!writeRequested || policyManager.isComplianceAffectingSeverityFilteringEnabled()) {
+            return;
+        }
+        throw new APIMGovernanceException(APIMGovExceptionCodes.BAD_REQUEST,
+                "Per policy severity filtering is not enabled on this deployment. Set "
+                        + "apim.governance.per_policy_severity_filtering_enabled to true in deployment.toml and "
+                        + "restart the server");
+    }
+
+    /**
+     * Report the severities stored for a policy. Null means the feature is off; empty means it's on but
+     * nothing is configured; a value lists the severities that count.
+     *
+     * @param policyManager Manager used to read the stored value
+     * @param policy        Policy to describe
+     * @param policyId      Policy ID
+     * @param organization  Organization
+     * @throws APIMGovernanceException If the stored value cannot be read
+     */
+    private void setComplianceAffectingSeverities(PolicyManager policyManager, APIMGovernancePolicy policy,
+                                                  String policyId, String organization)
+            throws APIMGovernanceException {
+
+        if (!policyManager.isComplianceAffectingSeverityFilteringEnabled()) {
+            policy.setComplianceAffectingSeverities(null);
+            return;
+        }
+        String severities = policyManager.getComplianceAffectingSeverities(policyId, organization);
+        policy.setComplianceAffectingSeverities(severities == null ? StringUtils.EMPTY : severities);
     }
 }

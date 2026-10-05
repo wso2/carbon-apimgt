@@ -15,43 +15,48 @@
  */
 package org.wso2.carbon.apimgt.impl.notifier;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.FaultyGatewayDeploymentException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
+import org.wso2.carbon.apimgt.api.model.GatewayDeployer;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
-import org.wso2.carbon.apimgt.impl.deployer.exceptions.DeployerException;
+import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
+import org.wso2.carbon.apimgt.impl.factory.GatewayHolder;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.RuntimeArtifactGeneratorUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.Event;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 
+import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier {
-    protected ApiMgtDAO apiMgtDAO;
     private static final Log log = LogFactory.getLog(ExternalGatewayNotifier.class);
 
     @Override
     public boolean publishEvent(Event event) throws NotifierException {
-        if (APIUtil.isAnyExternalGateWayProviderExists()) {
-            apiMgtDAO = ApiMgtDAO.getInstance();
+        if (APIUtil.isAnyExternalGateWayProviderExists(event.getTenantDomain())) {
             process(event);
         }
         return true;
     }
 
     /**
-     * Process gateway notifier events related to External gateway deployments
+     * Process gateway notifier events related to External gateway deployments.
      *
      * @param event related to deployments
      * @throws NotifierException if error occurs when casting event
@@ -59,57 +64,116 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier {
     private void process(Event event) throws NotifierException {
         DeployAPIInGatewayEvent deployAPIInGatewayEvent;
         deployAPIInGatewayEvent = (DeployAPIInGatewayEvent) event;
-        if (isExternalGatewayAvailableToDeployment(deployAPIInGatewayEvent))
+        if (deployAPIInGatewayEvent.getGatewayLabels() != null &&
+                !deployAPIInGatewayEvent.getGatewayLabels().isEmpty()) {
+            if (log.isDebugEnabled()) {
+                log.debug("Processing external gateway deployment for API: " + deployAPIInGatewayEvent.getUuid());
+            }
+        }
+        if (isExternalGatewayAvailableToDeployment(deployAPIInGatewayEvent)) {
             if (APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name().equals(event.getType())) {
                 deployApi(deployAPIInGatewayEvent);
             } else if (APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(event.getType())) {
                 unDeployApi(deployAPIInGatewayEvent);
             }
-    }
-
-    /**
-     * Deploy APIs to external gateway
-     *
-     * @param deployAPIInGatewayEvent DeployAPIInGatewayEvent to deploy APIs to external gateway
-     * @throws NotifierException if error occurs when deploying APIs to external gateway
-     */
-    private void deployApi(DeployAPIInGatewayEvent deployAPIInGatewayEvent) throws NotifierException {
-
-        boolean deployed;
-        Set<String> gateways = deployAPIInGatewayEvent.getGatewayLabels();
-        String apiId = deployAPIInGatewayEvent.getUuid();
-
-        try {
-            Map<String, Environment> environments = APIUtil.getEnvironments(deployAPIInGatewayEvent.getTenantDomain());
-            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
-                    getThreadLocalCarbonContext().getUsername());
-            API api = apiProvider.getAPIbyUUID(apiId, apiMgtDAO.getOrganizationByAPIUUID(apiId));
-
-            for (String deploymentEnv : gateways) {
-                if (environments.containsKey(deploymentEnv)) {
-                    ExternalGatewayDeployer deployer = ServiceReferenceHolder.getInstance().getExternalGatewayDeployer
-                            (environments.get(deploymentEnv).getProvider());
-                    if (deployer != null) {
-                        try {
-                            deployed = deployer.deploy(api, environments.get(deploymentEnv));
-                            if (!deployed) {
-                                throw new APIManagementException("Error while deploying API product to Solace broker");
-                            }
-                        } catch (DeployerException e) {
-                            throw new APIManagementException(e.getMessage());
-                        }
-                    }
-                }
-            }
-        } catch (APIManagementException e) {
-            throw new NotifierException(e.getMessage());
         }
     }
 
     /**
-     * Undeploy APIs from external gateway
+     * Deploy APIs to external gateway.
      *
-     * @param deployAPIInGatewayEvent DeployAPIInGatewayEvent to undeploy APIs from external gateway
+     * @param deployAPIInGatewayEvent DeployAPIInGatewayEvent to deploy APIs to external gateway.
+     * @throws NotifierException if error occurs when deploying APIs to external gateway.
+     */
+    private void deployApi(DeployAPIInGatewayEvent deployAPIInGatewayEvent) throws NotifierException {
+        Set<String> gateways = deployAPIInGatewayEvent.getGatewayLabels();
+        String apiId = deployAPIInGatewayEvent.getUuid();
+        if (log.isDebugEnabled()) {
+            log.debug("Deploying API: " + apiId + " to external gateways");
+        }
+        try {
+            Map<String, Environment> environments = APIUtil.getEnvironments(deployAPIInGatewayEvent.getTenantDomain());
+            Set<String> faultyEnvironments = new HashSet<>();
+            for (String deploymentEnv : gateways) {
+                try {
+                    if (environments.containsKey(deploymentEnv)) {
+                        GatewayAgentConfiguration gatewayConfiguration = ServiceReferenceHolder.getInstance()
+                                .getExternalGatewayConnectorConfiguration(
+                                        environments.get(deploymentEnv).getGatewayType());
+                        GatewayDeployer deployer = null;
+                        if (gatewayConfiguration != null &&
+                                StringUtils.isNotEmpty(gatewayConfiguration.getGatewayDeployerImplementation())) {
+                            deployer = GatewayHolder.getTenantGatewayInstance(deployAPIInGatewayEvent.getTenantDomain(),
+                                    deploymentEnv);
+                        }
+                        if (deployer == null) {
+                            log.warn("No gateway deployer found for environment: " + deploymentEnv);
+                            faultyEnvironments.add(deploymentEnv);
+                            continue;
+                        }
+                        String referenceArtifact = APIUtil.getApiExternalApiMappingReferenceByApiId(apiId,
+                                environments.get(deploymentEnv).getUuid());
+                        String encodedGatewayLabel = new String(Base64.encodeBase64(
+                                deploymentEnv.getBytes(StandardCharsets.UTF_8)));
+                        RuntimeArtifactDto federatedArtifact =
+                                RuntimeArtifactGeneratorUtil.generateRuntimeArtifact(apiId, encodedGatewayLabel,
+                                        "Federated",
+                                        PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+                        if (federatedArtifact == null || federatedArtifact.isFile() ||
+                                !(federatedArtifact.getArtifact() instanceof List)) {
+                            faultyEnvironments.add(deploymentEnv);
+                            continue;
+                        }
+                        List artifactList = (List) federatedArtifact.getArtifact();
+                        if (artifactList.isEmpty()) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Empty artifact list for API: " + apiId);
+                            }
+                            faultyEnvironments.add(deploymentEnv);
+                            continue;
+                        }
+                        Object artifact = artifactList.get(0);
+                        if (artifact instanceof API) {
+                            API api = (API) artifact;
+                            String updatedReferenceArtifact = deployer.deploy(api, referenceArtifact);
+                            if (updatedReferenceArtifact == null) {
+                                log.error(
+                                        "Failed to deploy API: " + api.getUuid() +
+                                                " to external gateway in environment: " +
+                                                deploymentEnv);
+                                throw new APIManagementException("Error while deploying API to the external gateway");
+                            }
+                            if (referenceArtifact == null) {
+                                APIUtil.addApiExternalApiMapping(apiId, environments.get(deploymentEnv).getUuid(),
+                                        updatedReferenceArtifact);
+                            } else {
+                                APIUtil.updateApiExternalApiMapping(apiId, environments.get(deploymentEnv).getUuid(),
+                                        updatedReferenceArtifact);
+                            }
+                            log.info("Successfully deployed API: " + api.getUuid() + " to environment: " +
+                                    deploymentEnv);
+                        }
+                    }
+                } catch (APIManagementException e) {
+                    log.error("Error while deploying API: " + apiId + " to external gateway in environment: " +
+                            deploymentEnv, e);
+                    faultyEnvironments.add(deploymentEnv);
+                }
+            }
+            if (!faultyEnvironments.isEmpty()) {
+                throw new FaultyGatewayDeploymentException("Error while deploying API to external gateway", null,
+                        faultyEnvironments, true);
+            }
+        } catch (APIManagementException e) {
+            throw new FaultyGatewayDeploymentException("Error while deploying API to external gateway", e,
+                    deployAPIInGatewayEvent.getGatewayLabels(), true);
+        }
+    }
+
+    /**
+     * Undeploy APIs from external gateway.
+     *
+     * @param deployAPIInGatewayEvent DeployAPIInGatewayEvent to undeploying APIs from external gateway
      * @throws NotifierException if error occurs when undeploying APIs from external gateway
      */
     private void unDeployApi(DeployAPIInGatewayEvent deployAPIInGatewayEvent) throws NotifierException {
@@ -117,33 +181,55 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier {
         boolean deleted;
         Set<String> gateways = deployAPIInGatewayEvent.getGatewayLabels();
         String apiId = deployAPIInGatewayEvent.getUuid();
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         try {
             Map<String, Environment> environments = APIUtil.getEnvironments(deployAPIInGatewayEvent.getTenantDomain());
-
-            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(deployAPIInGatewayEvent.getProvider());
-            API api = apiProvider.getAPIbyUUID(apiId, apiMgtDAO.getOrganizationByAPIUUID(apiId));
-
+            Set<String> faultyEnvironments = new HashSet<>();
             for (String deploymentEnv : gateways) {
-                if (environments.containsKey(deploymentEnv)) {
-                    ExternalGatewayDeployer deployer = ServiceReferenceHolder.getInstance().getExternalGatewayDeployer
-                            (environments.get(deploymentEnv).getProvider());
-                    if (deployer != null) {
-                        try {
-                            deleted = deployer.undeploy(api.getId().getName(), api.getId().getVersion(),
-                                    api.getContext(), environments.get(deploymentEnv));
-                            if (!deleted) {
-                                throw new NotifierException("Error while deleting API product from Solace broker");
+                try {
+                    if (environments.containsKey(deploymentEnv)) {
+                        GatewayDeployer deployer =
+                                GatewayHolder.getTenantGatewayInstance(deployAPIInGatewayEvent.getTenantDomain(),
+                                        deploymentEnv);
+                        if (deployer == null) {
+                            faultyEnvironments.add(deploymentEnv);
+                            continue;
+                        }
+                        String referenceArtifact = APIUtil.getApiExternalApiMappingReferenceByApiId(apiId,
+                                environments.get(deploymentEnv).getUuid());
+                        if (referenceArtifact == null) {
+                            throw new APIManagementException("API is not mapped with an External API");
+                        }
+                        deleted = deployer.undeploy(referenceArtifact, deployAPIInGatewayEvent.isDeleted());
+                        if (log.isDebugEnabled()) {
+                            log.debug(
+                                    "Undeploy API with reference artifact: " + referenceArtifact + ", isDeleted: " +
+                                            deployAPIInGatewayEvent.isDeleted());
+                        }
+                        if (!deleted) {
+                            throw new NotifierException("Error while undeploy externally deployed API");
+                        } else {
+                            if (deployAPIInGatewayEvent.isDeleted()) {
+                                APIUtil.deleteApiExternalApiMapping(apiId,
+                                        environments.get(deploymentEnv).getUuid());
+                                apiMgtDAO.removeAPIRevisionDeployment(apiId, deploymentEnv);
                             }
-                        } catch (DeployerException e) {
-                            throw new NotifierException(e.getMessage());
                         }
                     }
+                } catch (APIManagementException e) {
+                    log.error("Error while undeploying API: " + apiId + " from external gateway in environment: " +
+                            deploymentEnv, e);
+                    faultyEnvironments.add(deploymentEnv);
                 }
             }
+            if (!faultyEnvironments.isEmpty()) {
+                throw new FaultyGatewayDeploymentException("Error while undeploying API from external gateway", null,
+                        faultyEnvironments, false);
+            }
         } catch (APIManagementException e) {
-            throw new NotifierException(e.getMessage());
+            throw new FaultyGatewayDeploymentException("Error while undeploying API from external gateway", e,
+                    deployAPIInGatewayEvent.getGatewayLabels(), false);
         }
-
     }
 
     private boolean isExternalGatewayAvailableToDeployment(DeployAPIInGatewayEvent deployAPIInGatewayEvent)

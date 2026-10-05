@@ -19,6 +19,11 @@
 
 package org.wso2.carbon.apimgt.gateway;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 public class APIMgtGatewayConstants {
 
     public static final String CONSUMER_KEY = "api.ut.consumerKey";
@@ -28,6 +33,7 @@ public class APIMgtGatewayConstants {
     public static final String API = "api.ut.api";
     public static final String VERSION = "api.ut.version";
     public static final String API_TYPE = "api.ut.api_type";
+    public static final String SUB_TYPE = "api.ut.sub_type";
     public static final String RESOURCE = "api.ut.resource";
     public static final String API_STATUS = "api.ut.status";
     public static final String HTTP_METHOD = "api.ut.HTTP_METHOD";
@@ -44,6 +50,8 @@ public class APIMgtGatewayConstants {
     public static final String X_FORWARDED_FOR = "X-Forwarded-For";
     public static final String REQUEST_RECEIVED_TIME = "wso2statistics.request.received.time";
     public static final String AUTHORIZATION = "Authorization";
+    public static final String ACCESS_TOKEN = "ACCESS_TOKEN";
+    public static final String ACCESS_TOKEN_INVALID_REASON = "ACCESS_TOKEN_INVALID_REASON";
     public static final String REVOKED_ACCESS_TOKEN = "RevokedAccessToken";
     public static final String DEACTIVATED_ACCESS_TOKEN = "DeactivatedAccessToken";
     public static final String SCOPES = "Scopes";
@@ -53,6 +61,24 @@ public class APIMgtGatewayConstants {
     public static final String DUMMY_ENDPOINT_ADDRESS = "dummy_endpoint_address";
     public static final String CUSTOM_PROPERTY = "customProperty";
     public static final String RESOURCE_PATTERN = "^/.+?/.+?([/?].+)$";
+    public static final String AUTHENTICATORS_CHALLENGE_STRING = "API:authenticators_challenge_string";
+
+    /**
+     * Constants for identifying which error flow triggered the
+     * current error handling
+     */
+    public static final String API_ERROR_TYPE = "API_ERROR_TYPE";
+    public static final String API_ERROR_TYPE_AUTH = "AUTH";
+    public static final String API_ERROR_TYPE_THROTTLE = "THROTTLE";
+    public static final String API_ERROR_TYPE_THREAT = "THREAT";
+    public static final String API_ERROR_TYPE_RESOURCE_MISMATCH = "RESOURCE_MISMATCH";
+    public static final String API_ERROR_TYPE_BLOCKED = "BLOCKED";
+    public static final String API_ERROR_TYPE_BACKEND = "BACKEND";
+
+    /**
+     * Message-context property that stores the resolved AI error response formatter sequence
+     */
+    public static final String AI_CUSTOM_ERROR_FORMAT_SEQUENCE = "AI_CUSTOM_ERROR_FORMAT_SEQUENCE";
 
     public static final String METHOD_NOT_FOUND_ERROR_MSG = "Method not allowed for given API resource";
     public static final String RESOURCE_NOT_FOUND_ERROR_MSG = "No matching resource found for given API Request";
@@ -66,6 +92,8 @@ public class APIMgtGatewayConstants {
     public static final String RESPONSE_MEDIATION_LATENCY = "response_mediation_latency";
     public static final String AM_CORRELATION_ID = "am.correlationID";
     public static final String REFERER = "Referer";
+
+    public static final String HTTPS_NIO_PORT = "https.nio.port";
 
     /**
      * Constants for regex protector.
@@ -99,6 +127,7 @@ public class APIMgtGatewayConstants {
     public static final String SCHEMA_VALIDATION = "schemaValidation";
     public static final String XSD_URL = "xsdURL";
     public static final String UTF8 = "UTF-8";
+    public static final String INVALID_XML_FORMAT_MSG = "Invalid XML format in the request payload";
 
     /**
      * Web socket header for jwt assertion.
@@ -110,6 +139,14 @@ public class APIMgtGatewayConstants {
     public static final String WS_SECURED = "wss";
 
     public static final String GATEWAY_TYPE = "SYNAPSE";
+
+    /**
+     * Lock key prefix used by APILockManager to coordinate concurrent on-demand API deployments.
+     * Appended with the API context to form a unique per-API key.
+     *
+     * @see org.wso2.carbon.apimgt.gateway.utils.APILockManager
+     */
+    public static final String API_LOADING_ON_DEMAND = "LoadAPI_OnDemand";
 
     /**
      * Constants for Open Tracing
@@ -180,6 +217,7 @@ public class APIMgtGatewayConstants {
     public static final String OAUTH_ENDPOINT_INSTANCE = "oauth.instance";
     public static final String VALIDATED_X509_CERT = "ValidatedX509Cert";
     public static final String RESOURCE_SPAN = "API:Resource";
+    public static final String AUTO_TRANSPORT_OPERATION_CLEANUP = "autoTransportOperationCleanUp";
 
     /**
      * Web-sub related properties
@@ -198,5 +236,83 @@ public class APIMgtGatewayConstants {
     public static final String ACCESS_GRANT_CLAIM_NAME = "grantVerificationClaim";
     public static final String ACCESS_GRANT_CLAIM_VALUE = "grantVerificationClaimValue";
     public static final String SHOULD_ALLOW_ACCESS_VALIDATION = "shouldAllowValidation";
+
+    public static final String INCLUDE_TOKEN_INFO_IN_MSG_CTX= "includeTokenInfoInMsgCtx";
+
+    /**
+     * MCP related Constants
+     */
+    public static final String MCP_METHOD = "api.ut.MCP_METHOD";
+    public static final String MCP_REQUEST_BODY = "MCP_REQUEST_BODY";
+    public static final String MCP_NO_AUTH_REQUEST = "MCP_NO_AUTH_REQUEST";
+    public static final String MCP_CAPABILITY_NAME_KEY = "MCP_CAPABILITY_NAME";
+    public static final String MCP_HTTP_METHOD_KEY = "MCP_HTTP_METHOD";
+    public static final String MCP_SESSION_ID_KEY = "MCP_SESSION_ID";
+    public static final String MCP_REQUESTED_PROTOCOL_VERSION_KEY = "MCP_REQUESTED_PROTOCOL_VERSION";
+    public static final String MCP_CLIENT_INFO_KEY = "MCP_CLIENT_INFO";
+    public static final String MCP_PROTOCOL_VERSION_KEY = "MCP_PROTOCOL_VERSION";
+    public static final String MCP_SERVER_NAME_KEY = "MCP_SERVER_NAME";
+    public static final String MCP_SERVER_VERSION_KEY = "MCP_SERVER_VERSION";
+    public static final String MCP_REQUEST_SIZE_KEY = "MCP_REQUEST_SIZE";
+    public static final String MCP_API_ELECTED_RESOURCE_KEY = "MCP_API_ELECTED_RESOURCE";
+    public static final String MCP_ERROR_CODE_KEY = "MCP_ERROR_CODE";
+    public static final String MCP_IS_ERROR_KEY = "MCP_IS_ERROR";
+    public static final int MCP_DEFAULT_ERROR_CODE = 0;
+    public static final String MCP_RESOURCE = "/mcp";
+    public static final String MCP_WELL_KNOWN_RESOURCE = "/.well-known/oauth-protected-resource";
+    public static final String MCP_AUTH_CLAIM = "MCP_AUTHENTICATED";
+    public static final Long MCP_AUTH_TOKEN_EXPIRATION_TIME = 6000L;
+    public static final String MCP_ANALYTICS = "mcpAnalytics";
+    public static final String MCP_SESSION_ID = "sessionId";
+    public static final String MCP_CAPABILITY = "capability";
+    public static final String TOOL = "TOOL";
+    public static final String MCP_TOOL_CALL = "tools/call";
+    public static final String MCP_CAPABILITY_NAME = "capabilityName";
+    public static final String MCP_CLIENT_INFO = "clientInfo";
+    public static final String MCP_REQUESTED_PROTOCOL_VERSION = "requestedProtocolVersion";
+    public static final String MCP_CLIENT_NAME = "name";
+    public static final String MCP_CLIENT_VERSION = "version";
+    public static final String MCP_SERVER_INFO = "serverInfo";
+    public static final String MCP_PROTOCOL_VERSION = "protocolVersion";
+    public static final String MCP_SERVER_NAME = "name";
+    public static final String MCP_SERVER_VERSION = "version";
+    public static final String MCP_IS_ERROR = "isError";
+    public static final String MCP_ERROR_CODE = "errorCode";
+    public static final String SERVER_INFO = "serverInfo";
+    public static final String SERVER_NAME = "name";
+    public static final String SERVER_VERSION = "version";
+    public static final String PROTOCOL_VERSION = "protocolVersion";
+    public static final String RESULT = "result";
+    public static final String CODE = "code";
+    public static final String IS_ERROR = "isError";
+
+
+    /**
+     * JWT Claim related Constants
+     */
+    public static final Set<String> STANDARD_JWT_CLAIMS = Collections.unmodifiableSet(new HashSet<>(
+            Arrays.asList("sub", "iss", "aud", "exp", "iat", "jti", "azp", "nbf", "scope", "scp", "aut")));
+    public static final String SUBSCRIBER_CLAIM = "subscriber";
+    public static final String APPLICATION_ID_CLAIM = "applicationid";
+    public static final String APPLICATION_NAME_CLAIM = "applicationname";
+    public static final String APPLICATION_TIER_CLAIM = "applicationtier";
+    public static final String TIER_CLAIM = "tier";
+    public static final String APPLICATION_UUID_CLAIM = "applicationUUId";
+    public static final String KEY_TYPE_CLAIM = "keytype";
+    public static final String END_USER_CLAIM = "enduser";
+    public static final String END_USER_TENANT_ID_CLAIM = "enduserTenantId";
+    public static final String TOKEN_TYPE_CLAIM = "token_type";
+
+    // Basic Auth Client Pool configurations
+    public static final String BASIC_AUTH_VALIDATOR = "BasicAuthValidator.";
+    public static final String CONNECTION_POOL = "ConnectionPool.";
+    public static final String BASIC_AUTH_VALIDATOR_CONNECTION_POOL_MAX_IDLE =
+            BASIC_AUTH_VALIDATOR + CONNECTION_POOL + "MaxIdle";
+    public static final String BASIC_AUTH_VALIDATOR_CONNECTION_POOL_INIT_IDLE_CAPACITY =
+            BASIC_AUTH_VALIDATOR + CONNECTION_POOL + "InitIdleCapacity";
+    public static final String BASIC_AUTH_VALIDATOR_CONNECTION_POOL_MAX_ACTIVE =
+            BASIC_AUTH_VALIDATOR + CONNECTION_POOL + "MaxActive";
+    public static final String BASIC_AUTH_VALIDATOR_CONNECTION_POOL_MAX_WAIT_MILLIS =
+            BASIC_AUTH_VALIDATOR + CONNECTION_POOL + "MaxWaitMillis";
 }
 

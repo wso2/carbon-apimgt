@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
@@ -49,6 +50,8 @@ import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -324,7 +327,47 @@ public class CertificateMgtDaoTest {
     }
 
     /**
-     * To test the behaviour of the getDeletedClientCertificateAlias method.
+     * This method tests the behaviour of getClientCertificates method for APIProductIdentifier.
+     *
+     * @throws CertificateManagementException Certificate Management Exception
+     */
+    @Test
+    public void testGetClientCertificatesWithAPIProductIdentifier() throws CertificateManagementException {
+        String organization = "org1";
+        APIProductIdentifier productIdentifier = new APIProductIdentifier("CERTIFICATE", "CERTAPI", "1.0.0");
+
+        // Add a certificate using an APIProductIdentifier
+        boolean added = certificateMgtDAO.addClientCertificate(certificate, productIdentifier, "testProductAlias",
+                "Gold", APIConstants.API_KEY_TYPE_PRODUCTION, TENANT_ID, "org1");
+        Assert.assertTrue("Certificate should be added successfully", added);
+
+        // Retrieve certificates
+        List<ClientCertificateDTO> clientCertificateDTOS = certificateMgtDAO.getClientCertificates(TENANT_ID,
+                "testProductAlias", APIConstants.API_KEY_TYPE_PRODUCTION, productIdentifier, organization);
+        Assert.assertEquals("The client certificate DTO list should contain one entry", 1,
+                clientCertificateDTOS.size());
+
+        // Verify the returned DTO
+        ClientCertificateDTO dto = clientCertificateDTOS.get(0);
+        Assert.assertNotNull("API identifier should not be null", dto.getApiIdentifier());
+        Assert.assertTrue("API identifier should be an instance of APIIdentifier",
+                dto.getApiIdentifier() instanceof APIIdentifier);
+        Assert.assertEquals("Provider name should match", productIdentifier.getProviderName(),
+                dto.getApiIdentifier().getProviderName());
+        Assert.assertEquals("API name should match", productIdentifier.getName(), dto.getApiIdentifier().getName());
+        Assert.assertEquals("Version should match", productIdentifier.getVersion(), dto.getApiIdentifier().getVersion());
+        Assert.assertEquals("UUID should be propagated", productIdentifier.getUUID(), dto.getApiIdentifier().getUUID());
+
+        boolean deleted = certificateMgtDAO.deleteClientCertificate(productIdentifier, "testProductAlias",
+                APIConstants.API_KEY_TYPE_PRODUCTION, TENANT_ID);
+        Assert.assertTrue("Certificate should be deleted successfully", deleted);
+    }
+
+    /**
+     * To test the behaviour of the getDeletedClientCertificateAlias method. Client certificates are hard deleted,
+     * so a delete leaves no REMOVED = 1 entry behind and this method never returns an alias. The final assertion
+     * guards that invariant - a non zero count would mean the soft delete has come back, which is what collides
+     * with the primary key (ALIAS, TENANT_ID, KEY_TYPE, REMOVED, REVISION_UUID) across APIs.
      *
      * @throws CertificateManagementException Certificate Management Exception.
      */
@@ -341,7 +384,48 @@ public class CertificateMgtDaoTest {
         deleteClientCertificate();
         aliasList = certificateMgtDAO.getDeletedClientCertificateAliasOfGivenKeyType(apiIdentifier,
                 APIConstants.API_KEY_TYPE_PRODUCTION, TENANT_ID);
-        Assert.assertEquals("The number of deleted certificates retrieved was wrong", 1, aliasList.size());
+        Assert.assertEquals("Client certificates are hard deleted, so no removed entry should remain", 0,
+                aliasList.size());
+    }
+
+    /**
+     * To test the behaviour of checkWhetherAliasExistInRevisions. An alias held by a revision of another API of the
+     * same tenant may not be reused, because API_ID is not part of the primary key of AM_API_CLIENT_CERTIFICATE and
+     * restoring that revision would violate it. The API that owns the revision must still be able to reuse its own
+     * alias, so that certificate rotation keeps working.
+     *
+     * @throws Exception Certificate Management Exception or SQL Exception.
+     */
+    @Test
+    public void testCheckWhetherAliasExistInRevisions() throws Exception {
+
+        APIIdentifier otherApiIdentifier = new APIIdentifier("DEL", "Delicious", "1.0.0");
+        String alias = "revision alias";
+
+        Assert.assertFalse("An alias that no revision holds was detected as existing",
+                certificateMgtDAO.checkWhetherAliasExistInRevisions(APIConstants.API_KEY_TYPE_PRODUCTION, alias,
+                        otherApiIdentifier, TENANT_ID));
+
+        addClientCertificateOfRevision(apiIdentifier, alias, "revision-1");
+        try {
+            Assert.assertTrue("An alias held by a revision of another API was not detected",
+                    certificateMgtDAO.checkWhetherAliasExistInRevisions(APIConstants.API_KEY_TYPE_PRODUCTION, alias,
+                            otherApiIdentifier, TENANT_ID));
+
+            Assert.assertFalse("The API that owns the revision was blocked from reusing its own alias",
+                    certificateMgtDAO.checkWhetherAliasExistInRevisions(APIConstants.API_KEY_TYPE_PRODUCTION, alias,
+                            apiIdentifier, TENANT_ID));
+
+            Assert.assertFalse("A revision alias of one key type blocked another key type",
+                    certificateMgtDAO.checkWhetherAliasExistInRevisions(APIConstants.API_KEY_TYPE_SANDBOX, alias,
+                            otherApiIdentifier, TENANT_ID));
+
+            Assert.assertFalse("A revision alias of one tenant blocked another tenant",
+                    certificateMgtDAO.checkWhetherAliasExistInRevisions(APIConstants.API_KEY_TYPE_PRODUCTION, alias,
+                            otherApiIdentifier, TENANT_2));
+        } finally {
+            removeClientCertificateEntries(alias);
+        }
     }
 
     /**
@@ -364,6 +448,53 @@ public class CertificateMgtDaoTest {
     private boolean deleteClientCertificate() throws CertificateManagementException {
         return certificateMgtDAO.deleteClientCertificate(apiIdentifier, "test",
                 APIConstants.API_KEY_TYPE_PRODUCTION, TENANT_ID);
+    }
+
+    /**
+     * To add a client certificate entry that belongs to a revision of the given API. The DAO only writes current
+     * API entries, so the revision entry is inserted directly.
+     *
+     * @param identifier   Identifier of the API which owns the revision.
+     * @param alias        Alias of the certificate.
+     * @param revisionUUID UUID of the revision holding the certificate.
+     * @throws SQLException If the insert fails.
+     */
+    private void addClientCertificateOfRevision(APIIdentifier identifier, String alias, String revisionUUID)
+            throws SQLException {
+
+        String query = "INSERT INTO AM_API_CLIENT_CERTIFICATE(TENANT_ID, ALIAS, API_ID, CERTIFICATE, REMOVED, "
+                + "TIER_NAME, KEY_TYPE, REVISION_UUID) VALUES(?,?,(SELECT API_ID FROM AM_API WHERE "
+                + "API_PROVIDER=? AND API_NAME=? AND API_VERSION=?),?,?,?,?,?)";
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setInt(1, TENANT_ID);
+            preparedStatement.setString(2, alias);
+            preparedStatement.setString(3, identifier.getProviderName());
+            preparedStatement.setString(4, identifier.getName());
+            preparedStatement.setString(5, identifier.getVersion());
+            preparedStatement.setBytes(6, certificate.getBytes());
+            preparedStatement.setBoolean(7, false);
+            preparedStatement.setString(8, "Gold");
+            preparedStatement.setString(9, APIConstants.API_KEY_TYPE_PRODUCTION);
+            preparedStatement.setString(10, revisionUUID);
+            preparedStatement.executeUpdate();
+        }
+    }
+
+    /**
+     * To remove every client certificate entry of the given alias, regardless of revision.
+     *
+     * @param alias Alias of the certificate.
+     * @throws SQLException If the delete fails.
+     */
+    private void removeClientCertificateEntries(String alias) throws SQLException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection
+                     .prepareStatement("DELETE FROM AM_API_CLIENT_CERTIFICATE WHERE ALIAS=?")) {
+            preparedStatement.setString(1, alias);
+            preparedStatement.executeUpdate();
+        }
     }
 
 }

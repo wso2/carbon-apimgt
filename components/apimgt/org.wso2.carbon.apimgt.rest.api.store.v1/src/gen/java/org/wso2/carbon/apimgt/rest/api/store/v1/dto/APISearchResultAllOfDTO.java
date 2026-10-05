@@ -22,6 +22,7 @@ import javax.validation.Valid;
 
 public class APISearchResultAllOfDTO   {
   
+    private String displayName = null;
     private String description = null;
     private String context = null;
     private String version = null;
@@ -32,6 +33,24 @@ public class APISearchResultAllOfDTO   {
     private String avgRating = null;
     private Boolean monetizedInfo = null;
     private AdvertiseInfoDTO advertiseInfo = null;
+
+  /**
+   * Human-friendly name shown in UI. Length limited to DB column size.
+   **/
+  public APISearchResultAllOfDTO displayName(String displayName) {
+    this.displayName = displayName;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Pizza Shack API", value = "Human-friendly name shown in UI. Length limited to DB column size.")
+  @JsonProperty("displayName")
+  public String getDisplayName() {
+    return displayName;
+  }
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
+  }
 
   /**
    * A brief description about the API
@@ -221,7 +240,8 @@ public class APISearchResultAllOfDTO   {
       return false;
     }
     APISearchResultAllOfDTO apISearchResultAllOf = (APISearchResultAllOfDTO) o;
-    return Objects.equals(description, apISearchResultAllOf.description) &&
+    return Objects.equals(displayName, apISearchResultAllOf.displayName) &&
+        Objects.equals(description, apISearchResultAllOf.description) &&
         Objects.equals(context, apISearchResultAllOf.context) &&
         Objects.equals(version, apISearchResultAllOf.version) &&
         Objects.equals(provider, apISearchResultAllOf.provider) &&
@@ -235,7 +255,7 @@ public class APISearchResultAllOfDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(description, context, version, provider, status, thumbnailUri, businessInformation, avgRating, monetizedInfo, advertiseInfo);
+    return Objects.hash(displayName, description, context, version, provider, status, thumbnailUri, businessInformation, avgRating, monetizedInfo, advertiseInfo);
   }
 
   @Override
@@ -243,6 +263,7 @@ public class APISearchResultAllOfDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class APISearchResultAllOfDTO {\n");
     
+    sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");

@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SettingsGatewayConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SettingsKeyManagerConfigurationDTO;
 import javax.validation.constraints.*;
 
@@ -28,8 +29,13 @@ public class SettingsDTO   {
     private Boolean isJWTEnabledForLoginTokens = false;
     private Boolean orgAccessControlEnabled = null;
     private List<SettingsKeyManagerConfigurationDTO> keyManagerConfiguration = new ArrayList<SettingsKeyManagerConfigurationDTO>();
+    private List<SettingsGatewayConfigurationDTO> gatewayConfiguration = new ArrayList<SettingsGatewayConfigurationDTO>();
     private Boolean analyticsEnabled = null;
     private Boolean transactionCounterEnable = null;
+    private Boolean isGatewayNotificationEnabled = false;
+    private List<String> platformGatewayVersions = new ArrayList<String>();
+    private Boolean consumptionExportEnabled = null;
+    private Boolean perPolicySeverityFilteringEnabled = null;
 
   /**
    **/
@@ -119,6 +125,24 @@ public class SettingsDTO   {
   }
 
   /**
+   **/
+  public SettingsDTO gatewayConfiguration(List<SettingsGatewayConfigurationDTO> gatewayConfiguration) {
+    this.gatewayConfiguration = gatewayConfiguration;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("gatewayConfiguration")
+  public List<SettingsGatewayConfigurationDTO> getGatewayConfiguration() {
+    return gatewayConfiguration;
+  }
+  public void setGatewayConfiguration(List<SettingsGatewayConfigurationDTO> gatewayConfiguration) {
+    this.gatewayConfiguration = gatewayConfiguration;
+  }
+
+  /**
    * To determine whether analytics is enabled or not
    **/
   public SettingsDTO analyticsEnabled(Boolean analyticsEnabled) {
@@ -154,6 +178,78 @@ public class SettingsDTO   {
     this.transactionCounterEnable = transactionCounterEnable;
   }
 
+  /**
+   * Is Gateway Notification Enabled
+   **/
+  public SettingsDTO isGatewayNotificationEnabled(Boolean isGatewayNotificationEnabled) {
+    this.isGatewayNotificationEnabled = isGatewayNotificationEnabled;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Is Gateway Notification Enabled")
+  @JsonProperty("isGatewayNotificationEnabled")
+  public Boolean isIsGatewayNotificationEnabled() {
+    return isGatewayNotificationEnabled;
+  }
+  public void setIsGatewayNotificationEnabled(Boolean isGatewayNotificationEnabled) {
+    this.isGatewayNotificationEnabled = isGatewayNotificationEnabled;
+  }
+
+  /**
+   * API Platform Gateway versions for the quick-start guide.
+   **/
+  public SettingsDTO platformGatewayVersions(List<String> platformGatewayVersions) {
+    this.platformGatewayVersions = platformGatewayVersions;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "API Platform Gateway versions for the quick-start guide.")
+  @JsonProperty("platformGatewayVersions")
+  public List<String> getPlatformGatewayVersions() {
+    return platformGatewayVersions;
+  }
+  public void setPlatformGatewayVersions(List<String> platformGatewayVersions) {
+    this.platformGatewayVersions = platformGatewayVersions;
+  }
+
+  /**
+   * Whether the ConsumptionDataExportService OSGi service is available
+   **/
+  public SettingsDTO consumptionExportEnabled(Boolean consumptionExportEnabled) {
+    this.consumptionExportEnabled = consumptionExportEnabled;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "Whether the ConsumptionDataExportService OSGi service is available")
+  @JsonProperty("consumptionExportEnabled")
+  public Boolean isConsumptionExportEnabled() {
+    return consumptionExportEnabled;
+  }
+  public void setConsumptionExportEnabled(Boolean consumptionExportEnabled) {
+    this.consumptionExportEnabled = consumptionExportEnabled;
+  }
+
+  /**
+   * Is per policy compliance affecting severity filtering enabled for governance policies. When enabled a policy can declare which rule severities affect its compliance verdict. 
+   **/
+  public SettingsDTO perPolicySeverityFilteringEnabled(Boolean perPolicySeverityFilteringEnabled) {
+    this.perPolicySeverityFilteringEnabled = perPolicySeverityFilteringEnabled;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "Is per policy compliance affecting severity filtering enabled for governance policies. When enabled a policy can declare which rule severities affect its compliance verdict. ")
+  @JsonProperty("perPolicySeverityFilteringEnabled")
+  public Boolean isPerPolicySeverityFilteringEnabled() {
+    return perPolicySeverityFilteringEnabled;
+  }
+  public void setPerPolicySeverityFilteringEnabled(Boolean perPolicySeverityFilteringEnabled) {
+    this.perPolicySeverityFilteringEnabled = perPolicySeverityFilteringEnabled;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -169,13 +265,18 @@ public class SettingsDTO   {
         Objects.equals(isJWTEnabledForLoginTokens, settings.isJWTEnabledForLoginTokens) &&
         Objects.equals(orgAccessControlEnabled, settings.orgAccessControlEnabled) &&
         Objects.equals(keyManagerConfiguration, settings.keyManagerConfiguration) &&
+        Objects.equals(gatewayConfiguration, settings.gatewayConfiguration) &&
         Objects.equals(analyticsEnabled, settings.analyticsEnabled) &&
-        Objects.equals(transactionCounterEnable, settings.transactionCounterEnable);
+        Objects.equals(transactionCounterEnable, settings.transactionCounterEnable) &&
+        Objects.equals(isGatewayNotificationEnabled, settings.isGatewayNotificationEnabled) &&
+        Objects.equals(platformGatewayVersions, settings.platformGatewayVersions) &&
+        Objects.equals(consumptionExportEnabled, settings.consumptionExportEnabled) &&
+        Objects.equals(perPolicySeverityFilteringEnabled, settings.perPolicySeverityFilteringEnabled);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(scopes, gatewayTypes, isJWTEnabledForLoginTokens, orgAccessControlEnabled, keyManagerConfiguration, analyticsEnabled, transactionCounterEnable);
+    return Objects.hash(scopes, gatewayTypes, isJWTEnabledForLoginTokens, orgAccessControlEnabled, keyManagerConfiguration, gatewayConfiguration, analyticsEnabled, transactionCounterEnable, isGatewayNotificationEnabled, platformGatewayVersions, consumptionExportEnabled, perPolicySeverityFilteringEnabled);
   }
 
   @Override
@@ -188,8 +289,13 @@ public class SettingsDTO   {
     sb.append("    isJWTEnabledForLoginTokens: ").append(toIndentedString(isJWTEnabledForLoginTokens)).append("\n");
     sb.append("    orgAccessControlEnabled: ").append(toIndentedString(orgAccessControlEnabled)).append("\n");
     sb.append("    keyManagerConfiguration: ").append(toIndentedString(keyManagerConfiguration)).append("\n");
+    sb.append("    gatewayConfiguration: ").append(toIndentedString(gatewayConfiguration)).append("\n");
     sb.append("    analyticsEnabled: ").append(toIndentedString(analyticsEnabled)).append("\n");
     sb.append("    transactionCounterEnable: ").append(toIndentedString(transactionCounterEnable)).append("\n");
+    sb.append("    isGatewayNotificationEnabled: ").append(toIndentedString(isGatewayNotificationEnabled)).append("\n");
+    sb.append("    platformGatewayVersions: ").append(toIndentedString(platformGatewayVersions)).append("\n");
+    sb.append("    consumptionExportEnabled: ").append(toIndentedString(consumptionExportEnabled)).append("\n");
+    sb.append("    perPolicySeverityFilteringEnabled: ").append(toIndentedString(perPolicySeverityFilteringEnabled)).append("\n");
     sb.append("}");
     return sb.toString();
   }

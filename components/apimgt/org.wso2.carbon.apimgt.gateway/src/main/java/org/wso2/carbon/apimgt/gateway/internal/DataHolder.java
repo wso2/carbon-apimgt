@@ -18,14 +18,20 @@
 
 package org.wso2.carbon.apimgt.gateway.internal;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GraphQLSchemaDTO;
+import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
 import org.wso2.carbon.apimgt.api.model.LLMProviderInfo;
+import org.wso2.carbon.apimgt.api.model.VHost;
+import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
+import org.wso2.carbon.apimgt.impl.APIConstants.GatewayNotification.GatewayRegistrationResponse;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataLoader;
@@ -33,23 +39,52 @@ import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.keymgt.model.exception.DataLoadingException;
 import org.wso2.carbon.apimgt.keymgt.model.impl.SubscriptionDataLoaderImpl;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class DataHolder {
     private static final Log log  = LogFactory.getLog(DataHolder.class);
     private static final DataHolder Instance = new DataHolder();
-    private Map<String, List<String>> apiToCertificatesMap = new HashMap();
+    private Map<String, List<String>> apiToCertificatesMap = new HashMap<>();
     private Map<String, String> googleAnalyticsConfigMap = new HashMap<>();
     private Map<String, GraphQLSchemaDTO> apiToGraphQLSchemaDTOMap = new HashMap<>();
     private Map<String, List<String>> apiToKeyManagersMap = new HashMap<>();
-    private Map<String,Map<String, API>> tenantAPIMap  = new HashMap<>();
+    private Map<String, Map<String, API>> tenantAPIMap = new ConcurrentHashMap<>();
     private Map<String, Boolean> tenantDeployStatus = new HashMap<>();
     private Map<String, LLMProviderInfo> llmProviderMap = new HashMap<>();
+    private final Map<String, APIKeyInfo> apiKeyInfoHashMap = new ConcurrentHashMap<>();
+    private final ReadWriteLock apiKeyInfoLock = new ReentrantReadWriteLock();
+    private final Map<String, Cache<String, Long>> apiSuspendedEndpoints = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, AbstractAPIMgtGatewayJWTGenerator> jwtGeneratorTenantMap =
+            new ConcurrentHashMap<>();
+
     private boolean isAllGatewayPoliciesDeployed = false;
+    private boolean tenantsProvisioned = false;
+    private static GatewayRegistrationResponse gatewayRegistrationResponse = GatewayRegistrationResponse.NOT_RESPONDED;
+    private String gatewayID;
 
     private DataHolder() {
-        initializeTenantDeploymentStatusMap();
+    }
+
+    public boolean isTenantsProvisioned() {
+        return tenantsProvisioned;
+    }
+
+    public void setTenantsProvisioned(boolean tenantsProvisioned) {
+        boolean oldTenantsProvisioned = this.tenantsProvisioned;
+        this.tenantsProvisioned = tenantsProvisioned;
+        if (tenantsProvisioned && !oldTenantsProvisioned) {
+            initializeTenantDeploymentStatusMap();
+        }
     }
 
     public Map<String, List<String>> getApiToCertificatesMap() {
@@ -117,6 +152,74 @@ public class DataHolder {
         return Instance;
     }
 
+    /**
+     * Adds a new opaque api key info.
+     *
+     * @param apiKeyInfo the api key info to add
+     */
+    public void addOpaqueAPIKeyInfo(APIKeyInfo apiKeyInfo) {
+
+        apiKeyInfoLock.writeLock().lock();
+        try {
+            apiKeyInfoHashMap.put(apiKeyInfo.getLookupKey(), apiKeyInfo);
+        } finally {
+            apiKeyInfoLock.writeLock().unlock();
+        }
+    }
+
+    /**
+     * Returns opaque api key info for the given lookup key
+     *
+     */
+    public APIKeyInfo getOpaqueAPIKeyInfo(String lookupKey) {
+
+        apiKeyInfoLock.readLock().lock();
+        try {
+            return apiKeyInfoHashMap.get(lookupKey);
+        } finally {
+            apiKeyInfoLock.readLock().unlock();
+        }
+    }
+
+    /**
+     * Removes an opaque api key info.
+     *
+     * @param lookupKey the reference for the api key hash to remove
+     */
+    public void removeOpaqueAPIKeyInfo(String lookupKey) {
+
+        apiKeyInfoLock.writeLock().lock();
+        try {
+            apiKeyInfoHashMap.remove(lookupKey);
+        } finally {
+            apiKeyInfoLock.writeLock().unlock();
+        }
+    }
+
+    /**
+     * Atomically replaces an opaque API key entry under a new lookup key.
+     * Acquires the exclusive write lock so no reads or other writes can observe
+     * the transient state between the remove and the put.
+     *
+     * @param oldLookupKey the current key under which the entry is stored
+     * @param newLookupKey the new key to store the entry under
+     */
+    public void replaceOpaqueAPIKeyEntry(String oldLookupKey, String newLookupKey) {
+
+        apiKeyInfoLock.writeLock().lock();
+        try {
+            APIKeyInfo apiKeyInfo = apiKeyInfoHashMap.remove(oldLookupKey);
+            if (apiKeyInfo != null) {
+                APIKeyInfo updatedKeyInfo = new APIKeyInfo(apiKeyInfo);
+                updatedKeyInfo.setApiKeyHash(newLookupKey);
+                updatedKeyInfo.setLookupKey(newLookupKey);
+                apiKeyInfoHashMap.put(newLookupKey, updatedKeyInfo);
+            }
+        } finally {
+            apiKeyInfoLock.writeLock().unlock();
+        }
+    }
+
     public void addApiToAliasList(String apiId, List<String> aliasList) {
 
         apiToCertificatesMap.put(apiId, aliasList);
@@ -158,7 +261,12 @@ public class DataHolder {
     }
 
     public boolean isAllApisDeployed() {
-        return tenantDeployStatus.values().stream().allMatch(Boolean::booleanValue);
+        for (Boolean b : tenantDeployStatus.values()) {
+            if (!b.booleanValue()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public Map<String, Boolean> getTenantDeployStatus() {
@@ -200,12 +308,8 @@ public class DataHolder {
         if (index != -1) {
             defaultContext = context.substring(0, index);
         }
-        Map<String, API> apiMap;
-        if (tenantAPIMap.containsKey(api.getOrganization())) {
-            apiMap = tenantAPIMap.get(api.getOrganization());
-        } else {
-            apiMap = new HashMap<>();
-        }
+        Map<String, API> apiMap = tenantAPIMap.computeIfAbsent(api.getOrganization(),
+                k -> new ConcurrentHashMap<>());
         API oldAPI = apiMap.get(api.getContext());
         if (oldAPI != null) {
             apiMap.remove(api.getContext());
@@ -217,10 +321,14 @@ public class DataHolder {
         if (api.isDefaultVersion()) {
             apiMap.put(defaultContext, api);
         }
-        tenantAPIMap.put(api.getOrganization(), apiMap);
     }
 
     public void markAPIAsDeployed(GatewayAPIDTO gatewayAPIDTO) {
+        if (gatewayAPIDTO.getApiContext() == null) {
+            // Internal/special-purpose APIs (e.g. JWKS endpoint) may not have an API context set;
+            // they are not tracked in tenantAPIMap, so nothing to mark.
+            return;
+        }
         Map<String, API> apiMap = tenantAPIMap.get(gatewayAPIDTO.getTenantDomain());
         if (apiMap != null) {
             API api = apiMap.get(gatewayAPIDTO.getApiContext());
@@ -230,6 +338,79 @@ public class DataHolder {
                     log.debug("API : " + api.getApiName() + "is deployed successfully");
                 }
                 api.setRevisionId(gatewayAPIDTO.getRevision());
+            }
+        }
+    }
+
+    /**
+     * Checks whether the API represented by the given DTO is already marked as deployed
+     * in the in-memory tenant API map.
+     *
+     * <p>Used by the tenant-loading thread to skip deploying an API that the passthrough
+     * (on-demand) thread has already fully deployed.
+     *
+     * @param gatewayAPIDTO the DTO identifying the API by tenant domain and API context
+     * @return {@code true} if the API exists in the map and its {@code deployed} flag is
+     *         {@code true}; {@code false} otherwise
+     */
+    public boolean isDeployed(GatewayAPIDTO gatewayAPIDTO) {
+        if (gatewayAPIDTO.getApiContext() == null) {
+            // Internal/special-purpose APIs (e.g. JWKS endpoint) are not tracked in tenantAPIMap.
+            return false;
+        }
+        Map<String, API> apiMap = tenantAPIMap.get(gatewayAPIDTO.getTenantDomain());
+        if (apiMap != null) {
+            API api = apiMap.get(gatewayAPIDTO.getApiContext());
+            return api != null && api.isDeployed();
+        }
+        return false;
+    }
+
+    public boolean isDuplicateEvent(String tenantDomain, String apiContext, String lastUpdatedEventId) {
+        Map<String, API> apiMap = tenantAPIMap.get(tenantDomain);
+        if (apiMap != null) {
+            API api = apiMap.get(apiContext);
+            if (api != null) {
+                if (lastUpdatedEventId != null && api.getLastUpdatedEventId() != null) {
+                    return api.getLastUpdatedEventId().equalsIgnoreCase(lastUpdatedEventId);
+                }
+            }
+        }
+        return false;
+    }
+
+    public void updateLastUpdatedEventId(GatewayAPIDTO gatewayAPIDTO, String lastUpdatedEventId) {
+        Map<String, API> apiMap = tenantAPIMap.get(gatewayAPIDTO.getTenantDomain());
+        if (apiMap != null) {
+            API api = apiMap.get(gatewayAPIDTO.getApiContext());
+            if (api != null) {
+                if (lastUpdatedEventId != null) {
+                    api.setLastUpdatedEventId(lastUpdatedEventId);
+                }
+            }
+        }
+    }
+
+    /**
+     * Populate vhosts information to API object
+     *
+     * @param gatewayAPIDTO gateway API DTO containing vhosts and other info
+     */
+    public void populateVhosts(GatewayAPIDTO gatewayAPIDTO) {
+        Map<String, API> apiMap = tenantAPIMap.get(gatewayAPIDTO.getTenantDomain());
+        if (apiMap != null) {
+            API api = apiMap.get(gatewayAPIDTO.getApiContext());
+            if (api != null) {
+                List<VHost> vhosts = gatewayAPIDTO.getVhosts();
+                api.setVhosts(vhosts != null ? vhosts : new ArrayList<>());
+                if (log.isDebugEnabled()) {
+                    log.debug("Populated vhosts info for API : " + api.getApiName());
+                }
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("API not found for context " + gatewayAPIDTO.getApiContext() + " in tenant domain "
+                            + gatewayAPIDTO.getTenantDomain());
+                }
             }
         }
     }
@@ -290,9 +471,148 @@ public class DataHolder {
     private void initializeTenantDeploymentStatusMap() {
         try {
             Set<String> tenants = GatewayUtils.getTenantsToBeDeployed();
-            tenantDeployStatus = tenants.stream().collect(Collectors.toMap(str -> str, str -> false));
+            for (String str : tenants) {
+                tenantDeployStatus.putIfAbsent(str, false);
+            }
         } catch (APIManagementException e) {
             log.error("Error while initializing tenant deployment status map", e);
         }
+    }
+
+    /**
+     * Initializes a cache for a specific API key if not already present.
+     *
+     * @param apiKey The key representing the API and tenant domain.
+     */
+    public synchronized void initCache(String apiKey) {
+        apiSuspendedEndpoints.putIfAbsent(apiKey, CacheBuilder.newBuilder()
+                .expireAfterWrite(1, TimeUnit.HOURS)
+                .build());
+    }
+
+    /**
+     * Retrieves the cache for a given endpoint key if it exists.
+     *
+     * @param apiKey The key representing the API and tenant domain.
+     * @return The cache associated with the specified endpoint key, or {@code null} if not initialized.
+     */
+    public Cache<String, Long> getCache(String apiKey) {
+        return apiSuspendedEndpoints.get(apiKey);
+    }
+
+    /**
+     * Suspends an endpoint for a specific API with a given expiry time.
+     *
+     * @param apiKey       The key representing the API and tenant domain.
+     * @param endpointId   The identifier of the endpoint.
+     * @param expiryMillis The suspension duration in milliseconds.
+     */
+    public void suspendEndpoint(String apiKey, String endpointId, long expiryMillis) {
+
+        Cache<String, Long> cache = getCache(apiKey);
+        if (cache != null) {
+            cache.put(endpointId, System.currentTimeMillis() + expiryMillis);
+        }
+    }
+
+    /**
+     * Checks if an endpoint is currently suspended for a given API.
+     *
+     * @param apiKey     The key representing the API and tenant domain.
+     * @param endpointId The identifier of the endpoint.
+     * @return {@code true} if the endpoint is suspended and has not expired, otherwise {@code false}.
+     */
+    public boolean isEndpointSuspended(String apiKey, String endpointId) {
+
+        Cache<String, Long> cache = getCache(apiKey);
+        if (cache == null) {
+            return false;
+        }
+
+        Long expirationTime = cache.getIfPresent(endpointId);
+        if (expirationTime == null || System.currentTimeMillis() > expirationTime) {
+            cache.invalidate(endpointId);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Removes an endpoint from the suspended list for a specific API.
+     *
+     * @param apiKey     The key representing the API and tenant domain.
+     * @param endpointId The identifier of the endpoint.
+     */
+    public void removeSuspendedEndpoint(String apiKey, String endpointId) {
+        Cache<String, Long> cache = getCache(apiKey);
+        if (cache != null) {
+            cache.invalidate(endpointId);
+        }
+    }
+
+    /**
+     * Releases an API's cache and removes it if no active references exist.
+     *
+     * @param apiKey The key representing the API and tenant domain.
+     */
+    public synchronized void releaseCache(String apiKey) {
+
+        apiSuspendedEndpoints.remove(apiKey);
+    }
+
+    public String getGatewayID() {
+        return gatewayID;
+    }
+
+    public void setGatewayID(String gatewayID) {
+        this.gatewayID = gatewayID;
+    }
+
+    public GatewayRegistrationResponse getGatewayRegistrationResponse() {
+        return gatewayRegistrationResponse;
+    }
+
+    /**
+     * Checks if the gateway is registered or acknowledged.
+     *
+     * @return true if the gateway registration response is REGISTERED or ACKNOWLEDGED, false otherwise
+     */
+    public boolean isGatewayRegistered() {
+        return gatewayRegistrationResponse == GatewayRegistrationResponse.REGISTERED
+                || gatewayRegistrationResponse == GatewayRegistrationResponse.ACKNOWLEDGED;
+    }
+
+    public static void setGatewayRegistrationResponse(GatewayRegistrationResponse gatewayRegistrationResponse) {
+        DataHolder.gatewayRegistrationResponse = gatewayRegistrationResponse;
+    }
+
+    /**
+     * Update API properties, revision ID, and deployment status in subscription data store
+     *
+     * @param gatewayAPIDTO Gateway API DTO containing additional properties and other info
+     */
+    public void updateAPIPropertiesFromGatewayDTO(GatewayAPIDTO gatewayAPIDTO) {
+        Map<String, API> apiMap = tenantAPIMap.get(gatewayAPIDTO.getTenantDomain());
+        if (apiMap != null) {
+            API api = apiMap.get(gatewayAPIDTO.getApiContext());
+            if (api != null) {
+                api.setApiProperties(gatewayAPIDTO.getAdditionalProperties());
+                if (log.isDebugEnabled()) {
+                    log.debug("Updated API properties for API: " + api.getName() + " (Context: " + api.getContext() +
+                            ")");
+                }
+            }
+        }
+    }
+
+    /**
+     * Returns the map of JWT generators per tenant domain.
+     *
+     * @return ConcurrentMap where the key is the tenant domain and the value is the corresponding
+     * AbstractAPIMgtGatewayJWTGenerator instance.
+     */
+    public ConcurrentMap<String, AbstractAPIMgtGatewayJWTGenerator> getJwtGeneratorTenantMap() {
+
+        return jwtGeneratorTenantMap;
     }
 }

@@ -65,6 +65,8 @@ public abstract class AbstractFaultDataCollector extends CommonRequestDataCollec
             return subCategory instanceof FaultSubCategories.Throttling;
         } else if (FaultCategory.TARGET_CONNECTIVITY == this.subType) {
             return subCategory instanceof FaultSubCategories.TargetConnectivity;
+        } else if (FaultCategory.GUARDRAIL_FAULT == this.subType) {
+            return subCategory instanceof FaultSubCategories.GuardrailViolation;
         } else if (FaultCategory.OTHER == this.subType) {
             return subCategory instanceof FaultSubCategories.Other;
         }

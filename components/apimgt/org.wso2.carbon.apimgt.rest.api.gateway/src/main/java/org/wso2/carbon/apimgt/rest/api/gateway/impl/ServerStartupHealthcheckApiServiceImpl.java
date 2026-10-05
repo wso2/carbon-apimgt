@@ -30,7 +30,7 @@ public class ServerStartupHealthcheckApiServiceImpl implements ServerStartupHeal
     public Response serverStartupHealthcheckGet(MessageContext messageContext) {
         boolean isAllApisDeployed = GatewayUtils.isAllApisDeployed();
         boolean isAllGatewayPoliciesDeployed = GatewayUtils.isAllGatewayPoliciesDeployed();
-        if (isAllApisDeployed && isAllGatewayPoliciesDeployed) {
+        if (GatewayUtils.isTenantsProvisioned() && isAllApisDeployed && isAllGatewayPoliciesDeployed) {
             return Response.status(Response.Status.OK).build();
         }
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();

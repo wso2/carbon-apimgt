@@ -18,10 +18,13 @@
 
 package org.wso2.carbon.apimgt.api.model.policy;
 
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
+
 public class EventCountLimit extends Limit {
 
     private long eventCount;
 
+    @UsedByMigrationClient
     public long getEventCount() {
         return eventCount;
     }

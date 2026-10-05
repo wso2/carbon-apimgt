@@ -17,6 +17,12 @@
  */
 package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.ws.rs.core.Response;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
@@ -27,21 +33,16 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.restapi.publisher.SearchApiServiceImplUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApiResultDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SearchResultListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.SearchApiServiceImplUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.APIInfoMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.ApplicationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import javax.ws.rs.core.Response;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 public class ApisApiServiceImpl implements ApisApiService {
 
@@ -59,18 +60,32 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @throws APIManagementException If there is any when getting the all apis
      */
     public Response getAllAPIs(Integer limit, Integer offset, String query, String ifNoneMatch,
-                               MessageContext messageContext) throws APIManagementException {
+            MessageContext messageContext) throws APIManagementException {
+
         SearchResultListDTO resultListDTO = new SearchResultListDTO();
+
+        // Set default values for limit and offset if not provided
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         query = query == null ? APIConstants.CHAR_ASTERIX : query;
+
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String organization = RestApiUtil.getOrganization(messageContext);
+
+        // Perform the paginated API search
         Map<String, Object> result = apiProvider.searchPaginatedAPIs(query, organization, offset, limit);
+
+        // Extract the list of APIs and convert them to DTOs
         List<Object> apis = SearchApiServiceImplUtil.getAPIListFromAPISearchResult(result);
         List<ApiResultDTO> allMatchedResults = getAllMatchedResults(apis);
+
         resultListDTO.setApis(allMatchedResults);
         resultListDTO.setCount(allMatchedResults.size());
+
+        // Create and set the PaginationDTO
+        APIInfoMappingUtil.setPaginationParams(resultListDTO, limit, offset, (Integer) result
+                .get(APIConstants.API_DATA_LENGTH), query);
+
         return Response.ok().entity(resultListDTO).build();
     }
 
@@ -85,16 +100,20 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     public Response providerNamePost(String provider, String apiId, MessageContext messageContext)
             throws APIManagementException {
-        String organisation = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        String organization = RestApiCommonUtil.getLoggedInUserTenantDomain();
         try {
             if (!APIUtil.isUserExist(provider)) {
-                throw new APIManagementException("User " + provider + " not found.",
-                        ExceptionCodes.USER_NOT_FOUND);
+                throw new APIManagementException("User " + provider + " not found.", ExceptionCodes.USER_NOT_FOUND);
+            }
+            // Check if the user tenant domain matches with the API's tenant domain
+            if (organization != null && !organization.equals(MultitenantUtils.getTenantDomain(provider))) {
+                throw new APIManagementException("Provider tenant domain does not match with the API's tenant domain.",
+                        ExceptionCodes.TENANT_MISMATCH);
             }
             APIAdmin apiAdmin = new APIAdminImpl();
-            apiAdmin.updateApiProvider(apiId, provider, organisation);
+            apiAdmin.updateApiProvider(apiId, provider, organization);
         } catch (APIManagementException e) {
-            throw new APIManagementException("Error while changing the API provider", e,
+            throw new APIManagementException("Error while changing the API provider. " + e.getMessage(), e,
                     ExceptionCodes.CHANGE_API_PROVIDER_FAILED);
         }
         return Response.ok().build();

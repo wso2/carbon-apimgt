@@ -29,6 +29,8 @@ public class WebSocketApiConstants {
     public static final String URL_SEPARATOR = "/";
     public static final String DEFAULT_RESOURCE_NAME = "/_default_resource_of_api_";
     public static final String WS_SSL_CHANNEL_HANDLER_NAME = "ssl";
+    public static final String SOURCE_HANDSHAKE_PRESENT = "websocket.source.handshake.present";
+    public static final String TARGET_ENDPOINT_ADDRESS = "ENDPOINT_ADDRESS";
 
     //Constants for Websocket frame error codes and messages
     public static class FrameErrorConstants {
@@ -50,6 +52,8 @@ public class WebSocketApiConstants {
         public static final String GRAPHQL_INVALID_QUERY_MESSAGE = "INVALID QUERY";
         public static final String ERROR_CODE = "code";
         public static final String ERROR_MESSAGE = "message";
+        public static final int API_BLOCKED = 4006;
+        public static final String API_BLOCKED_MESSAGE = "Websocket API temporarily blocked.";
     }
 
     //Constants for Websocket handshake error codes and messages

@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket;
 
 import io.netty.channel.ChannelHandlerContext;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.SynapseConstants;
@@ -109,7 +110,8 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
     @Override
     public boolean isAnonymous() {
         AuthenticationContext authContext = getAuthenticationContext();
-        return isAuthenticated() && APIConstants.END_USER_ANONYMOUS.equalsIgnoreCase(authContext.getUsername());
+        return isAuthenticated() && APIConstants.END_USER_ANONYMOUS.equalsIgnoreCase(authContext.getUsername())
+                && StringUtils.isEmpty(authContext.getApplicationUUID());
     }
 
     @Override
@@ -322,8 +324,7 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
         }
         customProperties.put(Constants.API_USER_NAME_KEY, getUserName());
         customProperties.put(Constants.API_CONTEXT_KEY, getApiContext());
-        customProperties.put(Constants.RESPONSE_SIZE,
-                WebSocketUtils.getPropertyFromChannel(Constants.RESPONSE_SIZE, ctx));
+        customProperties.put(Constants.RESPONSE_SIZE, getResponseSize());
         return customProperties;
     }
     
@@ -373,5 +374,10 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
                 (long) WebSocketUtils.getPropertyFromChannel(Constants.BACKEND_START_TIME_PROPERTY, ctx) == 0 &&
                         WebSocketUtils.getPropertyFromChannel(Constants.REQUEST_START_TIME_PROPERTY, ctx) != null &&
                         WebSocketUtils.getPropertyFromChannel(Constants.REQUEST_END_TIME_PROPERTY, ctx) != null);
+    }
+
+    private long getResponseSize() {
+        Object responseSize = WebSocketUtils.getPropertyFromChannel(Constants.RESPONSE_SIZE, ctx);
+        return responseSize == null ? 0L : ((Number) responseSize).longValue();
     }
 }

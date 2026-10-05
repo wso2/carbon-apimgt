@@ -74,7 +74,9 @@ public class KeyManagerHolder {
             organizationKeyManagerDto = new OrganizationKeyManagerDto();
         }
         if (organizationKeyManagerDto.getKeyManagerByName(name) != null) {
-            log.warn("Key Manager " + name + " already initialized in tenant " + organization);
+            if (log.isDebugEnabled()) {
+                log.debug("Key Manager " + name + " already initialized in tenant " + organization);
+            }
         }
         if (keyManagerConfiguration.isEnabled() && !KeyManagerConfiguration.TokenType.EXCHANGED
                 .equals(keyManagerConfiguration.getTokenType())) {
@@ -99,6 +101,12 @@ public class KeyManagerHolder {
                             keyManagerConfiguration.addParameter(APIConstants.KEY_MANAGER_PASSWORD,
                                     apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD));
                             keyManagerConfiguration.addParameter(APIConstants.KEY_MANAGER_TENANT_DOMAIN, organization);
+                            keyManagerConfiguration.addParameter(APIConstants.KeyManager.ENABLE_APPLICATION_SCOPES,
+                                    APIUtil.isApplicationScopesEnabledForResidentKM());
+                        }
+                        if (APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE.equals(type)) {
+                            keyManagerConfiguration.addParameter(APIConstants.KeyManager.ENABLE_MULTIPLE_CLIENT_SECRETS,
+                                    APIUtil.isMultipleClientSecretsEnabled());
                         }
                         keyManager.loadConfiguration(keyManagerConfiguration);
                     } catch (ClassNotFoundException | IllegalAccessException | InstantiationException
@@ -121,9 +129,9 @@ public class KeyManagerHolder {
             keyManagerDto.setIssuer(issuer);
             keyManagerDto.setJwtValidator(jwtValidator);
             keyManagerDto.setKeyManager(keyManager);
-            tenantKeyManagerDto.putKeyManagerDto(keyManagerDto);
+            tenantKeyManagerDto.putKeyManagerDto(keyManagerDto, keyManagerConfiguration.getType());
             if (APIConstants.GLOBAL_KEY_MANAGER_TENANT_DOMAIN.equals(organization)) {
-                globalKMMap.putKeyManagerDto(keyManagerDto);
+                globalKMMap.putKeyManagerDto(keyManagerDto, keyManagerConfiguration.getType());
                 globalJWTValidatorMap.put(issuer, keyManagerDto);
             } else {
                 organizationWiseMap.put(organization, tenantKeyManagerDto);
@@ -274,6 +282,14 @@ public class KeyManagerHolder {
         return null;
     }
 
+    public static KeyManagerDto getKeyManagerByName(String tenantDomain, String keyManagerName) {
+        OrganizationKeyManagerDto organizationKeyManagerDto = getTenantKeyManagerDto(tenantDomain);
+        if (organizationKeyManagerDto != null) {
+            return organizationKeyManagerDto.getKeyManagerByName(keyManagerName);
+        }
+        return null;
+    }
+
     private static OrganizationKeyManagerDto getTenantKeyManagerDto(String tenantDomain) {
 
         OrganizationKeyManagerDto organizationKeyManagerDto = getTenantKeyManagerDtoFromMap(tenantDomain);
@@ -311,7 +327,8 @@ public class KeyManagerHolder {
         if (tenantKeyManagerDto != null) {
             keyManagerMap.putAll(tenantKeyManagerDto.getKeyManagerMap());
         }
-        OrganizationKeyManagerDto globalKeyManagerDto = getTenantKeyManagerDto(APIConstants.GLOBAL_KEY_MANAGER_TENANT_DOMAIN);
+        OrganizationKeyManagerDto globalKeyManagerDto = getTenantKeyManagerDto(APIConstants
+                .GLOBAL_KEY_MANAGER_TENANT_DOMAIN);
         if (globalKeyManagerDto != null) {
             keyManagerMap.putAll(globalKeyManagerDto.getKeyManagerMap());
         }

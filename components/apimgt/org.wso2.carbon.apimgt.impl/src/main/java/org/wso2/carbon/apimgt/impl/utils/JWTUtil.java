@@ -32,6 +32,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.io.IOException;
@@ -120,8 +121,8 @@ public class JWTUtil {
                     JWSAlgorithm.RS384.equals(algorithm))) {
                 return verifyTokenSignature(jwt, (RSAPublicKey) publicCert.getPublicKey());
             } else {
-                log.error("Public key is not RSA");
-                throw new APIManagementException("Public key is not RSA");
+                log.error("Public key is not RSA for alias " + alias);
+                throw new APIManagementException("Public key is not RSA", ExceptionCodes.ACCESS_TOKEN_INVALID);
             }
         } else {
             log.error("Couldn't find a public certificate with alias " + alias + " to verify the signature");

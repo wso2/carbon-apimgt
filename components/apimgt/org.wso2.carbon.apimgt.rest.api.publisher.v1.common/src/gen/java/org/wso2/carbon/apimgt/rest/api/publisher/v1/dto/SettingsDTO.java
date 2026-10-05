@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GatewayFeatureCatalogDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MonetizationAttributeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SettingsCustomPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriberContactAttributeDTO;
@@ -29,6 +30,7 @@ public class SettingsDTO   {
     private String devportalUrl = null;
     private List<EnvironmentDTO> environment = new ArrayList<EnvironmentDTO>();
     private List<String> gatewayTypes = new ArrayList<String>();
+    private GatewayFeatureCatalogDTO gatewayFeatureCatalog = null;
     private List<String> scopes = new ArrayList<String>();
     private List<MonetizationAttributeDTO> monetizationAttributes = new ArrayList<MonetizationAttributeDTO>();
     private List<SubscriberContactAttributeDTO> subscriberContactAttributes = new ArrayList<SubscriberContactAttributeDTO>();
@@ -44,6 +46,11 @@ public class SettingsDTO   {
     private Boolean isJWTEnabledForLoginTokens = false;
     private Boolean orgAccessControlEnabled = null;
     private Boolean allowSubscriptionValidationDisabling = true;
+    private Boolean designAssistantEnabled = true;
+    private Boolean aiAuthTokenProvided = false;
+    private Boolean isGatewayNotificationEnabled = false;
+    private Boolean isMCPSupportEnabled = true;
+    private Boolean perPolicySeverityFilteringEnabled = null;
     private List<SettingsCustomPropertiesDTO> customProperties = new ArrayList<SettingsCustomPropertiesDTO>();
 
   /**
@@ -90,13 +97,31 @@ public class SettingsDTO   {
   }
 
   
-  @ApiModelProperty(example = "[\"Regular\",\"APK\"]", value = "")
+  @ApiModelProperty(example = "[\"Regular\",\"APK\",\"AWS\"]", value = "")
   @JsonProperty("gatewayTypes")
   public List<String> getGatewayTypes() {
     return gatewayTypes;
   }
   public void setGatewayTypes(List<String> gatewayTypes) {
     this.gatewayTypes = gatewayTypes;
+  }
+
+  /**
+   **/
+  public SettingsDTO gatewayFeatureCatalog(GatewayFeatureCatalogDTO gatewayFeatureCatalog) {
+    this.gatewayFeatureCatalog = gatewayFeatureCatalog;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("GatewayFeatureCatalog")
+  public GatewayFeatureCatalogDTO getGatewayFeatureCatalog() {
+    return gatewayFeatureCatalog;
+  }
+  public void setGatewayFeatureCatalog(GatewayFeatureCatalogDTO gatewayFeatureCatalog) {
+    this.gatewayFeatureCatalog = gatewayFeatureCatalog;
   }
 
   /**
@@ -368,6 +393,96 @@ public class SettingsDTO   {
   }
 
   /**
+   * Specifies whether Design Assistant enabled 
+   **/
+  public SettingsDTO designAssistantEnabled(Boolean designAssistantEnabled) {
+    this.designAssistantEnabled = designAssistantEnabled;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Specifies whether Design Assistant enabled ")
+  @JsonProperty("designAssistantEnabled")
+  public Boolean isDesignAssistantEnabled() {
+    return designAssistantEnabled;
+  }
+  public void setDesignAssistantEnabled(Boolean designAssistantEnabled) {
+    this.designAssistantEnabled = designAssistantEnabled;
+  }
+
+  /**
+   * Checks if the auth token is provided for AI service usage.
+   **/
+  public SettingsDTO aiAuthTokenProvided(Boolean aiAuthTokenProvided) {
+    this.aiAuthTokenProvided = aiAuthTokenProvided;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Checks if the auth token is provided for AI service usage.")
+  @JsonProperty("aiAuthTokenProvided")
+  public Boolean isAiAuthTokenProvided() {
+    return aiAuthTokenProvided;
+  }
+  public void setAiAuthTokenProvided(Boolean aiAuthTokenProvided) {
+    this.aiAuthTokenProvided = aiAuthTokenProvided;
+  }
+
+  /**
+   * Is Gateway Notification Enabled
+   **/
+  public SettingsDTO isGatewayNotificationEnabled(Boolean isGatewayNotificationEnabled) {
+    this.isGatewayNotificationEnabled = isGatewayNotificationEnabled;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Is Gateway Notification Enabled")
+  @JsonProperty("isGatewayNotificationEnabled")
+  public Boolean isIsGatewayNotificationEnabled() {
+    return isGatewayNotificationEnabled;
+  }
+  public void setIsGatewayNotificationEnabled(Boolean isGatewayNotificationEnabled) {
+    this.isGatewayNotificationEnabled = isGatewayNotificationEnabled;
+  }
+
+  /**
+   * This indicates whether the MCP support is enabled or not.
+   **/
+  public SettingsDTO isMCPSupportEnabled(Boolean isMCPSupportEnabled) {
+    this.isMCPSupportEnabled = isMCPSupportEnabled;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "This indicates whether the MCP support is enabled or not.")
+  @JsonProperty("isMCPSupportEnabled")
+  public Boolean isIsMCPSupportEnabled() {
+    return isMCPSupportEnabled;
+  }
+  public void setIsMCPSupportEnabled(Boolean isMCPSupportEnabled) {
+    this.isMCPSupportEnabled = isMCPSupportEnabled;
+  }
+
+  /**
+   * Is per policy compliance affecting severity filtering enabled for governance policies. When enabled a policy can declare which rule severities affect its compliance verdict. 
+   **/
+  public SettingsDTO perPolicySeverityFilteringEnabled(Boolean perPolicySeverityFilteringEnabled) {
+    this.perPolicySeverityFilteringEnabled = perPolicySeverityFilteringEnabled;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "Is per policy compliance affecting severity filtering enabled for governance policies. When enabled a policy can declare which rule severities affect its compliance verdict. ")
+  @JsonProperty("perPolicySeverityFilteringEnabled")
+  public Boolean isPerPolicySeverityFilteringEnabled() {
+    return perPolicySeverityFilteringEnabled;
+  }
+  public void setPerPolicySeverityFilteringEnabled(Boolean perPolicySeverityFilteringEnabled) {
+    this.perPolicySeverityFilteringEnabled = perPolicySeverityFilteringEnabled;
+  }
+
+  /**
    **/
   public SettingsDTO customProperties(List<SettingsCustomPropertiesDTO> customProperties) {
     this.customProperties = customProperties;
@@ -398,6 +513,7 @@ public class SettingsDTO   {
     return Objects.equals(devportalUrl, settings.devportalUrl) &&
         Objects.equals(environment, settings.environment) &&
         Objects.equals(gatewayTypes, settings.gatewayTypes) &&
+        Objects.equals(gatewayFeatureCatalog, settings.gatewayFeatureCatalog) &&
         Objects.equals(scopes, settings.scopes) &&
         Objects.equals(monetizationAttributes, settings.monetizationAttributes) &&
         Objects.equals(subscriberContactAttributes, settings.subscriberContactAttributes) &&
@@ -413,12 +529,17 @@ public class SettingsDTO   {
         Objects.equals(isJWTEnabledForLoginTokens, settings.isJWTEnabledForLoginTokens) &&
         Objects.equals(orgAccessControlEnabled, settings.orgAccessControlEnabled) &&
         Objects.equals(allowSubscriptionValidationDisabling, settings.allowSubscriptionValidationDisabling) &&
+        Objects.equals(designAssistantEnabled, settings.designAssistantEnabled) &&
+        Objects.equals(aiAuthTokenProvided, settings.aiAuthTokenProvided) &&
+        Objects.equals(isGatewayNotificationEnabled, settings.isGatewayNotificationEnabled) &&
+        Objects.equals(isMCPSupportEnabled, settings.isMCPSupportEnabled) &&
+        Objects.equals(perPolicySeverityFilteringEnabled, settings.perPolicySeverityFilteringEnabled) &&
         Objects.equals(customProperties, settings.customProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(devportalUrl, environment, gatewayTypes, scopes, monetizationAttributes, subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, portalConfigurationOnlyModeEnabled, retryCallWithNewOAuthTokenEnabled, crossTenantSubscriptionEnabled, defaultAdvancePolicy, defaultSubscriptionPolicy, authorizationHeader, isJWTEnabledForLoginTokens, orgAccessControlEnabled, allowSubscriptionValidationDisabling, customProperties);
+    return Objects.hash(devportalUrl, environment, gatewayTypes, gatewayFeatureCatalog, scopes, monetizationAttributes, subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, portalConfigurationOnlyModeEnabled, retryCallWithNewOAuthTokenEnabled, crossTenantSubscriptionEnabled, defaultAdvancePolicy, defaultSubscriptionPolicy, authorizationHeader, isJWTEnabledForLoginTokens, orgAccessControlEnabled, allowSubscriptionValidationDisabling, designAssistantEnabled, aiAuthTokenProvided, isGatewayNotificationEnabled, isMCPSupportEnabled, perPolicySeverityFilteringEnabled, customProperties);
   }
 
   @Override
@@ -429,6 +550,7 @@ public class SettingsDTO   {
     sb.append("    devportalUrl: ").append(toIndentedString(devportalUrl)).append("\n");
     sb.append("    environment: ").append(toIndentedString(environment)).append("\n");
     sb.append("    gatewayTypes: ").append(toIndentedString(gatewayTypes)).append("\n");
+    sb.append("    gatewayFeatureCatalog: ").append(toIndentedString(gatewayFeatureCatalog)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    monetizationAttributes: ").append(toIndentedString(monetizationAttributes)).append("\n");
     sb.append("    subscriberContactAttributes: ").append(toIndentedString(subscriberContactAttributes)).append("\n");
@@ -444,6 +566,11 @@ public class SettingsDTO   {
     sb.append("    isJWTEnabledForLoginTokens: ").append(toIndentedString(isJWTEnabledForLoginTokens)).append("\n");
     sb.append("    orgAccessControlEnabled: ").append(toIndentedString(orgAccessControlEnabled)).append("\n");
     sb.append("    allowSubscriptionValidationDisabling: ").append(toIndentedString(allowSubscriptionValidationDisabling)).append("\n");
+    sb.append("    designAssistantEnabled: ").append(toIndentedString(designAssistantEnabled)).append("\n");
+    sb.append("    aiAuthTokenProvided: ").append(toIndentedString(aiAuthTokenProvided)).append("\n");
+    sb.append("    isGatewayNotificationEnabled: ").append(toIndentedString(isGatewayNotificationEnabled)).append("\n");
+    sb.append("    isMCPSupportEnabled: ").append(toIndentedString(isMCPSupportEnabled)).append("\n");
+    sb.append("    perPolicySeverityFilteringEnabled: ").append(toIndentedString(perPolicySeverityFilteringEnabled)).append("\n");
     sb.append("    customProperties: ").append(toIndentedString(customProperties)).append("\n");
     sb.append("}");
     return sb.toString();

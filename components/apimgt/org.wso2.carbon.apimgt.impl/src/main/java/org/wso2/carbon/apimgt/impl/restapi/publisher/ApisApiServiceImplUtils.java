@@ -18,22 +18,13 @@
 
 package org.wso2.carbon.apimgt.impl.restapi.publisher;
 
-import com.amazonaws.SdkClientException;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.auth.BasicSessionCredentials;
-import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
-import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.lambda.AWSLambda;
-import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
-import com.amazonaws.services.lambda.model.FunctionConfiguration;
-import com.amazonaws.services.lambda.model.ListFunctionsResult;
-import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
-import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClientBuilder;
-import com.amazonaws.services.securitytoken.model.AssumeRoleRequest;
-import com.amazonaws.services.securitytoken.model.AssumeRoleResult;
-import com.amazonaws.services.securitytoken.model.Credentials;
+import org.wso2.carbon.apimgt.api.model.Backend;
+import org.apache.http.client.HttpClient;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.api.model.BackendOperation;
+import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
+import org.wso2.carbon.apimgt.impl.MCPInitializerAndToolFetcher;
+import software.amazon.awssdk.core.exception.SdkClientException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -69,6 +60,8 @@ import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.GatewayMode;
+import org.wso2.carbon.apimgt.api.model.OASParserOptions;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
@@ -78,17 +71,32 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
-import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
-import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.restapi.CommonUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
+import org.wso2.carbon.apimgt.spec.parser.definitions.OAS2Parser;
+import org.wso2.carbon.apimgt.spec.parser.definitions.OAS3Parser;
+import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
 import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.CarbonUtils;
-
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.AwsSessionCredentials;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.http.SdkHttpClient;
+import software.amazon.awssdk.http.apache.ApacheHttpClient;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.regions.providers.DefaultAwsRegionProviderChain;
+import software.amazon.awssdk.services.lambda.LambdaClient;
+import software.amazon.awssdk.services.lambda.model.FunctionConfiguration;
+import software.amazon.awssdk.services.lambda.model.ListFunctionsResponse;
+import software.amazon.awssdk.services.sts.StsClient;
+import software.amazon.awssdk.services.sts.model.AssumeRoleRequest;
+import software.amazon.awssdk.services.sts.model.AssumeRoleResponse;
+import software.amazon.awssdk.services.sts.model.Credentials;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -98,19 +106,26 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+import java.util.Objects;
 
 import static org.wso2.carbon.apimgt.impl.restapi.CommonUtils.constructEndpointConfigForService;
 import static org.wso2.carbon.apimgt.impl.restapi.CommonUtils.validateScopes;
 import static org.wso2.carbon.apimgt.impl.restapi.Constants.CHARSET;
+import static org.wso2.carbon.apimgt.api.APIConstants.SupportedHTTPVerbs;
 
 public class ApisApiServiceImplUtils {
 
@@ -163,7 +178,7 @@ public class ApisApiServiceImplUtils {
      * @throws SdkClientException if AWSLambda SDK throws an error
      */
     public static JSONObject getAmazonResourceNames(API api)
-            throws ParseException, CryptoException, SdkClientException {
+            throws ParseException, CryptoException, SdkClientException, URISyntaxException {
         JSONObject arns = new JSONObject();
         String endpointConfigString = api.getEndpointConfig();
         if (StringUtils.isNotEmpty(endpointConfigString)) {
@@ -182,17 +197,17 @@ public class ApisApiServiceImplUtils {
                 String roleArn = (String) endpointConfig.get(APIConstants.AMZN_ROLE_ARN);
                 String roleSessionName = (String) endpointConfig.get(APIConstants.AMZN_ROLE_SESSION_NAME);
                 String roleRegion = (String) endpointConfig.get(APIConstants.AMZN_ROLE_REGION);
-                AWSLambda awsLambdaClient = getAWSLambdaClient(accessKey, secretKey, region,
+                LambdaClient awsLambdaClient = getAWSLambdaClient(accessKey, secretKey, region,
                         roleArn, roleSessionName, roleRegion);
                 if (awsLambdaClient == null) {
                     return new JSONObject();
                 }
-                ListFunctionsResult listFunctionsResult = awsLambdaClient.listFunctions();
-                List<FunctionConfiguration> functionConfigurations = listFunctionsResult.getFunctions();
+                ListFunctionsResponse listFunctionsResult = awsLambdaClient.listFunctions();
+                List<FunctionConfiguration> functionConfigurations = listFunctionsResult.functions();
                 arns.put("count", functionConfigurations.size());
                 JSONArray list = new JSONArray();
                 for (FunctionConfiguration functionConfiguration : functionConfigurations) {
-                    list.put(functionConfiguration.getFunctionArn());
+                    list.put(functionConfiguration.functionArn());
                 }
                 arns.put("list", list);
                 return arns;
@@ -211,9 +226,10 @@ public class ApisApiServiceImplUtils {
      * @return AWS Lambda Client
      * @throws CryptoException when decoding secrets fail
      */
-    private static AWSLambda getAWSLambdaClient(String accessKey, String secretKey, String region,
-                                          String roleArn, String roleSessionName, String roleRegion) throws CryptoException {
-        AWSLambda awsLambdaClient;
+    private static LambdaClient getAWSLambdaClient(String accessKey, String secretKey, String region,
+            String roleArn, String roleSessionName, String roleRegion)
+            throws CryptoException, URISyntaxException {
+        LambdaClient awsLambdaClient;
         if (StringUtils.isEmpty(accessKey) && StringUtils.isEmpty(secretKey)) {
             awsLambdaClient = getARNsWithIAMRole(roleArn, roleSessionName, roleRegion);
             return awsLambdaClient;
@@ -234,45 +250,44 @@ public class ApisApiServiceImplUtils {
      * @param roleRegion      AWS role region
      * @return AWS Lambda Client
      */
-    private static AWSLambda getARNsWithIAMRole(String roleArn, String roleSessionName, String roleRegion) {
-        AWSLambda awsLambdaClient;
+    private static LambdaClient getARNsWithIAMRole(String roleArn, String roleSessionName, String roleRegion)
+            throws URISyntaxException {
+        LambdaClient awsLambdaClient;
+        SdkHttpClient httpClient = ApacheHttpClient.builder().build();
         if (log.isDebugEnabled()) {
             log.debug("Using temporary credentials supplied by the IAM role attached to AWS " +
                     "instance");
         }
         if (StringUtils.isEmpty(roleArn) && StringUtils.isEmpty(roleSessionName)
                 && StringUtils.isEmpty(roleRegion)) {
-            awsLambdaClient = AWSLambdaClientBuilder.standard()
-                    .withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
+            awsLambdaClient = LambdaClient.builder().httpClient(httpClient)
+                    .credentialsProvider(DefaultCredentialsProvider.create())
                     .build();
             return awsLambdaClient;
         } else if (StringUtils.isNotEmpty(roleArn) && StringUtils.isNotEmpty(roleSessionName)
                 && StringUtils.isNotEmpty(roleRegion)) {
-            String stsRegion = String.valueOf(Regions.getCurrentRegion());
-            AWSSecurityTokenService awsSTSClient;
+            String stsRegion = new DefaultAwsRegionProviderChain().getRegion().toString();
+            StsClient awsSTSClient;
             if (StringUtils.isEmpty(stsRegion)) {
-                awsSTSClient = AWSSecurityTokenServiceClientBuilder.standard()
-                        .withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
+                awsSTSClient = StsClient.builder()
+                        .credentialsProvider(DefaultCredentialsProvider.create())
                         .build();
             } else {
-                awsSTSClient = AWSSecurityTokenServiceClientBuilder.standard()
-                        .withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
-                        .withEndpointConfiguration(new EndpointConfiguration("https://sts."
-                                + stsRegion + ".amazonaws.com", stsRegion))
-                        .build();
+                URI stsEndpoint = new URI("https://sts." + stsRegion + ".amazonaws.com");
+                awsSTSClient = StsClient.builder()
+                        .credentialsProvider(DefaultCredentialsProvider.create())
+                        .endpointOverride(stsEndpoint).build();
             }
-            AssumeRoleRequest roleRequest = new AssumeRoleRequest()
-                    .withRoleArn(roleArn)
-                    .withRoleSessionName(roleSessionName);
-            AssumeRoleResult assumeRoleResult = awsSTSClient.assumeRole(roleRequest);
-            Credentials sessionCredentials = assumeRoleResult.getCredentials();
-            BasicSessionCredentials basicSessionCredentials = new BasicSessionCredentials(
-                    sessionCredentials.getAccessKeyId(),
-                    sessionCredentials.getSecretAccessKey(),
-                    sessionCredentials.getSessionToken());
-            awsLambdaClient = AWSLambdaClientBuilder.standard()
-                    .withCredentials(new AWSStaticCredentialsProvider(basicSessionCredentials))
-                    .withRegion(roleRegion)
+            AssumeRoleRequest roleRequest = AssumeRoleRequest.builder()
+                    .roleArn(roleArn)
+                    .roleSessionName(roleSessionName)
+                    .build();
+            AssumeRoleResponse assumeRoleResult = awsSTSClient.assumeRole(roleRequest);
+            Credentials sessionCredentials = assumeRoleResult.credentials();
+            AwsSessionCredentials basicSessionCredentials = AwsSessionCredentials.create(sessionCredentials.accessKeyId(), sessionCredentials.secretAccessKey(), sessionCredentials.sessionToken());
+            awsLambdaClient = LambdaClient.builder().httpClient(httpClient)
+                    .credentialsProvider(StaticCredentialsProvider.create(basicSessionCredentials))
+                    .region(Region.of(roleRegion))
                     .build();
             return awsLambdaClient;
         } else {
@@ -291,45 +306,52 @@ public class ApisApiServiceImplUtils {
      * @return AWS Lambda Client
      * @throws CryptoException when decoding secrets fail
      */
-    private static AWSLambda getARNsWithStoredCredentials(String accessKey, String secretKey, String region,
+    private static LambdaClient getARNsWithStoredCredentials(String accessKey, String secretKey, String region,
                                                           String roleArn, String roleSessionName, String roleRegion)
-            throws CryptoException {
-        AWSLambda awsLambdaClient;
+            throws CryptoException, URISyntaxException {
+        LambdaClient awsLambdaClient;
         if (log.isDebugEnabled()) {
             log.debug("Using user given stored credentials");
         }
-        if (secretKey.length() == APIConstants.AWS_ENCRYPTED_SECRET_KEY_LENGTH) {
-            CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+        CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+        boolean isEncryptedSecretKey = false;
+        try {
+            isEncryptedSecretKey = cryptoUtil.base64DecodeAndIsSelfContainedCipherText(secretKey);
+        } catch (CryptoException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("AWS secret key is not a self-contained cipher text; using stored value as-is.", e);
+            }
+        }
+        if (isEncryptedSecretKey) {
             secretKey = new String(cryptoUtil.base64DecodeAndDecrypt(secretKey),
                     StandardCharsets.UTF_8);
         }
-        BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
+        AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(accessKey, secretKey);
         if (StringUtils.isEmpty(roleArn) && StringUtils.isEmpty(roleSessionName)
                 && StringUtils.isEmpty(roleRegion)) {
-            awsLambdaClient = AWSLambdaClientBuilder.standard()
-                    .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
-                    .withRegion(region)
+            SdkHttpClient httpClient = ApacheHttpClient.builder().build();
+            awsLambdaClient = LambdaClient.builder()
+                    .credentialsProvider(StaticCredentialsProvider.create(awsCredentials)).httpClient(httpClient)
+                    .region(Region.of(region))
                     .build();
             return awsLambdaClient;
         } else if (StringUtils.isNotEmpty(roleArn) && StringUtils.isNotEmpty(roleSessionName)
                 && StringUtils.isNotEmpty(roleRegion)) {
-            AWSSecurityTokenService awsSTSClient = AWSSecurityTokenServiceClientBuilder.standard()
-                    .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
-                    .withEndpointConfiguration(new EndpointConfiguration("https://sts."
-                            + region + ".amazonaws.com", region))
+            URI stsEndpoint = new URI("https://sts." + region + ".amazonaws.com");
+            StsClient awsSTSClient = StsClient.builder()
+                    .credentialsProvider(StaticCredentialsProvider.create(awsCredentials))
+                    .endpointOverride(stsEndpoint).build();
+            AssumeRoleRequest roleRequest = AssumeRoleRequest.builder()
+                    .roleArn(roleArn)
+                    .roleSessionName(roleSessionName)
                     .build();
-            AssumeRoleRequest roleRequest = new AssumeRoleRequest()
-                    .withRoleArn(roleArn)
-                    .withRoleSessionName(roleSessionName);
-            AssumeRoleResult assumeRoleResult = awsSTSClient.assumeRole(roleRequest);
-            Credentials sessionCredentials = assumeRoleResult.getCredentials();
-            BasicSessionCredentials basicSessionCredentials = new BasicSessionCredentials(
-                    sessionCredentials.getAccessKeyId(),
-                    sessionCredentials.getSecretAccessKey(),
-                    sessionCredentials.getSessionToken());
-            awsLambdaClient = AWSLambdaClientBuilder.standard()
-                    .withCredentials(new AWSStaticCredentialsProvider(basicSessionCredentials))
-                    .withRegion(roleRegion)
+            AssumeRoleResponse assumeRoleResult = awsSTSClient.assumeRole(roleRequest);
+            Credentials sessionCredentials = assumeRoleResult.credentials();
+            AwsSessionCredentials basicSessionCredentials = AwsSessionCredentials.create(sessionCredentials.accessKeyId(), sessionCredentials.secretAccessKey(), sessionCredentials.sessionToken());
+            SdkHttpClient httpClient = ApacheHttpClient.builder().build();
+            awsLambdaClient = LambdaClient.builder()
+                    .credentialsProvider(StaticCredentialsProvider.create(basicSessionCredentials)).httpClient(httpClient)
+                    .region(Region.of(roleRegion))
                     .build();
             return awsLambdaClient;
         } else {
@@ -638,28 +660,49 @@ public class ApisApiServiceImplUtils {
                                                                             boolean returnContent)
             throws APIManagementException {
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
+        OASParserOptions baseParserOptions = ServiceReferenceHolder.getInstance()
+                .getAPIMDependencyConfigurationService().getAPIMDependencyConfigurations().getOasParserOptions();
+        OASParserOptions parserOptions = APIUtil.buildRefResolutionOptions(baseParserOptions,
+                CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+        // Resolve the configured import size limit once so all validation paths honor it.
+        String maxContentSizeStr = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getFirstProperty(
+                        org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_OAS_FILE_SIZE_LIMIT);
+        if (maxContentSizeStr == null || maxContentSizeStr.trim().isEmpty()) {
+            maxContentSizeStr = org.wso2.carbon.apimgt.api.
+                    APIConstants.API_PUBLISHER_IMPORT_OAS_FILE_SIZE_LIMIT_DEFAULT_MB;
+        }
         if (url != null) {
-            validationResponse = OASParserUtil.validateAPIDefinitionByURL(url, returnContent);
+            try {
+                URL urlObj = new URL(url);
+                HttpClient httpClient = APIUtil.getHttpClient(urlObj.getPort(), urlObj.getProtocol());
+                validationResponse = OASParserUtil.validateAPIDefinitionByURL(url, httpClient, returnContent,
+                        parserOptions, maxContentSizeStr);
+            } catch (MalformedURLException e) {
+                throw new APIManagementException("Error while processing the API definition URL", e);
+            }
         } else if (inputStream != null) {
             try {
                 if (fileName != null) {
                     if (fileName.endsWith(".zip")) {
-                        validationResponse =
-                                OASParserUtil.extractAndValidateOpenAPIArchive(inputStream, returnContent);
+                        validationResponse = OASParserUtil.extractAndValidateOpenAPIArchive(inputStream, returnContent,
+                                parserOptions, maxContentSizeStr);
                     } else {
                         String openAPIContent = IOUtils.toString(inputStream, CHARSET);
-                        validationResponse = OASParserUtil.validateAPIDefinition(openAPIContent, returnContent);
+                        validationResponse = OASParserUtil.validateAPIDefinition(openAPIContent, returnContent,
+                                parserOptions);
                     }
                 } else {
                     String openAPIContent = IOUtils.toString(inputStream, CHARSET);
-                    validationResponse = OASParserUtil.validateAPIDefinition(openAPIContent, returnContent);
+                    validationResponse = OASParserUtil.validateAPIDefinition(openAPIContent, returnContent,
+                            parserOptions);
                 }
             } catch (IOException e) {
                 throw new APIManagementException("Error while processing the file input",
                         e, ExceptionCodes.from(ExceptionCodes.OPENAPI_PARSE_EXCEPTION));
             }
         } else if (apiDefinition != null) {
-            validationResponse = OASParserUtil.validateAPIDefinition(apiDefinition, returnContent);
+            validationResponse = OASParserUtil.validateAPIDefinition(apiDefinition, returnContent, parserOptions);
         }
 
         return validationResponse;
@@ -691,40 +734,53 @@ public class ApisApiServiceImplUtils {
                 apiToAdd.setApiSecurity(service.getSecurityType().toString());
             }
         }
-        APIDefinition apiDefinition = validationResponse.getParser();
-        SwaggerData swaggerData;
-        String definitionToAdd = validationResponse.getJsonContent();
-        if (syncOperations) {
-            validateScopes(apiToAdd, apiProvider, username);
-            swaggerData = new SwaggerData(apiToAdd);
-            definitionToAdd = apiDefinition.populateCustomManagementInfo(definitionToAdd, swaggerData);
-        }
-        definitionToAdd = OASParserUtil.preProcess(definitionToAdd);
 
-        Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(definitionToAdd);
+        String definitionToAdd;
+        APIDefinition apiDefinition = validationResponse.getParser();
+        String definition = validationResponse.getJsonContent();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(organization);
         String defaultAPILevelPolicy = APIUtil.getDefaultAPILevelPolicy(tenantId);
-        for (URITemplate uriTemplate : uriTemplates) {
-            if (StringUtils.isEmpty(uriTemplate.getThrottlingTier())) {
-                uriTemplate.setThrottlingTier(defaultAPILevelPolicy);
-            }
-            if (StringUtils.isEmpty(uriTemplate.getAuthType())) {
-                uriTemplate.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
-            }
-        }
 
-        Set<Scope> scopes = apiDefinition.getScopes(definitionToAdd);
-        apiToAdd.setUriTemplates(uriTemplates);
-        apiToAdd.setScopes(scopes);
-        //Set extensions from API definition to API object
-        apiToAdd = OASParserUtil.setExtensionsToAPI(definitionToAdd, apiToAdd);
-        if (!syncOperations) {
+        if (APIConstants.API_TYPE_MCP.equals(apiToAdd.getType())) {
+            String backendId = UUID.randomUUID().toString();
+            Set<URITemplate> uriTemplates = generateMCPFeatures(apiToAdd.getSubtype(), definition, backendId,
+                    apiToAdd.getUriTemplates(), apiDefinition);
+            applyDefaultThrottlingAndAuth(uriTemplates, defaultAPILevelPolicy);
+            apiToAdd.setUriTemplates(uriTemplates);
             validateScopes(apiToAdd, apiProvider, username);
-            swaggerData = new SwaggerData(apiToAdd);
-            definitionToAdd = apiDefinition
-                    .populateCustomManagementInfo(validationResponse.getJsonContent(), swaggerData);
-        }
+            Backend backend = createDefaultBackend(backendId, definition, apiToAdd.getEndpointConfig());
+            apiToAdd.getBackends().add(backend);
+            apiToAdd.setEndpointConfig(null);
+            SwaggerData swaggerData = new SwaggerData(apiToAdd);
+            definitionToAdd = new OAS3Parser().generateAPIDefinition(swaggerData);
+        } else {
+            definition = OASParserUtil.preProcess(definition,
+                    ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
+                            .getAPIMDependencyConfigurations().getOasParserOptions());
+            if (syncOperations) {
+                validateScopes(apiToAdd, apiProvider, username);
+                SwaggerData swaggerData = new SwaggerData(apiToAdd);
+                definition = apiDefinition.populateCustomManagementInfo(definition, swaggerData,
+                        ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
+                                .getAPIMDependencyConfigurations().getOasParserOptions());
+            }
+            Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(definition);
+            applyDefaultThrottlingAndAuth(uriTemplates, defaultAPILevelPolicy);
 
+            Set<Scope> scopes = apiDefinition.getScopes(definition);
+            apiToAdd.setUriTemplates(uriTemplates);
+            apiToAdd.setScopes(scopes);
+            apiToAdd = OASParserUtil.setExtensionsToAPI(definition, apiToAdd);
+
+            if (!syncOperations) {
+                validateScopes(apiToAdd, apiProvider, username);
+                SwaggerData swaggerData = new SwaggerData(apiToAdd);
+                definition = apiDefinition.populateCustomManagementInfo(validationResponse.getJsonContent(),
+                        swaggerData, ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
+                                .getAPIMDependencyConfigurations().getOasParserOptions());
+            }
+            definitionToAdd = definition;
+        }
         // adding the definition
         apiToAdd.setSwaggerDefinition(definitionToAdd);
 
@@ -735,6 +791,216 @@ public class ApisApiServiceImplUtils {
 
         return addedAPI;
     }
+
+    /**
+     * Applies default throttling tier and authentication type to the given set of URI templates,
+     * if they are not already defined.
+     *
+     * @param uriTemplates          the set of URI templates to update
+     * @param defaultThrottlingTier the default throttling policy to apply when none is set
+     */
+    private static void applyDefaultThrottlingAndAuth(Set<URITemplate> uriTemplates, String defaultThrottlingTier) {
+
+        for (URITemplate uriTemplate : uriTemplates) {
+            if (StringUtils.isEmpty(uriTemplate.getThrottlingTier())) {
+                uriTemplate.setThrottlingTier(defaultThrottlingTier);
+            }
+            if (StringUtils.isEmpty(uriTemplate.getAuthType())) {
+                uriTemplate.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
+            }
+        }
+    }
+
+    /**
+     * Creates and initializes a Backend instance with the given parameters.
+     *
+     * @param backendApiId      unique identifier for the backend
+     * @param backendDefinition OpenAPI definition for the backend
+     * @param endpointConfig    endpoint configuration
+     * @return configured Backend instance
+     */
+    private static Backend createDefaultBackend(String backendApiId, String backendDefinition, String endpointConfig) {
+
+        Backend backend = new Backend();
+        backend.setId(backendApiId);
+        backend.setName(APIConstants.MCP.MCP_DEFAULT_BACKEND_NAME);
+        backend.setDefinition(backendDefinition);
+        backend.setEndpointConfig(endpointConfig);
+        return backend;
+    }
+
+    /**
+     * Generates MCP feature URI templates for a backend API.
+     *
+     * @param subtype              MCP feature subtype
+     * @param backendApiDefinition API definition string
+     * @param backendId         backend API ID
+     * @param uriTemplates         existing URI templates
+     * @param parser               parser to generate MCP tools
+     * @return generated MCP feature templates
+     * @throws APIManagementException if generation fails
+     */
+    public static Set<URITemplate> generateMCPFeatures(String subtype, String backendApiDefinition, String backendId,
+                                                       Set<URITemplate> uriTemplates, APIDefinition parser)
+            throws APIManagementException {
+
+        Set<URITemplate> mcpTools;
+        if (APIConstants.API_SUBTYPE_SERVER_PROXY.equals(subtype)) {
+            mcpTools = findMatchingTools(backendApiDefinition, uriTemplates, backendId);
+        } else {
+            mcpTools = parser.generateMCPTools(backendApiDefinition, null, backendId, subtype, uriTemplates);
+        }
+        if (mcpTools == null || mcpTools.isEmpty()) {
+            throw new APIManagementException("Failed to generate MCP features: no URI templates were produced.");
+        }
+        return mcpTools;
+    }
+
+    /**
+     * Update URI templates with tool metadata from the MCP backend definition and return the matched templates.
+     *
+     * @param backendApiDefinitionJson Backend definition as JSON string (must contain a non-empty "tools" array)
+     * @param uriTemplates             Candidate URI templates to enrich
+     * @param backendId                Backend identifier to set on matched templates' mappings
+     * @return Templates that were matched and updated (never null)
+     * @throws APIManagementException If the definition JSON is invalid or required tool fields are missing
+     */
+    public static Set<URITemplate> findMatchingTools(String backendApiDefinitionJson, Set<URITemplate> uriTemplates,
+                                                     String backendId) throws APIManagementException {
+
+        org.json.JSONObject backendDefinitionJson = parseBackendDefinition(backendApiDefinitionJson);
+        org.json.JSONArray toolsArray = MCPInitializerAndToolFetcher.extractToolsArray(backendDefinitionJson);
+
+        Map<String, String> schemaByToolName = new HashMap<>();
+        Map<String, String> descriptionByToolName = new HashMap<>();
+        populateToolLookups(toolsArray, schemaByToolName, descriptionByToolName);
+
+        return populateURITemplatesWithTools(uriTemplates, schemaByToolName, descriptionByToolName, backendId);
+    }
+
+    /**
+     * Parse backend definition JSON string.
+     */
+    private static org.json.JSONObject parseBackendDefinition(String backendJson) throws APIManagementException {
+
+        if (StringUtils.isBlank(backendJson)) {
+            throw new APIManagementException("Backend API definition cannot be empty.",
+                    ExceptionCodes.MCP_SERVER_TOOL_LIST_GENERATION_FAILED);
+        }
+        try {
+            return new org.json.JSONObject(backendJson);
+        } catch (org.json.JSONException e) {
+            throw new APIManagementException("Invalid backend API definition JSON: " + e.getMessage(), e,
+                    ExceptionCodes.MCP_SERVER_TOOL_LIST_GENERATION_FAILED);
+        }
+    }
+
+    /**
+     * Populates lookup maps for tool schemas and descriptions using the provided tools array.
+     *
+     * @param toolsArray            JSON array of tool objects
+     * @param schemaByToolName      Map to populate with tool name → input schema JSON string
+     * @param descriptionByToolName Map to populate with tool name → tool description
+     * @throws APIManagementException If any tool entry is missing a required field
+     */
+    private static void populateToolLookups(org.json.JSONArray toolsArray, Map<String, String> schemaByToolName,
+                                            Map<String, String> descriptionByToolName) throws APIManagementException {
+
+        for (int index = 0; index < toolsArray.length(); index++) {
+            org.json.JSONObject toolJson = toolsArray.optJSONObject(index);
+            if (toolJson == null) {
+                continue;
+            }
+
+            String toolName = StringUtils.trimToNull(toolJson.optString(APIConstants.MCP.TOOL_NAME_KEY, null));
+            String toolDescription =
+                    StringUtils.trimToNull(toolJson.optString(APIConstants.MCP.TOOL_DESCRIPTION_KEY, null));
+            org.json.JSONObject inputSchemaJson = toolJson.optJSONObject(APIConstants.MCP.TOOL_INPUT_SCHEMA_KEY);
+            String inputSchema = (inputSchemaJson != null) ? inputSchemaJson.toString() : null;
+
+            if (StringUtils.isBlank(toolName)) {
+                throw new APIManagementException("Tool[" + index + "]: name is required.",
+                        ExceptionCodes.PARAMETER_NOT_PROVIDED);
+            }
+            if (StringUtils.isBlank(toolDescription)) {
+                throw new APIManagementException("Tool[" + index + "]: description is required.",
+                        ExceptionCodes.PARAMETER_NOT_PROVIDED);
+            }
+            if (StringUtils.isBlank(inputSchema)) {
+                throw new APIManagementException("Tool[" + index + "]: input schema is required.",
+                        ExceptionCodes.PARAMETER_NOT_PROVIDED);
+            }
+
+            schemaByToolName.put(toolName,
+                    MCPInitializerAndToolFetcher.buildToolMetadata(toolJson).toString());
+            descriptionByToolName.put(toolName, toolDescription);
+        }
+    }
+
+    /**
+     * Populate URI templates with tool metadata from the MCP backend definition.
+     *
+     * @param uriTemplates          Candidate URI templates to enrich
+     * @param schemaByToolName      Map of tool names to their input schemas
+     * @param descriptionByToolName Map of tool names to their descriptions
+     * @param backendId             Backend identifier to set on matched templates' mappings
+     * @return Templates that were matched and updated (never null)
+     */
+    private static Set<URITemplate> populateURITemplatesWithTools(Set<URITemplate> uriTemplates,
+                                                                  Map<String, String> schemaByToolName,
+                                                                  Map<String, String> descriptionByToolName,
+                                                                  String backendId) throws APIManagementException {
+
+        if (uriTemplates == null || uriTemplates.isEmpty()) {
+            return Collections.emptySet();
+        }
+
+        Set<String> tools = new LinkedHashSet<>();
+        Set<URITemplate> matchedTemplates = new LinkedHashSet<>();
+        for (URITemplate uriTemplate : uriTemplates) {
+            if (uriTemplate == null) {
+                continue;
+            }
+            BackendOperationMapping backendMapping = uriTemplate.getBackendOperationMapping();
+            if (backendMapping == null) {
+                continue;
+            }
+            BackendOperation backendOperation = backendMapping.getBackendOperation();
+            if (backendOperation == null) {
+                continue;
+            }
+
+            String operationVerb = (backendOperation.getVerb() != null) ? backendOperation.getVerb().toString() : null;
+            String operationTarget = StringUtils.trimToNull(backendOperation.getTarget());
+
+            if (!SupportedHTTPVerbs.TOOL.toString().equalsIgnoreCase(operationVerb) || operationTarget == null) {
+                continue;
+            }
+
+            String toolSchema = schemaByToolName.get(operationTarget);
+            if (toolSchema == null) {
+                continue;
+            }
+            if (uriTemplate.getUriTemplate() == null || uriTemplate.getUriTemplate().isEmpty()) {
+                uriTemplate.setUriTemplate(operationTarget);
+            }
+            if (uriTemplate.getDescription() == null || uriTemplate.getDescription().isEmpty()) {
+                uriTemplate.setDescription(descriptionByToolName.get(operationTarget));
+            }
+            if (uriTemplate.getSchemaDefinition() == null || uriTemplate.getSchemaDefinition().isEmpty()) {
+                uriTemplate.setSchemaDefinition(toolSchema);
+            }
+            backendMapping.setBackendId(backendId);
+            if (!tools.add(uriTemplate.getUriTemplate())) {
+                log.error("Duplicate MCP tool detected: " + uriTemplate.getUriTemplate());
+                throw new APIManagementException("Tool " + uriTemplate.getUriTemplate() + " is repeated",
+                        ExceptionCodes.DUPLICATE_MCP_TOOLS);
+            }
+            matchedTemplates.add(uriTemplate);
+        }
+        return matchedTemplates;
+    }
+
 
     /**
      * @param api           API
@@ -877,10 +1143,19 @@ public class ApisApiServiceImplUtils {
                                                                                String vhost, boolean mandatoryVHOST)
             throws APIManagementException {
 
-        if (environments.get(environment) == null) {
+        Environment env = environments.get(environment);
+        if (env == null) {
             final String errorMessage = "Gateway environment not found: " + environment;
             throw new APIManagementException(errorMessage, ExceptionCodes.from(
                     ExceptionCodes.INVALID_GATEWAY_ENVIRONMENT, String.format("name '%s'", environment)));
+        } else {
+            if (GatewayMode.READ_ONLY.getMode().equals(env.getMode())) {
+                final String errorMessage = "The mode of gateway environment : " + environment
+                        + " is READ_ONLY. Cannot deploy revision";
+                throw new APIManagementException(errorMessage,
+                        ExceptionCodes.from(ExceptionCodes.READ_ONLY_MODE_GATEWAY_ENVIRONMENT,
+                                String.format("name '%s'", environment)));
+            }
         }
 
         if (mandatoryVHOST && StringUtils.isEmpty(vhost)) {
@@ -896,7 +1171,8 @@ public class ApisApiServiceImplUtils {
             //Checking the vhost is included in the available vhost list
             if (vhostItem.getHost().equals(vhost)) {
                 isVhostValidated = true;
-            } else if (vhostItem.getWsHost().equals(vhost)) {
+            } else if (Objects.equals(vhostItem.getWsHost(), vhost) 
+                    || Objects.equals(vhostItem.getWssHost(), vhost)) {
                 // This was added to preserve the functionality in case of Deploying a WebSocket API revision.
                 // For WebSocket APIs apiRevisionDeploymentDTO.getVhost() returns the wsHost
                 isVhostValidated = true;
@@ -1016,4 +1292,6 @@ public class ApisApiServiceImplUtils {
         serviceInfo.put("md5", service.getMd5());
         return serviceInfo;
     }
+
+
 }

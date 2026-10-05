@@ -18,10 +18,12 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
+import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
-import java.util.Objects;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class represents a LLM (Large Language Model) Provider.
@@ -37,6 +39,8 @@ public class LLMProvider implements Serializable {
     private String configurations = null;
     private boolean builtInSupport = false;
     private String organization = null;
+    private List<LLMModel> modelList = new ArrayList<>();
+    private boolean multipleVendorSupport = false;
 
     public LLMProvider(String name, String apiVersion) {
 
@@ -114,5 +118,45 @@ public class LLMProvider implements Serializable {
     public void setOrganization(String organization) {
 
         this.organization = organization;
+    }
+
+    public List<LLMModel> getModelList() {
+        return modelList;
+    }
+
+    public void setModelList(List<LLMModel> modelList) {
+        this.modelList = modelList == null ? new ArrayList<>() : new ArrayList<>(modelList);
+    }
+
+    public void setMultipleVendorSupport(boolean multipleVendorSupport) {
+        this.multipleVendorSupport = multipleVendorSupport;
+    }
+
+    public boolean isMultipleVendorSupport() {
+        return multipleVendorSupport;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof LLMProvider)) {
+            return false;
+        }
+        LLMProvider that = (LLMProvider) o;
+        return isBuiltInSupport() == that.isBuiltInSupport() &&
+                isMultipleVendorSupport() == that.isMultipleVendorSupport() &&
+                Objects.equals(getId(), that.getId()) && Objects.equals(getName(), that.getName()) &&
+                Objects.equals(getDescription(), that.getDescription()) &&
+                Objects.equals(getApiVersion(), that.getApiVersion()) &&
+                Objects.equals(getApiDefinition(), that.getApiDefinition()) &&
+                Objects.equals(getConfigurations(), that.getConfigurations()) &&
+                Objects.equals(getOrganization(), that.getOrganization()) &&
+                Objects.equals(getModelList(), that.getModelList());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getName(), getDescription(), getApiVersion(), getApiDefinition(),
+                getConfigurations(),
+                isBuiltInSupport(), getOrganization(), getModelList(), isMultipleVendorSupport());
     }
 }

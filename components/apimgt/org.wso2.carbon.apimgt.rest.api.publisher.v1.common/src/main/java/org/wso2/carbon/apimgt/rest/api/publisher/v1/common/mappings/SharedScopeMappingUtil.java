@@ -6,14 +6,17 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SharedScopeUsage;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SharedScopeUsageDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SharedScopeUsageEntityDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SharedScopeUsedAPIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SharedScopeUsedAPIResourceInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SharedScopeUsedResourceInfoDTO;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -67,15 +70,20 @@ public class SharedScopeMappingUtil {
         sharedScopeUsageDTO.setName(sharedScopeUsage.getName());
 
         List<SharedScopeUsedAPIInfoDTO> usedAPIInfoDTOList = new ArrayList<>();
+        List<SharedScopeUsageEntityDTO> usageEntityDTOList = new ArrayList<>();
         for (API api : sharedScopeUsage.getApis()) {
             APIIdentifier apiIdentifier = api.getId();
+
+            // Deprecated API usage information
             SharedScopeUsedAPIInfoDTO usedAPIInfoDTO = new SharedScopeUsedAPIInfoDTO();
             usedAPIInfoDTO.setName(apiIdentifier.getName());
             usedAPIInfoDTO.setVersion(apiIdentifier.getVersion());
             usedAPIInfoDTO.setProvider(apiIdentifier.getProviderName());
             usedAPIInfoDTO.setContext(api.getContext());
 
-            String revisionName = api.getRevisionId() != 0 ? "Revision " + api.getRevisionId() : "Current API";
+            String revisionName = api.getRevisionId() != 0 ?
+                    "Revision " + api.getRevisionId() :
+                    APIConstants.API_REVISION_CURRENT_API;
             usedAPIInfoDTO.setRevisionID(revisionName);
 
             List<SharedScopeUsedAPIResourceInfoDTO> usedAPIResourceInfoDTOList = new ArrayList<>();
@@ -87,7 +95,31 @@ public class SharedScopeMappingUtil {
             }
             usedAPIInfoDTO.setUsedResourceList(usedAPIResourceInfoDTOList);
             usedAPIInfoDTOList.add(usedAPIInfoDTO);
+
+            // New usage information
+            SharedScopeUsageEntityDTO entity = new SharedScopeUsageEntityDTO();
+            entity.setName(apiIdentifier.getName());
+            entity.setVersion(apiIdentifier.getVersion());
+            entity.setProvider(apiIdentifier.getProviderName());
+            entity.setContext(api.getContext());
+            entity.setRevisionId(revisionName);
+
+            String type = api.getType();
+            entity.setType(type);
+
+            List<SharedScopeUsedResourceInfoDTO> entityResList = new ArrayList<>();
+            if (api.getUriTemplates() != null) {
+                for (URITemplate uriTemplate : api.getUriTemplates()) {
+                    SharedScopeUsedResourceInfoDTO resourceInfoDTO = new SharedScopeUsedResourceInfoDTO();
+                    resourceInfoDTO.setTarget(uriTemplate.getUriTemplate());
+                    resourceInfoDTO.setVerb(uriTemplate.getHTTPVerb());
+                    entityResList.add(resourceInfoDTO);
+                }
+            }
+            entity.setUsedResourceList(entityResList);
+            usageEntityDTOList.add(entity);
         }
+        sharedScopeUsageDTO.setUsages(usageEntityDTOList);
         sharedScopeUsageDTO.setUsedApiList(usedAPIInfoDTOList);
 
         return sharedScopeUsageDTO;

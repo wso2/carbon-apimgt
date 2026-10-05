@@ -17,6 +17,7 @@
 package org.wso2.carbon.apimgt.persistence;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.persistence.dto.AdminContentSearchResult;
@@ -117,6 +118,17 @@ public interface APIPersistence {
     PublisherAPI updateAPI(Organization org, PublisherAPI publisherAPI) throws APIPersistenceException;
 
     /**
+     * Updates resource policy resource for the given resource id from the registry.
+     *
+     * @param identifier API identifier
+     * @param resourceId Resource identifier
+     * @param content    resource policy content
+     * @throws APIPersistenceException
+     */
+     void updateResourcePolicyFromRegistryResourceId(APIIdentifier identifier, String resourceId, String content)
+            throws APIPersistenceException;
+
+    /**
      * Get security scheme of API
      *
      * @param org   Organization the API is owned by
@@ -137,6 +149,17 @@ public interface APIPersistence {
     PublisherAPI getPublisherAPI(Organization org, String apiId) throws APIPersistenceException;
 
     /**
+     * Get the API information stored in persistence layer, that is used for publisher operations
+     *
+     * @param org     Organization the API is owned by
+     * @param apiId   API ID
+     * @param apiType API Type
+     * @return API information
+     * @throws APIPersistenceException
+     */
+    PublisherAPI getPublisherAPI(Organization org, String apiId, String apiType) throws APIPersistenceException;
+
+    /**
      * Get the API information stored in persistence layer, that is used for DevPortal operations
      *
      * @param org   Organization the API is owned by
@@ -145,6 +168,18 @@ public interface APIPersistence {
      * @throws APIPersistenceException
      */
     DevPortalAPI getDevPortalAPI(Organization org, String apiId) throws APIPersistenceException;
+
+    /**
+     * Get the API information stored in persistence layer, that is used for DevPortal operations
+     *
+     * @param org     Organization the API is owned by
+     * @param apiId   API ID
+     * @param apiType API Type
+     * @return API information
+     * @throws APIPersistenceException
+     */
+    DevPortalAPI getDevPortalAPI(Organization org, String apiId, String apiType) throws APIPersistenceException;
+
 
     /**
      * Delete API

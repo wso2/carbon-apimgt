@@ -64,6 +64,14 @@ public class TelemetryConstants {
      */
     static final String OTLP_CONFIG_URL = "OpenTelemetry.RemoteTracer.Url";
     static final String OPENTELEMETRY_PROPERTIES_PREFIX = "OpenTelemetry.RemoteTracer.Properties.";
+
+    /**
+     * Sampler Constants.
+     */
+    static final String OTLP_CONFIG_SAMPLER = "OpenTelemetry.RemoteTracer.SamplerMode";
+    static final String SAMPLER_ALWAYS_ON = "always_on";
+    static final String SAMPLER_ALWAYS_OFF = "always_off";
+    static final String SAMPLER_PARENT_BASED = "parent_based";
     static final String OTEL_RESOURCE_ATTRIBUTE_CONFIG_KEYS_PREFIX = "OpenTelemetry.ResourceAttributes.";
     static final String OTEL_RESOURCE_ATTRIBUTES_ENVIRONMENT_VARIABLE_NAME = "OTEL_RESOURCE_ATTRIBUTES";
 

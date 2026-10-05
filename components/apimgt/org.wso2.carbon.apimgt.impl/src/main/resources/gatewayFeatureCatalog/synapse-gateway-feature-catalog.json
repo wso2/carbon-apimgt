@@ -1,0 +1,77 @@
+{
+  "wso2/synapse": {
+    "apiTypes": [
+      "rest",
+      "soap",
+      "graphql",
+      "ws",
+      "wh",
+      "sse",
+      "ai",
+      "mcp"
+    ],
+    "gatewayFeatures": {
+      "basic": [
+        "defaultVersion",
+        "advertised"
+      ],
+      "runtime": [
+        "cors",
+        "schemaValidation",
+        "queryAnalysis",
+        "responseCaching",
+        "transportsHTTP",
+        "transportsHTTPS",
+        "transportsMutualSSL",
+        "oauth2",
+        "apikey",
+        "basicAuth",
+        "audienceValidation",
+        "backendThroughput",
+        "keyManagerConfig"
+      ],
+      "resources": [
+        "apiLevelRateLimiting",
+        "operationLevelRateLimiting",
+        "operationSecurity"
+      ],
+      "localScopes": [
+        "operationScopes"
+      ],
+      "policies": [
+        "policies"
+      ],
+      "monetization": [
+        "monetization"
+      ],
+      "subscriptions": [
+        "subscriptions"
+      ],
+      "endpoints": [
+        "http",
+        "service",
+        "address",
+        "default",
+        "INLINE",
+        "dynamic",
+        "awslambda",
+        "sequence_backend",
+        "advancedConfigurations",
+        "loadBalanceAndFailoverConfigurations",
+        "endpointSecurity",
+        "typePRODUCTION",
+        "typeSANDBOX",
+        "ws"
+      ],
+      "endpointSecurity": [
+        "basicAuth",
+        "oauth2",
+        "digest",
+        "apikey"
+      ],
+      "tryout": [
+        "tryout"
+      ]
+    }
+  }
+}

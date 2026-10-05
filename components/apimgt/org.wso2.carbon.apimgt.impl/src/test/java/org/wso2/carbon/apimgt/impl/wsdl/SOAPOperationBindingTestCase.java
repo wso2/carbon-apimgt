@@ -23,8 +23,13 @@ import io.swagger.parser.SwaggerParser;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.api.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
@@ -34,9 +39,25 @@ import java.util.Map;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ServiceReferenceHolder.class})
 public class SOAPOperationBindingTestCase {
+    private static ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+    private static APIManagerConfigurationService apimConfigService = Mockito.mock(
+            APIManagerConfigurationService.class);
+    private static APIManagerConfiguration apimConfig = Mockito.mock(APIManagerConfiguration.class);
+
+    public void mockConfigs() throws Exception {
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apimConfigService);
+        Mockito.when(apimConfigService.getAPIManagerConfiguration()).thenReturn(apimConfig);
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        PowerMockito.when(
+                        ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                                .getFirstProperty(APIConstants.API_PUBLISHER_IMPORT_WSDL_FILE_SIZE_LIMIT))
+                .thenReturn(APIConstants.API_PUBLISHER_IMPORT_WSDL_FILE_SIZE_LIMIT_DEFAULT_MB);
+    }
 
     @Test
     public void testGetSoapOperationMapping() throws Exception {
+        mockConfigs();
         String mapping = SOAPOperationBindingUtils.getSoapOperationMappingForUrl(Thread.currentThread().getContextClassLoader()
                 .getResource("wsdls/phoneverify.wsdl").toExternalForm());
         Assert.assertTrue("Failed getting soap operation mapping from the WSDL", !mapping.isEmpty());
@@ -54,6 +75,7 @@ public class SOAPOperationBindingTestCase {
 
     @Test
     public void testGetSwaggerFromWSDL() throws Exception {
+        mockConfigs();
         String swaggerStr = SOAPOperationBindingUtils.getSoapOperationMappingForUrl(Thread.currentThread().getContextClassLoader()
                 .getResource("wsdls/phoneverify.wsdl").toExternalForm());
 
@@ -66,7 +88,7 @@ public class SOAPOperationBindingTestCase {
     }
 
     @Test public void testGetSwaggerFromWSDLWithExternalXSDs() throws Exception {
-
+        mockConfigs();
         String externalXSDElementName = "InvokeClaimGeniousDataIntoCordysElement";
         String externalXSDElementInputOperation = "invokeClaimGeniousDataIntoCordysBindingOperationInput";
         String externalXSDElementOutputOperation = "invokeClaimGeniousDataIntoCordysBindingOperationOutput";
@@ -95,6 +117,7 @@ public class SOAPOperationBindingTestCase {
 
     @Test
     public void testCompareGeneratedSwagger() throws Exception {
+        mockConfigs();
         String swaggerString = "{\n" + "  \"swagger\": \"2.0\",\n" + "  \"paths\": {\n" + "    \"/getCustomer\": {\n"
                 + "      \"get\": {\n" + "        \"operationId\": \"getCustomer\",\n" + "        \"parameters\": [],\n"
                 + "        \"responses\": {\n" + "          \"default\": {\n" + "            \"description\": \"\",\n"
@@ -116,6 +139,7 @@ public class SOAPOperationBindingTestCase {
 
     @Test
     public void testVendorExtensions() throws Exception {
+        mockConfigs();
         String swaggerStr = SOAPOperationBindingUtils.getSoapOperationMappingForUrl(
                 Thread.currentThread().getContextClassLoader().getResource("wsdls/simpleCustomerService.wsdl")
                         .toExternalForm());

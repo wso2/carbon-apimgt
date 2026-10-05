@@ -290,9 +290,14 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
             throw new DataLoadingException(msg, e);
         }
         if (responseString != null && !responseString.isEmpty()) {
-            ApplicationList list = new Gson().fromJson(responseString, ApplicationList.class);
-            if (list.getList() != null && !list.getList().isEmpty()) {
-                application = list.getList().get(0);
+            ApplicationList applicationList = new Gson().fromJson(responseString, ApplicationList.class);
+            if (applicationList != null && applicationList.getList() != null && !applicationList.getList().isEmpty()) {
+                for (Application app : applicationList.getList()) {
+                    if (app.getId() == appId) {
+                        application = app;
+                        break;
+                    }
+                }
             }
         }
         return application;
@@ -463,6 +468,10 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
         // Remove the deployed property from the API object before sending to the internal API
         // as this is not there in the internal DTO
         apiJsonObject.remove("deployed");
+        apiJsonObject.remove("apiProperties");
+        if (log.isDebugEnabled()) {
+            log.debug("Removed 'deployed' and 'apiProperties' fields from API object before internal subscription");
+        }
         String modifiedApiJson = gson.toJson(apiJsonObject);
 
         try {

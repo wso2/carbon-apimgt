@@ -37,11 +37,12 @@ public class APIAuthenticationAdminClient {
 
     private static final Log log = LogFactory.getLog(APIAuthenticationAdminClient.class);
 
-    public void invalidateResourceCache(String apiContext, String apiVersion, Set<URITemplate> uriTemplates) {
+    public void invalidateResourceCache(String apiContext, String apiVersion, Set<URITemplate> uriTemplates, String organization) {
 
         JSONObject api = new JSONObject();
         api.put("apiContext", apiContext);
         api.put("apiVersion", apiVersion);
+        api.put("organization", organization);
         JSONArray resources = new JSONArray();
         for (URITemplate uriTemplate : uriTemplates) {
             JSONObject resource = new JSONObject();
@@ -58,26 +59,13 @@ public class APIAuthenticationAdminClient {
     }
 
     /**
-     * Removes the active tokens that are cached on the API Gateway
-     * @param activeTokens - The active access tokens to be removed from the gateway cache.
-     */
-    public void invalidateCachedTokens(Set<String> activeTokens) {
-
-        JSONArray tokenArray = new JSONArray();
-        tokenArray.addAll(activeTokens);
-        Object[] objectData = new Object[]{APIConstants.GATEWAY_KEY_CACHE_NAME,
-                StringEscapeUtils.escapeJava(tokenArray.toJSONString())};
-        publishEvent(objectData);
-    }
-
-    /**
      * Removes a given username that is cached on the API Gateway
      *
      * @param username - The username to be removed from the gateway cache.
      */
-    public void invalidateCachedUsername(String username) {
+    public void invalidateCachedUsername(String username,String tenantDomain) {
 
-        invalidateCachedUsernames(new String[]{username});
+        invalidateCachedUsernames(new String[]{username}, tenantDomain);
     }
 
     /**
@@ -85,12 +73,15 @@ public class APIAuthenticationAdminClient {
      *
      * @param username_list - The list of usernames to be removed from the gateway cache.
      */
-    public void invalidateCachedUsernames(String[] username_list) {
+    public void invalidateCachedUsernames(String[] username_list, String tenantDomain) {
 
         JSONArray userArray = new JSONArray();
         userArray.addAll(Arrays.asList(username_list));
+        JSONObject event = new JSONObject();
+        event.put("organization", tenantDomain);
+        event.put("users",userArray);
         Object[] objectData = new Object[]{APIConstants.GATEWAY_USERNAME_CACHE_NAME,
-                StringEscapeUtils.escapeJava(userArray.toJSONString())};
+                StringEscapeUtils.escapeJava(event.toJSONString())};
         publishEvent(objectData);
     }
 

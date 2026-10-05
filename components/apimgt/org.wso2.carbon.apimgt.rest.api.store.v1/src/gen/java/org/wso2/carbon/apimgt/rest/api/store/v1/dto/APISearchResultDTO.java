@@ -24,6 +24,7 @@ import javax.validation.Valid;
 
 public class APISearchResultDTO extends SearchResultDTO  {
   
+    private String displayName = null;
     private String description = null;
     private String context = null;
     private String version = null;
@@ -34,6 +35,24 @@ public class APISearchResultDTO extends SearchResultDTO  {
     private String avgRating = null;
     private Boolean monetizedInfo = null;
     private AdvertiseInfoDTO advertiseInfo = null;
+
+  /**
+   * Human-friendly name shown in UI. Length limited to DB column size.
+   **/
+  public APISearchResultDTO displayName(String displayName) {
+    this.displayName = displayName;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Pizza Shack API", value = "Human-friendly name shown in UI. Length limited to DB column size.")
+  @JsonProperty("displayName")
+  public String getDisplayName() {
+    return displayName;
+  }
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
+  }
 
   /**
    * A brief description about the API
@@ -223,7 +242,8 @@ public class APISearchResultDTO extends SearchResultDTO  {
       return false;
     }
     APISearchResultDTO apISearchResult = (APISearchResultDTO) o;
-    return Objects.equals(description, apISearchResult.description) &&
+    return Objects.equals(displayName, apISearchResult.displayName) &&
+        Objects.equals(description, apISearchResult.description) &&
         Objects.equals(context, apISearchResult.context) &&
         Objects.equals(version, apISearchResult.version) &&
         Objects.equals(provider, apISearchResult.provider) &&
@@ -237,7 +257,7 @@ public class APISearchResultDTO extends SearchResultDTO  {
 
   @Override
   public int hashCode() {
-    return Objects.hash(description, context, version, provider, status, thumbnailUri, businessInformation, avgRating, monetizedInfo, advertiseInfo);
+    return Objects.hash(displayName, description, context, version, provider, status, thumbnailUri, businessInformation, avgRating, monetizedInfo, advertiseInfo);
   }
 
   @Override
@@ -245,6 +265,7 @@ public class APISearchResultDTO extends SearchResultDTO  {
     StringBuilder sb = new StringBuilder();
     sb.append("class APISearchResultDTO {\n");
     sb.append("    ").append(toIndentedString(super.toString())).append("\n");
+    sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");

@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.keymgt.model;
 
+import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApiPolicy;
@@ -218,5 +219,7 @@ public interface SubscriptionDataStore {
     List<ApplicationKeyMapping> getKeyMappingByApplicationId(int applicationId);
 
     void destroy();
+
+    void updateAPIPropertiesFromGatewayDTO(GatewayAPIDTO gatewayAPIDTO);
 }
 

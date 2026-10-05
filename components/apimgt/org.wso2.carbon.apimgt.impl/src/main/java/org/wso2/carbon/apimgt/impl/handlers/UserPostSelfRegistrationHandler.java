@@ -121,6 +121,9 @@ public class UserPostSelfRegistrationHandler extends AbstractEventHandler {
                     signUpWFDto.setExternalWorkflowReference(userSignUpWFExecutor.generateUUID());
                     signUpWFDto.setWorkflowType(WorkflowConstants.WF_TYPE_AM_USER_SIGNUP);
                     signUpWFDto.setCallbackUrl(userSignUpWFExecutor.getCallbackURL());
+                    String workflowDescription = String.format("Approve Devportal signup request done by %s from the tenant domain %s", userName, signUpWFDto.getTenantDomain());
+                    signUpWFDto.setWorkflowDescription(workflowDescription);
+
                     userSignUpWFExecutor.execute(signUpWFDto);
 
                 }

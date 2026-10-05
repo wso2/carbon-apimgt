@@ -17,6 +17,8 @@
 */
 package org.wso2.carbon.apimgt.api.model;
 
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
+
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -31,10 +33,12 @@ public class Scope implements Serializable{
     String id;
     int usageCount;
 
+    @UsedByMigrationClient
     public String getKey() {
         return key;
     }
 
+    @UsedByMigrationClient
     public void setKey(String key) {
         this.key = key;
     }
@@ -43,14 +47,17 @@ public class Scope implements Serializable{
         return name;
     }
 
+    @UsedByMigrationClient
     public void setName(String name) {
         this.name = name;
     }
 
+    @UsedByMigrationClient
     public String getRoles() {
         return roles;
     }
 
+    @UsedByMigrationClient
     public void setRoles(String roles) {
         this.roles = roles;
     }
@@ -59,6 +66,7 @@ public class Scope implements Serializable{
         return description;
     }
 
+    @UsedByMigrationClient
     public void setDescription(String description) {
         this.description = description;
     }
@@ -67,6 +75,7 @@ public class Scope implements Serializable{
         return id;
     }
 
+    @UsedByMigrationClient
     public void setId(String id) {
         this.id = id;
     }

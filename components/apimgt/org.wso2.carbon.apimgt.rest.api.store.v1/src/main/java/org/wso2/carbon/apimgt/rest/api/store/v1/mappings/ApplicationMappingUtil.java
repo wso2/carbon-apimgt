@@ -207,14 +207,12 @@ public class ApplicationMappingUtil {
      * @return Updated sort by field
      */
     public static String getApplicationSortByField (String sortBy) {
-        String updatedSortBy = "";
-        if (RestApiConstants.SORT_BY_NAME.equals(sortBy)) {
-            updatedSortBy = APIConstants.APPLICATION_NAME;
-        } else if (RestApiConstants.SORT_BY_OWNER.equals(sortBy)) {
+        String updatedSortBy = APIConstants.APPLICATION_NAME;
+        if (RestApiConstants.SORT_BY_OWNER.equalsIgnoreCase(sortBy)) {
             updatedSortBy = APIConstants.APPLICATION_CREATED_BY;
-        } else if (RestApiConstants.SORT_BY_THROTTLING_TIER.equals(sortBy)) {
+        } else if (RestApiConstants.SORT_BY_THROTTLING_TIER.equalsIgnoreCase(sortBy)) {
             updatedSortBy = APIConstants.APPLICATION_TIER;
-        } else if (RestApiConstants.SORT_BY_STATUS.equals(sortBy)) {
+        } else if (RestApiConstants.SORT_BY_STATUS.equalsIgnoreCase(sortBy)) {
             updatedSortBy = APIConstants.APPLICATION_STATUS;
         }
         return updatedSortBy;

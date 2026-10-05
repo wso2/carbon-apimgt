@@ -19,14 +19,20 @@ package org.wso2.carbon.apimgt.api.model;
 
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Objects;
 
 /**
  * This class represent an Virtual Host
  */
-public class VHost {
+public class VHost implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     // host name from the http endpoint
     private String host;
     private String httpContext = "";
@@ -58,6 +64,7 @@ public class VHost {
     public VHost() {
     }
 
+    @UsedByMigrationClient
     public String getHost() {
         return host;
     }
@@ -66,6 +73,7 @@ public class VHost {
         this.host = host;
     }
 
+    @UsedByMigrationClient
     public String getHttpContext() {
         return httpContext;
     }
@@ -74,6 +82,7 @@ public class VHost {
         this.httpContext = httpContext;
     }
 
+    @UsedByMigrationClient
     public Integer getHttpPort() {
         return httpPort;
     }
@@ -82,6 +91,7 @@ public class VHost {
         this.httpPort = httpPort;
     }
 
+    @UsedByMigrationClient
     public Integer getHttpsPort() {
         return httpsPort;
     }
@@ -90,6 +100,7 @@ public class VHost {
         this.httpsPort = httpsPort;
     }
 
+    @UsedByMigrationClient
     public Integer getWsPort() {
         return wsPort;
     }
@@ -106,6 +117,7 @@ public class VHost {
         this.wsHost = wsHost;
     }
 
+    @UsedByMigrationClient
     public Integer getWssPort() {
         return wssPort;
     }
@@ -147,10 +159,12 @@ public class VHost {
     }
 
     public String getWsUrl() {
+        if (wsHost == null) return null;
         return getUrl("ws", wsHost, wsPort == DEFAULT_HTTP_PORT ? ""  : ":" + wsPort, "");
     }
 
     public String getWssUrl() {
+        if (wssHost == null) return null;
         return getUrl("wss", wssHost, wssPort == DEFAULT_HTTPS_PORT ? "" : ":" + wssPort, "");
     }
 
@@ -162,8 +176,38 @@ public class VHost {
         return String.format("%s://%s%s%s", protocol, hostName, port, context);
     }
 
+    private void findAndDisableMissingProtocols(String[] endpoints) {
+        boolean wsFound = false;
+        boolean wssFound = false;
+        for (String endpoint : endpoints) {
+            if (StringUtils.isEmpty(endpoint)) {
+                continue;
+            }
+            String[] elem = endpoint.split(PROTOCOL_SEPARATOR);
+            if (elem.length != 2) {
+                continue;
+            }
+            switch (elem[0]) {
+            case WS_PROTOCOL:
+                wsFound = true;
+                break;
+            case WSS_PROTOCOL:
+                wssFound = true;
+                break;
+            }
+        }
+        if (!wsFound) {
+            this.disableWs();
+        }
+        if (!wssFound) {
+            this.disableWss();
+        }
+    }
+
+    @UsedByMigrationClient
     public static VHost fromEndpointUrls(String[] endpoints) throws APIManagementException {
         VHost vhost = new VHost();
+        vhost.findAndDisableMissingProtocols(endpoints);
 
         for (String endpoint : endpoints) {
             if (StringUtils.isEmpty(endpoint)) {
@@ -223,16 +267,18 @@ public class VHost {
         if (StringUtils.isEmpty(vhost.getHost())) {
             throw new APIManagementException("Error while building VHost, missing required HTTP or HTTPS endpoint");
         }
-
-        // If WebSocket host name of Vhost is empty, use HTTP/HTTPS endpoint hostname
-        if ((vhost.getWsHost() == null) || (StringUtils.isEmpty(vhost.getWsHost()))) {
-            vhost.setWsHost(vhost.getHost());
-        }
-        if ((vhost.getWssHost() == null) || (StringUtils.isEmpty(vhost.getWssHost()))) {
-            vhost.setWssHost(vhost.getHost());
-        }
-
+        
         return vhost;
+    }
+
+    public void disableWs() {
+        this.wsPort = null;
+        this.wsHost = null;
+    }
+
+    public void disableWss() {
+        this.wssPort = null;
+        this.wssHost = null;
     }
 
     @Override
@@ -250,8 +296,10 @@ public class VHost {
                 && StringUtils.equals(vHost.httpContext, this.httpContext)
                 && vHost.httpPort.equals(this.httpPort)
                 && vHost.httpsPort.equals(this.httpsPort)
-                && vHost.wsPort.equals(this.wsPort)
-                && vHost.wssPort.equals(this.wssPort);
+                && Objects.equals(vHost.wsHost, this.wsHost)
+                && Objects.equals(vHost.wssHost, this.wssHost)
+                && Objects.equals(vHost.wsPort, this.wsPort)
+                && Objects.equals(vHost.wssPort, this.wssPort);
     }
 
     @Override
@@ -264,8 +312,12 @@ public class VHost {
                 + ((httpContext == null) ? 0 : httpContext.hashCode());
         result = prime * result + httpPort;
         result = prime * result + httpsPort;
-        result = prime * result + wsPort;
-        result = prime * result + wssPort;
+        result = prime * result
+                + ((wsHost == null) ? 0 : wsHost.hashCode());
+        result = prime * result
+                + ((wssHost == null) ? 0 : wssHost.hashCode());
+        result = prime * result + ((wsPort == null) ? 0 : wsPort);
+        result = prime * result + ((wssPort == null) ? 0 : wssPort);
         return result;
     }
 }

@@ -45,14 +45,15 @@ LlmProvidersApiService delegate = new LlmProvidersApiServiceImpl();
     @ApiOperation(value = "Add a LLM provider", notes = "Add a new LLM provider ", response = LLMProviderResponseDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:llm_provider_manage", description = "Manage LLM Providers")
+            @AuthorizationScope(scope = "apim:llm_provider_manage", description = "Create, update and delete LLM providers. View requires apim:llm_provider_view"),
+            @AuthorizationScope(scope = "apim:llm_provider_create", description = "Create AI and LLM service providers")
         })
     }, tags={ "LLMProviders",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created LLM provider as entity in the body. ", response = LLMProviderResponseDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class) })
-    public Response addLLMProvider(@Multipart(value = "name", required = false)  String name, @Multipart(value = "apiVersion", required = false)  String apiVersion, @Multipart(value = "description", required = false)  String description, @Multipart(value = "configurations", required = false)  String configurations,  @Multipart(value = "apiDefinition", required = false) InputStream apiDefinitionInputStream, @Multipart(value = "apiDefinition" , required = false) Attachment apiDefinitionDetail) throws APIManagementException{
-        return delegate.addLLMProvider(name, apiVersion, description, configurations, apiDefinitionInputStream, apiDefinitionDetail, securityContext);
+    public Response addLLMProvider(@Multipart(value = "name", required = false)  String name, @Multipart(value = "apiVersion", required = false)  String apiVersion, @Multipart(value = "description", required = false)  String description, @Multipart(value = "configurations", required = false)  String configurations,  @Multipart(value = "apiDefinition", required = false) InputStream apiDefinitionInputStream, @Multipart(value = "apiDefinition" , required = false) Attachment apiDefinitionDetail, @Multipart(value = "modelList", required = false)  String modelList) throws APIManagementException{
+        return delegate.addLLMProvider(name, apiVersion, description, configurations, apiDefinitionInputStream, apiDefinitionDetail, modelList, securityContext);
     }
 
     @DELETE
@@ -62,7 +63,8 @@ LlmProvidersApiService delegate = new LlmProvidersApiServiceImpl();
     @ApiOperation(value = "Delete a LLM Provider", notes = "Delete a LLM Provider by llmProviderId ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:llm_provider_manage", description = "Manage LLM Providers")
+            @AuthorizationScope(scope = "apim:llm_provider_manage", description = "Create, update and delete LLM providers. View requires apim:llm_provider_view"),
+            @AuthorizationScope(scope = "apim:llm_provider_delete", description = "Delete AI and LLM service providers")
         })
     }, tags={ "LLMProvider",  })
     @ApiResponses(value = { 
@@ -78,7 +80,8 @@ LlmProvidersApiService delegate = new LlmProvidersApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get LLM Provider", notes = "Get a LLM Provider ", response = LLMProviderResponseDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:llm_provider_view", description = "View AI and LLM service providers")
         })
     }, tags={ "LLMProvider",  })
     @ApiResponses(value = { 
@@ -93,7 +96,8 @@ LlmProvidersApiService delegate = new LlmProvidersApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get all LLM providers", notes = "Get all LLM providers ", response = LLMProviderSummaryResponseListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:llm_provider_view", description = "View AI and LLM service providers")
         })
     }, tags={ "LLMProviders",  })
     @ApiResponses(value = { 
@@ -109,14 +113,15 @@ LlmProvidersApiService delegate = new LlmProvidersApiServiceImpl();
     @ApiOperation(value = "Update an LLM provider", notes = "Update a LLM provider by LLMProviderId ", response = LLMProviderResponseDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:llm_provider_manage", description = "Manage LLM Providers")
+            @AuthorizationScope(scope = "apim:llm_provider_manage", description = "Create, update and delete LLM providers. View requires apim:llm_provider_view"),
+            @AuthorizationScope(scope = "apim:llm_provider_update", description = "Update AI and LLM service providers")
         })
     }, tags={ "LLMProvider" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. LLM Provider updated. ", response = LLMProviderResponseDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response updateLLMProvider(@ApiParam(value = "LLM Provider UUID ",required=true) @PathParam("llmProviderId") String llmProviderId, @Multipart(value = "name", required = false)  String name, @Multipart(value = "apiVersion", required = false)  String apiVersion, @Multipart(value = "description", required = false)  String description, @Multipart(value = "configurations", required = false)  String configurations,  @Multipart(value = "apiDefinition", required = false) InputStream apiDefinitionInputStream, @Multipart(value = "apiDefinition" , required = false) Attachment apiDefinitionDetail) throws APIManagementException{
-        return delegate.updateLLMProvider(llmProviderId, name, apiVersion, description, configurations, apiDefinitionInputStream, apiDefinitionDetail, securityContext);
+    public Response updateLLMProvider(@ApiParam(value = "LLM Provider UUID ",required=true) @PathParam("llmProviderId") String llmProviderId, @Multipart(value = "name", required = false)  String name, @Multipart(value = "apiVersion", required = false)  String apiVersion, @Multipart(value = "description", required = false)  String description, @Multipart(value = "configurations", required = false)  String configurations,  @Multipart(value = "apiDefinition", required = false) InputStream apiDefinitionInputStream, @Multipart(value = "apiDefinition" , required = false) Attachment apiDefinitionDetail, @Multipart(value = "modelList", required = false)  String modelList) throws APIManagementException{
+        return delegate.updateLLMProvider(llmProviderId, name, apiVersion, description, configurations, apiDefinitionInputStream, apiDefinitionDetail, modelList, securityContext);
     }
 }

@@ -85,9 +85,9 @@ public class CustomAPIIndexerTest {
         Mockito.when(genericArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY)).thenReturn("public");
         resource.setProperty(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX + APIConstants.
                 CUSTOM_API_INDEXER_PROPERTY, APIConstants.CUSTOM_API_INDEXER_PROPERTY);
-        Assert.assertEquals(APIConstants.OVERVIEW_PREFIX + APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX +
-                APIConstants.CUSTOM_API_INDEXER_PROPERTY, indexer.getIndexedDocument(file2Index).getFields().keySet().
-                toArray()[0].toString());
+        Assert.assertTrue("custom property not available in the resource before indexing",
+                indexer.getIndexedDocument(file2Index).getFields().containsKey(APIConstants.OVERVIEW_PREFIX + APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX +
+                APIConstants.CUSTOM_API_INDEXER_PROPERTY));
     }
 
     /**

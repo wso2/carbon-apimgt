@@ -22,7 +22,9 @@ import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import javax.cache.Cache;
 
@@ -30,6 +32,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants.ConfigType;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
@@ -64,7 +67,7 @@ public class APIMConfigServiceImpl implements APIMConfigService {
     private static final String PUBLISHER_ORG_READ = "apim:publisher_organization_read";
     private static final String ADMIN_ORG_READ = "apim:organization_read";
     private static final String ADMIN_ORG_MANAGE = "apim:organization_manage";
-    
+
     protected SystemConfigurationsDAO systemConfigurationsDAO;
 
     public APIMConfigServiceImpl() {
@@ -173,6 +176,7 @@ public class APIMConfigServiceImpl implements APIMConfigService {
     }
 
     @Override
+    @UsedByMigrationClient
     public void addTenantConfig(String organization, String tenantConfig) throws APIManagementException {
 
         if (organization == null) {
@@ -182,6 +186,7 @@ public class APIMConfigServiceImpl implements APIMConfigService {
     }
 
     @Override
+    @UsedByMigrationClient
     public String getTenantConfig(String organization) throws APIManagementException {
 
         if (organization == null) {
@@ -193,26 +198,48 @@ public class APIMConfigServiceImpl implements APIMConfigService {
     /*
      *  This method facilitates the on-the-fly migration of the scope section in the tenant-config.json. This
      *  checks whether RESTAPIScopes section has newly introduced scopes and add them to the json String if it
-     *  is not available. 
+     *  is not available.
      */
     private String addMissingScopes(String systemConfig) {
         if (systemConfig == null) {
             return null;
         }
+
         // List of newly introduced scopes
-        String[] scopesToCheck = {
-                "apim:admin_tier_view",
-                "apim:admin_tier_manage",
-                "apim:keymanagers_manage",
-                "apim:api_category",
-                SUBSCRIPTION_APPROVAL_VIEW_SCOPE,
-                SUBSCRIPTION_APPROVAL_MANAGE_SCOPE,
-                PUBLISHER_ORG_READ,
-                ADMIN_ORG_MANAGE,
-                ADMIN_ORG_READ
-            };
-        
-        ArrayList<String> missingScopesList = new ArrayList<>(Arrays.asList(scopesToCheck));
+        Map<String, String> scopesToCheck = new HashMap<>();
+        scopesToCheck.put("apim:admin_tier_view", "admin");
+        scopesToCheck.put("apim:admin_tier_manage", "admin");
+        scopesToCheck.put("apim:keymanagers_manage", "admin");
+        scopesToCheck.put("apim:api_category", "admin");
+        scopesToCheck.put("apim:api_provider_change", "admin");
+        scopesToCheck.put("apim:app_settings_change", "admin");
+        scopesToCheck.put("apim:gateway_policy_manage", "admin");
+        scopesToCheck.put("apim:gateway_policy_view", "admin,Internal/creator,Internal/publisher,Internal/observer");
+        scopesToCheck.put("apim:llm_provider_manage", "admin");
+        scopesToCheck.put("apim:llm_provider_read", "admin,Internal/publisher,Internal/creator");
+        scopesToCheck.put("apim:gov_rule_manage", "admin");
+        scopesToCheck.put("apim:gov_rule_read", "admin,Internal/publisher,Internal/creator,Internal/observer");
+        scopesToCheck.put("apim:gov_result_read", "admin,Internal/publisher,Internal/creator,Internal/observer");
+        scopesToCheck.put("apim:gov_policy_manage", "admin");
+        scopesToCheck.put("apim:gov_policy_read", "admin,Internal/publisher,Internal/creator,Internal/observer");
+
+        // MCP Server specific scopes
+        scopesToCheck.put("apim:mcp_server_create", "admin,Internal/creator");
+        scopesToCheck.put("apim:mcp_server_manage", "admin");
+        scopesToCheck.put("apim:mcp_server_view", "admin,Internal/publisher,Internal/creator,Internal/analytics,Internal/observer");
+        scopesToCheck.put("apim:mcp_server_list_view", "admin,Internal/integration_dev");
+        scopesToCheck.put("apim:mcp_server_import_export", "admin,Internal/devops");
+        scopesToCheck.put("apim:mcp_server_publish", "admin,Internal/publisher");
+        scopesToCheck.put("apim:mcp_server_delete", "admin,Internal/creator");
+        scopesToCheck.put("apim:mcp_server_generate_key", "admin,Internal/creator,Internal/publisher");
+
+        scopesToCheck.put(SUBSCRIPTION_APPROVAL_VIEW_SCOPE, "admin,Internal/publisher");
+        scopesToCheck.put(SUBSCRIPTION_APPROVAL_MANAGE_SCOPE, "admin,Internal/publisher");
+        scopesToCheck.put(PUBLISHER_ORG_READ, "admin,Internal/creator");
+        scopesToCheck.put(ADMIN_ORG_MANAGE, "admin");
+        scopesToCheck.put(ADMIN_ORG_READ, "admin");
+
+        ArrayList<String> missingScopesList = new ArrayList<>(scopesToCheck.keySet());
         
         JsonParser jsonParser = new JsonParser();
         JsonObject jsonObject = jsonParser.parse(systemConfig).getAsJsonObject();
@@ -241,23 +268,16 @@ public class APIMConfigServiceImpl implements APIMConfigService {
         for (String missingScope : missingScopesList) {
             JsonObject newScope = new JsonObject();
             newScope.addProperty("Name", missingScope);
-            if (missingScope.equals(SUBSCRIPTION_APPROVAL_VIEW_SCOPE) ||
-                    missingScope.equals(SUBSCRIPTION_APPROVAL_MANAGE_SCOPE)) {
-                newScope.addProperty("Roles", "admin,Internal/publisher");
-            } else if (missingScope.equals(PUBLISHER_ORG_READ)) {
-                newScope.addProperty("Roles", "admin,Internal/creator");
-            } else {
-                newScope.addProperty("Roles", "admin");
-            }
+            newScope.addProperty("Roles", scopesToCheck.get(missingScope));
             scopeArray.add(newScope);
         }
               
         // Convert the modified JSON back to a string
-        String modifiedJson = jsonObject.toString();
-        return modifiedJson;
+        return jsonObject.toString();
     }
 
     @Override
+    @UsedByMigrationClient
     public void updateTenantConfig(String organization, String tenantConfig) throws APIManagementException {
 
         if (organization == null) {

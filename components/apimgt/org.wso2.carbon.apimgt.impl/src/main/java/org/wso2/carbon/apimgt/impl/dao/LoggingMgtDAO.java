@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.impl.dao;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -213,41 +214,45 @@ public class LoggingMgtDAO {
         return apiLogInfoDTOList;
     }
 
-    public List<APILogInfoDTO> retrieveAllAPILoggerList() throws APIManagementException {
+    public List<APILogInfoDTO> retrieveAllAPILoggerList(String organization) throws APIManagementException {
         List<APILogInfoDTO> apiLogInfoDTOList = new ArrayList<>();
-        String queryPerApi = SQLConstants.RETRIEVE_ALL_PER_API_LOGGING_SQL;
-        String queryPerApiResource = SQLConstants.RETRIEVE_ALL_PER_API_RESOURCE_LOGGING_SQL;
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(queryPerApi)) {
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                while (resultSet.next()) {
-                    String logLevel = APIConstants.LOG_LEVEL_OFF;
-                    if (resultSet.getString(APIConstants.LOG_LEVEL) != null) {
-                        logLevel = resultSet.getString(APIConstants.LOG_LEVEL);
-                    }
-                    APILogInfoDTO apiLogInfoDTO = new APILogInfoDTO(resultSet.getString(API_UUID),
-                            resultSet.getString(CONTEXT), logLevel);
-                    apiLogInfoDTOList.add(apiLogInfoDTO);
-                }
-            }
-            PreparedStatement preparedStatementResource = connection.prepareStatement(queryPerApiResource);
-            {
-                try (ResultSet resultSet = preparedStatementResource.executeQuery()) {
-                    while (resultSet.next()) {
-                        String logLevel = APIConstants.LOG_LEVEL_OFF;
-                        if (resultSet.getString(APIConstants.LOG_LEVEL) != null) {
-                            logLevel = resultSet.getString(APIConstants.LOG_LEVEL);
+        if (StringUtils.isNotEmpty(organization)) {
+            String queryPerApi = SQLConstants.RETRIEVE_ALL_PER_API_LOGGING_SQL;
+            String queryPerApiResource = SQLConstants.RETRIEVE_ALL_PER_API_RESOURCE_LOGGING_SQL;
+            try (Connection connection = APIMgtDBUtil.getConnection()) {
+                try (PreparedStatement preparedStatement = connection.prepareStatement(queryPerApi)) {
+                    preparedStatement.setString(1, organization);
+                    try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                        while (resultSet.next()) {
+                            String logLevel = APIConstants.LOG_LEVEL_OFF;
+                            if (resultSet.getString(APIConstants.LOG_LEVEL) != null) {
+                                logLevel = resultSet.getString(APIConstants.LOG_LEVEL);
+                            }
+                            APILogInfoDTO apiLogInfoDTO = new APILogInfoDTO(resultSet.getString(API_UUID),
+                                    resultSet.getString(CONTEXT), logLevel);
+                            apiLogInfoDTOList.add(apiLogInfoDTO);
                         }
-                        APILogInfoDTO apiLogInfoDTO = new APILogInfoDTO(resultSet.getString(API_UUID),
-                                resultSet.getString(CONTEXT), logLevel,
-                                resultSet.getString(APIConstants.RESOURCE_METHOD),
-                                resultSet.getString(APIConstants.RESOURCE_PATH));
-                        apiLogInfoDTOList.add(apiLogInfoDTO);
                     }
                 }
+                try (PreparedStatement preparedStatementResource = connection.prepareStatement(queryPerApiResource)) {
+                    preparedStatementResource.setString(1, organization);
+                    try (ResultSet resultSet = preparedStatementResource.executeQuery()) {
+                        while (resultSet.next()) {
+                            String logLevel = APIConstants.LOG_LEVEL_OFF;
+                            if (resultSet.getString(APIConstants.LOG_LEVEL) != null) {
+                                logLevel = resultSet.getString(APIConstants.LOG_LEVEL);
+                            }
+                            APILogInfoDTO apiLogInfoDTO = new APILogInfoDTO(resultSet.getString(API_UUID),
+                                    resultSet.getString(CONTEXT), logLevel,
+                                    resultSet.getString(APIConstants.RESOURCE_METHOD),
+                                    resultSet.getString(APIConstants.RESOURCE_PATH));
+                            apiLogInfoDTOList.add(apiLogInfoDTO);
+                        }
+                    }
+                }
+            } catch (SQLException e) {
+                handleException("Failed to retrieve organization", e);
             }
-        } catch (SQLException e) {
-            handleException("Failed to retrieve organization", e);
         }
         return apiLogInfoDTOList;
     }

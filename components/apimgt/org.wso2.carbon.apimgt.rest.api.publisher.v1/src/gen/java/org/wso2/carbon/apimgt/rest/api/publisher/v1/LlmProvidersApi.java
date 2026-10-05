@@ -84,6 +84,21 @@ LlmProvidersApiService delegate = new LlmProvidersApiServiceImpl();
     }
 
     @GET
+    @Path("/{llmProviderId}/models")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get LLM provider's model list", notes = "Get LLM provider's model list ", response = String.class, responseContainer = "List", authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:llm_provider_read", description = "Read LLM Providers")
+        })
+    }, tags={ "LLMProvider",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. List of models ", response = String.class, responseContainer = "List") })
+    public Response getLLMProviderModels(@ApiParam(value = "",required=true) @PathParam("llmProviderId") String llmProviderId) throws APIManagementException{
+        return delegate.getLLMProviderModels(llmProviderId, securityContext);
+    }
+
+    @GET
     
     
     @Produces({ "application/json" })

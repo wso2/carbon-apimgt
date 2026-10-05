@@ -31,6 +31,7 @@ public class DevPortalAPIInfo {
     private static final Log log = LogFactory.getLog(DevPortalAPIInfo.class);
     private String id;
     private String apiName;
+    private String displayName;
     private String version;
     private String providerName;
     private String context;
@@ -163,6 +164,14 @@ public class DevPortalAPIInfo {
     }
     public void setAdditionalProperties(Map<String, String> additionalProperties) {
         this.additionalProperties = additionalProperties;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     public String getBusinessOwnerEmail() {

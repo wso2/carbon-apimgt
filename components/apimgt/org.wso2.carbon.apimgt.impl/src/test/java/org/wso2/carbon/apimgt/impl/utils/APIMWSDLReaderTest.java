@@ -25,10 +25,12 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.api.APIConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -155,7 +157,6 @@ public class APIMWSDLReaderTest {
     @Test
     public void testSetServiceDefinition() throws Exception {
         doMockStatics();
-        PowerMockito.mockStatic(APIUtil.class);
         API api = getAPIForTesting();
         String environmentName = "Default";
         String environmentType = "hybrid";
@@ -179,7 +180,7 @@ public class APIMWSDLReaderTest {
 
     @Test
     public void testSetServiceDefinitionWithInvalidAPIGatewayEndpoints() throws Exception {
-        PowerMockito.mockStatic(APIUtil.class);
+        doMockStatics();
         API api = getAPIForTesting();
         String environmentName = "Default";
         String environmentType = "hybrid";
@@ -208,6 +209,7 @@ public class APIMWSDLReaderTest {
             env1.setType("hybrid");
             env1.setApiGatewayEndpoint("http://localhost:8280,https://localhost:8243");
             gatewayEnvironments.put("e1", env1);
+            gatewayEnvironments.put("Default", env1);
 
             PowerMockito.mockStatic(ServiceReferenceHolder.class);
             PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
@@ -222,12 +224,23 @@ public class APIMWSDLReaderTest {
                     .getAPIManagerConfiguration()
                     .getApiGatewayEnvironments()).thenReturn(gatewayEnvironments);
 
+            PowerMockito.when(ServiceReferenceHolder.getInstance()
+                            .getAPIManagerConfigurationService()
+                            .getAPIManagerConfiguration()
+                            .getFirstProperty(APIConstants.API_PUBLISHER_IMPORT_WSDL_FILE_SIZE_LIMIT))
+                    .thenReturn(APIConstants.API_PUBLISHER_IMPORT_WSDL_FILE_SIZE_LIMIT_DEFAULT_MB);
+
             ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
             PowerMockito.mockStatic(ApiMgtDAO.class);
             Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
             Mockito.when(apiMgtDAO.getAllEnvironments(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME))
                     .thenReturn(new ArrayList<org.wso2.carbon.apimgt.api.model.Environment>());
-            PowerMockito.when(APIUtil.getEnvironments("61416403c40f086ad2dc5eed")).thenReturn(gatewayEnvironments);
+            // Stub getEnvironments only; CALLS_REAL_METHODS keeps buildOMElement, getServerURL, etc. real.
+            // Without mockStatic first, when(getEnvironments(...)) executed the real method and Mockito
+            // threw WrongTypeOfReturnValue (when() received a plain Map, not a mock).
+            PowerMockito.mockStatic(APIUtil.class, Mockito.CALLS_REAL_METHODS);
+            PowerMockito.when(APIUtil.getEnvironments(ArgumentMatchers.any()))
+                    .thenReturn(gatewayEnvironments);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
@@ -237,6 +250,7 @@ public class APIMWSDLReaderTest {
         API api = new API(new APIIdentifier("admin", "api1", "1.0.0"));
         api.setTransports("https");
         api.setContext("/abc");
+        api.setOrganization("61416403c40f086ad2dc5eed");
         return api;
     }
 }

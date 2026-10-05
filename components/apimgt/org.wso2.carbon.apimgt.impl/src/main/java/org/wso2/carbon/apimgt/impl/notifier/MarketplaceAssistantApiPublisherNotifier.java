@@ -18,7 +18,9 @@ package org.wso2.carbon.apimgt.impl.notifier;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.api.AIRequestContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.ai.AIRequestPropertyEnricherHolder;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -82,7 +84,11 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
 
             if (APIConstants.EventType.API_LIFECYCLE_CHANGE.name().equals(event.getType())) {
                 String lifecycleEvent = apiEvent.getLifecycleEvent();
-                String currentStatus = apiEvent.getCurrentStatus().toUpperCase();
+                String currentStatus = apiEvent.getCurrentStatus();
+                if (lifecycleEvent == null || currentStatus == null) {
+                    return;
+                }
+                currentStatus = currentStatus.toUpperCase();
                 switch (lifecycleEvent) {
                     case APIConstants.DEMOTE_TO_CREATED:
                     case APIConstants.BLOCK:
@@ -160,6 +166,9 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
         public void run() {
             try {
                 String api_type = api.getType();
+                if (APIConstants.API_TYPE_MCP.equals(api_type)) {
+                    return;
+                }
                 JSONObject payload = new JSONObject();
 
                 payload.put(APIConstants.API_SPEC_TYPE, api_type);
@@ -198,15 +207,21 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
                 payload.put(APIConstants.VISIBILITYROLES, visibleRoles.toLowerCase());
                 payload.put(APIConstants.APIM_VERSION, APIUtil.getAPIMVersion());
 
+                AIRequestContext context = APIUtil.buildAIRequestContext(apiEvent.getTenantDomain(),
+                        marketplaceAssistantConfigurationDto.getApiPublishResource(), null);
+                String finalPayload = APIUtil.addAdditionalPropertiesToPayload(payload.toString(),
+                        AIRequestPropertyEnricherHolder.getInstance().resolveProperties(context,
+                                enricher -> enricher.enrichMarketplaceAssistantApiPublishProperties(context)));
+
                 if (marketplaceAssistantConfigurationDto.isKeyProvided()) {
                     APIUtil.invokeAIService(marketplaceAssistantConfigurationDto.getEndpoint(),
                             marketplaceAssistantConfigurationDto.getTokenEndpoint(),
                             marketplaceAssistantConfigurationDto.getKey(),
-                            marketplaceAssistantConfigurationDto.getApiPublishResource(), payload.toString(), null);
+                            marketplaceAssistantConfigurationDto.getApiPublishResource(), finalPayload, null);
                 } else if (marketplaceAssistantConfigurationDto.isAuthTokenProvided()) {
                     APIUtil.invokeAIService(marketplaceAssistantConfigurationDto.getEndpoint(), null,
                             marketplaceAssistantConfigurationDto.getAccessToken(),
-                            marketplaceAssistantConfigurationDto.getApiPublishResource(), payload.toString(), null);
+                            marketplaceAssistantConfigurationDto.getApiPublishResource(), finalPayload, null);
                 }
             } catch (APIManagementException e) {
                 String errorMessage = "Error encountered while Uploading the API with UUID: " +

@@ -31,6 +31,39 @@ public class EnvironmentDTO   {
     private String displayName = null;
     private String type = "hybrid";
     private String gatewayType = "Regular";
+
+    @XmlType(name="ModeEnum")
+    @XmlEnum(String.class)
+    public enum ModeEnum {
+        READ_ONLY("READ_ONLY"),
+        READ_WRITE("READ_WRITE"),
+        WRITE_ONLY("WRITE_ONLY");
+        private String value;
+
+        ModeEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static ModeEnum fromValue(String v) {
+            for (ModeEnum b : ModeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
+    private ModeEnum mode = ModeEnum.WRITE_ONLY;
     private String serverUrl = null;
     private String provider = null;
     private Boolean showInApiConsole = null;
@@ -125,6 +158,24 @@ public class EnvironmentDTO   {
   }
   public void setGatewayType(String gatewayType) {
     this.gatewayType = gatewayType;
+  }
+
+  /**
+   * The mode of the environment. This indicates whether the environment is in read-only or read-write mode. **READ_ONLY:** The environment is in read-only mode. API cannot be deployed, only discovery is possible. **READ_WRITE:** The environment is in read-write mode. APIs can be deployed and discovered. **WRITE_ONLY:** The environment is in write-only mode/ APIs only can be deployed. 
+   **/
+  public EnvironmentDTO mode(ModeEnum mode) {
+    this.mode = mode;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "READ_WRITE", value = "The mode of the environment. This indicates whether the environment is in read-only or read-write mode. **READ_ONLY:** The environment is in read-only mode. API cannot be deployed, only discovery is possible. **READ_WRITE:** The environment is in read-write mode. APIs can be deployed and discovered. **WRITE_ONLY:** The environment is in write-only mode/ APIs only can be deployed. ")
+  @JsonProperty("mode")
+  public ModeEnum getMode() {
+    return mode;
+  }
+  public void setMode(ModeEnum mode) {
+    this.mode = mode;
   }
 
   /**
@@ -267,6 +318,7 @@ public class EnvironmentDTO   {
         Objects.equals(displayName, environment.displayName) &&
         Objects.equals(type, environment.type) &&
         Objects.equals(gatewayType, environment.gatewayType) &&
+        Objects.equals(mode, environment.mode) &&
         Objects.equals(serverUrl, environment.serverUrl) &&
         Objects.equals(provider, environment.provider) &&
         Objects.equals(showInApiConsole, environment.showInApiConsole) &&
@@ -278,7 +330,7 @@ public class EnvironmentDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, displayName, type, gatewayType, serverUrl, provider, showInApiConsole, vhosts, endpointURIs, additionalProperties, permissions);
+    return Objects.hash(id, name, displayName, type, gatewayType, mode, serverUrl, provider, showInApiConsole, vhosts, endpointURIs, additionalProperties, permissions);
   }
 
   @Override
@@ -291,6 +343,7 @@ public class EnvironmentDTO   {
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    gatewayType: ").append(toIndentedString(gatewayType)).append("\n");
+    sb.append("    mode: ").append(toIndentedString(mode)).append("\n");
     sb.append("    serverUrl: ").append(toIndentedString(serverUrl)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    showInApiConsole: ").append(toIndentedString(showInApiConsole)).append("\n");

@@ -35,6 +35,8 @@ public class Constants {
     public static final String API_USER_NAME_KEY = "userName";
     public static final String API_CONTEXT_KEY = "apiContext";
     public static final String RESPONSE_SIZE = "responseSize";
+    public static final String REQUEST_SIZE = "requestSize";
+    public static final String RESOURCE_PATH = "RESOURCE_PATH";
     public static final String RESPONSE_CONTENT_TYPE = "responseContentType";
     public static final String API_ANALYTICS_CUSTOM_DATA_PROVIDER_CLASS = "publisher.custom.data.provider.class";
 
@@ -58,10 +60,14 @@ public class Constants {
 
         public static final int WS_TARGET_FAILURE_START = 1002;
         public static final int WS_TARGET_FAILURE__END = 1015;
+
+        public static final int GUARDRAIL_FAILURE_START = 900514;
+        public static final int GUARDRAIL_FAILURE__END = 900515;
     }
 
     public static final int RESOURCE_NOT_FOUND_ERROR_CODE = 404;
     public static final int METHOD_NOT_ALLOWED_ERROR_CODE = 405;
+    public static final int GUARDRAIL_ERROR_CODE = 900514;
     public static final int ENDPOINT_SUSPENDED_ERROR_CODE = 303001;
     public static final int RESOURCE_NOT_FOUND_APIM_ERROR_CODE = 900906;
 
@@ -77,10 +83,34 @@ public class Constants {
 
     public static final String CERTIFICATE_COMMON_NAME = "commonName";
     public static final String NOT_APPLICABLE_VALUE = "N/A";
+    public static final String SEND_HEADER = "send_headers";
+    public static final String REQUEST_HEADERS = "requestHeaders";
+    public static final String RESPONSE_HEADERS = "responseHeaders";
+    public static final String RESPONSE_HEADER_MASK = "response_headers";
+    public static final String REQUEST_HEADER_MASK = "request_headers";
+    public static final String MASK_VALUE = "*****";
+
+    public static final String SEND_PAYLOAD = "send_payloads";
+    public static final String REQUEST_BODY = "requestBody";
+    public static final String RESPONSE_BODY = "responseBody";
+    public static final String REQUEST_BODY_TRANSFER_ENCODING = "requestBodyTransferEncoding";
+    public static final String RESPONSE_BODY_TRANSFER_ENCODING = "responseBodyTransferEncoding";
+    public static final String TRANSFER_ENCODING_BASE64 = "base64";
+    public static final String PAYLOAD_SIZE_LIMIT = "payload_size_limit";
+    public static final int DEFAULT_PAYLOAD_SIZE_LIMIT_BYTES = 100000;
+    public static final String CAPTURE_PAYLOADS_WITHOUT_CONTENT_LENGTH = "capture_payloads_without_content_length";
+    public static final String REQUEST_CONTENT_TYPE = "requestContentType";
+    // Internal message-context property keys used to stash the captured request body between the
+    // request-out flow and event collection. Namespaced (apim.analytics.*) like every other analytics
+    // message-context property so a user policy's <property name="requestBody"/> cannot collide with
+    // them. Distinct from the wire keys above (REQUEST_BODY / REQUEST_BODY_TRANSFER_ENCODING), which
+    // remain the publisher contract in the event properties map.
+    public static final String REQUEST_BODY_PROPERTY = "apim.analytics.request.body";
+    public static final String REQUEST_BODY_TRANSFER_ENCODING_PROPERTY = "apim.analytics.request.body.encoding";
 
     public static final String AI_METADATA = "aiMetadata";
-    public static final String AI_VENDOR_NAME = "vendor_name";
-    public static final String AI_VENDOR_VERSION = "vendor_version";
+    public static final String AI_VENDOR_NAME = "vendorName";
+    public static final String AI_VENDOR_VERSION = "vendorVersion";
     public static final String AI_MODEL = "model";
     public static final String AI_TOKEN_USAGE = "aiTokenUsage";
     public static final String AI_PROMPT_TOKEN_USAGE = "promptTokens";
@@ -88,6 +118,10 @@ public class Constants {
     public static final String HOUR = "hour";
     public static final String AI_TOTAL_TOKEN_USAGE = "totalTokens";
     public static final String IS_EGRESS = "isEgress";
-    public static final String SUB_TYPE = "subtype";
+    public static final String SUBTYPE = "subtype";
+
+    public static final String MCP_METHOD = "jsonRpcMethod";
+    public static final String GUARDRAIL_NAME = "guardrailName";
+    public static final String IS_GUARDRAIL_HIT = "isGuardrailHit";
 
 }

@@ -41,7 +41,11 @@ LinterCustomRulesApiService delegate = new LinterCustomRulesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get linter custom rules.", notes = "This operation can be used to get linter custom rules from tenant-config. ", response = String.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
+            @AuthorizationScope(scope = "apim:api_metadata_view", description = "View API listing, configuration, and definition resources (swagger, wsdl, graphql, certificates, mediation policies, monetization). Excludes lifecycle, revisions, deployments, documents, comments, subscriptions, shared scopes, and common operation policies."),
+            @AuthorizationScope(scope = "apim:api_product_metadata_view", description = "View API Product listing and configuration (excludes documents, deployments, lifecycle, comments)"),
+            @AuthorizationScope(scope = "apim:mcp_server_metadata_view", description = "View MCP Server listing and configuration (excludes documents, deployments, lifecycle, comments)")
         })
     }, tags={ "Linter Custom Rules" })
     @ApiResponses(value = { 
@@ -49,7 +53,7 @@ LinterCustomRulesApiService delegate = new LinterCustomRulesApiServiceImpl();
         @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response getLinterCustomRules() throws APIManagementException{
-        return delegate.getLinterCustomRules(securityContext);
+    public Response getLinterCustomRules( @ApiParam(value = "")  @QueryParam("apiId") String apiId,  @ApiParam(value = "")  @QueryParam("apiType") String apiType) throws APIManagementException{
+        return delegate.getLinterCustomRules(apiId, apiType, securityContext);
     }
 }

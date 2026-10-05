@@ -28,7 +28,7 @@
     
         <parameter name="ServiceClass">org.wso2.carbon.apimgt.impl.service.APIConsumerAdmin</parameter>
         <parameter name="DoAuthentication" locked="true">true</parameter>
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/login</parameter>
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage</parameter>
 
 
         <parameter name="adminService" locked="true">true</parameter>

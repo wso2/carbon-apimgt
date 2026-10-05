@@ -254,6 +254,7 @@ paths:
             - apim:admin
             - apim:tier_manage
             - apim:admin_tier_manage
+            - apim:admin_tier_create
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -372,6 +373,7 @@ paths:
             - apim:admin
             - apim:tier_manage
             - apim:admin_tier_manage
+            - apim:admin_tier_update
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -399,6 +401,7 @@ paths:
             - apim:tier_manage
             - apim:admin_tier_manage
             - apim:policies_import_export
+            - apim:admin_tier_delete
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -508,6 +511,7 @@ paths:
             - apim:admin
             - apim:tier_manage
             - apim:admin_tier_manage
+            - apim:admin_tier_create
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -636,6 +640,7 @@ paths:
             - apim:admin
             - apim:tier_manage
             - apim:admin_tier_manage
+            - apim:admin_tier_update
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -663,6 +668,7 @@ paths:
             - apim:tier_manage
             - apim:admin_tier_manage
             - apim:policies_import_export
+            - apim:admin_tier_delete
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -771,6 +777,7 @@ paths:
             - apim:admin
             - apim:tier_manage
             - apim:admin_tier_manage
+            - apim:admin_tier_create
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -893,6 +900,7 @@ paths:
             - apim:admin
             - apim:tier_manage
             - apim:admin_tier_manage
+            - apim:admin_tier_update
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -923,6 +931,7 @@ paths:
             - apim:tier_manage
             - apim:admin_tier_manage
             - apim:policies_import_export
+            - apim:admin_tier_delete
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1026,6 +1035,7 @@ paths:
             - apim:admin
             - apim:tier_manage
             - apim:admin_tier_manage
+            - apim:admin_tier_create
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1144,6 +1154,7 @@ paths:
             - apim:admin
             - apim:tier_manage
             - apim:admin_tier_manage
+            - apim:admin_tier_update
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1171,6 +1182,7 @@ paths:
             - apim:tier_manage
             - apim:admin_tier_manage
             - apim:policies_import_export
+            - apim:admin_tier_delete
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1413,6 +1425,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:bl_manage
+            - apim:bl_create
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1478,6 +1491,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:bl_manage
+            - apim:bl_delete
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1517,6 +1531,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:bl_manage
+            - apim:bl_update
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PATCH -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1592,6 +1607,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:app_settings_change
             - apim:app_owner_change
             - apim:app_import_export
             - apim:admin_application_view
@@ -1678,12 +1694,60 @@ paths:
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v4/applications/0a043c2b-ee75-4ef3-9e1c-fc2610ccfa8b"'
 
+  /applications/{applicationId}/change-settings:
+    post:
+      tags:
+        - Application
+      operationId: updateApplicationSettings
+      summary: Update Application Settings
+      description: |
+        This operation allows updating one or more settings of an application.
+      parameters:
+        - $ref: '#/components/parameters/applicationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationUpdateRequest'
+      responses:
+        200:
+          description: Application updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:app_settings_change
+      x-code-samples:
+        - lang: Curl
+          source: |
+            curl -k -X POST \
+            -H "Authorization: Bearer <access-token>" \
+            -H "Content-Type: application/json" \
+            -d '{
+                  "owner": "newOwner",
+                  "tokenType": "JWT"
+                }' \
+            "https://127.0.0.1:9443/api/am/admin/v4/applications/0a043c2b-ee75-4ef3-9e1c-fc2610ccfa8b"
+
   /applications/{applicationId}/change-owner:
     post:
+      deprecated: true
       tags:
         - Application
       summary: Change Application Owner
       description: |
+        **Deprecated.**
+        This API will be removed in a future release.
+        Use `/applications/{applicationId}/change-settings` instead.
+        
         This operation is used to change the owner of an Application.
         In order to change the owner of an application, we need to pass the new application owner as a query parameter
       parameters:
@@ -1713,10 +1777,180 @@ paths:
           "https://127.0.0.1:9443/api/am/admin/v4/applications/0a043c2b-ee75-4ef3-9e1c-fc2610ccfa8b/change-owner?owner=admin"'
 
   ######################################################
+  # AI Service Providers resource APIs
+  ######################################################
+  /ai-service-providers:
+    get:
+      tags:
+        - AIServiceProviders
+      summary: Get all AI Service providers
+      description: |
+        Get all AI Service providers
+      responses:
+        200:
+          description: |
+            OK.
+            AI Service providers returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIServiceProviderSummaryResponseList'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:llm_provider_view
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/admin/v4/ai-service-providers"'
+      operationId: getAIServiceProviders
+
+    post:
+      tags:
+        - AIServiceProviders
+      summary: Add a AI Service provider
+      description: |
+        Add a new AI Service provider
+      requestBody:
+        description: |
+          AI Service provider object that should to be added
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AIServiceProviderRequest'
+        required: true
+      responses:
+        201:
+          description: |
+            Created.
+            Successful response with the newly created AI Service provider as entity in the body.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIServiceProviderResponse'
+        400:
+          $ref: '#/components/responses/BadRequest'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:llm_provider_manage
+            - apim:llm_provider_create
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer <ACCESS_TOKEN>" -H "Content-Type: multipart/form-data" 
+          -F "name=AIServiceProviderName" -F "apiVersion=v1" -F "configurations={\"key\":\"value\"}" 
+          -F "apiDefinition=@api_definition_file.json" 
+          "https://127.0.0.1:9443/api/am/admin/v4/ai-service-providers"'
+      operationId: addAIServiceProvider
+
+  ######################################################
+  # The "Individual AI Service Provider" resource APIs
+  ######################################################
+  /ai-service-providers/{aiServiceProviderId}:
+    put:
+      tags:
+        - AIServiceProvider
+      summary: Update an AI Service provider
+      description: |
+        Update a AI Service provider by AIServiceProviderId
+      parameters:
+        - $ref: '#/components/parameters/aiServiceProviderId'
+      requestBody:
+        description: |
+          AI Service Provider object with updated information
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AIServiceProviderRequest'
+        required: true
+      responses:
+        200:
+          description: |
+            OK.
+            AI Service Provider updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIServiceProviderResponse'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:llm_provider_manage
+            - apim:llm_provider_update
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" \
+                   -F "name=UpdatedProviderName" \
+                   -F "apiVersion=v2" \
+                   -F "configurations={\"key\":\"value\"}" \
+                   -F "apiDefinition=@api_definition.json" \
+                   "https://127.0.0.1:9443/api/am/admin/v4/ai-service-providers/{aiServiceProviderId}"'
+      operationId: updateAIServiceProvider
+
+    delete:
+      tags:
+        - AIServiceProvider
+      summary: Delete a AI Service Provider
+      description: |
+        Delete a AI Service Provider by aiServiceProviderId
+      parameters:
+        - $ref: '#/components/parameters/aiServiceProviderId'
+      responses:
+        200:
+          description: |
+            OK.
+            AI Service provider successfully deleted.
+          content: { }
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:llm_provider_manage
+            - apim:llm_provider_delete
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/admin/v4/ai-service-providers/a2f1e643-9b2a-4f58-bd7a-8c2d3f1e9d6f"'
+      operationId: deleteAIServiceProvider
+
+    get:
+      tags:
+        - AIServiceProvider
+      summary: Get AI Service Provider
+      description: |
+        Get a AI Service Provider
+      parameters:
+        - $ref: '#/components/parameters/aiServiceProviderId'
+      responses:
+        200:
+          description: |
+            OK.
+            OpenAPI specification
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIServiceProviderResponse'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:llm_provider_view
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/admin/v4/ai-service-providers/a2f1e643-9b2a-4f58-bd7a-8c2d3f1e9d6f"'
+      operationId: getAIServiceProvider
+
+  ######################################################
   # LLM Providers resource APIs
   ######################################################
   /llm-providers:
     get:
+      deprecated: true
       tags:
         - LLMProviders
       summary: Get all LLM providers
@@ -1734,6 +1968,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:llm_provider_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1741,6 +1976,7 @@ paths:
       operationId: getLLMProviders
 
     post:
+      deprecated: true
       tags:
         - LLMProviders
       summary: Add a LLM provider
@@ -1774,6 +2010,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:llm_provider_manage
+            - apim:llm_provider_create
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1785,6 +2022,7 @@ paths:
   ######################################################
   /llm-providers/{llmProviderId}:
     put:
+      deprecated: true
       tags:
         - LLMProvider
       summary: Update an LLM provider
@@ -1819,6 +2057,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:llm_provider_manage
+            - apim:llm_provider_update
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1826,6 +2065,7 @@ paths:
       operationId: updateLLMProvider
 
     delete:
+      deprecated: true
       tags:
         - LLMProvider
       summary: Delete a LLM Provider
@@ -1845,6 +2085,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:llm_provider_manage
+            - apim:llm_provider_delete
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1871,6 +2112,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:llm_provider_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1934,6 +2176,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:environment_manage
+            - apim:environment_create
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1943,6 +2186,42 @@ paths:
   # The "Individual Environment" resource APIs
   ######################################################
   /environments/{environmentId}:
+    get:
+      tags:
+        - Environments
+      summary: Get a Gateway Environment Configuration
+      description: |
+        Retrieve a single Gateway Environment Configuration. We should provide the Id of the Environment as a path parameter.
+      parameters:
+        - $ref: '#/components/parameters/environmentId'
+      responses:
+        200:
+          description: |
+            OK.
+            Gateway Environment Configuration returned
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Environment'
+        404:
+          $ref: '#/components/responses/NotFound'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:environment_manage
+            - apim:environment_read
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/admin/v4/environments/8d263942-a6df-4cc2-a804-7a2525501450"'
     put:
       tags:
         - Environments
@@ -1976,6 +2255,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:environment_manage
+            - apim:environment_update
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2001,10 +2281,223 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:environment_manage
+            - apim:environment_delete
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v4/environments/d7cf8523-9180-4255-84fa-6cb171c1f779"'
+
+  /environments/{environmentId}/gateways:
+    get:
+      tags:
+        - Environments
+      summary: Get Gateway Instances in a Gateway Environment
+      description: |
+        Retrieve list of gateway Instances in the gateway environment.
+      parameters:
+        - $ref: '#/components/parameters/environmentId'
+      responses:
+        200:
+          description: |
+            OK.
+            List of gateway Instances in the gateway environment returned
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GatewayInstanceList'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:environment_read
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/admin/v4/environments/8d263942-a6df-4cc2-a804-7a2525501450/gateways"'
+
+  ######################################################
+  # The "Platform Gateways" resource API (platform / self-hosted gateway registration)
+  ######################################################
+  /gateways:
+    get:
+      operationId: getPlatformGateways
+      tags:
+        - Platform Gateways
+      summary: Get all platform gateways
+      description: |
+        Get all registered platform gateways for the organization.
+      responses:
+        200:
+          description: |
+            OK.
+            List of platform gateways returned (without registration tokens).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GatewayList'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:admin
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/admin/v4/gateways"'
+    post:
+      operationId: createPlatformGateway
+      tags:
+        - Platform Gateways
+      summary: Register a platform gateway
+      description: |
+        Register a new platform gateway. A registration token is generated and returned
+        once in the response; store it (e.g. as GATEWAY_CONTROL_PLANE_TOKEN in Docker Compose) for the
+        gateway to connect to the control plane WebSocket. The token is stored hashed and cannot be retrieved later.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePlatformGatewayRequest'
+      responses:
+        201:
+          description: |
+            Created.
+            Gateway and registration token (returned once) in the response body.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GatewayResponseWithToken'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        409:
+          $ref: '#/components/responses/Conflict'
+      security:
+        - OAuth2Security:
+            - apim:admin
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v4/gateways"'
+
+  /gateways/{gatewayId}/regenerate-token:
+    post:
+      operationId: regeneratePlatformGatewayToken
+      tags:
+        - Platform Gateways
+      summary: Regenerate registration token for a platform gateway
+      description: |
+        Regenerate the registration token for an existing platform gateway. The old token is revoked
+        and a new one is generated. Store the new token (e.g. as GATEWAY_CONTROL_PLANE_TOKEN in Docker Compose)
+        for the gateway to reconnect to the control plane WebSocket. The token is returned only once.
+      parameters:
+        - name: gatewayId
+          in: path
+          description: Gateway UUID
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: |
+            OK.
+            Gateway and new registration token (returned once) in the response body.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GatewayResponseWithToken'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:admin
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/admin/v4/gateways/{gatewayId}/regenerate-token"'
+
+  /gateways/{gatewayId}:
+    put:
+      operationId: updatePlatformGateway
+      tags:
+        - Platform Gateways
+      summary: Update a platform gateway
+      description: |
+        Update platform gateway metadata. Request body must include all updatable fields (displayName,
+        description, properties, permissions). Name and vhost cannot be changed. UI should send
+        the full resource representation to align with PUT semantics.
+      parameters:
+        - name: gatewayId
+          in: path
+          description: Gateway UUID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePlatformGatewayRequest'
+      responses:
+        200:
+          description: OK. Updated platform gateway in the response body.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformGatewayResponse'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:admin
+    delete:
+      operationId: deletePlatformGateway
+      tags:
+        - Platform Gateways
+      summary: Delete a platform gateway
+      description: |
+        Delete a platform gateway and all its references (tokens, instance mappings, revision deployment
+        records, gateway environment, permissions). Fails with 409 if any API revisions are currently
+        deployed to this gateway; undeploy all APIs from the gateway first.
+      parameters:
+        - name: gatewayId
+          in: path
+          description: Gateway UUID
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK. Gateway and all references removed.
+        404:
+          $ref: '#/components/responses/NotFound'
+        409:
+          description: Conflict. Cannot delete gateway while API revisions are deployed to it.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - OAuth2Security:
+            - apim:admin
 
   ######################################################
   # The "Organizations" resource API
@@ -2063,6 +2556,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:organization_manage
+            - apim:organization_create
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2134,6 +2628,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:organization_manage
+            - apim:organization_update
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2159,11 +2654,12 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:organization_manage
+            - apim:organization_delete
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v4/organizations/d7cf8523-9180-4255-84fa-6cb171c1f779"'
- 
+
   /me/organization-information:
     get:
       tags:
@@ -2562,6 +3058,7 @@ paths:
             - apim:admin
             - apim:admin_operations
             - apim:api_category
+            - apim:api_category_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2597,6 +3094,7 @@ paths:
             - apim:admin
             - apim:admin_operations
             - apim:api_category
+            - apim:api_category_create
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2640,6 +3138,7 @@ paths:
             - apim:admin
             - apim:admin_operations
             - apim:api_category
+            - apim:api_category_update
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2666,6 +3165,7 @@ paths:
             - apim:admin
             - apim:admin_operations
             - apim:api_category
+            - apim:api_category_delete
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3001,6 +3501,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:scope_manage
+            - apim:app_owner_change
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3267,6 +3768,194 @@ paths:
           -F file=@theme.zip "https://127.0.0.1:9443/api/am/admin/v4/tenant-theme"'
 
   ######################################################
+  # Organization theme of Devportal related APIs
+  ######################################################
+  /org-themes:
+    get:
+      operationId: getOrgThemes
+      summary: Retrieve UUIDs of org-theme contents
+      description: Returns the UUIDs of org-theme contents and their publish status.
+      parameters:
+        - name: publish
+          in: query
+          description: Filter themes based on published status
+          required: false
+          schema:
+            type: boolean
+      responses:
+        200:
+          description: List of org themes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ContentPublishStatusResponse'
+        404:
+          $ref: '#/components/responses/NotFound'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:tenant_theme_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X GET -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+                "https://127.0.0.1:9443/api/am/admin/v4/org-themes?publish=true"'
+
+    post:
+      operationId: importOrgTheme
+      summary: Import org theme
+      description: Imports a drafted zip of an org theme to APIM.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  description: |
+                    The org-content.zip file
+                  format: binary
+      responses:
+        200:
+          description: Successfully imported
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        413:
+          $ref: '#/components/responses/PayloadTooLarge'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:tenant_theme_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" 
+                -F "file=@org-content.zip" 
+                "https://127.0.0.1:9443/api/am/admin/v4/org-themes"'
+
+  /org-themes/{id}/content:
+    get:
+      operationId: getOrgThemeContent
+      summary: Retrieve org theme as zip
+      description: Returns the org theme as a zip file for the given ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Returns the org theme zip
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        404:
+          $ref: '#/components/responses/NotFound'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:tenant_theme_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X GET -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+                "https://127.0.0.1:9443/api/am/admin/v4/org-themes/{id}/content" 
+                -o org-content.zip'
+
+  /org-themes/{id}:
+    delete:
+      operationId: deleteOrgTheme
+      summary: Delete an org theme
+      description: Deletes the org theme for the given ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successfully deleted
+        404:
+          $ref: '#/components/responses/NotFound'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:tenant_theme_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+                "https://127.0.0.1:9443/api/am/admin/v4/org-themes/{id}"'
+
+  /org-themes/{id}/status:
+    post:
+      operationId: updateOrgThemeStatus
+      summary: Update publish status of an org theme
+      description: Publishes or unpublishes an org theme to the dev portal.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContentPublishStatus"
+      responses:
+        200:
+          description: Successfully updated status
+        400:
+          $ref: '#/components/responses/BadRequest'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:tenant_theme_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" 
+                -H "Content-Type: application/json" 
+                -d ''{"ACTION": "PUBLISH"}'' 
+                "https://127.0.0.1:9443/api/am/admin/v4/org-themes/{id}/status"'
+
+  ######################################################
   # The Tenant config resource APIs
   ######################################################
   /tenant-config:
@@ -3406,6 +4095,7 @@ paths:
             - apim:admin
             - apim:admin_operations
             - apim:keymanagers_manage
+            - apim:keymanagers_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3441,6 +4131,7 @@ paths:
             - apim:admin
             - apim:admin_operations
             - apim:keymanagers_manage
+            - apim:keymanagers_create
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3482,6 +4173,7 @@ paths:
             - apim:admin
             - apim:admin_operations
             - apim:keymanagers_manage
+            - apim:keymanagers_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3521,6 +4213,7 @@ paths:
             - apim:admin
             - apim:admin_operations
             - apim:keymanagers_manage
+            - apim:keymanagers_update
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3546,6 +4239,8 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:admin_operations
+            - apim:keymanagers_manage
+            - apim:keymanagers_delete
       x-code-samples:
         - lang: Shell
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3575,6 +4270,7 @@ paths:
             - apim:admin
             - apim:admin_operations
             - apim:keymanagers_manage
+            - apim:keymanagers_view
       x-code-samples:
         - lang: Shell
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3610,6 +4306,7 @@ paths:
             - apim:admin
             - apim:admin_operations
             - apim:keymanagers_manage
+            - apim:keymanagers_create
       x-code-samples:
         - lang: Shell
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3653,6 +4350,7 @@ paths:
             - apim:admin
             - apim:admin_operations
             - apim:keymanagers_manage
+            - apim:keymanagers_view
       x-code-samples:
         - lang: Shell
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3692,6 +4390,7 @@ paths:
             - apim:admin
             - apim:admin_operations
             - apim:keymanagers_manage
+            - apim:keymanagers_update
       x-code-samples:
         - lang: Shell
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3718,6 +4417,7 @@ paths:
             - apim:admin
             - apim:admin_operations
             - apim:keymanagers_manage
+            - apim:keymanagers_delete
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3757,6 +4457,7 @@ paths:
             - apim:admin
             - apim:admin_operations
             - apim:keymanagers_manage
+            - apim:keymanagers_create
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3797,6 +4498,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:admin_operations
+            - apim:keymanagers_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3837,6 +4539,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:admin_operations
+            - apim:keymanagers_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3896,6 +4599,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:api_provider_change
+            - apim:admin_api_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3980,6 +4684,71 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+    ######################################################
+  # Export API Consumption Data
+  ######################################################
+  /export-consumption:
+    get:
+      tags:
+        - Consumption
+      summary: |
+        Export API Consumption Data
+      description: |
+        This operation provides a ZIP archive containing API consumption/usage data
+        for a given date range.
+      parameters:
+        - name: fromDate
+          in: query
+          description: |
+            Start date of the export range (inclusive). Format: YYYY-MM-DD.
+          required: true
+          schema:
+            type: string
+        - name: toDate
+          in: query
+          description: |
+            End date of the export range (inclusive). Format: YYYY-MM-DD.
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: |
+            OK.
+            Consumption data exported successfully as a ZIP file.
+          headers:
+            Content-Disposition:
+              description: |
+                Indicates the filename for the download (e.g., consumption-report.zip).
+              schema:
+                type: string
+            Content-Type:
+              description: The content type of the body.
+              schema:
+                type: string
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:admin
+      x-code-samples:
+        - lang: Curl
+          source: |
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" \
+            "https://127.0.0.1:9443/api/am/admin/v4/export-consumption?fromDate=2026-01-01&toDate=2026-03-31" \
+            > consumption-report.zip
+      operationId: exportConsumptionData
   ######################################################
   # The "Label Collection" resource API
   ######################################################
@@ -4002,6 +4771,8 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:label_view
+            - apim:label_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4016,7 +4787,7 @@ paths:
         Add a new Label
       requestBody:
         description: |
-            Label object that should to be added
+          Label object that should to be added
         content:
           application/json:
             schema:
@@ -4034,10 +4805,12 @@ paths:
         400:
           $ref: '#/components/responses/BadRequest'
         409:
-            $ref: '#/components/responses/Conflict'
+          $ref: '#/components/responses/Conflict'
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:label_create
+            - apim:label_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4082,6 +4855,8 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:label_update
+            - apim:label_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4109,6 +4884,8 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:label_delete
+            - apim:label_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4141,11 +4918,81 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:label_view
+            - apim:label_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v4/labels/d7cf8523-9180-4255-84fa-6cb171c1f779/usage"'
       operationId: getLabelUsage
+
+  ######################################################
+  # The "API Key Collection" resource API
+  ######################################################
+  /api-keys:
+    get:
+      tags:
+        - APIKeys
+      summary: Get all API Keys
+      description: |
+        Retrieve all API Keys.
+      operationId: getAllAPIKeys
+      responses:
+        200:
+          description: |
+            OK.
+            API keys returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyList'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:admin
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -X GET "https://127.0.0.1:9443/api/am/admin/v4/api-keys"'
+
+  /api-keys/revoke:
+    post:
+      tags:
+        - APIKeys
+      summary: Revoke an API Key
+      description: |
+        Revoke an API Key for the API
+      operationId: revokeAPIKeyFromAdmin
+      requestBody:
+        description: |
+          API key revoke object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/APIKeyRevokeRequest'
+        required: true
+      responses:
+        200:
+          description: |
+            OK.
+            Api key revoked successfully.
+          content: { }
+        400:
+          $ref: '#/components/responses/BadRequest'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:admin
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -X POST -d @data.json 
+          "https://127.0.0.1:9443/api/am/admin/v4/api-keys/ght65523-7650-4255-84fa-6cb171c1f779/d7cf8523-9180-4255-84fa-6cb171c1f779/PRODUCTION/revoke"'
 
 components:
   schemas:
@@ -4192,6 +5039,25 @@ components:
           type: string
           description: |
             Description about individual errors occurred
+    ContentPublishStatus:
+      type: object
+      properties:
+        action:
+          type: string
+          enum:
+            - PUBLISH
+            - UNPUBLISH
+      example:
+        action: PUBLISH
+    ContentPublishStatusResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: UUID of the org-theme
+        published:
+          type: boolean
+          description: Publish status of the org-theme
     ThrottlePolicyList:
       title: Throttle Policy List
       type: object
@@ -4891,6 +5757,19 @@ components:
         owner:
           type: string
           example: admin
+        tokenType:
+          type: string
+          enum:
+            - OAUTH
+            - JWT
+        createdTime:
+          type: string
+          readOnly: true
+          example: "1651555310208"
+        keyManagers:
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyManagerInfo'
         status:
           type: string
           example: APPROVED
@@ -4989,6 +5868,13 @@ components:
           type: string
           description: The name of the API.
           example: PizzaShackAPI
+        displayName:
+          type: string
+          example: PizzaShack API
+          description: |
+            Display name of the API.
+            This is the name that will be displayed in the Publisher and DevPortal.
+            If not provided, the name will be used as the display name.
         version:
           type: string
           description: The version of the API
@@ -5036,8 +5922,28 @@ components:
           example: Gateway environment in US Region
         isReadOnly:
           type: boolean
-          readOnly: true
           example: false
+          default: false
+          deprecated: true
+        mode:
+          type: string
+          enum:
+            - READ_ONLY
+            - READ_WRITE
+            - WRITE_ONLY
+          example: READ_WRITE
+          default: WRITE_ONLY
+          description: |
+            The mode of the environment. This indicates whether the environment is in read-only or read-write mode.
+            **READ_ONLY:** The environment is in read-only mode. API cannot be deployed, only discovery is possible.
+            **READ_WRITE:** The environment is in read-write mode. APIs can be deployed and discovered.
+            **WRITE_ONLY:** The environment is in write-only mode/ APIs only can be deployed.
+        apiDiscoveryScheduledWindow:
+          type: integer
+          description: |
+            The time window in minutes to schedule the API discovery task.
+            This is used to discover APIs from the API Gateway and update the API list in the environment.
+          default: 60
         vhosts:
           type: array
           minItems: 1
@@ -5067,6 +5973,28 @@ components:
               items:
                 type: string
                 example: Internal/everyone
+        status:
+          type: string
+          readOnly: true
+          description: For platform gateway environments (gatewayType APIPlatform), connection status to the control plane (Active or Inactive).
+          example: Active
+          default: Active
+          enum:
+            - Active
+            - Inactive
+        vhost:
+          type: string
+          format: uri
+          readOnly: true
+          description: For platform gateway environments, the gateway URL (e.g. https://host:9443). Same as Platform Gateways API; only set when this environment represents a platform gateway.
+          example: https://mg.wso2.com
+        platformGatewayVersions:
+          type: array
+          readOnly: true
+          description: API Platform Gateway versions from config. Set for deploy targets so UI can show version choices in the quick-start guide.
+          items:
+            type: string
+            example: "1.0.0"
     EnvironmentList:
       title: Environment List
       type: object
@@ -5080,6 +6008,235 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Environment'
+    GatewayInstanceList:
+      title: Gateway instance list
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of Gateway Instances returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/GatewayInstance'
+    GatewayInstance:
+      title: Gateway instance in the gateway environment
+      type: object
+      required:
+        - gatewayId
+      properties:
+        gatewayId:
+          type: string
+          example: "Env1_1372344"
+        lastActive:
+          type: string
+          example: "2025-06-26T06:47:50Z"
+        status:
+          type: string
+          example: ACTIVE
+          default: ACTIVE
+          enum:
+            - ACTIVE
+            - EXPIRED
+    ApplicationUpdateRequest:
+      type: object
+      description: Request body to update application attributes
+      properties:
+        owner:
+          type: string
+          description: The new owner of the application
+        tokenType:
+          type: string
+          description: The type of token for the application (e.g., JWT)
+          enum:
+            - JWT
+    CreatePlatformGatewayRequest:
+      title: Create Platform Gateway Request
+      description: Request body for creating a platform gateway (name, displayName, vhost as URL, optional properties). Same property name as platform API; type is URL.
+      required:
+        - name
+        - displayName
+        - vhost
+      type: object
+      properties:
+        name:
+          type: string
+          pattern: '^[a-z0-9-]+$'
+          minLength: 3
+          maxLength: 64
+          description: URL-friendly gateway identifier (lowercase alphanumeric with hyphens, unique per organization)
+          example: prod-gateway-01
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Human-readable gateway name
+          example: Production Gateway 01
+        description:
+          type: string
+          maxLength: 1023
+          description: Optional description
+        vhost:
+          type: string
+          format: uri
+          description: Gateway URL (e.g. https://mg.example.com:9443). Same name as platform API; type is URL. Server persists host internally.
+          example: https://mg.wso2.com
+        properties:
+          type: object
+          additionalProperties: true
+          description: Custom key-value properties for the gateway
+          example: {"region": "us-west", "tier": "premium"}
+        permissions:
+          type: object
+          description: Gateway visibility permissions configuration
+          properties:
+            permissionType:
+              type: string
+              enum: [PUBLIC, ALLOW, DENY]
+              default: PUBLIC
+              description: |
+                Permission type for gateway visibility:
+                - PUBLIC: Gateway is visible to all users
+                - ALLOW: Gateway is visible only to specified roles
+                - DENY: Gateway is hidden from specified roles
+            roles:
+              type: array
+              items:
+                type: string
+              description: List of roles for ALLOW/DENY permission types
+              example: ["admin", "publisher"]
+          example:
+            permissionType: ALLOW
+            roles: ["admin", "publisher"]
+    UpdatePlatformGatewayRequest:
+      title: Update Platform Gateway Request
+      description: |
+        Request body for PUT /gateways/{gatewayId}. Per PUT semantics, send the full resource
+        representation. Name and vhost are immutable (server validates they match the existing gateway).
+      required:
+        - name
+        - displayName
+        - vhost
+      type: object
+      properties:
+        name:
+          type: string
+          pattern: '^[a-z0-9-]+$'
+          minLength: 3
+          maxLength: 64
+          description: Gateway identifier (immutable; must match existing). Required for PUT full representation.
+        vhost:
+          type: string
+          format: uri
+          description: Gateway URL (immutable; must match existing). Same name as platform API; type is URL. Example https://mg.wso2.com
+          example: https://mg.wso2.com
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Human-readable gateway name
+          example: Production Gateway 01
+        description:
+          type: string
+          maxLength: 1023
+          description: Optional description
+        properties:
+          type: object
+          additionalProperties: true
+          description: Custom key-value properties for the gateway
+          example: {"region": "us-west", "tier": "premium"}
+        permissions:
+          type: object
+          description: Gateway visibility permissions (on-prem extension)
+          properties:
+            permissionType:
+              type: string
+              enum: [PUBLIC, ALLOW, DENY]
+              default: PUBLIC
+            roles:
+              type: array
+              items:
+                type: string
+              description: List of roles for ALLOW/DENY permission types
+    PlatformGatewayResponse:
+      title: Platform Gateway Response
+      description: Platform gateway response (without registration token). Used for list and get.
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: Gateway UUID
+        name:
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        properties:
+          type: object
+          additionalProperties: true
+          description: Custom key-value properties
+        vhost:
+          type: string
+          format: uri
+          readOnly: true
+          description: Gateway URL (e.g. https://host or https://host:9443). Same name as platform API; type is URL.
+        isActive:
+          type: boolean
+          readOnly: true
+          description: Indicates if the gateway is currently connected to the control plane via WebSocket
+        permissions:
+          type: object
+          description: Gateway visibility permissions configuration
+          properties:
+            permissionType:
+              type: string
+              enum: [PUBLIC, ALLOW, DENY]
+              default: PUBLIC
+              description: |
+                Permission type for gateway visibility:
+                - PUBLIC: Gateway is visible to all users
+                - ALLOW: Gateway is visible only to specified roles
+                - DENY: Gateway is hidden from specified roles
+            roles:
+              type: array
+              items:
+                type: string
+              description: List of roles for ALLOW/DENY permission types
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+    GatewayResponseWithToken:
+      title: Gateway Response With Token
+      description: Platform gateway response including the one-time registration token (POST create or regenerate-token).
+      allOf:
+        - $ref: '#/components/schemas/PlatformGatewayResponse'
+        - type: object
+          properties:
+            registrationToken:
+              type: string
+              description: |
+                Registration token (returned only once on create or regenerate). Use as api-key when connecting
+                the gateway to the control plane WebSocket. Store e.g. as GATEWAY_REGISTRATION_TOKEN.
+    GatewayList:
+      title: Gateway List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: Number of platform gateways returned
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlatformGatewayResponse'
     Organization:
       title: Organization
       required:
@@ -5125,6 +6282,151 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Organization'
+    AIServiceProviderRequest:
+      title: AIServiceProvider
+      required:
+        - name
+        - apiVersion
+        - configurations
+        - apiDefinition
+      type: object
+      properties:
+        name:
+          maxLength: 255
+          minLength: 1
+          type: string
+          example: OpenAI
+        apiVersion:
+          maxLength: 255
+          minLength: 1
+          type: string
+          example: 1.0.0
+        description:
+          maxLength: 1023
+          type: string
+          example: OpenAI LLM
+        multipleModelProviderSupport:
+          type: string
+          description: |
+            Indicates whether the AI Service Provider supports multiple model providers.
+            If true, the AI Service Provider can support multiple model providers.
+            If false, the AI Service Provider supports only one model provider.
+          default: "false"
+        configurations:
+          type: string
+          description: LLM Provider configurations
+        apiDefinition:
+          type: string
+          description: OpenAPI specification
+          format: binary
+        modelProviders:
+          type: string
+    ModelProvider:
+      title: Model Provider
+      type: object
+      required:
+        - name
+        - models
+      properties:
+        models:
+          type: array
+          items:
+            type: string
+            example: "gpt-4o"
+        name:
+          type: string
+          example: OpenAI
+    AIServiceProviderResponse:
+      title: AIServiceProviderResponse
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+          example: ece92bdc-e1e6-325c-b6f4-656208a041e9
+        name:
+          maxLength: 255
+          minLength: 1
+          type: string
+          example: OpenAI
+        apiVersion:
+          maxLength: 255
+          minLength: 1
+          type: string
+          example: 1.0.0
+        builtInSupport:
+          type: boolean
+          description: Is built-in support
+        multipleModelProviderSupport:
+          type: boolean
+          description: |
+            Indicates whether the AI Service Provider supports multiple model providers.
+            If true, the AI Service Provider can support multiple model providers.
+            If false, the AI Service Provider supports only one model provider.
+        description:
+          maxLength: 1023
+          type: string
+          example: OpenAI LLM
+        configurations:
+          type: string
+          description: LLM Provider configurations
+        apiDefinition:
+          type: string
+          description: OpenAPI specification
+        modelProviders:
+          type: array
+          description: List of model providers supported by the AI Service Provider
+          items:
+            $ref: '#/components/schemas/ModelProvider'
+        deprecated:
+          type: boolean
+          description: Indicates if the LLM provider is deprecated
+          example: false
+    AIServiceProviderSummaryResponse:
+      title: AIServiceProviderSummaryResponse
+      type: object
+      required:
+        - name
+        - apiVersion
+      properties:
+        id:
+          type: string
+          readOnly: true
+          example: ece92bdc-e1e6-325c-b6f4-656208a041e9
+        name:
+          maxLength: 255
+          minLength: 1
+          type: string
+          example: open-ai
+        apiVersion:
+          maxLength: 255
+          minLength: 1
+          type: string
+          example: 1.0.0
+        builtInSupport:
+          type: boolean
+          description: Is built-in support
+        description:
+          maxLength: 1023
+          type: string
+          example: OpenAI LLM Provider
+        deprecated:
+          type: boolean
+          description: Indicates if the LLM provider is deprecated
+          example: false
+    AIServiceProviderSummaryResponseList:
+      title: AIServiceProviderSummaryResponseList
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of LLM Providers returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/AIServiceProviderSummaryResponse'
     LLMProviderRequest:
       title: LLMProvider
       type: object
@@ -5150,6 +6452,9 @@ components:
           type: string
           description: OpenAPI specification
           format: binary
+        modelList:
+          type: string
+          description: List of models supported by the LLM Provider as a stringified JSON array
     LLMProviderResponse:
       title: LLMProviderResponse
       type: object
@@ -5181,6 +6486,11 @@ components:
         apiDefinition:
           type: string
           description: OpenAPI specification
+        modelList:
+          type: array
+          items:
+            type: string
+          description: List of models supported by the LLM Provider
     LLMProviderSummaryResponse:
       title: LLMProviderSummaryResponse
       type: object
@@ -5228,8 +6538,6 @@ components:
         host:
           maxLength: 255
           minLength: 1
-          # hostname regex as per RFC 1123 (http://tools.ietf.org/html/rfc1123) and appended *
-          pattern: '^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$'
           type: string
           example: mg.wso2.com
         httpContext:
@@ -5431,7 +6739,7 @@ components:
           type: array
           items:
             type: string
-        IsJWTEnabledForLoginTokens: 
+        IsJWTEnabledForLoginTokens:
           type: boolean
           default: false
         orgAccessControlEnabled:
@@ -5456,6 +6764,10 @@ components:
               defaultScopesClaim:
                 type: string
                 example: scope
+              authConfigurations:
+                type: array
+                items:
+                  $ref: '#/components/schemas/KeyManagerConfiguration'
               configurations:
                 type: array
                 items:
@@ -5464,6 +6776,33 @@ components:
                 type: array
                 items:
                   $ref: '#/components/schemas/KeyManagerConfiguration'
+              configurationConstraints:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ConfigurationConstraint'
+        gatewayConfiguration:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                example: default
+              displayName:
+                type: string
+                example: default
+              supportedModes:
+                type: array
+                items:
+                  type: string
+                  example: 'READ_WRITE'
+              configurations:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GatewayConfiguration'
+              defaultHostnameTemplate:
+                type: string
+                example: '{apiId}.execute-api.{region}.amazonaws.com'
         analyticsEnabled:
           type: boolean
           description: To determine whether analytics is enabled or not
@@ -5471,6 +6810,26 @@ components:
         transactionCounterEnable:
           type: boolean
           description: To determine whether the transaction counter is enabled or not
+          example: false
+        isGatewayNotificationEnabled:
+          type: boolean
+          description: Is Gateway Notification Enabled
+          default: false
+        platformGatewayVersions:
+          type: array
+          description: API Platform Gateway versions for the quick-start guide.
+          items:
+            type: string
+            example: "1.0.0"
+        consumptionExportEnabled:
+          type: boolean
+          description: Whether the ConsumptionDataExportService OSGi service is available
+          example: false
+        perPolicySeverityFilteringEnabled:
+          type: boolean
+          description: |
+            Is per policy compliance affecting severity filtering enabled for governance policies. When enabled a
+            policy can declare which rule severities affect its compliance verdict.
           example: false
     ScopeList:
       title: Scope Role Mapping List
@@ -5643,6 +7002,10 @@ components:
           type: boolean
           example: false
           default: false
+        enableProvisionedAppValidation:
+          type: boolean
+          example: true
+          default: true
         enableSelfValidationJWT:
           type: boolean
           example: true
@@ -5780,6 +7143,75 @@ components:
         tooltip:
           type: string
           example: Enter username to connect to key manager
+        default:
+          type: object
+          properties: { }
+          example: admin
+        values:
+          type: array
+          items:
+            type: object
+            properties: { }
+        updateDisabled:
+          type: boolean
+          description: Indicates that this configuration field cannot be modified once the Key Manager is created.
+          default: false
+          example: true
+    ConfigurationConstraint:
+      title: Configurable Configuration Constraints
+      type: object
+      properties:
+        name:
+          type: string
+          example: application_access_token_expiry_time
+        label:
+          type: string
+          example: Access Token Expiry
+        type:
+          type: string
+          example: input
+        multiple:
+          type: boolean
+          example: true
+        tooltip:
+          type: string
+          example: Define the valid range for token expiration in seconds.
+        constraintType:
+          type: string
+          example: RANGE
+        values:
+          type: array
+          items:
+            type: object
+            properties: { }
+        default:
+          type: object
+          properties: { }
+    GatewayConfiguration:
+      title: Gateway Configuration
+      type: object
+      properties:
+        name:
+          type: string
+          example: consumer_key
+        label:
+          type: string
+          example: Consumer Key
+        type:
+          type: string
+          example: select
+        required:
+          type: boolean
+          example: true
+        mask:
+          type: boolean
+          example: true
+        multiple:
+          type: boolean
+          example: true
+        tooltip:
+          type: string
+          example: Enter username
         default:
           type: object
           properties: {}
@@ -6052,6 +7484,7 @@ components:
             - SUBSCRIPTION_DELETION
             - SUBSCRIPTION_UPDATE
             - REVISION_DEPLOYMENT
+            - APPLICATION_UPDATE
         workflowStatus:
           type: string
           description: |
@@ -6316,6 +7749,73 @@ components:
               description: List of APIs associated with the label.
               items:
                 $ref: '#/components/schemas/ApiResult'
+    APIKey:
+      title: API Key details to invoke APIs
+      type: object
+      properties:
+        keyUUID:
+          type: string
+          description: The UUID of the API key
+        keyName:
+          type: string
+          description: API Key name
+          example: Test_Key
+        apiName:
+          type: string
+          description: API Name
+          example: NotificationsAPI
+        applicationName:
+          type: string
+          description: Application Name
+          example: DefaultApplication
+        keyType:
+          type: string
+          description: Application Key Type
+          example: PRODUCTION
+          enum:
+            - PRODUCTION
+            - SANDBOX
+        user:
+          type: string
+          description: Owner of the Application
+          example: Bob
+        issuedOn:
+          type: integer
+          format: int64
+          description: Created time in Unix epoch milliseconds
+          example: 1599196134000
+        validityPeriod:
+          type: integer
+          format: int64
+          example: 3600
+        lastUsed:
+          type: integer
+          format: int64
+          nullable: true
+          description: Last used time in Unix epoch milliseconds
+          example: 1599196134000
+    APIKeyList:
+      title: API Keys List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of API keys returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/APIKey'
+    APIKeyRevokeRequest:
+      title: API Key revoke request object
+      type: object
+      required:
+        - keyUUID
+      properties:
+        keyUUID:
+          type: string
+          description: The UUID of the API key
 
   responses:
     BadRequest:
@@ -6506,7 +8006,8 @@ components:
       name: environmentId
       in: path
       description: |
-        Environment UUID (or Environment name defined in config)
+        Environment UUID (or Environment name defined in config), in case the ID contains special characters it should
+        be base64 encoded
       required: true
       schema:
         type: string
@@ -6523,6 +8024,14 @@ components:
       in: path
       description: |
         LLM Provider UUID
+      required: true
+      schema:
+        type: string
+    aiServiceProviderId:
+      name: aiServiceProviderId
+      in: path
+      description: |
+        AI Service Provider UUID
       required: true
       schema:
         type: string
@@ -6648,6 +8157,17 @@ components:
       required: true
       schema:
         type: string
+    keyType:
+      name: keyType
+      in: path
+      description: |
+        **Application Key Type** standing for the type of the keys (i.e. Production or Sandbox).
+      required: true
+      schema:
+        type: string
+        enum:
+          - PRODUCTION
+          - SANDBOX
   securitySchemes:
     OAuth2Security:
       type: oauth2
@@ -6667,6 +8187,7 @@ components:
             apim:mediation_policy_view: View mediation policies
             apim:mediation_policy_create: Create and update mediation policies
             apim:app_owner_change: Retrieve and manage applications
+            apim:app_settings_change: Change Application Settings
             apim:app_import_export: Import and export applications related operations
             apim:api_import_export: Import and export APIs related operations
             apim:api_product_import_export: Import and export API Products related
@@ -6689,12 +8210,48 @@ components:
             apim:role_manage: Manage system roles
             apim:admin_application_view: View Applications
             apim:keymanagers_manage: Manage Key Managers
-            apim:api_provider_change: Retrieve and manage applications
-            apim:llm_provider_manage: Manage LLM Providers
+            apim:api_provider_change: Retrieve and manage apis
+            apim:admin_api_view: View Apis
+            apim:llm_provider_manage: Create, update and delete LLM providers. View requires apim:llm_provider_view
             apim:gov_policy_read: Retrieve governance policies
             apim:gov_policy_manage: Manage governance policies
             apim:gov_result_read: Retrieve governance results
             apim:gov_rule_read: Retrieve governance rules
             apim:gov_rule_manage: Manage governance rules
-            apim:organization_manage: Manage Organizations
+            apim:organization_manage: Create, update and delete organizations. View requires apim:organization_read
             apim:organization_read: Read Organizations
+            apim:environment_create: Create gateway environments
+            apim:environment_update: Update gateway environments
+            apim:environment_delete: Delete gateway environments
+            apim:api_category_view: View API categories
+            apim:api_category_create: Create API categories
+            apim:api_category_update: Update API categories
+            apim:api_category_delete: Delete API categories
+            apim:admin_tier_create: Create rate limiting policies
+            apim:admin_tier_update: Update rate limiting policies
+            apim:admin_tier_delete: Delete rate limiting policies
+            apim:bl_create: Create deny policies
+            apim:bl_update: Update deny policies
+            apim:bl_delete: Delete deny policies
+            apim:keymanagers_view: View key manager configurations
+            apim:keymanagers_create: Create key managers
+            apim:keymanagers_update: Update key managers
+            apim:keymanagers_delete: Delete key managers
+            apim:organization_create: Create organizations
+            apim:organization_update: Update organizations
+            apim:organization_delete: Delete organizations
+            apim:llm_provider_view: View AI and LLM service providers
+            apim:llm_provider_create: Create AI and LLM service providers
+            apim:llm_provider_update: Update AI and LLM service providers
+            apim:llm_provider_delete: Delete AI and LLM service providers
+            apim:label_view: View labels
+            apim:label_create: Create labels
+            apim:label_update: Update labels
+            apim:label_delete: Delete labels
+            apim:label_manage: Full access to all label operations
+            apim:gov_rule_create: Create governance rulesets
+            apim:gov_rule_update: Update governance rulesets
+            apim:gov_rule_delete: Delete governance rulesets
+            apim:gov_policy_create: Create governance policies
+            apim:gov_policy_update: Update governance policies
+            apim:gov_policy_delete: Delete governance policies

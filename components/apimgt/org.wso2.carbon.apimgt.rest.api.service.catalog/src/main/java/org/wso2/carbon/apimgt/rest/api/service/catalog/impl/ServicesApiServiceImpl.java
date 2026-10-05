@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.apache.http.client.HttpClient;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
@@ -31,15 +32,16 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.OASParserOptions;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.ServiceFilterParams;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
-import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParserUtil;
-import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.AsyncApiParserImplUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.ServicesApiService;
@@ -55,6 +57,8 @@ import org.wso2.carbon.apimgt.rest.api.service.catalog.utils.Md5HashGenerator;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.utils.ServiceCatalogUtils;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.utils.ServiceEntryMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParserUtil;
+import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -63,6 +67,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -103,7 +109,11 @@ public class ServicesApiServiceImpl implements ServicesApiService {
             ServiceEntry createdService = serviceCatalog.getServiceByUUID(serviceId, tenantId);
             return Response.ok().entity(ServiceEntryMappingUtil.fromServiceToDTO(createdService, false)).build();
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error when validating the service definition", log);
+            if (e.getErrorHandler() != null && e.getErrorHandler().getHttpStatusCode() == 400) {
+                RestApiUtil.handleBadRequest(e.getErrorHandler().getErrorDescription(), log);
+            } else {
+                RestApiUtil.handleInternalServerError("Error when validating the service definition", log);
+            }
         } catch (IOException e) {
             RestApiUtil.handleInternalServerError("Error when reading the file content", log);
         }
@@ -422,7 +432,11 @@ public class ServicesApiServiceImpl implements ServicesApiService {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
                 RestApiUtil.handleResourceNotFoundError("Service", serviceId, e, log);
             }
-            RestApiUtil.handleInternalServerError("Error when validating the service definition", log);
+            if (e.getErrorHandler() != null && e.getErrorHandler().getHttpStatusCode() == 400) {
+                RestApiUtil.handleBadRequest(e.getErrorHandler().getErrorDescription(), log);
+            } else {
+                RestApiUtil.handleInternalServerError("Error when validating the service definition", log);
+            }
         } catch (IOException e) {
             RestApiUtil.handleInternalServerError("Error when reading the file content", log);
         }
@@ -465,9 +479,25 @@ public class ServicesApiServiceImpl implements ServicesApiService {
             //validate file
             //convert .yml or .yaml to JSON for validation
             String schemaToBeValidated = CommonUtil.yamlToJson(definitionContent);
-            validationResponse = AsyncApiParserUtil.validateAsyncAPISpecification(schemaToBeValidated, true);
+            validationResponse = AsyncApiParserUtil.validateAsyncAPISpecification(schemaToBeValidated,
+                    true, AsyncApiParserImplUtil.getParserOptionsFromConfig());
         } else if (url != null) {
-            validationResponse = AsyncApiParserUtil.validateAsyncAPISpecificationByURL(url, true);
+            try {
+                URL urlObj = new URL(url);
+                HttpClient httpClient = APIUtil.getHttpClient(urlObj.getPort(), urlObj.getProtocol());
+                String maxFileSizeStr = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                        .getAPIManagerConfiguration().getFirstProperty(
+                                org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_ASYNC_FILE_SIZE_LIMIT);
+                if (maxFileSizeStr == null || maxFileSizeStr.trim().isEmpty()) {
+                    maxFileSizeStr = org.wso2.carbon.apimgt.api.
+                            APIConstants.API_PUBLISHER_IMPORT_ASYNC_FILE_SIZE_LIMIT_DEFAULT_MB;
+                }
+                // Validate URL
+                validationResponse = AsyncApiParserUtil.validateAsyncAPISpecificationByURL(url, httpClient, true,
+                        AsyncApiParserImplUtil.getParserOptionsFromConfig(), maxFileSizeStr);
+            } catch (MalformedURLException e) {
+                throw new APIManagementException("Error while processing the API definition URL", e);
+            }
         }
         return validationResponse;
     }
@@ -482,10 +512,25 @@ public class ServicesApiServiceImpl implements ServicesApiService {
     private APIDefinitionValidationResponse validateOpenAPIDefinition(String url, String definitionContent)
             throws APIManagementException {
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
+        OASParserOptions parserOptions = APIUtil.buildRefResolutionOptions(CommonUtil.getOasParserOptions(),
+                RestApiCommonUtil.getLoggedInUserTenantDomain());
         if (definitionContent != null) {
-            validationResponse = OASParserUtil.validateAPIDefinition(definitionContent, true);
+            validationResponse = OASParserUtil.validateAPIDefinition(definitionContent, true, parserOptions);
         } else if (url != null) {
-            validationResponse = OASParserUtil.validateAPIDefinitionByURL(url, true);
+            try {
+                URL urlObj = new URL(url);
+                HttpClient httpClient = APIUtil.getHttpClient(urlObj.getPort(), urlObj.getProtocol());
+                String maxFileSizeStr = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                        .getAPIManagerConfiguration().getFirstProperty(
+                                org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_OAS_FILE_SIZE_LIMIT);
+                if (maxFileSizeStr == null || maxFileSizeStr.trim().isEmpty()) {
+                    maxFileSizeStr = org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_OAS_FILE_SIZE_LIMIT_DEFAULT_MB;
+                }
+                validationResponse = OASParserUtil.validateAPIDefinitionByURL(url, httpClient, true, parserOptions,
+                        maxFileSizeStr);
+            } catch (MalformedURLException e) {
+                throw new APIManagementException("Error while processing the API definition URL", e);
+            }
         }
         return validationResponse;
     }
@@ -520,7 +565,7 @@ public class ServicesApiServiceImpl implements ServicesApiService {
 
     private void validateInputParams(InputStream definitionInputStream, Attachment fileDetail, String inlineContent) {
         boolean isFileSpecified = definitionInputStream != null && fileDetail != null &&
-                fileDetail.getContentDisposition() != null && fileDetail.getContentDisposition().getFilename() != null;
+                fileDetail.getDataHandler() != null && fileDetail.getDataHandler().getName() != null;
         if (inlineContent == null && !isFileSpecified) {
             RestApiUtil.handleBadRequest("Either inline definition or file should be provided", log);
         }

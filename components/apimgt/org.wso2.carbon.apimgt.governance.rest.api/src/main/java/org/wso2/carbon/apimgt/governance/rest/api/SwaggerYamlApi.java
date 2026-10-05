@@ -23,11 +23,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
-import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.spec.parser.definitions.OAS3Parser;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -74,10 +75,11 @@ public class SwaggerYamlApi {
             if (openAPIDef == null) {
                 synchronized (LOCK_GOV_OPENAPI_DEF) {
                     if (openAPIDef == null) {
-                        String definition = IOUtils
-                                .toString(this.getClass().getClassLoader().getResourceAsStream("governance-api.yaml"),
-                                        StandardCharsets.UTF_8);
-                        openAPIDef = new OAS3Parser().removeExamplesFromOpenAPI(definition);
+                        try (InputStream defStream = this.getClass()
+                                .getClassLoader().getResourceAsStream("governance-api.yaml")) {
+                            String definition = IOUtils.toString(defStream, StandardCharsets.UTF_8);
+                            openAPIDef = new OAS3Parser().removeExamplesFromOpenAPI(definition);
+                        }
                     }
                 }
             }

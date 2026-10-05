@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManager;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.impl.utils.LRUCache;
 import org.wso2.carbon.user.core.UserCoreConstants;
 
@@ -65,6 +66,7 @@ public class APIManagerFactory {
         return new UserAwareAPIConsumer(username, organization);
     }
 
+    @UsedByMigrationClient
     public APIProvider getAPIProvider(String username) throws APIManagementException {
         return newProvider(username);
     }

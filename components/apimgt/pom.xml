@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>carbon-apimgt</artifactId>
-        <version>9.31.23-SNAPSHOT</version>
+        <version>9.33.193-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -34,11 +34,13 @@
         <module>org.wso2.carbon.apimgt.api</module>
         <module>org.wso2.carbon.apimgt.governance.api</module>
         <module>org.wso2.carbon.apimgt.persistence</module>
+        <module>org.wso2.carbon.apimgt.spec.parser</module>
         <module>org.wso2.carbon.apimgt.impl</module>
         <module>org.wso2.carbon.apimgt.tracing</module>
         <module>org.wso2.carbon.apimgt.solace</module>
         <module>org.wso2.carbon.apimgt.keymgt</module>
         <module>org.wso2.carbon.apimgt.keymgt.client</module>
+        <module>org.wso2.carbon.apimgt.multitenant.auth</module>
         <module>org.wso2.carbon.apimgt.gateway</module>
         <module>org.wso2.carbon.apimgt.core</module>
         <module>org.wso2.carbon.apimgt.rest.api.util</module>
@@ -70,5 +72,6 @@
         <module>org.wso2.carbon.apimgt.devops.impl</module>
         <module>org.wso2.carbon.apimgt.governance.impl</module>
         <module>org.wso2.carbon.apimgt.governance.rest.api</module>
+        <module>org.wso2.carbon.apimgt.federated.gateway</module>
     </modules>
 </project>

@@ -21,9 +21,10 @@ package org.wso2.carbon.apimgt.governance.impl.util;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
-import org.wso2.carbon.apimgt.governance.impl.config.GovernanceConfiguration;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,9 +49,9 @@ public class APIMGovernanceDBUtil {
     /**
      * Initializes the data source
      *
-     * @throws GovernanceException if an error occurs while loading DB configuration
+     * @throws APIMGovernanceException if an error occurs while loading DB configuration
      */
-    public static void initialize() throws GovernanceException {
+    public static void initialize() throws APIMGovernanceException {
         if (dataSource != null) {
             return;
         }
@@ -60,17 +61,18 @@ public class APIMGovernanceDBUtil {
                 if (log.isDebugEnabled()) {
                     log.debug("Initializing data source");
                 }
-                GovernanceConfiguration config = ServiceReferenceHolder.getInstance().
-                        getGovernanceConfigurationService().getGovernanceConfiguration();
-                String dataSourceName = config.getFirstProperty(DATA_SOURCE_NAME);
+                APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                        getAPIMConfigurationService().getAPIManagerConfiguration();
+                String dataSourceName = config.getAPIMGovernanceConfigurationDto()
+                        .getDataSourceName();
 
                 if (dataSourceName != null) {
                     try {
                         Context ctx = new InitialContext();
                         dataSource = (DataSource) ctx.lookup(dataSourceName);
                     } catch (NamingException e) {
-                        throw new GovernanceException("Error while looking up the data " +
-                                "source: " + dataSourceName, e);
+                        throw new APIMGovernanceException(APIMGovExceptionCodes.DATASOURCE_INACCESSIBLE
+                                , e, dataSourceName);
                     }
                 } else {
                     log.error(DATA_SOURCE_NAME + " not defined in api-manager.xml.");

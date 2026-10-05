@@ -21,21 +21,31 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.model.AppConfigConstraintType;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
+import org.wso2.carbon.apimgt.api.model.KeyManagerApplicationConfigValidator;
 import org.wso2.carbon.apimgt.api.model.policy.AIAPIQuotaLimit;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.kmvalidator.KeyManagerApplicationConfigValidatorFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AIAPIQuotaLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleConditionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.exception.ForbiddenException;
+import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.File;
@@ -43,14 +53,19 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public class RestApiAdminUtils {
+
+    private static final Log log = LogFactory.getLog(RestApiAdminUtils.class);
 
     private RestApiAdminUtils() {}
 
@@ -208,40 +223,72 @@ public class RestApiAdminUtils {
             throws APIManagementException, IOException {
 
         byte[] buffer = new byte[1024];
-        InputStream existingTenantTheme = null;
-        InputStream themeContent = null;
-        File tenantThemeDirectory;
-        File backupDirectory = null;
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
 
-
+        try (InputStream inputStream = themeContentInputStream) {
             APIAdmin apiAdmin = new APIAdminImpl();
+            
             //add or update the tenant theme in the database
             if (apiAdmin.isTenantThemeExist(tenantId)) {
-                existingTenantTheme = apiAdmin.getTenantTheme(tenantId);
-                apiAdmin.updateTenantTheme(tenantId, themeContentInputStream);
-            } else {
-                apiAdmin.addTenantTheme(tenantId, themeContentInputStream);
-            }
-            //retrieve the tenant theme from the database to import it to the file system
-            themeContent = apiAdmin.getTenantTheme(tenantId);
-
-            //import the tenant theme to the file system
-            String outputFolder = getTenantThemeDirectoryPath(tenantDomain);
-            tenantThemeDirectory = new File(outputFolder);
-            if (!tenantThemeDirectory.exists()) {
-                if (!tenantThemeDirectory.mkdirs()) {
-                    APIUtil.handleException("Unable to create tenant theme directory at " + outputFolder);
+                try (InputStream existingTenantTheme = apiAdmin.getTenantTheme(tenantId)) {
+                    apiAdmin.updateTenantTheme(tenantId, inputStream);
+                    
+                    //retrieve the tenant theme from the database to import it to the file system
+                    try (InputStream themeContent = apiAdmin.getTenantTheme(tenantId)) {
+                        importThemeToFileSystem(themeContent, tenantDomain, buffer);
+                    } catch (APIManagementException | IOException e) {
+                        //if an error occurs, revert the changes that were done when importing a tenant theme
+                        revertTenantThemeImportChanges(tenantDomain, existingTenantTheme);
+                        throw new APIManagementException(e.getMessage(), e,
+                                ExceptionCodes.from(ExceptionCodes.TENANT_THEME_IMPORT_FAILED, tenantDomain, e.getMessage()));
+                    }
                 }
             } else {
-                //copy the existing tenant theme as a backup in case a restoration is needed to take place
-                String tempPath = getTenantThemeBackupDirectoryPath(tenantDomain);
-                backupDirectory = new File(tempPath);
-                FileUtils.copyDirectory(tenantThemeDirectory, backupDirectory);
-                //remove existing files inside the directory
-                FileUtils.cleanDirectory(tenantThemeDirectory);
+                apiAdmin.addTenantTheme(tenantId, inputStream);
+                
+                //retrieve the tenant theme from the database to import it to the file system
+                try (InputStream themeContent = apiAdmin.getTenantTheme(tenantId)) {
+                    importThemeToFileSystem(themeContent, tenantDomain, buffer);
+                } catch (APIManagementException | IOException e) {
+                    //if an error occurs, revert the changes that were done when importing a tenant theme
+                    revertTenantThemeImportChanges(tenantDomain, null);
+                    throw new APIManagementException(e.getMessage(), e,
+                            ExceptionCodes.from(ExceptionCodes.TENANT_THEME_IMPORT_FAILED, tenantDomain, e.getMessage()));
+                }
             }
-            //get the zip file content
+        }
+    }
+
+    /**
+     * Imports the content of the provided tenant theme archive to the file system
+     *
+     * @param themeContent content relevant to the tenant theme
+     * @param tenantDomain tenant to which the theme is imported
+     * @param buffer       byte array used as a buffer when reading the zip content
+     * @throws APIManagementException if an error occurs while performing file or directory related operations
+     * @throws IOException            if an error occurs while performing file or directory related operations
+     */
+    private static void importThemeToFileSystem(InputStream themeContent, String tenantDomain, byte[] buffer)
+            throws APIManagementException, IOException {
+        File tenantThemeDirectory;
+        File backupDirectory = null;
+        
+        //import the tenant theme to the file system
+        String outputFolder = getTenantThemeDirectoryPath(tenantDomain);
+        tenantThemeDirectory = new File(outputFolder);
+        if (!tenantThemeDirectory.exists()) {
+            if (!tenantThemeDirectory.mkdirs()) {
+                APIUtil.handleException("Unable to create tenant theme directory at " + outputFolder);
+            }
+        } else {
+            //copy the existing tenant theme as a backup in case a restoration is needed to take place
+            String tempPath = getTenantThemeBackupDirectoryPath(tenantDomain);
+            backupDirectory = new File(tempPath);
+            FileUtils.copyDirectory(tenantThemeDirectory, backupDirectory);
+            //remove existing files inside the directory
+            FileUtils.cleanDirectory(tenantThemeDirectory);
+        }
+        //get the zip file content
         try (ZipInputStream zipInputStream = new ZipInputStream(themeContent)) {
             //get the zipped file list entry
             ZipEntry zipEntry = zipInputStream.getNextEntry();
@@ -285,18 +332,9 @@ public class RestApiAdminUtils {
                 zipEntry = zipInputStream.getNextEntry();
             }
             zipInputStream.closeEntry();
-            zipInputStream.close();
             if (backupDirectory != null) {
                 FileUtils.deleteDirectory(backupDirectory);
             }
-        } catch (APIManagementException | IOException e) {
-            //if an error occurs, revert the changes that were done when importing a tenant theme
-            revertTenantThemeImportChanges(tenantDomain, existingTenantTheme);
-            throw new APIManagementException(e.getMessage(), e,
-                    ExceptionCodes.from(ExceptionCodes.TENANT_THEME_IMPORT_FAILED, tenantDomain, e.getMessage()));
-        } finally {
-            IOUtils.closeQuietly(themeContent);
-            IOUtils.closeQuietly(themeContentInputStream);
         }
     }
 
@@ -382,5 +420,113 @@ public class RestApiAdminUtils {
         FileUtils.copyDirectory(backupDirectory, tenantThemeDirectory);
         FileUtils.deleteDirectory(backupDirectory);
         apiAdmin.updateTenantTheme(tenantId, existingTenantTheme);
+    }
+
+    /**
+     * Validates Key Manager constraint configurations (meta-validation).
+     * Ensures that constraint definitions themselves are valid before persisting.
+     *
+     * @param additionalProperties Key Manager additional properties containing constraints
+     * @throws APIManagementException if constraint metadata validation fails
+     */
+    public static void validateKeyManagerConstraints(Map<String, Object> additionalProperties)
+            throws APIManagementException {
+
+        if (additionalProperties == null) {
+            return;
+        }
+        Object constraintsObj = additionalProperties.get(APIConstants.KeyManager.CONSTRAINTS);
+        if (constraintsObj == null) {
+            return;
+        }
+        Map<String, Map<String, Object>> constraintsMap;
+        if (constraintsObj instanceof Map) {
+            constraintsMap = (Map<String, Map<String, Object>>) constraintsObj;
+        } else {
+            return;
+        }
+        List<String> errorMessages = new ArrayList<>();
+        for (Map.Entry<String, Map<String, Object>> entry : constraintsMap.entrySet()) {
+            String fieldName = entry.getKey();
+            Object rawConfig = entry.getValue();
+            if (rawConfig == null) {
+                continue;
+            }
+            if (!(rawConfig instanceof Map)) {
+                errorMessages.add("Constraint configuration for field '" + fieldName + "' must be a valid object");
+                continue;
+            }
+            Map<String, Object> constraintConfig = (Map<String, Object>) rawConfig;
+            String constraintTypeStr = (String) constraintConfig.get(APIConstants.KeyManager.CONSTRAINT_TYPE);
+            if (constraintTypeStr == null) {
+                errorMessages.add("Missing constraint type for field '" + fieldName + "'");
+                continue;
+            }
+            AppConfigConstraintType constraintType = AppConfigConstraintType.fromString(constraintTypeStr);
+            if (constraintType == null) {
+                errorMessages.add("Invalid constraint type for field '" + fieldName + "'");
+                continue;
+            }
+            KeyManagerApplicationConfigValidator validator = 
+                KeyManagerApplicationConfigValidatorFactory.getValidator(constraintType);
+            if (validator != null) {
+                Object constraintValue = constraintConfig.get(APIConstants.KeyManager.CONSTRAINT_VALUE);
+                Map<String, Object> constraintValueMap = null;
+                if (constraintValue instanceof Map) {
+                    constraintValueMap = (Map<String, Object>) constraintValue;
+                } else {
+                        errorMessages.add("Constraint value for field '" + fieldName + "' must be a valid object");
+                        continue;
+                }
+                try {
+                    validator.validateMetadata(constraintValueMap);
+                } catch (APIManagementException e) {
+                    errorMessages.add(
+                            "Invalid constraint configuration for field '" + fieldName + "': " + e.getMessage()
+                    );
+                }
+            }
+        }
+        if (!errorMessages.isEmpty()) {
+            String combinedMessage = String.join("; ", errorMessages);
+            throw new APIManagementException(
+                    "Constraint validation failed: " + combinedMessage,
+                    ExceptionCodes.from(
+                            ExceptionCodes.INVALID_APPLICATION_ADDITIONAL_PROPERTIES,
+                            combinedMessage
+                    )
+            );
+        }
+    }
+
+    /**
+     * Validates that the logged-in user belongs to the super tenant.
+     * Throws a ForbiddenException if the user is from a non-super tenant.
+     *
+     * @param resourceDescription a short description of the resource being accessed, used in the error message
+     * @throws ForbiddenException if the logged-in user is not from the super tenant
+     */
+    public static void checkSuperTenantAccess(String resourceDescription) throws ForbiddenException {
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            RestApiUtil.handleAuthorizationFailure("You are not allowed to access this resource",
+                    new APIManagementException("Tenant " + tenantDomain + " is not allowed to access " +
+                            resourceDescription + ". Only super tenant is allowed"), log);
+        }
+    }
+
+    /**
+     * Handles an internal server error by throwing an InternalServerErrorException
+     * with the given message. The message is logged at error level but the stack
+     * trace is not printed.
+     *
+     * @param msg error message to return to the client
+     * @param log logger instance
+     * @throws InternalServerErrorException always thrown
+     */
+    public static void handleInternalServerError(String msg, Log log) throws InternalServerErrorException {
+        InternalServerErrorException exception = RestApiUtil.buildInternalServerErrorException(msg);
+        log.error(msg);
+        throw exception;
     }
 }

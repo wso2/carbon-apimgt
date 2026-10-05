@@ -67,6 +67,7 @@ import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceArtifactConfiguration;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
@@ -113,7 +114,8 @@ import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
 @PrepareForTest(
         {LogFactory.class, APIUtil.class, ServiceReferenceHolder.class, SSLSocketFactory.class, CarbonUtils.class,
                 GovernanceUtils.class, MultitenantUtils.class,
-                GenericArtifactManager.class, KeyManagerHolder.class, ApiMgtDAO.class, PrivilegedCarbonContext.class})
+                GenericArtifactManager.class, KeyManagerHolder.class, ApiMgtDAO.class, PrivilegedCarbonContext.class,
+                IdentityUtil.class})
 @PowerMockIgnore("javax.net.ssl.*")
 public class APIUtilTest {
 
@@ -365,6 +367,181 @@ public class APIUtilTest {
 
         Assert.assertFalse("Unexpected sandbox endpoint found", APIUtil.isSandboxEndpointsExists(jsonArray
                 .toJSONString()));
+    }
+
+    @Test
+    public void testIsSandboxEndpointsNotExistsWhenValueIsExplicitlyNull() throws Exception {
+
+        JSONObject root = new JSONObject();
+        root.put("endpoint_type", "http");
+        root.put("production_endpoints", buildEndpoint());
+        root.put("sandbox_endpoints", null);
+
+        Assert.assertFalse("A null sandbox_endpoints value must not count as a configured sandbox endpoint",
+                APIUtil.isSandboxEndpointsExists(root.toJSONString()));
+        Assert.assertTrue("Production endpoint must still be detected",
+                APIUtil.isProductionEndpointsExists(root.toJSONString()));
+    }
+
+    @Test
+    public void testIsProductionEndpointsNotExistsWhenValueIsExplicitlyNull() throws Exception {
+
+        JSONObject root = new JSONObject();
+        root.put("endpoint_type", "http");
+        root.put("production_endpoints", null);
+        root.put("sandbox_endpoints", buildEndpoint());
+
+        Assert.assertFalse("A null production_endpoints value must not count as a configured production endpoint",
+                APIUtil.isProductionEndpointsExists(root.toJSONString()));
+        Assert.assertTrue("Sandbox endpoint must still be detected",
+                APIUtil.isSandboxEndpointsExists(root.toJSONString()));
+    }
+
+    @Test
+    public void testBothEndpointStagesExplicitlyNull() throws Exception {
+
+        JSONObject root = new JSONObject();
+        root.put("endpoint_type", "http");
+        root.put("production_endpoints", null);
+        root.put("sandbox_endpoints", null);
+
+        Assert.assertFalse("Unexpected production endpoint found",
+                APIUtil.isProductionEndpointsExists(root.toJSONString()));
+        Assert.assertFalse("Unexpected sandbox endpoint found",
+                APIUtil.isSandboxEndpointsExists(root.toJSONString()));
+    }
+
+    @Test
+    public void testEndpointStagesWithAbsentKeysRemainUnchanged() throws Exception {
+
+        JSONObject productionOnly = new JSONObject();
+        productionOnly.put("endpoint_type", "http");
+        productionOnly.put("production_endpoints", buildEndpoint());
+        Assert.assertTrue(APIUtil.isProductionEndpointsExists(productionOnly.toJSONString()));
+        Assert.assertFalse(APIUtil.isSandboxEndpointsExists(productionOnly.toJSONString()));
+
+        JSONObject sandboxOnly = new JSONObject();
+        sandboxOnly.put("endpoint_type", "http");
+        sandboxOnly.put("sandbox_endpoints", buildEndpoint());
+        Assert.assertFalse(APIUtil.isProductionEndpointsExists(sandboxOnly.toJSONString()));
+        Assert.assertTrue(APIUtil.isSandboxEndpointsExists(sandboxOnly.toJSONString()));
+
+        JSONObject both = new JSONObject();
+        both.put("endpoint_type", "http");
+        both.put("production_endpoints", buildEndpoint());
+        both.put("sandbox_endpoints", buildEndpoint());
+        Assert.assertTrue(APIUtil.isProductionEndpointsExists(both.toJSONString()));
+        Assert.assertTrue(APIUtil.isSandboxEndpointsExists(both.toJSONString()));
+
+        JSONObject neither = new JSONObject();
+        neither.put("endpoint_type", "http");
+        Assert.assertFalse(APIUtil.isProductionEndpointsExists(neither.toJSONString()));
+        Assert.assertFalse(APIUtil.isSandboxEndpointsExists(neither.toJSONString()));
+    }
+
+    @Test
+    public void testIsSandboxEndpointsNotExistsWhenNestedGraphQLValueIsExplicitlyNull() throws Exception {
+
+        JSONObject http = new JSONObject();
+        http.put("endpoint_type", "http");
+        http.put("production_endpoints", buildEndpoint());
+        http.put("sandbox_endpoints", null);
+
+        String config = buildGraphQLConfig(http);
+
+        Assert.assertFalse("A null nested http.sandbox_endpoints value must not count as a configured endpoint",
+                APIUtil.isSandboxEndpointsExists(config));
+        Assert.assertTrue("Nested production endpoint must still be detected",
+                APIUtil.isProductionEndpointsExists(config));
+    }
+
+    @Test
+    public void testIsProductionEndpointsNotExistsWhenNestedGraphQLValueIsExplicitlyNull() throws Exception {
+
+        JSONObject http = new JSONObject();
+        http.put("endpoint_type", "http");
+        http.put("production_endpoints", null);
+        http.put("sandbox_endpoints", buildEndpoint());
+
+        String config = buildGraphQLConfig(http);
+
+        Assert.assertFalse("A null nested http.production_endpoints value must not count as a configured endpoint",
+                APIUtil.isProductionEndpointsExists(config));
+        Assert.assertTrue("Nested sandbox endpoint must still be detected",
+                APIUtil.isSandboxEndpointsExists(config));
+    }
+
+    @Test
+    public void testBothNestedGraphQLEndpointStagesExplicitlyNull() throws Exception {
+
+        JSONObject http = new JSONObject();
+        http.put("endpoint_type", "http");
+        http.put("production_endpoints", null);
+        http.put("sandbox_endpoints", null);
+
+        String config = buildGraphQLConfig(http);
+
+        Assert.assertFalse(APIUtil.isProductionEndpointsExists(config));
+        Assert.assertFalse(APIUtil.isSandboxEndpointsExists(config));
+    }
+
+    @Test
+    public void testNestedGraphQLEndpointStagesWithAbsentKeysRemainUnchanged() throws Exception {
+
+        JSONObject both = new JSONObject();
+        both.put("endpoint_type", "http");
+        both.put("production_endpoints", buildEndpoint());
+        both.put("sandbox_endpoints", buildEndpoint());
+        Assert.assertTrue(APIUtil.isProductionEndpointsExists(buildGraphQLConfig(both)));
+        Assert.assertTrue(APIUtil.isSandboxEndpointsExists(buildGraphQLConfig(both)));
+
+        JSONObject productionOnly = new JSONObject();
+        productionOnly.put("endpoint_type", "http");
+        productionOnly.put("production_endpoints", buildEndpoint());
+        Assert.assertTrue(APIUtil.isProductionEndpointsExists(buildGraphQLConfig(productionOnly)));
+        Assert.assertFalse(APIUtil.isSandboxEndpointsExists(buildGraphQLConfig(productionOnly)));
+
+        JSONObject sandboxOnly = new JSONObject();
+        sandboxOnly.put("endpoint_type", "http");
+        sandboxOnly.put("sandbox_endpoints", buildEndpoint());
+        Assert.assertFalse(APIUtil.isProductionEndpointsExists(buildGraphQLConfig(sandboxOnly)));
+        Assert.assertTrue(APIUtil.isSandboxEndpointsExists(buildGraphQLConfig(sandboxOnly)));
+    }
+
+    @Test
+    public void testGraphQLTopLevelNullStagesFallThroughToNestedEndpoints() throws Exception {
+
+        JSONObject http = new JSONObject();
+        http.put("endpoint_type", "http");
+        http.put("production_endpoints", buildEndpoint());
+        http.put("sandbox_endpoints", buildEndpoint());
+
+        JSONObject root = new JSONObject();
+        root.put("endpoint_type", "graphql");
+        root.put("production_endpoints", null);
+        root.put("sandbox_endpoints", null);
+        root.put("http", http);
+
+        Assert.assertTrue("Null top-level stage must fall through to the nested http endpoints",
+                APIUtil.isProductionEndpointsExists(root.toJSONString()));
+        Assert.assertTrue("Null top-level stage must fall through to the nested http endpoints",
+                APIUtil.isSandboxEndpointsExists(root.toJSONString()));
+    }
+
+    private JSONObject buildEndpoint() {
+
+        JSONObject endpoint = new JSONObject();
+        endpoint.put("url", "https://localhost:9443/am/sample/pizzashack/v1/api/");
+        endpoint.put("config", null);
+        return endpoint;
+    }
+
+    private String buildGraphQLConfig(JSONObject httpConfig) {
+
+        JSONObject root = new JSONObject();
+        root.put("endpoint_type", "graphql");
+        root.put("http", httpConfig);
+        return root.toJSONString();
     }
 
     @Test
@@ -1721,6 +1898,10 @@ public class APIUtilTest {
 
         PowerMockito.mockStatic(PrivilegedCarbonContext.class);
         PowerMockito.mockStatic(CarbonContext.class);
+        CarbonContext carbonContext = Mockito.mock(CarbonContext.class);
+        PowerMockito.when(CarbonContext.getThreadLocalCarbonContext()).thenReturn(carbonContext);
+        Mockito.when(carbonContext.getTenantDomain()).thenReturn(org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        Mockito.when(carbonContext.getTenantId()).thenReturn(org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_ID);
         PrivilegedCarbonContext privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
         Mockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedCarbonContext);
 
@@ -1751,7 +1932,8 @@ public class APIUtilTest {
         Log logMock = Mockito.mock(Log.class);
         PowerMockito.mockStatic(LogFactory.class);
         Mockito.when(LogFactory.getLog(any(Class.class))).thenReturn(logMock);
-
+        PowerMockito.mockStatic(IdentityUtil.class);
+        PowerMockito.doReturn(true).when(IdentityUtil.class, "isUserStoreInUsernameCaseSensitive", userNameWithoutChange);
         boolean expectedResult = APIUtil.hasPermission(userNameWithoutChange, permission);
         Assert.assertEquals(true, expectedResult);
     }
@@ -1924,7 +2106,8 @@ public class APIUtilTest {
 
         String username = "Kelso";
         String[] roles = {"PUBLISHER", "ADMIN", "TEST-ROLE"};
-
+        PowerMockito.mockStatic(IdentityUtil.class);
+        PowerMockito.doReturn(true).when(IdentityUtil.class, "isUserStoreInUsernameCaseSensitive", username);
         PowerMockito.spy(APIUtil.class);
         PowerMockito.doReturn(roles)
                 .when(APIUtil.class, "getValueFromCache", APIConstants.API_USER_ROLE_CACHE, username);
@@ -1961,6 +2144,8 @@ public class APIUtilTest {
         Mockito.when(userRealm.getUserStoreManager()).thenReturn(userStoreManager);
         Mockito.when(MultitenantUtils.getTenantAwareUsername(username)).thenReturn(tenantAwareUsername);
         Mockito.when(userStoreManager.getRoleListOfUser(tenantAwareUsername)).thenReturn(roles);
+        PowerMockito.mockStatic(IdentityUtil.class);
+        PowerMockito.doReturn(true).when(IdentityUtil.class, "isUserStoreInUsernameCaseSensitive", username);
         PowerMockito.doNothing().when(APIUtil.class, "addToRolesCache", Mockito.any(), Mockito.any(), Mockito.any());
 
         Assert.assertEquals(roles, APIUtil.getListOfRoles(username));
@@ -1992,6 +2177,8 @@ public class APIUtilTest {
         Mockito.when(MultitenantUtils.getTenantDomain(username)).thenReturn(tenantDomain);
         Mockito.when(MultitenantUtils.getTenantAwareUsername(username)).thenReturn(tenantAwareUsername);
         Mockito.when(userStoreManager.getRoleListOfUser(MultitenantUtils.getTenantAwareUsername(username))).thenReturn(roles);
+        PowerMockito.mockStatic(IdentityUtil.class);
+        PowerMockito.doReturn(true).when(IdentityUtil.class, "isUserStoreInUsernameCaseSensitive", username);
         PowerMockito.doNothing().when(APIUtil.class, "addToRolesCache", Mockito.any(), Mockito.any(), Mockito.any());
 
         Assert.assertEquals(roles, APIUtil.getListOfRoles(username));

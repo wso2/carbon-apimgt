@@ -20,3 +20,4 @@ bigIntcmp=org.wso2.carbon.apimgt.throttling.siddhi.extension.BigIntCompareFuncti
 timeLength=org.wso2.carbon.apimgt.throttling.siddhi.extension.AsyncAPIThrottleStreamProcessor
 count=org.wso2.carbon.apimgt.throttling.siddhi.extension.CountAttributeAggregatorWithReset
 sum=org.wso2.carbon.apimgt.throttling.siddhi.extension.SumAttributeAggregatorWithReset
+distributedCount=org.wso2.carbon.apimgt.throttling.siddhi.extension.DistributedCountAttributeAggregator

@@ -45,7 +45,8 @@ public class PostAuthenticationInterceptor extends AbstractPhaseInterceptor {
 
     /**
      * Handles the incoming message after post authentication. Validate the authentication scheme of the incoming request
-     * based on the properties set by previous interceptors. If non of the authentication scheme is set, return a 401
+     * based on the properties set by previous interceptors. If none of the accepted authentication schemes is set,
+     * return a 401
      * unauthenticated response.
      * 
      * @param inMessage cxf incoming message
@@ -58,12 +59,12 @@ public class PostAuthenticationInterceptor extends AbstractPhaseInterceptor {
             return;
         }
         String authScheme = (String) inMessage.get(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME);
-        //check if the request does not have either the bearer or basic auth header. If so, throw 401 
-        //unauthenticated error.
+        // Check if the request has one of the accepted auth schemes: Opaque, Basic, JWT, or Platform Gateway API Key.
         if (!StringUtils.equals(authScheme, RestApiConstants.OPAQUE_AUTHENTICATION)
                 && !StringUtils.equals(authScheme, RestApiConstants.BASIC_AUTHENTICATION)
-                  && !StringUtils.equals(authScheme, RestApiConstants.JWT_AUTHENTICATION)) {
-            log.error("Authentication failed: Bearer/Basic authentication header is missing");
+                && !StringUtils.equals(authScheme, RestApiConstants.JWT_AUTHENTICATION)
+                && !StringUtils.equals(authScheme, RestApiConstants.PLATFORM_GATEWAY_API_KEY)) {
+            log.error("Authentication failed: expected Opaque, JWT, Basic, or Platform Gateway API Key");
             throw new AuthenticationException("Unauthenticated request");
         }
     }

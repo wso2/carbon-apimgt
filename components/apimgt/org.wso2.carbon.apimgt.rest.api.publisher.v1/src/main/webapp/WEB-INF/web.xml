@@ -56,7 +56,10 @@
                 org.wso2.carbon.apimgt.rest.api.publisher.v1.WorkflowsApi,
                 org.wso2.carbon.apimgt.rest.api.publisher.v1.LlmProvidersApi,
                 org.wso2.carbon.apimgt.rest.api.publisher.v1.LabelsApi,
-                org.wso2.carbon.apimgt.rest.api.publisher.v1.OrganizationsApi
+                org.wso2.carbon.apimgt.rest.api.publisher.v1.OrganizationsApi,
+                org.wso2.carbon.apimgt.rest.api.publisher.v1.DesignAssistantApi,
+                org.wso2.carbon.apimgt.rest.api.publisher.v1.AiServiceProvidersApi,
+                org.wso2.carbon.apimgt.rest.api.publisher.v1.McpServersApi
             </param-value>
         </init-param>
         <init-param>
@@ -75,14 +78,14 @@
         <init-param>
             <param-name>jaxrs.inInterceptors</param-name>
             <param-value>
-                org.wso2.carbon.apimgt.rest.api.util.interceptors.URLValidationInterceptor(majorVersion=v4 latestVersion=v4.2),
+                org.wso2.carbon.apimgt.rest.api.util.interceptors.URLValidationInterceptor(majorVersion=v4 latestVersion=v4.5),
                 org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.TokenMergeInterceptor,
                 org.wso2.carbon.apimgt.rest.api.util.interceptors.PreAuthenticationInterceptor,
                 org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.OAuthAuthenticationInterceptor,
                 org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.BasicAuthenticationInterceptor,
                 org.wso2.carbon.apimgt.rest.api.util.interceptors.PostAuthenticationInterceptor,
                 org.wso2.carbon.apimgt.rest.api.util.interceptors.validation.ValidationInInterceptor,
-                org.wso2.carbon.apimgt.rest.api.util.interceptors.OrganizationInterceptor,
+                org.wso2.carbon.apimgt.rest.api.util.interceptors.OrganizationInterceptor(allowTenantHeader=false),
                 org.wso2.carbon.apimgt.rest.api.util.interceptors.quotalimit.ResourceQuotaLimitInterceptor
             </param-value>
         </init-param>

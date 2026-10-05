@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.governance.api.model;
 
+import java.util.Locale;
+
 /**
  * This class represents the compliance state of an artifact
  */
@@ -27,13 +29,10 @@ public enum ArtifactComplianceState {
     NOT_APPLICABLE;
 
     public static ArtifactComplianceState fromString(String text) {
-        if ("compliant".equalsIgnoreCase(text)) {
-            return COMPLIANT;
-        } else if ("non_compliant".equalsIgnoreCase(text)) {
-            return NON_COMPLIANT;
-        } else if ("not_applicable".equalsIgnoreCase(text)) {
-            return NOT_APPLICABLE;
+        try {
+            return ArtifactComplianceState.valueOf(text.toUpperCase(Locale.ENGLISH));
+        } catch (IllegalArgumentException e) {
+            return null;
         }
-        return null;
     }
 }

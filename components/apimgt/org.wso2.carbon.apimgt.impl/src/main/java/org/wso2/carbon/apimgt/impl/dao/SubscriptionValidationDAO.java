@@ -17,7 +17,6 @@
  */
 package org.wso2.carbon.apimgt.impl.dao;
 
-import com.google.gson.Gson;
 import edu.emory.mathcs.backport.java.util.Arrays;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -26,6 +25,9 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
+import org.wso2.carbon.apimgt.api.model.APIOperationMapping;
+import org.wso2.carbon.apimgt.api.model.BackendOperation;
+import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.AIAPIQuotaLimit;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
@@ -55,6 +57,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -170,7 +173,7 @@ public class SubscriptionValidationDAO {
                 String attributeName = resultSet.getString("ATTRIBUTE_NAME");
                 String attributeValue = resultSet.getString("ATTRIBUTE_VALUE");
                 if (StringUtils.isNotEmpty(attributeName)) {
-                    application.addAttribute(attributeName, attributeValue);
+                    application.addAttribute(attributeName, (attributeValue != null) ? attributeValue : StringUtils.EMPTY);
                 }
                 //read from the application_group_mapping table and make it a set
                 String groupId = resultSet.getString("GROUP_ID");
@@ -1200,10 +1203,15 @@ public class SubscriptionValidationDAO {
 
     private void attachURlMappingDetailsOfApiProduct(Connection connection, API api, String revisionId)
             throws SQLException {
-        // Need API Product revision ID to avoid unnecessary iterations
-        String sql = SubscriptionValidationSQLConstants.GET_ALL_API_PRODUCT_URI_TEMPLATES_SQL;
+        boolean isRevisionBasedResourcesEnabled = isRevisionBasedAPIProductResourcesEnabled();
+        String sql = isRevisionBasedResourcesEnabled ?
+                SubscriptionValidationSQLConstants.GET_API_PRODUCT_URI_TEMPLATES_BY_REVISION_SQL :
+                SubscriptionValidationSQLConstants.GET_ALL_API_PRODUCT_URI_TEMPLATES_SQL;
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setInt(1, api.getApiId());
+            if (isRevisionBasedResourcesEnabled) {
+                preparedStatement.setString(2, revisionId);
+            }
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     String httpMethod = resultSet.getString("HTTP_METHOD");
@@ -1233,6 +1241,12 @@ public class SubscriptionValidationDAO {
                 attachPolicies(connection, revisionId, api);
             }
         }
+    }
+
+    private boolean isRevisionBasedAPIProductResourcesEnabled() {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        return config != null && config.isAPIProductRevisionBasedResourcesEnabled();
     }
 
     public API getAPIByContextAndVersion(String context, String version, String deployment, boolean isExpand) {
@@ -1274,7 +1288,9 @@ public class SubscriptionValidationDAO {
                         String revision = resultSet.getString("REVISION_UUID");
                         api.setStatus(resultSet.getString("STATUS"));
                         api.setOrganization(resultSet.getString("ORGANIZATION"));
-                        api.setIsDefaultVersion(isAPIDefaultVersion(connection, provider, name, version));
+                        String publishedDefaultApiVersion = getAPIDefaultVersion(connection, provider, name);
+                        setDefaultVersionContext(apiType, api, version, publishedDefaultApiVersion,
+                                api.getContext(), api.getContextTemplate());
                         if (resultSet.getString("IS_EGRESS") != null) {
                             api.setEgress(parseInt(resultSet.getString("IS_EGRESS")));
                         }
@@ -1316,6 +1332,23 @@ public class SubscriptionValidationDAO {
                     String urlPattern = resultSet.getString("URL_PATTERN");
                     String throttlingTier = resultSet.getString("THROTTLING_TIER");
                     String scopeName = resultSet.getString("SCOPE_NAME");
+                    String description = null;
+                    try (InputStream descriptionDefStream = resultSet.getBinaryStream("DESCRIPTION")) {
+                        if (descriptionDefStream != null) {
+                            description = APIMgtDBUtil.getStringFromInputStream(descriptionDefStream);
+                        }
+                    } catch (IOException e) {
+                        log.error("Error while reading description of the URI template", e);
+                    }
+                    String schemaDefinition = null;
+                    try (InputStream schemaDefStream = resultSet.getBinaryStream("SCHEMA_DEFINITION")) {
+                        if (schemaDefStream != null) {
+                            schemaDefinition = APIMgtDBUtil.getStringFromInputStream(schemaDefStream);
+                        }
+                    } catch (IOException e) {
+                        log.error("Error while reading schema definition of the URI template", e);
+                    }
+                    int urlMappingId = resultSet.getInt("URL_MAPPING_ID");
                     URLMapping urlMapping = api.getResource(urlPattern, httpMethod);
                     if (urlMapping == null) {
                         urlMapping = new URLMapping();
@@ -1323,6 +1356,12 @@ public class SubscriptionValidationDAO {
                         urlMapping.setHttpMethod(httpMethod);
                         urlMapping.setThrottlingPolicy(throttlingTier);
                         urlMapping.setUrlPattern(urlPattern);
+                        urlMapping.setDescription(description);
+                        urlMapping.setSchemaDefinition(schemaDefinition);
+
+                        if (APIConstants.API_TYPE_MCP.equals(api.getApiType())) {
+                            populateMcpOperationMappings(connection, urlMappingId, urlMapping, api);
+                        }
                     }
                     if (StringUtils.isNotEmpty(scopeName)) {
                         urlMapping.addScope(scopeName);
@@ -1336,6 +1375,54 @@ public class SubscriptionValidationDAO {
             boolean isPolicyEnabled = Boolean.parseBoolean(configs.get(POLICY_ENABLED_FOR_ANALYTICS));
             if (isPolicyEnabled) {
                 attachPolicies(connection, revisionId, api);
+            }
+        }
+    }
+
+    private void populateMcpOperationMappings(Connection connection, int urlMappingId, URLMapping urlMapping, API api)
+            throws SQLException {
+        String sql;
+        if (APIConstants.API_SUBTYPE_DIRECT_BACKEND.equals(api.getSubtype()) ||
+                APIConstants.API_SUBTYPE_SERVER_PROXY.equals(api.getSubtype())) {
+            sql = SubscriptionValidationSQLConstants.GET_MCP_BACKEND_OPERATION_MAPPING_BY_REF_URL_MAPPING_ID;
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setInt(1, urlMappingId);
+                try (ResultSet resultSet = ps.executeQuery()) {
+                    if (resultSet.next()) {
+                        BackendOperationMapping backendOperationMapping = new BackendOperationMapping();
+
+                        BackendOperation backendOperation = new BackendOperation();
+                        backendOperation.setVerb(org.wso2.carbon.apimgt.api.APIConstants.SupportedHTTPVerbs.
+                                fromValue(resultSet.getString("VERB")));
+                        backendOperation.setTarget(resultSet.getString("TARGET"));
+                        backendOperationMapping.setBackendOperation(backendOperation);
+
+                        urlMapping.setBackendOperationMapping(backendOperationMapping);
+                    }
+                }
+            }
+        } else if (APIConstants.API_SUBTYPE_EXISTING_API.equals(api.getSubtype())) {
+            sql = SubscriptionValidationSQLConstants.GET_MCP_API_OPERATION_MAPPING_BY_REF_URL_MAPPING_ID;
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setInt(1, urlMappingId);
+                try (ResultSet resultSet = ps.executeQuery()) {
+                    if (resultSet.next()) {
+
+                        APIOperationMapping apiOperationMapping = new APIOperationMapping();
+                        apiOperationMapping.setApiUuid(resultSet.getString("API_UUID"));
+                        apiOperationMapping.setApiName(resultSet.getString("API_NAME"));
+                        apiOperationMapping.setApiVersion(resultSet.getString("API_VERSION"));
+                        apiOperationMapping.setApiContext(resultSet.getString("CONTEXT"));
+
+                        BackendOperation backendOperation = new BackendOperation();
+                        backendOperation.setVerb(org.wso2.carbon.apimgt.api.APIConstants.SupportedHTTPVerbs.
+                                fromValue(resultSet.getString("HTTP_METHOD")));
+                        backendOperation.setTarget(resultSet.getString("URL_PATTERN"));
+                        apiOperationMapping.setBackendOperation(backendOperation);
+
+                        urlMapping.setApiOperationMapping(apiOperationMapping);
+                    }
+                }
             }
         }
     }
@@ -1357,7 +1444,8 @@ public class SubscriptionValidationDAO {
                         String policyVersion = resultSet.getString("POLICY_VERSION");
                         String operationPolicyDirection = resultSet.getString("OPERATION_POLICY_DIRECTION");
                         String operationPolicyID = resultSet.getString("OPERATION_POLICY_UUID");
-                        String parameters = resultSet.getString("OPERATION_PARAMS");
+                        String parameters = APIMgtDBUtil.getStringFromInputStream(resultSet.getBinaryStream("OPERATION_PARAMS"));
+
                         URLMapping urlMapping = null;
                         if (StringUtils.isNotEmpty(httpMethod) && StringUtils.isNotEmpty(urlPattern)) {
                             urlMapping = api.getResource(urlPattern, httpMethod);
@@ -1401,8 +1489,9 @@ public class SubscriptionValidationDAO {
                     String apiPolicyUUID = resultSet.getString("API_POLICY_UUID");
 
                     // We get parameters of the policies separately. However, this can be retrieved from the AM_API_OPERATION_POLICY_MAPPING as it contains both API and Operation Policies
-                    String operationParameters = resultSet.getString("OPERATION_PARAMS");
-                    String apiParams = resultSet.getString("API_PARAMS");
+                    String operationParameters = APIMgtDBUtil.getStringFromInputStream(resultSet.getBinaryStream("OPERATION_PARAMS"));
+                    String apiParams = APIMgtDBUtil.getStringFromInputStream(resultSet.getBinaryStream("API_PARAMS"));
+
                     URLMapping urlMapping = null;
                     if (StringUtils.isNotEmpty(httpMethod) && StringUtils.isNotEmpty(urlPattern)) {
                         urlMapping = api.getResource(urlPattern, httpMethod);
@@ -1535,8 +1624,6 @@ public class SubscriptionValidationDAO {
                     return resultSet.getString("PUBLISHED_DEFAULT_API_VERSION");
                 }
             }
-        } catch (SQLException e) {
-            log.error("Error while loading default version", e);
         }
         return null;
     }

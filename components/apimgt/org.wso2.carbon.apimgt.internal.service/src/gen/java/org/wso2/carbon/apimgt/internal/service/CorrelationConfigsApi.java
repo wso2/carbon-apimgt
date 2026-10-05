@@ -26,7 +26,7 @@ import javax.validation.constraints.*;
 
 @Api(description = "the correlation-configs API")
 
-@Produces({ "application/json" })
+
 
 
 public class CorrelationConfigsApi  {

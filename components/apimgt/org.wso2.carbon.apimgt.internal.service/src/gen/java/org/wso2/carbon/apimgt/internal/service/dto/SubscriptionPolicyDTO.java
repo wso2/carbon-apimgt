@@ -2,8 +2,11 @@ package org.wso2.carbon.apimgt.internal.service.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import org.wso2.carbon.apimgt.internal.service.dto.GraphQLQueryDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.PolicyDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionPolicyAllOfDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ThrottleLimitDTO;
 import javax.validation.constraints.*;
 
@@ -15,7 +18,11 @@ import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
+import javax.validation.Valid;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 
 public class SubscriptionPolicyDTO   {
   
@@ -212,6 +219,7 @@ public class SubscriptionPolicyDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("defaultLimit")
   public ThrottleLimitDTO getDefaultLimit() {
     return defaultLimit;

@@ -21,8 +21,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.spec.parser.definitions.OAS3Parser;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -30,6 +30,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 @Path("/swagger.yaml")
 @Consumes({ "text/yaml" })
@@ -62,9 +64,11 @@ public class SwaggerYamlApi {
             if (openAPIDef == null) {
                 synchronized (LOCK_ADMIN_OPENAPI_DEF) {
                     if (openAPIDef == null) {
-                        String definition = IOUtils
-                                .toString(this.getClass().getResourceAsStream("/admin-api.yaml"), "UTF-8");
-                        openAPIDef = new OAS3Parser().removeExamplesFromOpenAPI(definition);
+                        try (InputStream defStream = this.getClass()
+                                .getClassLoader().getResourceAsStream("admin-api.yaml")) {
+                            String definition = IOUtils.toString(defStream, StandardCharsets.UTF_8);
+                            openAPIDef = new OAS3Parser().removeExamplesFromOpenAPI(definition);
+                        }
                     }
                 }
             }

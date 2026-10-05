@@ -45,7 +45,8 @@ ApiCategoriesApiService delegate = new ApiCategoriesApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories and Key Managers related operations"),
-            @AuthorizationScope(scope = "apim:api_category", description = "Manage API categories")
+            @AuthorizationScope(scope = "apim:api_category", description = "Manage API categories"),
+            @AuthorizationScope(scope = "apim:api_category_delete", description = "Delete API categories")
         })
     }, tags={ "API Category (Individual)",  })
     @ApiResponses(value = { 
@@ -63,7 +64,8 @@ ApiCategoriesApiService delegate = new ApiCategoriesApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories and Key Managers related operations"),
-            @AuthorizationScope(scope = "apim:api_category", description = "Manage API categories")
+            @AuthorizationScope(scope = "apim:api_category", description = "Manage API categories"),
+            @AuthorizationScope(scope = "apim:api_category_update", description = "Update API categories")
         })
     }, tags={ "API Category (Individual)",  })
     @ApiResponses(value = { 
@@ -82,7 +84,8 @@ ApiCategoriesApiService delegate = new ApiCategoriesApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories and Key Managers related operations"),
-            @AuthorizationScope(scope = "apim:api_category", description = "Manage API categories")
+            @AuthorizationScope(scope = "apim:api_category", description = "Manage API categories"),
+            @AuthorizationScope(scope = "apim:api_category_view", description = "View API categories")
         })
     }, tags={ "API Category (Collection)",  })
     @ApiResponses(value = { 
@@ -99,7 +102,8 @@ ApiCategoriesApiService delegate = new ApiCategoriesApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories and Key Managers related operations"),
-            @AuthorizationScope(scope = "apim:api_category", description = "Manage API categories")
+            @AuthorizationScope(scope = "apim:api_category", description = "Manage API categories"),
+            @AuthorizationScope(scope = "apim:api_category_create", description = "Create API categories")
         })
     }, tags={ "API Category (Individual)" })
     @ApiResponses(value = { 

@@ -26,6 +26,7 @@ import org.apache.cxf.interceptor.security.AuthenticationException;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
+import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -38,6 +39,7 @@ import org.wso2.carbon.apimgt.rest.api.util.MethodStats;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
@@ -153,7 +155,10 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
                 if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
                     APIUtil.loadTenantConfigBlockingMode(tenantDomain);
                 }
-                return validateRoles(inMessage, userRealm, tenantDomain, username);
+                if (validateRoles(inMessage, userRealm, tenantDomain, username) && validateAdminPermission(userRealm,
+                        username, inMessage)) {
+                    return true;
+                }
             }
         } catch (UserStoreException e) {
             log.error("Error occurred while authenticating user: " + username, e);
@@ -290,7 +295,7 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
                         break;
                     }
                 }
-            } else {
+            } else if (!checkForProductRestAPIScopes(scope.getKey())){
                 //No role for the requested resource scope. Add it to the validated user scope list. 
                 validatedUserScopes.add(scope);
                 if (log.isDebugEnabled()) {
@@ -316,6 +321,18 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
         log.error("Insufficient privileges. Role validation failed for user: "
                 + username + " to access resource path: " + path + " and verb " + verb);
         return false;
+    }
+
+    /**
+     * This method is used to check whether a given scope is a product REST API scope or not.
+     * Product REST API scopes are identified by their prefixes.
+     *
+     * @param scope scope
+     * @return true if it is a product REST API scope
+     */
+    private boolean checkForProductRestAPIScopes(String scope) {
+        return (scope.startsWith("apim:") && !scope.startsWith("apim:dcr:"))
+                || scope.startsWith("apim_analytics:") || scope.startsWith("service_catalog:");
     }
 
     /**
@@ -351,6 +368,55 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
             RestApiUtil
                     .handleInternalServerError("Unable to retrieve/process " +
                             "Basic Auth blocked URIs for REST API", e, log);
+        }
+        return false;
+    }
+
+    /**
+     * This method validates the admin permission availability of the user for admin permission restricted
+     * REST APIs.
+     *
+     * @param userRealm UserRealm
+     * @param username  username
+     * @param message  cxf Message
+     * @return true if user is authorized, false otherwise.
+     */
+    private boolean validateAdminPermission(UserRealm userRealm, String username, Message message) {
+        try {
+            String path = (String) message.get(Message.PATH_INFO);
+            if (path.contains(APIConstants.RestApiConstants.REST_API_OLD_VERSION)) {
+                path = path.replace("/" + APIConstants.RestApiConstants.REST_API_OLD_VERSION, "");
+            }
+            String httpMethod = (String) message.get(Message.HTTP_REQUEST_METHOD);
+            Dictionary<String,List<String>> adminRestrictedResourcePathsMap =
+                    RestApiUtil.getAdminPermissionRestrictedURIsToMethodsMap();
+            Enumeration<String> uriTemplateSet = adminRestrictedResourcePathsMap.keys();
+
+            while (uriTemplateSet.hasMoreElements()) {
+                String uriTemplate = uriTemplateSet.nextElement();
+                if ((uriTemplate.endsWith("*") && path.startsWith(uriTemplate.replace("*", ""))) ||
+                        uriTemplate.equals(path)) {
+                    List<String> allowedVerbs = adminRestrictedResourcePathsMap.get(uriTemplate);
+                    boolean methodAllowed = false;
+                    for (String m : allowedVerbs) {
+                        if (httpMethod != null && httpMethod.equalsIgnoreCase(m.trim())) {
+                            methodAllowed = true;
+                            break;
+                        }
+                    }
+                    if (methodAllowed) {
+                        AuthorizationManager manager = userRealm.getAuthorizationManager();
+                        return manager.isUserAuthorized(MultitenantUtils.getTenantAwareUsername(username),
+                                APIConstants.Permissions.APIM_ADMIN, CarbonConstants.UI_PERMISSION_ACTION);
+                    }
+                }
+            }
+            return true; // If no admin restricted APIs are matched, allow access by default.
+        } catch (UserStoreException e) {
+            log.error("Error while checking admin permission: " + username, e);
+        } catch (APIManagementException e) {
+            RestApiUtil
+                    .handleInternalServerError("Unable to retrieve/process admin permission restricted REST APIs", e, log);
         }
         return false;
     }

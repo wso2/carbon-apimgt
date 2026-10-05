@@ -27,6 +27,7 @@ public class APIInfoDTO   {
   
     private String id = null;
     private String name = null;
+    private String displayName = null;
     private String description = null;
     private String context = null;
     private String version = null;
@@ -41,6 +42,7 @@ public class APIInfoDTO   {
     private APIBusinessInformationDTO businessInformation = null;
     private Boolean isSubscriptionAvailable = null;
     private String monetizationLabel = null;
+    private String gatewayType = null;
     private String gatewayVendor = null;
     private List<APIInfoAdditionalPropertiesDTO> additionalProperties = new ArrayList<APIInfoAdditionalPropertiesDTO>();
     private Boolean monetizedInfo = null;
@@ -79,6 +81,24 @@ public class APIInfoDTO   {
   }
   public void setName(String name) {
     this.name = name;
+  }
+
+  /**
+   * Display name of the API. This is the name that will be displayed in the Publisher and DevPortal. If not provided, the name will be used as the display name. 
+   **/
+  public APIInfoDTO displayName(String displayName) {
+    this.displayName = displayName;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Calculator API", value = "Display name of the API. This is the name that will be displayed in the Publisher and DevPortal. If not provided, the name will be used as the display name. ")
+  @JsonProperty("displayName")
+  public String getDisplayName() {
+    return displayName;
+  }
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
   }
 
   /**
@@ -326,6 +346,23 @@ public class APIInfoDTO   {
 
   /**
    **/
+  public APIInfoDTO gatewayType(String gatewayType) {
+    this.gatewayType = gatewayType;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "solace", value = "")
+  @JsonProperty("gatewayType")
+  public String getGatewayType() {
+    return gatewayType;
+  }
+  public void setGatewayType(String gatewayType) {
+    this.gatewayType = gatewayType;
+  }
+
+  /**
+   **/
   public APIInfoDTO gatewayVendor(String gatewayVendor) {
     this.gatewayVendor = gatewayVendor;
     return this;
@@ -425,6 +462,7 @@ public class APIInfoDTO   {
     APIInfoDTO apIInfo = (APIInfoDTO) o;
     return Objects.equals(id, apIInfo.id) &&
         Objects.equals(name, apIInfo.name) &&
+        Objects.equals(displayName, apIInfo.displayName) &&
         Objects.equals(description, apIInfo.description) &&
         Objects.equals(context, apIInfo.context) &&
         Objects.equals(version, apIInfo.version) &&
@@ -439,6 +477,7 @@ public class APIInfoDTO   {
         Objects.equals(businessInformation, apIInfo.businessInformation) &&
         Objects.equals(isSubscriptionAvailable, apIInfo.isSubscriptionAvailable) &&
         Objects.equals(monetizationLabel, apIInfo.monetizationLabel) &&
+        Objects.equals(gatewayType, apIInfo.gatewayType) &&
         Objects.equals(gatewayVendor, apIInfo.gatewayVendor) &&
         Objects.equals(additionalProperties, apIInfo.additionalProperties) &&
         Objects.equals(monetizedInfo, apIInfo.monetizedInfo) &&
@@ -448,7 +487,7 @@ public class APIInfoDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, type, createdTime, provider, lifeCycleStatus, thumbnailUri, avgRating, throttlingPolicies, advertiseInfo, businessInformation, isSubscriptionAvailable, monetizationLabel, gatewayVendor, additionalProperties, monetizedInfo, egress, subtype);
+    return Objects.hash(id, name, displayName, description, context, version, type, createdTime, provider, lifeCycleStatus, thumbnailUri, avgRating, throttlingPolicies, advertiseInfo, businessInformation, isSubscriptionAvailable, monetizationLabel, gatewayType, gatewayVendor, additionalProperties, monetizedInfo, egress, subtype);
   }
 
   @Override
@@ -458,6 +497,7 @@ public class APIInfoDTO   {
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
@@ -472,6 +512,7 @@ public class APIInfoDTO   {
     sb.append("    businessInformation: ").append(toIndentedString(businessInformation)).append("\n");
     sb.append("    isSubscriptionAvailable: ").append(toIndentedString(isSubscriptionAvailable)).append("\n");
     sb.append("    monetizationLabel: ").append(toIndentedString(monetizationLabel)).append("\n");
+    sb.append("    gatewayType: ").append(toIndentedString(gatewayType)).append("\n");
     sb.append("    gatewayVendor: ").append(toIndentedString(gatewayVendor)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("    monetizedInfo: ").append(toIndentedString(monetizedInfo)).append("\n");

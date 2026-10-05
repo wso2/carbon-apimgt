@@ -101,6 +101,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_rule_read
+            - apim:gov_rule_manage
     post:
       summary: Create a new ruleset.
       description: Creates a new ruleset in the user's organization.
@@ -148,6 +149,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_rule_manage
+            - apim:gov_rule_create
   /rulesets/{rulesetId}:
     get:
       summary: Retrieves details of a specific ruleset.
@@ -191,6 +193,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_rule_read
+            - apim:gov_rule_manage
     put:
       summary: Updates a specific ruleset.
       description: Updates the details of the ruleset identified by the `rulesetId`.
@@ -240,6 +243,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_rule_manage
+            - apim:gov_rule_update
     delete:
       summary: Deletes a specific ruleset.
       description: Deletes an existing ruleset identified by the rulesetId.
@@ -278,6 +282,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_rule_manage
+            - apim:gov_rule_delete
   /rulesets/{rulesetId}/content:
     get:
       summary: Retrieves the content of a specific ruleset.
@@ -324,6 +329,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_rule_read
+            - apim:gov_rule_manage
   /rulesets/{rulesetId}/usage:
     get:
       summary: Retrieves the policy usage of a specific ruleset.
@@ -371,6 +377,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_rule_read
+            - apim:gov_rule_manage
   /policies:
     get:
       summary: Retrieves a list of all governance policies.
@@ -402,7 +409,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GovernancePolicyList'
+                $ref: '#/components/schemas/APIMGovernancePolicyList'
         "400":
           description: Bad Request
           content:
@@ -430,6 +437,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_policy_read
+            - apim:gov_policy_manage
     post:
       summary: Creates a new governance policy.
       description: Creates a new governance policy for the user's organization.
@@ -442,14 +450,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GovernancePolicy'
+              $ref: '#/components/schemas/APIMGovernancePolicy'
       responses:
         "201":
           description: OK. Governance policy created successfully.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GovernancePolicy'
+                $ref: '#/components/schemas/APIMGovernancePolicy'
         "400":
           description: Bad Request
           content:
@@ -477,6 +485,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_policy_manage
+            - apim:gov_policy_create
   /policies/{policyId}:
     get:
       summary: Get a specific governance policy
@@ -492,7 +501,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GovernancePolicy'
+                $ref: '#/components/schemas/APIMGovernancePolicy'
         "400":
           description: Bad Request
           content:
@@ -520,6 +529,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_policy_read
+            - apim:gov_policy_manage
     put:
       summary: Update a specific governance policy
       description: Updates the details of an existing governance policy identified by the policyId.
@@ -534,14 +544,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GovernancePolicy'
+              $ref: '#/components/schemas/APIMGovernancePolicy'
       responses:
         "200":
           description: OK. Governance policy updated successfully.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GovernancePolicy'
+                $ref: '#/components/schemas/APIMGovernancePolicy'
         "400":
           description: Bad Request
           content:
@@ -569,6 +579,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_policy_manage
+            - apim:gov_policy_update
     delete:
       summary: Delete a specific governance policy
       description: Deletes an existing governance policy identified by the policyId.
@@ -607,10 +618,11 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_policy_manage
+            - apim:gov_policy_delete
   /artifact-compliance/api:
     get:
       summary: Retrieves compliance of all API artifacts
-      description: Retrieves compliance of all API artifacts within the organization.
+      description: Retrieves compliance of all API artifacts within the organization visible to logged-in user.
       operationId: getComplianceStatusListOfAPIs
       parameters:
         - $ref: '#/components/parameters/limit'
@@ -654,7 +666,7 @@ paths:
   /artifact-compliance/api/summary:
     get:
       summary: Retrieves the summary of compliance of all API artifacts
-      description: Retrieves the summary of compliance of all API artifacts within the organization.
+      description: Retrieves the summary of compliance of all API artifacts within the organization visible to logged-in user.
       operationId: getComplianceSummaryForAPIs
       tags:
         - Artifact Compliance
@@ -867,7 +879,7 @@ paths:
   /policy-adherence/{policyId}:
     get:
       summary: Retrieve adherence details for a specific policy
-      description: Retrieve adherence details associated with a specific governance policy within the organization using its unique ID.
+      description: Retrieve adherence details associated with a specific governance policy within the organization using its unique ID. The list of artifacts under the policy will only contain the artifacts visible to user
       operationId: getPolicyAdherenceByPolicyId
       tags:
         - Policy Adherence
@@ -970,10 +982,12 @@ components:
       properties:
         name:
           type: string
+          maxLength: 256
           description: Name of the ruleset.
           example: "API Security Ruleset"
         description:
           type: string
+          maxLength: 1024
           description: A brief description of the ruleset.
           example: "A ruleset designed to enforce security standards for APIs."
         rulesetContent:
@@ -1021,6 +1035,7 @@ components:
           enum:
             - REST_API
             - ASYNC_API
+            - MCP
           example: REST_API
         documentationLink:
           type: string
@@ -1076,6 +1091,7 @@ components:
           enum:
             - REST_API
             - ASYNC_API
+            - MCP
           example: REST_API
         documentationLink:
           type: string
@@ -1110,7 +1126,7 @@ components:
         - ruleType
         - artifactType
         - provider
-    GovernancePolicy:
+    APIMGovernancePolicy:
       type: object
       description: Detailed information about a governance policy.
       properties:
@@ -1122,10 +1138,12 @@ components:
         name:
           type: string
           description: Name of the governance policy.
+          maxLength: 256
           example: "API Security Policy"
         description:
           type: string
           description: A brief description of the governance policy.
+          maxLength: 1024
           example: "Policy for enforcing security standards across all APIs."
         governableStates:
           type: array
@@ -1182,6 +1200,17 @@ components:
           description: Timestamp when the governance policy was last updated.
           readOnly: true
           example: "2024-08-02T12:00:00Z"
+        complianceAffectingSeverities:
+          type: string
+          nullable: true
+          description: |
+            Comma separated rule severities (ERROR, WARN, INFO) that make this policy fail. Other severities
+            are still reported but do not affect the policy adherence status.
+
+            Null means the feature is not enabled on this deployment. Empty means it is enabled but nothing is
+            configured, so every severity applies. Omitting the field on an update preserves the existing value;
+            sending it empty clears the selection.
+          example: "ERROR,WARN"
       required:
         - name
         - rulesets
@@ -1221,7 +1250,7 @@ components:
             - BLOCK
             - NOTIFY
           example: "BLOCK"
-    GovernancePolicyList:
+    APIMGovernancePolicyList:
       type: object
       description: A list of governance policies.
       properties:
@@ -1233,7 +1262,7 @@ components:
           type: array
           description: List of governance policies.
           items:
-            $ref: '#/components/schemas/GovernancePolicy'
+            $ref: '#/components/schemas/APIMGovernancePolicy'
         pagination:
           $ref: '#/components/schemas/Pagination'
     ArtifactComplianceSummary:
@@ -1252,6 +1281,10 @@ components:
           type: integer
           description: Number of non-compliant artifacts.
           example: 4
+        pending:
+          type: integer
+          description: Number of artifacts pending for compliance.
+          example: 0
         notApplicable:
           type: integer
           description: Number of artifacts not applicable for compliance yet.
@@ -1432,12 +1465,25 @@ components:
             - FOLLOWED
             - VIOLATED
             - UNAPPLIED
+            - PENDING
           example: "FOLLOWED"
         rulesetValidationResults:
           type: array
           description: List of ruleset validation information.
           items:
             $ref: '#/components/schemas/RulesetValidationResultWithoutRules'
+        complianceAffectingSeverities:
+          type: array
+          description: |
+            Severities that a rule violation must have for it to fail this policy. Every severity applies when
+            the policy has none configured, which is the default.
+          items:
+            type: string
+            enum:
+              - ERROR
+              - WARN
+              - INFO
+          example: ["ERROR", "WARN", "INFO"]
     ArtifactComplianceForPolicy:
       type: object
       description: Compliance status of an artifact for a specific policy.
@@ -1470,7 +1516,12 @@ components:
           example: "API Security Ruleset"
         status:
           type: string
-          description: Status of the ruleset validation.
+          nullable: true
+          description: |
+            Status of the ruleset validation. UNAPPLIED means it has not been evaluated yet.
+
+            Null is reported instead of PASSED/FAILED when per policy severity filtering is on, since this
+            ruleset can legitimately pass under one governing policy and fail under another.
           enum:
             - PASSED
             - FAILED
@@ -1588,17 +1639,29 @@ components:
         name:
           type: string
           description: Name of the artifact.
-          example: "API1"
+          example: "Test API"
         type:
           type: string
           description: Type of the artifact.
           enum:
             - API
           example: "API"
+        extendedType:
+          type: string
+          description: Extended type of the artifact.
+          enum:
+            - REST_API
+            - ASYNC_API
+            - MCP
+          example: "REST_API"
         version:
           type: string
           description: Version of the artifact.
           example: "1.0.0"
+        owner:
+          type: string
+          description: Owner of the artifact.
+          example: "admin"
   securitySchemes:
     OAuth2Security:
       type: oauth2
@@ -1612,6 +1675,12 @@ components:
             apim:gov_policy_read: Read governance policies
             apim:gov_policy_manage: Manage governance policies
             apim:gov_result_read: Read governance results
+            apim:gov_rule_create: Create governance rulesets
+            apim:gov_rule_update: Update governance rulesets
+            apim:gov_rule_delete: Delete governance rulesets
+            apim:gov_policy_create: Create governance policies
+            apim:gov_policy_update: Update governance policies
+            apim:gov_policy_delete: Delete governance policies
   parameters:
     artifactId:
       name: artifactId

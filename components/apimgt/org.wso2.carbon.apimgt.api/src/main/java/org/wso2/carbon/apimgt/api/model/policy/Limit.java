@@ -18,11 +18,14 @@
 
 package org.wso2.carbon.apimgt.api.model.policy;
 
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
+
 public class Limit {
 
     private String timeUnit;
     private int unitTime;
 
+    @UsedByMigrationClient
     public String getTimeUnit() {
         return timeUnit;
     }
@@ -31,6 +34,7 @@ public class Limit {
         this.timeUnit = timeUnit;
     }
 
+    @UsedByMigrationClient
     public int getUnitTime() {
         return unitTime;
     }

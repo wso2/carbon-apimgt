@@ -531,6 +531,10 @@ public class SequenceUtils {
      */
     public static void listExamples(String parent, Example example, Map<String, String> parameterJsonPathMapping) {
 
+        if (example == null) {
+            parameterJsonPathMapping.put(parent, "simple");
+            return;
+        }
         if (SOAPToRESTConstants.Swagger.OBJECT_TYPE.equals(example.getTypeName())) {
             Map<String, Example> values = ((ObjectExample) example).getValues();
             if (values != null) {

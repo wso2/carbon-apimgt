@@ -34,19 +34,27 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.EmptyCallbackURLForCodeGrantsException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
+import org.wso2.carbon.apimgt.api.model.ConsumerSecretInfo;
+import org.wso2.carbon.apimgt.api.model.ConsumerSecretRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -57,11 +65,19 @@ import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIInfoListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyAssociationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyAssociationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyDissociateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyGenerateRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyRenewRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyRevokeRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIWithKeyInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AppAPIKeyAssociateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationDTO.VisibilityEnum;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationInfoDTO;
@@ -75,6 +91,10 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ConsumerSecretCreationRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ConsumerSecretDeletionRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ConsumerSecretDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ConsumerSecretListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.APIInfoMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ApplicationMappingUtil;
@@ -101,7 +121,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 public class ApplicationsApiServiceImpl implements ApplicationsApiService {
@@ -136,7 +155,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
         // todo: Do a second level filtering for the incoming group ID.
         // todo: eg: use case is when there are lots of applications which is accessible to his group "g1", he wants to see
-        // todo: what are the applications shared to group "g2" among them. 
+        // todo: what are the applications shared to group "g2" among them.
         groupId = RestApiUtil.getLoggedInUserGroupId();
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -206,12 +225,13 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      * @param appOwner            Target owner of the application
      * @param skipApplicationKeys Skip application keys while importing
      * @param update              Update if existing application found or import
+     * @param ignoreTier          Ignore tier and proceed with subscribed APIs
      * @param messageContext      Message Context
      * @return imported Application
      */
     @Override public Response applicationsImportPost(InputStream fileInputStream, Attachment fileDetail,
             Boolean preserveOwner, Boolean skipSubscriptions, String appOwner, Boolean skipApplicationKeys,
-            Boolean update, MessageContext messageContext) throws APIManagementException {
+            Boolean update, Boolean ignoreTier, MessageContext messageContext) throws APIManagementException {
         String ownerId;
         Application application;
 
@@ -228,6 +248,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
             // Retrieve the application DTO object from the aggregated exported application
             ApplicationDTO applicationDTO = exportedApplication.getApplicationInfo();
+            validateApplicationGroups(applicationDTO.getGroups());
 
             if (!StringUtils.isBlank(appOwner)) {
                 ownerId = appOwner;
@@ -247,6 +268,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 ImportUtils.validateOwner(username, applicationGroupId, apiConsumer);
             }
 
+            // This is to handle if the subscriber hasn't logged into the APIM Devportal
+            // and not available in the AM_SUBSCRIBER table
+            ImportUtils.validateSubscriber(ownerId, applicationGroupId, apiConsumer);
+
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
 
@@ -254,8 +279,16 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     && update) {
                 int appId = APIUtil.getApplicationId(applicationDTO.getName(), ownerId);
                 Application oldApplication = apiConsumer.getApplicationById(appId);
+                if (APIConstants.ApplicationStatus.UPDATE_PENDING.equals(oldApplication.getStatus())) {
+                    RestApiUtil.handleConflict("Application is in UPDATE PENDING state " +
+                            "and cannot be updated until the pending update is resolved.", log);
+                }
+                if (APIConstants.ApplicationStatus.APPLICATION_CREATED.equals(oldApplication.getStatus()) ||
+                        APIConstants.ApplicationStatus.APPLICATION_REJECTED.equals(oldApplication.getStatus())) {
+                    RestApiUtil.handleBadRequest("Applications that are not yet approved cannot be updated.", log);
+                }
                 application = preProcessAndUpdateApplication(ownerId, applicationDTO, oldApplication,
-                        oldApplication.getUUID(), orgInfo.getOrganizationId());
+                        oldApplication.getUUID(), orgInfo);
             } else {
                 application = preProcessAndAddApplication(ownerId, applicationDTO, organization, orgInfo.getOrganizationId());
                 update = Boolean.FALSE;
@@ -265,7 +298,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             if (skipSubscriptions == null || !skipSubscriptions) {
                 skippedAPIs = ImportUtils
                         .importSubscriptions(exportedApplication.getSubscribedAPIs(), ownerId, application,
-                                update, apiConsumer, organization);
+                                update, ignoreTier, apiConsumer, organization);
             }
             Application importedApplication = apiConsumer.getApplicationById(application.getId());
             importedApplication.setOwner(ownerId);
@@ -287,12 +320,16 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 // Add application keys if present and keys does not exists in the current application
                 if (applicationDTO.getKeys().size() > 0) {
                     for (ApplicationKeyDTO applicationKeyDTO : applicationDTO.getKeys()) {
-                        if (!availableTypes.contains(applicationKeyDTO.getKeyType().value())) {
-                            ImportUtils.addApplicationKey(ownerId, importedApplication, applicationKeyDTO, apiConsumer,
-                                    false);
-                        } else {
-                            ImportUtils.addApplicationKey(ownerId, importedApplication, applicationKeyDTO, apiConsumer,
-                                    update);
+                        if (applicationKeyDTO.getConsumerKey() != null && !applicationKeyDTO.getConsumerKey()
+                                .isEmpty() && applicationKeyDTO.getConsumerSecret() != null && !applicationKeyDTO.getConsumerSecret()
+                                .isEmpty()) {
+                            if (!availableTypes.contains(applicationKeyDTO.getKeyType().value())) {
+                                ImportUtils.addApplicationKey(ownerId, importedApplication, applicationKeyDTO,
+                                        apiConsumer, false);
+                            } else {
+                                ImportUtils.addApplicationKey(ownerId, importedApplication, applicationKeyDTO,
+                                        apiConsumer, update);
+                            }
                         }
                     }
                 }
@@ -373,6 +410,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         if (tierName == null) {
             RestApiUtil.handleBadRequest("Throttling tier cannot be null", log);
         }
+        validateApplicationGroups(applicationDto.getGroups());
 
         Object applicationAttributesFromUser = applicationDto.getAttributes();
         Map<String, String> applicationAttributes = new ObjectMapper()
@@ -383,12 +421,13 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
         //subscriber field of the body is not honored. It is taken from the context
         Application application = ApplicationMappingUtil.fromDTOtoApplication(applicationDto, username);
-        
+        application.setSubOrganization(sharedOrganization);
+
         application.setSharedOrganization(APIConstants.DEFAULT_APP_SHARING_KEYWORD); // default
         if ((applicationDto.getVisibility() != null)
                 && applicationDto.getVisibility() == VisibilityEnum.SHARED_WITH_ORG && sharedOrganization != null) {
             application.setSharedOrganization(sharedOrganization);
-        } 
+        }
 
         int applicationId = apiConsumer.addApplication(application, username, organization);
 
@@ -474,9 +513,16 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             if (oldApplication == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
-
             if (!orgWideAppUpdateEnabled && !RestAPIStoreUtils.isUserOwnerOfApplication(oldApplication)) {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            }
+            if (APIConstants.ApplicationStatus.UPDATE_PENDING.equals(oldApplication.getStatus())) {
+                RestApiUtil.handleConflict("Application is in UPDATE PENDING state " +
+                        "and cannot be updated until the pending update is resolved.", log);
+            }
+            if (APIConstants.ApplicationStatus.APPLICATION_CREATED.equals(oldApplication.getStatus()) ||
+                    APIConstants.ApplicationStatus.APPLICATION_REJECTED.equals(oldApplication.getStatus())) {
+                RestApiUtil.handleBadRequest("Applications that are not yet approved cannot be updated.", log);
             }
             if (body.getName() != null && !body.getName().equalsIgnoreCase(oldApplication.getName())) {
                 if (APIUtil.isApplicationExist(username, body.getName(),
@@ -487,7 +533,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             }
             OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
             Application updatedApplication = preProcessAndUpdateApplication(username, body, oldApplication,
-                    applicationId, orgInfo.getOrganizationId());
+                    applicationId, orgInfo);
             ApplicationDTO updatedApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(updatedApplication);
             return Response.ok().entity(updatedApplicationDTO).build();
 
@@ -550,8 +596,9 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      * @return Updated application
      */
     private Application preProcessAndUpdateApplication(String username, ApplicationDTO applicationDto,
-            Application oldApplication, String applicationId, String sharedOrganization) throws APIManagementException {
+            Application oldApplication, String applicationId, OrganizationInfo sharedOrganizationInfo) throws APIManagementException {
         APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+        validateApplicationGroups(applicationDto.getGroups());
         Object applicationAttributesFromUser = applicationDto.getAttributes();
         Map<String, String> applicationAttributes = new ObjectMapper()
                 .convertValue(applicationAttributesFromUser, Map.class);
@@ -562,11 +609,14 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
         //we do not honor the subscriber coming from the request body as we can't change the subscriber of the application
         Application application = ApplicationMappingUtil.fromDTOtoApplication(applicationDto, username);
+        application.setSubOrganization(oldApplication.getSubOrganization());
 
         //we do not honor the application id which is sent via the request body
         application.setUUID(oldApplication != null ? oldApplication.getUUID() : null);
 
         application.setSharedOrganization(oldApplication.getSharedOrganization()); // default
+        String sharedOrganization = sharedOrganizationInfo.getOrganizationId();
+
         if (applicationDto.getVisibility() != null) {
             if (applicationDto.getVisibility() == VisibilityEnum.SHARED_WITH_ORG && sharedOrganization != null) {
                 application.setSharedOrganization(sharedOrganization);
@@ -574,11 +624,45 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 application.setSharedOrganization(APIConstants.DEFAULT_APP_SHARING_KEYWORD);
             }
 
-        } 
+        }
         apiConsumer.updateApplication(application);
+
+        // Added to use the application name as part of sp name instead of application UUID when specified
+        String applicationSpNameProp = System.getProperty(APIConstants.KeyManager.SP_NAME_APPLICATION);
+        boolean applicationSpName = Boolean.parseBoolean(applicationSpNameProp);
+        //If application name is renamed, need to update SP app as well
+        if (applicationSpName && !application.getName().equals(oldApplication.getName())) {
+            //Fetch Application Keys
+            Set<APIKey> applicationKeys = getApplicationKeys(applicationId, apiConsumer.getRequestedTenant(),
+                                                             sharedOrganizationInfo);
+            //Check what application JSON params are
+            for (APIKey key : applicationKeys) {
+                if (!APIConstants.OAuthAppMode.MAPPED.name().equals(key.getCreateMode())) {
+                    JsonObject jsonParams = new JsonObject();
+                    String grantTypes = StringUtils.join(key.getGrantTypes(), ',');
+                    jsonParams.addProperty(APIConstants.JSON_GRANT_TYPES, grantTypes);
+                    jsonParams.addProperty(APIConstants.JSON_USERNAME, username);
+                    apiConsumer.updateAuthClient(username, application,
+                                                 key.getType(), key.getCallbackUrl(), null, null, null,
+                                                 application.getGroupId(), new Gson().toJson(jsonParams), key.getKeyManager());
+                }
+            }
+        }
 
         //retrieves the updated application and send as the response
         return apiConsumer.getApplicationByUUID(applicationId);
+    }
+
+    private void validateApplicationGroups(List<String> groups) throws APIManagementException {
+
+        if (groups == null) {
+            return;
+        }
+        for (String group : groups) {
+            if (group != null && !group.equals(StringUtils.strip(group))) {
+                RestApiUtil.handleBadRequest("Application groups must not contain leading or trailing whitespace.", log);
+            }
+        }
     }
 
     /**
@@ -593,13 +677,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      */
     @Override
     public Response applicationsExportGet(String appName, String appOwner, Boolean withKeys, String format,
-            MessageContext messageContext) throws APIManagementException {
+            Boolean all, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
         APIConsumer apiConsumer;
-        Application application = null;
-
-        if (StringUtils.isBlank(appName) || StringUtils.isBlank(appOwner)) {
-            RestApiUtil.handleBadRequest("Application name or owner should not be empty or null.", log);
-        }
+        String organization = RestApiCommonUtil.validateTenantDomain(xWSO2Tenant);
+        boolean tenantFlowStarted = false;
 
         // Default export format is YAML
         ExportFormat exportFormat = StringUtils.isNotEmpty(format) ?
@@ -609,19 +690,155 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         String username = RestApiCommonUtil.getLoggedInUsername();
 
         apiConsumer = RestApiCommonUtil.getConsumer(username);
-        if (appOwner != null && apiConsumer.getSubscriber(appOwner) != null) {
-            application = ExportUtils.getApplicationDetails(appName, appOwner, apiConsumer);
-        }
-        if (application == null) {
-            throw new APIManagementException("No application found with name " + appName + " owned by " + appOwner, ExceptionCodes.APPLICATION_NOT_FOUND);
-        } else if (!MultitenantUtils.getTenantDomain(application.getSubscriber().getName())
-                .equals(MultitenantUtils.getTenantDomain(username))) {
-            throw new APIManagementException("Cross Tenant Exports are not allowed", ExceptionCodes.TENANT_MISMATCH);
-        }
 
-        File file = ExportUtils.exportApplication(application, apiConsumer, exportFormat, withKeys);
-        return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
-                "attachment; filename=\"" + file.getName() + "\"").build();
+        try {
+            // Enable skip secret masking when exporting with keys to get actual secrets
+            if (withKeys != null && withKeys) {
+                APIUtil.enableSkipSecretMasking();
+            }
+
+            if (!RestApiCommonUtil.getLoggedInUserTenantDomain().equals(organization)) {
+                RestApiCommonUtil.startTenantFlowWithTenantAdmin(organization);
+                tenantFlowStarted = true;
+            }
+
+            if (Boolean.TRUE.equals(all)) {
+                APIAdmin apiAdmin = new APIAdminImpl();
+                Application[] applicationsOfOrganization =
+                        apiAdmin.getAllApplicationsOfTenantForMigration(organization);
+                List<Application> fullApplications = new ArrayList<>();
+                for (Application simpleApplication : applicationsOfOrganization) {
+                    Application fullApplication = ExportUtils.getApplicationDetails(simpleApplication.getName(),
+                            simpleApplication.getOwner(), apiConsumer);
+                    if (fullApplication != null) {
+                        fullApplications.add(fullApplication);
+                    }
+                }
+                File file = ExportUtils.exportApplications(fullApplications, apiConsumer, exportFormat, withKeys);
+                return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + file.getName() + "\"").build();
+            }
+
+            if (StringUtils.isBlank(appName) || StringUtils.isBlank(appOwner)) {
+                RestApiUtil.handleBadRequest("Application name or owner should not be empty or null.", log);
+            }
+
+            Application application = null;
+            if (apiConsumer.getSubscriber(appOwner) == null) {
+                throw new APIManagementException("No subscriber found with name " + appOwner,
+                        ExceptionCodes.from(ExceptionCodes.SUBSCRIBER_NOT_FOUND, appOwner));
+            }
+            application = ExportUtils.getApplicationDetails(appName, appOwner, apiConsumer);
+            if (application == null) {
+                throw new APIManagementException("No application found with name " + appName + " owned by " + appOwner,
+                        ExceptionCodes.APPLICATION_NOT_FOUND);
+            } else if (!MultitenantUtils.getTenantDomain(application.getSubscriber().getName())
+                    .equals(organization)) {
+                throw new APIManagementException("Cross Tenant Exports are not allowed", ExceptionCodes.TENANT_MISMATCH);
+            }
+
+            File file = ExportUtils.exportApplication(application, apiConsumer, exportFormat, withKeys);
+            return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
+                    "attachment; filename=\"" + file.getName() + "\"").build();
+        } finally {
+            APIUtil.clearSkipSecretMasking();
+            if (tenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+    }
+
+    @Override
+    public Response associateAPIKeyToApp(String applicationUUId, String keyType, AppAPIKeyAssociateRequestDTO body,
+                                                                         String ifMatch, MessageContext messageContext)
+            throws APIManagementException {
+        String userName = RestApiCommonUtil.getLoggedInUsername();
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        Application application;
+        if (body == null || StringUtils.isBlank(body.getApiUUID()) || StringUtils.isBlank(body.getKeyUUID())) {
+            RestApiUtil.handleBadRequest("API UUID and Key UUID cannot be null", log);
+            return null;
+        }
+        boolean isValidKeyType = APIConstants.API_KEY_TYPE_PRODUCTION.equalsIgnoreCase(keyType)
+                || APIConstants.API_KEY_TYPE_SANDBOX.equalsIgnoreCase(keyType);
+        if (!isValidKeyType) {
+            RestApiUtil.handleBadRequest("Invalid keyType. KeyType should be either PRODUCTION or SANDBOX", log);
+            return null;
+        }
+        String apiUUId = body.getApiUUID();
+        String keyUUId = body.getKeyUUID();
+        try {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(userName);
+            if ((application = apiConsumer.getApplicationByUUID(applicationUUId)) == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationUUId, log);
+                return null;
+            }
+
+            if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
+                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationUUId, log);
+                return null;
+            }
+            API api = null;
+            try {
+                api = apiConsumer.getLightweightAPIByUUID(apiUUId, organization);
+            } catch (APIManagementException e) {
+                if (e instanceof APIMgtAuthorizationFailedException) {
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiUUId, log);
+                } else if (e instanceof APIMgtResourceNotFoundException) {
+                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiUUId, log);
+                } else {
+                    throw e;
+                }
+            }
+            if (api == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiUUId, log);
+                return null;
+            }
+            APIKeyInfo apikeyInfo = apiConsumer.createAssociationToApp(api, keyUUId, application,
+                    RestApiCommonUtil.getLoggedInUserTenantDomain(), userName);
+            APIKeyAssociationDTO apiKeyAssociationDTO = ApplicationKeyMappingUtil.formApiAssociationToDTO(
+                    apikeyInfo.getApiName(),
+                    application.getName(), apikeyInfo.getKeyName());
+            return Response.ok().entity(apiKeyAssociationDTO).build();
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while creating an association to the API Key " + keyUUId, e,
+                    log);
+        }
+        return null;
+    }
+
+    @Override
+    public Response getAPIKeyAssociationsForApp(String applicationId, String keyType, String ifNoneMatch,
+                                                MessageContext messageContext)
+            throws APIManagementException {
+        String userName = RestApiCommonUtil.getLoggedInUsername();
+        Application application;
+        try {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(userName);
+            if ((application = apiConsumer.getApplicationByUUID(applicationId)) == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            } else {
+                if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                } else {
+                    boolean isValidKeyType = APIConstants.API_KEY_TYPE_PRODUCTION.equalsIgnoreCase(keyType)
+                            || APIConstants.API_KEY_TYPE_SANDBOX.equalsIgnoreCase(keyType);
+                    if (!isValidKeyType) {
+                        RestApiUtil.handleBadRequest("Invalid keyType. KeyType should be either PRODUCTION or SANDBOX", log);
+                    } else {
+                        List<APIKeyInfo> apiKeyAssociationsList = apiConsumer.getApiKeyAssociations(applicationId, keyType,
+                                RestApiCommonUtil.getLoggedInUserTenantDomain(), userName);
+                        List<APIKeyAssociationInfoDTO> apiKeyAssociationInfoDTOList =
+                                ApplicationKeyMappingUtil.formApiKeyAssociationListToDTOList(apiKeyAssociationsList);
+                        return Response.ok().entity(apiKeyAssociationInfoDTOList).build();
+                    }
+                }
+            }
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while retrieving API Key associations for application " +
+                    applicationId, e, log);
+        }
+        return null;
     }
 
     @Override
@@ -630,7 +847,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
         String userName = RestApiCommonUtil.getLoggedInUsername();
         Application application;
-        int validityPeriod;
+        long validityPeriod;
+        String keyName = null;
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(userName);
             if ((application = apiConsumer.getApplicationByUUID(applicationId)) == null) {
@@ -651,11 +869,13 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     } else {
                         validityPeriod = -1;
                     }
-
+                    if (body != null && body.getKeyName() != null) {
+                        keyName = body.getKeyName();
+                    }
                     String restrictedIP = null;
                     String restrictedReferer = null;
 
-                    if (body.getAdditionalProperties() != null) {
+                    if (body != null && body.getAdditionalProperties() != null) {
                         Map additionalProperties = (HashMap) body.getAdditionalProperties();
                         if (additionalProperties.get(APIConstants.JwtTokenConstants.PERMITTED_IP) != null) {
                             restrictedIP = (String) additionalProperties.get(APIConstants.JwtTokenConstants.PERMITTED_IP);
@@ -665,99 +885,306 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                         }
                     }
                     String apiKey = apiConsumer.generateApiKey(application, userName, validityPeriod,
-                            restrictedIP, restrictedReferer);
-                    APIKeyDTO apiKeyDto = ApplicationKeyMappingUtil.formApiKeyToDTO(apiKey, validityPeriod);
+                            restrictedIP, restrictedReferer, keyName);
+                    APIKeyDTO apiKeyDto = ApplicationKeyMappingUtil.formApiKeyToDTO(apiKey, validityPeriod, keyName);
                     return Response.ok().entity(apiKeyDto).build();
                 }
             }
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while generatig API Keys for application " + applicationId, e, log);
+            RestApiUtil.handleInternalServerError("Error while generating API Keys for application " + applicationId, e, log);
         }
         return null;
     }
 
     @Override
-    public Response applicationsApplicationIdApiKeysKeyTypeRevokePost(String applicationId, String keyType,
-                                  String ifMatch, APIKeyRevokeRequestDTO body, MessageContext messageContext) {
+    public Response getAppBoundAPIKeys(String applicationId, String keyType, String ifMatch,
+                                                               MessageContext messageContext) {
+        String userName = RestApiCommonUtil.getLoggedInUsername();
+        Application application;
+        try {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(userName);
+            if ((application = apiConsumer.getApplicationByUUID(applicationId)) == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            } else {
+                if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                } else {
+                    boolean isValidKeyType = APIConstants.API_KEY_TYPE_PRODUCTION.equalsIgnoreCase(keyType)
+                                    || APIConstants.API_KEY_TYPE_SANDBOX.equalsIgnoreCase(keyType);
+                    if (!isValidKeyType) {
+                        RestApiUtil.handleBadRequest("Invalid keyType. KeyType should be either PRODUCTION or SANDBOX", log);
+                    } else {
+                        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+                        List<APIKeyInfo> apiKeyList = apiConsumer.getApiKeys(applicationId, keyType, tenantDomain, userName);
+                        List<APIKeyInfoDTO> apiKeyInfoDTOList = ApplicationKeyMappingUtil.formApiKeyListToDTOList(apiKeyList);
+                        return Response.ok().entity(apiKeyInfoDTOList).build();
+                    }
+                }
+            }
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while retrieving API Keys for application " + applicationId, e, log);
+        }
+        return null;
+    }
+
+    @Override
+    public Response dissociateAPIKeyFromApp(String applicationId, String keyType, APIKeyDissociateRequestDTO body,
+                                                                          String ifMatch, MessageContext messageContext)
+            throws APIManagementException {
+        String userName = RestApiCommonUtil.getLoggedInUsername();
+        if (body == null || StringUtils.isBlank(body.getKeyUUID())) {
+            RestApiUtil.handleBadRequest("Key UUID is Required.", log);
+            return null;
+        }
+        String keyUUID = body.getKeyUUID();
+        Application application;
+        try {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(userName);
+            if ((application = apiConsumer.getApplicationByUUID(applicationId)) == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            } else {
+                if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                } else {
+                    if (APIConstants.API_KEY_TYPE_PRODUCTION.equalsIgnoreCase(keyType)) {
+                        application.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
+                    } else if (APIConstants.API_KEY_TYPE_SANDBOX.equalsIgnoreCase(keyType)) {
+                        application.setKeyType(APIConstants.API_KEY_TYPE_SANDBOX);
+                    } else {
+                        RestApiUtil.handleBadRequest("Invalid keyType. KeyType should be either PRODUCTION or SANDBOX", log);
+                    }
+                    apiConsumer.removeApiKeyAssociationViaApp(application, keyUUID,
+                            RestApiCommonUtil.getLoggedInUserTenantDomain(), userName);
+                    return Response.ok().build();
+                }
+            }
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while removing an association to the API Key " + keyUUID, e, log);
+        }
+        return null;
+    }
+
+    @Override
+    public Response regenerateAppBoundAPIKey(String applicationId, String keyType, APIKeyRenewRequestDTO body, String ifMatch,
+                                             MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
-        String apiKey = body.getApikey();
-        if (!StringUtils.isEmpty(apiKey) && APIUtil.isValidJWT(apiKey)) {
+        if (body == null) {
+            RestApiUtil.handleBadRequest("Request body is required", log);
+            return null;
+        }
+        String keyUUID = body.getKeyUUID();
+        if (!StringUtils.isEmpty(keyUUID)) {
             try {
-                String[] splitToken = apiKey.split("\\.");
-                String signatureAlgorithm = APIUtil.getSignatureAlgorithm(splitToken);
-                String certAlias = APIUtil.getSigningAlias(splitToken);
-                Certificate certificate = APIUtil.getCertificateFromParentTrustStore(certAlias);
-                if(APIUtil.verifyTokenSignature(splitToken, certificate, signatureAlgorithm)) {
-                    APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-                    Application application = apiConsumer.getApplicationByUUID(applicationId);
-                    org.json.JSONObject decodedBody = new org.json.JSONObject(
-                                        new String(Base64.getUrlDecoder().decode(splitToken[1])));
-                    if (application != null) {
-                        if (orgWideAppUpdateEnabled || RestAPIStoreUtils.isUserOwnerOfApplication(application)
-                                || RestAPIStoreUtils.isApplicationSharedtoUser(application)) {
-                            if (decodedBody.getJSONObject(APIConstants.JwtTokenConstants.APPLICATION) != null) {
-                                org.json.JSONObject appInfo =
-                                        decodedBody.getJSONObject(APIConstants.JwtTokenConstants.APPLICATION);
-                                String appUuid = appInfo.getString(APIConstants.JwtTokenConstants.APPLICATION_UUID);
-                                if (applicationId.equals(appUuid)) {
-                                    long expiryTime = Long.MAX_VALUE;
-                                    org.json.JSONObject payload = new org.json.JSONObject(
-                                            new String(Base64.getUrlDecoder().decode(splitToken[1])));
-                                    if (payload.has(APIConstants.JwtTokenConstants.EXPIRY_TIME)) {
-                                        expiryTime = APIUtil.getExpiryifJWT(apiKey);
-                                    }
-                                    String tokenIdentifier = payload.getString(APIConstants.JwtTokenConstants.JWT_ID);
-                                    String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-                                    apiConsumer.revokeAPIKey(tokenIdentifier, expiryTime, tenantDomain);
-                                    return Response.ok().build();
-                                } else {
-                                    if (log.isDebugEnabled()) {
-                                        log.debug("Application uuid " + applicationId + " isn't matched with the " +
-                                                "application in the token " + appUuid + " of API Key " +
-                                                APIUtil.getMaskedToken(apiKey));
-                                    }
-                                    RestApiUtil.handleBadRequest("Validation failed for the given token ", log);
-                                }
-                            } else {
-                                if (log.isDebugEnabled()) {
-                                    log.debug("Application is not included in the token " +
-                                            APIUtil.getMaskedToken(apiKey));
-                                }
-                                RestApiUtil.handleBadRequest("Validation failed for the given token ", log);
-                            }
+                String organization = RestApiUtil.getValidatedOrganization(messageContext);
+                APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username, organization);
+                Application application = apiConsumer.getApplicationByUUID(applicationId);
+                if (application != null) {
+                    if (orgWideAppUpdateEnabled || RestAPIStoreUtils.isUserOwnerOfApplication(application)
+                            || RestAPIStoreUtils.isApplicationSharedtoUser(application)) {
+                        boolean isValidKeyType = APIConstants.API_KEY_TYPE_PRODUCTION.equalsIgnoreCase(keyType)
+                                || APIConstants.API_KEY_TYPE_SANDBOX.equalsIgnoreCase(keyType);
+                        if (!isValidKeyType) {
+                            RestApiUtil.handleBadRequest("Invalid keyType. KeyType should be either PRODUCTION " +
+                                    "or SANDBOX", log);
                         } else {
-                            if (log.isDebugEnabled()) {
-                                log.debug("Logged in user " + username + " isn't the owner of the application "
-                                        + applicationId);
+                            if (APIConstants.API_KEY_TYPE_PRODUCTION.equalsIgnoreCase(keyType)) {
+                                application.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
+                            } else {
+                                application.setKeyType(APIConstants.API_KEY_TYPE_SANDBOX);
                             }
-                            RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION,
-                                    applicationId, log);
+                            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+                            APIKeyInfo apiKeyInfo = apiConsumer.regenerateApiKey(application, keyType, keyUUID,
+                                    tenantDomain, username);
+                            APIKeyDTO apiKeyDto = ApplicationKeyMappingUtil.formApiKeyToDTO(apiKeyInfo.getApiKey(),
+                                    (int) apiKeyInfo.getValidityPeriod(), apiKeyInfo.getKeyName());
+                            return Response.ok().entity(apiKeyDto).build();
                         }
-                    }else {
-                        if(log.isDebugEnabled()) {
-                            log.debug("Application with given id " + applicationId + " doesn't not exist ");
+                    } else {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Logged in user " + username + " isn't the owner of the application "
+                                    + applicationId);
                         }
-                        RestApiUtil.handleBadRequest("Validation failed for the given token ", log);
+                        RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION,
+                                applicationId, log);
                     }
                 } else {
-                    if(log.isDebugEnabled()) {
-                        log.debug("Signature verification of given token " + APIUtil.getMaskedToken(apiKey) +
-                                                                                                            " is failed");
+                    if (log.isDebugEnabled()) {
+                        log.debug("Application with given id " + applicationId + " doesn't exist ");
                     }
-                    RestApiUtil.handleInternalServerError("Validation failed for the given token", log);
+                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
                 }
             } catch (APIManagementException e) {
-                String msg = "Error while revoking API Key of application " + applicationId;
-                if(log.isDebugEnabled()) {
-                    log.debug("Error while revoking API Key of application " +
-                            applicationId+ " and token " + APIUtil.getMaskedToken(apiKey));
+                String msg = "Error while regenerating API Key of application " + applicationId;
+                if (log.isDebugEnabled()) {
+                    log.debug("Error while regenerating API Key of application " +
+                            applicationId + " and API Key " + keyUUID);
                 }
                 log.error(msg, e);
                 RestApiUtil.handleInternalServerError(msg, e, log);
             }
         } else {
-            log.debug("Provided API Key " + APIUtil.getMaskedToken(apiKey) + " is not valid");
+            if (log.isDebugEnabled()) {
+                log.debug("Provided API Key UUID " + keyUUID + " is not valid");
+            }
             RestApiUtil.handleBadRequest("Provided API Key isn't valid ", log);
+        }
+        return null;
+    }
+
+    @Override
+    public Response applicationsApplicationIdApiKeysKeyTypeRevokePost(String applicationId, String keyType, APIKeyRevokeRequestDTO body, String ifMatch,
+                                         MessageContext messageContext) {
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        if (body == null) {
+            RestApiUtil.handleBadRequest("Request body is required", log);
+            return null;
+        }
+        String apiKey = body.getApikey();
+        String keyUUID = body.getKeyUUID();
+        try {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            Application application = apiConsumer.getApplicationByUUID(applicationId);
+            if (application != null) {
+                if (orgWideAppUpdateEnabled || RestAPIStoreUtils.isUserOwnerOfApplication(application)
+                        || RestAPIStoreUtils.isApplicationSharedtoUser(application)) {
+                    if (!StringUtils.isEmpty(apiKey) && APIUtil.isValidJWT(apiKey)) {
+                        String[] splitToken = apiKey.split("\\.");
+                        String signatureAlgorithm = APIUtil.getSignatureAlgorithm(splitToken);
+                        String certAlias = APIUtil.getSigningAlias(splitToken);
+                        Certificate certificate = APIUtil.getCertificateFromParentTrustStore(certAlias);
+                        if(APIUtil.verifyTokenSignature(splitToken, certificate, signatureAlgorithm)) {
+                            org.json.JSONObject decodedBody = new org.json.JSONObject(
+                                                new String(Base64.getUrlDecoder().decode(splitToken[1])));
+                                    if (decodedBody.getJSONObject(APIConstants.JwtTokenConstants.APPLICATION) != null) {
+                                        org.json.JSONObject appInfo =
+                                                decodedBody.getJSONObject(APIConstants.JwtTokenConstants.APPLICATION);
+                                        String appUuid = appInfo.getString(APIConstants.JwtTokenConstants.APPLICATION_UUID);
+                                        if (applicationId.equals(appUuid)) {
+                                            long expiryTime = Long.MAX_VALUE;
+                                            org.json.JSONObject payload = new org.json.JSONObject(
+                                                    new String(Base64.getUrlDecoder().decode(splitToken[1])));
+                                            if (payload.has(APIConstants.JwtTokenConstants.EXPIRY_TIME)) {
+                                                expiryTime = APIUtil.getExpiryifJWT(apiKey);
+                                            }
+                                            String tokenIdentifier = payload.getString(APIConstants.JwtTokenConstants.JWT_ID);
+                                            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+                                            // Resolve apiId/keyName so platform gateways can be notified (6-arg revoke broadcasts)
+                                            List<APIKeyInfo> appKeys = apiConsumer.getApiKeys(applicationId, keyType, tenantDomain, username);
+                                            APIKeyInfo keyInfo = (appKeys != null) ? appKeys.stream()
+                                                    .filter(k -> tokenIdentifier.equals(k.getKeyUUID()))
+                                                    .findFirst().orElse(null) : null;
+                                            if (keyInfo != null && StringUtils.isNotBlank(keyInfo.getApiUUId())
+                                                    && StringUtils.isNotBlank(keyInfo.getKeyName())) {
+                                                apiConsumer.revokeAPIKey(tokenIdentifier, expiryTime, tenantDomain,
+                                                        keyInfo.getApiUUId(), keyInfo.getKeyName(), username);
+                                            } else {
+                                                apiConsumer.revokeAPIKey(tokenIdentifier, expiryTime, tenantDomain);
+                                            }
+                                            return Response.ok().build();
+                                        } else {
+                                            if (log.isDebugEnabled()) {
+                                                log.debug("Application uuid " + applicationId + " isn't matched with the " +
+                                                        "application in the token " + appUuid + " of API Key " +
+                                                        APIUtil.getMaskedToken(apiKey));
+                                            }
+                                            RestApiUtil.handleBadRequest("Validation failed for the given token ", log);
+                                        }
+                                    } else {
+                                        if (log.isDebugEnabled()) {
+                                            log.debug("Application is not included in the token " +
+                                                    APIUtil.getMaskedToken(apiKey));
+                                        }
+                                        RestApiUtil.handleBadRequest("Validation failed for the given token ", log);
+                                    }
+                        } else {
+                            if(log.isDebugEnabled()) {
+                                log.debug("Signature verification of given token " + APIUtil.getMaskedToken(apiKey) +
+                                                                                                                    " is failed");
+                            }
+                            RestApiUtil.handleInternalServerError("Validation failed for the given token", log);
+                        }
+                    } else if (!StringUtils.isEmpty(keyUUID)) {
+                        boolean isValidKeyType = APIConstants.API_KEY_TYPE_PRODUCTION.equalsIgnoreCase(keyType)
+                                || APIConstants.API_KEY_TYPE_SANDBOX.equalsIgnoreCase(keyType);
+                        if (!isValidKeyType) {
+                            RestApiUtil.handleBadRequest("Invalid keyType. KeyType should be either PRODUCTION " +
+                                    "or SANDBOX", log);
+                        } else {
+                            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+                            apiConsumer.revokeApiKey(keyUUID, tenantDomain, RestApiCommonUtil.getLoggedInUsername());
+                            return Response.ok().build();
+                        }
+                    } else {
+                        if (log.isDebugEnabled()) {
+                            if (!StringUtils.isEmpty(apiKey)) {
+                                log.debug("Provided API Key " + APIUtil.getMaskedToken(apiKey) + " is not valid");
+                            } else {
+                                log.debug("Provided API Key UUID " + keyUUID + " is not valid");
+                            }
+                        }
+                        RestApiUtil.handleBadRequest("Provided API Key isn't valid ", log);
+                    }
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Logged in user " + username + " isn't the owner of the application "
+                                + applicationId);
+                    }
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION,
+                            applicationId, log);
+                }
+            } else {
+                if(log.isDebugEnabled()) {
+                    log.debug("Application with given id " + applicationId + " doesn't exist ");
+                }
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);;
+            }
+        } catch (APIManagementException e) {
+            String msg = "Error while revoking API Key of application " + applicationId;
+            if (log.isDebugEnabled()) {
+                if (!StringUtils.isEmpty(keyUUID)) {
+                    log.debug("Error while revoking API Key of application " +
+                            applicationId + " and token " + keyUUID);
+                } else {
+                    log.debug("Error while revoking API Key of application " +
+                            applicationId + " and token " + APIUtil.getMaskedToken(apiKey));
+                }
+            }
+            log.error(msg, e);
+            RestApiUtil.handleInternalServerError(msg, e, log);
+        }
+        return null;
+    }
+
+    @Override
+    public Response getSubscribedAPIsWithAPIKeys(String applicationId, String keyType,
+                                                                            String ifNoneMatch, MessageContext messageContext)
+            throws APIManagementException {
+        String userName = RestApiCommonUtil.getLoggedInUsername();
+        Application application;
+        try {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(userName);
+            if ((application = apiConsumer.getApplicationByUUID(applicationId)) == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            } else {
+                if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                } else {
+                    boolean isValidKeyType = APIConstants.API_KEY_TYPE_PRODUCTION.equalsIgnoreCase(keyType)
+                            || APIConstants.API_KEY_TYPE_SANDBOX.equalsIgnoreCase(keyType);
+                    if (!isValidKeyType) {
+                        RestApiUtil.handleBadRequest("Invalid keyType. KeyType should be either PRODUCTION or SANDBOX", log);
+                    } else {
+                        List<APIKeyInfo> apiKeyList = apiConsumer.getApisWithApiKeys(applicationId, keyType,
+                                RestApiCommonUtil.getLoggedInUserTenantDomain(), userName);
+                        List<APIWithKeyInfoDTO> apiApiKeyInfoDTOList = ApplicationKeyMappingUtil.
+                                formApiWithApiKeyListToDTOList(apiKeyList);
+                        return Response.ok().entity(apiApiKeyInfoDTOList).build();
+                    }
+                }
+            }
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while retrieving APIs with API Keys for application " +
+                    applicationId, e, log);
         }
         return null;
     }
@@ -818,6 +1245,11 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             Application application = apiConsumer.getApplicationByUUID(applicationId);
             if (application != null) {
                 if (orgWideAppUpdateEnabled || RestAPIStoreUtils.isUserOwnerOfApplication(application)) {
+                    if (APIConstants.ApplicationStatus.APPLICATION_CREATED.equals(application.getStatus())
+                            || APIConstants.ApplicationStatus.APPLICATION_REJECTED.equals(application.getStatus())) {
+                        RestApiUtil.handleBadRequest(
+                                "Cannot generate keys for applications that are not yet approved.", log);
+                    }
                     String[] accessAllowDomainsArray = {"ALL"};
                     JSONObject jsonParamObj = new JSONObject();
                     jsonParamObj.put(ApplicationConstants.OAUTH_CLIENT_USERNAME, username);
@@ -844,6 +1276,11 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                             jsonParamObj.put(APIConstants.JSON_ADDITIONAL_PROPERTIES, jsonContent);
                         }
                     }
+
+                    if (StringUtils.isNotEmpty(body.getCallbackUrl())) {
+                        jsonParamObj.put(APIConstants.JSON_CALLBACK_URL, body.getCallbackUrl());
+                    }
+
                     String jsonParams = jsonParamObj.toString();
                     String tokenScopes = StringUtils.join(body.getScopes(), " ");
                     String keyManagerName = APIConstants.KeyManager.DEFAULT_KEY_MANAGER;
@@ -924,7 +1361,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      * Used to get all keys of an application
      *
      * @param applicationUUID Id of the application
-     * @param orgInfo 
+     * @param orgInfo
      * @return List of application keys
      */
     private Set<APIKey> getApplicationKeys(String applicationUUID, String tenantDomain, OrganizationInfo orgInfo) {
@@ -1185,6 +1622,107 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         return null;
     }
 
+    @Override
+    public Response generateConsumerSecret(String applicationId, String keyMappingId,
+                                           ConsumerSecretCreationRequestDTO consumerSecretCreationRequestDTO,
+                                           MessageContext messageContext) throws APIManagementException {
+        if (!APIUtil.isMultipleClientSecretsEnabled()) {
+            throw new APIManagementException("The requested operation is not supported",
+                    ExceptionCodes.OPERATION_NOT_SUPPORTED_FOR_SINGLE_CLIENT_SECRET_MODE);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Generating consumer secret for application: " + applicationId
+                    + " and key mapping: " + keyMappingId);
+        }
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        Set<APIKey> applicationKeys = getApplicationKeys(applicationId);
+        if (applicationKeys == null) {
+            return null;
+        }
+        ApplicationKeyDTO applicationKeyDTO = getApplicationKeyByAppIDAndKeyMapping(applicationId, keyMappingId);
+        if (applicationKeyDTO != null) {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            String clientId = applicationKeyDTO.getConsumerKey();
+            ConsumerSecretRequest consumerSecretRequest = ApplicationKeyMappingUtil.
+                    fromDTOtoConsumerSecretRequest(clientId, consumerSecretCreationRequestDTO);
+            ConsumerSecretInfo consumerSecret = apiConsumer.generateConsumerSecret(applicationKeyDTO.getKeyManager(),
+                    consumerSecretRequest);
+            ConsumerSecretDTO consumerSecretResponseDTO = ApplicationKeyMappingUtil.
+                    fromConsumerSecretToDTO(consumerSecret);
+            if (log.isDebugEnabled()) {
+                log.debug("Consumer secret generated for application: " + applicationId
+                        + " and key mapping: " + keyMappingId);
+            }
+            return Response.status(Response.Status.CREATED).entity(consumerSecretResponseDTO).build();
+        } else {
+            RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APP_CONSUMER_KEY, keyMappingId, log);
+        }
+        return null;
+    }
+
+    @Override
+    public Response getConsumerSecrets(String applicationId, String keyMappingId, MessageContext messageContext)
+            throws APIManagementException {
+        if (!APIUtil.isMultipleClientSecretsEnabled()) {
+            throw new APIManagementException("The requested operation is not supported",
+                    ExceptionCodes.OPERATION_NOT_SUPPORTED_FOR_SINGLE_CLIENT_SECRET_MODE);
+        }
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        Set<APIKey> applicationKeys = getApplicationKeys(applicationId);
+        if (applicationKeys == null) {
+            return null;
+        }
+        ApplicationKeyDTO applicationKeyDTO = getApplicationKeyByAppIDAndKeyMapping(applicationId, keyMappingId);
+        if (applicationKeyDTO != null) {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            String clientId = applicationKeyDTO.getConsumerKey();
+            List<ConsumerSecretInfo> consumerSecrets = apiConsumer.retrieveConsumerSecrets(clientId,
+                    applicationKeyDTO.getKeyManager());
+            ConsumerSecretListDTO consumerSecretListDTO = ApplicationKeyMappingUtil.
+                    fromConsumerSecretListToDTO(consumerSecrets);
+            return Response.ok().entity(consumerSecretListDTO).build();
+        } else {
+            RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APP_CONSUMER_KEY, keyMappingId, log);
+        }
+        return null;
+    }
+
+    @Override
+    public Response revokeConsumerSecret(String applicationId, String keyMappingId,
+                                         ConsumerSecretDeletionRequestDTO consumerSecretDeletionRequestDTO,
+                                         MessageContext messageContext) throws APIManagementException {
+        if (!APIUtil.isMultipleClientSecretsEnabled()) {
+            throw new APIManagementException("The requested operation is not supported",
+                    ExceptionCodes.OPERATION_NOT_SUPPORTED_FOR_SINGLE_CLIENT_SECRET_MODE);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Revoking consumer secret of application: " + applicationId
+                    + " and key mapping: " + keyMappingId);
+        }
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        Set<APIKey> applicationKeys = getApplicationKeys(applicationId);
+        if (applicationKeys == null) {
+            return null;
+        }
+        ApplicationKeyDTO applicationKeyDTO = getApplicationKeyByAppIDAndKeyMapping(applicationId, keyMappingId);
+        if (applicationKeyDTO != null) {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            String clientId = applicationKeyDTO.getConsumerKey();
+            ConsumerSecretRequest consumerSecretRequest = ApplicationKeyMappingUtil.
+                    fromDTOtoConsumerSecretRequest(clientId, consumerSecretDeletionRequestDTO);
+            apiConsumer.deleteConsumerSecret(consumerSecretDeletionRequestDTO.getSecretId(),
+                    applicationKeyDTO.getKeyManager(), consumerSecretRequest);
+            if (log.isDebugEnabled()) {
+                log.debug("Consumer secret revoked for application: " + applicationId
+                        + " and key mapping: " + keyMappingId);
+            }
+            return Response.noContent().build();
+        } else {
+            RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APP_CONSUMER_KEY, keyMappingId, log);
+        }
+        return null;
+    }
+
     /**
      * Generate keys using existing consumer key and consumer secret
      *
@@ -1200,7 +1738,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         String username = RestApiCommonUtil.getLoggedInUsername();
         JSONObject jsonParamObj = new JSONObject();
         APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-        Application application = apiConsumer.getApplicationByUUID(applicationId);
+        Application application = apiConsumer.getLightweightApplicationByUUID(applicationId);
         String keyManagerName = APIConstants.KeyManager.DEFAULT_KEY_MANAGER;
         if (StringUtils.isNotEmpty(body.getKeyManager())) {
             keyManagerName = body.getKeyManager();
@@ -1277,6 +1815,13 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getLightweightApplicationByUUID(applicationId);
+            if (application == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            }
+            // Only the application owner can delete OAuth keys
+            if (!RestAPIStoreUtils.isUserOwnerOfApplication(application)) {
+                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            }
             boolean result = apiConsumer.removalKeys(application, keyMappingId, xWSO2Tenant);
             if (result) {
                 return Response.ok().build();

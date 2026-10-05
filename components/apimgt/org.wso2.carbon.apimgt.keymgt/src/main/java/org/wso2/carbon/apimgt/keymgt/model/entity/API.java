@@ -19,11 +19,14 @@
 package org.wso2.carbon.apimgt.keymgt.model.entity;
 
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
+import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.subscription.CacheableEntity;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Entity for keeping API related information.
@@ -40,14 +43,17 @@ public class API implements CacheableEntity<String> {
     private String apiType = null;
     private String status;
     private String organization;
-    private boolean deployed = false;
+    private volatile boolean deployed = false;
     private boolean isDefaultVersion = false;
     private String securityScheme;
     private String revisionId;
+    private Map<String, String> apiProperties = new HashMap<>();
     private List<OperationPolicy> apiPolicies = new ArrayList<>();
     private boolean isSubscriptionValidationDisabled = false;
     private Boolean isEgress = null;
     private String subtype = null;
+    private List<VHost> vhosts = new ArrayList<>();
+    private String lastUpdatedEventId = null;
 
     public API() {
     }
@@ -90,6 +96,7 @@ public class API implements CacheableEntity<String> {
      * @param apiType
      * @param status
      * @param isDefaultVersion
+     * @param isDeployed
      */
     public API(String uuid, Integer apiId, String provider, String name, String version, String context,
                String policy, String apiType, String status, boolean isDefaultVersion,boolean isDeployed) {
@@ -363,5 +370,31 @@ public class API implements CacheableEntity<String> {
 
     public void setSubtype(String subtype) {
         this.subtype = subtype;
+    }
+
+    public Map<String, String> getApiProperties() {
+        return apiProperties;
+    }
+
+    public void setApiProperties(Map<String, String> apiProperties) {
+        this.apiProperties = apiProperties;
+    }
+
+    public List<VHost> getVhosts() {
+        return vhosts;
+    }
+
+    public void setVhosts(List<VHost> vhosts) {
+        if (vhosts != null) {
+            this.vhosts = vhosts;
+        }
+    }
+
+    public String getLastUpdatedEventId() {
+        return lastUpdatedEventId;
+    }
+
+    public void setLastUpdatedEventId(String lastUpdatedEventId) {
+        this.lastUpdatedEventId = lastUpdatedEventId;
     }
 }

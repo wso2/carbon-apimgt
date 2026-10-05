@@ -1,0 +1,617 @@
+rules:
+  # ============================================================================
+  # Missing Admin Permission Check in BasicAuth Interceptor
+  # Advisory: WSO2-2025-4401
+  # ============================================================================
+  - id: wso2-authz-basic-auth-missing-admin-permission-check
+    patterns:
+      - pattern: validateRoles($MSG, $REALM, $TENANT, $USER)
+      - pattern-not-inside: |
+          if (validateRoles(...) && validateAdminPermission(...)) { ... }
+      - pattern-not-inside: |
+          validateRoles(...);
+          ...
+          validateAdminPermission(...);
+      - pattern-not-inside: |
+          validateAdminPermission(...);
+          ...
+          validateRoles(...);
+      - pattern-not-inside: |
+          if (!validateRoles(...)) {
+              ...
+          }
+          ...
+          validateAdminPermission(...);
+      - pattern-not-inside: |
+          if (!validateAdminPermission(...)) {
+              ...
+          }
+          ...
+          validateRoles(...);
+    message: >
+      Basic authentication interceptor returns the result of role validation
+      without also verifying admin permissions. A user with valid credentials and
+      matching roles but without admin privileges can access admin-restricted REST
+      API endpoints. Fix: Add a call to validateAdminPermission() and require both
+      role validation and admin permission checks to pass before granting access.
+    languages: [java]
+    severity: ERROR
+    metadata:
+      cwe: CWE-862
+      owasp: A01:2021
+      category: authorization
+      confidence: HIGH
+      advisory: WSO2-2025-4401
+      references:
+        - https://github.com/wso2/carbon-apimgt/pull/13381
+
+  # ============================================================================
+  # Missing Webhook Topic Validation in Event Handler
+  # Advisory: WSO2-2025-4410
+  # ============================================================================
+  - id: wso2-authz-webhook-missing-topic-validation
+    patterns:
+      - pattern: |
+          RelayUtils.buildMessage($CTX);
+          ...
+          $SYNCTX.setProperty(APIConstants.Webhooks.PAYLOAD_PROPERTY, $PAYLOAD);
+      - pattern-not-inside: |
+          boolean $VALID = validateTopic(...);
+          ...
+          RelayUtils.buildMessage($CTX);
+          ...
+          $SYNCTX.setProperty(APIConstants.Webhooks.PAYLOAD_PROPERTY, $PAYLOAD);
+    message: >
+      Webhook event handler processes incoming events and sets the payload property
+      without first validating the topic query parameter against the API's registered
+      topics. An attacker can send webhook event notifications with arbitrary or
+      nonexistent topic values, causing the gateway to accept and forward forged
+      events. Fix: Call validateTopic() before processing the webhook event payload
+      and reject requests with invalid topics.
+    languages: [java]
+    severity: ERROR
+    metadata:
+      cwe: CWE-20
+      owasp: A05:2021
+      category: authorization
+      confidence: HIGH
+      advisory: WSO2-2025-4410
+      references:
+        - https://github.com/wso2/carbon-apimgt/pull/13216
+
+  # ============================================================================
+  # Admin Service Method Missing Authorization Check Before User Operation
+  # Advisory: WSO2-2025-4503
+  # ============================================================================
+  - id: wso2-authz-admin-service-missing-authorization-on-user-operation
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $REALM = TOTPUtil.getUserRealm($USER);
+          - pattern: |
+              TOTPKeyGenerator.$KEYFUNC($USER, ...);
+      - pattern-not-inside: |
+          if (!this.isAuthorized(...)) {
+              throw ...;
+          }
+          ...
+          $REALM = TOTPUtil.getUserRealm($USER);
+      - pattern-not-inside: |
+          if (!this.isAuthorized(...)) {
+              throw ...;
+          }
+          ...
+          TOTPKeyGenerator.$KEYFUNC($USER, ...);
+    message: >
+      Admin service method operates on a user-supplied username parameter
+      (accessing TOTP secrets, user realm, or key generation) without first
+      verifying that the authenticated caller is authorized to act on behalf of
+      that user. Any authenticated user can invoke this admin service to manage
+      another user's TOTP configuration. Fix: Check authorization using
+      CarbonContext.getThreadLocalCarbonContext().getUsername() and
+      AuthorizationManager.isUserAuthorized() before performing the operation.
+    languages: [java]
+    severity: ERROR
+    metadata:
+      cwe: CWE-862
+      owasp: A01:2021
+      category: authorization
+      confidence: MEDIUM
+      advisory: WSO2-2025-4503
+      references:
+        - https://github.com/wso2-extensions/identity-outbound-auth-totp/pull/220
+        - https://github.com/wso2/carbon-apimgt/pull/13493
+
+  # ============================================================================
+  # CXF REST Service Missing Permission Validation Interceptor
+  # Advisory: WSO2-2025-4503
+  # ============================================================================
+  - id: wso2-authz-cxf-handler-missing-permission-check
+    patterns:
+      - pattern: |
+          $POLICY = $MSG.get(AuthorizationPolicy.class);
+          ...
+          $USER = $POLICY.getUserName();
+      - pattern-not-inside: |
+          $POLICY = $MSG.get(AuthorizationPolicy.class);
+          ...
+          $USER = $POLICY.getUserName();
+          ...
+          if (APIUtil.hasPermission(...)) {
+              ...
+          }
+      - pattern-not-inside: |
+          $POLICY = $MSG.get(AuthorizationPolicy.class);
+          ...
+          $USER = $POLICY.getUserName();
+          ...
+          if ($AUTHMAN.isUserAuthorized(...)) {
+              ...
+          }
+    message: >
+      CXF interceptor extracts user credentials from the AuthorizationPolicy
+      but does not verify the user has the required permissions before allowing
+      the request to proceed. An authenticated user without proper authorization
+      can access restricted REST API endpoints. Fix: Add permission validation
+      using APIUtil.hasPermission() or AuthorizationManager.isUserAuthorized()
+      before the request reaches the service handler.
+    languages: [java]
+    severity: ERROR
+    metadata:
+      cwe: CWE-862
+      owasp: A01:2021
+      category: authorization
+      confidence: MEDIUM
+      advisory: WSO2-2025-4503
+      references:
+        - https://github.com/wso2/carbon-apimgt/pull/13493
+
+  # ============================================================================
+  # Scope Validation Fail-Open on Empty URI Templates
+  # Advisory: WSO2-2025-4733
+  # ============================================================================
+  - id: wso2-authz-scope-validation-fail-open-on-empty-templates
+    patterns:
+      - pattern: |
+          Set<URITemplate> $TEMPLATES = $UTIL.getURITemplatesForBasePath(...);
+          ...
+          if ($TEMPLATES.isEmpty()) {
+              ...
+              return true;
+          }
+      - pattern-not: |
+          Set<URITemplate> $TEMPLATES = $UTIL.getURITemplatesForBasePath(...);
+          ...
+          if ($TEMPLATES.isEmpty()) {
+              ...
+              return false;
+          }
+    message: >
+      Scope validation returns true (allowing access) when no URI templates
+      match the request path, effectively bypassing authorization. If the URI
+      template set is empty, the method cannot determine required scopes and
+      should deny access (return false) rather than granting it. An attacker
+      can manipulate the request path so that template lookup fails, bypassing
+      scope validation entirely.
+      Fix: Return false when URI templates are empty to fail closed.
+    languages: [java]
+    severity: ERROR
+    metadata:
+      cwe: CWE-862
+      owasp: A01:2021
+      category: authorization
+      confidence: HIGH
+      advisory: WSO2-2025-4733
+      references:
+        - https://github.com/wso2/carbon-apimgt/pull/13521
+
+  # ============================================================================
+  # Organization Resolver Unconditionally Trusts Tenant Header
+  # Advisory: WSO2-2025-4918
+  # ============================================================================
+  - id: wso2-authz-unconditional-tenant-header-trust
+    patterns:
+      - pattern: |
+          $TENANT = (ArrayList) ((TreeMap) ($PROPS.get(...))).get($HEADER);
+      - pattern-not-inside: |
+          $ALLOW = $PROPS.get(APIConstants.PROPERTY_ALLOW_TENANT_HEADER_KEY);
+          ...
+          $TENANT = (ArrayList) ((TreeMap) ($PROPS.get(...))).get($HEADER);
+    message: >
+      Organization resolver reads the tenant domain from an HTTP request header
+      (X-WSO2-Tenant) without first checking whether the endpoint should honor
+      that header. An attacker can supply a forged tenant header on admin or
+      publisher API endpoints to impersonate another tenant, resulting in
+      cross-tenant authorization bypass. Fix: Gate the tenant header reading
+      behind an allowTenantHeader property check, and set it to false for
+      endpoints that should not accept tenant overrides from client headers.
+    languages: [java]
+    severity: ERROR
+    metadata:
+      cwe: CWE-863
+      owasp: A01:2021
+      category: authorization
+      confidence: MEDIUM
+      advisory: WSO2-2025-4918
+      references:
+        - https://github.com/wso2/carbon-apimgt/pull/13546
+
+  # ============================================================================
+  # Tenant Domain Resolved from Authenticated User Instead of Target Owner
+  # Advisory: WSO2-2025-4918
+  # ============================================================================
+  - id: wso2-authz-tenant-domain-from-wrong-principal
+    patterns:
+      - pattern: |
+          if (isUserSuperAdmin($AUTH_USER)) {
+              ...
+              String $TENANT = MultitenantUtils.getTenantDomain($AUTH_USER);
+              ...
+          }
+      - pattern-not: |
+          if (isUserSuperAdmin($AUTH_USER)) {
+              ...
+              String $TENANT = MultitenantUtils.getTenantDomain($OWNER);
+              String $TENANT_USER = MultitenantUtils.getTenantAwareUsername($OWNER);
+              ...
+          }
+    message: >
+      When a super admin registers a service provider on behalf of another
+      tenant user, the tenant domain is resolved from the authenticated admin
+      username rather than the intended owner. This causes the service provider
+      to be created in the wrong tenant context, enabling cross-tenant
+      impersonation during dynamic client registration.
+      Fix: Use MultitenantUtils.getTenantDomain(owner) instead of
+      MultitenantUtils.getTenantDomain(authUserName) to ensure the tenant
+      domain is derived from the target owner, not the acting admin.
+    languages: [java]
+    severity: ERROR
+    metadata:
+      cwe: CWE-863
+      owasp: A01:2021
+      category: authorization
+      confidence: HIGH
+      advisory: WSO2-2025-4918
+      references:
+        - https://github.com/wso2/carbon-apimgt/pull/13546
+  # ============================================================================
+  # Weak Hash Algorithm - MD5 Usage in MessageDigest
+  # Advisory: WSO2-2024-3461
+  # ============================================================================
+  - id: wso2-config-weak-md5-hash
+    patterns:
+      - pattern: |
+          MessageDigest.getInstance("MD5")
+      # Exclude non-security uses: MD5 of random/UUID data for cache busting
+      - pattern-not-inside: |
+          $RANDOM = new SecureRandom();
+          ...
+          MessageDigest.getInstance("MD5");
+      - pattern-not-inside: |
+          $UUID = UUID.randomUUID();
+          ...
+          MessageDigest.getInstance("MD5");
+    message: >
+      MD5 is a cryptographically broken hash algorithm susceptible to collision
+      attacks. It should not be used for security-sensitive operations such as
+      generating user identifiers, integrity checks, or digital signatures.
+      Fix: Replace with a stronger algorithm such as SHA-256.
+      Note: Literal "MD5" in MessageDigest.getInstance() is flagged. Uses with
+      configurable algorithm variables are not flagged.
+    languages: [java]
+    severity: WARNING
+    metadata:
+      cwe: CWE-328
+      owasp: A02:2021
+      category: weak-cryptography
+      confidence: MEDIUM
+      advisory: WSO2-2024-3461
+      references:
+        - https://github.com/wso2/carbon-apimgt/pull/12482
+  # ============================================================================
+  # MIME Type Spoofing - Media Type From Client Header
+  # Advisory: WSO2-2025-4104
+  # ============================================================================
+  - id: wso2-file-handling-mime-type-from-header
+    patterns:
+      - pattern: |
+          String $MEDIA = $OBJ.getHeader($HEADER);
+          ...
+          $FUNC(..., $MEDIA, ...);
+    message: >
+      File media type is determined from a client-supplied HTTP header (Content-Type
+      or similar), which is entirely attacker-controlled. An attacker can upload a
+      malicious file (e.g., executable) while claiming it is a benign type (e.g.,
+      application/pdf). Fix: Detect the actual media type from file content using
+      Apache Tika or similar content-based detection, and validate that the detected
+      type matches the file extension.
+      Advisory: WSO2-2025-4104 / CVE-2025-4760.
+    languages: [java]
+    severity: WARNING
+    metadata:
+      cwe: CWE-434
+      owasp: A04:2021
+      category: file-handling
+      confidence: MEDIUM
+      advisory: WSO2-2025-4104
+      references:
+        - https://github.com/wso2/carbon-apimgt/pull/13099
+
+  # ============================================================================
+  # MIME Type Spoofing - File Upload Without Extension Validation
+  # Advisory: WSO2-2025-4104
+  # ============================================================================
+  - id: wso2-file-handling-upload-no-extension-validation
+    patterns:
+      - pattern: |
+          RestApiPublisherUtils.attachFileToProductDocument($API_ID, $DOC, $STREAM, $DETAIL, $ORG)
+      - pattern-not-inside: |
+          if (APIUtil.isSupportedFileType(...)) {
+              ...
+          }
+      - pattern-not-inside: |
+          if ($OBJ.isSupportedFileType(...)) {
+              ...
+          }
+    message: >
+      File attachment operation for API product documentation proceeds without
+      validating that the uploaded file has a supported extension. An attacker
+      can upload files with dangerous extensions (e.g., .exe, .jsp, .war).
+      Fix: Check the file extension against an allowlist using
+      APIUtil.isSupportedFileType() before processing the upload.
+      Advisory: WSO2-2025-4104 / CVE-2025-4760.
+    languages: [java]
+    severity: WARNING
+    metadata:
+      cwe: CWE-434
+      owasp: A04:2021
+      category: file-handling
+      confidence: MEDIUM
+      advisory: WSO2-2025-4104
+      references:
+        - https://github.com/wso2/carbon-apimgt/pull/13099
+  # ============================================================================
+  # Path Traversal - File Path Concatenation Without Normalization
+  # Advisory: WSO2-2023-2988
+  # ============================================================================
+  - id: wso2-path-traversal-file-concat-no-normalize
+    patterns:
+      - pattern-either:
+          - pattern: |
+              new FileInputStream($BASE.getAbsolutePath() + File.separator + $FILENAME)
+          - pattern: |
+              new FileInputStream($BASE.getAbsolutePath() + $SEP + $FILENAME)
+          - pattern: |
+              new File($BASE.getAbsolutePath() + File.separator + $FILENAME)
+          - pattern: |
+              new File($BASE.getAbsolutePath() + $SEP + $FILENAME)
+      - pattern-not-inside: |
+          $RESOLVED = $BASE_PATH.resolve($USER_PATH).normalize();
+          ...
+          if (!$RESOLVED.startsWith(...)) { ... }
+          ...
+    message: >
+      File path constructed by concatenating a base directory with a user-controlled
+      filename without normalization or path traversal validation. An attacker can supply
+      a filename containing '../' sequences to read or write files outside the intended
+      directory. Fix: Use Path.resolve() followed by normalize(), then verify the result
+      starts with the expected base directory.
+    languages: [java]
+    severity: ERROR
+    metadata:
+      cwe: CWE-22
+      owasp: A01:2021
+      category: path-traversal
+      confidence: HIGH
+      advisory: WSO2-2023-2988
+      references:
+        - https://github.com/wso2/carbon-apimgt/pull/12206
+
+  # ============================================================================
+  # Path Traversal - File Write with Unvalidated Filename
+  # Advisory: WSO2-2024-3461
+  # ============================================================================
+  - id: wso2-path-traversal-file-write-unvalidated-name
+    patterns:
+      - pattern-either:
+          - pattern: |
+              new FileOutputStream(new File($BASE + $FILENAME + ...))
+          - pattern: |
+              new FileOutputStream(new File($BASE + $FILENAME))
+      - pattern-not-inside: |
+          String $CANONICAL = $FILE.getCanonicalPath();
+          ...
+          if (!$CANONICAL.startsWith(...)) { ... }
+          ...
+    message: >
+      File created using a path constructed from a potentially unvalidated
+      filename parameter. An attacker may supply path traversal sequences to
+      write files outside the intended directory. Fix: Validate the canonical
+      path of the resolved file stays within the expected base directory.
+    languages: [java]
+    severity: ERROR
+    metadata:
+      cwe: CWE-22
+      owasp: A01:2021
+      category: path-traversal
+      confidence: HIGH
+      advisory: WSO2-2024-3461
+      references:
+        - https://github.com/wso2/carbon-apimgt/pull/12482
+
+  # ============================================================================
+  # Zip Slip - File Copy Without Canonical Path Validation
+  # Advisory: WSO2-2024-3461
+  # ============================================================================
+  - id: wso2-path-traversal-copy-stream-no-canonical-check
+    patterns:
+      - pattern: |
+          FileUtils.copyInputStreamToFile($INPUT, $PATH.toFile())
+      - pattern-not-inside: |
+          String $CANONICAL = $FILE.getCanonicalPath();
+          ...
+          if (!$CANONICAL.startsWith(...)) { ... }
+          ...
+          FileUtils.copyInputStreamToFile($INPUT, $PATH.toFile());
+    message: >
+      File copy operation writes an input stream to a file path without
+      validating that the resolved path stays within the intended directory.
+      This can enable a Zip Slip attack where a crafted archive entry with
+      path traversal sequences (e.g., '../../') writes files outside the
+      extraction directory. Fix: Resolve the canonical path and verify it
+      starts with the expected base directory before writing.
+    languages: [java]
+    severity: ERROR
+    metadata:
+      cwe: CWE-22
+      owasp: A01:2021
+      category: path-traversal
+      confidence: HIGH
+      advisory: WSO2-2024-3461
+      references:
+        - https://github.com/wso2/carbon-apimgt/pull/12482
+
+  # ============================================================================
+  # Path Traversal - File Delete with Unvalidated Filename
+  # Advisory: WSO2-2024-3461
+  # ============================================================================
+  - id: wso2-path-traversal-file-delete-unvalidated-name
+    patterns:
+      - pattern: |
+          File $FILE = new File($BASE + $FILENAME + ...);
+          ...
+          $FILE.delete();
+      - pattern-not: |
+          File $FILE = new File($BASE + $FILENAME + ...);
+          ...
+          String $CANONICAL = $FILE.getCanonicalPath();
+          ...
+          if (!$CANONICAL.startsWith(...)) { ... }
+          ...
+          $FILE.delete();
+    message: >
+      File deletion using a path constructed from a potentially unvalidated
+      filename parameter. An attacker may supply path traversal sequences to
+      delete files outside the intended directory. Fix: Validate the canonical
+      path of the resolved file stays within the expected base directory before
+      deletion.
+    languages: [java]
+    severity: ERROR
+    metadata:
+      cwe: CWE-22
+      owasp: A01:2021
+      category: path-traversal
+      confidence: HIGH
+      advisory: WSO2-2024-3461
+      references:
+        - https://github.com/wso2/carbon-apimgt/pull/12482
+
+  - id: wso2-path-traversal-transferfile-unsanitized
+    patterns:
+      - pattern: |
+          RestApiUtil.transferFile($INPUT, $FILENAME, $DIR)
+      - pattern-not-inside: |
+          $RESOLVED = resolveFilePath(...);
+          ...
+      - pattern-not-inside: |
+          $RESOLVED = $PATH.resolve(...).normalize();
+          ...
+    message: >
+      File transfer operation uses an unsanitized filename. The filename parameter
+      may contain path traversal sequences that allow writing files outside the
+      intended directory. Fix: Resolve and normalize the file path, then validate it
+      remains within the expected base directory before passing to transferFile.
+    languages: [java]
+    severity: ERROR
+    metadata:
+      cwe: CWE-22
+      owasp: A01:2021
+      category: path-traversal
+      confidence: MEDIUM
+      advisory: WSO2-2023-2988
+      references:
+        - https://github.com/wso2/carbon-apimgt/pull/12206
+  # ============================================================================
+  # XXE - DocumentBuilderFactory Without XML Protection
+  # Advisory: WSO2-2024-3472
+  # ============================================================================
+  - id: wso2-xxe-documentbuilderfactory-missing-protection
+    patterns:
+      - pattern: |
+          DocumentBuilderFactory $DBF = ...;
+          ...
+          $DBF.newDocumentBuilder();
+      - pattern-not: |
+          DocumentBuilderFactory $DBF = ...;
+          ...
+          $DBF.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+          ...
+          $DBF.newDocumentBuilder();
+      - pattern-not: |
+          DocumentBuilderFactory $DBF = ...;
+          ...
+          $DBF.setFeature(Constants.XERCES_FEATURE_PREFIX + Constants.DISALLOW_DOCTYPE_DECL_FEATURE, true);
+          ...
+          $DBF.newDocumentBuilder();
+      - pattern-not: |
+          DocumentBuilderFactory $DBF = ...;
+          ...
+          $DBF.setFeature("http://xml.org/sax/features/external-general-entities", false);
+          ...
+          $DBF.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+          ...
+          $DBF.newDocumentBuilder();
+      - pattern-not: |
+          DocumentBuilderFactory $DBF = ...;
+          ...
+          $DBF.setFeature(Constants.SAX_FEATURE_PREFIX + Constants.EXTERNAL_GENERAL_ENTITIES_FEATURE, false);
+          ...
+          $DBF.setFeature(Constants.SAX_FEATURE_PREFIX + Constants.EXTERNAL_PARAMETER_ENTITIES_FEATURE, false);
+          ...
+          $DBF.newDocumentBuilder();
+      - pattern-not: |
+          DocumentBuilderFactory $DBF = ...;
+          ...
+          $DBF.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+          ...
+          $DBF.setFeature("http://xml.org/sax/features/external-general-entities", false);
+          ...
+          $DBF.newDocumentBuilder();
+      - pattern-not: |
+          DocumentBuilderFactory $DBF = ...;
+          ...
+          $DBF.setFeature(Constants.SAX_FEATURE_PREFIX + Constants.EXTERNAL_PARAMETER_ENTITIES_FEATURE, false);
+          ...
+          $DBF.setFeature(Constants.SAX_FEATURE_PREFIX + Constants.EXTERNAL_GENERAL_ENTITIES_FEATURE, false);
+          ...
+          $DBF.newDocumentBuilder();
+      # Exclude factories obtained via secured utility methods (interprocedural XXE protection)
+      - pattern-not: |
+          DocumentBuilderFactory $DBF = getSecuredDocumentBuilder(...);
+          ...
+          $DBF.newDocumentBuilder();
+      - pattern-not: |
+          DocumentBuilderFactory $DBF = $OBJ.getSecuredDocumentBuilder(...);
+          ...
+          $DBF.newDocumentBuilder();
+    message: >
+      DocumentBuilderFactory is used to create an XML parser without disabling
+      DOCTYPE declarations or external entities. This can allow XML External
+      Entity (XXE) attacks where an attacker crafts XML input containing external
+      entity references to read local files, perform SSRF, or cause denial of
+      service. Fix: Either disallow DOCTYPE declarations or disable external
+      entities on the factory before creating the document builder:
+      factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+      or
+      factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+      factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+    languages: [java]
+    severity: ERROR
+    metadata:
+      cwe: CWE-611
+      owasp: A05:2021
+      category: xxe
+      confidence: MEDIUM
+      advisory: WSO2-2024-3472
+      references:
+        - https://github.com/wso2/carbon-apimgt/pull/12526

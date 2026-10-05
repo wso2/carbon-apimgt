@@ -23,6 +23,8 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.utils.CarbonUtils;
 
@@ -59,6 +61,36 @@ public class APIMSiddhiExtensionsComponent {
             log.error("Invalid Port Offset: " + portOffset + ". Default value 0 will be used.", e);
             return 0;
         }
+    }
+    /**
+     * Sets the API Manager Configuration Service. This method is called  when the API Manager Configuration Service
+     * becomes available.
+     *
+     * @param configurationService The API Manager Configuration Service instance.
+     */
+    @Reference(
+            name = "api.manager.config.service",
+            service = org.wso2.carbon.apimgt.impl.APIManagerConfigurationService.class,
+            cardinality = org.osgi.service.component.annotations.ReferenceCardinality.MANDATORY,
+            policy = org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC,
+            unbind = "unsetAPIManagerConfigurationService")
+    protected void setAPIManagerConfigurationService(APIManagerConfigurationService configurationService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting APIM Configuration Service");
+        }
+        ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
+    }
+
+    /**
+     * Unsets the API Manager Configuration Service.
+     *
+     * @param configurationService The API Manager Configuration Service instance.
+     */
+    protected void unsetAPIManagerConfigurationService(APIManagerConfigurationService configurationService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Unsetting APIM Configuration Service");
+        }
+        ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(null);
     }
 
 }

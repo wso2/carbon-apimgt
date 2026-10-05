@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>9.31.23-SNAPSHOT</version>
+        <version>9.33.193-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -43,7 +43,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.commons</groupId>
+            <groupId>org.wso2.orbit.org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
         <dependency>
@@ -125,6 +125,11 @@
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.governance.api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.spec.parser</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -185,6 +190,8 @@
                         --add-opens java.base/sun.net.www.protocol.jar=ALL-UNNAMED  
                         --add-opens java.base/java.math=ALL-UNNAMED
                         --add-opens java.base/java.nio.charset=ALL-UNNAMED
+                        --add-opens java.base/java.util.regex=ALL-UNNAMED
+                        --add-opens java.base/java.lang=ALL-UNNAMED
                     </argLine>
                 </configuration>
                 <dependencies>
@@ -231,13 +238,14 @@
                             org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
                             org.osgi.service.*;version="${imp.package.version.osgi.service}",
                             org.apache.commons.logging.*; version="${import.package.version.commons.logging}",
-                            javax.validation.*; version="1.1.0.Final",
+                            jakarta.validation.*; version="1.1.0.Final",
                             *;resolution:=optional
                         </Import-Package>
                         <Export-Package>
                             org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;version="${carbon.apimgt.version}",
                             org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.*;version="${carbon.apimgt.version}"
                         </Export-Package>
+                        <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>

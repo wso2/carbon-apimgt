@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>9.31.23-SNAPSHOT</version>
+        <version>9.33.193-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -29,7 +29,6 @@
     <artifactId>org.wso2.carbon.apimgt.tracing</artifactId>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - API Tracing</name>
-    <description />
     <url>http://wso2.org</url>
 
     <dependencies>
@@ -61,8 +60,12 @@
             <artifactId>zipkin-sender-okhttp3</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.zipkin.zipkin2</groupId>
+            <artifactId>zipkin</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.wso2.orbit.io.jaeger</groupId>
-            <artifactId>jaeger-client</artifactId>
+            <artifactId>jaeger-client-jdk21</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
@@ -153,6 +156,10 @@
                             !org.wso2.carbon.apimgt.tracing.internal.*,
                             org.wso2.carbon.apimgt.tracing.*;version="${carbon.apimgt.version}"
                         </Export-Package>
+                        <Provide-Capability>
+                            osgi.service;objectClass=org.wso2.carbon.apimgt.tracing.TracingService,
+                            osgi.service;objectClass=org.wso2.carbon.apimgt.tracing.telemetry.TelemetryService
+                        </Provide-Capability>
                         <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
                 </configuration>

@@ -114,12 +114,15 @@ public class APIConfigContext extends ConfigContext {
 
         // Set the enable retry call with new Oauth token property
         context.put(APIConstants.ENABLE_RETRY_CALL_WITH_NEW_OAUTH_TOKEN, isRetryCallWithNewOAuthTokenEnabled());
+
+        // Set the enable failover in load balanced endpoints property
+        context.put(APIConstants.FAILOVER_IN_LOADBALANCED_ENDPOINTS_PROPERTY, isFailoverEnabled());
     }
 
     private void setApiProductVelocityContext(APIProduct apiProduct, VelocityContext context) {
         APIProductIdentifier id = apiProduct.getId();
         //set the api name version and context
-        context.put("apiName", id.getName());
+        context.put("apiName", this.getAPIProductName(apiProduct));
         context.put("apiVersion", id.getVersion());
 
         // We set the context pattern now to support plugable version strategy
@@ -138,6 +141,18 @@ public class APIConfigContext extends ConfigContext {
         } else {
             context.put("apiIsOauthProtected", Boolean.FALSE);
         }
+        // if API is secured with api_Key
+        if (apiSecurity != null && apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
+            context.put("apiIsApiKeyProtected", Boolean.TRUE);
+        } else {
+            context.put("apiIsApiKeyProtected", Boolean.FALSE);
+        }
+        // if API is secured with basic_auth
+        if (apiSecurity != null && apiSecurity.contains(APIConstants.API_SECURITY_BASIC_AUTH)) {
+            context.put("apiIsBasicAuthProtected", Boolean.TRUE);
+        } else {
+            context.put("apiIsBasicAuthProtected", Boolean.FALSE);
+        }
         if (apiProduct.isEnabledSchemaValidation()) {
             context.put("enableSchemaValidation", Boolean.TRUE);
         } else {
@@ -151,13 +166,25 @@ public class APIConfigContext extends ConfigContext {
         // API test key
         context.put("testKey", apiProduct.getTestKey());
 
-
         // Set the enable retry call with new Oauth token property
         context.put(APIConstants.ENABLE_RETRY_CALL_WITH_NEW_OAUTH_TOKEN, isRetryCallWithNewOAuthTokenEnabled());
+
+        // Set the enable failover in load balanced endpoints property
+        context.put(APIConstants.FAILOVER_IN_LOADBALANCED_ENDPOINTS_PROPERTY, isFailoverEnabled());
     }
 
     public String getAPIName(API api) {
-        return api.getId().getApiName();
+        return APIConstants.SYNAPSE_API_NAME_PREFIX + "--" + api.getId().getApiName();
+    }
+
+    /**
+     * Returns the API product name prefixed with the Synapse API name prefix.
+     *
+     * @param product API product
+     * @return prefixed name in the format {prefix}--{productName}
+     */
+    public String getAPIProductName(APIProduct product) {
+        return APIConstants.SYNAPSE_API_NAME_PREFIX + "--" + product.getId().getName();
     }
 
     /**
@@ -169,6 +196,17 @@ public class APIConfigContext extends ConfigContext {
         String property = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getFirstProperty(
                 APIConstants.MEDIATOR_CONFIG + APIConstants.OAuthConstants.OAUTH_MEDIATION_CONFIG + APIConstants.
                         OAuthConstants.ENABLE_RETRY_CALL_WITH_NEW_TOKEN);
+        return Boolean.parseBoolean(property);
+    }
+
+    /**
+     * Checks whether failover is enabled in load balanced endpoints based on the configuration.
+     *
+     * @return {@code true} if fail over in load balanced endpoints is enabled; {@code false} otherwise.
+     */
+    protected boolean isFailoverEnabled() {
+        String property = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
+                .getFirstProperty(APIConstants.ENABLE_FAILOVER_IN_LOADBALANCED_ENDPOINTS);
         return Boolean.parseBoolean(property);
     }
 }
