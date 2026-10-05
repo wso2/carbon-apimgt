@@ -498,10 +498,14 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
                     }
                 }
 
-                // Response headers via Axis2 transport property
+                // Response headers via Axis2 transport property. Strip credential/session headers
+                // first: on a fault path this map can still be the inbound request map, so publishing
+                // it raw would leak Authorization/ApiKey/Cookie. Copy before stripping so the live
+                // transport map is left untouched.
                 Object respHeadersObj = axis2.getAxis2MessageContext().getProperty(TRANSPORT_HEADERS);
                 if (respHeadersObj instanceof Map) {
-                    Map<String, Object> respHeaders = (Map<String, Object>) respHeadersObj;
+                    Map<String, Object> respHeaders = new LinkedHashMap<>((Map<String, Object>) respHeadersObj);
+                    respHeaders.keySet().removeIf(AnalyticsPayloadUtil::isSensitiveHeader);
                     Map<String, Object> maskedResp =
                             applyMask(respHeaders, parseMaskSet(getMaskProperties().get(RESPONSE_HEADER_MASK)));
                     if (!maskedResp.isEmpty()) {
@@ -510,6 +514,37 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
                             log.debug("Added " + maskedResp.size() + " response headers to analytics event");
                         }
                     }
+                }
+            }
+        }
+
+        // Request/response body (optional)
+        if (AnalyticsPayloadUtil.shouldSendPayloads()) {
+            log.debug("Including request/response body in analytics event");
+            int sizeLimit = AnalyticsPayloadUtil.getPayloadSizeLimit();
+            // Request body was captured in the request flow and stashed on the message context under
+            // internal (namespaced) property keys; it is published under the wire keys.
+            Object requestBody = messageContext.getProperty(Constants.REQUEST_BODY_PROPERTY);
+            if (requestBody instanceof String) {
+                custom.put(Constants.REQUEST_BODY, requestBody);
+                Object reqEncoding = messageContext.getProperty(Constants.REQUEST_BODY_TRANSFER_ENCODING_PROPERTY);
+                if (reqEncoding instanceof String) {
+                    custom.put(Constants.REQUEST_BODY_TRANSFER_ENCODING, reqEncoding);
+                }
+                // Convey the request Content-Type so Moesif can label/parse the body even when
+                // send_headers is off. (The response Content-Type already rides as responseContentType.)
+                String reqContentType = getRequestContentType();
+                if (reqContentType != null) {
+                    custom.put(Constants.REQUEST_CONTENT_TYPE, reqContentType);
+                }
+            }
+            // Response body is built and read here, at event-collection time.
+            AnalyticsPayloadUtil.CapturedBody responseBody =
+                    AnalyticsPayloadUtil.extractPayload(messageContext, sizeLimit, "response");
+            if (responseBody != null && responseBody.getBody() != null) {
+                custom.put(Constants.RESPONSE_BODY, responseBody.getBody());
+                if (responseBody.getTransferEncoding() != null) {
+                    custom.put(Constants.RESPONSE_BODY_TRANSFER_ENCODING, responseBody.getTransferEncoding());
                 }
             }
         }
@@ -847,6 +882,33 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         return UNKNOWN_VALUE;
     }
 
+    /**
+     * The request Content-Type, read case-insensitively from the request headers stashed as analytics
+     * metadata during the request-in flow ({@code REQUEST_HEADERS}). Used to convey the request body's
+     * media type to Moesif independently of {@code send_headers}.
+     *
+     * @return the request Content-Type, or {@code null} if unavailable
+     */
+    @SuppressWarnings("unchecked")
+    private String getRequestContentType() {
+        if (!(messageContext instanceof Axis2MessageContext)) {
+            return null;
+        }
+        Map<String, Object> analyticsMeta = ((Axis2MessageContext) messageContext).getAnalyticsMetadata();
+        if (analyticsMeta == null) {
+            return null;
+        }
+        Object reqHeadersObj = analyticsMeta.get(REQUEST_HEADERS);
+        if (reqHeadersObj instanceof Map) {
+            for (Map.Entry<String, Object> e : ((Map<String, Object>) reqHeadersObj).entrySet()) {
+                if (HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(String.valueOf(e.getKey())) && e.getValue() != null) {
+                    return e.getValue().toString();
+                }
+            }
+        }
+        return null;
+    }
+
     private String getCommonName() {
         if (messageContext.getPropertyKeySet().contains(APIConstants.CERTIFICATE_COMMON_NAME)) {
             return (String) messageContext.getProperty(APIConstants.CERTIFICATE_COMMON_NAME);
@@ -943,7 +1005,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         }
         for (Map.Entry<String, Object> e : headers.entrySet()) {
             String key = String.valueOf(e.getKey());
-            boolean masked =maskSet.contains(key.toLowerCase(java.util.Locale.ROOT));
+            boolean masked = maskSet.contains(key.toLowerCase(java.util.Locale.ROOT));
             out.put(key, masked ? MASK_VALUE : e.getValue());
         }
         return out;

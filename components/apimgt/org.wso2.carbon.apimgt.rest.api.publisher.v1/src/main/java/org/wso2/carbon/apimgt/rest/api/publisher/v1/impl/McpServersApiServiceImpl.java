@@ -201,7 +201,8 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             result = apiProvider.searchPaginatedAPIs(query, organization, offset, limit);
             Set<API> apis = (Set<API>) result.get("apis");
             allMatchedApis.addAll(apis);
-            apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis);
+            // MCP server listings do not expose additional properties, so they are explicitly left out here.
+            apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis, false);
             Object totalLength = result.get("length");
             Integer length = 0;
             if (totalLength != null) {
@@ -1014,6 +1015,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                     ExceptionCodes.MCP_REQUEST_BODY_CANNOT_BE_NULL);
         }
         String url = StringUtils.trimToEmpty(mcPServerProxyRequest.getUrl());
+        APIUtil.validateRemoteURL(url, RestApiCommonUtil.getLoggedInUserTenantDomain());
         MCPServerDTO mcpServerDTO = mcPServerProxyRequest.getAdditionalProperties();
         SecurityInfoDTO securityInfoDTO = mcPServerProxyRequest.getSecurityInfo();
 
@@ -2434,14 +2436,41 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             } else {
                 RestApiUtil.handleBadRequest("Endpoint config is not in correct format", log);
             }
+
+            org.json.JSONObject endpointConfig = null;
+            if (endpointConfigObj instanceof Map) {
+                endpointConfig = new org.json.JSONObject((Map<?, ?>) endpointConfigObj);
+            } else if (endpointConfigObj instanceof String) {
+                endpointConfig = new org.json.JSONObject(endpointConfigObj.toString());
+            }
+            if (endpointConfig != null) {
+                String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+                if (!APIConstants.ENDPOINT_TYPE_DEFAULT.equalsIgnoreCase(
+                        endpointConfig.optString(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                    ArrayList<String> endpoints = new ArrayList<>();
+                    APIUtil.extractURLsFromEndpointConfig(endpointConfig,
+                            APIConstants.API_DATA_PRODUCTION_ENDPOINTS, endpoints);
+                    APIUtil.extractURLsFromEndpointConfig(endpointConfig,
+                            APIConstants.API_DATA_SANDBOX_ENDPOINTS, endpoints);
+                    APIUtil.extractURLsFromEndpointConfig(endpointConfig,
+                            APIConstants.ENDPOINT_PRODUCTION_FAILOVERS, endpoints);
+                    APIUtil.extractURLsFromEndpointConfig(endpointConfig,
+                            APIConstants.ENDPOINT_SANDBOX_FAILOVERS, endpoints);
+                    for (String endpoint : endpoints) {
+                        APIUtil.validateRemoteURL(endpoint, tenantDomain);
+                    }
+                }
+            }
+
             String definition = backendAPIDTO.getDefinition();
             if (StringUtils.isNotBlank(definition)) {
                 if (APIConstants.API_SUBTYPE_DIRECT_BACKEND.equals(subtype)) {
                     APIDefinitionValidationResponse validationResponse =
                             OASParserUtil.validateAPIDefinition(definition, Boolean.TRUE,
-                                    ServiceReferenceHolder.getInstance()
+                                    APIUtil.buildRefResolutionOptions(ServiceReferenceHolder.getInstance()
                                             .getAPIMDependencyConfigurationService()
-                                            .getAPIMDependencyConfigurations().getOasParserOptions());
+                                            .getAPIMDependencyConfigurations().getOasParserOptions(),
+                                            RestApiCommonUtil.getLoggedInUserTenantDomain()));
                     if (!validationResponse.isValid()) {
                         List<ErrorListItemDTO> errorListItemDTOs =
                                 APIMappingUtil.getErrorListItemsDTOsFromErrorHandlers(
@@ -2593,10 +2622,16 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         ApiEndpointValidationResponseDTO apiEndpointValidationResponseDTO = new ApiEndpointValidationResponseDTO();
         apiEndpointValidationResponseDTO.setError("");
         try {
+            APIUtil.validateRemoteURL(endpointUrl, RestApiCommonUtil.getLoggedInUserTenantDomain());
             APIEndpointValidationDTO apiEndpointValidationDTO =
                     ApisApiServiceImplUtils.sendHttpHEADRequest(endpointUrl);
             apiEndpointValidationResponseDTO = APIMappingUtil.fromEndpointValidationToDTO(apiEndpointValidationDTO);
             return Response.status(Response.Status.OK).entity(apiEndpointValidationResponseDTO).build();
+        } catch (APIManagementException e) {
+            if (e.getErrorHandler() == null || e.getErrorHandler().getHttpStatusCode() != 400) {
+                throw e;
+            }
+            apiEndpointValidationResponseDTO.setError(e.getErrorHandler().getErrorDescription());
         } catch (MalformedURLException e) {
             log.error("Malformed Url error occurred while sending the HEAD request to the given endpoint url:", e);
             apiEndpointValidationResponseDTO.setError(e.getMessage());
@@ -2632,7 +2667,11 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                     inlineAPIDefinition,
                     returnContent, false);
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
+            if (e.getErrorHandler() != null && e.getErrorHandler().getHttpStatusCode() == 400) {
+                RestApiUtil.handleBadRequest(e.getErrorHandler().getErrorDescription(), log);
+            } else {
+                RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
+            }
         }
 
         OpenAPIDefinitionValidationResponseDTO validationResponseDTO =
@@ -2669,6 +2708,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         dto.setUrl(serverUrl);
 
         final String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        APIUtil.validateRemoteURL(serverUrl, RestApiCommonUtil.getLoggedInUserTenantDomain());
         SecurityInfoDTO securityInfo = dto.getSecurityInfo();
         String mcpServerId = StringUtils.trimToNull(dto.getMcpServerId());
 

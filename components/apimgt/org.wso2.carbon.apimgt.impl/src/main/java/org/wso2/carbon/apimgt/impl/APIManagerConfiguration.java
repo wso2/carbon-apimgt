@@ -145,6 +145,7 @@ public class APIManagerConfiguration {
     private static DesignAssistantConfigurationDTO designAssistantConfigurationDto = new DesignAssistantConfigurationDTO();
     private static AIAPIConfigurationsDTO aiapiConfigurationsDTO = new AIAPIConfigurationsDTO();
     private static final APIMGovernanceConfigDTO apimGovConfigurationDto = new APIMGovernanceConfigDTO();
+    private String aiRequestPropertyEnricherImpl;
 
     private WorkflowProperties workflowProperties = new WorkflowProperties();
     private Map<String, Environment> apiGatewayEnvironments = new LinkedHashMap<String, Environment>();
@@ -184,6 +185,7 @@ public class APIManagerConfiguration {
     private boolean isTransactionCounterEnabled;
     private static boolean isMCPSupportEnabled = true;
     private static boolean isMCPEnforceAuthForAllMethods = true;
+    private static boolean isAPIProductRevisionBasedResourcesEnabled = true;
     private static String devportalMode = APIConstants.DEVPORTAL_MODE_HYBRID;
     private static volatile boolean isRuntimeReadOnly = false;
 
@@ -231,6 +233,18 @@ public class APIManagerConfiguration {
     public static boolean isTokenRevocationEnabled() {
 
         return !tokenRevocationClassName.isEmpty();
+    }
+
+    /**
+     * Returns the fully qualified class name of the configured
+     * {@link org.wso2.carbon.apimgt.api.AIRequestPropertyEnricher} implementation, used to attach
+     * additional properties to outbound AI service request payloads.
+     *
+     * @return the configured class name, or {@code null} when none is configured
+     */
+    public String getAIRequestPropertyEnricherImpl() {
+
+        return aiRequestPropertyEnricherImpl;
     }
 
     public MarketplaceAssistantConfigurationDTO getMarketplaceAssistantConfigurationDto() {
@@ -618,6 +632,7 @@ public class APIManagerConfiguration {
                     OMElement password = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_PASSWORD));
                     OMElement databaseId = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_DATABASE_ID));
                     OMElement connectionTimeout = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_CONNECTION_TIMEOUT));
+                    OMElement socketTimeout = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_SOCKET_TIMEOUT));
                     OMElement isSslEnabled = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_IS_SSL_ENABLED));
 
                     if (host != null && StringUtils.isNotBlank(host.getText())) {
@@ -654,7 +669,15 @@ public class APIManagerConfiguration {
                             distributedThrottleConfig.setConnectionTimeout(Integer.parseInt(connectionTimeout.getText().trim()));
                         } catch (NumberFormatException e) {
                             log.warn("Invalid connectionTimeout value: " + connectionTimeout.getText(), e);
-                        }                    }
+                        }
+                    }
+                    if (socketTimeout != null) {
+                        try {
+                            distributedThrottleConfig.setSocketTimeout(Integer.parseInt(socketTimeout.getText().trim()));
+                        } catch (NumberFormatException e) {
+                            log.warn("Invalid socketTimeout value: " + socketTimeout.getText(), e);
+                        }
+                    }
                     if (isSslEnabled != null) {
                         distributedThrottleConfig.setSslEnabled(Boolean.parseBoolean(isSslEnabled.getText().trim()));
                     }
@@ -683,6 +706,8 @@ public class APIManagerConfiguration {
                                 distributedThrottleConfig.setTimeBetweenEvictionRunsMillis(Long.parseLong(propertyNode.getText()));
                             } else if (APIConstants.DISTRIBUTED_THROTTLE_NUM_TESTS_PER_EVICTION_RUNS.equals(propertyNode.getLocalName())) {
                                 distributedThrottleConfig.setNumTestsPerEvictionRun(Integer.parseInt(propertyNode.getText()));
+                            } else if (APIConstants.DISTRIBUTED_THROTTLE_MAX_WAIT_MILLIS.equals(propertyNode.getLocalName())) {
+                                distributedThrottleConfig.setMaxWaitMillis(Long.parseLong(propertyNode.getText()));
                             }
                         }
                     }
@@ -887,6 +912,8 @@ public class APIManagerConfiguration {
                 setAiConfiguration(element);
             } else if (APIConstants.AI.MCP.equals(localName)) {
                 setMCPConfigurations(element);
+            } else if (APIConstants.APIProductConfigs.API_PRODUCT.equals(localName)) {
+                setAPIProductConfigurations(element);
             } else if (APIConstants.TokenValidationConstants.TOKEN_VALIDATION_CONFIG.equals(localName)) {
                 setTokenValidation(element);
             } else if (APIConstants.ORG_BASED_ACCESS_CONTROL.equals(localName)) {
@@ -1024,6 +1051,12 @@ public class APIManagerConfiguration {
 
                         this.llmProviderConfigurationDTO.setType(type);
                         this.llmProviderConfigurationDTO.setProperties(propertiesMap);
+                    }
+                    if (APIConstants.AI.PROPERTY_ENRICHER_IMPL.equals(aiChildElement.getLocalName())) {
+                        String enricherImpl = aiChildElement.getText();
+                        if (StringUtils.isNotBlank(enricherImpl)) {
+                            this.aiRequestPropertyEnricherImpl = enricherImpl.trim();
+                        }
                     }
                     if (APIConstants.AI.VECTOR_DB_PROVIDER.equals(aiChildElement.getLocalName())) {
                         String type = aiChildElement.getAttributeValue(
@@ -3231,6 +3264,42 @@ public class APIManagerConfiguration {
     }
 
     /**
+     * Set API Product Configurations
+     *
+     * @param omElement XML Config
+     */
+    private void setAPIProductConfigurations(OMElement omElement) {
+
+        if (omElement == null) {
+            log.debug("API Product configuration element is null. Skipping configuration parsing.");
+            return;
+        }
+        OMElement revisionBasedResourcesElement = omElement.getFirstChildWithName(
+                new QName(APIConstants.APIProductConfigs.ENABLE_REVISION_BASED_RESOURCES));
+        if (revisionBasedResourcesElement != null && StringUtils.isNotBlank(revisionBasedResourcesElement.getText())) {
+            String revisionBasedResourcesValue = revisionBasedResourcesElement.getText().trim();
+            if (Boolean.TRUE.toString().equalsIgnoreCase(revisionBasedResourcesValue)
+                    || Boolean.FALSE.toString().equalsIgnoreCase(revisionBasedResourcesValue)) {
+                isAPIProductRevisionBasedResourcesEnabled = Boolean.parseBoolean(revisionBasedResourcesValue);
+            } else {
+                log.warn("Invalid value for " + APIConstants.APIProductConfigs.ENABLE_REVISION_BASED_RESOURCES
+                        + ". Using default: " + isAPIProductRevisionBasedResourcesEnabled);
+            }
+        }
+    }
+
+    /**
+     * Returns whether the resource level settings (rate limiting tier, auth scheme and scopes) of an API Product sent
+     * to the Gateway are taken only from the deployed revision of the API Product.
+     *
+     * @return true if revision based API Product resources are enabled, false otherwise.
+     */
+    public boolean isAPIProductRevisionBasedResourcesEnabled() {
+
+        return isAPIProductRevisionBasedResourcesEnabled;
+    }
+
+    /**
      * Set Devportal Mode
      *
      * @return Devportal mode.
@@ -3403,6 +3472,14 @@ public class APIManagerConfiguration {
             String dataSourceName = dataSource.getText();
             apimGovConfigurationDto.setDataSourceName(dataSourceName);
         }
+
+        // The governance configuration DTO is shared statically, so an absent element is set to false rather than
+        // left alone. Parsing then always reflects the file that was read, instead of whatever a previous parse
+        // happened to leave behind, and the feature stays off unless a deployment asks for it.
+        OMElement perPolicySeverityFiltering = omElement.getFirstChildWithName(
+                new QName(APIConstants.APIMGovernance.PER_POLICY_SEVERITY_FILTERING_ENABLED));
+        apimGovConfigurationDto.setPerPolicySeverityFilteringEnabled(perPolicySeverityFiltering != null
+                && Boolean.parseBoolean(perPolicySeverityFiltering.getText()));
 
         OMElement schedulerConfig = omElement
                 .getFirstChildWithName(new QName(APIConstants.APIMGovernance.SCHEDULER_CONFIG));

@@ -25,8 +25,8 @@ import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Application;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Event;
 
 import java.time.Instant;
-import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -45,6 +45,11 @@ import static org.wso2.carbon.apimgt.common.analytics.Constants.USERNAME_PROP_TY
  */
 public abstract class CommonRequestDataCollector extends AbstractRequestDataCollector {
     private static final Log log = LogFactory.getLog(CommonRequestDataCollector.class);
+
+    // Fixed-width, millisecond-precision ISO-8601 in UTC, e.g. "2026-03-27T09:53:59.996Z".
+    // DateTimeFormatter is immutable and thread-safe, unlike SimpleDateFormat.
+    private static final DateTimeFormatter ISO_8601_MILLIS = DateTimeFormatter
+            .ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").withZone(ZoneOffset.UTC);
 
     public CommonRequestDataCollector(AnalyticsDataProvider provider) {
         super(provider);
@@ -69,9 +74,7 @@ public abstract class CommonRequestDataCollector extends AbstractRequestDataColl
     }
 
     public static String getTimeInISO(long time) {
-        OffsetDateTime offsetDateTime = OffsetDateTime
-                .ofInstant(Instant.ofEpochMilli(time), ZoneOffset.UTC.normalized());
-        return offsetDateTime.toString();
+        return ISO_8601_MILLIS.format(Instant.ofEpochMilli(time));
     }
 
     /**

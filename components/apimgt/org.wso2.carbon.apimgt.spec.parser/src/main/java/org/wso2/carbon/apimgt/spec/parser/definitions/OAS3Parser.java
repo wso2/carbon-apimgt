@@ -962,12 +962,18 @@ public class OAS3Parser extends APIDefinition {
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
         String processedDefinition = OASParserUtil.preprocessYamlWithLimit(apiDefinition, parserOptions);
         OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
-        ParseOptions options = new ParseOptions();
+        ParseOptions options = parserOptions != null ? convertOptionsToParseOptions(parserOptions)
+                : new ParseOptions();
         options.setResolve(true);
         SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(processedDefinition, null, options);
         if (CollectionUtils.isNotEmpty(parseAttemptForV3.getMessages())) {
             validationResponse.setValid(false);
             for (String message : parseAttemptForV3.getMessages()) {
+                if (parserOptions != null && parserOptions.isNetworkAccessControlEnabled()
+                        && OASParserUtil.isUntrustedUrlInDefinition(message)) {
+                    throw new APIManagementException(ExceptionCodes.UNTRUSTED_URL_IN_DEFINITION.getErrorMessage(),
+                            ExceptionCodes.UNTRUSTED_URL_IN_DEFINITION);
+                }
                 OASParserUtil.addErrorToValidationResponse(validationResponse, message);
                 if (message.contains(APISpecParserConstants.OPENAPI_IS_MISSING_MSG)) {
                     ErrorItem errorItem = new ErrorItem();
@@ -2033,9 +2039,14 @@ public class OAS3Parser extends APIDefinition {
         return parseAttemptForV3.getOpenAPI();
     }
 
-    private ParseOptions convertOptionsToParseOptions(OASParserOptions options) {
+    ParseOptions convertOptionsToParseOptions(OASParserOptions options) {
         ParseOptions parserOptions = new ParseOptions();
         parserOptions.setExplicitStyleAndExplode(options.isExplicitStyleAndExplode());
+        // Enable swagger-parser's built-in Safe URL Resolver for embedded remote $refs only when a network
+        // access-control policy is configured; otherwise resolution stays unrestricted for backwards compatibility.
+        parserOptions.setSafelyResolveURL(options.isNetworkAccessControlEnabled());
+        parserOptions.setRemoteRefAllowList(options.getRemoteRefAllowList());
+        parserOptions.setRemoteRefBlockList(options.getRemoteRefBlockList());
         return parserOptions;
     }
 
@@ -2861,10 +2872,17 @@ public class OAS3Parser extends APIDefinition {
                 continue;
             }
 
+            // Resolve each tool against its own parse of the definition. Resolving a schema writes
+            // the expanded content back onto the components it walks, so sharing one parsed
+            // definition would let the first tool's resolution change what the later ones see: a
+            // tool whose body is a schema an earlier tool reached through a circular reference would
+            // inherit that truncation instead of expanding it.
+            OpenAPI toolDefinition = getOpenAPI(backendApiDefinition);
+            mergePathParametersIntoOperations(toolDefinition);
             OperationMatch match =
-                    findMatchingOperation(backendDefinition, backendOperation.getTarget(), backendOperation.getVerb());
+                    findMatchingOperation(toolDefinition, backendOperation.getTarget(), backendOperation.getVerb());
             if (match != null) {
-                URITemplate toolTemplate = populateURITemplate(template, match, backendDefinition, backendId,
+                URITemplate toolTemplate = populateURITemplate(template, match, toolDefinition, backendId,
                         refApiId, true);
                 if (!tools.add(toolTemplate.getUriTemplate())) {
                     log.error("Duplicate MCP tool detected: " + toolTemplate.getUriTemplate());
@@ -2912,11 +2930,18 @@ public class OAS3Parser extends APIDefinition {
                 continue;
             }
 
-            OperationMatch match = findMatchingOperation(backendDefinition, backendOperation.getTarget(),
+            // Resolve each tool against its own parse of the definition. Resolving a schema writes
+            // the expanded content back onto the components it walks, so sharing one parsed
+            // definition would let the first tool's resolution change what the later ones see: a
+            // tool whose body is a schema an earlier tool reached through a circular reference would
+            // inherit that truncation instead of expanding it.
+            OpenAPI toolDefinition = getOpenAPI(backendApiDefinition);
+            mergePathParametersIntoOperations(toolDefinition);
+            OperationMatch match = findMatchingOperation(toolDefinition, backendOperation.getTarget(),
                     backendOperation.getVerb());
 
             if (match != null) {
-                URITemplate populated = populateURITemplate(template, match, backendDefinition, backendId, refApiId,
+                URITemplate populated = populateURITemplate(template, match, toolDefinition, backendId, refApiId,
                         false);
                 if (!tools.add(populated.getUriTemplate())) {
                     log.error("Duplicate MCP tool detected: " + populated.getUriTemplate());
@@ -3187,7 +3212,7 @@ public class OAS3Parser extends APIDefinition {
 
                 String name = param.getIn() + "_" + param.getName();
                 Map<String, Object> paramSchema = new LinkedHashMap<>();
-                Schema<?> schema = resolveSchema(param.getSchema(), openAPI);
+                Schema<?> schema = resolveSchema(param.getSchema(), openAPI, new HashSet<>());
 
                 if (schema != null) {
                     paramSchema.put(APISpecParserConstants.TYPE, schema.getType());
@@ -3222,7 +3247,7 @@ public class OAS3Parser extends APIDefinition {
                 Schema<?> rawSchema =
                         requestBody.getContent().get(APISpecParserConstants.APPLICATION_JSON_MEDIA_TYPE).getSchema();
 
-                Schema<?> bodySchema = resolveSchema(rawSchema, openAPI);
+                Schema<?> bodySchema = resolveSchema(rawSchema, openAPI, new HashSet<>());
 
                 Map<String, Object> requestBodyNode = new LinkedHashMap<>();
                 requestBodyNode.put(APISpecParserConstants.TYPE, APISpecParserConstants.OBJECT);
@@ -3251,43 +3276,86 @@ public class OAS3Parser extends APIDefinition {
 
     /**
      * Resolves a schema by recursively resolving $ref, allOf, oneOf, anyOf, and not properties.
-     * Returns the resolved Schema object.
-     *
-     * @param schema   Schema to resolve
-     * @param openAPI  OpenAPI definition to resolve against
-     * @return Resolved Schema object
-     */
-    private Schema<?> resolveSchema(Schema<?> schema, OpenAPI openAPI) {
-
-        return resolveSchema(schema, openAPI, new HashSet<>());
-    }
-
-    /**
-     * Resolves a schema by recursively resolving $ref, allOf, oneOf, anyOf, and not properties.
-     * This version tracks visited references to prevent circular references.
+     * This version tracks the references already visited on the current resolution path so that a
+     * circular reference terminates instead of recursing until the stack overflows.
+     * <p>
+     * The visited set is the path currently being walked, not everything seen so far: each reference
+     * is removed again as the recursion unwinds, so a schema referenced from two unrelated places is
+     * still expanded at both. Every nested call must be given this same set - starting a fresh one
+     * loses the path, which is what made a cycle through a schema's properties recurse forever.
      *
      * @param schema      Schema to resolve
      * @param openAPI     OpenAPI definition to resolve against
-     * @param visitedRefs Set of visited reference names to detect circular references
+     * @param visitedRefs Set of visited reference keys on the current resolution path
      * @return Resolved Schema object
      */
     private Schema<?> resolveSchema(Schema<?> schema, OpenAPI openAPI, Set<String> visitedRefs) {
 
         if (schema == null) return null;
 
+        String heldRefKey = null;
         if (schema.get$ref() != null) {
-            schema = resolveComponentRef(schema.get$ref(), openAPI, visitedRefs, Schema.class);
+            Schema<?> reference = schema;
+            String ref = schema.get$ref();
+            String refKey = componentRefKey(ref);
+            // refKey is "<category>:<name>"; the component name alone reads better in the emitted
+            // description than the whole JSON Pointer.
+            String name = refKey == null ? ref : refKey.substring(refKey.indexOf(':') + 1);
+            if (refKey != null && visitedRefs.contains(refKey)) {
+                log.warn("Circular reference truncated while resolving schema reference: " + ref);
+                return unexpandedObjectSchema(reference, name);
+            }
+            schema = resolveComponentRef(ref, openAPI, visitedRefs, Schema.class);
+            if (schema == null) {
+                // resolveComponentRef returns null both for a chain of aliases that closes on
+                // itself and for one that ends at a component the definition never declares. Only a
+                // cycle is described as an object, matching how every other cycle is rendered; an
+                // unresolved reference keeps its existing behaviour and its field is dropped.
+                if (closesCycle(ref, openAPI, visitedRefs)) {
+                    log.warn("Circular reference truncated while resolving schema reference: " + ref);
+                    return unexpandedObjectSchema(reference, name);
+                }
+                return null;
+            }
+            // resolveComponentRef releases the reference as soon as its lookup finishes. Hold it
+            // again for the whole traversal of the resolved schema's body, otherwise a schema that
+            // refers back to itself is looked up afresh at every level and never terminates.
+            if (refKey != null) {
+                visitedRefs.add(refKey);
+                heldRefKey = refKey;
+            }
         }
-        if (schema == null) {
-            return null;
+        try {
+            return resolveSchemaBody(schema, openAPI, visitedRefs);
+        } finally {
+            if (heldRefKey != null) {
+                visitedRefs.remove(heldRefKey);
+            }
         }
+    }
+
+    /**
+     * Resolves the composition keywords, properties, items and additional properties of a schema
+     * that has already been dereferenced. Split out of {@link #resolveSchema(Schema, OpenAPI, Set)}
+     * so that the reference the schema came from stays on the visited path for the whole traversal.
+     *
+     * @param schema      dereferenced schema whose body should be resolved
+     * @param openAPI     OpenAPI definition to resolve against
+     * @param visitedRefs Set of visited reference keys on the current resolution path
+     * @return Resolved Schema object
+     */
+    private Schema<?> resolveSchemaBody(Schema<?> schema, OpenAPI openAPI, Set<String> visitedRefs) {
+
         // Resolve allOf
         if (schema.getAllOf() != null && !schema.getAllOf().isEmpty()) {
             Schema<?> merged = new ObjectSchema();
             Map<String, Schema> mergedProps = new LinkedHashMap<>();
             List<String> mergedRequired = new ArrayList<>();
             for (Schema<?> part : schema.getAllOf()) {
-                Schema<?> resolved = resolveSchema(part, openAPI);
+                Schema<?> resolved = resolveSchema(part, openAPI, visitedRefs);
+                if (resolved == null) {
+                    continue;
+                }
                 if (resolved.getProperties() != null) mergedProps.putAll(resolved.getProperties());
                 if (resolved.getRequired() != null) mergedRequired.addAll(resolved.getRequired());
             }
@@ -3299,39 +3367,132 @@ public class OAS3Parser extends APIDefinition {
         // oneOf / anyOf
         if (schema.getOneOf() != null) {
             schema.setOneOf(schema.getOneOf().stream()
-                    .map(s -> resolveSchema(s, openAPI))
+                    .map(s -> resolveSchema(s, openAPI, visitedRefs))
                     .collect(Collectors.toList()));
         }
 
         if (schema.getAnyOf() != null) {
             schema.setAnyOf(schema.getAnyOf().stream()
-                    .map(s -> resolveSchema(s, openAPI))
+                    .map(s -> resolveSchema(s, openAPI, visitedRefs))
                     .collect(Collectors.toList()));
         }
         if (schema.getNot() != null) {
-            schema.setNot(resolveSchema(schema.getNot(), openAPI));
+            schema.setNot(resolveSchema(schema.getNot(), openAPI, visitedRefs));
         }
 
         // Recursively resolve properties
         if (schema.getProperties() != null) {
             Map<String, Schema> resolvedProps = new LinkedHashMap<>();
             for (Map.Entry<String, Schema> entry : schema.getProperties().entrySet()) {
-                resolvedProps.put(entry.getKey(), resolveSchema(entry.getValue(), openAPI));
+                resolvedProps.put(entry.getKey(), resolveSchema(entry.getValue(), openAPI, visitedRefs));
             }
             schema.setProperties(resolvedProps);
         }
 
         // Array items
         if ("array".equals(schema.getType()) && schema.getItems() != null) {
-            schema.setItems(resolveSchema(schema.getItems(), openAPI));
+            schema.setItems(resolveSchema(schema.getItems(), openAPI, visitedRefs));
         }
 
         // Additional properties
         if (schema.getAdditionalProperties() instanceof Schema) {
-            schema.setAdditionalProperties(resolveSchema((Schema<?>) schema.getAdditionalProperties(), openAPI));
+            schema.setAdditionalProperties(
+                    resolveSchema((Schema<?>) schema.getAdditionalProperties(), openAPI, visitedRefs));
         }
 
         return schema;
+    }
+
+    /**
+     * Builds the schema emitted in place of a reference that closes a circular chain. An object with
+     * no declared properties states what is true of it - the field takes an object, whose shape
+     * cannot be written out without recursing forever. Dropping the field instead would claim the
+     * API does not accept it, and returning the reference unresolved would leave a $ref no consumer
+     * can follow, because the generated schema carries no components section.
+     *
+     * @param original the reference that could not be expanded
+     * @param name     the name of the component it points at
+     * @return an object schema standing in for the unexpanded reference
+     */
+    private Schema<?> unexpandedObjectSchema(Schema<?> original, String name) {
+        ObjectSchema placeholder = new ObjectSchema();
+        if (original != null && StringUtils.isNotBlank(original.getDescription())) {
+            placeholder.setDescription(original.getDescription());
+        } else {
+            placeholder.setDescription("Circular reference to '" + name
+                    + "'; nested properties are omitted.");
+        }
+        return placeholder;
+    }
+
+    /**
+     * Reports whether following this reference revisits a component that is already being resolved.
+     * Used to tell a reference that failed because its chain of aliases closes on itself from one
+     * that simply ends at a component the definition never declares - resolveComponentRef returns
+     * null for both, but only the first should be described rather than dropped.
+     *
+     * @param ref         the reference to follow
+     * @param openAPI     OpenAPI definition to resolve against
+     * @param visitedRefs references already on the current resolution path
+     * @return true if following the reference closes a cycle
+     */
+    private boolean closesCycle(String ref, OpenAPI openAPI, Set<String> visitedRefs) {
+        Set<String> chain = new HashSet<>(visitedRefs);
+        String current = ref;
+        while (current != null) {
+            String key = componentRefKey(current);
+            if (key == null) {
+                // Not a component reference this parser follows.
+                return false;
+            }
+            if (!chain.add(key)) {
+                // Already on the chain, so the reference closes a cycle.
+                return true;
+            }
+            Schema<?> target = declaredSchema(key, openAPI);
+            if (target == null) {
+                // The chain ends at a component the definition does not declare.
+                return false;
+            }
+            current = target.get$ref();
+        }
+        return false;
+    }
+
+    /**
+     * Looks up the schema a tracking key names, or null if the definition declares no such schema.
+     *
+     * @param refKey  key produced by {@link #componentRefKey(String)}
+     * @param openAPI OpenAPI definition to look in
+     * @return the declared schema, or null
+     */
+    private Schema<?> declaredSchema(String refKey, OpenAPI openAPI) {
+        if (refKey == null || !refKey.startsWith(APISpecParserConstants.SCHEMAS + ":")
+                || openAPI == null || openAPI.getComponents() == null
+                || openAPI.getComponents().getSchemas() == null) {
+            return null;
+        }
+        return openAPI.getComponents().getSchemas().get(refKey.substring(refKey.indexOf(':') + 1));
+    }
+
+    /**
+     * Derives the key used to track a component reference on the current resolution path. Kept in
+     * one place so that the cycle check in {@link #resolveSchema(Schema, OpenAPI, Set)} and the one
+     * in {@link #resolveComponentRef(String, OpenAPI, Set, Class)} always agree.
+     *
+     * @param ref Reference string (e.g. "#/components/schemas/ComponentName")
+     * @return the tracking key, or null if this is not a resolvable component reference
+     */
+    private String componentRefKey(String ref) {
+        if (ref == null || !ref.startsWith("#/components/")) {
+            return null;
+        }
+        String[] parts = ref.split("/");
+        if (parts.length < 4) {
+            return null;
+        }
+        String name = parts[3].replace("~1", "/").replace("~0", "~"); // JSON Pointer unescape
+        return parts[2] + ":" + name;
     }
 
     /**
@@ -3360,9 +3521,13 @@ public class OAS3Parser extends APIDefinition {
             log.warn("Malformed component reference: " + ref);
             return null;
         }
-        String category = parts[2];
-        String name = parts[3].replace("~1", "/").replace("~0", "~"); // JSON Pointer unescape
-        String refKey = category + ":" + name;
+        // Past both guards above componentRefKey cannot return null - they are exactly its own
+        // conditions - so category and name are derived from the very key the cycle check uses,
+        // and the JSON Pointer unescape rule stays in one place.
+        String refKey = componentRefKey(ref);
+        int separator = refKey.indexOf(':');
+        String category = refKey.substring(0, separator);
+        String name = refKey.substring(separator + 1);
         if (visitedRefs.contains(refKey)) {
             if (log.isDebugEnabled()) {
                 log.debug("Circular reference detected: " + refKey);
@@ -3370,38 +3535,45 @@ public class OAS3Parser extends APIDefinition {
             return null;
         }
         visitedRefs.add(refKey);
-        Object resolved = null;
-        if (openAPI == null || openAPI.getComponents() == null) {
-            return null;
-        }
-        switch (category) {
-            case APISpecParserConstants.SCHEMAS:
-                resolved = openAPI.getComponents().getSchemas() != null ?
-                        openAPI.getComponents().getSchemas().get(name) : null;
-                break;
-            case APISpecParserConstants.REQUEST_BODIES:
-                resolved = openAPI.getComponents().getRequestBodies() != null ?
-                        openAPI.getComponents().getRequestBodies().get(name) : null;
-                break;
-            case APISpecParserConstants.PARAMETERS:
-                resolved = openAPI.getComponents().getParameters() != null ?
-                        openAPI.getComponents().getParameters().get(name) : null;
-                break;
-            default:
+        // Removed again on the way out so the set stays the path currently being walked. Keeping it
+        // would leave a component unresolved the second time it is referenced from an unrelated
+        // place - for instance an allOf whose two branches both compose the same schema.
+        try {
+            Object resolved = null;
+            if (openAPI == null || openAPI.getComponents() == null) {
                 return null;
+            }
+            switch (category) {
+                case APISpecParserConstants.SCHEMAS:
+                    resolved = openAPI.getComponents().getSchemas() != null ?
+                            openAPI.getComponents().getSchemas().get(name) : null;
+                    break;
+                case APISpecParserConstants.REQUEST_BODIES:
+                    resolved = openAPI.getComponents().getRequestBodies() != null ?
+                            openAPI.getComponents().getRequestBodies().get(name) : null;
+                    break;
+                case APISpecParserConstants.PARAMETERS:
+                    resolved = openAPI.getComponents().getParameters() != null ?
+                            openAPI.getComponents().getParameters().get(name) : null;
+                    break;
+                default:
+                    return null;
+            }
+            if (resolved == null) {
+                log.warn("Unknown component category: " + category + " in reference: " + ref);
+                return null;
+            }
+            if (resolved instanceof Schema && ((Schema<?>) resolved).get$ref() != null) {
+                return (T) resolveComponentRef(((Schema<?>) resolved).get$ref(), openAPI, visitedRefs, expectedType);
+            } else if (resolved instanceof RequestBody && ((RequestBody) resolved).get$ref() != null) {
+                return (T) resolveComponentRef(((RequestBody) resolved).get$ref(), openAPI, visitedRefs, expectedType);
+            } else if (resolved instanceof Parameter && ((Parameter) resolved).get$ref() != null) {
+                return (T) resolveComponentRef(((Parameter) resolved).get$ref(), openAPI, visitedRefs, expectedType);
+            }
+            return expectedType.isInstance(resolved) ? expectedType.cast(resolved) : null;
+        } finally {
+            visitedRefs.remove(refKey);
         }
-        if (resolved == null) {
-            log.warn("Unknown component category: " + category + " in reference: " + ref);
-            return null;
-        }
-        if (resolved instanceof Schema && ((Schema<?>) resolved).get$ref() != null) {
-            return (T) resolveComponentRef(((Schema<?>) resolved).get$ref(), openAPI, visitedRefs, expectedType);
-        } else if (resolved instanceof RequestBody && ((RequestBody) resolved).get$ref() != null) {
-            return (T) resolveComponentRef(((RequestBody) resolved).get$ref(), openAPI, visitedRefs, expectedType);
-        } else if (resolved instanceof Parameter && ((Parameter) resolved).get$ref() != null) {
-            return (T) resolveComponentRef(((Parameter) resolved).get$ref(), openAPI, visitedRefs, expectedType);
-        }
-        return expectedType.isInstance(resolved) ? expectedType.cast(resolved) : null;
     }
 
     /**
@@ -3488,8 +3660,7 @@ public class OAS3Parser extends APIDefinition {
 
     /**
      * Adds a default HTTP GET resource to the given {@link OpenAPI} definition.
-     * This resource is configured with application or user-level token authentication and unlimited subscription
-     * policy.
+     * This resource is configured with no authentication and unlimited subscription policy.
      *
      * @param openAPI the {@link OpenAPI} object to which the resource will be added
      * @param path    the resource path to add
@@ -3497,7 +3668,7 @@ public class OAS3Parser extends APIDefinition {
     private void addDefaultGetPathToSwagger(OpenAPI openAPI, String path) {
 
         SwaggerData.Resource resource = new SwaggerData.Resource();
-        resource.setAuthType(APISpecParserConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
+        resource.setAuthType(APISpecParserConstants.AUTH_NO_AUTHENTICATION);
         resource.setPolicy(APISpecParserConstants.DEFAULT_SUB_POLICY_UNLIMITED);
         resource.setPath(path);
         resource.setVerb(APISpecParserConstants.HTTP_GET);

@@ -130,8 +130,7 @@ public class SettingsMappingUtil {
         settingsDTO.setPasswordPolicyMaxLength(passwordPolicyMaxLength);
         settingsDTO.setApiChatEnabled(config.getApiChatConfigurationDto().isEnabled());
         settingsDTO.setMarketplaceAssistantEnabled(config.getMarketplaceAssistantConfigurationDto().isEnabled());
-        settingsDTO.setAiAuthTokenProvided(config.getApiChatConfigurationDto().isAuthTokenProvided() ||
-                config.getApiChatConfigurationDto().isKeyProvided());
+        settingsDTO.setAiAuthTokenProvided(isAiCredentialProvided(config));
         settingsDTO.setDevportalMode(
                 SettingsDTO.DevportalModeEnum.fromValue(config.getDevportalMode()));
 
@@ -156,6 +155,32 @@ public class SettingsMappingUtil {
             }
         }
         return settingsDTO;
+    }
+
+    /**
+     * Whether a credential is configured for any AI feature the Developer Portal serves.
+     * <p>
+     * All AI features share the same {@code apim.ai.key} and {@code apim.ai.token}, so
+     * this answers "is an AI credential configured at all" rather than anything about a
+     * particular feature. Whether an individual feature is usable is decided by its own
+     * enabled flag, which the caller reports separately.
+     * <p>
+     * Both features the Developer Portal serves have to be consulted because the
+     * {@code Enabled} value of a feature gates the parsing of its credential: turning
+     * one feature off leaves its configuration DTO with no key and no token. Reading
+     * this from a single feature therefore reported "no credential" for both of them as
+     * soon as that one feature was disabled, which disabled the Developer Portal AI
+     * components even though a credential was configured.
+     *
+     * @param config API Manager configuration
+     * @return true when API Chat or the Marketplace Assistant holds a key or an auth token
+     */
+    private boolean isAiCredentialProvided(APIManagerConfiguration config) {
+
+        return config.getApiChatConfigurationDto().isKeyProvided()
+                || config.getApiChatConfigurationDto().isAuthTokenProvided()
+                || config.getMarketplaceAssistantConfigurationDto().isKeyProvided()
+                || config.getMarketplaceAssistantConfigurationDto().isAuthTokenProvided();
     }
 
     private List<String> GetScopeList() throws APIManagementException {

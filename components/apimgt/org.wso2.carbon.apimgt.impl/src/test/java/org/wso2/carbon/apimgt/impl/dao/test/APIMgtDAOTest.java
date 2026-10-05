@@ -399,6 +399,61 @@ public class APIMgtDAOTest {
     }
 
     @Test
+    public void testGetSubscribedAPIsAndAPIProductsByApplication() throws Exception {
+        Subscriber subscriber = new Subscriber("sub_apiproduct_user");
+        subscriber.setEmail("apiproductuser@wso2.com");
+        subscriber.setSubscribedDate(new Date());
+        subscriber.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+        apiMgtDAO.addSubscriber(subscriber, null);
+
+        Application application = new Application("APIPRODUCT_SUB_APP", subscriber);
+        int applicationId = apiMgtDAO.addApplication(application, subscriber.getName(), "testOrg");
+        application.setId(applicationId);
+
+        APIIdentifier apiIdentifier = new APIIdentifier("subProductProvider", "SubProductTestAPI", "V1.0.0");
+        API api = new API(apiIdentifier);
+        api.setContext("/subProductTestApi");
+        api.setContextTemplate("/subProductTestApi/{version}");
+        api.setVersionTimestamp(String.valueOf(System.currentTimeMillis()));
+        api.getId().setId(apiMgtDAO.addAPI(api, MultitenantConstants.SUPER_TENANT_ID, "testOrg"));
+        apiMgtDAO.addSubscription(new ApiTypeWrapper(api), application,
+                APIConstants.SubscriptionStatus.UNBLOCKED, subscriber.getName());
+
+        APIProductIdentifier productIdentifier = new APIProductIdentifier("subProductProvider",
+                "SubProductTestProduct", "V1.0.0");
+        APIProduct apiProduct = new APIProduct(productIdentifier);
+        apiProduct.setContext("/subProductTestProduct");
+        apiProduct.setContextTemplate("/subProductTestProduct/{version}");
+        apiProduct.setVersionTimestamp(String.valueOf(System.currentTimeMillis()));
+        apiProduct.setUuid(UUID.randomUUID().toString());
+        apiMgtDAO.addAPIProduct(apiProduct, "testOrg");
+        // addAPIProduct() does not write the generated id back onto the APIProduct (unlike addAPI()), so it must
+        // be looked up explicitly; AM_API_PRODUCT rows live in the same AM_API table keyed by uuid.
+        apiProduct.setProductId(apiMgtDAO.getAPIID(apiProduct.getUuid()));
+        apiMgtDAO.addSubscription(new ApiTypeWrapper(apiProduct), application,
+                APIConstants.SubscriptionStatus.UNBLOCKED, subscriber.getName());
+
+        Set<SubscribedAPI> result = apiMgtDAO.getSubscribedAPIsAndAPIProductsByApplication(application);
+        assertEquals(2, result.size());
+
+        boolean foundApi = false;
+        boolean foundProduct = false;
+        for (SubscribedAPI subscribedAPI : result) {
+            if (subscribedAPI.getAPIIdentifier() != null) {
+                assertEquals("SubProductTestAPI", subscribedAPI.getAPIIdentifier().getApiName());
+                assertNull(subscribedAPI.getProductId());
+                foundApi = true;
+            } else {
+                assertNotNull(subscribedAPI.getProductId());
+                assertEquals("SubProductTestProduct", subscribedAPI.getProductId().getName());
+                foundProduct = true;
+            }
+        }
+        assertTrue("Expected a subscription backed by a plain API", foundApi);
+        assertTrue("Expected a subscription backed by an API Product", foundProduct);
+    }
+
+    @Test
     public void testForwardingBlockedAndProdOnlyBlockedSubscriptionsToNewAPIVersion() throws APIManagementException {
         List<API> oldApiVersionList = new ArrayList<>();
 

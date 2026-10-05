@@ -84,11 +84,29 @@ public class Constants {
     public static final String CERTIFICATE_COMMON_NAME = "commonName";
     public static final String NOT_APPLICABLE_VALUE = "N/A";
     public static final String SEND_HEADER = "send_headers";
-    public static final String REQUEST_HEADERS= "requestHeaders";
-    public static final String RESPONSE_HEADERS= "responseHeaders";
+    public static final String REQUEST_HEADERS = "requestHeaders";
+    public static final String RESPONSE_HEADERS = "responseHeaders";
     public static final String RESPONSE_HEADER_MASK = "response_headers";
     public static final String REQUEST_HEADER_MASK = "request_headers";
     public static final String MASK_VALUE = "*****";
+
+    public static final String SEND_PAYLOAD = "send_payloads";
+    public static final String REQUEST_BODY = "requestBody";
+    public static final String RESPONSE_BODY = "responseBody";
+    public static final String REQUEST_BODY_TRANSFER_ENCODING = "requestBodyTransferEncoding";
+    public static final String RESPONSE_BODY_TRANSFER_ENCODING = "responseBodyTransferEncoding";
+    public static final String TRANSFER_ENCODING_BASE64 = "base64";
+    public static final String PAYLOAD_SIZE_LIMIT = "payload_size_limit";
+    public static final int DEFAULT_PAYLOAD_SIZE_LIMIT_BYTES = 100000;
+    public static final String CAPTURE_PAYLOADS_WITHOUT_CONTENT_LENGTH = "capture_payloads_without_content_length";
+    public static final String REQUEST_CONTENT_TYPE = "requestContentType";
+    // Internal message-context property keys used to stash the captured request body between the
+    // request-out flow and event collection. Namespaced (apim.analytics.*) like every other analytics
+    // message-context property so a user policy's <property name="requestBody"/> cannot collide with
+    // them. Distinct from the wire keys above (REQUEST_BODY / REQUEST_BODY_TRANSFER_ENCODING), which
+    // remain the publisher contract in the event properties map.
+    public static final String REQUEST_BODY_PROPERTY = "apim.analytics.request.body";
+    public static final String REQUEST_BODY_TRANSFER_ENCODING_PROPERTY = "apim.analytics.request.body.encoding";
 
     public static final String AI_METADATA = "aiMetadata";
     public static final String AI_VENDOR_NAME = "vendorName";

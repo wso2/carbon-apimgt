@@ -157,6 +157,7 @@ paths:
             Please note that you need to use encoded URL (URL encoding) if you are using a client which does not support URL encoding (such as curl)
           schema:
             type: string
+        - $ref: '#/components/parameters/expandProperties'
         - $ref: '#/components/parameters/If-None-Match'
         - $ref: '#/components/parameters/Accept'
       responses:
@@ -7282,6 +7283,21 @@ paths:
           schema:
             type: boolean
             default: false
+        - name: all
+          in: query
+          description: |
+            Export all APIs and their revisions
+          schema:
+            type: boolean
+            default: false
+        - name: allRevisions
+          in: query
+          description: |
+            Export all revisions of the specified API.
+          schema:
+            type: boolean
+            default: false
+        - $ref: '#/components/parameters/requestedTenant'
       responses:
         200:
           description: |
@@ -15420,7 +15436,7 @@ components:
           type: string
           example: Pizza Shack API Product
         context:
-          maxLength: 60
+          maxLength: 232
           minLength: 1
           type: string
           example: pizzaproduct
@@ -18562,6 +18578,12 @@ components:
           type: boolean
           description: This indicates whether the MCP support is enabled or not.
           default: true
+        perPolicySeverityFilteringEnabled:
+          type: boolean
+          description: |
+            Is per policy compliance affecting severity filtering enabled for governance policies. When enabled a
+            policy can declare which rule severities affect its compliance verdict.
+          example: false
         customProperties:
           type: array
           items:
@@ -19363,6 +19385,14 @@ components:
       schema:
         type: boolean
         default : false
+    expandProperties:
+      name: expandProperties
+      in: query
+      description: |
+        Defines whether the additionalProperties and additionalPropertiesMap of each API should be included in the response.
+      schema:
+        type: boolean
+        default: false
     apiId:
       name: apiId
       in: path

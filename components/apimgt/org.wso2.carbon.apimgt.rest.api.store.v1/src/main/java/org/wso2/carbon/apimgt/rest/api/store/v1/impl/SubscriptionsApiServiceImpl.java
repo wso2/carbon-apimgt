@@ -72,6 +72,9 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
 
     private static final Log log = LogFactory.getLog(SubscriptionsApiServiceImpl.class);
 
+    // Value of the "match" query parameter that requires apiId and applicationId to both match.
+    private static final String MATCH_ALL = "ALL";
+
     /**
      * Get all subscriptions that are of user or shared subscriptions of the user's group.
      * <p/>
@@ -86,7 +89,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
      * @return matched subscriptions as a list of SubscriptionDTOs
      */
     @Override
-    public Response subscriptionsGet(String apiId, String applicationId, String groupId,
+    public Response subscriptionsGet(String apiId, String applicationId, String match, String groupId,
                                      String xWSO2Tenant, Integer offset, Integer limit, String ifNoneMatch,
                                      MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
@@ -106,7 +109,37 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
             SubscriptionListDTO subscriptionListDTO;
-            if (!StringUtils.isEmpty(apiId)) {
+            if (!StringUtils.isEmpty(apiId) && !StringUtils.isEmpty(applicationId)
+                    && MATCH_ALL.equalsIgnoreCase(match)) {
+                Application application = apiConsumer.getApplicationByUUID(applicationId);
+
+                if (application == null) {
+                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                    return null;
+                }
+
+                if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                }
+
+                int total = apiConsumer.getSubscriptionCount(subscriber, application.getName(), groupId);
+                subscriptions = apiConsumer.getPaginatedSubscribedAPIsByApplication(application, 0, total,
+                        organization);
+                for (SubscribedAPI subscribedAPI : subscriptions) {
+                    if (subscribedAPI.getIdentifier() != null
+                            && apiId.equals(subscribedAPI.getIdentifier().getUUID())) {
+                        subscribedAPIList.add(subscribedAPI);
+                        break;
+                    }
+                }
+
+                subscriptionListDTO = SubscriptionMappingUtil.fromSubscriptionListToDTO(subscribedAPIList, limit,
+                        offset, organization);
+                SubscriptionMappingUtil.setPaginationParams(subscriptionListDTO, apiId, applicationId, groupId, limit,
+                        offset, subscribedAPIList.size());
+                return Response.ok().entity(subscriptionListDTO).build();
+
+            } else if (!StringUtils.isEmpty(apiId)) {
                 // todo : FIX properly, need to done properly with backend side pagination.
                 // todo : getSubscribedIdentifiers() method should NOT be used. Appears to be too slow.
 

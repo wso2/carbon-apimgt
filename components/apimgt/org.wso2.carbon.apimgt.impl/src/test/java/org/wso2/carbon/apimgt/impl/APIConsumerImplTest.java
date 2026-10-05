@@ -33,6 +33,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.reflect.Whitebox;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.WorkflowStatus;
@@ -40,6 +41,7 @@ import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIRating;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
@@ -60,6 +62,7 @@ import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
 import org.wso2.carbon.apimgt.impl.workflow.AbstractApplicationRegistrationWorkflowExecutor;
@@ -455,8 +458,46 @@ public class APIConsumerImplTest {
         assertNotNull(apiConsumer.getSubscribedAPIs(subscriber, "testApplication","testID"));
     }
 
+    @Test
+    public void testSendApplicationDeletionEventForApiAndApiProductSubscriptions() throws Exception {
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
 
+        Subscriber subscriber = new Subscriber("productSubscriber");
+        Application application = new Application("APIPRODUCT_SUB_APP", subscriber);
+        application.setId(1);
+        application.setUUID(UUID.randomUUID().toString());
+        Tier tier = new Tier("Gold");
 
+        APIIdentifier apiIdentifier = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
+        SubscribedAPI apiSubscription = new SubscribedAPI(subscriber, apiIdentifier);
+        apiSubscription.setApplication(application);
+        apiSubscription.setTier(tier);
+        apiSubscription.setSubscriptionId(1);
+        apiSubscription.setUUID(UUID.randomUUID().toString());
+
+        APIProductIdentifier productIdentifier = new APIProductIdentifier(API_PROVIDER, "SampleProduct",
+                SAMPLE_API_VERSION);
+        SubscribedAPI productSubscription = new SubscribedAPI(subscriber, productIdentifier);
+        productSubscription.setApplication(application);
+        productSubscription.setTier(tier);
+        productSubscription.setSubscriptionId(2);
+        productSubscription.setUUID(UUID.randomUUID().toString());
+
+        // Regression guard for the API Product SUBSCRIPTIONS_DELETE fix: previously this set would only ever
+        // contain plain-API SubscribedAPI entries; now it also carries API Product ones. This must not NPE
+        // (subscribedAPI.getIdentifier(), not the API-only getAPIIdentifier(), is required downstream) and both
+        // subscriptions must be individually notified.
+        Set<SubscribedAPI> subscribedAPIs = new HashSet<>();
+        subscribedAPIs.add(apiSubscription);
+        subscribedAPIs.add(productSubscription);
+
+        Whitebox.invokeMethod(apiConsumer, "sendApplicationDeletionEvent", application,
+                new HashSet<APIKey>(), subscribedAPIs);
+
+        PowerMockito.verifyStatic(APIUtil.class, Mockito.times(2));
+        APIUtil.sendNotification(Mockito.any(SubscriptionEvent.class),
+                Mockito.eq(APIConstants.NotifierType.SUBSCRIPTIONS.name()));
+    }
 
     @Test
     public void testGetApplicationById() throws APIManagementException {

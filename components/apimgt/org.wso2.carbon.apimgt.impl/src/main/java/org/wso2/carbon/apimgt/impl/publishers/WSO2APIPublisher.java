@@ -615,14 +615,48 @@ public class WSO2APIPublisher implements APIPublisher {
      * @param apiId    API UUID of the API to redirect
      * @return Exact redirect URL for the API in external store
      */
-    private String getExternalStoreRedirectURLForAPI(int tenantId, String apiId) throws APIManagementException {
+    protected String getExternalStoreRedirectURLForAPI(int tenantId, String apiId) throws APIManagementException {
 
         String redirectURL = getExternalStoreRedirectURL(tenantId);
-        if (redirectURL.split(APIConstants.EXTERNAL_API_DEVPORTAL_URL_REGEX).length == 0) {
+        if (StringUtils.isBlank(redirectURL)) {
             return redirectURL;
         }
-        return redirectURL.split(APIConstants.EXTERNAL_API_DEVPORTAL_URL_REGEX)[0]
-                + APIConstants.RestApiConstants.REST_API_PUB_RESOURCE_PATH_APIS + "/" + apiId;
+        try {
+            //Query parameters of the configured Store URL (Eg: ?tenant=<tenantDomain>) have to be preserved in the
+            //redirect URL. Otherwise the link resolves to the super tenant's Developer Portal instead of the
+            //Developer Portal of the tenant which published the API.
+            URIBuilder uriBuilder = new URIBuilder(redirectURL.trim());
+            uriBuilder.setPath(getDevPortalBasePath(uriBuilder.getPath())
+                    + APIConstants.RestApiConstants.REST_API_PUB_RESOURCE_PATH_APIS + "/" + apiId);
+            return uriBuilder.build().toString();
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while building the redirect URL for API: " + apiId
+                    + " from the configured Store URL: " + redirectURL;
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, e);
+        }
+    }
+
+    /**
+     * Get the Developer Portal base path from the path of the configured Store URL. The Store URL can be configured
+     * either as the Developer Portal context (Eg: /devportal) or as the API listing page of the Developer Portal
+     * (Eg: /devportal/apis) as documented.
+     *
+     * @param storeURLPath Path of the configured Store URL
+     * @return Developer Portal base path without a trailing slash or the "/apis" suffix
+     */
+    private String getDevPortalBasePath(String storeURLPath) {
+
+        if (StringUtils.isBlank(storeURLPath)) {
+            return StringUtils.EMPTY;
+        }
+        String basePath = StringUtils.stripEnd(storeURLPath.trim(), "/");
+        //Drop the "/apis" suffix if present, so that the API path is not duplicated (Eg: /devportal/apis/apis/<uuid>)
+        if (StringUtils.endsWith(basePath, APIConstants.RestApiConstants.REST_API_PUB_RESOURCE_PATH_APIS)) {
+            basePath = basePath.substring(0,
+                    basePath.length() - APIConstants.RestApiConstants.REST_API_PUB_RESOURCE_PATH_APIS.length());
+        }
+        return basePath;
     }
 
     /**

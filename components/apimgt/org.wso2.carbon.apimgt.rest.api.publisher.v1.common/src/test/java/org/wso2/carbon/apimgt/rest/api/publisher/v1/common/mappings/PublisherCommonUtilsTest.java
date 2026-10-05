@@ -27,20 +27,27 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.reflect.Whitebox;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
+import org.wso2.carbon.apimgt.api.doc.model.APIResource;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.TierNameComparator;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
@@ -179,6 +186,8 @@ public class PublisherCommonUtilsTest {
 
         Mockito.when(apiDto.getEndpointConfig()).thenReturn(endpointConfig);
         Mockito.when(advertiseInfoDto.isAdvertised()).thenReturn(false);
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        PowerMockito.when(RestApiCommonUtil.getLoggedInUserTenantDomain()).thenReturn(ORGANIZATION);
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.when(APIUtil.validateEndpointURLs(endpoints)).thenReturn(true);
         Assert.assertTrue(PublisherCommonUtils.validateEndpoints(new APIDTOTypeWrapper(apiDto)));
@@ -210,6 +219,8 @@ public class PublisherCommonUtilsTest {
 
         Mockito.when(apiDto.getEndpointConfig()).thenReturn(endpointConfig);
         Mockito.when(advertiseInfoDto.isAdvertised()).thenReturn(false);
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        PowerMockito.when(RestApiCommonUtil.getLoggedInUserTenantDomain()).thenReturn(ORGANIZATION);
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.when(APIUtil.validateEndpointURLs(endpoints)).thenReturn(false);
         Assert.assertFalse(PublisherCommonUtils.validateEndpoints(new APIDTOTypeWrapper(apiDto)));
@@ -241,6 +252,8 @@ public class PublisherCommonUtilsTest {
 
         Mockito.when(apiDto.getEndpointConfig()).thenReturn(endpointConfig);
         Mockito.when(advertiseInfoDto.isAdvertised()).thenReturn(false);
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        PowerMockito.when(RestApiCommonUtil.getLoggedInUserTenantDomain()).thenReturn(ORGANIZATION);
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.when(APIUtil.validateEndpointURLs(endpoints)).thenReturn(false);
         Assert.assertFalse(PublisherCommonUtils.validateEndpoints(new APIDTOTypeWrapper(apiDto)));
@@ -282,6 +295,8 @@ public class PublisherCommonUtilsTest {
         Mockito.when(advertiseInfoDto.getApiExternalProductionEndpoint()).thenReturn(externalProductionEndpointString);
         Mockito.when(advertiseInfoDto.getApiExternalSandboxEndpoint()).thenReturn(externalSandboxEndpointString);
         Mockito.when(advertiseInfoDto.getOriginalDevPortalUrl()).thenReturn(originalDevPortalUrl);
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        PowerMockito.when(RestApiCommonUtil.getLoggedInUserTenantDomain()).thenReturn(ORGANIZATION);
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.when(APIUtil.validateEndpointURLs(endpoints)).thenReturn(true);
         Assert.assertTrue(PublisherCommonUtils.validateEndpoints(new APIDTOTypeWrapper(apiDto)));
@@ -323,6 +338,8 @@ public class PublisherCommonUtilsTest {
         Mockito.when(advertiseInfoDto.getApiExternalProductionEndpoint()).thenReturn(externalProductionEndpointString);
         Mockito.when(advertiseInfoDto.getApiExternalSandboxEndpoint()).thenReturn(externalSandboxEndpointString);
         Mockito.when(advertiseInfoDto.getOriginalDevPortalUrl()).thenReturn(originalDevPortalUrl);
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        PowerMockito.when(RestApiCommonUtil.getLoggedInUserTenantDomain()).thenReturn(ORGANIZATION);
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.when(APIUtil.validateEndpointURLs(endpoints)).thenReturn(false);
         Assert.assertFalse(PublisherCommonUtils.validateEndpoints(new APIDTOTypeWrapper(apiDto)));
@@ -373,6 +390,8 @@ public class PublisherCommonUtilsTest {
 
         Mockito.when(apiDto.getEndpointConfig()).thenReturn(endpointConfig);
         Mockito.when(apiDto.getAdvertiseInfo()).thenReturn(null);
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        PowerMockito.when(RestApiCommonUtil.getLoggedInUserTenantDomain()).thenReturn(ORGANIZATION);
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.when(APIUtil.validateEndpointURLs(endpoints)).thenReturn(true);
         Assert.assertTrue(PublisherCommonUtils.validateEndpoints(new APIDTOTypeWrapper(apiDto)));
@@ -412,6 +431,8 @@ public class PublisherCommonUtilsTest {
         Mockito.when(advertiseInfoDto.getApiExternalProductionEndpoint()).thenReturn(null);
         Mockito.when(advertiseInfoDto.getApiExternalSandboxEndpoint()).thenReturn(externalSandboxEndpointString);
         Mockito.when(advertiseInfoDto.getOriginalDevPortalUrl()).thenReturn(originalDevPortalUrl);
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        PowerMockito.when(RestApiCommonUtil.getLoggedInUserTenantDomain()).thenReturn(ORGANIZATION);
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.when(APIUtil.validateEndpointURLs(endpoints)).thenReturn(true);
         Assert.assertTrue(PublisherCommonUtils.validateEndpoints(new APIDTOTypeWrapper(apiDto)));
@@ -655,4 +676,174 @@ public class PublisherCommonUtilsTest {
         }
     }
 
+    @Test
+    public void testGetRemovedProductResourcesWhenResourceIsUnchanged() throws Exception {
+
+        API existingAPI = createAPIWithResources(true, "GET:/hello", "POST:/hello");
+        APIDTO updatedAPIDTO = createAPIDTOWithOperations("GET:/hello", "POST:/hello");
+
+        List<APIResource> removedResources = Whitebox.invokeMethod(PublisherCommonUtils.class,
+                "getRemovedProductResources", updatedAPIDTO, existingAPI);
+
+        Assert.assertTrue("An unchanged product used resource was reported as removed: " + removedResources,
+                removedResources.isEmpty());
+    }
+
+    /**
+     * Resource paths of an API are case-sensitive, therefore changing only the letter case of a resource path
+     * removes the original resource. This has to be reported when the resource is used by one or more API Products,
+     * otherwise the product to resource mapping of the API Product is left dangling.
+     */
+    @Test
+    public void testGetRemovedProductResourcesWhenResourcePathLetterCaseChanged() throws Exception {
+
+        API existingAPI = createAPIWithResources(true, "GET:/hello");
+        APIDTO updatedAPIDTO = createAPIDTOWithOperations("GET:/Hello");
+
+        List<APIResource> removedResources = Whitebox.invokeMethod(PublisherCommonUtils.class,
+                "getRemovedProductResources", updatedAPIDTO, existingAPI);
+
+        Assert.assertEquals("A letter case only change of a product used resource path was not detected as a "
+                + "removed resource", 1, removedResources.size());
+        Assert.assertEquals(new APIResource("GET", "/hello"), removedResources.get(0));
+    }
+
+    /**
+     * Path parameter names are part of the URL template stored against the API Product, hence a letter case change
+     * of a path parameter has to be treated the same way as any other resource path change.
+     */
+    @Test
+    public void testGetRemovedProductResourcesWhenPathParameterLetterCaseChanged() throws Exception {
+
+        API existingAPI = createAPIWithResources(true, "GET:/pizza/{orderId}");
+        APIDTO updatedAPIDTO = createAPIDTOWithOperations("GET:/pizza/{orderid}");
+
+        List<APIResource> removedResources = Whitebox.invokeMethod(PublisherCommonUtils.class,
+                "getRemovedProductResources", updatedAPIDTO, existingAPI);
+
+        Assert.assertEquals("A letter case only change of a path parameter was not detected as a removed resource",
+                1, removedResources.size());
+        Assert.assertEquals(new APIResource("GET", "/pizza/{orderId}"), removedResources.get(0));
+    }
+
+    /**
+     * HTTP verbs are persisted in upper case and are written to the API definition in lower case, therefore the verb
+     * comparison has to stay case-insensitive.
+     */
+    @Test
+    public void testGetRemovedProductResourcesWhenHttpVerbLetterCaseChanged() throws Exception {
+
+        API existingAPI = createAPIWithResources(true, "GET:/hello");
+        APIDTO updatedAPIDTO = createAPIDTOWithOperations("get:/hello");
+
+        List<APIResource> removedResources = Whitebox.invokeMethod(PublisherCommonUtils.class,
+                "getRemovedProductResources", updatedAPIDTO, existingAPI);
+
+        Assert.assertTrue("A product used resource was reported as removed for an HTTP verb letter case difference: "
+                + removedResources, removedResources.isEmpty());
+    }
+
+    @Test
+    public void testGetRemovedProductResourcesWhenNonProductResourcePathLetterCaseChanged() throws Exception {
+
+        API existingAPI = createAPIWithResources(false, "GET:/hello");
+        APIDTO updatedAPIDTO = createAPIDTOWithOperations("GET:/Hello");
+
+        List<APIResource> removedResources = Whitebox.invokeMethod(PublisherCommonUtils.class,
+                "getRemovedProductResources", updatedAPIDTO, existingAPI);
+
+        Assert.assertTrue("A resource which is not used by any API Product was reported as removed: "
+                + removedResources, removedResources.isEmpty());
+    }
+
+    @Test
+    public void testGetRemovedProductResourcesWhenResourcePathChanged() throws Exception {
+
+        API existingAPI = createAPIWithResources(true, "GET:/v1/hello");
+        APIDTO updatedAPIDTO = createAPIDTOWithOperations("GET:/v3/hello");
+
+        List<APIResource> removedResources = Whitebox.invokeMethod(PublisherCommonUtils.class,
+                "getRemovedProductResources", updatedAPIDTO, existingAPI);
+
+        Assert.assertEquals("A removed product used resource was not detected", 1, removedResources.size());
+        Assert.assertEquals(new APIResource("GET", "/v1/hello"), removedResources.get(0));
+    }
+
+    private API createAPIWithResources(boolean usedByProducts, String... verbAndPaths) {
+        API api = new API(new APIIdentifier(PROVIDER, "PizzaShackAPI", API_PRODUCT_VERSION));
+        api.setUuid(API_ID);
+        Set<URITemplate> uriTemplates = new HashSet<>();
+        for (String verbAndPath : verbAndPaths) {
+            String[] verbAndPathParts = verbAndPath.split(":", 2);
+            URITemplate uriTemplate = new URITemplate();
+            uriTemplate.setHTTPVerb(verbAndPathParts[0]);
+            uriTemplate.setUriTemplate(verbAndPathParts[1]);
+            uriTemplate.setResourceURI(verbAndPathParts[1]);
+            if (usedByProducts) {
+                uriTemplate.addUsedByProduct(
+                        new APIProductIdentifier(PROVIDER, API_PRODUCT_NAME, API_PRODUCT_VERSION));
+            }
+            uriTemplates.add(uriTemplate);
+        }
+        api.setUriTemplates(uriTemplates);
+        return api;
+    }
+
+    private APIDTO createAPIDTOWithOperations(String... verbAndPaths) {
+        APIDTO apiDto = new APIDTO();
+        List<APIOperationsDTO> operations = new ArrayList<>();
+        for (String verbAndPath : verbAndPaths) {
+            String[] verbAndPathParts = verbAndPath.split(":", 2);
+            APIOperationsDTO operation = new APIOperationsDTO();
+            operation.setVerb(verbAndPathParts[0]);
+            operation.setTarget(verbAndPathParts[1]);
+            operations.add(operation);
+        }
+        apiDto.setOperations(operations);
+        return apiDto;
+    }
+
+    @Test
+    public void testValidateEndpointsRejectsArrayWithNoUsableUrl() throws APIManagementException {
+        // A populated endpoint array whose entries carry no usable URL must raise the endpoint-specific error,
+        // not silently produce an empty endpoint list.
+        APIDTO apiDto = Mockito.mock(APIDTO.class);
+        HashMap<String, Object> endpointConfig = new HashMap<>();
+        endpointConfig.put(API_ENDPOINT_CONFIG_PROTOCOL_TYPE, "http");
+        List<Object> productionEndpoints = new ArrayList<>();
+        productionEndpoints.add("not-an-object");                // non-object entry
+        productionEndpoints.add(new HashMap<String, Object>());  // object without a url
+        endpointConfig.put(API_DATA_PRODUCTION_ENDPOINTS, productionEndpoints);
+        Mockito.when(apiDto.getEndpointConfig()).thenReturn(endpointConfig);
+
+        try {
+            PublisherCommonUtils.validateEndpoints(new APIDTOTypeWrapper(apiDto));
+            fail("Expected ENDPOINT_URL_NOT_PROVIDED for an endpoint array with no usable URL");
+        } catch (APIManagementException e) {
+            Assert.assertEquals(ExceptionCodes.ENDPOINT_URL_NOT_PROVIDED.getErrorCode(),
+                    e.getErrorHandler().getErrorCode());
+        }
+    }
+
+    @Test
+    public void testValidateEndpointsAcceptsMixedArrayWithOneUsableUrl() throws APIManagementException {
+        // A mixed array must still validate: the usable URL is kept and the malformed entry is skipped.
+        APIDTO apiDto = Mockito.mock(APIDTO.class);
+        HashMap<String, Object> endpointConfig = new HashMap<>();
+        endpointConfig.put(API_ENDPOINT_CONFIG_PROTOCOL_TYPE, "http");
+        List<Object> productionEndpoints = new ArrayList<>();
+        productionEndpoints.add("not-an-object");                // skipped
+        HashMap<String, Object> valid = new HashMap<>();
+        valid.put("url", "https://valid.test");
+        productionEndpoints.add(valid);                          // usable
+        endpointConfig.put(API_DATA_PRODUCTION_ENDPOINTS, productionEndpoints);
+        Mockito.when(apiDto.getEndpointConfig()).thenReturn(endpointConfig);
+
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        PowerMockito.when(RestApiCommonUtil.getLoggedInUserTenantDomain()).thenReturn(ORGANIZATION);
+        PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.when(APIUtil.validateEndpointURLs(Mockito.any())).thenReturn(true);
+
+        Assert.assertTrue(PublisherCommonUtils.validateEndpoints(new APIDTOTypeWrapper(apiDto)));
+    }
 }

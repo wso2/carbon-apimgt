@@ -992,6 +992,18 @@ public class APIMappingUtil {
     }
 
     /**
+     * Converts a List object of APIs into a DTO.
+     *
+     * @param apiList          List of APIs
+     * @param expandProperties whether the additional properties of each API should be included in the DTO
+     * @return APIListDTO object containing APIDTOs
+     */
+    public static Object fromAPIListToDTO(List<API> apiList, boolean expandProperties)
+            throws APIManagementException {
+        return fromAPIListToInfoDTO(apiList, expandProperties);
+    }
+
+    /**
      * Converts a List object of APIs into Info DTO List.
      *
      * @param apiList List of APIs
@@ -1003,6 +1015,25 @@ public class APIMappingUtil {
         List<APIInfoDTO> apiInfoDTOs = apiListDTO.getList();
         for (API api : apiList) {
             apiInfoDTOs.add(fromAPIToInfoDTO(api));
+        }
+        apiListDTO.setCount(apiInfoDTOs.size());
+        return apiListDTO;
+    }
+
+    /**
+     * Converts a List object of APIs into Info DTO List.
+     *
+     * @param apiList          List of APIs
+     * @param expandProperties whether the additional properties of each API should be included in the DTO
+     * @return APIListDTO object containing APIDTOs
+     */
+    public static APIListDTO fromAPIListToInfoDTO(List<API> apiList, boolean expandProperties)
+            throws APIManagementException {
+
+        APIListDTO apiListDTO = new APIListDTO();
+        List<APIInfoDTO> apiInfoDTOs = apiListDTO.getList();
+        for (API api : apiList) {
+            apiInfoDTOs.add(fromAPIToInfoDTO(api, expandProperties));
         }
         apiListDTO.setCount(apiInfoDTOs.size());
         return apiListDTO;
@@ -1089,12 +1120,26 @@ public class APIMappingUtil {
     }
 
     /**
-     * Creates a minimal DTO representation of an API object.
+     * Creates a minimal DTO representation of an API object. The additional properties of the API are included
+     * whenever they are available, which is the behaviour this overload has always had. Callers that need the
+     * additional properties to be included only on request should use
+     * {@link #fromAPIToInfoDTO(API, boolean)} instead.
      *
      * @param api API object
      * @return a minimal representation DTO
      */
     public static APIInfoDTO fromAPIToInfoDTO(API api) {
+        return fromAPIToInfoDTO(api, api.getAdditionalProperties() != null);
+    }
+
+    /**
+     * Creates a minimal DTO representation of an API object.
+     *
+     * @param api              API object
+     * @param expandProperties whether the additional properties of the API should be included in the DTO
+     * @return a minimal representation DTO
+     */
+    public static APIInfoDTO fromAPIToInfoDTO(API api, boolean expandProperties) {
 
         APIInfoDTO apiInfoDTO = new APIInfoDTO();
         apiInfoDTO.setDescription(api.getDescription());
@@ -1133,7 +1178,7 @@ public class APIMappingUtil {
         }
         apiInfoDTO.updatedBy(api.getUpdatedBy());
         apiInfoDTO.setAdvertiseOnly(api.isAdvertiseOnly());
-        if (api.getAdditionalProperties() != null) {
+        if (expandProperties && api.getAdditionalProperties() != null) {
             JSONObject additionalProperties = api.getAdditionalProperties();
             List<APIInfoAdditionalPropertiesDTO> additionalPropertiesList = new ArrayList<>();
             Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap = new HashMap<>();
@@ -4996,7 +5041,12 @@ public class APIMappingUtil {
             }
             String awsSecretKeyValue =
                     (String) deploymentStage.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY);
-            if (StringUtils.isNotEmpty(awsSecretKeyValue)) {
+            // Only decrypt when the stored value is actually self-contained cipher text. In
+            // environment-credentials mode no secret is encrypted on the save path, so a stray
+            // non-empty value (e.g. a masked placeholder) would otherwise reach base64DecodeAndDecrypt
+            // and fail with a CryptoException. Mirrors the apiKeyValue handling above.
+            if (StringUtils.isNotEmpty(awsSecretKeyValue)
+                    && cryptoUtil.base64DecodeAndIsSelfContainedCipherText(awsSecretKeyValue)) {
                 deploymentStage.put(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY,
                         new String(cryptoUtil.base64DecodeAndDecrypt(awsSecretKeyValue)));
             }

@@ -19,6 +19,8 @@
 
 package org.wso2.carbon.apimgt.spec.parser.definitions;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.models.HttpMethod;
 import io.swagger.models.Operation;
 import io.swagger.models.Path;
@@ -29,23 +31,41 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
+import io.swagger.models.properties.AbstractProperty;
+import io.swagger.models.properties.ArrayProperty;
+import io.swagger.models.properties.ComposedProperty;
+import io.swagger.models.properties.MapProperty;
+import io.swagger.models.properties.ObjectProperty;
+import io.swagger.models.properties.Property;
+import io.swagger.models.properties.StringProperty;
+import org.wso2.carbon.apimgt.api.APIConstants;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.BackendOperation;
+import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 
 import java.io.File;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import static org.mockito.Mockito.when;
 
@@ -416,4 +436,815 @@ public class OAS2ParserTest extends OASTestBase {
         return apiScopes;
     }
 
+    // -------------------------------------------------------------------------
+    // Circular $ref handling in MCP tool schema generation.
+    //
+    // resolveModel and resolveProperty are mutually recursive. Each used to start a fresh
+    // visitedRefs set instead of passing on the one it was given, so a cycle running through a
+    // model's properties lost the path and recursed until the stack overflowed. These cover the
+    // shapes a self-referential model actually takes, and the case a naive fix breaks: a model
+    // referenced twice from unrelated places must still be expanded at both.
+    //
+    // Every test carries a timeout so a regression fails rather than hanging the build.
+    // -------------------------------------------------------------------------
+
+    private static final int CIRCULAR_TIMEOUT_MS = 30000;
+    private static final String CIRCULAR_BACKEND_ID = "forum-backend";
+    private static final APIIdentifier CIRCULAR_REF_API_ID =
+            new APIIdentifier("admin", "ForumAPI", "1.0.0");
+    private final ObjectMapper circularMapper = new ObjectMapper();
+
+    private static String swagger20(String path, String bodyRef, String definitions) {
+        return "{\n"
+                + "  \"swagger\": \"2.0\",\n"
+                + "  \"info\": { \"title\": \"Forum\", \"version\": \"1.0\" },\n"
+                + "  \"paths\": {\n"
+                + "    \"" + path + "\": {\n"
+                + "      \"post\": {\n"
+                + "        \"parameters\": [\n"
+                + "          { \"name\": \"body\", \"in\": \"body\",\n"
+                + "            \"schema\": { \"$ref\": \"#/definitions/" + bodyRef + "\" } }\n"
+                + "        ],\n"
+                + "        \"responses\": { \"200\": { \"description\": \"OK\" } }\n"
+                + "      }\n"
+                + "    }\n"
+                + "  },\n"
+                + "  \"definitions\": {\n" + definitions + "\n  }\n"
+                + "}";
+    }
+
+    private URITemplate mcpTool(String name, String target, String verb) {
+        URITemplate template = new URITemplate();
+        template.setUriTemplate(name);
+        template.setHTTPVerb(APISpecParserConstants.HTTP_VERB_TOOL);
+        BackendOperationMapping mapping = new BackendOperationMapping();
+        mapping.setBackendId(CIRCULAR_BACKEND_ID);
+        BackendOperation op = new BackendOperation();
+        op.setTarget(target);
+        op.setVerb(APIConstants.SupportedHTTPVerbs.valueOf(verb));
+        mapping.setBackendOperation(op);
+        template.setBackendOperationMapping(mapping);
+        return template;
+    }
+
+    private JsonNode generateToolSchema(String definition, String target) throws Exception {
+        Set<URITemplate> templates = new LinkedHashSet<>();
+        templates.add(mcpTool("theTool", target, "POST"));
+        Set<URITemplate> result = oas2Parser.generateMCPTools(definition, CIRCULAR_REF_API_ID,
+                CIRCULAR_BACKEND_ID, APISpecParserConstants.API_SUBTYPE_DIRECT_BACKEND, templates);
+        Assert.assertEquals("Expected exactly one generated tool", 1, result.size());
+        String schema = result.iterator().next().getSchemaDefinition();
+        Assert.assertNotNull("A schema should have been generated", schema);
+        return circularMapper.readTree(schema);
+    }
+
+    private JsonNode requestBodyProperties(JsonNode schema) {
+        JsonNode requestBody = schema.path("properties").path("requestBody");
+        Assert.assertTrue("Schema should carry a requestBody property",
+                schema.path("properties").has("requestBody"));
+        Assert.assertTrue("requestBody should carry its resolved properties",
+                requestBody.has("properties"));
+        return requestBody.path("properties");
+    }
+
+    /**
+     * Walks the whole tree looking for a leftover reference. The generated schema carries no
+     * definitions section, so any surviving $ref would point at nothing.
+     */
+    private void assertNoUnresolvedReference(JsonNode node, String path) {
+        if (node.isObject()) {
+            Iterator<String> names = node.fieldNames();
+            while (names.hasNext()) {
+                String name = names.next();
+                Assert.assertNotEquals("Unresolved reference left at " + path + "/" + name,
+                        "$ref", name);
+                assertNoUnresolvedReference(node.get(name), path + "/" + name);
+            }
+        } else if (node.isArray()) {
+            for (int i = 0; i < node.size(); i++) {
+                assertNoUnresolvedReference(node.get(i), path + "/" + i);
+            }
+        }
+    }
+
+    @Test(timeout = CIRCULAR_TIMEOUT_MS)
+    public void testCircularRefThroughFieldTerminates() throws Exception {
+        String definition = swagger20("/comments", "Comment",
+                "    \"Comment\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"required\": [\"text\"],\n"
+                + "      \"properties\": {\n"
+                + "        \"text\": { \"type\": \"string\" },\n"
+                + "        \"parent\": { \"$ref\": \"#/definitions/Comment\" }\n"
+                + "      }\n"
+                + "    }");
+
+        JsonNode props = requestBodyProperties(generateToolSchema(definition, "/comments"));
+
+        Assert.assertEquals("A non-circular sibling should still resolve",
+                "string", props.path("text").path("type").asText());
+        Assert.assertTrue("The circular field should still be declared", props.has("parent"));
+        Assert.assertEquals("An unexpanded cycle should render as a plain object",
+                "object", props.path("parent").path("type").asText());
+        // The description is the only signal an agent has that content was omitted rather than
+        // genuinely absent, and it is the only place the omitted model is named.
+        String description = props.path("parent").path("description").asText();
+        Assert.assertTrue("An unexpanded cycle should say that its nested properties were omitted, "
+                + "but the description was: " + description, description.contains("omitted"));
+        Assert.assertTrue("The description should name the model that was omitted, "
+                + "but the description was: " + description, description.contains("Comment"));
+    }
+
+    @Test(timeout = CIRCULAR_TIMEOUT_MS)
+    public void testCircularRefThroughListTerminates() throws Exception {
+        String definition = swagger20("/comments", "Comment",
+                "    \"Comment\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": {\n"
+                + "        \"text\": { \"type\": \"string\" },\n"
+                + "        \"replies\": {\n"
+                + "          \"type\": \"array\",\n"
+                + "          \"items\": { \"$ref\": \"#/definitions/Comment\" }\n"
+                + "        }\n"
+                + "      }\n"
+                + "    }");
+
+        JsonNode props = requestBodyProperties(generateToolSchema(definition, "/comments"));
+
+        Assert.assertEquals("array", props.path("replies").path("type").asText());
+        Assert.assertEquals("The recursive item type should still be described",
+                "object", props.path("replies").path("items").path("type").asText());
+    }
+
+    @Test(timeout = CIRCULAR_TIMEOUT_MS)
+    public void testIndirectCircularRefTerminates() throws Exception {
+        String definition = swagger20("/threads", "Thread",
+                "    \"Thread\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": {\n"
+                + "        \"title\": { \"type\": \"string\" },\n"
+                + "        \"author\": { \"$ref\": \"#/definitions/User\" }\n"
+                + "      }\n"
+                + "    },\n"
+                + "    \"User\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": {\n"
+                + "        \"name\": { \"type\": \"string\" },\n"
+                + "        \"lastThread\": { \"$ref\": \"#/definitions/Thread\" }\n"
+                + "      }\n"
+                + "    }");
+
+        JsonNode props = requestBodyProperties(generateToolSchema(definition, "/threads"));
+        JsonNode author = props.path("author");
+
+        Assert.assertEquals("The intermediate model should expand",
+                "string", author.path("properties").path("name").path("type").asText());
+        Assert.assertEquals("The back-reference should still be described",
+                "object", author.path("properties").path("lastThread").path("type").asText());
+    }
+
+    @Test(timeout = CIRCULAR_TIMEOUT_MS)
+    public void testCircularRefThroughNestedObjectTerminates() throws Exception {
+        String definition = swagger20("/comments", "Comment",
+                "    \"Comment\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": {\n"
+                + "        \"text\": { \"type\": \"string\" },\n"
+                + "        \"meta\": {\n"
+                + "          \"type\": \"object\",\n"
+                + "          \"properties\": {\n"
+                + "            \"origin\": { \"$ref\": \"#/definitions/Comment\" }\n"
+                + "          }\n"
+                + "        }\n"
+                + "      }\n"
+                + "    }");
+
+        JsonNode props = requestBodyProperties(generateToolSchema(definition, "/comments"));
+
+        Assert.assertEquals("The inline object should survive",
+                "object", props.path("meta").path("type").asText());
+        Assert.assertEquals("The cycle inside the inline object should be described",
+                "object", props.path("meta").path("properties").path("origin").path("type").asText());
+    }
+
+    @Test(timeout = CIRCULAR_TIMEOUT_MS)
+    public void testCircularRefThroughAllOfTerminates() throws Exception {
+        String definition = swagger20("/nodes", "Node",
+                "    \"Audit\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": { \"createdBy\": { \"type\": \"string\" } }\n"
+                + "    },\n"
+                + "    \"Node\": {\n"
+                + "      \"allOf\": [\n"
+                + "        { \"$ref\": \"#/definitions/Audit\" },\n"
+                + "        { \"type\": \"object\",\n"
+                + "          \"properties\": {\n"
+                + "            \"label\": { \"type\": \"string\" },\n"
+                + "            \"child\": { \"$ref\": \"#/definitions/Node\" }\n"
+                + "          }\n"
+                + "        }\n"
+                + "      ]\n"
+                + "    }");
+
+        JsonNode schema = generateToolSchema(definition, "/nodes");
+        JsonNode props = requestBodyProperties(schema);
+
+        Assert.assertTrue("Properties merged from the composed model should be present",
+                props.has("createdBy"));
+        Assert.assertTrue("Properties declared inline in the allOf should be present",
+                props.has("label"));
+        Assert.assertEquals("The circular field should be described, not left as a raw $ref",
+                "object", props.path("child").path("type").asText());
+        assertNoUnresolvedReference(schema, "");
+    }
+
+    @Test(timeout = CIRCULAR_TIMEOUT_MS)
+    public void testGeneratedToolSchemaHasNoUnresolvedReference() throws Exception {
+        String definition = swagger20("/comments", "Comment",
+                "    \"Comment\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": {\n"
+                + "        \"text\": { \"type\": \"string\" },\n"
+                + "        \"parent\": { \"$ref\": \"#/definitions/Comment\" },\n"
+                + "        \"replies\": {\n"
+                + "          \"type\": \"array\",\n"
+                + "          \"items\": { \"$ref\": \"#/definitions/Comment\" }\n"
+                + "        }\n"
+                + "      }\n"
+                + "    }");
+
+        assertNoUnresolvedReference(generateToolSchema(definition, "/comments"), "");
+    }
+
+    /**
+     * No cycle at all. Order refers to Address twice, and both occurrences must stay fully
+     * expanded - the visited set tracks the current path, not everything seen so far.
+     */
+    @Test(timeout = CIRCULAR_TIMEOUT_MS)
+    public void testSharedNonCircularRefExpandedAtEveryOccurrence() throws Exception {
+        String definition = swagger20("/orders", "Order",
+                "    \"Address\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": {\n"
+                + "        \"street\": { \"type\": \"string\" },\n"
+                + "        \"city\": { \"type\": \"string\" }\n"
+                + "      }\n"
+                + "    },\n"
+                + "    \"Order\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": {\n"
+                + "        \"billingAddress\": { \"$ref\": \"#/definitions/Address\" },\n"
+                + "        \"shippingAddress\": { \"$ref\": \"#/definitions/Address\" }\n"
+                + "      }\n"
+                + "    }");
+
+        JsonNode props = requestBodyProperties(generateToolSchema(definition, "/orders"));
+
+        for (String field : new String[] { "billingAddress", "shippingAddress" }) {
+            Assert.assertEquals(field + " should keep its street field", "string",
+                    props.path(field).path("properties").path("street").path("type").asText());
+            Assert.assertEquals(field + " should keep its city field", "string",
+                    props.path(field).path("properties").path("city").path("type").asText());
+        }
+    }
+
+    /**
+     * Nested allOf where two branches compose the same non-circular model. Resolving the left branch
+     * must not leave Common on the visited path and make the right branch skip it.
+     */
+    @Test(timeout = CIRCULAR_TIMEOUT_MS)
+    public void testAllOfBranchesSharingAModelBothContribute() throws Exception {
+        String definition = swagger20("/records", "Wrapper",
+                "    \"Common\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": { \"id\": { \"type\": \"string\" } }\n"
+                + "    },\n"
+                + "    \"Left\": {\n"
+                + "      \"allOf\": [\n"
+                + "        { \"$ref\": \"#/definitions/Common\" },\n"
+                + "        { \"type\": \"object\", \"properties\": { \"leftField\": { \"type\": \"string\" } } }\n"
+                + "      ]\n"
+                + "    },\n"
+                + "    \"Right\": {\n"
+                + "      \"allOf\": [\n"
+                + "        { \"$ref\": \"#/definitions/Common\" },\n"
+                + "        { \"type\": \"object\", \"properties\": { \"rightField\": { \"type\": \"string\" } } }\n"
+                + "      ]\n"
+                + "    },\n"
+                + "    \"Wrapper\": {\n"
+                + "      \"allOf\": [\n"
+                + "        { \"$ref\": \"#/definitions/Left\" },\n"
+                + "        { \"$ref\": \"#/definitions/Right\" }\n"
+                + "      ]\n"
+                + "    }");
+
+        JsonNode props = requestBodyProperties(generateToolSchema(definition, "/records"));
+
+        Assert.assertTrue("Left branch should contribute its own field", props.has("leftField"));
+        Assert.assertTrue("Right branch should contribute its own field", props.has("rightField"));
+        Assert.assertTrue("The shared model must survive both branches", props.has("id"));
+    }
+
+    /**
+     * Two tools built from one parsed definition. Resolution must not write its results back onto
+     * the definition, or the first tool changes what the second one sees.
+     */
+    @Test(timeout = CIRCULAR_TIMEOUT_MS)
+    public void testResolvingOneToolDoesNotDegradeAnother() throws Exception {
+        String definition = "{\n"
+                + "  \"swagger\": \"2.0\",\n"
+                + "  \"info\": { \"title\": \"Graph\", \"version\": \"1.0\" },\n"
+                + "  \"paths\": {\n"
+                + "    \"/roots\": { \"post\": {\n"
+                + "      \"parameters\": [ { \"name\": \"body\", \"in\": \"body\",\n"
+                + "        \"schema\": { \"$ref\": \"#/definitions/Root\" } } ],\n"
+                + "      \"responses\": { \"200\": { \"description\": \"OK\" } } } },\n"
+                + "    \"/ms\": { \"post\": {\n"
+                + "      \"parameters\": [ { \"name\": \"body\", \"in\": \"body\",\n"
+                + "        \"schema\": { \"$ref\": \"#/definitions/M\" } } ],\n"
+                + "      \"responses\": { \"200\": { \"description\": \"OK\" } } } }\n"
+                + "  },\n"
+                + "  \"definitions\": {\n"
+                + "    \"Root\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": {\n"
+                + "        \"tag\": { \"type\": \"string\" },\n"
+                + "        \"first\": { \"$ref\": \"#/definitions/M\" },\n"
+                + "        \"second\": { \"$ref\": \"#/definitions/M\" }\n"
+                + "      }\n"
+                + "    },\n"
+                + "    \"M\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": {\n"
+                + "        \"label\": { \"type\": \"string\" },\n"
+                + "        \"backRef\": { \"$ref\": \"#/definitions/Root\" }\n"
+                + "      }\n"
+                + "    }\n"
+                + "  }\n"
+                + "}";
+
+        Set<URITemplate> templates = new LinkedHashSet<>();
+        templates.add(mcpTool("createRoot", "/roots", "POST"));
+        templates.add(mcpTool("createM", "/ms", "POST"));
+
+        Set<URITemplate> result = oas2Parser.generateMCPTools(definition, CIRCULAR_REF_API_ID,
+                CIRCULAR_BACKEND_ID, APISpecParserConstants.API_SUBTYPE_DIRECT_BACKEND, templates);
+        Assert.assertEquals(2, result.size());
+
+        JsonNode mSchema = null;
+        for (URITemplate template : result) {
+            if ("createM".equals(template.getUriTemplate())) {
+                mSchema = circularMapper.readTree(template.getSchemaDefinition());
+            }
+        }
+        Assert.assertNotNull("The M tool should have been generated", mSchema);
+
+        JsonNode backRef = mSchema.path("properties").path("requestBody").path("properties")
+                .path("backRef");
+        Assert.assertEquals("Root should be expanded inside the M tool regardless of which tool "
+                        + "resolved first", "string",
+                backRef.path("properties").path("tag").path("type").asText());
+    }
+
+    /**
+     * An acyclic definition must come through resolution with every attribute intact. Resolution
+     * rebuilds properties rather than editing them in place, so anything the rebuild forgets to
+     * carry would be lost silently, on definitions that have no cycle at all.
+     */
+    @Test(timeout = CIRCULAR_TIMEOUT_MS)
+    public void testAcyclicDefinitionKeepsPropertyAttributes() throws Exception {
+        String definition = swagger20("/carts", "Cart",
+                "    \"Item\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": { \"sku\": { \"type\": \"string\" } }\n"
+                + "    },\n"
+                + "    \"Cart\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": {\n"
+                + "        \"items\": {\n"
+                + "          \"type\": \"array\",\n"
+                + "          \"description\": \"Lines in the cart\",\n"
+                + "          \"uniqueItems\": true,\n"
+                + "          \"minItems\": 1,\n"
+                + "          \"maxItems\": 50,\n"
+                + "          \"items\": { \"$ref\": \"#/definitions/Item\" }\n"
+                + "        },\n"
+                + "        \"audit\": {\n"
+                + "          \"type\": \"object\",\n"
+                + "          \"description\": \"Audit block\",\n"
+                + "          \"readOnly\": true,\n"
+                + "          \"properties\": { \"createdBy\": { \"$ref\": \"#/definitions/Item\" } }\n"
+                + "        }\n"
+                + "      }\n"
+                + "    }");
+
+        JsonNode props = requestBodyProperties(generateToolSchema(definition, "/carts"));
+
+        JsonNode items = props.path("items");
+        Assert.assertEquals("array", items.path("type").asText());
+        Assert.assertEquals("Lines in the cart", items.path("description").asText());
+        Assert.assertTrue("uniqueItems should survive resolution", items.path("uniqueItems").asBoolean());
+        Assert.assertEquals(1, items.path("minItems").asInt());
+        Assert.assertEquals(50, items.path("maxItems").asInt());
+        Assert.assertEquals("The referenced item type should be expanded", "string",
+                items.path("items").path("properties").path("sku").path("type").asText());
+
+        JsonNode audit = props.path("audit");
+        Assert.assertEquals("Audit block", audit.path("description").asText());
+        Assert.assertTrue("readOnly should survive resolution", audit.path("readOnly").asBoolean());
+        Assert.assertEquals("The nested reference should be expanded", "string",
+                audit.path("properties").path("createdBy").path("properties").path("sku")
+                        .path("type").asText());
+    }
+
+    /**
+     * Guards the field list copied by OAS2Parser.copyCommonPropertyFields against changes in
+     * swagger-models. Resolution rebuilds properties, so a field added to these classes by a library
+     * upgrade would be dropped silently from every generated schema. If this fails, review
+     * copyCommonPropertyFields before updating the expected names here.
+     */
+    @Test
+    public void testPropertyFieldsHaveNotChanged() {
+        assertDeclaredFields(AbstractProperty.class, "name", "type", "format", "example", "xml",
+                "required", "position", "description", "title", "readOnly", "allowEmptyValue",
+                "access", "vendorExtensions", "booleanValue");
+        assertDeclaredFields(ArrayProperty.class, "TYPE", "uniqueItems", "items", "maxItems", "minItems");
+        assertDeclaredFields(ObjectProperty.class, "TYPE", "properties");
+        assertDeclaredFields(MapProperty.class, "property", "minProperties", "maxProperties");
+        assertDeclaredFields(ComposedProperty.class, "TYPE", "allOf");
+    }
+
+    private void assertDeclaredFields(Class<?> type, String... expected) {
+        Set<String> actual = Arrays.stream(type.getDeclaredFields())
+                .filter(f -> !f.isSynthetic())
+                .map(Field::getName)
+                .collect(Collectors.toCollection(TreeSet::new));
+        Set<String> want = new TreeSet<>(Arrays.asList(expected));
+        Assert.assertEquals("swagger-models has changed the fields of " + type.getSimpleName()
+                + ". Review OAS2Parser.copyCommonPropertyFields before updating this list.",
+                want, actual);
+    }
+
+    /**
+     * A cycle that runs only through allOf, never through a property. Nothing on that path
+     * registers the reference unless resolveModel holds it across the traversal of the resolved
+     * model's body, so this recursed until the stack overflowed.
+     */
+    @Test(timeout = CIRCULAR_TIMEOUT_MS)
+    public void testCircularRefThroughAllOfChainTerminates() throws Exception {
+        String definition = swagger20("/nodes", "Alpha",
+                "    \"Alpha\": { \"allOf\": [ { \"$ref\": \"#/definitions/Beta\" } ] },\n"
+                + "    \"Beta\":  { \"allOf\": [ { \"$ref\": \"#/definitions/Alpha\" } ] }");
+
+        JsonNode schema = generateToolSchema(definition, "/nodes");
+
+        Assert.assertTrue("A requestBody should still be emitted",
+                schema.path("properties").has("requestBody"));
+        assertNoUnresolvedReference(schema, "");
+    }
+
+    /**
+     * The cycle runs through a map's value type. resolveProperty handled Ref, Array and Object
+     * properties but not Map, so additionalProperties was never traversed.
+     */
+    @Test(timeout = CIRCULAR_TIMEOUT_MS)
+    public void testCircularRefThroughMapValueTerminates() throws Exception {
+        String definition = swagger20("/trees", "Tree",
+                "    \"Tree\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": {\n"
+                + "        \"name\": { \"type\": \"string\" },\n"
+                + "        \"children\": {\n"
+                + "          \"type\": \"object\",\n"
+                + "          \"additionalProperties\": { \"$ref\": \"#/definitions/Tree\" }\n"
+                + "        }\n"
+                + "      }\n"
+                + "    }");
+
+        JsonNode schema = generateToolSchema(definition, "/trees");
+        JsonNode props = requestBodyProperties(schema);
+
+        Assert.assertEquals("string", props.path("name").path("type").asText());
+        Assert.assertTrue("The recursive map field should still be declared", props.has("children"));
+        assertNoUnresolvedReference(schema, "");
+    }
+
+    /** A map whose value type is not circular must still be expanded. */
+    @Test(timeout = CIRCULAR_TIMEOUT_MS)
+    public void testNonCircularMapValueIsExpanded() throws Exception {
+        String definition = swagger20("/carts", "Cart",
+                "    \"Item\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": { \"sku\": { \"type\": \"string\" } }\n"
+                + "    },\n"
+                + "    \"Cart\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": {\n"
+                + "        \"entries\": {\n"
+                + "          \"type\": \"object\",\n"
+                + "          \"additionalProperties\": { \"$ref\": \"#/definitions/Item\" }\n"
+                + "        }\n"
+                + "      }\n"
+                + "    }");
+
+        JsonNode schema = generateToolSchema(definition, "/carts");
+        JsonNode props = requestBodyProperties(schema);
+
+        Assert.assertEquals("The map value type should be expanded", "string",
+                props.path("entries").path("additionalProperties").path("properties")
+                        .path("sku").path("type").asText());
+        assertNoUnresolvedReference(schema, "");
+    }
+
+    /**
+     * A property referencing an allOf model. resolveModel merges composed models, but resolveProperty
+     * used to expand a reference only when its target was a plain model, so this came back as an
+     * unresolved $ref pointing at a definitions section the generated schema does not carry.
+     */
+    @Test(timeout = CIRCULAR_TIMEOUT_MS)
+    public void testPropertyReferenceToComposedModelIsExpanded() throws Exception {
+        String definition = swagger20("/records", "Record",
+                "    \"Common\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": { \"id\": { \"type\": \"string\" } }\n"
+                + "    },\n"
+                + "    \"Left\": {\n"
+                + "      \"allOf\": [\n"
+                + "        { \"$ref\": \"#/definitions/Common\" },\n"
+                + "        { \"type\": \"object\", \"properties\": { \"leftField\": { \"type\": \"string\" } } }\n"
+                + "      ]\n"
+                + "    },\n"
+                + "    \"Record\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": { \"left\": { \"$ref\": \"#/definitions/Left\" } }\n"
+                + "    }");
+
+        JsonNode schema = generateToolSchema(definition, "/records");
+        JsonNode left = requestBodyProperties(schema).path("left");
+
+        Assert.assertEquals("The composed model should expand to an object",
+                "object", left.path("type").asText());
+        Assert.assertEquals("Properties inherited through allOf should be present",
+                "string", left.path("properties").path("id").path("type").asText());
+        Assert.assertEquals("Properties declared inline in the allOf should be present",
+                "string", left.path("properties").path("leftField").path("type").asText());
+        assertNoUnresolvedReference(schema, "");
+    }
+
+    /**
+     * Non-body parameters sit alongside the request body in the generated schema, keyed by location
+     * so a query parameter and a header of the same name cannot collide. The $ref parameter is
+     * resolved through resolveComponentRef, which now releases its reference on the way out.
+     */
+    @Test(timeout = CIRCULAR_TIMEOUT_MS)
+    public void testParametersAreKeyedByLocationAlongsideCircularBody() throws Exception {
+        String definition = "{\n"
+                + "  \"swagger\": \"2.0\",\n"
+                + "  \"info\": { \"title\": \"Forum\", \"version\": \"1.0\" },\n"
+                + "  \"paths\": {\n"
+                + "    \"/comments/{tenant}\": {\n"
+                + "      \"post\": {\n"
+                + "        \"parameters\": [\n"
+                + "          { \"$ref\": \"#/parameters/TenantId\" },\n"
+                + "          { \"name\": \"limit\", \"in\": \"query\", \"type\": \"integer\" },\n"
+                + "          { \"name\": \"body\", \"in\": \"body\",\n"
+                + "            \"schema\": { \"$ref\": \"#/definitions/Comment\" } }\n"
+                + "        ],\n"
+                + "        \"responses\": { \"200\": { \"description\": \"OK\" } }\n"
+                + "      }\n"
+                + "    }\n"
+                + "  },\n"
+                + "  \"parameters\": {\n"
+                + "    \"TenantId\": { \"name\": \"tenant\", \"in\": \"path\",\n"
+                + "      \"required\": true, \"type\": \"string\" }\n"
+                + "  },\n"
+                + "  \"definitions\": {\n"
+                + "    \"Comment\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": {\n"
+                + "        \"text\": { \"type\": \"string\" },\n"
+                + "        \"parent\": { \"$ref\": \"#/definitions/Comment\" }\n"
+                + "      }\n"
+                + "    }\n"
+                + "  }\n"
+                + "}";
+
+        JsonNode schema = generateToolSchema(definition, "/comments/{tenant}");
+        JsonNode props = schema.path("properties");
+
+        Assert.assertEquals("A $ref parameter should resolve and be keyed by its location",
+                "string", props.path("path_tenant").path("type").asText());
+        Assert.assertEquals("An inline parameter should be keyed by its location",
+                "integer", props.path("query_limit").path("type").asText());
+        Assert.assertEquals("The circular body should still resolve alongside the parameters",
+                "string", props.path("requestBody").path("properties").path("text").path("type").asText());
+        assertNoUnresolvedReference(schema, "");
+    }
+
+    /**
+     * A property written as an inline allOf parses to a ComposedProperty. resolveProperty handled
+     * Ref, Array, Map and Object properties only, so its allOf entries were never traversed and any
+     * $ref inside them survived into the generated schema.
+     */
+    @Test(timeout = CIRCULAR_TIMEOUT_MS)
+    public void testComposedPropertyIsMergedIntoOneObject() throws Exception {
+        String definition = swagger20("/entries", "Entry",
+                "    \"Common\": { \"type\": \"object\",\n"
+                + "      \"properties\": { \"id\": { \"type\": \"string\" } } },\n"
+                + "    \"Entry\": { \"type\": \"object\", \"properties\": {\n"
+                + "        \"merged\": { \"allOf\": [ { \"$ref\": \"#/definitions/Common\" },\n"
+                + "            { \"type\": \"object\",\n"
+                + "              \"properties\": { \"note\": { \"type\": \"string\" } } } ] } } }");
+
+        JsonNode schema = generateToolSchema(definition, "/entries");
+        JsonNode merged = requestBodyProperties(schema).path("merged");
+
+        Assert.assertEquals("The composed property should render as one object",
+                "object", merged.path("type").asText());
+        Assert.assertEquals("Properties from the referenced part should be merged in",
+                "string", merged.path("properties").path("id").path("type").asText());
+        Assert.assertEquals("Properties declared inline should be merged in",
+                "string", merged.path("properties").path("note").path("type").asText());
+        assertNoUnresolvedReference(schema, "");
+    }
+
+    /** A composed property whose allOf points back at an enclosing model must still terminate. */
+    @Test(timeout = CIRCULAR_TIMEOUT_MS)
+    public void testCircularComposedPropertyTerminates() throws Exception {
+        String definition = swagger20("/nodes", "Node",
+                "    \"Node\": { \"type\": \"object\", \"properties\": {\n"
+                + "        \"label\": { \"type\": \"string\" },\n"
+                + "        \"child\": { \"allOf\": [ { \"$ref\": \"#/definitions/Node\" } ] } } }");
+
+        JsonNode schema = generateToolSchema(definition, "/nodes");
+        JsonNode props = requestBodyProperties(schema);
+
+        Assert.assertEquals("string", props.path("label").path("type").asText());
+        Assert.assertTrue("The composed field should still be declared", props.has("child"));
+        assertNoUnresolvedReference(schema, "");
+    }
+
+    /**
+     * A reference naming a definition that does not exist. It fails to resolve exactly as a
+     * circular one does, but it is not a cycle: the field is dropped rather than being emitted with
+     * an unresolved $ref, matching how OAS3Parser treats an undeclared component.
+     */
+    @Test(timeout = CIRCULAR_TIMEOUT_MS)
+    public void testUnknownDefinitionReferenceIsDropped() throws Exception {
+        String definition = swagger20("/holders", "Holder",
+                "    \"Holder\": {\n"
+                + "      \"type\": \"object\",\n"
+                + "      \"properties\": {\n"
+                + "        \"name\":    { \"type\": \"string\" },\n"
+                + "        \"missing\": { \"$ref\": \"#/definitions/DoesNotExist\" }\n"
+                + "      }\n"
+                + "    }");
+
+        JsonNode schema = generateToolSchema(definition, "/holders");
+        JsonNode props = requestBodyProperties(schema);
+
+        Assert.assertEquals("string", props.path("name").path("type").asText());
+        Assert.assertFalse("An undefined reference should not survive in the schema",
+                props.has("missing"));
+        assertNoUnresolvedReference(schema, "");
+    }
+
+    /**
+     * Fields that resolution deliberately does not carry across to a rebuilt property.
+     */
+    private static final Set<String> FIELDS_NOT_CARRIED = new HashSet<>(Arrays.asList(
+            "type",   // each property class fixes its own type in its constructor
+            "xml"));  // swagger-models exposes no getter, so it can neither be copied nor serialised
+
+    /**
+     * Fields holding nested content, which resolution rewrites by design. Checked for presence
+     * rather than equality.
+     */
+    private static final Set<String> FIELDS_RESOLVED = new HashSet<>(Arrays.asList(
+            "items",       // ArrayProperty
+            "properties",  // ObjectProperty
+            "property",    // MapProperty, its additionalProperties
+            "allOf"));     // ComposedProperty
+
+    /**
+     * Verifies behaviourally that resolution carries every field a property declares.
+     *
+     * Resolution rebuilds properties rather than editing them in place, so anything the rebuild
+     * forgets is dropped silently from every generated schema. testPropertyFieldsHaveNotChanged
+     * only notices when swagger-models changes shape; this drives the copy itself, so a field added
+     * to these classes fails here by name even if someone updates that list without updating the
+     * copy.
+     */
+    @Test
+    public void testResolutionCarriesEveryDeclaredPropertyField() throws Exception {
+        Swagger swagger = new SwaggerParser().parse(swagger20("/x", "Empty",
+                "    \"Empty\": { \"type\": \"object\", \"properties\": {} }"));
+
+        for (Class<? extends AbstractProperty> type : Arrays.asList(
+                ArrayProperty.class, ObjectProperty.class, MapProperty.class, ComposedProperty.class)) {
+
+            AbstractProperty source = type.getDeclaredConstructor().newInstance();
+            for (Field f : declaredFieldsOf(type)) {
+                Object value = sampleValue(f);
+                if (value != null) {
+                    f.setAccessible(true);
+                    f.set(source, value);
+                }
+            }
+
+            Property resolved = invokeResolveProperty(source, swagger);
+            Assert.assertNotNull(type.getSimpleName() + " should resolve to a property", resolved);
+
+            for (Field f : declaredFieldsOf(type)) {
+                String name = f.getName();
+                if (FIELDS_NOT_CARRIED.contains(name)) {
+                    continue;
+                }
+                f.setAccessible(true);
+                Object before = f.get(source);
+                if (FIELDS_RESOLVED.contains(name)) {
+                    // rewritten by design; only its presence is meaningful
+                    Field target = fieldOn(resolved.getClass(), name);
+                    if (target != null) {
+                        target.setAccessible(true);
+                        Assert.assertNotNull(type.getSimpleName() + "." + name
+                                + " lost its nested content during resolution", target.get(resolved));
+                    }
+                    continue;
+                }
+                Field target = fieldOn(resolved.getClass(), name);
+                Assert.assertNotNull(type.getSimpleName() + "." + name
+                        + " has no counterpart on the resolved property", target);
+                target.setAccessible(true);
+                Assert.assertEquals(type.getSimpleName() + "." + name
+                                + " was not carried across by resolution - add it to "
+                                + "OAS2Parser.copyCommonPropertyFields or to the branch that "
+                                + "rebuilds this property type",
+                        before, target.get(resolved));
+            }
+        }
+    }
+
+    /** Declared fields of the class itself plus those it inherits from AbstractProperty. */
+    private List<Field> declaredFieldsOf(Class<?> type) {
+        List<Field> fields = new ArrayList<>();
+        for (Class<?> c = type; c != null && AbstractProperty.class.isAssignableFrom(c); c = c.getSuperclass()) {
+            for (Field f : c.getDeclaredFields()) {
+                if (!f.isSynthetic() && !java.lang.reflect.Modifier.isStatic(f.getModifiers())) {
+                    fields.add(f);
+                }
+            }
+        }
+        return fields;
+    }
+
+    private Field fieldOn(Class<?> type, String name) {
+        for (Class<?> c = type; c != null; c = c.getSuperclass()) {
+            try {
+                return c.getDeclaredField(name);
+            } catch (NoSuchFieldException ignored) {
+                // keep walking up
+            }
+        }
+        return null;
+    }
+
+    private Object sampleValue(Field f) {
+        Class<?> t = f.getType();
+        String name = f.getName();
+        if (FIELDS_NOT_CARRIED.contains(name)) {
+            return null;
+        }
+        if (t == String.class) {
+            return "value-of-" + name;
+        }
+        if (t == Boolean.class || t == boolean.class) {
+            return Boolean.TRUE;
+        }
+        if (t == Integer.class) {
+            return 7;
+        }
+        if (t == java.util.List.class) {
+            return Collections.singletonList(new ObjectProperty());
+        }
+        if (t == java.util.Map.class) {
+            return "vendorExtensions".equals(name)
+                    ? Collections.singletonMap("x-sample", (Object) "on")
+                    : Collections.singletonMap("nested", new StringProperty());
+        }
+        if (Property.class.isAssignableFrom(t)) {
+            return new StringProperty();
+        }
+        if (t == Object.class) {
+            return "example-of-" + name;
+        }
+        return null;
+    }
+
+    private Property invokeResolveProperty(Property property, Swagger swagger) throws Exception {
+        Method m = OAS2Parser.class.getDeclaredMethod("resolveProperty",
+                Property.class, Swagger.class, Set.class);
+        m.setAccessible(true);
+        return (Property) m.invoke(oas2Parser, property, swagger, new HashSet<String>());
+    }
 }

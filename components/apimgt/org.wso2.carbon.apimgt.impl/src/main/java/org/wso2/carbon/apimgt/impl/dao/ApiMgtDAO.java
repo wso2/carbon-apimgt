@@ -4723,44 +4723,25 @@ public class ApiMgtDAO {
     public Application[] getAllApplicationsOfTenantForMigration(String appTenantDomain) throws
             APIManagementException {
 
-        Connection connection;
-        PreparedStatement prepStmt = null;
-        ResultSet rs;
-        Application[] applications = null;
         String sqlQuery = SQLConstants.GET_SIMPLE_APPLICATIONS;
-
-        String tenantFilter = "AND SUB.TENANT_ID=?";
-        sqlQuery += tenantFilter;
-        try {
-            connection = APIMgtDBUtil.getConnection();
-
-            int appTenantId = APIUtil.getTenantIdFromTenantDomain(appTenantDomain);
-            prepStmt = connection.prepareStatement(sqlQuery);
+        ArrayList<Application> applicationsList = new ArrayList<Application>();
+        int appTenantId = APIUtil.getTenantIdFromTenantDomain(appTenantDomain);
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
             prepStmt.setInt(1, appTenantId);
-            rs = prepStmt.executeQuery();
-
-            ArrayList<Application> applicationsList = new ArrayList<Application>();
-            Application application;
-            while (rs.next()) {
-                application = new Application(Integer.parseInt(rs.getString("APPLICATION_ID")));
-                application.setName(rs.getString("NAME"));
-                application.setOwner(rs.getString("CREATED_BY"));
-                applicationsList.add(application);
-            }
-            applications = applicationsList.toArray(new Application[applicationsList.size()]);
-        } catch (SQLException e) {
-            handleException("Error when reading the application information from the persistence store.", e);
-        } finally {
-            if (prepStmt != null) {
-                try {
-                    prepStmt.close();
-                } catch (SQLException e) {
-                    log.warn("Database error. Could not close Statement. Continuing with others." +
-                            e.getMessage(), e);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    Application application = new Application(Integer.parseInt(rs.getString("APPLICATION_ID")));
+                    application.setName(rs.getString("NAME"));
+                    application.setUUID(rs.getString("UUID"));
+                    application.setOwner(rs.getString("CREATED_BY"));
+                    applicationsList.add(application);
                 }
             }
+        } catch (SQLException e) {
+            handleException("Error when reading the application information from the persistence store.", e);
         }
-        return applications;
+        return applicationsList.toArray(new Application[applicationsList.size()]);
     }
 
     /**
@@ -23002,6 +22983,56 @@ public class ApiMgtDAO {
             }
         } catch (SQLException e) {
             handleException("Failed to get SubscribedAPI of application :" + application.getName(), e);
+        }
+        return subscribedAPIs;
+    }
+
+    /**
+     * Retrieves all the subscriptions of the given application, including both plain API subscriptions and
+     * API Product subscriptions. Each returned {@link SubscribedAPI} is backed by the identifier type matching
+     * its subscription (APIIdentifier or APIProductIdentifier).
+     * <p>
+     * Unlike {@link #getSubscribedAPIsByApplication(Application)}, which filters out API Product subscriptions
+     * for backward compatibility with its existing callers, this method returns the complete set of subscriptions.
+     *
+     * @param application Application for which the subscriptions should be retrieved.
+     * @return a set of {@link SubscribedAPI} containing both API and API Product subscriptions of the application.
+     * @throws APIManagementException if an error occurs while retrieving the subscriptions.
+     */
+    public Set<SubscribedAPI> getSubscribedAPIsAndAPIProductsByApplication(Application application)
+            throws APIManagementException {
+        Set<SubscribedAPI> subscribedAPIs = new LinkedHashSet<>();
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps =
+                     connection.prepareStatement(SQLConstants.GET_SUBSCRIBED_APIS_BY_APP_ID_SQL)) {
+            ps.setInt(1, application.getId());
+            try (ResultSet result = ps.executeQuery()) {
+                while (result.next()) {
+                    String apiType = result.getString("TYPE");
+                    SubscribedAPI subscribedAPI;
+                    if (APIConstants.API_PRODUCT.equalsIgnoreCase(apiType)) {
+                        APIProductIdentifier identifier = new APIProductIdentifier(
+                                APIUtil.replaceEmailDomain(result.getString("API_PROVIDER")),
+                                result.getString("API_NAME"), result.getString("API_VERSION"));
+                        identifier.setUuid(result.getString("API_UUID"));
+                        subscribedAPI = new SubscribedAPI(application.getSubscriber(), identifier);
+                    } else {
+                        APIIdentifier identifier = new APIIdentifier(APIUtil.replaceEmailDomain(result.getString
+                                ("API_PROVIDER")), result.getString("API_NAME"),
+                                result.getString("API_VERSION"));
+                        identifier.setUuid(result.getString("API_UUID"));
+                        subscribedAPI = new SubscribedAPI(application.getSubscriber(), identifier);
+                    }
+                    subscribedAPI.setApplication(application);
+                    subscribedAPI.setOrganization(result.getString("ORGANIZATION"));
+                    initSubscribedAPI(subscribedAPI, result);
+                    subscribedAPIs.add(subscribedAPI);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get SubscribedAPIs and API Products of application :"
+                    + application.getName(), e);
         }
         return subscribedAPIs;
     }

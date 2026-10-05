@@ -93,6 +93,12 @@ public class ZillizVectorDBProviderServiceImpl implements VectorDBProviderServic
 
     @Override public String getType() { return APIConstants.AI.VECTOR_DB_PROVIDER_ZILLIZ_TYPE; }
 
+    @Override
+    public void close() {
+        // No persistent resource to release: each request builds and discards its own HttpClient
+        // in invokeZillizAPI() rather than reusing one held by this instance.
+    }
+
     /**
      * Create a vector index in the database if it does not exist.
      */

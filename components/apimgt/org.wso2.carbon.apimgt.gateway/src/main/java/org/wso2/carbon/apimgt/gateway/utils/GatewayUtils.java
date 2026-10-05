@@ -2037,6 +2037,43 @@ public class GatewayUtils {
         sendFault(messageContext, status);
     }
 
+    /**
+     * Sends a fault response when the gateway itself cannot authenticate to an AWS backend - the
+     * credentials could not be resolved, or the configured role could not be assumed.
+     *
+     * <p>This is a gateway-to-backend failure, not a client authentication failure, so it is reported as
+     * {@code 500} with {@link APIMgtGatewayConstants#API_ERROR_TYPE_BACKEND} rather than a 401 with an
+     * authentication challenge - the caller's credentials were never the problem.</p>
+     *
+     * <p>The supplied {@code errorDetail} is returned to the client and must stay generic. The
+     * underlying AWS failure quotes role ARNs, account ids and STS messages, and is logged by the
+     * caller instead of being surfaced outward.</p>
+     *
+     * @param messageContext the message context of the current request.
+     * @param errorDetail    a generic, client-safe description of the failure.
+     * @return {@code false} always, so a mediator can {@code return} this directly to halt mediation.
+     */
+    public static boolean handleAWSAuthFailure(org.apache.synapse.MessageContext messageContext,
+                                               String errorDetail) {
+
+        messageContext.setProperty(SynapseConstants.ERROR_CODE,
+                APISecurityConstants.AWS_CREDENTIAL_RESOLUTION_ERROR);
+        messageContext.setProperty(SynapseConstants.ERROR_MESSAGE,
+                APISecurityConstants.AWS_CREDENTIAL_RESOLUTION_ERROR_MESSAGE);
+        messageContext.setProperty(SynapseConstants.ERROR_DETAIL, errorDetail);
+        // Publish the error flow type such that any error sequence can branch on it.
+        messageContext.setProperty(APIMgtGatewayConstants.API_ERROR_TYPE,
+                APIMgtGatewayConstants.API_ERROR_TYPE_BACKEND);
+        Mediator sequence = getErrorResponseFormatterSequence(messageContext,
+                APISecurityConstants.BACKEND_AUTH_FAILURE_HANDLER);
+        // Invoke the custom error handler specified by the user. If it handles the response itself, the
+        // rest of the fault handling is skipped.
+        if (sequence == null || sequence.mediate(messageContext)) {
+            sendFault(messageContext, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        }
+        return false;
+    }
+
     protected static void sendFault(org.apache.synapse.MessageContext messageContext, int status) {
         Utils.sendFault(messageContext, status);
     }

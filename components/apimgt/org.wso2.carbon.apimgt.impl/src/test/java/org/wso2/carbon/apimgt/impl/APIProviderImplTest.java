@@ -2013,4 +2013,129 @@ public class APIProviderImplTest {
         policy.setParameters(params);
         return policy;
     }
+
+    @Test
+    public void testGetRemovedProductResourcesWhenResourceIsUnchanged() throws APIManagementException {
+
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        API existingAPI = createAPIWithResources(true, "GET:/hello", "POST:/hello");
+
+        List<APIResource> removedResources = apiProvider
+                .getRemovedProductResources(createURITemplates("GET:/hello", "POST:/hello"), existingAPI);
+
+        Assert.assertTrue("An unchanged product used resource was reported as removed: " + removedResources,
+                removedResources.isEmpty());
+    }
+
+    /**
+     * Resource paths of an API are case-sensitive, therefore changing only the letter case of a resource path
+     * removes the original resource. This has to be reported when the resource is used by one or more API Products,
+     * otherwise the product to resource mapping of the API Product is left dangling.
+     */
+    @Test
+    public void testGetRemovedProductResourcesWhenResourcePathLetterCaseChanged() throws APIManagementException {
+
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        API existingAPI = createAPIWithResources(true, "GET:/hello");
+
+        List<APIResource> removedResources = apiProvider
+                .getRemovedProductResources(createURITemplates("GET:/Hello"), existingAPI);
+
+        Assert.assertEquals("A letter case only change of a product used resource path was not detected as a "
+                + "removed resource", 1, removedResources.size());
+        Assert.assertEquals(new APIResource("GET", "/hello"), removedResources.get(0));
+    }
+
+    /**
+     * Path parameter names are part of the URL template stored against the API Product, hence a letter case change
+     * of a path parameter has to be treated the same way as any other resource path change.
+     */
+    @Test
+    public void testGetRemovedProductResourcesWhenPathParameterLetterCaseChanged() throws APIManagementException {
+
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        API existingAPI = createAPIWithResources(true, "GET:/pizza/{orderId}");
+
+        List<APIResource> removedResources = apiProvider
+                .getRemovedProductResources(createURITemplates("GET:/pizza/{orderid}"), existingAPI);
+
+        Assert.assertEquals("A letter case only change of a path parameter was not detected as a removed resource",
+                1, removedResources.size());
+        Assert.assertEquals(new APIResource("GET", "/pizza/{orderId}"), removedResources.get(0));
+    }
+
+    /**
+     * HTTP verbs are persisted in upper case and are written to the API definition in lower case, therefore the verb
+     * comparison has to stay case-insensitive.
+     */
+    @Test
+    public void testGetRemovedProductResourcesWhenHttpVerbLetterCaseChanged() throws APIManagementException {
+
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        API existingAPI = createAPIWithResources(true, "GET:/hello");
+
+        List<APIResource> removedResources = apiProvider
+                .getRemovedProductResources(createURITemplates("get:/hello"), existingAPI);
+
+        Assert.assertTrue("A product used resource was reported as removed for an HTTP verb letter case difference: "
+                + removedResources, removedResources.isEmpty());
+    }
+
+    @Test
+    public void testGetRemovedProductResourcesWhenNonProductResourcePathLetterCaseChanged()
+            throws APIManagementException {
+
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        API existingAPI = createAPIWithResources(false, "GET:/hello");
+
+        List<APIResource> removedResources = apiProvider
+                .getRemovedProductResources(createURITemplates("GET:/Hello"), existingAPI);
+
+        Assert.assertTrue("A resource which is not used by any API Product was reported as removed: "
+                + removedResources, removedResources.isEmpty());
+    }
+
+    @Test
+    public void testGetRemovedProductResourcesWhenResourcePathChanged() throws APIManagementException {
+
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        API existingAPI = createAPIWithResources(true, "GET:/v1/hello");
+
+        List<APIResource> removedResources = apiProvider
+                .getRemovedProductResources(createURITemplates("GET:/v3/hello"), existingAPI);
+
+        Assert.assertEquals("A removed product used resource was not detected", 1, removedResources.size());
+        Assert.assertEquals(new APIResource("GET", "/v1/hello"), removedResources.get(0));
+    }
+
+    private API createAPIWithResources(boolean usedByProducts, String... verbAndPaths) {
+        API api = new API(new APIIdentifier("admin", "PizzaShackAPI", "1.0.0"));
+        api.setUuid(apiUUID);
+        api.setUriTemplates(createURITemplates(usedByProducts, verbAndPaths));
+        return api;
+    }
+
+    private Set<URITemplate> createURITemplates(String... verbAndPaths) {
+        return createURITemplates(false, verbAndPaths);
+    }
+
+    private Set<URITemplate> createURITemplates(boolean usedByProducts, String... verbAndPaths) {
+        Set<URITemplate> uriTemplates = new HashSet<>();
+        for (String verbAndPath : verbAndPaths) {
+            uriTemplates.add(createURITemplate(verbAndPath, usedByProducts));
+        }
+        return uriTemplates;
+    }
+
+    private URITemplate createURITemplate(String verbAndPath, boolean usedByProducts) {
+        String[] verbAndPathParts = verbAndPath.split(":", 2);
+        URITemplate uriTemplate = new URITemplate();
+        uriTemplate.setHTTPVerb(verbAndPathParts[0]);
+        uriTemplate.setUriTemplate(verbAndPathParts[1]);
+        uriTemplate.setResourceURI(verbAndPathParts[1]);
+        if (usedByProducts) {
+            uriTemplate.addUsedByProduct(new APIProductIdentifier("admin", "PizzaShackProduct", "1.0.0"));
+        }
+        return uriTemplate;
+    }
 }

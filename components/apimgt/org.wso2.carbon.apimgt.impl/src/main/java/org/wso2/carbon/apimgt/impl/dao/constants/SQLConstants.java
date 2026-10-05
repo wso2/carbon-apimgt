@@ -1014,7 +1014,7 @@ public class SQLConstants {
 
     public static final String GET_API_AVERAGE_RATING_SQL =
             " SELECT " +
-            "   CAST( SUM(RATING) AS DECIMAL)/COUNT(RATING) AS RATING " +
+            "   AVG(CAST(RATING AS DECIMAL(10,3))) AS RATING " +
             " FROM " +
             "   AM_API_RATINGS " +
             " WHERE " +
@@ -1161,15 +1161,16 @@ public class SQLConstants {
 
     public static final String GET_SIMPLE_APPLICATIONS =
             " SELECT " +
-            "   APPLICATION_ID, " +
-            "   NAME," +
-            "   USER_ID, " +
+            "   APP.UUID, " +
+            "   APP.APPLICATION_ID, " +
+            "   APP.NAME," +
+            "   SUB.USER_ID, " +
             "   APP.CREATED_BY " +
             " FROM" +
             "   AM_APPLICATION APP, " +
             "   AM_SUBSCRIBER SUB  " +
             " WHERE " +
-            "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID ";
+            "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID AND SUB.TENANT_ID = ?";
 
     public static final String GET_APPLICATIONS_BY_OWNER =
             "SELECT " +
@@ -3710,6 +3711,10 @@ public class SQLConstants {
         public static final String SELECT_CERTIFICATE_FOR_ALIAS = "SELECT ALIAS FROM AM_API_CLIENT_CERTIFICATE "
                 + "WHERE KEY_TYPE=? AND ALIAS=? AND REMOVED=? AND TENANT_ID =? and REVISION_UUID ='Current API'";
 
+        public static final String SELECT_CERTIFICATE_FOR_ALIAS_IN_REVISIONS = "SELECT ALIAS FROM AM_API_CLIENT_CERTIFICATE "
+                + "WHERE KEY_TYPE=? AND ALIAS=? AND REMOVED=? AND TENANT_ID =? AND REVISION_UUID <> 'Current API' "
+                + "AND API_ID <> (SELECT API_ID FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? AND API_VERSION = ? )";
+
         public static final String SELECT_CERTIFICATE_FOR_TENANT =
                 "SELECT AC.CERTIFICATE, AC.ALIAS, AC.TIER_NAME, AA.API_PROVIDER, AA.API_NAME, "
                         + "AA.API_VERSION FROM AM_API_CLIENT_CERTIFICATE AC, AM_API AA WHERE AC.KEY_TYPE=? AND "
@@ -3742,6 +3747,13 @@ public class SQLConstants {
                 "AND API_ID=(SELECT API_ID FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? AND API_VERSION = ? )";
 
         public static final String DELETE_CERTIFICATES_WITHOUT_APIID = "UPDATE AM_API_CLIENT_CERTIFICATE SET REMOVED=? "
+                + "WHERE TENANT_ID=? AND ALIAS=? AND KEY_TYPE=? AND REVISION_UUID ='Current API'";
+
+        public static final String HARD_DELETE_CERTIFICATES = "DELETE FROM AM_API_CLIENT_CERTIFICATE "
+                + "WHERE TENANT_ID=? AND REVISION_UUID ='Current API' AND ALIAS=? AND KEY_TYPE=? " +
+                "AND API_ID=(SELECT API_ID FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? AND API_VERSION = ? )";
+
+        public static final String HARD_DELETE_CERTIFICATES_WITHOUT_APIID = "DELETE FROM AM_API_CLIENT_CERTIFICATE "
                 + "WHERE TENANT_ID=? AND ALIAS=? AND KEY_TYPE=? AND REVISION_UUID ='Current API'";
 
         public static final String CERTIFICATE_COUNT_QUERY = "SELECT COUNT(*) AS count FROM AM_API_CLIENT_CERTIFICATE " +

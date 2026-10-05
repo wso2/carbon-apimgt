@@ -29,6 +29,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
@@ -36,7 +37,9 @@ import org.wso2.carbon.apimgt.api.model.Backend;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationMappingDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerOperationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubtypeConfigurationDTO;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -374,6 +377,110 @@ public class ImportUtilsMCPServerTest {
                     + "for SERVER_PROXY subtype");
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("No backends found to update for API"));
+        }
+    }
+
+    /**
+     * Builds an EXISTING_API subtype MCP Server carrying a single tool mapped onto a referenced API.
+     *
+     * @param referencedApiId      UUID the artifact carries for the referenced API
+     * @param referencedApiName    name of the referenced API, null when the artifact does not carry it
+     * @param referencedApiVersion version of the referenced API, null when the artifact does not carry it
+     * @return the operation mapping held by the MCP Server, so that it can be asserted on after the import
+     */
+    private APIOperationMappingDTO withReferencedApi(String referencedApiId, String referencedApiName,
+                                                     String referencedApiVersion) {
+
+        SubtypeConfigurationDTO subtypeConfig = new SubtypeConfigurationDTO();
+        subtypeConfig.setSubtype(APIConstants.API_SUBTYPE_EXISTING_API);
+        mcpServerDTO.setSubtypeConfiguration(subtypeConfig);
+
+        APIOperationMappingDTO apiOperationMapping = new APIOperationMappingDTO();
+        apiOperationMapping.setApiId(referencedApiId);
+        apiOperationMapping.setApiName(referencedApiName);
+        apiOperationMapping.setApiVersion(referencedApiVersion);
+
+        MCPServerOperationDTO operation = new MCPServerOperationDTO();
+        operation.setTarget("getMenu");
+        operation.setApiOperationMapping(apiOperationMapping);
+        mcpServerDTO.setOperations(Collections.singletonList(operation));
+
+        return apiOperationMapping;
+    }
+
+    /**
+     * The UUID carried by the artifact belongs to the environment it was exported from. When the referenced API is
+     * present here under the same name and version, the mapping is moved onto the UUID of this environment.
+     */
+    @Test
+    public void testImportMCPServerResolvesReferencedApiUuidOfThisEnvironment() throws Exception {
+
+        APIOperationMappingDTO apiOperationMapping =
+                withReferencedApi("uuid-of-the-source-environment", "BackendPizzaAPI", "1.0.0");
+        setupMCPServerDTOMock(mcpServerDTO);
+
+        ImportUtils.importMCPServer(EXTRACTED_PATH, mcpServerDTO, true, false, true,
+                false, false, tokenScopes, null, ORGANIZATION);
+
+        Assert.assertEquals("The referenced API should be resolved to the UUID of this environment",
+                API_UUID, apiOperationMapping.getApiId());
+    }
+
+    /**
+     * The name and the version are the key the referenced API is looked up by. An artifact that does not carry them
+     * keeps the UUID it came with, so that it is resolved the way it was before the lookup was introduced.
+     */
+    @Test
+    public void testImportMCPServerKeepsReferencedApiUuidWhenNameAndVersionAreMissing() throws Exception {
+
+        APIOperationMappingDTO apiOperationMapping = withReferencedApi("uuid-carried-by-the-artifact", null, null);
+        setupMCPServerDTOMock(mcpServerDTO);
+
+        // Match a lookup made with no name and no version too, so that the assertion fails if one is ever made.
+        PowerMockito.doReturn(targetApi).when(ImportUtils.class, "retrieveApiToOverwrite",
+                ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.anyString(),
+                ArgumentMatchers.any(APIProvider.class), ArgumentMatchers.any(Boolean.class),
+                ArgumentMatchers.anyString());
+
+        ImportUtils.importMCPServer(EXTRACTED_PATH, mcpServerDTO, true, false, true,
+                false, false, tokenScopes, null, ORGANIZATION);
+
+        Assert.assertEquals("The UUID carried by the artifact should be left untouched",
+                "uuid-carried-by-the-artifact", apiOperationMapping.getApiId());
+    }
+
+    /**
+     * An import failure is reported with the error of the failure that caused it. Reporting it as a generic server
+     * error hides the reason, such as a referenced API that is absent from this environment.
+     */
+    @Test
+    public void testImportMCPServerReportsTheErrorOfTheUnderlyingFailure() throws Exception {
+
+        withReferencedApi("uuid-of-the-source-environment", "BackendPizzaAPI", "1.0.0");
+        setupMCPServerDTOMock(mcpServerDTO);
+
+        // Take the creation path, where the reference is resolved while the MCP Server is being added.
+        PowerMockito.doReturn(null).when(ImportUtils.class, "retrieveApiToOverwrite",
+                ArgumentMatchers.anyString(), ArgumentMatchers.anyString(),
+                ArgumentMatchers.anyString(), ArgumentMatchers.any(APIProvider.class),
+                ArgumentMatchers.any(Boolean.class), ArgumentMatchers.anyString());
+
+        Mockito.when(PublisherCommonUtils.addAPIWithGeneratedSwaggerDefinition(
+                        ArgumentMatchers.any(APIDTOTypeWrapper.class), ArgumentMatchers.anyString(),
+                        ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.any()))
+                .thenThrow(new APIManagementException("Referenced API not found",
+                        ExceptionCodes.from(ExceptionCodes.REFERENCE_API_NOT_FOUND,
+                                "BackendPizzaAPI", "1.0.0", "uuid-of-the-source-environment")));
+
+        try {
+            ImportUtils.importMCPServer(EXTRACTED_PATH, mcpServerDTO, true, false, false,
+                    false, false, tokenScopes, null, ORGANIZATION);
+            Assert.fail("Should throw APIManagementException when the referenced API cannot be resolved");
+        } catch (APIManagementException e) {
+            Assert.assertEquals("The error of the underlying failure should be reported",
+                    ExceptionCodes.REFERENCE_API_NOT_FOUND.getErrorCode(), e.getErrorHandler().getErrorCode());
+            Assert.assertEquals("A reference that cannot be resolved is a bad request",
+                    400, e.getErrorHandler().getHttpStatusCode());
         }
     }
 }

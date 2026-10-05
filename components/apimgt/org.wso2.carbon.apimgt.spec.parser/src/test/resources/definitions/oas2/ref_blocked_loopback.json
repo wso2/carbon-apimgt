@@ -1,0 +1,17 @@
+{
+  "swagger": "2.0",
+  "info": { "title": "blocked-ref", "version": "1.0.0" },
+  "basePath": "/blocked-ref/1.0.0",
+  "paths": {
+    "/x": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "ok",
+            "schema": { "$ref": "http://169.254.169.254/x.json#/X" }
+          }
+        }
+      }
+    }
+  }
+}

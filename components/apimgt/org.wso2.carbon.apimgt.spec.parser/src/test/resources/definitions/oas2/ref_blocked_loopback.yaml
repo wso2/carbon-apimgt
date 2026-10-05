@@ -1,0 +1,15 @@
+# Swagger 2.0 definition (YAML) with a disallowed remote $ref. Regression fixture: a YAML OAS2 body must be
+# scanned for remote $refs by the network access control gate, not only a JSON one.
+swagger: "2.0"
+info:
+  title: blocked-ref-yaml
+  version: 1.0.0
+basePath: /blocked-ref-yaml/1.0.0
+paths:
+  /x:
+    get:
+      responses:
+        '200':
+          description: ok
+          schema:
+            $ref: 'http://169.254.169.254/x.json#/X'

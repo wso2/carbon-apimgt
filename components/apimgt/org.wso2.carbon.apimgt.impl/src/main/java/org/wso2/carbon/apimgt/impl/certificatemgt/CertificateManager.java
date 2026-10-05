@@ -179,8 +179,9 @@ public interface CertificateManager {
      * @param tenantId      : The tenant which the client certificate is added against
      * @param organization  : Organization
      * @return SUCCESS : If Operation succeeded, INTERNAL_SERVER_ERROR : If any internal error occurred,
-     * ALIAS_EXISTS_IN_TRUST_STORE : If the alias already present in the trust store,CERTIFICATE_EXPIRED : If the
-     * certificate is expired.
+     * ALIAS_EXISTS_IN_TRUST_STORE : If the alias already present in the trust store,
+     * ALIAS_EXISTS_IN_API_REVISION : If a revision of another API of the same tenant holds the alias,
+     * CERTIFICATE_EXPIRED : If the certificate is expired.
      */
     ResponseCode addClientCertificate(Identifier apiIdentifier, String certificate, String alias, String tierName,
                                       String keyType, int tenantId, String organization);

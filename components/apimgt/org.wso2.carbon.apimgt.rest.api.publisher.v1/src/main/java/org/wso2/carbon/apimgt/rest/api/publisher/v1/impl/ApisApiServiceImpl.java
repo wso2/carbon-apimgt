@@ -25,6 +25,7 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -90,6 +91,7 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.spec.parser.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import software.amazon.awssdk.core.exception.SdkClientException;
@@ -129,8 +131,9 @@ public class ApisApiServiceImpl implements ApisApiService {
     private static final String API_PRODUCT_TYPE = "APIPRODUCT";
 
     @Override
-    public Response getAllAPIs(Integer limit, Integer offset, String xWSO2Tenant, String query, String ifNoneMatch,
-                               String accept, MessageContext messageContext) {
+    public Response getAllAPIs(Integer limit, Integer offset, String xWSO2Tenant, String query,
+                               Boolean expandProperties, String ifNoneMatch, String accept,
+                               MessageContext messageContext) {
 
         List<API> allMatchedApis = new ArrayList<>();
         Object apiListDTO;
@@ -170,7 +173,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             Set<API> apis = (Set<API>) result.get("apis");
             allMatchedApis.addAll(apis);
 
-            apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis);
+            apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis, BooleanUtils.isTrue(expandProperties));
 
             //Add pagination section in the response
             Object totalLength = result.get("length");
@@ -1576,6 +1579,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else if (ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE.getResponseCode() == responseCode) {
                 RestApiUtil.handleResourceAlreadyExistsError("The alias '" + alias +
                         "' already exists in the trust store for " + keyType + " key type.", log);
+            } else if (ResponseCode.ALIAS_EXISTS_IN_API_REVISION.getResponseCode() == responseCode) {
+                RestApiUtil.handleResourceAlreadyExistsError("The alias '" + alias + "' is already used by a "
+                        + "revision of another API or API Product in this tenant. Client certificate aliases must "
+                        + "be unique within a tenant, including aliases held by API revisions.", log);
             } else if (ResponseCode.CERTIFICATE_EXPIRED.getResponseCode() == responseCode) {
                 RestApiUtil.handleBadRequest(
                         "Error while adding the certificate to the API " + apiId + ". " + "Certificate Expired.", log);
@@ -3053,7 +3060,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     private String updateSwagger(String apiId, String apiDefinition, String organization)
             throws APIManagementException, FaultGatewaysException {
-        OASParserOptions oasParserOptions = CommonUtil.getOasParserOptions();
+        OASParserOptions oasParserOptions = APIUtil.buildRefResolutionOptions(
+                CommonUtil.getOasParserOptions(), RestApiCommonUtil.getLoggedInUserTenantDomain());
         APIDefinitionValidationResponse response = OASParserUtil.validateAPIDefinition(apiDefinition, true,
                 oasParserOptions);
         if (!response.isValid()) {
@@ -3220,9 +3228,15 @@ public class ApisApiServiceImpl implements ApisApiService {
         ApiEndpointValidationResponseDTO apiEndpointValidationResponseDTO = new ApiEndpointValidationResponseDTO();
         apiEndpointValidationResponseDTO.setError("");
         try {
+            APIUtil.validateRemoteURL(endpointUrl, RestApiCommonUtil.getLoggedInUserTenantDomain());
             APIEndpointValidationDTO apiEndpointValidationDTO = ApisApiServiceImplUtils.sendHttpHEADRequest(endpointUrl);
             apiEndpointValidationResponseDTO = APIMappingUtil.fromEndpointValidationToDTO(apiEndpointValidationDTO);
             return Response.status(Response.Status.OK).entity(apiEndpointValidationResponseDTO).build();
+        } catch (APIManagementException e) {
+            if (e.getErrorHandler() == null || e.getErrorHandler().getHttpStatusCode() != 400) {
+                throw RestApiUtil.buildInternalServerErrorException(e.getMessage());
+            }
+            apiEndpointValidationResponseDTO.setError(e.getErrorHandler().getErrorDescription());
         } catch (MalformedURLException e) {
             log.error("Malformed Url error occurred while sending the HEAD request to the given endpoint url:", e);
             apiEndpointValidationResponseDTO.setError(e.getMessage());
@@ -3285,7 +3299,11 @@ public class ApisApiServiceImpl implements ApisApiService {
                     inlineApiDefinition,
                     returnContent, false);
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
+            if (e.getErrorHandler() != null && e.getErrorHandler().getHttpStatusCode() == 400) {
+                RestApiUtil.handleBadRequest(e.getErrorHandler().getErrorDescription(), log);
+            } else {
+                RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
+            }
         }
 
         OpenAPIDefinitionValidationResponseDTO validationResponseDTO = (OpenAPIDefinitionValidationResponseDTO) validationResponseMap
@@ -3426,6 +3444,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         WSDLValidationResponse validationResponse = new WSDLValidationResponse();
 
         if (url != null) {
+            APIUtil.validateRemoteURL(url, RestApiCommonUtil.getLoggedInUserTenantDomain());
             try {
                 URL wsdlUrl = new URL(url);
                 validationResponse = APIMWSDLReader.validateWSDLUrl(wsdlUrl);
@@ -3509,6 +3528,22 @@ public class ApisApiServiceImpl implements ApisApiService {
             additionalPropertiesAPI.setProvider(username);
             additionalPropertiesAPI.setType(APIDTO.TypeEnum.fromValue(implementationType));
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            Object wsdlEndpointConfig = additionalPropertiesAPI.getEndpointConfig();
+            if (wsdlEndpointConfig instanceof Map) {
+                String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+                org.json.JSONObject endpointConfigObj = new org.json.JSONObject((Map) wsdlEndpointConfig);
+                if (!APIConstants.ENDPOINT_TYPE_DEFAULT.equalsIgnoreCase(
+                        endpointConfigObj.optString(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                    ArrayList<String> endpoints = new ArrayList<>();
+                    APIUtil.extractURLsFromEndpointConfig(endpointConfigObj, APIConstants.API_DATA_PRODUCTION_ENDPOINTS, endpoints);
+                    APIUtil.extractURLsFromEndpointConfig(endpointConfigObj, APIConstants.API_DATA_SANDBOX_ENDPOINTS, endpoints);
+                    APIUtil.extractURLsFromEndpointConfig(endpointConfigObj, APIConstants.ENDPOINT_PRODUCTION_FAILOVERS, endpoints);
+                    APIUtil.extractURLsFromEndpointConfig(endpointConfigObj, APIConstants.ENDPOINT_SANDBOX_FAILOVERS, endpoints);
+                    for (String endpoint : endpoints) {
+                        APIUtil.validateRemoteURL(endpoint, tenantDomain);
+                    }
+                }
+            }
             API apiToAdd = PublisherCommonUtils
                     .prepareToCreateAPIByDTO(new APIDTOTypeWrapper(additionalPropertiesAPI), RestApiCommonUtil.getLoggedInUserProvider(),
                             username, organization);
@@ -3861,7 +3896,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response exportAPI(String apiId, String name, String version, String revisionNum,
                               String providerName, String format, Boolean preserveStatus,
                               Boolean exportLatestRevision, String gatewayEnvironment, Boolean preserveCredentials,
-                              MessageContext messageContext)
+                              Boolean all, Boolean allRevisions, String xWSO2Tenant, MessageContext messageContext)
             throws APIManagementException {
 
         if (StringUtils.isEmpty(gatewayEnvironment)) {
@@ -3875,19 +3910,43 @@ public class ApisApiServiceImpl implements ApisApiService {
             ExportFormat exportFormat = StringUtils.isNotEmpty(format) ?
                     ExportFormat.valueOf(format.toUpperCase()) :
                     ExportFormat.YAML;
-            try {
-                String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            if (Boolean.TRUE.equals(all)) {
+                String organization = RestApiCommonUtil.validateTenantDomain(xWSO2Tenant);
                 ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
-                File file = importExportAPI
-                        .exportAPI(apiId, name, version, revisionNum, providerName, preserveStatus, exportFormat,
-                                Boolean.TRUE, preserveCredentials, exportLatestRevision, StringUtils.EMPTY, organization);
+                File file = importExportAPI.exportAPIs(organization, Boolean.TRUE.equals(allRevisions), exportFormat);
                 return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
                         "attachment; filename=\"" + file.getName() + "\"").build();
+            }
+            try {
+                String organization = RestApiCommonUtil.validateTenantDomain(xWSO2Tenant);
+                // Cross-tenant requests (organization differs from the caller's own tenant, which
+                // validateTenantDomain() only allows for callers holding the super-admin protected
+                // permission) must run under the target tenant's carbon context - otherwise the
+                // registry/governance lookups inside exportAPI() below resolve against the caller's
+                // own tenant and fail with a NullPointerException on the target API's artifact.
+                boolean tenantFlowStarted = false;
+                if (!RestApiCommonUtil.getLoggedInUserTenantDomain().equals(organization)) {
+                    RestApiCommonUtil.startTenantFlowWithTenantAdmin(organization);
+                    tenantFlowStarted = true;
+                }
+                try {
+                    ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
+                    File file = importExportAPI
+                            .exportAPI(apiId, name, version, revisionNum, providerName, preserveStatus, exportFormat,
+                                    Boolean.TRUE, preserveCredentials, exportLatestRevision, StringUtils.EMPTY,
+                                    organization);
+                    return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
+                            "attachment; filename=\"" + file.getName() + "\"").build();
+                } finally {
+                    if (tenantFlowStarted) {
+                        PrivilegedCarbonContext.endTenantFlow();
+                    }
+                }
             } catch (APIImportExportException e) {
                 throw new APIManagementException("Error while exporting " + RestApiConstants.RESOURCE_API, e);
             }
         } else {
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            String organization = RestApiCommonUtil.validateTenantDomain(xWSO2Tenant);
             if (StringUtils.isEmpty(apiId) && (StringUtils.isNotEmpty(name) && StringUtils.isNotEmpty(version))) {
                 APIIdentifier apiIdentifier = new APIIdentifier(providerName, name, version);
                 apiId = APIUtil.getUUIDFromIdentifier(apiIdentifier, organization);
@@ -3974,6 +4033,25 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleBadRequest(errorMessage, log);
             } else {
                 additionalPropertiesAPI = new ObjectMapper().readValue(additionalProperties, APIDTO.class);
+                Object rawEndpointConfig = additionalPropertiesAPI.getEndpointConfig();
+                if (rawEndpointConfig instanceof Map) {
+                    org.json.JSONObject endpointConfigObj = new org.json.JSONObject((Map) rawEndpointConfig);
+                    if (!APIConstants.ENDPOINT_TYPE_DEFAULT.equalsIgnoreCase(
+                            endpointConfigObj.optString(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                        ArrayList<String> endpointURLs = new ArrayList<>();
+                        APIUtil.extractURLsFromEndpointConfig(endpointConfigObj,
+                                APIConstants.API_DATA_PRODUCTION_ENDPOINTS, endpointURLs);
+                        APIUtil.extractURLsFromEndpointConfig(endpointConfigObj,
+                                APIConstants.API_DATA_SANDBOX_ENDPOINTS, endpointURLs);
+                        APIUtil.extractURLsFromEndpointConfig(endpointConfigObj,
+                                APIConstants.ENDPOINT_PRODUCTION_FAILOVERS, endpointURLs);
+                        APIUtil.extractURLsFromEndpointConfig(endpointConfigObj,
+                                APIConstants.ENDPOINT_SANDBOX_FAILOVERS, endpointURLs);
+                        for (String endpointURL : endpointURLs) {
+                            APIUtil.validateRemoteURL(endpointURL, RestApiCommonUtil.getLoggedInUserTenantDomain());
+                        }
+                    }
+                }
             }
 
             if (schema != null && StringUtils.isNotEmpty(schema)) {
@@ -3981,6 +4059,14 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else if (fileInputStream != null && !StringUtils.isBlank(additionalProperties)) {
                 graphQLSchema = IOUtils.toString(fileInputStream, RestApiConstants.CHARSET);
             } else if (url != null) {
+                try {
+                    APIUtil.validateRemoteURL(url, RestApiCommonUtil.getLoggedInUserTenantDomain());
+                } catch (APIManagementException e) {
+                    if (e.getErrorHandler() != null && e.getErrorHandler().getHttpStatusCode() == 400) {
+                        throw RestApiUtil.buildBadRequestException(e.getErrorHandler().getErrorDescription());
+                    }
+                    throw RestApiUtil.buildInternalServerErrorException(e.getMessage());
+                }
                 graphQLSchema = PublisherCommonUtils.retrieveGraphQLSchemaFromURL(url);
             } else {
                 Map<String, Object> endpointConfigurationMap =
@@ -3990,6 +4076,14 @@ public class ApisApiServiceImpl implements ApisApiService {
                     Map<String, String> productionEndpoints = (Map<String, String>) endpointConfigurationMap.get(
                         "production_endpoints");
                     endpointURL = productionEndpoints.get("url");
+                }
+                try {
+                    APIUtil.validateRemoteURL(endpointURL, RestApiCommonUtil.getLoggedInUserTenantDomain());
+                } catch (APIManagementException e) {
+                    if (e.getErrorHandler() != null && e.getErrorHandler().getHttpStatusCode() == 400) {
+                        throw RestApiUtil.buildBadRequestException(e.getErrorHandler().getErrorDescription());
+                    }
+                    throw RestApiUtil.buildInternalServerErrorException(e.getMessage());
                 }
                 graphQLSchema = PublisherCommonUtils.generateGraphQLSchemaFromIntrospection(endpointURL);
             }
@@ -4034,6 +4128,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         } catch (APIManagementException e) {
             if (e.getMessage().contains(ExceptionCodes.API_CONTEXT_MALFORMED_EXCEPTION.getErrorMessage())) {
                 RestApiUtil.handleBadRequest(e.getMessage(), e, log);
+            }
+            if (e.getErrorHandler() != null && e.getErrorHandler().getHttpStatusCode() == 400) {
+                RestApiUtil.handleBadRequest(e.getErrorHandler().getErrorDescription(), e, log);
             }
             String errorMessage = "Error while adding new API : " + additionalPropertiesAPI.getProvider() + "-" +
                     additionalPropertiesAPI.getName() + "-" + additionalPropertiesAPI.getVersion() + " - "
@@ -4117,6 +4214,18 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (fileDetail != null) {
                 filename = fileDetail.getDataHandler().getName();
                 schema = IOUtils.toString(fileInputStream, RestApiConstants.CHARSET);
+            }
+            if (url != null) {
+                try {
+                    APIUtil.validateRemoteURL(url, RestApiCommonUtil.getLoggedInUserTenantDomain());
+                } catch (APIManagementException e) {
+                    if (e.getErrorHandler() == null || e.getErrorHandler().getHttpStatusCode() != 400) {
+                        throw RestApiUtil.buildInternalServerErrorException(e.getMessage());
+                    }
+                    validationResponse.setIsValid(false);
+                    validationResponse.setErrorMessage(e.getErrorHandler().getErrorDescription());
+                    return Response.ok().entity(validationResponse).build();
+                }
             }
             validationResponse = PublisherCommonUtils.validateGraphQLSchema(filename, schema, url, useIntrospection);
         } catch (IOException | APIManagementException e) {
@@ -4412,6 +4521,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             String vhost = apiRevisionDeploymentDTO.getVhost();
             APIRevisionDeployment apiRevisionDeployment = ApisApiServiceImplUtils.mapAPIRevisionDeploymentWithValidation(revisionId,
                     environments, environment, displayOnDevportal, vhost, true);
+
+            APIDTO apiRevisionDto = getAPIByID(revisionId, apiProvider, organization);
+            validateEndpointsForGatewayEnvironmentType(environments.get(environment), apiRevisionDto);
             apiRevisionDeployments.add(apiRevisionDeployment);
         }
         Map<String, String> complianceResult = PublisherCommonUtils.checkGovernanceComplianceSync(apiId,
@@ -4681,6 +4793,14 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         if (url != null) {
             try {
+                APIUtil.validateRemoteURL(url, RestApiCommonUtil.getLoggedInUserTenantDomain());
+            } catch (APIManagementException e) {
+                if (e.getErrorHandler() != null && e.getErrorHandler().getHttpStatusCode() == 400) {
+                    throw RestApiUtil.buildBadRequestException(e.getErrorHandler().getErrorDescription());
+                }
+                throw e;
+            }
+            try {
                 URL urlObj = new URL(url);
                 HttpClient httpClient = APIUtil.getHttpClient(urlObj.getPort(), urlObj.getProtocol());
                 String maxFileSizeStr = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
@@ -4765,6 +4885,23 @@ public class ApisApiServiceImpl implements ApisApiService {
             websocketTransports.add(APIConstants.WS_PROTOCOL);
             websocketTransports.add(APIConstants.WSS_PROTOCOL);
             apiDTOFromProperties.setTransport(websocketTransports);
+        }
+
+        Object asyncEndpointConfig = apiDTOFromProperties.getEndpointConfig();
+        if (asyncEndpointConfig instanceof Map) {
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            org.json.JSONObject endpointConfigObj = new org.json.JSONObject((Map) asyncEndpointConfig);
+            if (!APIConstants.ENDPOINT_TYPE_DEFAULT.equalsIgnoreCase(
+                    endpointConfigObj.optString(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                ArrayList<String> endpoints = new ArrayList<>();
+                APIUtil.extractURLsFromEndpointConfig(endpointConfigObj, APIConstants.API_DATA_PRODUCTION_ENDPOINTS, endpoints);
+                APIUtil.extractURLsFromEndpointConfig(endpointConfigObj, APIConstants.API_DATA_SANDBOX_ENDPOINTS, endpoints);
+                APIUtil.extractURLsFromEndpointConfig(endpointConfigObj, APIConstants.ENDPOINT_PRODUCTION_FAILOVERS, endpoints);
+                APIUtil.extractURLsFromEndpointConfig(endpointConfigObj, APIConstants.ENDPOINT_SANDBOX_FAILOVERS, endpoints);
+                for (String endpoint : endpoints) {
+                    APIUtil.validateRemoteURL(endpoint, tenantDomain);
+                }
+            }
         }
 
         try {
@@ -5020,8 +5157,12 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleBadRequest("Unsupported protocol specified in the Service Definition. Protocol " +
                         "should be either sse or websub or ws", log);
             }
-            RestApiUtil.handleInternalServerError("Error while retrieving the service key of the service " +
-                    "associated with API with id " + apiId, log);
+            if (e.getErrorHandler() != null && e.getErrorHandler().getHttpStatusCode() == 400) {
+                RestApiUtil.handleBadRequest(e.getErrorHandler().getErrorDescription(), log);
+            } else {
+                RestApiUtil.handleInternalServerError("Error while retrieving the service key of the service " +
+                        "associated with API with id " + apiId, log);
+            }
         } catch (FaultGatewaysException e) {
             String errorMessage = "Error while updating API : " + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -5259,6 +5400,86 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         // if apiProvider.getEnvironment(organization, envId) return null, it will throw an exception
         apiProvider.getEnvironment(organization, envId);
+    }
+
+    /**
+     * Rejects a revision deployment when the target gateway environment's type requires an endpoint the API does
+     * not define. Mirrors the guard in TemplateBuilderUtil#createAPIGatewayDTOtoPublishAPI, which would otherwise
+     * skip the API during synapse artifact generation and surface as "Storage returned null" on the gateway.
+     *
+     * @param environment target gateway environment
+     * @param apiDto      API being deployed
+     * @throws APIManagementException if the API does not define the endpoint required by the environment type
+     */
+    private void validateEndpointsForGatewayEnvironmentType(Environment environment, APIDTO apiDto)
+            throws APIManagementException {
+
+        if (environment == null || apiDto == null) {
+            return;
+        }
+        String environmentType = environment.getType();
+        boolean requiresProductionEndpoint =
+                APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environmentType);
+        boolean requiresSandboxEndpoint =
+                APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environmentType);
+        // 'hybrid' environments impose no endpoint requirement, matching the generation-time guard
+        if (!requiresProductionEndpoint && !requiresSandboxEndpoint) {
+            return;
+        }
+        if (!(apiDto.getEndpointConfig() instanceof Map)) {
+            return;
+        }
+        Map endpointConfigMap = (Map) apiDto.getEndpointConfig();
+        if (APIConstants.ENDPOINT_TYPE_AWSLAMBDA
+                .equals(endpointConfigMap.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+            return;
+        }
+        // APIUtil.isProductionEndpointsExists / isSandboxEndpointsExists dereference config members without
+        // null checks and catch only ParseException / ClassCastException, so several endpoint configurations
+        // make them throw. The try/catch around the calls below is what makes them safe; this cheap
+        // pre-check only skips the most common such shape without logging a stack trace for it.
+        if (!endpointConfigMap.containsKey(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)) {
+            return;
+        }
+        String endpointConfig;
+        try {
+            endpointConfig = new ObjectMapper().writeValueAsString(endpointConfigMap);
+        } catch (JsonProcessingException e) {
+            // Cannot evaluate the configuration; preserve the pre-existing behaviour rather than
+            // rejecting a deployment because of a serialization problem.
+            log.warn("Could not evaluate the endpoint configuration of API " + apiDto.getId()
+                    + " while validating deployment to gateway environment " + environment.getName(), e);
+            return;
+        }
+        boolean productionEndpointsExist;
+        boolean sandboxEndpointsExist;
+        try {
+            productionEndpointsExist = APIUtil.isProductionEndpointsExists(endpointConfig);
+            sandboxEndpointsExist = APIUtil.isSandboxEndpointsExists(endpointConfig);
+        } catch (RuntimeException e) {
+            // The configuration cannot be evaluated - for example a 'graphql' endpoint_type with no 'http'
+            // member, which makes the predicates dereference null. Preserve the pre-existing behaviour
+            // rather than rejecting a deployment on evidence we do not have.
+            log.warn("Could not evaluate the endpoint configuration of API " + apiDto.getId()
+                    + " while validating deployment to gateway environment " + environment.getName(), e);
+            return;
+        }
+        if (requiresProductionEndpoint && !productionEndpointsExist) {
+            log.warn("Rejecting deployment of API " + apiDto.getId() + " to gateway environment "
+                    + environment.getName() + " of type '" + environmentType
+                    + "': the API does not define a production endpoint.");
+            RestApiUtil.handleBadRequest(ExceptionCodes.from(
+                    ExceptionCodes.MISSING_ENDPOINT_FOR_GATEWAY_ENV_TYPE, environment.getName(),
+                    APIConstants.GATEWAY_ENV_TYPE_PRODUCTION), log);
+        }
+        if (requiresSandboxEndpoint && !sandboxEndpointsExist) {
+            log.warn("Rejecting deployment of API " + apiDto.getId() + " to gateway environment "
+                    + environment.getName() + " of type '" + environmentType
+                    + "': the API does not define a sandbox endpoint.");
+            RestApiUtil.handleBadRequest(ExceptionCodes.from(
+                    ExceptionCodes.MISSING_ENDPOINT_FOR_GATEWAY_ENV_TYPE, environment.getName(),
+                    APIConstants.GATEWAY_ENV_TYPE_SANDBOX), log);
+        }
     }
 
 }

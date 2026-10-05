@@ -11,7 +11,6 @@
     "IsUnlimitedTierPaid",
     "ExtensionHandlerPosition",
     "RESTAPIScopes",
-    "Meta",
     "NotificationsEnabled",
     "Notifications",
     "DefaultRoles"
@@ -455,54 +454,6 @@
               }
             ]
           }
-        }
-      },
-      "additionalProperties": true
-    },
-    "Meta": {
-      "$id": "#/properties/Meta",
-      "type": "object",
-      "title": "The Meta schema",
-      "description": "An explanation about the purpose of this instance.",
-      "default": {},
-      "examples": [
-        {
-          "Migration": {
-            "3.0.0": true
-          }
-        }
-      ],
-      "required": [
-        "Migration"
-      ],
-      "properties": {
-        "Migration": {
-          "$id": "#/properties/Meta/properties/Migration",
-          "type": "object",
-          "title": "The Migration schema",
-          "description": "An explanation about the purpose of this instance.",
-          "default": {},
-          "examples": [
-            {
-              "3.0.0": true
-            }
-          ],
-          "required": [
-            "3.0.0"
-          ],
-          "properties": {
-            "3.0.0": {
-              "$id": "#/properties/Meta/properties/Migration/properties/3.0.0",
-              "type": "boolean",
-              "title": "The 3.0.0 schema",
-              "description": "An explanation about the purpose of this instance.",
-              "default": false,
-              "examples": [
-                true
-              ]
-            }
-          },
-          "additionalProperties": true
         }
       },
       "additionalProperties": true
@@ -1355,6 +1306,46 @@
       "examples": [
         true, false
       ]
+    },
+    "NetworkSecurityAccessControl": {
+      "$id": "#/properties/NetworkSecurityAccessControl",
+      "type": "object",
+      "title": "NetworkSecurityAccessControl schema",
+      "description": "Tenant-level network security access control. Activated when this key is present.",
+      "default": {},
+      "properties": {
+        "Mode": {
+          "$id": "#/properties/NetworkSecurityAccessControl/properties/Mode",
+          "type": "string",
+          "title": "Mode schema",
+          "description": "'allow' — only hosts matching the Hosts list are permitted; others are blocked. 'deny' — hosts matching the Hosts list are blocked; others are permitted.",
+          "enum": ["allow", "deny"],
+          "examples": ["allow", "deny"]
+        },
+        "Hosts": {
+          "$id": "#/properties/NetworkSecurityAccessControl/properties/Hosts",
+          "type": "array",
+          "title": "Hosts schema",
+          "description": "Wildcard host patterns. In 'allow' mode these are permitted and bypass BlockPrivateNetworkAccess. In 'deny' mode these are blocked.",
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "examples": [
+            ["*.mycompany.com", "trustedpartner.io"]
+          ]
+        },
+        "BlockPrivateNetworkAccess": {
+          "$id": "#/properties/NetworkSecurityAccessControl/properties/BlockPrivateNetworkAccess",
+          "type": "boolean",
+          "title": "BlockPrivateNetworkAccess schema",
+          "description": "When true, blocks outbound requests resolving to private/reserved IP ranges. In allow mode, hosts matched by the Hosts list are exempt from private-network blocking.",
+          "default": false,
+          "examples": [true, false]
+        }
+      },
+      "required": ["Mode"],
+      "additionalProperties": false
     }
   },
   "additionalProperties": true

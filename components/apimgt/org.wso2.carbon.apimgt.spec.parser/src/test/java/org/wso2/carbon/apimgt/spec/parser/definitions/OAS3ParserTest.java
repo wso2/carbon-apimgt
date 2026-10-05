@@ -8,6 +8,7 @@ import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.security.OAuthFlow;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.parser.OpenAPIV3Parser;
+import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
@@ -15,6 +16,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -25,6 +27,7 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -550,5 +553,158 @@ public class OAS3ParserTest extends OASTestBase {
         apiScopes.add(globalScope);
         apiScopes.add(petLocalScope);
         return apiScopes;
+    }
+
+    @Test
+    public void testConvertOptionsToParseOptionsEnablesSafeResolution() {
+        OASParserOptions opts = new OASParserOptions();
+        opts.setNetworkAccessControlEnabled(true);
+        opts.setRemoteRefAllowList(Arrays.asList("*.wso2.com"));
+        opts.setRemoteRefBlockList(Arrays.asList("*.internal"));
+        ParseOptions po = new OAS3Parser().convertOptionsToParseOptions(opts);
+        Assert.assertTrue(po.isSafelyResolveURL());
+        Assert.assertEquals(Arrays.asList("*.wso2.com"), po.getRemoteRefAllowList());
+        Assert.assertEquals(Arrays.asList("*.internal"), po.getRemoteRefBlockList());
+    }
+
+    @Test
+    public void testConvertOptionsLeavesSafeResolutionOffWhenPolicyNotConfigured() {
+        // Backwards compatibility: with no network access-control policy configured, safe URL resolution must stay
+        // off so remote refs resolve exactly as they did before the feature was introduced.
+        OASParserOptions opts = new OASParserOptions();
+        ParseOptions po = new OAS3Parser().convertOptionsToParseOptions(opts);
+        Assert.assertFalse("Safe URL resolution must remain off when the policy is not configured",
+                po.isSafelyResolveURL());
+    }
+
+    @Test
+    public void testBlockedRemoteRefIsRejected() throws Exception {
+        String def = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(
+                "definitions/oas3/ref_blocked_loopback.json"), "UTF-8");
+        OASParserOptions opts = new OASParserOptions();
+        opts.setNetworkAccessControlEnabled(true);
+        opts.setRemoteRefBlockList(Arrays.asList("169.254.169.254"));
+        try {
+            OASParserUtil.validateAPIDefinition(def, true, opts);
+            Assert.fail("A blocked remote $ref must be rejected");
+        } catch (APIManagementException e) {
+            Assert.assertEquals("A blocked remote $ref must surface as UNTRUSTED_URL_IN_DEFINITION",
+                    ExceptionCodes.UNTRUSTED_URL_IN_DEFINITION.getErrorCode(), e.getErrorHandler().getErrorCode());
+        }
+    }
+
+    @Test
+    public void testOAS2BlockedRemoteRefIsRejected() throws Exception {
+        // OAS2 definitions fall back to the legacy SwaggerParser, which would otherwise fetch remote $refs
+        // unchecked; assert the gate in tryOAS2Validation rejects a blocked ref before that fetch.
+        String def = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(
+                "definitions/oas2/ref_blocked_loopback.json"), "UTF-8");
+        OASParserOptions opts = new OASParserOptions();
+        opts.setNetworkAccessControlEnabled(true);
+        opts.setRemoteRefBlockList(Arrays.asList("169.254.169.254"));
+
+        long start = System.nanoTime();
+        try {
+            OASParserUtil.validateAPIDefinition(def, true, opts);
+            Assert.fail("A blocked remote $ref in an OAS2 definition must be rejected");
+        } catch (APIManagementException e) {
+            Assert.assertEquals("A blocked remote $ref must surface as UNTRUSTED_URL_IN_DEFINITION",
+                    ExceptionCodes.UNTRUSTED_URL_IN_DEFINITION.getErrorCode(), e.getErrorHandler().getErrorCode());
+        }
+        long elapsedMillis = (System.nanoTime() - start) / 1_000_000;
+
+        // The safe resolver validates the host BEFORE any fetch, so a blocked direct ref is rejected without a
+        // network round trip. A fast (well under a second) rejection confirms no network fetch was attempted.
+        Assert.assertTrue("Expected the OAS2 remote-ref gate to reject quickly without attempting a network fetch, "
+                        + "but validation took " + elapsedMillis + "ms",
+                elapsedMillis < 5000);
+    }
+
+    @Test
+    public void testOAS2CleanIsValid() throws Exception {
+        String def = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(
+                "definitions/oas2/ref_clean_no_remote.json"), "UTF-8");
+        OASParserOptions opts = new OASParserOptions();
+        opts.setNetworkAccessControlEnabled(true);
+        opts.setRemoteRefBlockList(Arrays.asList("169.254.169.254"));
+        APIDefinitionValidationResponse resp = OASParserUtil.validateAPIDefinition(def, true, opts);
+        Assert.assertTrue("A clean OAS2 definition with no remote $ref must validate successfully", resp.isValid());
+    }
+
+    @Test
+    public void testOAS2BlockedRemoteRefInYamlIsRejected() throws Exception {
+        // YAML variant of the OAS2 gate test: the gate scans the raw definition, so remote-ref extraction must
+        // handle YAML as well as JSON - otherwise a YAML body slips past and the legacy parser fetches unchecked.
+        String def = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(
+                "definitions/oas2/ref_blocked_loopback.yaml"), "UTF-8");
+        OASParserOptions opts = new OASParserOptions();
+        opts.setNetworkAccessControlEnabled(true);
+        opts.setRemoteRefBlockList(Arrays.asList("169.254.169.254"));
+
+        long start = System.nanoTime();
+        try {
+            OASParserUtil.validateAPIDefinition(def, true, opts);
+            Assert.fail("A blocked remote $ref in a YAML OAS2 definition must be rejected");
+        } catch (APIManagementException e) {
+            Assert.assertEquals("A blocked remote $ref must surface as UNTRUSTED_URL_IN_DEFINITION",
+                    ExceptionCodes.UNTRUSTED_URL_IN_DEFINITION.getErrorCode(), e.getErrorHandler().getErrorCode());
+        }
+        long elapsedMillis = (System.nanoTime() - start) / 1_000_000;
+
+        Assert.assertTrue("Expected the OAS2 remote-ref gate to reject the YAML definition quickly without a network "
+                        + "fetch, but validation took " + elapsedMillis + "ms",
+                elapsedMillis < 5000);
+    }
+
+    @Test
+    public void testOAS2RemoteRefNotGatedWhenPolicyNotConfigured() throws Exception {
+        // Backwards compatibility: with the policy disabled, the OAS2 gate must not engage even with a block list
+        // present, so the legacy parser resolves refs as before; the .invalid fixture host makes the fetch fail fast.
+        String def = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(
+                "definitions/oas2/ref_backcompat_invalidhost.json"), "UTF-8");
+        OASParserOptions opts = new OASParserOptions();
+        opts.setRemoteRefBlockList(Arrays.asList("blocked.invalid"));
+        // networkAccessControlEnabled deliberately left false (its default).
+
+        APIDefinitionValidationResponse resp = OASParserUtil.validateAPIDefinition(def, true, opts);
+
+        boolean rejectedByPolicy = resp.getErrorItems().stream().anyMatch(e -> e.getErrorDescription() != null
+                && e.getErrorDescription().contains("not permitted by the network access control policy"));
+        Assert.assertFalse("The remote-ref gate must not engage when no policy is configured", rejectedByPolicy);
+    }
+
+    @Test
+    public void testOAS2NestedRemoteRefIsRejected() throws Exception {
+        // Nested-ref case: an OAS2 top-level $ref to an allowed host whose document carries a nested $ref to a
+        // blocked host; the safe resolver validates every ref it crawls, so the nested block must be rejected.
+        com.sun.net.httpserver.HttpServer server =
+                com.sun.net.httpserver.HttpServer.create(new java.net.InetSocketAddress("127.0.0.1", 0), 0);
+        String outerBody = "{\"definitions\":{\"Nested\":{\"$ref\":\"http://169.254.169.254/latest/meta-data\"}}}";
+        server.createContext("/outer.json", exchange -> {
+            byte[] body = outerBody.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+            exchange.sendResponseHeaders(200, body.length);
+            exchange.getResponseBody().write(body);
+            exchange.close();
+        });
+        server.start();
+        try {
+            int port = server.getAddress().getPort();
+            String def = "{\"swagger\":\"2.0\",\"info\":{\"title\":\"t\",\"version\":\"1.0.0\"},"
+                    + "\"paths\":{\"/x\":{\"get\":{\"responses\":{\"200\":{\"description\":\"ok\","
+                    + "\"schema\":{\"$ref\":\"http://127.0.0.1:" + port + "/outer.json#/definitions/Nested\"}}}}}}}";
+            OASParserOptions opts = new OASParserOptions();
+            opts.setNetworkAccessControlEnabled(true);
+            opts.setRemoteRefAllowList(Arrays.asList("127.0.0.1"));
+            opts.setRemoteRefBlockList(Arrays.asList("169.254.169.254"));
+            try {
+                OASParserUtil.validateAPIDefinition(def, true, opts);
+                Assert.fail("A nested remote $ref to a blocked host must be rejected");
+            } catch (APIManagementException e) {
+                Assert.assertEquals("A nested blocked remote $ref must surface as UNTRUSTED_URL_IN_DEFINITION",
+                        ExceptionCodes.UNTRUSTED_URL_IN_DEFINITION.getErrorCode(), e.getErrorHandler().getErrorCode());
+            }
+        } finally {
+            server.stop(0);
+        }
     }
 }
