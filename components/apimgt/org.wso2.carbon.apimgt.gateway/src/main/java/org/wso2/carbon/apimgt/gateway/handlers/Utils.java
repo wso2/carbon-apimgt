@@ -505,13 +505,17 @@ public class Utils {
             if (!isClientCertificateEncoded()) {
                 // Discard any characters (e.g. trailing spaces, \r, \n, [\r], [\n]) that load balancers may
                 // append outside the BEGIN/END markers before restructuring the certificate.
-                if (certificate.contains(APIConstants.BEGIN_CERTIFICATE_STRING)
-                        && certificate.contains(APIConstants.END_CERTIFICATE_STRING)) {
-                    certificate = APIConstants.BEGIN_CERTIFICATE_STRING
-                            + certificate.substring(certificate.indexOf(APIConstants.BEGIN_CERTIFICATE_STRING)
-                                    + APIConstants.BEGIN_CERTIFICATE_STRING.length(),
-                            certificate.indexOf(APIConstants.END_CERTIFICATE_STRING))
-                            + APIConstants.END_CERTIFICATE_STRING;
+                int beginIndex = certificate.indexOf(APIConstants.BEGIN_CERTIFICATE_STRING);
+                if (beginIndex != -1) {
+                    int contentStart = beginIndex + APIConstants.BEGIN_CERTIFICATE_STRING.length();
+                    // Look for the END marker only after the BEGIN marker so that malformed input with
+                    // reversed markers does not cause a StringIndexOutOfBoundsException.
+                    int endIndex = certificate.indexOf(APIConstants.END_CERTIFICATE_STRING, contentStart);
+                    if (endIndex != -1) {
+                        certificate = APIConstants.BEGIN_CERTIFICATE_STRING
+                                + certificate.substring(contentStart, endIndex)
+                                + APIConstants.END_CERTIFICATE_STRING;
+                    }
                 }
                 // Remove invalid characters, restructure line separators, and reconstruct the certificate
                 certificate = certificate
@@ -522,7 +526,7 @@ public class Utils {
                         .replaceAll("\n".concat(APIConstants.END_CERTIFICATE_STRING), "")
                         .replaceAll(APIConstants.END_CERTIFICATE_STRING, "")
                         // remove illegal characters such as \r, \n, [\r], [\n] injected by load balancers
-                        .replaceAll("\\\\r|\\\\n|\\[|]", "")
+                        .replaceAll("\\\\r|\\\\n|\\r|\\n|\\[|]", "")
                         .trim()
                         .replaceAll(" ", System.lineSeparator())
                         .trim();

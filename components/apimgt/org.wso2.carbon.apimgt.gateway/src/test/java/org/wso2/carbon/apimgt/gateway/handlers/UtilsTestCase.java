@@ -31,8 +31,9 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -173,36 +174,66 @@ public class UtilsTestCase {
 
     @Test
     public void testGetClientCertificateWithIllegalCharacters() throws IOException, APIManagementException {
-        final String clientCertificate = IOUtils.toString(
-                new FileInputStream("src/test/resources/cnf/certificate.pem"), StandardCharsets.UTF_8);
         // characters some load balancers append to the end of the certificate string
-        final String illegalCharacters = " [\\r][\\n]";
+        assertClientCertificateParsed(readClientCertificate() + " [\\r][\\n]");
+    }
 
-        Map<String, Object> headersMap = new HashMap<>();
-        headersMap.put(Utils.getClientCertificateHeader(), clientCertificate + illegalCharacters);
-        Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
-                .thenReturn(headersMap);
-
-        Assert.assertNotNull(Utils.getClientCertificate(axis2MsgCntxt));
+    @Test
+    public void testGetClientCertificateWithCRLFCharacters() throws IOException, APIManagementException {
+        // real CR/LF bytes inside and after the certificate content
+        assertClientCertificateParsed(readClientCertificate().replace("\n", "\r\n") + "\r\n");
     }
 
     @Test
     public void testGetClientCertificateWithURLEncodedCertificate() throws IOException, APIManagementException {
+        enableClientCertificateEncoding();
+        // characters some load balancers append to the end of the certificate string
+        assertClientCertificateParsed(urlEncode(readClientCertificate()) + "%0A[\\r][\\n]");
+    }
+
+    @Test
+    public void testGetClientCertificateWithURLEncodedCRLFCertificate() throws IOException, APIManagementException {
+        enableClientCertificateEncoding();
+        // real CR/LF bytes inside and after the URL encoded certificate content
+        assertClientCertificateParsed(urlEncode(readClientCertificate().replace("\n", "\r\n") + "\r\n"));
+    }
+
+    @Test(expected = APIManagementException.class)
+    public void testGetClientCertificateWithReversedMarkers() throws APIManagementException {
+        Map<String, Object> headersMap = new HashMap<>();
+        headersMap.put(Utils.getClientCertificateHeader(),
+                APIConstants.END_CERTIFICATE_STRING + " MIIF2DCCBMCgAwIBAgIEWcYJGDANBgkqhkiG9w0BAQsFADBTMQsw "
+                        + APIConstants.BEGIN_CERTIFICATE_STRING);
+        Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
+                .thenReturn(headersMap);
+
+        // malformed input must be reported through APIManagementException, not StringIndexOutOfBoundsException
+        Utils.getClientCertificate(axis2MsgCntxt);
+    }
+
+    private String readClientCertificate() throws IOException {
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("cnf/certificate.pem")) {
+            return IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+        }
+    }
+
+    private String urlEncode(String value) throws UnsupportedEncodingException {
+        // encode spaces as %20 (as load balancers do), since the gateway treats '+' as a literal base64 character
+        return URLEncoder.encode(value, StandardCharsets.UTF_8.name()).replace("+", "%20");
+    }
+
+    private void enableClientCertificateEncoding() {
         ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
         APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.MutualSSL.CLIENT_CERTIFICATE_ENCODE))
                 .thenReturn(Boolean.TRUE.toString());
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
         PowerMockito.when(serviceReferenceHolder.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+    }
 
-        final String clientCertificate = IOUtils.toString(
-                new FileInputStream("src/test/resources/cnf/certificate.pem"), StandardCharsets.UTF_8);
-        // characters some load balancers append to the end of the certificate string
-        final String illegalCharacters = "%0A[\\r][\\n]";
-
+    private void assertClientCertificateParsed(String headerValue) throws APIManagementException {
         Map<String, Object> headersMap = new HashMap<>();
-        headersMap.put(Utils.getClientCertificateHeader(),
-                URLEncoder.encode(clientCertificate, StandardCharsets.UTF_8.name()) + illegalCharacters);
+        headersMap.put(Utils.getClientCertificateHeader(), headerValue);
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
                 .thenReturn(headersMap);
 
