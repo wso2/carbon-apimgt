@@ -7742,6 +7742,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         log.info("Processing API revision deployment for API: " + apiId + ", revision: " + apiRevisionUUID
                 + ", deployments count: " + dedupedDeployments.size());
 
+        // Capture the user's requested displayOnDevportal per environment before
+        // handlePendingDeployments mutates the deployments to false for the pending state.
+        // The captured value is restored on approval (auto or admin) so the user's intent
+        // is honoured instead of being hard-coded to true.
+        Map<String, Boolean> userDisplayOnDevportal = new HashMap<>();
+        for (APIRevisionDeployment deployment : dedupedDeployments) {
+            userDisplayOnDevportal.put(deployment.getDeployment(), deployment.isDisplayOnDevportal());
+        }
+
         if (!isInitiatedFromGateway) {
             handlePendingDeployments(apiId, apiRevisionUUID, dedupedDeployments);
         }
@@ -7752,8 +7761,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (!isInitiatedFromGateway) {
                 apiMgtDAO.updateAPIRevisionDeploymentStatus(apiRevisionUUID,
                         APIConstants.APIRevisionStatus.API_REVISION_CREATED, deployment.getDeployment());
+                boolean requestedDisplayOnDevportal = userDisplayOnDevportal.getOrDefault(
+                        deployment.getDeployment(), Boolean.TRUE);
                 executeRevisionWorkflow(apiIdentifier, apiRevisionUUID, revisionId, organization, apiRevision,
-                        deployment);
+                        deployment, requestedDisplayOnDevportal);
             } else {
                 apiMgtDAO.updateAPIRevisionDeploymentForDiscoveredAPIs(apiRevisionUUID,
                         APIConstants.APIRevisionStatus.API_REVISION_APPROVED, Collections.singleton(deployment));
@@ -7821,7 +7832,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException if workflow execution fails
      */
     private void executeRevisionWorkflow(APIIdentifier apiIdentifier, String apiRevisionUUID, int revisionId,
-                                         String organization, APIRevision apiRevision, APIRevisionDeployment deployment)
+                                         String organization, APIRevision apiRevision, APIRevisionDeployment deployment,
+                                         boolean userDisplayOnDevportal)
             throws APIManagementException {
 
         WorkflowExecutor executor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT);
@@ -7844,6 +7856,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             workflowDTO.setEnvironment(deployment.getDeployment());
             workflowDTO.setRevisionId(String.valueOf(revisionId));
             workflowDTO.setInvoker(this.username);
+            // Carry the user's requested displayOnDevportal through workflow metadata so the
+            // admin-approval flow (completeDeploymentWorkFlow) can honour it when it resumes.
+            workflowDTO.setMetadata("displayOnDevportal", String.valueOf(userDisplayOnDevportal));
 
             String workflowDescription = String.format(
                     "Approve revision %s deployment request from the user %s for the environment %s of the API %s",
@@ -7858,7 +7873,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             WorkflowDTO persisted = apiMgtDAO.retrieveWorkflow(workflowDTO.getExternalWorkflowReference());
             if (persisted == null || WorkflowStatus.APPROVED.equals(persisted.getStatus())) {
-                deployment.setDisplayOnDevportal(true);
+                deployment.setDisplayOnDevportal(userDisplayOnDevportal);
                 apiMgtDAO.updateAPIRevisionDeployment(apiIdentifier.getUUID(), Collections.singleton(deployment));
                 resumeDeployedAPIRevision(apiIdentifier.getUUID(), organization, apiRevisionUUID,
                         String.valueOf(revisionId), deployment.getDeployment(), false);
