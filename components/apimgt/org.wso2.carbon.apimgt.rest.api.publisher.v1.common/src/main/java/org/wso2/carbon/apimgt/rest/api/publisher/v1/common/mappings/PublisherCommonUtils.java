@@ -72,7 +72,6 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIEndpointInfo;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIInfo;
 import org.wso2.carbon.apimgt.api.model.APIOperationMapping;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
@@ -4014,21 +4013,9 @@ public class PublisherCommonUtils {
         apiProductDtoToUpdate.setVersion(originalAPIProduct.getId().getVersion());
 
         // The context of an API Product can't be changed
-        boolean restoreOriginalContext = false;
-        APIInfo apiProductInfo = apiProvider.getAPIInfoByUUID(originalAPIProduct.getUuid());
-        if (apiProductInfo != null && StringUtils.isNotBlank(apiProductInfo.getContextTemplate())) {
-            apiProductDtoToUpdate.setContext(apiProductInfo.getContextTemplate());
-        } else if (StringUtils.isNotBlank(originalAPIProduct.getContextTemplate())) {
-            apiProductDtoToUpdate.setContext(originalAPIProduct.getContextTemplate());
-        } else {
-            restoreOriginalContext = true;
-        }
+        apiProductDtoToUpdate.setContext(originalAPIProduct.getContextTemplate());
 
         APIProduct product = APIMappingUtil.fromDTOtoAPIProduct(apiProductDtoToUpdate, username);
-        if (restoreOriginalContext) {
-            product.setContext(originalAPIProduct.getContext());
-            product.setContextTemplate(originalAPIProduct.getContextTemplate());
-        }
         validateSubscriptionAvailabilityForProduct(originalAPIProduct, product);
         product.setState(originalAPIProduct.getState());
         //We do not allow to modify provider,name,version  and uuid. Set the origial value
