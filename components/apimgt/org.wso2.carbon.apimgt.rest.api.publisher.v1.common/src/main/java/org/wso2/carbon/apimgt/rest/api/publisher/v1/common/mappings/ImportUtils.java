@@ -2504,10 +2504,11 @@ public class ImportUtils {
             JsonObject config = endpointConfigObject.get(APIConstants.ENDPOINT_SPECIFIC_CONFIG).
                     getAsJsonObject();
             JsonElement actionDuration = config.get(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION);
-            // JSON numbers are converted exactly by convertNumericEndpointConfigValues
-            if (actionDuration != null && !(actionDuration.isJsonPrimitive()
-                    && actionDuration.getAsJsonPrimitive().isNumber())) {
-                if (actionDuration.getAsString().isEmpty()) {
+            if (actionDuration != null) {
+                String integralValue = toIntegralString(actionDuration, true);
+                if (integralValue != null) {
+                    config.addProperty(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION, integralValue);
+                } else if (actionDuration.getAsString().isEmpty()) {
                     config.remove(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION);
                 } else {
                     long value = Math.round(actionDuration.getAsDouble());

@@ -366,9 +366,9 @@ public class ImportUtilsTest {
         Assert.assertEquals("3000000000", ImportUtils.getUpdatedEndpointConfig(stringEndpoint)
                 .getAsJsonObject(APIConstants.ENDPOINT_SPECIFIC_CONFIG)
                 .get(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION).getAsString());
-        assertUnchangedNumber(ImportUtils.getUpdatedEndpointConfig(fractionalEndpoint)
+        Assert.assertEquals("301", ImportUtils.getUpdatedEndpointConfig(fractionalEndpoint)
                 .getAsJsonObject(APIConstants.ENDPOINT_SPECIFIC_CONFIG)
-                .get(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION), "300.5");
+                .get(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION).getAsString());
     }
 
     @Test
