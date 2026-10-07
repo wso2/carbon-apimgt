@@ -129,6 +129,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.net.URLConnection;
 import java.nio.file.DirectoryIteratorException;
 import java.nio.file.DirectoryStream;
@@ -157,6 +158,19 @@ public class ImportUtils {
     public static final String OUT = "out";
     private static final Log log = LogFactory.getLog(ImportUtils.class);
     private static final String SOAPTOREST = "SoapToRest";
+    // Advanced endpoint config fields that Synapse parses as integers
+    private static final String[] ENDPOINT_CONFIG_INTEGER_FIELDS = {APIConstants.ENDPOINT_CONFIG_SUSPEND_DURATION,
+            APIConstants.ENDPOINT_CONFIG_RETRY_TIMEOUT, APIConstants.ENDPOINT_CONFIG_RETRY_DELAY};
+    // Advanced endpoint config fields that Synapse parses as longs
+    private static final String[] ENDPOINT_CONFIG_LONG_FIELDS = {APIConstants.ENDPOINT_CONFIG_ACTION_DURATION,
+            APIConstants.ENDPOINT_CONFIG_SUSPEND_MAX_DURATION};
+    // Advanced endpoint config fields that hold lists of integer error codes
+    private static final String[] ENDPOINT_CONFIG_ERROR_CODE_FIELDS = {APIConstants.ENDPOINT_CONFIG_SUSPEND_ERROR_CODE,
+            APIConstants.ENDPOINT_CONFIG_RETRY_ERROR_CODE};
+    // Endpoint config entries that hold an endpoint or a list of endpoints
+    private static final String[] ENDPOINT_CONFIG_ENDPOINT_TYPES = {APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS,
+            APIConstants.ENDPOINT_SANDBOX_ENDPOINTS, APIConstants.ENDPOINT_PRODUCTION_FAILOVERS,
+            APIConstants.ENDPOINT_SANDBOX_FAILOVERS};
     private static final List<String> backendAPIDefSupportedMCPSubtypes =
             Arrays.asList(APIConstants.API_SUBTYPE_DIRECT_BACKEND, APIConstants.API_SUBTYPE_SERVER_PROXY);
 
@@ -1450,6 +1464,11 @@ public class ImportUtils {
                     JsonArray endpoints = endpointsJson.getAsJsonArray();
                     for (JsonElement endpointElement : endpoints) {
                         JsonObject endpointObj = endpointElement.getAsJsonObject();
+                        // Gson reads numbers in the endpoint config as decimals, which Synapse rejects as integers
+                        JsonElement endpointConfigElement = endpointObj.get(ImportExportConstants.ENDPOINT_CONFIG);
+                        if (endpointConfigElement != null && endpointConfigElement.isJsonObject()) {
+                            convertNumericValuesInEndpoints(endpointConfigElement.getAsJsonObject());
+                        }
                         APIEndpointInfo apiEndpointInfo = new Gson().fromJson(endpointObj, APIEndpointInfo.class);
                         String endpointUUID = apiEndpointInfo.getId();
 
@@ -2466,6 +2485,8 @@ public class ImportUtils {
                     endpointConfig.add(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS, updatedArray);
                 }
             }
+            // Covers failover endpoints and the load balance session timeout, which are not handled above
+            convertNumericValuesInEndpoints(endpointConfig);
         }
         return configObject;
     }
@@ -2478,21 +2499,119 @@ public class ImportUtils {
      */
     public static JsonObject getUpdatedEndpointConfig(JsonObject endpointConfigObject) {
 
-        if (endpointConfigObject.has(APIConstants.ENDPOINT_SPECIFIC_CONFIG)) {
+        if (endpointConfigObject.has(APIConstants.ENDPOINT_SPECIFIC_CONFIG)
+                && endpointConfigObject.get(APIConstants.ENDPOINT_SPECIFIC_CONFIG).isJsonObject()) {
             JsonObject config = endpointConfigObject.get(APIConstants.ENDPOINT_SPECIFIC_CONFIG).
                     getAsJsonObject();
-            if (config.has(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION)) {
-                if (config.get(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION).getAsString().isEmpty()) {
+            JsonElement actionDuration = config.get(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION);
+            // JSON numbers are converted exactly by convertNumericEndpointConfigValues
+            if (actionDuration != null && !(actionDuration.isJsonPrimitive()
+                    && actionDuration.getAsJsonPrimitive().isNumber())) {
+                if (actionDuration.getAsString().isEmpty()) {
                     config.remove(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION);
                 } else {
-                    Double actionDuration = config.get(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION).getAsDouble();
-                    Integer value = (int) Math.round(actionDuration);
+                    long value = Math.round(actionDuration.getAsDouble());
                     config.remove(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION);
-                    config.addProperty(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION, value.toString());
+                    config.addProperty(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION, String.valueOf(value));
                 }
             }
         }
+        convertNumericEndpointConfigValues(endpointConfigObject);
         return endpointConfigObject;
+    }
+
+    /**
+     * Converts numeric values to integer strings in every endpoint of the given endpoint config (production, sandbox
+     * and failover endpoints) and in the load balance session timeout. Only numeric values are changed; string
+     * values are left as they are.
+     *
+     * @param endpointConfig Endpoint config of the API (the value of "endpointConfig")
+     */
+    private static void convertNumericValuesInEndpoints(JsonObject endpointConfig) {
+
+        for (String endpointType : ENDPOINT_CONFIG_ENDPOINT_TYPES) {
+            JsonElement endpoints = endpointConfig.get(endpointType);
+            if (endpoints == null) {
+                continue;
+            }
+            if (endpoints.isJsonObject()) {
+                convertNumericEndpointConfigValues(endpoints.getAsJsonObject());
+            } else if (endpoints.isJsonArray()) {
+                for (JsonElement endpoint : endpoints.getAsJsonArray()) {
+                    if (endpoint.isJsonObject()) {
+                        convertNumericEndpointConfigValues(endpoint.getAsJsonObject());
+                    }
+                }
+            }
+        }
+        convertIntegralValue(endpointConfig, ImportExportConstants.LOAD_BALANCE_SESSION_TIME_OUT_PROPERTY, true);
+    }
+
+    /**
+     * Older APIM versions stored the advanced endpoint config values as JSON numbers. Once the API definition is
+     * deserialized with Gson they become decimals (e.g. 100 -> 100.0), which Synapse rejects as integers. This
+     * converts such numbers to integer strings, the same format the Publisher portal stores. Only integral values
+     * within the range Synapse accepts for the field are converted, without rounding; any other value (such as a
+     * fractional number) and string values are not changed.
+     *
+     * @param endpointConfigObject Endpoint Config object from the API/API Product configuration
+     */
+    private static void convertNumericEndpointConfigValues(JsonObject endpointConfigObject) {
+
+        if (endpointConfigObject.has(APIConstants.ENDPOINT_SPECIFIC_CONFIG)
+                && endpointConfigObject.get(APIConstants.ENDPOINT_SPECIFIC_CONFIG).isJsonObject()) {
+            JsonObject config = endpointConfigObject.get(APIConstants.ENDPOINT_SPECIFIC_CONFIG).getAsJsonObject();
+            for (String field : ENDPOINT_CONFIG_INTEGER_FIELDS) {
+                convertIntegralValue(config, field, false);
+            }
+            for (String field : ENDPOINT_CONFIG_LONG_FIELDS) {
+                convertIntegralValue(config, field, true);
+            }
+            for (String field : ENDPOINT_CONFIG_ERROR_CODE_FIELDS) {
+                JsonElement errorCodes = config.get(field);
+                if (errorCodes != null && errorCodes.isJsonArray()) {
+                    JsonArray updatedErrorCodes = new JsonArray();
+                    for (JsonElement errorCode : errorCodes.getAsJsonArray()) {
+                        String integralErrorCode = toIntegralString(errorCode, false);
+                        if (integralErrorCode != null) {
+                            updatedErrorCodes.add(integralErrorCode);
+                        } else {
+                            updatedErrorCodes.add(errorCode);
+                        }
+                    }
+                    config.add(field, updatedErrorCodes);
+                }
+            }
+        }
+    }
+
+    private static void convertIntegralValue(JsonObject config, String field, boolean isLong) {
+
+        String integralValue = toIntegralString(config.get(field), isLong);
+        if (integralValue != null) {
+            config.addProperty(field, integralValue);
+        }
+    }
+
+    /**
+     * Returns the given JSON number as an integer string when it is an integral value that fits in an int (or a long
+     * when isLong is true). The value is converted exactly, without floating-point rounding.
+     *
+     * @param element JSON element to convert
+     * @param isLong  whether the value may be in the long range instead of the int range
+     * @return integer string, or null if the element is not an integral JSON number in the supported range
+     */
+    private static String toIntegralString(JsonElement element, boolean isLong) {
+
+        if (element == null || !element.isJsonPrimitive() || !element.getAsJsonPrimitive().isNumber()) {
+            return null;
+        }
+        try {
+            BigDecimal number = new BigDecimal(element.getAsString());
+            return isLong ? String.valueOf(number.longValueExact()) : String.valueOf(number.intValueExact());
+        } catch (NumberFormatException | ArithmeticException e) {
+            return null;
+        }
     }
 
     /**

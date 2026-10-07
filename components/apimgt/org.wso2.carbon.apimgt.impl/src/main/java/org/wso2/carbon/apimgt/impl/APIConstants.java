@@ -2200,6 +2200,12 @@ public final class APIConstants {
     public static final String CONNECTION_TIMEOUT_DEFAULT = "-1";
     public static final String ENDPOINT_SPECIFIC_CONFIG = "config";
     public static final String ENDPOINT_CONFIG_ACTION_DURATION = "actionDuration";
+    public static final String ENDPOINT_CONFIG_SUSPEND_DURATION = "suspendDuration";
+    public static final String ENDPOINT_CONFIG_SUSPEND_MAX_DURATION = "suspendMaxDuration";
+    public static final String ENDPOINT_CONFIG_RETRY_TIMEOUT = "retryTimeOut";
+    public static final String ENDPOINT_CONFIG_RETRY_DELAY = "retryDelay";
+    public static final String ENDPOINT_CONFIG_SUSPEND_ERROR_CODE = "suspendErrorCode";
+    public static final String ENDPOINT_CONFIG_RETRY_ERROR_CODE = "retryErroCode";
     public static final String ENDPOINT_TYPE_GRAPHQL = "graphql";
     public static final String ENABLE_RETRY_CALL_WITH_NEW_OAUTH_TOKEN = "enableRetryCallWithNewOauthToken";
 
