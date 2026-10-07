@@ -1202,6 +1202,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 apiInfo.setMonetizationStatus(Boolean.parseBoolean(artifact.
                         getAttribute(APIConstants.Monetization.API_MONETIZATION_STATUS)));
                 apiInfo.setDisplayName(artifact.getAttribute(APIConstants.API_OVERVIEW_DISPLAY_NAME));
+                apiInfo.setAdditionalProperties(RegistryPersistenceUtil.getAdditionalProperties(apiResource));
                 publisherAPIInfoList.add(apiInfo);
 
                 // Ensure the APIs returned matches the length, there could be an additional API
@@ -1653,6 +1654,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                         getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER_EMAIL));
                                 apiInfo.setMonetizationStatus(Boolean.parseBoolean(artifact.
                                         getAttribute(APIConstants.Monetization.API_MONETIZATION_STATUS)));
+                                apiInfo.setAdditionalProperties(
+                                        RegistryPersistenceUtil.getAdditionalProperties(resource));
                                 publisherAPIInfoList.add(apiInfo);
                             }
 

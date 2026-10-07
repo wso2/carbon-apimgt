@@ -34,6 +34,8 @@ import org.wso2.carbon.apimgt.gateway.mcp.response.ToolListResult;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -161,6 +163,28 @@ public class MCPPayloadGenerator {
         return gson.toJson(toolListResponse);
     }
 
+    private static final List<String> MCP_PARAM_LOCATION_PREFIXES = Collections.unmodifiableList(
+            Arrays.asList("query_", "header_", "path_", "cookie_", "formData_"));
+
+    /**
+     * Strips a known MCP parameter location prefix ("query_", "header_", "path_", "cookie_" or
+     * "formData_") from the given name, if present. These prefixes are added by WSO2 when generating
+     * MCP tool schemas from OpenAPI parameters, to disambiguate parameters that could exist in more
+     * than one location. Names that do not start with one of these prefixes (including arbitrary
+     * snake_case backend property names such as "agreement_number") are returned unchanged.
+     *
+     * @param name the property or required-field name to sanitize
+     * @return the name with a recognized location prefix removed, or the original name otherwise
+     */
+    private static String stripKnownLocationPrefix(String name) {
+        for (String prefix : MCP_PARAM_LOCATION_PREFIXES) {
+            if (name.startsWith(prefix)) {
+                return name.substring(prefix.length());
+            }
+        }
+        return name;
+    }
+
     private static ToolListResult.JsonSchema sanitizeInputSchema(ToolListResult.JsonSchema inputSchema) {
         if (inputSchema == null) {
             // Return an empty object schema if the input schema is null
@@ -178,8 +202,7 @@ public class MCPPayloadGenerator {
             for (String requiredProperty : requiredProperties) {
                 String sanitizedRequiredProperty;
                 if (!"requestBody".equalsIgnoreCase(requiredProperty)) {
-                    String[] parts = requiredProperty.split("_", 2);
-                    sanitizedRequiredProperty = parts.length > 1 ? parts[1] : requiredProperty;
+                    sanitizedRequiredProperty = stripKnownLocationPrefix(requiredProperty);
                 } else {
                     sanitizedRequiredProperty = requiredProperty;
                 }
@@ -198,8 +221,7 @@ public class MCPPayloadGenerator {
                     sanitizedProperties.put("requestBody", entry.getValue());
                     continue;
                 }
-                String[] parts = key.split("_", 2);
-                String sanitizedKey = parts.length > 1 ? parts[1] : key;
+                String sanitizedKey = stripKnownLocationPrefix(key);
                 Object property = entry.getValue();
                 sanitizedProperties.put(sanitizedKey, property);
             }
