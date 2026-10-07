@@ -3869,7 +3869,8 @@ public final class APIConstants {
          * lists are not required to hold the same values.
          */
         public static final List<String> SUPPORTED_PROTOCOL_VERSION_HEADERS =
-                Arrays.asList(PROTOCOL_VERSION_2025_JUNE, PROTOCOL_VERSION_2025_NOVEMBER);
+                Arrays.asList(PROTOCOL_VERSION_2024_NOVEMBER, PROTOCOL_VERSION_2025_MARCH,
+                        PROTOCOL_VERSION_2025_JUNE, PROTOCOL_VERSION_2025_NOVEMBER);
         public static final String PROTOCOL_VERSION_REQUESTED = "requested";
         public static final String PROTOCOL_VERSION_SUPPORTED = "supported";
         public static final String PROTOCOL_MISMATCH_ERROR = "Unsupported protocol version";
