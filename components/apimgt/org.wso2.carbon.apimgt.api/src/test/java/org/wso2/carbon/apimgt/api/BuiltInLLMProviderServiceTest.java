@@ -18,14 +18,22 @@
 
 package org.wso2.carbon.apimgt.api;
 
+import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.Option;
+import com.jayway.jsonpath.spi.json.GsonJsonProvider;
+import com.jayway.jsonpath.spi.json.JsonProvider;
+import com.jayway.jsonpath.spi.mapper.GsonMappingProvider;
+import com.jayway.jsonpath.spi.mapper.MappingProvider;
 import org.junit.Assert;
 import org.junit.Test;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class BuiltInLLMProviderServiceTest {
 
@@ -251,5 +259,49 @@ public class BuiltInLLMProviderServiceTest {
 
         Assert.assertEquals("existingValue", result.get("existingKey"));
         Assert.assertEquals("100", result.get("promptTokenCount"));
+    }
+
+    @Test
+    public void testGetResponseMetadataWithGsonJsonProviderReturnsUnquotedValues() throws APIManagementException {
+
+        // Synapse sets Gson as the default JsonPath provider at runtime.
+        Configuration.setDefaults(new Configuration.Defaults() {
+
+            private final JsonProvider jsonProvider = new GsonJsonProvider();
+            private final MappingProvider mappingProvider = new GsonMappingProvider();
+
+            @Override
+            public JsonProvider jsonProvider() {
+                return jsonProvider;
+            }
+
+            @Override
+            public MappingProvider mappingProvider() {
+                return mappingProvider;
+            }
+
+            @Override
+            public Set<Option> options() {
+                return EnumSet.noneOf(Option.class);
+            }
+        });
+        try {
+            String payload = "{\"model\":\"gpt-4.1-2025-04-14\",\"usage\":{\"inputTokens\":100}}";
+            LLMResponseMetaData responseMetadata = new LLMResponseMetaData(payload, null, null, null);
+
+            List<LLMProviderMetadata> metadataList = new ArrayList<>();
+            metadataList.add(new LLMProviderMetadata("responseModel",
+                    APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD, "$.model", true));
+            metadataList.add(new LLMProviderMetadata("promptTokenCount",
+                    APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD, "$.usage.inputTokens", true));
+
+            Map<String, String> result = service.getResponseMetadata(responseMetadata, metadataList,
+                    new HashMap<>());
+
+            Assert.assertEquals("gpt-4.1-2025-04-14", result.get("responseModel"));
+            Assert.assertEquals("100", result.get("promptTokenCount"));
+        } finally {
+            Configuration.setDefaults(null);
+        }
     }
 }
