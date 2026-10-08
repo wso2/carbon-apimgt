@@ -12876,14 +12876,13 @@ public final class APIUtil {
             }
         }
 
-        // Tenant policy. Only the config read is guarded; a misconfigured tenant policy must surface, not be swallowed.
+        // Tenant policy. A tenant policy that cannot be read, or is malformed, is a misconfiguration: skipping it would
+        // resolve remote refs without the tenant's restrictions.
         JSONObject tenantConfig;
         try {
             tenantConfig = getTenantConfig(tenantDomain);
         } catch (APIManagementException e) {
-            log.warn("Could not read tenant network access-control policy for $ref resolution; "
-                    + "proceeding with platform policy only.", e);
-            tenantConfig = null;
+            throw buildTenantPolicyMisconfiguredException("the tenant configuration could not be read", e);
         }
         boolean tenantPolicyConfigured = false;
         String tenantMode = null;
@@ -12891,6 +12890,9 @@ public final class APIUtil {
         boolean tenantBlockPrivateNetworkAccess = false;
         if (tenantConfig != null) {
             Object tenantPolicyValue = tenantConfig.get(APIConstants.NetworkSecurityAccessControl.TENANT_CONFIG_KEY);
+            if (tenantPolicyValue != null && !(tenantPolicyValue instanceof JSONObject)) {
+                throw buildTenantPolicyMisconfiguredException("the policy is not a JSON object", null);
+            }
             if (tenantPolicyValue instanceof JSONObject) {
                 policyConfigured = true;
                 tenantPolicyConfigured = true;
@@ -12899,6 +12901,9 @@ public final class APIUtil {
                 tenantBlockPrivateNetworkAccess = Boolean.TRUE.equals(tenantPolicy.get(
                         APIConstants.NetworkSecurityAccessControl.TENANT_BLOCK_PRIVATE_NETWORK_ACCESS));
                 Object tenantHostsValue = tenantPolicy.get(APIConstants.NetworkSecurityAccessControl.TENANT_HOSTS);
+                if (tenantHostsValue != null && !(tenantHostsValue instanceof JSONArray)) {
+                    throw buildTenantPolicyMisconfiguredException("the hosts value is not a JSON array", null);
+                }
                 if (tenantHostsValue instanceof JSONArray) {
                     for (Object host : (JSONArray) tenantHostsValue) {
                         tenantHosts.add(host.toString());
@@ -13013,6 +13018,22 @@ public final class APIUtil {
                     + "policy and is not applied to remote $ref resolution.");
             return false;
         }
+    }
+
+    /**
+     * Builds the error raised when the tenant network access-control policy cannot be read or is malformed.
+     *
+     * @param reason short description of the problem, used in the log message
+     * @param cause  the underlying exception, or {@code null}
+     * @return an exception with {@code NETWORK_SECURITY_ACCESS_CONTROL_MISCONFIGURED}
+     */
+    private static APIManagementException buildTenantPolicyMisconfiguredException(String reason, Throwable cause) {
+        APIManagementException ex = new APIManagementException(
+                ExceptionCodes.NETWORK_SECURITY_ACCESS_CONTROL_MISCONFIGURED.getErrorMessage(), cause,
+                ExceptionCodes.NETWORK_SECURITY_ACCESS_CONTROL_MISCONFIGURED);
+        log.error("Network security access control misconfiguration: the tenant policy could not be applied to "
+                + "remote reference resolution because " + reason + ".", ex);
+        return ex;
     }
 
     /**

@@ -172,6 +172,60 @@ public class APIUtilRefOptionsTest {
     }
 
     @Test
+    public void testTenantConfigReadFailureThrowsMisconfigured() throws Exception {
+        // A tenant config that cannot be read must fail the request rather than resolve refs without the tenant policy.
+        PowerMockito.spy(APIUtil.class);
+        PowerMockito.doThrow(new APIManagementException("read failure")).when(APIUtil.class, "getTenantConfig",
+                TENANT);
+        Whitebox.setInternalState(APIUtil.class, "networkSecurityEnabled", false);
+        Whitebox.setInternalState(APIUtil.class, "networkSecurityMode", (String) null);
+        Whitebox.setInternalState(APIUtil.class, "networkSecurityHosts", (java.util.List) null);
+        Whitebox.setInternalState(APIUtil.class, "networkSecurityBlockPrivateAccess", false);
+
+        try {
+            APIUtil.buildRefResolutionOptions(new OASParserOptions(), TENANT);
+            Assert.fail("A tenant config read failure must raise a misconfiguration error");
+        } catch (APIManagementException e) {
+            Assert.assertEquals(ExceptionCodes.NETWORK_SECURITY_ACCESS_CONTROL_MISCONFIGURED, e.getErrorHandler());
+        }
+    }
+
+    @Test
+    public void testNonObjectTenantPolicyThrowsMisconfigured() throws Exception {
+        PowerMockito.spy(APIUtil.class);
+        JSONObject tenantConfig = new JSONObject();
+        tenantConfig.put(APIConstants.NetworkSecurityAccessControl.TENANT_CONFIG_KEY, "allow");
+        PowerMockito.doReturn(tenantConfig).when(APIUtil.class, "getTenantConfig", TENANT);
+        setPlatform(false, null, null);
+
+        try {
+            APIUtil.buildRefResolutionOptions(new OASParserOptions(), TENANT);
+            Assert.fail("A tenant policy that is not a JSON object must raise a misconfiguration error");
+        } catch (APIManagementException e) {
+            Assert.assertEquals(ExceptionCodes.NETWORK_SECURITY_ACCESS_CONTROL_MISCONFIGURED, e.getErrorHandler());
+        }
+    }
+
+    @Test
+    public void testNonArrayTenantHostsThrowsMisconfigured() throws Exception {
+        PowerMockito.spy(APIUtil.class);
+        JSONObject policy = new JSONObject();
+        policy.put(APIConstants.NetworkSecurityAccessControl.TENANT_MODE, "deny");
+        policy.put(APIConstants.NetworkSecurityAccessControl.TENANT_HOSTS, "internal.example.com");
+        JSONObject tenantConfig = new JSONObject();
+        tenantConfig.put(APIConstants.NetworkSecurityAccessControl.TENANT_CONFIG_KEY, policy);
+        PowerMockito.doReturn(tenantConfig).when(APIUtil.class, "getTenantConfig", TENANT);
+        setPlatform(false, null, null);
+
+        try {
+            APIUtil.buildRefResolutionOptions(new OASParserOptions(), TENANT);
+            Assert.fail("A tenant hosts value that is not a JSON array must raise a misconfiguration error");
+        } catch (APIManagementException e) {
+            Assert.assertEquals(ExceptionCodes.NETWORK_SECURITY_ACCESS_CONTROL_MISCONFIGURED, e.getErrorHandler());
+        }
+    }
+
+    @Test
     public void testBothAllowModeIntersects() throws Exception {
         // AND: a host must be allowed by both policies, so the allow-list is the intersection of the two allow lists.
         PowerMockito.spy(APIUtil.class);
