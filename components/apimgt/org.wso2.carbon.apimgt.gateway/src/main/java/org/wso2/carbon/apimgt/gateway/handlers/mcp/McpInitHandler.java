@@ -24,11 +24,14 @@ import com.google.gson.JsonSyntaxException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpStatus;
 import org.apache.synapse.ManagedLifecycle;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.apache.synapse.core.axis2.Axis2Sender;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.api.model.APIOperationMapping;
@@ -76,6 +79,16 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
         try {
             String path = (String) messageContext.getProperty(APIMgtGatewayConstants.API_ELECTED_RESOURCE);
             String httpMethod = (String) messageContext.getProperty(APIMgtGatewayConstants.HTTP_METHOD);
+
+            // Reject a client that declares an MCP protocol revision this gateway does not implement, before any
+            // authentication is attempted. Answering with a bare 400 lets a client which supports both revisions
+            // fall back to the initialize handshake, instead of reading an authentication challenge as a signal
+            // that credentials are required.
+            if (StringUtils.startsWith(path, APIMgtGatewayConstants.MCP_RESOURCE)
+                    && !isSupportedMCPProtocolVersion(messageContext)) {
+                handleUnsupportedMCPProtocolVersion(messageContext);
+                return false;
+            }
 
             String httpsPort = System.getProperty(APIMgtGatewayConstants.HTTPS_NIO_PORT);
             if (!StringUtils.isEmpty(httpsPort)) {
@@ -258,5 +271,90 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
             default:
                 return false;
         }
+    }
+
+    /**
+     * Checks whether the MCP protocol revision declared by the client is one this gateway implements. Only a
+     * request which does not carry the MCP-Protocol-Version header at all is treated as supported, since the
+     * revision is then negotiated by the initialize handshake. A header carrying an empty or blank value declares
+     * no usable revision and is rejected like any other unsupported value.
+     *
+     * @param messageContext The message context of the request
+     * @return true if the declared revision is supported or the header was absent, false otherwise
+     */
+    private boolean isSupportedMCPProtocolVersion(MessageContext messageContext) {
+        String protocolVersion = getMCPProtocolVersionHeader(messageContext);
+        if (protocolVersion == null) {
+            return true;
+        }
+        boolean isSupported = APIConstants.MCP.SUPPORTED_PROTOCOL_VERSION_HEADERS.contains(protocolVersion.trim());
+        if (!isSupported && log.isDebugEnabled()) {
+            log.debug("Unsupported MCP protocol version declared in the " + APIConstants.MCP
+                    .MCP_PROTOCOL_VERSION_HEADER + " header: " + protocolVersion);
+        }
+        return isSupported;
+    }
+
+    /**
+     * Reads the MCP-Protocol-Version request header. HTTP header names are case insensitive, hence the transport
+     * headers are matched ignoring the letter case rather than looked up by an exact name.
+     *
+     * @param messageContext The message context of the request
+     * @return the declared protocol revision, or null when the header is absent
+     */
+    private String getMCPProtocolVersionHeader(MessageContext messageContext) {
+        org.apache.axis2.context.MessageContext axis2MC =
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+        Object transportHeaders = axis2MC.getProperty(
+                org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        if (!(transportHeaders instanceof Map)) {
+            return null;
+        }
+        for (Object entryObject : ((Map<?, ?>) transportHeaders).entrySet()) {
+            Map.Entry<?, ?> entry = (Map.Entry<?, ?>) entryObject;
+            if (entry.getKey() instanceof String && APIConstants.MCP.MCP_PROTOCOL_VERSION_HEADER
+                    .equalsIgnoreCase((String) entry.getKey())) {
+                return entry.getValue() != null ? entry.getValue().toString() : null;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Responds with a bare HTTP 400, carrying no entity body, so that a client which declared an unsupported MCP
+     * protocol revision can fall back to the revision negotiated by the initialize handshake.
+     *
+     * @param messageContext The message context of the request
+     */
+    private void handleUnsupportedMCPProtocolVersion(MessageContext messageContext) {
+        org.apache.axis2.context.MessageContext axis2MC =
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+        try {
+            // Drain the request body, so that the pass-through pipe is not left holding unconsumed content when
+            // the request is answered here instead of being forwarded.
+            RelayUtils.buildMessage(axis2MC);
+        } catch (IOException | XMLStreamException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Failed to build the request message while rejecting an unsupported MCP protocol "
+                        + "version", e);
+            }
+        }
+        JsonUtil.removeJsonPayload(axis2MC);
+        axis2MC.setProperty(APIConstants.NO_ENTITY_BODY, Boolean.TRUE);
+        axis2MC.setProperty(APIMgtGatewayConstants.HTTP_SC, HttpStatus.SC_BAD_REQUEST);
+
+        // drop request headers from the response
+        Object transportHeaders = axis2MC.getProperty(
+                org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        if (transportHeaders instanceof Map) {
+            ((Map<?, ?>) transportHeaders).clear();
+        }
+
+        // Turn the request context into a response context, otherwise Axis2Sender takes the outbound path and
+        // tries to treat the resource path as a target URL.
+        messageContext.setResponse(true);
+        messageContext.setProperty(SynapseConstants.RESPONSE, "true");
+        messageContext.setTo(null);
+        Axis2Sender.sendBack(messageContext);
     }
 }
