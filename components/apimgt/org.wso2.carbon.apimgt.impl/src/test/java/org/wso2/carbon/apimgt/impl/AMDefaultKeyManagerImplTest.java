@@ -528,7 +528,7 @@ public class AMDefaultKeyManagerImplTest {
 
 
     @Test
-    public void testUpdateResourceScopesPreservesExistingScope() throws APIManagementException {
+    public void testUpdateResourceScopesPreservesExistingScope() throws Exception {
 
         ScopeClient scopeClient = Mockito.mock(ScopeClient.class);
         Response response = Mockito.mock(Response.class);
