@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.rest.api.common;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.rest.api.common.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
+import org.wso2.carbon.apimgt.impl.dto.TokenValidationDto;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidator;
 
 import java.util.List;
@@ -43,6 +44,14 @@ public class APIMConfigUtil {
      */
     public static Map<String, TokenIssuerDto> getTokenIssuerMap() {
         return configuration.getJwtConfigurationDto().getTokenIssuerDtoMap();
+    }
+
+    /**
+     * This is to get token validation configurations from deployment.toml file
+     * @return TokenValidationDto
+     */
+    public static TokenValidationDto getTokenValidationDto() {
+        return configuration.getTokenValidationDto();
     }
 
     /**
