@@ -10471,8 +10471,22 @@ public final class APIUtil {
 
     @UsedByMigrationClient
     public static String getX509certificateContent(String certificate) {
+        int beginIndex = certificate.indexOf(APIConstants.BEGIN_CERTIFICATE_STRING);
+        if (beginIndex != -1) {
+            int contentStart = beginIndex + APIConstants.BEGIN_CERTIFICATE_STRING.length();
+            // Look for the END marker only after the BEGIN marker so that malformed input with
+            // reversed markers does not cause a StringIndexOutOfBoundsException.
+            int endIndex = certificate.indexOf(APIConstants.END_CERTIFICATE_STRING, contentStart);
+            if (endIndex != -1) {
+                // Extract only the content between the BEGIN/END markers, discarding any characters
+                // (e.g. trailing spaces, \r, \n, [\r], [\n]) that load balancers may append outside them.
+                certificate = certificate.substring(contentStart, endIndex);
+            }
+        }
         String content = certificate.replaceAll(APIConstants.BEGIN_CERTIFICATE_STRING, "")
-                .replaceAll(APIConstants.END_CERTIFICATE_STRING, "");
+                .replaceAll(APIConstants.END_CERTIFICATE_STRING, "")
+                // remove illegal base64 characters such as spaces, \r, \n, [\r], [\n]
+                .replaceAll("\\\\r|\\\\n|\\r|\\n|\\[|]| ", "");
 
         return content.trim();
     }
