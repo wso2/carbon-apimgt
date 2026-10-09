@@ -534,6 +534,8 @@ public class AMDefaultKeyManagerImplTest {
         Response response = Mockito.mock(Response.class);
         Mockito.when(response.status()).thenReturn(200);
         Mockito.when(scopeClient.isScopeExist(Mockito.anyString())).thenReturn(response);
+        Mockito.when(scopeClient.updateScope(Mockito.any(
+                org.wso2.carbon.apimgt.impl.dto.ScopeDTO.class), Mockito.anyString())).thenReturn(response);
         Whitebox.setInternalState(keyManager, "scopeClient", scopeClient);
 
         Scope existingScope = new Scope();
