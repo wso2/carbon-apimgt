@@ -17,6 +17,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.util.impl;
 
+import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.util.DateUtils;
@@ -103,6 +104,11 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
             String maskedToken = message.get(RestApiConstants.MASKED_TOKEN).toString();
             URL basePath = new URL(message.get(APIConstants.BASE_PATH).toString());
 
+            //Validate token class
+            if (!isAccessToken(signedJWTInfo, maskedToken)) {
+                return false;
+            }
+
             if (isRevoked(signedJWTInfo, jwtTokenIdentifier, maskedToken)) {
                 return false;
             }
@@ -136,6 +142,30 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
     }
 
     /**
+     * Check whether the given token is an access token.
+     *
+     * @param signedJWTInfo signed jwt info object
+     * @param maskedToken   masked token to be logged
+     * @return true if the token is an access token else false
+     */
+    private boolean isAccessToken(SignedJWTInfo signedJWTInfo, String maskedToken) {
+
+        boolean enforceTypeHeaderValidation = APIMConfigUtil.getTokenValidationDto()
+                .isEnforceTypeHeaderValidation();
+        if (!enforceTypeHeaderValidation) {
+            return true;
+        }
+        JOSEObjectType tokenType = signedJWTInfo.getSignedJWT().getHeader().getType();
+        if (tokenType == null || !APIConstants.JWT_HEADER_ACCESS_TOKEN_TYPE.equals(tokenType.toString())) {
+            log.error("JWT token validation failed. Reason: Type header validation is enforced and only "
+                    + "access tokens carrying the " + APIConstants.JWT_HEADER_ACCESS_TOKEN_TYPE
+                    + " type header are accepted. " + maskedToken);
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * Handle scope validation
      *
      * @param accessToken   JWT token
@@ -148,10 +178,23 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
         String maskedToken = message.get(RestApiConstants.MASKED_TOKEN).toString();
         OAuthTokenInfo oauthTokenInfo = new OAuthTokenInfo();
         oauthTokenInfo.setAccessToken(accessToken);
-        String tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-        if (signedJWTInfo.getJwtClaimsSet().getClaim(JwtTokenConstants.USER_DOMAIN) != null) {
-            tenantDomain = (String) signedJWTInfo.getJwtClaimsSet().getClaim(JwtTokenConstants.USER_DOMAIN);
-        } 
+        //the signature was verified against the certificate selected by app_td, so it identifies the signer
+        String appTenantDomain = signedJWTInfo.getJwtClaimsSet().getStringClaim(JwtTokenConstants.APP_DOMAIN);
+        String signingTenantDomain = StringUtils.isNotEmpty(appTenantDomain) ? appTenantDomain
+                : MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        String userTenantDomain = signedJWTInfo.getJwtClaimsSet().getStringClaim(JwtTokenConstants.USER_DOMAIN);
+
+        //only the super tenant key can speak for an organization other than the one that signed the token
+        if (StringUtils.isNotEmpty(userTenantDomain)
+                && !userTenantDomain.equals(signingTenantDomain)
+                && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(signingTenantDomain)) {
+            log.error("Invalid JWT token. The " + JwtTokenConstants.USER_DOMAIN + " claim names an "
+                    + "organization the signing organization has no authority over. " + maskedToken);
+            return false;
+        }
+
+        String tenantDomain = StringUtils.isNotEmpty(userTenantDomain) ? userTenantDomain
+                : signingTenantDomain;
         log.debug("Tenant domain for user " + tenantDomain);
         oauthTokenInfo.setEndUserName(signedJWTInfo.getJwtClaimsSet().getSubject() + "@" + tenantDomain);
         oauthTokenInfo.setConsumerKey(signedJWTInfo.getJwtClaimsSet().getStringClaim(JWTConstants.AUTHORIZED_PARTY));
