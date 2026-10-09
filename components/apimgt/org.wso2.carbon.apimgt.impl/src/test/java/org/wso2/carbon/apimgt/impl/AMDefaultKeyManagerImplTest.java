@@ -551,6 +551,8 @@ public class AMDefaultKeyManagerImplTest {
         Mockito.verify(scopeClient, Mockito.never()).deleteScope(Mockito.anyString());
         Mockito.verify(scopeClient, Mockito.never()).registerScope(
                 Mockito.any(org.wso2.carbon.apimgt.impl.dto.ScopeDTO.class));
+        Mockito.verify(scopeClient).updateScope(
+                Mockito.any(org.wso2.carbon.apimgt.impl.dto.ScopeDTO.class), Mockito.anyString());
     }
 
     private String getJSONString() {

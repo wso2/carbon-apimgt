@@ -1331,6 +1331,10 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             if (!isScopeExists(scopeKey)) {
                 //register scope in KM
                 registerScope(scope);
+            } else if (oldLocalScopeKeys.contains(scopeKey)) {
+                // Update metadata for an existing local scope without deleting it, so its
+                // Identity Server application authorization assignments remain intact.
+                updateScope(scope);
             } else {
                 if (log.isDebugEnabled()) {
                     log.debug("Scope: " + scopeKey + " already registered in KM. Skipping registering scope.");
