@@ -140,4 +140,24 @@ public class InboundWebsocketProcessorUtilQueryParamTest {
     public void testEncodedNonCredentialNameKeptVerbatim() {
         Assert.assertEquals("/ws?%61uthToken=X", strip("/ws?%61uthToken=X&access_token=GW"));
     }
+
+    @Test
+    public void testLeadingEqualsCredentialRemoved() {
+        Assert.assertEquals("/ws?authToken=X", strip("/ws?=access_token=GW&authToken=X"));
+    }
+
+    @Test
+    public void testLeadingEqualsNonCredentialKeptVerbatim() {
+        Assert.assertEquals("/ws?=region=eu", strip("/ws?=region=eu&access_token=GW"));
+    }
+
+    @Test
+    public void testLeadingEqualsValuelessNonCredentialKept() {
+        Assert.assertEquals("/ws?=region", strip("/ws?=region&access_token=GW"));
+    }
+
+    @Test
+    public void testBareEqualsDropped() {
+        Assert.assertEquals("/ws", strip("/ws?=&access_token=GW"));
+    }
 }

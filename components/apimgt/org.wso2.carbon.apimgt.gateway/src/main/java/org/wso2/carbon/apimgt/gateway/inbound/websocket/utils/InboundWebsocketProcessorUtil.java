@@ -365,8 +365,10 @@ public class InboundWebsocketProcessorUtil {
         }
         StringBuilder retained = new StringBuilder();
         for (String pair : fullRequestPath.substring(queryStart + 1).split("[&;]")) {
-            int equals = pair.indexOf('=');
-            String name = decodeQueryParamName(equals < 0 ? pair : pair.substring(0, equals));
+            // QueryStringDecoder skips a leading '=', so "=access_token=x" parses as the name access_token
+            String named = pair.startsWith("=") ? pair.substring(1) : pair;
+            int equals = named.indexOf('=');
+            String name = decodeQueryParamName(equals < 0 ? named : named.substring(0, equals));
             if (name.isEmpty() || tokenType.equals(name)) {
                 continue;
             }
