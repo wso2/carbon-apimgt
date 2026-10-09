@@ -370,11 +370,17 @@ public class WorkflowUtils {
             apiProvider.resumeDeployedAPIRevision(apiId, organization, workflow.getWorkflowReference(), revisionId,
                     environment, false);
 
-            //Set displayOnDevportal to true
+            // Restore the user's requested displayOnDevportal that was captured when the
+            // deployment was initiated. Fall back to true to preserve the pre-fix behaviour
+            // for any pending deployments that were created before this fix was applied and
+            // therefore do not carry the metadata entry.
+            String requestedDisplayOnDevportal = workflow.getMetadata("displayOnDevportal");
+            boolean displayOnDevportal = requestedDisplayOnDevportal == null
+                    || Boolean.parseBoolean(requestedDisplayOnDevportal);
             APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
             apiRevisionDeployment.setRevisionUUID(workflow.getWorkflowReference());
             apiRevisionDeployment.setDeployment(environment);
-            apiRevisionDeployment.setDisplayOnDevportal(true);
+            apiRevisionDeployment.setDisplayOnDevportal(displayOnDevportal);
             apiMgtDAO.updateAPIRevisionDeployment (apiId,Collections.singleton(apiRevisionDeployment));
         } catch (APIManagementException e) {
             String errorMsg = "Could not get workflow details for workflow reference id " + externalWorkflowRef;
