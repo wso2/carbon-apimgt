@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import feign.Response;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONObject;
@@ -37,17 +38,22 @@ import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.kmclient.KeyManagerClientException;
 import org.wso2.carbon.apimgt.impl.kmclient.model.ClientInfo;
 import org.wso2.carbon.apimgt.impl.kmclient.model.DCRClient;
 import org.wso2.carbon.apimgt.impl.kmclient.model.IntrospectInfo;
 import org.wso2.carbon.apimgt.impl.kmclient.model.IntrospectionClient;
+import org.wso2.carbon.apimgt.impl.kmclient.model.ScopeClient;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -520,6 +526,32 @@ public class AMDefaultKeyManagerImplTest {
 //        Assert.assertFalse(tokenInfo.isTokenValid());
 //    }
 
+
+    @Test
+    public void testUpdateResourceScopesPreservesExistingScope() throws APIManagementException {
+
+        ScopeClient scopeClient = Mockito.mock(ScopeClient.class);
+        Response response = Mockito.mock(Response.class);
+        Mockito.when(response.status()).thenReturn(200);
+        Mockito.when(scopeClient.isScopeExist(Mockito.anyString())).thenReturn(response);
+        Whitebox.setInternalState(keyManager, "scopeClient", scopeClient);
+
+        Scope existingScope = new Scope();
+        existingScope.setKey("testscope");
+        existingScope.setName("testscope");
+
+        Set<String> oldLocalScopeKeys = new HashSet<>();
+        oldLocalScopeKeys.add("testscope");
+        Set<Scope> newLocalScopes = new HashSet<>();
+        newLocalScopes.add(existingScope);
+
+        keyManager.updateResourceScopes(null, oldLocalScopeKeys, newLocalScopes,
+                Collections.emptySet(), Collections.emptySet());
+
+        Mockito.verify(scopeClient, Mockito.never()).deleteScope(Mockito.anyString());
+        Mockito.verify(scopeClient, Mockito.never()).registerScope(
+                Mockito.any(org.wso2.carbon.apimgt.impl.dto.ScopeDTO.class));
+    }
 
     private String getJSONString() {
         Map<String, String> parameters = new HashMap<String, String>();
