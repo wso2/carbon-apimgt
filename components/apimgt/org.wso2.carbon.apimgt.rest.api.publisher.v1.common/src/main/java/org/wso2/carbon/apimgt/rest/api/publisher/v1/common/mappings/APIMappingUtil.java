@@ -4356,7 +4356,8 @@ public class APIMappingUtil {
         context = checkAndSetVersionParam(context);
         product.setContextTemplate(context);
 
-        context = updateContextWithVersion(dto.getVersion(), originalContext, context);
+        // Use the version set in the identifier, which defaults to 1.0.0 when the request doesn't have a version
+        context = updateContextWithVersion(id.getVersion(), originalContext, context);
         product.setContext(context);
 
         product.setType(APIConstants.API_PRODUCT_IDENTIFIER_TYPE.replaceAll("\\s", EMPTY_STRING));
