@@ -522,9 +522,20 @@ public class Utils {
                 bytes = certificate.getBytes();
             } else {
                 try {
-                    certificate = URLDecoder.decode(certificate.replace("+", "%2B"), "UTF-8");
+                    if (certificate != null) {
+                        log.debug("Processing client certificate from header");
+
+                        /**
+                         * Pre-escapes literal plus '+' characters into percent-encoded '%2B' form.
+                         * This prevents Java's URLDecoder from converting base64 plus signs
+                         * into whitespace characters during the decoding stage.
+                         */
+                        String safeCertificate = certificate.replace("+", "%2B");
+                        certificate = URLDecoder.decode(safeCertificate, "UTF-8");
+                    }
                 } catch (UnsupportedEncodingException e) {
                     String msg = "Error while URL decoding certificate";
+                    log.error(msg + ": " + e.getMessage());
                     throw new APIManagementException(msg, e);
                 }
                 certificate = APIUtil.getX509certificateContent(certificate);
