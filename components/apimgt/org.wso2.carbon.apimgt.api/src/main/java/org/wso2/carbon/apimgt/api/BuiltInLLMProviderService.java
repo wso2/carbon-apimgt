@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.api;
 
+import com.google.gson.JsonPrimitive;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
 import java.net.URLDecoder;
@@ -56,8 +57,12 @@ public abstract class BuiltInLLMProviderService implements LLMProviderService {
                 if (APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD.equalsIgnoreCase(inputSource)) {
                     if (responseMetadata.getPayload() != null) {
                         try {
-                            String extractedValue =
-                                    JsonPath.read(responseMetadata.getPayload(), attributeIdentifier).toString();
+                            Object value = JsonPath.read(responseMetadata.getPayload(), attributeIdentifier);
+                            // JsonPath is configured with the Gson provider, so unwrap primitives to avoid
+                            // the JSON-quoted form returned by JsonPrimitive#toString()
+                            String extractedValue = (value instanceof JsonPrimitive)
+                                    ? ((JsonPrimitive) value).getAsString()
+                                    : String.valueOf(value);
                             metadataMap.put(attributeName, extractedValue);
                         } catch (PathNotFoundException e) {
                             log.debug("Attribute not found in the payload for identifier: " + attributeIdentifier);
