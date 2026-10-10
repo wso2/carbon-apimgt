@@ -1312,9 +1312,17 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             throws APIManagementException {
 
         detachResourceScopes(api, oldURITemplates);
-        // remove the old local scopes from the KM
+        // Keep scopes that are still referenced by the updated API. Deleting and re-registering
+        // an unchanged scope removes its authorization assignment in the Identity Server application.
+        Set<String> newLocalScopeKeys = new HashSet<>();
+        for (Scope scope : newLocalScopes) {
+            newLocalScopeKeys.add(scope.getKey());
+        }
+        // Remove only local scopes that are no longer used by the API.
         for (String oldScope : oldLocalScopeKeys) {
-            deleteScope(oldScope);
+            if (!newLocalScopeKeys.contains(oldScope)) {
+                deleteScope(oldScope);
+            }
         }
         //Register scopes
         for (Scope scope : newLocalScopes) {
@@ -1323,6 +1331,10 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             if (!isScopeExists(scopeKey)) {
                 //register scope in KM
                 registerScope(scope);
+            } else if (oldLocalScopeKeys.contains(scopeKey)) {
+                // Update metadata for an existing local scope without deleting it, so its
+                // Identity Server application authorization assignments remain intact.
+                updateScope(scope);
             } else {
                 if (log.isDebugEnabled()) {
                     log.debug("Scope: " + scopeKey + " already registered in KM. Skipping registering scope.");
