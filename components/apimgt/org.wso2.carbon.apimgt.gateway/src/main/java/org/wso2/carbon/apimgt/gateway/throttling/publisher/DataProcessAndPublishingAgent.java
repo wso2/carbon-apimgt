@@ -182,7 +182,7 @@ public class DataProcessAndPublishingAgent implements Runnable {
                 contentLength = transportHeaderMap.get(APIThrottleConstants.CONTENT_LENGTH);
             }
             if (contentLength != null) {
-                log.debug("Content lenght found in the request. Using it as the message size..");
+                log.debug("Content length found in the request. Using it as the message size..");
                 messageSizeInBytes  = Long.parseLong(contentLength.toString());
             } else {
                 log.debug("Building the message to get the message size..");
