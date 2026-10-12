@@ -324,8 +324,8 @@ public class APIUtilRefOptionsTest {
     }
 
     @Test
-    public void testTenantWildcardAllowEntriesDroppedUnderRestrictivePlatform() throws Exception {
-        // A wildcard entry names no single host and cannot be checked against the platform policy, so it is dropped.
+    public void testTenantWildcardAllowEntryKeptWhenDisjointFromPlatformDenyList() throws Exception {
+        // A wildcard entry that shares no host with any platform deny pattern is kept; '*' matches evil.com and is not.
         PowerMockito.spy(APIUtil.class);
         PowerMockito.doReturn(tenantPolicy("allow", "*", "*.example.com"))
                 .when(APIUtil.class, "getTenantConfig", TENANT);
@@ -333,8 +333,173 @@ public class APIUtilRefOptionsTest {
 
         OASParserOptions out = APIUtil.buildRefResolutionOptions(new OASParserOptions(), TENANT);
 
-        Assert.assertTrue(out.getRemoteRefAllowList() == null || out.getRemoteRefAllowList().isEmpty());
+        assertSameElements(Arrays.asList("*.example.com"), out.getRemoteRefAllowList());
         assertSameElements(Arrays.asList("evil.com", "*"), out.getRemoteRefBlockList());
+    }
+
+    @Test
+    public void testTenantWildcardAllowEntryDroppedWhenOverlappingPlatformDenyPattern() throws Exception {
+        // internal.partner.com matches both patterns, so the wildcard entry would let the resolver bypass the deny.
+        PowerMockito.spy(APIUtil.class);
+        PowerMockito.doReturn(tenantPolicy("allow", "*.partner.com")).when(APIUtil.class, "getTenantConfig", TENANT);
+        setPlatform(true, "deny", Arrays.asList("internal.*"));
+
+        OASParserOptions out = APIUtil.buildRefResolutionOptions(new OASParserOptions(), TENANT);
+
+        Assert.assertTrue(out.getRemoteRefAllowList() == null || out.getRemoteRefAllowList().isEmpty());
+    }
+
+    @Test
+    public void testTenantWildcardAllowEntryDroppedWhenPlatformDeniesIpPattern() throws Exception {
+        // A name match skips the resolver's address checks, so an IP deny pattern cannot be enforced for the entry.
+        PowerMockito.spy(APIUtil.class);
+        PowerMockito.doReturn(tenantPolicy("allow", "*.partner.com")).when(APIUtil.class, "getTenantConfig", TENANT);
+        setPlatform(true, "deny", Arrays.asList("evil.com", "203.0.113.*"));
+
+        OASParserOptions out = APIUtil.buildRefResolutionOptions(new OASParserOptions(), TENANT);
+
+        Assert.assertTrue(out.getRemoteRefAllowList() == null || out.getRemoteRefAllowList().isEmpty());
+    }
+
+    @Test
+    public void testTenantWildcardAllowEntryDroppedWhenPlatformBlocksPrivateNetworks() throws Exception {
+        PowerMockito.spy(APIUtil.class);
+        PowerMockito.doReturn(tenantPolicy("allow", "*.partner.com")).when(APIUtil.class, "getTenantConfig", TENANT);
+        setPlatform(true, "deny", Arrays.asList("evil.com"));
+        Whitebox.setInternalState(APIUtil.class, "networkSecurityBlockPrivateAccess", true);
+
+        OASParserOptions out = APIUtil.buildRefResolutionOptions(new OASParserOptions(), TENANT);
+
+        Assert.assertTrue(out.getRemoteRefAllowList() == null || out.getRemoteRefAllowList().isEmpty());
+    }
+
+    @Test
+    public void testTenantDenyOverlappingPlatformWildcardDropsIt() throws Exception {
+        PowerMockito.spy(APIUtil.class);
+        PowerMockito.doReturn(tenantPolicy("deny", "internal.partner.com"))
+                .when(APIUtil.class, "getTenantConfig", TENANT);
+        setPlatform(true, "allow", Arrays.asList("*.partner.com", "*.example.com"));
+
+        OASParserOptions out = APIUtil.buildRefResolutionOptions(new OASParserOptions(), TENANT);
+
+        assertSameElements(Arrays.asList("*.example.com"), out.getRemoteRefAllowList());
+        assertSameElements(Arrays.asList("internal.partner.com", "*"), out.getRemoteRefBlockList());
+    }
+
+    @Test
+    public void testBothAllowModeWildcardAndHost() throws Exception {
+        // The platform allows *.partner.com and the tenant allows api.partner.com: only api.partner.com is in both.
+        assertBothAllowIntersection(Arrays.asList("*.partner.com"), Arrays.asList("api.partner.com"),
+                Arrays.asList("api.partner.com"));
+    }
+
+    @Test
+    public void testBothAllowModeKeepsNarrowerWildcard() throws Exception {
+        assertBothAllowIntersection(Arrays.asList("*.a.com"), Arrays.asList("*.b.a.com"), Arrays.asList("*.b.a.com"));
+        assertBothAllowIntersection(Arrays.asList("*.com"), Arrays.asList("*.partner.com", "*.example.org"),
+                Arrays.asList("*.partner.com"));
+    }
+
+    @Test
+    public void testBothAllowModeCombinesPartiallyOverlappingWildcards() throws Exception {
+        // Neither pattern contains the other, but hosts starting with 'a' and ending with 'b' match both.
+        assertBothAllowIntersection(Arrays.asList("a*"), Arrays.asList("*b"), Arrays.asList("a*b"));
+        assertBothAllowIntersection(Arrays.asList("api.*"), Arrays.asList("*.example.com"),
+                Arrays.asList("api.example.com", "api.*.example.com"));
+    }
+
+    @Test
+    public void testBothAllowModeDisjointWildcardsBlockEverything() throws Exception {
+        assertBothAllowIntersection(Arrays.asList("*.partner.com"), Arrays.asList("*.other.com"),
+                java.util.Collections.<String>emptyList());
+    }
+
+    @Test
+    public void testBothAllowModeMatchAllKeepsOtherList() throws Exception {
+        assertBothAllowIntersection(Arrays.asList("*"), Arrays.asList("api.example.com", "*.partner.com"),
+                Arrays.asList("api.example.com", "*.partner.com"));
+    }
+
+    @Test
+    public void testBothAllowModeIgnoresCase() throws Exception {
+        assertBothAllowIntersection(Arrays.asList("*.Partner.com"), Arrays.asList("API.partner.COM"),
+                Arrays.asList("api.partner.com"));
+    }
+
+    @Test
+    public void testAllowEntriesWithResolverOnlySyntaxDropped() throws Exception {
+        // The resolver reads '?' as a wildcard and ':' as a port separator; the policy matches them literally.
+        PowerMockito.spy(APIUtil.class);
+        PowerMockito.doReturn(null).when(APIUtil.class, "getTenantConfig", TENANT);
+        setPlatform(true, "allow", Arrays.asList("api.example.com", "ap?.example.com", "api.example.com:8443"));
+
+        OASParserOptions out = APIUtil.buildRefResolutionOptions(new OASParserOptions(), TENANT);
+
+        assertSameElements(Arrays.asList("api.example.com"), out.getRemoteRefAllowList());
+    }
+
+    @Test
+    public void testHostPatternIntersectionMatchesExactlyTheCommonHosts() throws Exception {
+        // Exhaustive check over a small alphabet: a host matches some combined pattern exactly when it matches both
+        // input patterns under the policy's own matching rules.
+        java.util.List<String> patterns = new java.util.ArrayList<>();
+        enumerate(patterns, "", new char[]{'a', 'b', '.', '*'}, 3);
+        java.util.List<String> hosts = new java.util.ArrayList<>();
+        enumerate(hosts, "", new char[]{'a', 'b', '.'}, 4);
+        java.util.Map<String, java.util.regex.Pattern> regexes = new java.util.HashMap<>();
+        for (String pattern : patterns) {
+            regexes.put(pattern, java.util.regex.Pattern.compile(
+                    (String) Whitebox.invokeMethod(APIUtil.class, "toWildcardRegex", pattern)));
+        }
+        for (String first : patterns) {
+            for (String second : patterns) {
+                java.util.List<String> combined = Whitebox.invokeMethod(APIUtil.class, "intersectHostPatterns",
+                        first, second);
+                java.util.List<java.util.regex.Pattern> combinedRegexes = new java.util.ArrayList<>();
+                for (String pattern : combined) {
+                    combinedRegexes.add(java.util.regex.Pattern.compile(
+                            (String) Whitebox.invokeMethod(APIUtil.class, "toWildcardRegex", pattern)));
+                }
+                for (String host : hosts) {
+                    boolean expected = regexes.get(first).matcher(host).matches()
+                            && regexes.get(second).matcher(host).matches();
+                    boolean actual = false;
+                    for (java.util.regex.Pattern regex : combinedRegexes) {
+                        actual |= regex.matcher(host).matches();
+                    }
+                    Assert.assertEquals("'" + first + "' and '" + second + "' gave " + combined + " for '" + host
+                            + "'", expected, actual);
+                }
+            }
+        }
+    }
+
+    private static void enumerate(java.util.List<String> out, String prefix, char[] alphabet, int maxLength) {
+        out.add(prefix);
+        if (prefix.length() == maxLength) {
+            return;
+        }
+        for (char c : alphabet) {
+            enumerate(out, prefix + c, alphabet, maxLength);
+        }
+    }
+
+    private static void assertBothAllowIntersection(java.util.List<String> platformHosts,
+                                                    java.util.List<String> tenantHosts,
+                                                    java.util.List<String> expected) throws Exception {
+        PowerMockito.spy(APIUtil.class);
+        PowerMockito.doReturn(tenantPolicy("allow", tenantHosts.toArray(new String[0])))
+                .when(APIUtil.class, "getTenantConfig", TENANT);
+        setPlatform(true, "allow", platformHosts);
+
+        OASParserOptions out = APIUtil.buildRefResolutionOptions(new OASParserOptions(), TENANT);
+
+        if (expected.isEmpty()) {
+            Assert.assertTrue(out.getRemoteRefAllowList() == null || out.getRemoteRefAllowList().isEmpty());
+        } else {
+            assertSameElements(expected, out.getRemoteRefAllowList());
+        }
+        assertSameElements(Arrays.asList("*"), out.getRemoteRefBlockList());
     }
 
     @Test

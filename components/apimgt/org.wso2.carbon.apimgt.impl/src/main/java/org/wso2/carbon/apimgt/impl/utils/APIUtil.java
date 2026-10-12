@@ -470,6 +470,9 @@ public final class APIUtil {
     private static String networkSecurityMode;
     private static List<String> networkSecurityHosts;
     private static boolean networkSecurityBlockPrivateAccess;
+    // Host patterns with more wildcards than this are not combined, since the number of combined patterns grows
+    // quickly with the wildcard count; such entries are not applied to remote $ref resolution.
+    private static final int MAX_WILDCARDS_PER_HOST_PATTERN = 4;
 
     private static final Pattern URL_TEMPLATE_PATTERN = Pattern.compile("\\{[^{}]*}");
     // Prefix of the per-call placeholder that stands in for a template segment while a URL is parsed.
@@ -12838,12 +12841,16 @@ public final class APIUtil {
      * whose block-list is a wildcard-capable denylist:
      * <ul>
      *   <li>deny-mode hosts (from either policy) are unioned into the block-list;</li>
-     *   <li>allow-mode hosts go to the allow-list - the intersection when both policies are allow-mode, otherwise the
-     *       single allow-mode list;</li>
-     *   <li>any denied host is removed from the allow-list so it cannot short-circuit the block-list;</li>
+     *   <li>allow-mode hosts go to the allow-list - when both policies are allow-mode, the patterns matching exactly
+     *       the hosts that both lists match (for example {@code *.a.com} and {@code *.b.a.com} give {@code *.b.a.com}),
+     *       otherwise the single allow-mode list;</li>
+     *   <li>entries containing {@code ?} or {@code :} are dropped, since the resolver reads them as a wildcard or a
+     *       port while the policy treats them literally;</li>
      *   <li>when one policy is allow-mode and the other is a deny-mode or private-network-only policy, an allow-list
      *       entry is kept only if that other policy also permits it, since the allow-list short-circuits the
-     *       resolver's private-network check as well; wildcard entries cannot be checked and are dropped;</li>
+     *       resolver's block-list and private-network check. A wildcard entry is kept only when that policy does not
+     *       block private network access, has no deny pattern that could match an IP address, and has no deny
+     *       pattern that matches any host the entry matches;</li>
      *   <li>if either policy is allow-mode, a {@code "*"} entry is added to the block-list so everything not on the
      *       allow-list is denied - a restrictive whitelist, matching {@code applyAccessControlPolicy}.</li>
      * </ul>
@@ -12920,11 +12927,10 @@ public final class APIUtil {
 
         // Intersect the allow-mode host sets (a host must be allowed by every allow-mode policy under the AND policy).
         List<String> allowList = intersectAllowModeHostSets(allowModeHostSets);
-        // A denied host must never remain on the allow-list: the resolver's allow-list short-circuits to ALLOW and
-        // would otherwise bypass the block-list for a host that another policy denies.
-        allowList.removeAll(denyHosts);
-        // The allow-list also short-circuits the resolver's private-network check, so an entry allowed by one policy
-        // must still be permitted by the other policy when that one is a deny-mode or private-network-only policy.
+        allowList.removeIf(entry -> !isResolverCompatibleAllowEntry(entry));
+        // The allow-list short-circuits the resolver's block-list and private-network check, so an entry allowed by one
+        // policy must still be permitted by the other policy when that one is a deny-mode or private-network-only
+        // policy. This also removes any entry that the other policy denies.
         boolean platformRestrictsAllowList = networkSecurityEnabled
                 && !APIConstants.NetworkSecurityAccessControl.MODE_ALLOW.equalsIgnoreCase(networkSecurityMode);
         boolean tenantRestrictsAllowList = tenantPolicyConfigured
@@ -12955,8 +12961,9 @@ public final class APIUtil {
 
     /**
      * Intersects the allow-mode host sets collected from the platform and tenant policies for the remote-$ref
-     * resolver. With both policies in allow mode the result is their intersection (a host must be allowed by both
-     * under the AND policy); with a single allow-mode policy it is that policy's list; with none it is empty.
+     * resolver. With both policies in allow mode the result is a list of patterns that together match exactly the
+     * hosts matched by both lists (a host must be allowed by both under the AND policy); with a single allow-mode
+     * policy it is that policy's list; with none it is empty.
      *
      * @param allowModeHostSets one host set per allow-mode policy (may be empty)
      * @return a new, mutable list holding the intersection of the given sets; empty if none were provided
@@ -12967,9 +12974,157 @@ public final class APIUtil {
         }
         List<String> combined = new ArrayList<>(allowModeHostSets.get(0));
         for (int i = 1; i < allowModeHostSets.size(); i++) {
-            combined.retainAll(allowModeHostSets.get(i));
+            Set<String> intersection = new LinkedHashSet<>();
+            for (String first : combined) {
+                for (String second : allowModeHostSets.get(i)) {
+                    if (StringUtils.isBlank(first) || StringUtils.isBlank(second)) {
+                        continue;
+                    }
+                    List<String> overlap = intersectHostPatterns(first, second);
+                    if (overlap == null) {
+                        log.warn("Allow-list entries '" + first + "' and '" + second + "' are too complex to combine "
+                                + "and are not applied to remote $ref resolution.");
+                        continue;
+                    }
+                    intersection.addAll(overlap);
+                }
+            }
+            combined = removeSubsumedHostPatterns(intersection);
         }
         return combined;
+    }
+
+    /**
+     * Computes the host patterns that together match exactly the hosts matched by both given patterns, using the
+     * same matching rules as {@code isHostInList} (case-insensitive, {@code *} matches any sequence of characters).
+     * For example, {@code *.a.com} and {@code *.b.a.com} give {@code *.b.a.com}, and {@code *.partner.com} and
+     * {@code api.partner.com} give {@code api.partner.com}.
+     *
+     * @param first  the first host pattern
+     * @param second the second host pattern
+     * @return the patterns matching the common hosts (empty if the patterns have no host in common), or {@code null}
+     *         if a pattern has too many wildcards to be combined
+     */
+    private static List<String> intersectHostPatterns(String first, String second) {
+        String firstPattern = normalizeHostPattern(first);
+        String secondPattern = normalizeHostPattern(second);
+        if (StringUtils.countMatches(firstPattern, APIConstants.NetworkSecurityAccessControl.MATCH_ALL_HOSTS)
+                > MAX_WILDCARDS_PER_HOST_PATTERN
+                || StringUtils.countMatches(secondPattern, APIConstants.NetworkSecurityAccessControl.MATCH_ALL_HOSTS)
+                > MAX_WILDCARDS_PER_HOST_PATTERN) {
+            return null;
+        }
+        return removeSubsumedHostPatterns(
+                intersectHostPatternSuffixes(firstPattern, 0, secondPattern, 0, new HashMap<>()));
+    }
+
+    /**
+     * Returns the patterns matching exactly the strings matched by both {@code first.substring(i)} and
+     * {@code second.substring(j)}. Both patterns must be normalized (see {@link #normalizeHostPattern(String)}).
+     */
+    private static Set<String> intersectHostPatternSuffixes(String first, int i, String second, int j,
+                                                            Map<Long, Set<String>> memo) {
+        long key = ((long) i << 32) | j;
+        Set<String> cached = memo.get(key);
+        if (cached != null) {
+            return cached;
+        }
+        Set<String> result = new LinkedHashSet<>();
+        boolean firstEnded = i == first.length();
+        boolean secondEnded = j == second.length();
+        if (firstEnded || secondEnded) {
+            // An empty pattern matches only the empty string; the other pattern must be able to match it too.
+            String rest = firstEnded ? second.substring(j) : first.substring(i);
+            if (rest.isEmpty() || rest.equals(APIConstants.NetworkSecurityAccessControl.MATCH_ALL_HOSTS)) {
+                result.add("");
+            }
+        } else {
+            char a = first.charAt(i);
+            char b = second.charAt(j);
+            if (a != '*' && b != '*') {
+                if (a == b) {
+                    addWithPrefix(result, a, intersectHostPatternSuffixes(first, i + 1, second, j + 1, memo));
+                }
+            } else if (a == '*' && b == '*') {
+                // Whichever wildcard starts matching later ends first; branch on which one that is.
+                addWithPrefix(result, '*', intersectHostPatternSuffixes(first, i, second, j + 1, memo));
+                addWithPrefix(result, '*', intersectHostPatternSuffixes(first, i + 1, second, j, memo));
+            } else if (a == '*') {
+                // The wildcard either matches nothing more, or consumes the literal character b.
+                result.addAll(intersectHostPatternSuffixes(first, i + 1, second, j, memo));
+                addWithPrefix(result, b, intersectHostPatternSuffixes(first, i, second, j + 1, memo));
+            } else {
+                result.addAll(intersectHostPatternSuffixes(first, i, second, j + 1, memo));
+                addWithPrefix(result, a, intersectHostPatternSuffixes(first, i + 1, second, j, memo));
+            }
+        }
+        memo.put(key, result);
+        return result;
+    }
+
+    private static void addWithPrefix(Set<String> target, char prefix, Set<String> suffixes) {
+        for (String suffix : suffixes) {
+            // Adjacent wildcards are equivalent to one.
+            target.add(prefix == '*' && suffix.startsWith("*") ? suffix : prefix + suffix);
+        }
+    }
+
+    /**
+     * Lower-cases and trims a host pattern and collapses consecutive wildcards, which match the same hosts as one.
+     */
+    private static String normalizeHostPattern(String pattern) {
+        return pattern.trim().toLowerCase(Locale.ROOT).replaceAll("\\*+", "*");
+    }
+
+    /**
+     * Removes the patterns that only match hosts another pattern in the set already matches. A pattern {@code a} is
+     * covered by {@code b} when the text of {@code a}, with each {@code *} taken as a literal character, matches
+     * {@code b}.
+     *
+     * @param patterns normalized host patterns
+     * @return a new, mutable list of the remaining patterns, in their original order
+     */
+    private static List<String> removeSubsumedHostPatterns(Collection<String> patterns) {
+        List<String> candidates = new ArrayList<>(new LinkedHashSet<>(patterns));
+        List<String> result = new ArrayList<>();
+        for (String candidate : candidates) {
+            boolean covered = false;
+            for (String other : candidates) {
+                if (other.equals(candidate) || !candidate.matches(toWildcardRegex(other))) {
+                    continue;
+                }
+                // Two patterns covering each other match the same hosts; keep the first of them.
+                if (!other.matches(toWildcardRegex(candidate))
+                        || candidates.indexOf(other) < candidates.indexOf(candidate)) {
+                    covered = true;
+                    break;
+                }
+            }
+            if (!covered) {
+                result.add(candidate);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Checks whether an allow-list entry is read the same way by the remote-$ref resolver as by the network
+     * access-control policy. The resolver treats {@code ?} as a single-character wildcard and {@code :} as a port
+     * separator, while the policy matches both literally, so such entries are not applied.
+     *
+     * @param allowListEntry the allow-list entry
+     * @return {@code true} if the entry can be passed to the resolver
+     */
+    private static boolean isResolverCompatibleAllowEntry(String allowListEntry) {
+        if (StringUtils.isBlank(allowListEntry)) {
+            return false;
+        }
+        if (allowListEntry.contains("?") || allowListEntry.contains(":")) {
+            log.warn("Allow-list entry '" + allowListEntry + "' contains '?' or ':' and is not applied to remote $ref "
+                    + "resolution.");
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -12994,7 +13149,7 @@ public final class APIUtil {
 
     /**
      * Checks whether a single allow-list entry is permitted by a deny-mode or private-network-only policy. A wildcard
-     * pattern names no single host and cannot be checked, so it is not permitted.
+     * pattern is checked with {@link #isWildcardEntryPermittedByPolicy}.
      *
      * @param allowListEntry            the allow-list entry
      * @param mode                      the policy mode
@@ -13004,11 +13159,11 @@ public final class APIUtil {
      */
     private static boolean isEntryPermittedByPolicy(String allowListEntry, String mode, List<String> policyHosts,
                                                     boolean blockPrivateNetworkAccess) {
-        if (StringUtils.isBlank(allowListEntry)
-                || allowListEntry.contains(APIConstants.NetworkSecurityAccessControl.MATCH_ALL_HOSTS)) {
-            log.warn("Allow-list entry '" + allowListEntry + "' is blank or a wildcard pattern and is not applied to "
-                    + "remote $ref resolution while a deny-mode or private-network-only policy is also configured.");
+        if (StringUtils.isBlank(allowListEntry)) {
             return false;
+        }
+        if (allowListEntry.contains(APIConstants.NetworkSecurityAccessControl.MATCH_ALL_HOSTS)) {
+            return isWildcardEntryPermittedByPolicy(allowListEntry, mode, policyHosts, blockPrivateNetworkAccess);
         }
         try {
             applyAccessControlPolicy(allowListEntry, mode, policyHosts, blockPrivateNetworkAccess);
@@ -13018,6 +13173,69 @@ public final class APIUtil {
                     + "policy and is not applied to remote $ref resolution.");
             return false;
         }
+    }
+
+    /**
+     * Checks whether a wildcard allow-list entry is permitted by a deny-mode or private-network-only policy. The
+     * resolver allows a host that matches the entry by name without resolving it, so the entry is kept only when the
+     * policy has no check that depends on the resolved address and none of its deny patterns matches a host the
+     * entry matches:
+     * <ul>
+     *   <li>the policy does not block private network access;</li>
+     *   <li>no deny pattern could match an IP address;</li>
+     *   <li>no deny pattern has a host in common with the entry.</li>
+     * </ul>
+     *
+     * @param allowListEntry            the wildcard allow-list entry
+     * @param mode                      the policy mode
+     * @param policyHosts               the policy's host patterns
+     * @param blockPrivateNetworkAccess whether the policy blocks private network addresses
+     * @return {@code true} if every host the entry matches is permitted by the policy
+     */
+    private static boolean isWildcardEntryPermittedByPolicy(String allowListEntry, String mode,
+                                                            List<String> policyHosts,
+                                                            boolean blockPrivateNetworkAccess) {
+        if (blockPrivateNetworkAccess) {
+            log.warn("Allow-list entry '" + allowListEntry + "' is a wildcard pattern and is not applied to remote $ref "
+                    + "resolution while the other network access-control policy blocks private network access.");
+            return false;
+        }
+        if (!APIConstants.NetworkSecurityAccessControl.MODE_DENY.equalsIgnoreCase(mode) || policyHosts == null) {
+            return true;
+        }
+        for (String denyPattern : policyHosts) {
+            if (StringUtils.isBlank(denyPattern)) {
+                continue;
+            }
+            if (couldMatchIpAddress(denyPattern)) {
+                log.warn("Allow-list entry '" + allowListEntry + "' is a wildcard pattern and is not applied to remote "
+                        + "$ref resolution while the other network access-control policy denies '" + denyPattern
+                        + "', which can match an IP address.");
+                return false;
+            }
+            List<String> overlap = intersectHostPatterns(allowListEntry, denyPattern);
+            if (overlap == null || !overlap.isEmpty()) {
+                log.warn("Allow-list entry '" + allowListEntry + "' matches hosts that the other network "
+                        + "access-control policy denies through '" + denyPattern + "' and is not applied to remote "
+                        + "$ref resolution.");
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Checks whether a host pattern could match an IPv4 or IPv6 address, judged from its literal characters: digits
+     * and dots for IPv4, or hexadecimal digits and colons for IPv6. A pattern made only of wildcards matches any
+     * address.
+     *
+     * @param pattern the host pattern
+     * @return {@code true} if the pattern could match an IP address
+     */
+    private static boolean couldMatchIpAddress(String pattern) {
+        String literals = normalizeHostPattern(pattern)
+                .replace(APIConstants.NetworkSecurityAccessControl.MATCH_ALL_HOSTS, "");
+        return literals.matches("[0-9.]*") || literals.matches("[0-9a-f:]*");
     }
 
     /**
