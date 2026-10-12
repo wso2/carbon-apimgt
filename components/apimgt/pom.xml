@@ -73,5 +73,6 @@
         <module>org.wso2.carbon.apimgt.governance.impl</module>
         <module>org.wso2.carbon.apimgt.governance.rest.api</module>
         <module>org.wso2.carbon.apimgt.federated.gateway</module>
+        <module>org.wso2.carbon.apimgt.tm.healthcheck</module>
     </modules>
 </project>

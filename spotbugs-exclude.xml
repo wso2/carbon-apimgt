@@ -75,7 +75,11 @@
     <Match>
         <Class name="org.wso2.carbon.apimgt.throttle.policy.deployer.internal.ServiceReferenceHolder"/>
         <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2, MS_EXPOSE_REP"/>
-    </Match> 
+    </Match>
+    <Match>
+        <Class name="org.wso2.carbon.apimgt.tm.healthcheck.internal.ServiceReferenceHolder"/>
+        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2, MS_EXPOSE_REP"/>
+    </Match>
     <Match>
         <Class name="org.wso2.carbon.apimgt.cache.invalidation.APIMgtCacheInvalidationListener"/>
         <Bug pattern="EI_EXPOSE_REP2"/>
