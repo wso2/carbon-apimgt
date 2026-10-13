@@ -17,6 +17,7 @@
 
 package org.wso2.carbon.apimgt.impl.utils;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants;
@@ -184,6 +185,36 @@ public class GatewayUtils {
     public static String retrieveAWSCredAlias(String name, String version, String type) {
 
         return name.concat("--v").concat(version).concat("--").concat(type);
+    }
+
+    /**
+     * Builds the secure-vault alias for one chunk of a GCP endpoint's service-account key. The alias must be
+     * identical on the store side (credential registration) and the lookup side (template vault-lookup), so it
+     * is derived deterministically from the API name/version, the endpoint UUID, the deployment stage and the
+     * chunk index (an AI API holds a key per endpoint per stage).
+     * <p>
+     * The alias is stored in the registry {@code REG_PROPERTY.REG_NAME} column, which is {@code VARCHAR(100)}.
+     * The API name, version and endpoint UUID are individually unbounded (a UUID alone is 36 chars), so a plain
+     * concatenation overflows the column. The identity is therefore hashed into a fixed-length token behind a
+     * readable {@code gcp--serviceAccountKey} prefix (mirroring the {@code oauth--clientSecret} convention); the
+     * chunk index is kept outside the hash so chunk ordering stays visible in the vault.
+     *
+     * @param name       the API name
+     * @param version    the API version
+     * @param endpointId the endpoint UUID
+     * @param type       the deployment stage (PRODUCTION / SANDBOX)
+     * @param index      the zero-based chunk index
+     * @return the per-chunk secure-vault alias (always &lt; 100 chars)
+     */
+    public static String retrieveGCPServiceAccountKeyChunkAlias(String name, String version, String endpointId,
+                                                                String type, int index) {
+
+        String identity = name + "--v" + version + "--" + endpointId + "--" + type;
+        // 32 hex chars = 128 bits of the SHA-256 digest - collision-safe at this scale, and keeps the whole
+        // alias (prefix + 32 + index) comfortably within the 100-char REG_NAME limit.
+        String identityHash = DigestUtils.sha256Hex(identity).substring(0, 32);
+        return APIConstants.ENDPOINT_SECURITY_TYPE_GCP.concat("--serviceAccountKey--")
+                .concat(identityHash).concat("--").concat(String.valueOf(index));
     }
 
     public static String retrieveUniqueIdentifier(String apiId, String type) {
