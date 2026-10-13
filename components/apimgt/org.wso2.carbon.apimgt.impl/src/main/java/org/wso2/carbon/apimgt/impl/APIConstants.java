@@ -139,6 +139,8 @@ public final class APIConstants {
     public static final String API_TENANT_CONF_DEFAULT_SUBSCRIPTION_TIER = "DefaultSubscriptionLevelTier";
 
     public static final String API_TENANT_CONF_EXPOSE_ENDPOINT_PASSWORD = "ExposeEndpointPassword";
+    public static final String API_TENANT_CONF_SCOPES_TO_EXPOSE_ENDPOINT_CREDENTIALS =
+            "ScopesToExposeEndpointCredentials";
     public static final String API_TENANT_CONF_ALLOW_SUBSCRIPTION_VALIDATION_DISABLING
             = "AllowSubscriptionValidationDisabling";
 

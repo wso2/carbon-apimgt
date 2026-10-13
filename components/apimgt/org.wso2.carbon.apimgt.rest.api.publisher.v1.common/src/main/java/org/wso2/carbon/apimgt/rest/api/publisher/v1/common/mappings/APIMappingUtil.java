@@ -5003,6 +5003,55 @@ public class APIMappingUtil {
     }
 
     /**
+     * Masks endpoint-security secrets in an endpoint configuration {@link Map} for the export flow.
+     * <p>
+     * This is an export-only safeguard, applied when the caller does not hold a scope from
+     * {@code ScopesToExposeEndpointCredentials} (see {@code RestApiPublisherUtils.isCredentialExportAllowed}).
+     * The shared mapper keeps credentials whenever {@code ExposeEndpointPassword} is enabled or
+     * {@code preserveCredentials} is requested; this method blanks the secrets regardless of both. Retrieval (GET)
+     * and the internal export flows do not call this method and are unaffected. Operates in place; no-op when there
+     * is no {@code endpoint_security} block.
+     *
+     * @param endpointConfig the endpoint configuration map to mask (may be {@code null})
+     * @throws APIManagementException if the endpoint security cannot be processed
+     */
+    public static void maskEndpointSecurityOnExport(Map endpointConfig) throws APIManagementException {
+        if (endpointConfig == null) {
+            return;
+        }
+        Object security = endpointConfig.get(APIConstants.ENDPOINT_SECURITY);
+        if (security instanceof Map) {
+            endpointConfig.put(APIConstants.ENDPOINT_SECURITY, handleEndpointSecurity(new JSONObject((Map) security)));
+        }
+    }
+
+    /**
+     * Masks endpoint-security secrets in a JSON-string endpoint configuration for the export flow (used for
+     * backend endpoint configs that are stored as strings). Same export-only semantics as
+     * {@link #maskEndpointSecurityOnExport(Map)}.
+     *
+     * @param endpointConfig the endpoint configuration JSON string to mask
+     * @return the masked JSON string, or the original value when there is nothing to mask
+     * @throws APIManagementException if the endpoint configuration cannot be parsed or processed
+     */
+    public static String maskEndpointSecurityOnExport(String endpointConfig) throws APIManagementException {
+        if (StringUtils.isBlank(endpointConfig)) {
+            return endpointConfig;
+        }
+        try {
+            JSONObject config = (JSONObject) new JSONParser().parse(endpointConfig);
+            Object security = config.get(APIConstants.ENDPOINT_SECURITY);
+            if (security instanceof JSONObject) {
+                config.put(APIConstants.ENDPOINT_SECURITY, handleEndpointSecurity((JSONObject) security));
+                return config.toJSONString();
+            }
+            return endpointConfig;
+        } catch (ParseException e) {
+            throw new APIManagementException("Error while masking endpoint security for export", e);
+        }
+    }
+
+    /**
      * Decrypts sensitive information in the endpoint security configuration,
      * including client secrets and custom OAuth parameters for sandbox and production endpoints.
      *
