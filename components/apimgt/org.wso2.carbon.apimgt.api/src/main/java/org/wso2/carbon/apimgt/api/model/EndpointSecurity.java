@@ -54,6 +54,7 @@ public class EndpointSecurity {
     private String secretKey = null;
     private String region = null;
     private String service = null;
+    private String serviceAccountKey = null;
 
     // Serialized only when set. API#getEndpointConfig() migrates legacy endpoint configs by
     // constructing a bare EndpointSecurity and serializing it into endpoint_security; without
@@ -107,6 +108,7 @@ public class EndpointSecurity {
         this.proxyConfigs = endpointSecurity.proxyConfigs;
         this.connectionTimeoutConfigType = endpointSecurity.connectionTimeoutConfigType;
         this.proxyConfigType = endpointSecurity.proxyConfigType;
+        this.serviceAccountKey = endpointSecurity.serviceAccountKey;
     }
 
     public EndpointSecurity() {
@@ -361,6 +363,14 @@ public class EndpointSecurity {
 
     public void setAuthType(String authType) {
         this.authType = authType;
+    }
+
+    public String getServiceAccountKey() {
+        return serviceAccountKey;
+    }
+
+    public void setServiceAccountKey(String serviceAccountKey) {
+        this.serviceAccountKey = serviceAccountKey;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

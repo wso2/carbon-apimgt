@@ -251,6 +251,13 @@ public class ApisApiServiceImpl implements ApisApiService {
             throws APIManagementException {
         URI createdApiUri;
         APIDTO createdApiDTO;
+        if (APIDTO.TypeEnum.GRAPHQL.equals(body.getType())) {
+            // A GraphQL API cannot be complete without a schema, which this endpoint has no way to carry
+            throw new APIManagementException("GraphQL API type does not support API creation from scratch. "
+                    + "Use /apis/import-graphql-schema instead.",
+                    ExceptionCodes.from(ExceptionCodes.API_TYPE_INCOMPATIBLE_WITH_RESOURCE,
+                            "API creation from scratch", APIDTO.TypeEnum.GRAPHQL.toString()));
+        }
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
@@ -3379,6 +3386,8 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             PublisherCommonUtils.encryptEndpointSecurityAWSSecretKey(endpointConfig, CryptoUtil.getDefaultCryptoUtil(),
                     StringUtils.EMPTY, StringUtils.EMPTY, apiDTOFromProperties);
+            PublisherCommonUtils.encryptEndpointSecurityGCPServiceAccountKey(endpointConfig,
+                    CryptoUtil.getDefaultCryptoUtil(), StringUtils.EMPTY, StringUtils.EMPTY, apiDTOFromProperties);
             // Import the API and Definition
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIDTO createdApiDTO = RestApiPublisherUtils.importOpenAPIDefinitionForAPIs(fileInputStream, url,
