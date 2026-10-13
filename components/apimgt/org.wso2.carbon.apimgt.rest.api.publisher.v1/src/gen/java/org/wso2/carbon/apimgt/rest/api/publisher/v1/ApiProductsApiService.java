@@ -46,7 +46,7 @@ public interface ApiProductsApiService {
       public Response deleteAPIProductLifecycleStatePendingTasks(String apiProductId, MessageContext messageContext) throws APIManagementException;
       public Response deleteAPIProductRevision(String apiProductId, String revisionId, MessageContext messageContext) throws APIManagementException;
       public Response deployAPIProductRevision(String apiProductId, String revisionId, List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTO, MessageContext messageContext) throws APIManagementException;
-      public Response exportAPIProduct(String name, String version, String providerName, String revisionNumber, String format, Boolean preserveStatus, Boolean latestRevision, MessageContext messageContext) throws APIManagementException;
+      public Response exportAPIProduct(String name, String version, String providerName, String revisionNumber, String format, Boolean preserveStatus, Boolean latestRevision, Boolean preserveCredentials, MessageContext messageContext) throws APIManagementException;
       public Response getAPIProduct(String apiProductId, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAPIProductDocument(String apiProductId, String documentId, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAPIProductDocumentContent(String apiProductId, String documentId, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;

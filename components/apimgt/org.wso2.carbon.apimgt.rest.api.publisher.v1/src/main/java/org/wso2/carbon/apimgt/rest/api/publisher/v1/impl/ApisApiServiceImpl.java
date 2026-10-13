@@ -3919,15 +3919,32 @@ public class ApisApiServiceImpl implements ApisApiService {
             ExportFormat exportFormat = StringUtils.isNotEmpty(format) ?
                     ExportFormat.valueOf(format.toUpperCase()) :
                     ExportFormat.YAML;
+            String organization = RestApiCommonUtil.validateTenantDomain(xWSO2Tenant);
+            // ScopesToExposeEndpointCredentials of the exported organization governs credential export. A caller
+            // holding an allowed scope gets the existing behaviour (ExposeEndpointPassword or preserveCredentials);
+            // otherwise credentials are masked regardless of both.
+            boolean credentialExportAllowed = RestApiPublisherUtils.isCredentialExportAllowed(
+                    (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
+                            .get(RestApiConstants.USER_REST_API_SCOPES), organization);
             if (Boolean.TRUE.equals(all)) {
-                String organization = RestApiCommonUtil.validateTenantDomain(xWSO2Tenant);
+                if (!credentialExportAllowed) {
+                    log.warn("Credential export not permitted (caller lacks a scope in "
+                            + "ScopesToExposeEndpointCredentials). Exporting all APIs of organization " + organization
+                            + " with credentials masked.");
+                }
                 ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
-                File file = importExportAPI.exportAPIs(organization, Boolean.TRUE.equals(allRevisions), exportFormat);
+                File file = importExportAPI.exportAPIs(organization, Boolean.TRUE.equals(allRevisions), exportFormat,
+                        credentialExportAllowed);
                 return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
                         "attachment; filename=\"" + file.getName() + "\"").build();
             }
             try {
-                String organization = RestApiCommonUtil.validateTenantDomain(xWSO2Tenant);
+                if (!credentialExportAllowed && preserveCredentials) {
+                    log.warn("Credential export not permitted (caller lacks a scope in "
+                            + "ScopesToExposeEndpointCredentials). Exporting API " + apiId
+                            + " with credentials masked.");
+                    preserveCredentials = false;
+                }
                 // Cross-tenant requests (organization differs from the caller's own tenant, which
                 // validateTenantDomain() only allows for callers holding the super-admin protected
                 // permission) must run under the target tenant's carbon context - otherwise the
@@ -3943,7 +3960,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     File file = importExportAPI
                             .exportAPI(apiId, name, version, revisionNum, providerName, preserveStatus, exportFormat,
                                     Boolean.TRUE, preserveCredentials, exportLatestRevision, StringUtils.EMPTY,
-                                    organization);
+                                    organization, false, credentialExportAllowed);
                     return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
                             "attachment; filename=\"" + file.getName() + "\"").build();
                 } finally {

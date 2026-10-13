@@ -690,19 +690,34 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     @Override
     public Response exportAPIProduct(String name, String version, String providerName, String revisionNumber,
                                      String format, Boolean preserveStatus, Boolean exportLatestRevision,
-                                     MessageContext messageContext) throws APIManagementException {
+                                     Boolean preserveCredentials, MessageContext messageContext)
+            throws APIManagementException {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         //If not specified status is preserved by default
         preserveStatus = preserveStatus == null || preserveStatus;
+        //If not specified preserveCredentials is set to false by default
+        preserveCredentials = preserveCredentials != null && preserveCredentials;
 
         // Default export format is YAML
         ExportFormat exportFormat = StringUtils.isNotEmpty(format) ? ExportFormat.valueOf(format.toUpperCase()) :
                 ExportFormat.YAML;
+        // ScopesToExposeEndpointCredentials governs credential export. A caller holding an allowed scope gets the
+        // existing behaviour (ExposeEndpointPassword or preserveCredentials); otherwise credentials are masked
+        // regardless of both.
+        boolean credentialExportAllowed = RestApiPublisherUtils.isCredentialExportAllowed(
+                (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
+                        .get(RestApiConstants.USER_REST_API_SCOPES),
+                RestApiCommonUtil.getLoggedInUserTenantDomain());
+        if (!credentialExportAllowed && preserveCredentials) {
+            log.warn("Credential export not permitted (caller lacks a scope in ScopesToExposeEndpointCredentials). "
+                    + "Exporting API Product " + name + "-" + version + " with credentials masked.");
+            preserveCredentials = false;
+        }
         ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
         try {
             File file = importExportAPI
                     .exportAPIProduct(null, name, version, providerName, revisionNumber, exportFormat, preserveStatus,
-                            true, true, exportLatestRevision, organization);
+                            true, preserveCredentials, exportLatestRevision, organization, credentialExportAllowed);
             return Response.ok(file)
                     .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\""
                             + file.getName() + "\"")

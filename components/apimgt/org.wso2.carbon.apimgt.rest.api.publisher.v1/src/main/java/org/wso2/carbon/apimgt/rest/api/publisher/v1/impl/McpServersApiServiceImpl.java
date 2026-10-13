@@ -2051,11 +2051,24 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                     ExportFormat.YAML;
             try {
                 String organization = RestApiUtil.getValidatedOrganization(messageContext);
+                // ScopesToExposeEndpointCredentials governs credential export. A caller holding an allowed scope
+                // gets the existing behaviour (ExposeEndpointPassword or preserveCredentials); otherwise
+                // credentials are masked regardless of both.
+                boolean credentialExportAllowed = RestApiPublisherUtils.isCredentialExportAllowed(
+                        (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
+                                .get(RestApiConstants.USER_REST_API_SCOPES),
+                        RestApiCommonUtil.getLoggedInUserTenantDomain());
+                if (!credentialExportAllowed && preserveCredentials) {
+                    log.warn("Credential export not permitted (caller lacks a scope in "
+                            + "ScopesToExposeEndpointCredentials). Exporting MCP Server " + mcpServerId
+                            + " with credentials masked.");
+                    preserveCredentials = false;
+                }
                 ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
                 File file = importExportAPI
                         .exportMCPServer(mcpServerId, name, version, revisionNumber, providerName, preserveStatus,
                                 exportFormat, Boolean.TRUE, preserveCredentials, latestRevision, StringUtils.EMPTY,
-                                organization);
+                                organization, credentialExportAllowed);
                 return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
                         "attachment; filename=\"" + file.getName() + "\"").build();
             } catch (APIImportExportException e) {

@@ -78,7 +78,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
                           boolean preserveStatus, ExportFormat format, boolean preserveDocs,
                           boolean preserveCredentials,
                           boolean exportLatestRevision, String originalDevPortalUrl, String organization,
-                          boolean exploded)
+                          boolean exploded, boolean credentialExportAllowed)
             throws APIManagementException, APIImportExportException {
 
         APIIdentifier apiIdentifier;
@@ -122,12 +122,12 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         apiIdentifier.setUuid(exportAPIUUID);
         return ExportUtils.exportAPI(apiProvider, apiIdentifier, new APIDTOTypeWrapper(apiDtoToReturn), api, userName,
                 format, preserveStatus, preserveDocs, originalDevPortalUrl, organization, preserveCredentials,
-                exploded);
+                exploded, credentialExportAllowed);
     }
 
     @Override
-    public File exportAPIs(String organization, boolean allRevisions, ExportFormat format)
-            throws APIManagementException {
+    public File exportAPIs(String organization, boolean allRevisions, ExportFormat format,
+                           boolean credentialExportAllowed) throws APIManagementException {
         // Switch the thread's carbon context to the TARGET organization before touching the registry/governance
         // layer below - without this, per-API artifact lookups resolve against the caller's own tenant context
         // and fail (or, if the caller isn't legitimately authorized for `organization`, silently operate on the
@@ -153,7 +153,8 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
                         try {
                             path = Files.createDirectory(Path.of(apiDirectory.toString(), apiResult.getId()));
                             currentCopy = exportAPI(apiResult.getId(), null, null, null, null, true, format,
-                                    true, true, false, null, organization, true);
+                                    true, credentialExportAllowed, false, null, organization, true,
+                                    credentialExportAllowed);
                             FileUtils.copyDirectory(currentCopy, path.toAbsolutePath().toFile(), true);
                         } finally {
                             if (currentCopy != null) {
@@ -172,7 +173,8 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
                                     try {
                                         revisionExportedFile = exportAPI(apiResult.getId(), null, null,
                                                 Integer.toString(revisionDto.getId()), null, true, format,
-                                                true, true, false, null, organization, true);
+                                                true, credentialExportAllowed, false, null, organization, true,
+                                                credentialExportAllowed);
                                         if (revisionExportedFile != null) {
                                             FileUtils.copyDirectory(revisionExportedFile,
                                                     revisionDirectoryPath.toAbsolutePath().toFile(), true);
@@ -214,7 +216,8 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
     public File exportMCPServer(String apiId, String name, String version, String revisionNum, String providerName,
                                 boolean preserveStatus, ExportFormat format, boolean preserveDocs,
                                 boolean preserveCredentials, boolean exportLatestRevision, String originalDevPortalUrl,
-                                String organization) throws APIManagementException, APIImportExportException {
+                                String organization, boolean credentialExportAllowed)
+            throws APIManagementException, APIImportExportException {
 
         APIIdentifier apiIdentifier;
         MCPServerDTO apiDtoToReturn;
@@ -250,7 +253,8 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         apiIdentifier = api.getId();
         apiIdentifier.setUuid(exportAPIUUID);
         return ExportUtils.exportAPI(apiProvider, apiIdentifier, new APIDTOTypeWrapper(apiDtoToReturn), api, userName,
-                format, preserveStatus, preserveDocs, originalDevPortalUrl, organization, preserveCredentials, false);
+                format, preserveStatus, preserveDocs, originalDevPortalUrl, organization, preserveCredentials, false,
+                credentialExportAllowed);
     }
 
     @Override
@@ -303,7 +307,8 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
     @Override
     public File exportAPIProduct(String apiId, String name, String version, String providerName, String revisionNum,
                                  ExportFormat format, boolean preserveStatus, boolean preserveDocs,
-                                 boolean preserveCredentials, boolean exportLatestRevision, String organization)
+                                 boolean preserveCredentials, boolean exportLatestRevision, String organization,
+                                 boolean credentialExportAllowed)
             throws APIManagementException, APIImportExportException {
 
         APIProductIdentifier apiProductIdentifier;
@@ -346,7 +351,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
             apiProductDtoToReturn = APIMappingUtil.fromAPIProducttoDTO(apiProduct, preserveCredentials);
             return ExportUtils
                     .exportApiProduct(apiProvider, apiProductIdentifier, apiProductDtoToReturn, userName, format,
-                            preserveStatus, preserveDocs, preserveCredentials, organization);
+                            preserveStatus, preserveDocs, preserveCredentials, organization, credentialExportAllowed);
         }
         return null;
 
