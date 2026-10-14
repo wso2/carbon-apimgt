@@ -82,8 +82,10 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -235,44 +237,9 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
                     Element schemaElement = schema.getElement();
                     NodeList schemaNodes = schemaElement.getChildNodes();
                     schemaNodeList.addAll(SOAPOperationBindingUtils.list(schemaNodes));
-                    //gets types from imported schemas from the parent wsdl. Nested schemas will not be imported.
+                    //gets types from imported schemas from the parent wsdl, including nested schema imports.
                     if (importedSchemas != null) {
-                        for (Object importedSchemaObj : importedSchemas.keySet()) {
-                            String schemaUrl = (String) importedSchemaObj;
-                            if (importedSchemas.get(schemaUrl) != null) {
-                                Vector vector = (Vector) importedSchemas.get(schemaUrl);
-                                for (Object schemaVector : vector) {
-                                    if (schemaVector instanceof SchemaImport) {
-                                        Schema referencedSchema = ((SchemaImport) schemaVector)
-                                                .getReferencedSchema();
-                                        if (referencedSchema != null && referencedSchema.getElement() != null) {
-                                            if (referencedSchema.getElement().hasChildNodes()) {
-                                                schemaNodeList.addAll(SOAPOperationBindingUtils
-                                                        .list(referencedSchema.getElement().getChildNodes()));
-                                            } else {
-                                                log.warn("The referenced schema : " + schemaUrl
-                                                        + " doesn't have any defined types");
-                                            }
-                                        } else {
-                                            boolean isInlineSchema = false;
-                                            for (Object aSchema : typeList) {
-                                                if (schemaUrl.equalsIgnoreCase(
-                                                        ((Schema) aSchema).getElement()
-                                                                .getAttribute(TARGET_NAMESPACE_ATTRIBUTE))) {
-                                                    isInlineSchema = true;
-                                                    break;
-                                                }
-                                            }
-                                            if (isInlineSchema) {
-                                                log.debug(schemaUrl + " is already defined inline. Hence continue.");
-                                            } else {
-                                                log.warn("Cannot access referenced schema for the schema defined at: " + schemaUrl);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        resolveImportedXSDs(importedSchemas);
                     } else {
                         log.info("No any imported schemas found in the given wsdl.");
                     }
@@ -333,6 +300,71 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
                     + " with a single WSDL.");
         }
         return canProcess;
+    }
+
+    /**
+     * Recursively resolve imported schemas, including schemas imported by an already-imported schema.
+     *
+     * @param importedSchemas schemas imported from the definition or a referenced schema
+     */
+    private void resolveImportedXSDs(Map importedSchemas) {
+        resolveImportedXSDs(importedSchemas, Collections.newSetFromMap(new IdentityHashMap<Schema, Boolean>()));
+    }
+
+    /**
+     * Recursively resolve imported schemas, including schemas imported by an already-imported schema, guarding
+     * against cyclic and diamond imports by tracking the schema documents that have already been visited.
+     * <p>
+     * The imports map is keyed by namespace, and a namespace may be split across several schema documents, so the
+     * guard tracks the referenced {@link Schema} instances instead. WSDL4J reuses a single {@link Schema} instance
+     * per schema location, so a document reached again through a cyclic or diamond import is the same instance.
+     *
+     * @param importedSchemas schemas imported from the definition or a referenced schema
+     * @param visitedSchemas  schema documents that have already been processed in this resolution chain
+     */
+    private void resolveImportedXSDs(Map importedSchemas, Set<Schema> visitedSchemas) {
+
+        for (Object importedSchemaObj : importedSchemas.keySet()) {
+            String schemaUrl = (String) importedSchemaObj;
+            if (importedSchemas.get(schemaUrl) == null) {
+                continue;
+            }
+            Vector vector = (Vector) importedSchemas.get(schemaUrl);
+            for (Object schemaVector : vector) {
+                if (!(schemaVector instanceof SchemaImport)) {
+                    continue;
+                }
+                Schema referencedSchema = ((SchemaImport) schemaVector).getReferencedSchema();
+                if (referencedSchema != null && referencedSchema.getElement() != null) {
+                    if (!visitedSchemas.add(referencedSchema)) {
+                        continue;
+                    }
+                    if (referencedSchema.getImports() != null) {
+                        resolveImportedXSDs(referencedSchema.getImports(), visitedSchemas);
+                    }
+                    if (referencedSchema.getElement().hasChildNodes()) {
+                        schemaNodeList.addAll(SOAPOperationBindingUtils
+                                .list(referencedSchema.getElement().getChildNodes()));
+                    } else {
+                        log.warn("The referenced schema : " + schemaUrl + " doesn't have any defined types");
+                    }
+                } else {
+                    boolean isInlineSchema = false;
+                    for (Object aSchema : typeList) {
+                        if (schemaUrl.equalsIgnoreCase(
+                                ((Schema) aSchema).getElement().getAttribute(TARGET_NAMESPACE_ATTRIBUTE))) {
+                            isInlineSchema = true;
+                            break;
+                        }
+                    }
+                    if (isInlineSchema) {
+                        log.debug(schemaUrl + " is already defined inline. Hence continue.");
+                    } else {
+                        log.warn("Cannot access referenced schema for the schema defined at: " + schemaUrl);
+                    }
+                }
+            }
+        }
     }
 
     public WSDLInfo getWsdlInfo() throws APIMgtWSDLException {

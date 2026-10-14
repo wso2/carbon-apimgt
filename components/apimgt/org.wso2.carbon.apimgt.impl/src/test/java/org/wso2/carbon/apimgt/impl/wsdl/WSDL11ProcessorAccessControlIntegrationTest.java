@@ -39,6 +39,7 @@ import java.net.InetSocketAddress;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -224,6 +225,21 @@ public class WSDL11ProcessorAccessControlIntegrationTest {
         return "<xsd:schema targetNamespace=\"" + namespace + "\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"/>";
     }
 
+    /** An XSD declaring one top-level element, optionally importing another schema. */
+    private static String schemaWithElement(String namespace, String elementName, String importNamespace,
+            String schemaLocation) {
+        String importDecl = schemaLocation == null ? ""
+                : "  <xsd:import namespace=\"" + importNamespace + "\" schemaLocation=\"" + schemaLocation + "\"/>\n";
+        return "<xsd:schema targetNamespace=\"" + namespace + "\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\n"
+                + importDecl
+                + "  <xsd:element name=\"" + elementName + "\">\n"
+                + "    <xsd:complexType><xsd:sequence>\n"
+                + "      <xsd:element name=\"value\" type=\"xsd:string\"/>\n"
+                + "    </xsd:sequence></xsd:complexType>\n"
+                + "  </xsd:element>\n"
+                + "</xsd:schema>";
+    }
+
     private static void write(File file, String content) throws IOException {
         Files.write(file.toPath(), content.getBytes(StandardCharsets.UTF_8));
     }
@@ -362,6 +378,27 @@ public class WSDL11ProcessorAccessControlIntegrationTest {
         WSDL11SOAPOperationExtractor ex = new WSDL11SOAPOperationExtractor();
         assertTrue(ex.initPath(dir.getAbsolutePath()));
         assertFalse(ex.hasError());
+    }
+
+    // SOAP-to-REST extractor: types from transitively imported schemas reach the model, a cyclic import terminates,
+    // and two different documents sharing a namespace (one direct, one nested) are both processed.
+    @Test
+    public void soapToRestResolvesNestedCyclicAndSameNamespaceImports() throws Exception {
+        File dir = tmp.newFolder("archive-" + System.nanoTime());
+        write(new File(dir, "service.wsdl"), wsdlWithTwoXsdImports("a.xsd", "urn:b", "b2.xsd"));
+        write(new File(dir, "a.xsd"), schemaWithElement("urn:c", "AElement", "urn:b", "b1.xsd"));
+        // b1.xsd imports a.xsd back, forming a cycle a.xsd -> b1.xsd -> a.xsd
+        write(new File(dir, "b1.xsd"), schemaWithElement("urn:b", "B1Element", "urn:c", "a.xsd"));
+        write(new File(dir, "b2.xsd"), schemaWithElement("urn:b", "B2Element", null, null));
+        WSDL11SOAPOperationExtractor ex = new WSDL11SOAPOperationExtractor();
+        assertTrue(ex.initPath(dir.getAbsolutePath()));
+        assertFalse(ex.hasError());
+        Map<String, ?> models = ex.getWsdlInfo().getParameterModelMap();
+        assertNotNull(models);
+        assertTrue("type from the directly imported schema is missing", models.containsKey("AElement"));
+        assertTrue("type from the nested import is missing", models.containsKey("B1Element"));
+        assertTrue("type from a second document in an already-visited namespace is missing",
+                models.containsKey("B2Element"));
     }
 
     // init(URL) with a file: URL has relative refs to the WSDL's OWN directory: a sibling schema
