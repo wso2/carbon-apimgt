@@ -3580,44 +3580,6 @@ public class PublisherCommonUtils {
             throw new APIManagementException(ExceptionCodes.NO_RESOURCES_FOUND);
         }
         Set<org.wso2.carbon.apimgt.api.model.Scope> scopes = oasParser.getScopes(apiDefinition);
-        //validating scope roles
-        for (org.wso2.carbon.apimgt.api.model.Scope scope : scopes) {
-            String roles = scope.getRoles();
-            if (roles != null) {
-                boolean scopeBindingNeedsUpdate = false;
-                List<String> correctedRoles = new ArrayList<>();
-                for (String aRole : roles.split(",")) {
-                    String correctedRole = aRole;
-                    boolean prefixCorrected = false;
-                    if (aRole.contains("/")) {
-                        String[] roleParts = aRole.split("/", 2);
-                        String prefix = roleParts[0];
-                        if ("APPLICATION".equalsIgnoreCase(prefix) && !"Application".equals(prefix)) {
-                            correctedRole = "Application/" + roleParts[1];
-                            prefixCorrected = true;
-                        }
-                    }
-
-                    boolean isValidRole = APIUtil.isRoleNameExist(RestApiCommonUtil.getLoggedInUsername(),
-                            correctedRole);
-                    if (!isValidRole) {
-                        String errorMessage = "Role '" + correctedRole + "' Does not exist.";
-                        throw new APIManagementException(errorMessage,
-                                ExceptionCodes.from(ExceptionCodes.ROLE_OF_SCOPE_DOES_NOT_EXIST, correctedRole));
-                    }
-
-                    if (prefixCorrected) {
-                        scopeBindingNeedsUpdate = true;
-                    }
-                    correctedRoles.add(correctedRole);
-                }
-
-                if (scopeBindingNeedsUpdate) {
-                    scope.setRoles(String.join(",", correctedRoles));
-                    apiProvider.updateSharedScope(scope, organization);
-                }
-            }
-        }
 
         List<APIResource> removedProductResources = apiProvider.getRemovedProductResources(uriTemplates, existingAPI);
 
@@ -3737,6 +3699,8 @@ public class PublisherCommonUtils {
             throw new APIManagementException("Error when parsing endpoint configurations ", e);
         }
 
+        // Validates local scope roles. Shared scope bindings in the definition are only a copy, so they are not
+        // validated here, and the stored values are applied by key managers that support it.
         PublisherCommonUtils.validateScopes(existingAPI);
         APIUtil.validateAndUpdateURITemplates(existingAPI, APIUtil.getInternalOrganizationId(organization));
         SwaggerData swaggerData = new SwaggerData(existingAPI);
