@@ -201,12 +201,12 @@ public class APIUtilRefOptionsTest {
     public void testPlatformDenyTenantAllowAddsWildcardAndKeepsAllowedHost() throws Exception {
         // Platform deny + tenant allow: only the tenant-allowed hosts resolve, and the platform-denied host is blocked.
         PowerMockito.spy(APIUtil.class);
-        PowerMockito.doReturn(tenantPolicy("allow", "corp.com")).when(APIUtil.class, "getTenantConfig", TENANT);
+        PowerMockito.doReturn(tenantPolicy("allow", "203.0.113.10")).when(APIUtil.class, "getTenantConfig", TENANT);
         setPlatform(true, "deny", Arrays.asList("evil.com"));
 
         OASParserOptions out = APIUtil.buildRefResolutionOptions(new OASParserOptions(), TENANT);
 
-        assertSameElements(Arrays.asList("corp.com"), out.getRemoteRefAllowList());
+        assertSameElements(Arrays.asList("203.0.113.10"), out.getRemoteRefAllowList());
         assertSameElements(Arrays.asList("evil.com", "*"), out.getRemoteRefBlockList());
     }
 
@@ -215,13 +215,13 @@ public class APIUtilRefOptionsTest {
         // A host that appears on both a deny list and an allow list must stay blocked: the resolver's allow-list
         // short-circuits to ALLOW, so a denied host has to be removed from the allow-list, not merely block-listed.
         PowerMockito.spy(APIUtil.class);
-        PowerMockito.doReturn(tenantPolicy("allow", "shared.com", "ok.com"))
+        PowerMockito.doReturn(tenantPolicy("allow", "shared.com", "203.0.113.20"))
                 .when(APIUtil.class, "getTenantConfig", TENANT);
         setPlatform(true, "deny", Arrays.asList("shared.com"));
 
         OASParserOptions out = APIUtil.buildRefResolutionOptions(new OASParserOptions(), TENANT);
 
-        assertSameElements(Arrays.asList("ok.com"), out.getRemoteRefAllowList());
+        assertSameElements(Arrays.asList("203.0.113.20"), out.getRemoteRefAllowList());
         assertSameElements(Arrays.asList("shared.com", "*"), out.getRemoteRefBlockList());
     }
 
@@ -237,6 +237,106 @@ public class APIUtilRefOptionsTest {
 
         Assert.assertTrue(out.getRemoteRefAllowList() == null || out.getRemoteRefAllowList().isEmpty());
         assertSameElements(Arrays.asList("a.com", "b.com"), out.getRemoteRefBlockList());
+    }
+
+    @Test
+    public void testPlatformPrivateNetworkBlockingFiltersTenantAllowList() throws Exception {
+        // The allow-list short-circuits the resolver's private-network check, so a tenant allow entry that the
+        // platform's private-network blocking rejects must not reach the allow-list.
+        PowerMockito.spy(APIUtil.class);
+        PowerMockito.doReturn(tenantPolicy("allow", "127.0.0.1", "203.0.113.10"))
+                .when(APIUtil.class, "getTenantConfig", TENANT);
+        setPlatform(true, "deny", java.util.Collections.<String>emptyList());
+        Whitebox.setInternalState(APIUtil.class, "networkSecurityBlockPrivateAccess", true);
+
+        OASParserOptions out = APIUtil.buildRefResolutionOptions(new OASParserOptions(), TENANT);
+
+        assertSameElements(Arrays.asList("203.0.113.10"), out.getRemoteRefAllowList());
+        assertSameElements(Arrays.asList("*"), out.getRemoteRefBlockList());
+    }
+
+    @Test
+    public void testPlatformBlankModePrivateNetworkBlockingFiltersTenantAllowList() throws Exception {
+        // A platform policy with no mode and private-network blocking on restricts the tenant allow-list the same way.
+        PowerMockito.spy(APIUtil.class);
+        PowerMockito.doReturn(tenantPolicy("allow", "127.0.0.1")).when(APIUtil.class, "getTenantConfig", TENANT);
+        setPlatform(true, null, null);
+        Whitebox.setInternalState(APIUtil.class, "networkSecurityBlockPrivateAccess", true);
+
+        OASParserOptions out = APIUtil.buildRefResolutionOptions(new OASParserOptions(), TENANT);
+
+        Assert.assertTrue(out.getRemoteRefAllowList() == null || out.getRemoteRefAllowList().isEmpty());
+        assertSameElements(Arrays.asList("*"), out.getRemoteRefBlockList());
+    }
+
+    @Test
+    public void testTenantWildcardAllowEntriesDroppedUnderRestrictivePlatform() throws Exception {
+        // A wildcard entry names no single host and cannot be checked against the platform policy, so it is dropped.
+        PowerMockito.spy(APIUtil.class);
+        PowerMockito.doReturn(tenantPolicy("allow", "*", "*.example.com"))
+                .when(APIUtil.class, "getTenantConfig", TENANT);
+        setPlatform(true, "deny", Arrays.asList("evil.com"));
+
+        OASParserOptions out = APIUtil.buildRefResolutionOptions(new OASParserOptions(), TENANT);
+
+        Assert.assertTrue(out.getRemoteRefAllowList() == null || out.getRemoteRefAllowList().isEmpty());
+        assertSameElements(Arrays.asList("evil.com", "*"), out.getRemoteRefBlockList());
+    }
+
+    @Test
+    public void testPlatformWildcardDenyFiltersTenantAllowList() throws Exception {
+        // A platform deny pattern must remove a matching tenant allow entry, not only an identical one.
+        PowerMockito.spy(APIUtil.class);
+        PowerMockito.doReturn(tenantPolicy("allow", "db.internal")).when(APIUtil.class, "getTenantConfig", TENANT);
+        setPlatform(true, "deny", Arrays.asList("*.internal"));
+
+        OASParserOptions out = APIUtil.buildRefResolutionOptions(new OASParserOptions(), TENANT);
+
+        Assert.assertTrue(out.getRemoteRefAllowList() == null || out.getRemoteRefAllowList().isEmpty());
+        assertSameElements(Arrays.asList("*.internal", "*"), out.getRemoteRefBlockList());
+    }
+
+    @Test
+    public void testNonRestrictivePlatformKeepsTenantAllowList() throws Exception {
+        // A platform policy that restricts nothing leaves the tenant allow-list, wildcards included, unchanged.
+        PowerMockito.spy(APIUtil.class);
+        PowerMockito.doReturn(tenantPolicy("allow", "*.example.com")).when(APIUtil.class, "getTenantConfig", TENANT);
+        setPlatform(true, "deny", java.util.Collections.<String>emptyList());
+
+        OASParserOptions out = APIUtil.buildRefResolutionOptions(new OASParserOptions(), TENANT);
+
+        assertSameElements(Arrays.asList("*.example.com"), out.getRemoteRefAllowList());
+        assertSameElements(Arrays.asList("*"), out.getRemoteRefBlockList());
+    }
+
+    @Test
+    public void testTenantDenyNarrowsPlatformAllowList() throws Exception {
+        // A tenant deny-mode policy may narrow the platform allow-list, including through a wildcard pattern.
+        PowerMockito.spy(APIUtil.class);
+        PowerMockito.doReturn(tenantPolicy("deny", "203.0.113.2*")).when(APIUtil.class, "getTenantConfig", TENANT);
+        setPlatform(true, "allow", Arrays.asList("203.0.113.10", "203.0.113.20"));
+
+        OASParserOptions out = APIUtil.buildRefResolutionOptions(new OASParserOptions(), TENANT);
+
+        assertSameElements(Arrays.asList("203.0.113.10"), out.getRemoteRefAllowList());
+        assertSameElements(Arrays.asList("203.0.113.2*", "*"), out.getRemoteRefBlockList());
+    }
+
+    @Test
+    public void testTenantPrivateNetworkBlockingNarrowsPlatformAllowList() throws Exception {
+        // A tenant policy with no mode and private-network blocking on removes private hosts from the platform list.
+        PowerMockito.spy(APIUtil.class);
+        JSONObject policy = new JSONObject();
+        policy.put(APIConstants.NetworkSecurityAccessControl.TENANT_BLOCK_PRIVATE_NETWORK_ACCESS, true);
+        JSONObject tenantConfig = new JSONObject();
+        tenantConfig.put(APIConstants.NetworkSecurityAccessControl.TENANT_CONFIG_KEY, policy);
+        PowerMockito.doReturn(tenantConfig).when(APIUtil.class, "getTenantConfig", TENANT);
+        setPlatform(true, "allow", Arrays.asList("127.0.0.1", "203.0.113.10"));
+
+        OASParserOptions out = APIUtil.buildRefResolutionOptions(new OASParserOptions(), TENANT);
+
+        assertSameElements(Arrays.asList("203.0.113.10"), out.getRemoteRefAllowList());
+        assertSameElements(Arrays.asList("*"), out.getRemoteRefBlockList());
     }
 
     @Test
