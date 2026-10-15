@@ -439,7 +439,7 @@ public class InMemoryAPIDeployer {
                 setClientCertificatesToRemoveIntoGatewayDTO(gatewayAPIDTO);
                 if (APIConstants.API_PRODUCT.equals(gatewayEvent.getApiType())) {
                     APIProductIdentifier apiProductIdentifier = new APIProductIdentifier(gatewayEvent.getProvider(),
-                            gatewayEvent.getName(), gatewayEvent.getVersion());
+                            gatewayEvent.getName(), gatewayEvent.getVersion(), gatewayEvent.getUuid());
                     Set<APIEvent> associatedApis = gatewayEvent.getAssociatedApis();
                     for (APIEvent associatedApi : associatedApis) {
                         GatewayUtils.setCustomSequencesToBeRemoved(apiProductIdentifier, associatedApi.getUuid(),

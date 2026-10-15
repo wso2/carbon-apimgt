@@ -4179,6 +4179,13 @@ public class PublisherCommonUtils {
             }
         }
 
+        // The version of an API Product can't be changed. Set the original version so that it is used to build the
+        // context when the request doesn't have a version
+        apiProductDtoToUpdate.setVersion(originalAPIProduct.getId().getVersion());
+
+        // The context of an API Product can't be changed
+        apiProductDtoToUpdate.setContext(originalAPIProduct.getContextTemplate());
+
         APIProduct product = APIMappingUtil.fromDTOtoAPIProduct(apiProductDtoToUpdate, username);
         validateSubscriptionAvailabilityForProduct(originalAPIProduct, product);
         product.setState(originalAPIProduct.getState());
@@ -4268,6 +4275,11 @@ public class PublisherCommonUtils {
 
         if (apiProductDTO.getApiKeyHeader() == null) {
             apiProductDTO.setApiKeyHeader(APIConstants.API_KEY_HEADER_DEFAULT);
+        }
+
+        //set the default version of the API Product
+        if (StringUtils.isBlank(apiProductDTO.getVersion())) {
+            apiProductDTO.setVersion(APIConstants.API_PRODUCT_VERSION_1_0_0);
         }
 
         //isDefaultVersion is true for a new API Product.
