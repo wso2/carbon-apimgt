@@ -2051,7 +2051,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                     ExportFormat.YAML;
             try {
                 String organization = RestApiUtil.getValidatedOrganization(messageContext);
-                // ScopesToExposeEndpointCredentials governs credential export. A caller holding an allowed scope
+                // ScopesToExposeCredentials governs credential export. A caller holding an allowed scope
                 // gets the existing behaviour (ExposeEndpointPassword or preserveCredentials); otherwise
                 // credentials are masked regardless of both.
                 boolean credentialExportAllowed = RestApiPublisherUtils.isCredentialExportAllowed(
@@ -2060,7 +2060,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                         RestApiCommonUtil.getLoggedInUserTenantDomain());
                 if (!credentialExportAllowed && preserveCredentials) {
                     log.warn("Credential export not permitted (caller lacks a scope in "
-                            + "ScopesToExposeEndpointCredentials). Exporting MCP Server " + mcpServerId
+                            + "ScopesToExposeCredentials). Exporting MCP Server " + mcpServerId
                             + " with credentials masked.");
                     preserveCredentials = false;
                 }

@@ -92,17 +92,17 @@ public class RestApiPublisherUtils {
 
     /**
      * Code-defined default set of scopes permitted to export decrypted credentials, used when the
-     * tenant-conf does not define {@code ScopesToExposeEndpointCredentials}. By default these scopes
+     * tenant-conf does not define {@code ScopesToExposeCredentials}. By default these scopes
      * map only to the admin and Internal/devops roles.
      */
-    private static final List<String> DEFAULT_SCOPES_TO_EXPOSE_ENDPOINT_CREDENTIALS = Arrays.asList(
+    private static final List<String> DEFAULT_SCOPES_TO_EXPOSE_CREDENTIALS = Arrays.asList(
             "apim:api_import_export", "apim:mcp_server_import_export", "apim:api_product_import_export");
 
     /**
      * Determines whether the current caller may receive backend credentials in an export.
      * <p>
      * This is the governing check for the export flows: the caller must hold at least one scope from the tenant's
-     * {@code ScopesToExposeEndpointCredentials} list. When it does, the existing behaviour is unchanged (credentials
+     * {@code ScopesToExposeCredentials} list. When it does, the existing behaviour is unchanged (credentials
      * are exported if {@code ExposeEndpointPassword} is enabled or {@code preserveCredentials=true} is requested).
      * When it does not, credentials are masked regardless of {@code ExposeEndpointPassword} or
      * {@code preserveCredentials}. The list is read from tenant-conf; when the key is absent the code-defined
@@ -123,9 +123,9 @@ public class RestApiPublisherUtils {
         JSONObject tenantConfig = APIUtil.getTenantConfig(tenantDomain);
         // Allowed scopes: absent => code default list; present (including empty) => use exactly as defined.
         List<String> allowedScopes;
-        Object scopesValue = tenantConfig.get(APIConstants.API_TENANT_CONF_SCOPES_TO_EXPOSE_ENDPOINT_CREDENTIALS);
+        Object scopesValue = tenantConfig.get(APIConstants.API_TENANT_CONF_SCOPES_TO_EXPOSE_CREDENTIALS);
         if (scopesValue == null) {
-            allowedScopes = DEFAULT_SCOPES_TO_EXPOSE_ENDPOINT_CREDENTIALS;
+            allowedScopes = DEFAULT_SCOPES_TO_EXPOSE_CREDENTIALS;
         } else {
             allowedScopes = new ArrayList<>();
             if (scopesValue instanceof JSONArray) {

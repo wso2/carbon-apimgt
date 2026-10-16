@@ -5007,7 +5007,7 @@ public class APIMappingUtil {
      * Masks endpoint-security secrets in an endpoint configuration {@link Map} for the export flow.
      * <p>
      * This is an export-only safeguard, applied when the caller does not hold a scope from
-     * {@code ScopesToExposeEndpointCredentials} (see {@code RestApiPublisherUtils.isCredentialExportAllowed}).
+     * {@code ScopesToExposeCredentials} (see {@code RestApiPublisherUtils.isCredentialExportAllowed}).
      * The shared mapper keeps credentials whenever {@code ExposeEndpointPassword} is enabled or
      * {@code preserveCredentials} is requested; this method blanks the secrets regardless of both. Retrieval (GET)
      * and the internal export flows do not call this method and are unaffected. Operates in place; no-op when there

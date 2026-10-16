@@ -3920,7 +3920,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     ExportFormat.valueOf(format.toUpperCase()) :
                     ExportFormat.YAML;
             String organization = RestApiCommonUtil.validateTenantDomain(xWSO2Tenant);
-            // ScopesToExposeEndpointCredentials of the exported organization governs credential export. A caller
+            // ScopesToExposeCredentials of the exported organization governs credential export. A caller
             // holding an allowed scope gets the existing behaviour (ExposeEndpointPassword or preserveCredentials);
             // otherwise credentials are masked regardless of both.
             boolean credentialExportAllowed = RestApiPublisherUtils.isCredentialExportAllowed(
@@ -3929,7 +3929,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (Boolean.TRUE.equals(all)) {
                 if (!credentialExportAllowed) {
                     log.warn("Credential export not permitted (caller lacks a scope in "
-                            + "ScopesToExposeEndpointCredentials). Exporting all APIs of organization " + organization
+                            + "ScopesToExposeCredentials). Exporting all APIs of organization " + organization
                             + " with credentials masked.");
                 }
                 ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
@@ -3941,7 +3941,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             try {
                 if (!credentialExportAllowed && preserveCredentials) {
                     log.warn("Credential export not permitted (caller lacks a scope in "
-                            + "ScopesToExposeEndpointCredentials). Exporting API " + apiId
+                            + "ScopesToExposeCredentials). Exporting API " + apiId
                             + " with credentials masked.");
                     preserveCredentials = false;
                 }

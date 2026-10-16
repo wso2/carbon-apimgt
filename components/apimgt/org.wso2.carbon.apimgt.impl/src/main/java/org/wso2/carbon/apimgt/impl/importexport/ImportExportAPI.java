@@ -105,7 +105,7 @@ public interface ImportExportAPI {
      *                             (This is used for advertise only APIs).
      * @param organization         Organization
      * @param exploded             Return an exploded (unarchived) export directory instead of a zip.
-     * @param credentialExportAllowed Whether the caller holds a scope in ScopesToExposeEndpointCredentials. When
+     * @param credentialExportAllowed Whether the caller holds a scope in ScopesToExposeCredentials. When
      *                             false, endpoint credentials are masked regardless of ExposeEndpointPassword and
      *                             preserveCredentials
      * @return API artifact.
@@ -162,7 +162,7 @@ public interface ImportExportAPI {
      * @param originalDevPortalUrl Original DevPortal URL (redirect URL) for the original Store
      *                             (This is used for advertise only APIs).
      * @param organization         Organization
-     * @param credentialExportAllowed Whether the caller holds a scope in ScopesToExposeEndpointCredentials. When
+     * @param credentialExportAllowed Whether the caller holds a scope in ScopesToExposeCredentials. When
      *                             false, endpoint credentials are masked regardless of ExposeEndpointPassword and
      *                             preserveCredentials
      * @return MCP Server artifact.
@@ -211,7 +211,7 @@ public interface ImportExportAPI {
      * @param organization    Organization
      * @param allRevisions    Whether to export all revisions of each API or not.
      * @param format          Format of output documents. Can be YAML or JSON
-     * @param credentialExportAllowed Whether the caller holds a scope in ScopesToExposeEndpointCredentials. When
+     * @param credentialExportAllowed Whether the caller holds a scope in ScopesToExposeCredentials. When
      *                        false, endpoint credentials are masked regardless of ExposeEndpointPassword
      * @return API artifact.
      * @throws APIManagementException if an error occurs while exporting APIs.
@@ -275,7 +275,7 @@ public interface ImportExportAPI {
      * @param preserveCredentials   Preserve credentials on Export.
      * @param exportLatestRevision  Export the most recent revision.
      * @param organization          Organization
-     * @param credentialExportAllowed Whether the caller holds a scope in ScopesToExposeEndpointCredentials. When
+     * @param credentialExportAllowed Whether the caller holds a scope in ScopesToExposeCredentials. When
      *                              false, endpoint credentials of the dependent APIs are masked regardless of
      *                              ExposeEndpointPassword and preserveCredentials
      * @return APIProduct Artifact.

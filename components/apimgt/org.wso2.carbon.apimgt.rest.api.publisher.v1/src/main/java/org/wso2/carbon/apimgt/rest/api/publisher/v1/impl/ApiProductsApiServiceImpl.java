@@ -701,7 +701,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         // Default export format is YAML
         ExportFormat exportFormat = StringUtils.isNotEmpty(format) ? ExportFormat.valueOf(format.toUpperCase()) :
                 ExportFormat.YAML;
-        // ScopesToExposeEndpointCredentials governs credential export. A caller holding an allowed scope gets the
+        // ScopesToExposeCredentials governs credential export. A caller holding an allowed scope gets the
         // existing behaviour (ExposeEndpointPassword or preserveCredentials); otherwise credentials are masked
         // regardless of both.
         boolean credentialExportAllowed = RestApiPublisherUtils.isCredentialExportAllowed(
@@ -709,7 +709,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                         .get(RestApiConstants.USER_REST_API_SCOPES),
                 RestApiCommonUtil.getLoggedInUserTenantDomain());
         if (!credentialExportAllowed && preserveCredentials) {
-            log.warn("Credential export not permitted (caller lacks a scope in ScopesToExposeEndpointCredentials). "
+            log.warn("Credential export not permitted (caller lacks a scope in ScopesToExposeCredentials). "
                     + "Exporting API Product " + name + "-" + version + " with credentials masked.");
             preserveCredentials = false;
         }

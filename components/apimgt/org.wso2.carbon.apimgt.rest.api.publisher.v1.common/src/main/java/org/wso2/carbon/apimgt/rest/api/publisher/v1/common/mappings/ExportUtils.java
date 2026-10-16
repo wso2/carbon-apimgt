@@ -228,7 +228,7 @@ public class ExportUtils {
      * @param organization         Organization
      * @param preserveCredentials  Preserve credentials on export
      * @param exploded             Return an exploded (unarchived) export directory instead of a zip.
-     * @param credentialExportAllowed Whether the caller holds a scope in ScopesToExposeEndpointCredentials. When
+     * @param credentialExportAllowed Whether the caller holds a scope in ScopesToExposeCredentials. When
      *                             false, endpoint credentials are masked regardless of ExposeEndpointPassword and
      *                             preserveCredentials
      * @return File containing the exported API artifact.
@@ -243,7 +243,7 @@ public class ExportUtils {
         int tenantId;
         String currentApiUuid;
 
-        // When the caller is not permitted to export credentials (ScopesToExposeEndpointCredentials), mask the
+        // When the caller is not permitted to export credentials (ScopesToExposeCredentials), mask the
         // endpoint security of the main endpoint config so that ExposeEndpointPassword cannot expose it either.
         if (!credentialExportAllowed && apiDtoToReturn.getEndpointConfig() instanceof Map) {
             APIMappingUtil.maskEndpointSecurityOnExport((Map) apiDtoToReturn.getEndpointConfig());
@@ -409,7 +409,7 @@ public class ExportUtils {
      * @param preserveDocs          Preserve documentation on export
      * @param preserveCredentials   Preserve credentials on export
      * @param organization          Organization Identifier
-     * @param credentialExportAllowed Whether the caller holds a scope in ScopesToExposeEndpointCredentials. When
+     * @param credentialExportAllowed Whether the caller holds a scope in ScopesToExposeCredentials. When
      *                              false, endpoint credentials of the dependent APIs are masked regardless of
      *                              ExposeEndpointPassword and preserveCredentials
      * @return File containing the exported API Product artifact
@@ -1014,7 +1014,7 @@ public class ExportUtils {
      * @param apiProvider         the {@link APIProvider} used to retrieve endpoint information
      * @param organization        the organization context for the API retrieval
      * @param preserveCredentials whether sensitive credentials should be retained in the exported data
-     * @param credentialExportAllowed whether the caller holds a scope in ScopesToExposeEndpointCredentials; when
+     * @param credentialExportAllowed whether the caller holds a scope in ScopesToExposeCredentials; when
      *                            false, endpoint credentials are masked regardless of ExposeEndpointPassword and
      *                            preserveCredentials
      * @throws APIManagementException if an error occurs while retrieving or writing endpoint data
@@ -1080,7 +1080,7 @@ public class ExportUtils {
      * @param apiProvider         the {@link APIProvider} used to retrieve backend information
      * @param organization        the organization context for the API retrieval
      * @param preserveCredentials whether sensitive credentials should be retained in the exported data
-     * @param credentialExportAllowed whether the caller holds a scope in ScopesToExposeEndpointCredentials; when
+     * @param credentialExportAllowed whether the caller holds a scope in ScopesToExposeCredentials; when
      *                            false, endpoint credentials are masked regardless of ExposeEndpointPassword and
      *                            preserveCredentials
      * @throws APIManagementException if an error occurs while retrieving or writing backend data
@@ -1634,7 +1634,7 @@ public class ExportUtils {
      * @param preserveDocs          Whether documentation is preserved while export
      * @param preserveCredentials   Whether credentials are preserved while export
      * @param organization          Organization
-     * @param credentialExportAllowed Whether the caller holds a scope in ScopesToExposeEndpointCredentials; when
+     * @param credentialExportAllowed Whether the caller holds a scope in ScopesToExposeCredentials; when
      *                              false, endpoint credentials are masked regardless of ExposeEndpointPassword and
      *                              preserveCredentials
      * @throws APIImportExportException If an error occurs while creating the directory or extracting the archive
