@@ -257,6 +257,28 @@ public class APIControllerUtil {
             if (pair.getValue() instanceof Map) {
                 convertValuesToStrings((Map) pair.getValue());
             }
+            if (pair.getValue() instanceof List) {
+                convertListValuesToStrings((List) pair.getValue());
+            }
+        }
+    }
+
+    /**
+     * This method will be used to convert any integer values to strings in a list of values, such as a list of
+     * error codes, and in the maps the list holds.
+     *
+     * @param values List to be validated and converted
+     */
+    private static void convertListValuesToStrings(List<Object> values) {
+        for (int i = 0; i < values.size(); i++) {
+            Object value = values.get(i);
+            if (value instanceof Integer) {
+                values.set(i, value.toString());
+            } else if (value instanceof Map) {
+                convertValuesToStrings((Map) value);
+            } else if (value instanceof List) {
+                convertListValuesToStrings((List) value);
+            }
         }
     }
 
