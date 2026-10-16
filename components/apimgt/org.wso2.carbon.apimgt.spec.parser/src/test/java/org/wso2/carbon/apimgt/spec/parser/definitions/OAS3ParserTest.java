@@ -7,6 +7,7 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.security.OAuthFlow;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
@@ -490,6 +491,50 @@ public class OAS3ParserTest extends OASTestBase {
                         + File.separator + "devportal" + File.separator + "oas3_with_apikey_response.json"),
                 String.valueOf(StandardCharsets.UTF_8));
         Assert.assertEquals(oasDefinitionExpected, response);
+    }
+
+    @Test
+    public void testGetOASDefinitionForStoreWithEmptyGatewayHost() throws Exception {
+
+        String swagger = IOUtils.toString(
+                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3" + File.separator
+                        + "publisher" + File.separator + "oas3_mig_without_sec_extensions.json"),
+                String.valueOf(StandardCharsets.UTF_8));
+        APIIdentifier apiIdentifier = new APIIdentifier("admin", "PizzaShackAPI", "1.0.0");
+        API api = new API(apiIdentifier);
+        api.setApiSecurity("oauth_basic_auth_api_key_mandatory,oauth2");
+        api.setTransports("http,https");
+        api.setContext("/pizzashack/1.0.0");
+        api.setScopes(new HashSet<>());
+
+        Map<String, String> hostWithSchemes = new HashMap<>();
+        hostWithSchemes.put(APISpecParserConstants.HTTP_PROTOCOL, "");
+        hostWithSchemes.put(APISpecParserConstants.HTTPS_PROTOCOL, "");
+
+        String response = oas3Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes, null);
+        assertNoMalformedEmptyHostServerUrls(response);
+
+        // Matches APIConsumerImpl when the API is not deployed: only an empty HTTP host is provided.
+        api.setTransports("http");
+        hostWithSchemes = new HashMap<>();
+        hostWithSchemes.put(APISpecParserConstants.HTTP_PROTOCOL, "");
+        response = oas3Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes, null);
+        assertNoMalformedEmptyHostServerUrls(response);
+    }
+
+    private void assertNoMalformedEmptyHostServerUrls(String response) {
+        OpenAPI openAPI = new OpenAPIV3Parser().readContents(response, null, null).getOpenAPI();
+        Assert.assertNotNull(openAPI);
+        Assert.assertFalse("Malformed HTTP server URL generated for empty gateway host",
+                response.contains("http:///pizzashack/1.0.0"));
+        Assert.assertFalse("Malformed HTTPS server URL generated for empty gateway host",
+                response.contains("https:///pizzashack/1.0.0"));
+        if (openAPI.getServers() != null) {
+            for (Server server : openAPI.getServers()) {
+                Assert.assertFalse("Malformed server URL generated for empty gateway host: " + server.getUrl(),
+                        server.getUrl() != null && server.getUrl().contains(":///"));
+            }
+        }
     }
 
     @Test
