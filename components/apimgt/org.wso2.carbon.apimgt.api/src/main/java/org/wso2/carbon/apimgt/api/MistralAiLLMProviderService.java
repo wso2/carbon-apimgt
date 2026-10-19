@@ -92,6 +92,12 @@ public class MistralAiLLMProviderService extends BuiltInLLMProviderService {
                     APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_REMAINING_TOKEN_COUNT,
                     APIConstants.AIAPIConstants.INPUT_SOURCE_HEADER,
                     APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_REMAINING_TOKEN_COUNT, false));
+            // Optional usage counters, published to analytics under aiTokenUsage
+            llmProviderMetadata.add(new LLMProviderMetadata(
+                    APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_CACHE_READ_TOKEN_COUNT,
+                    APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD,
+                    APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_CACHE_READ_TOKEN_COUNT, false,
+                    APIConstants.AIAPIConstants.ANALYTICS_CATEGORY_TOKEN_USAGE));
             llmProviderConfiguration.setMetadata(llmProviderMetadata);
 
             // Set default model List

@@ -57,6 +57,7 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import java.io.IOException;
 import java.security.cert.Certificate;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.xml.stream.XMLStreamException;
@@ -255,6 +256,7 @@ public class ExtensionListenerUtil {
      * @param extensionResponseDTO ExtensionResponseDTO
      * @return true or false indicating continue or return response
      */
+    @SuppressWarnings("unchecked")
     private static boolean handleExtensionResponse(MessageContext messageContext,
                                                    ExtensionResponseDTO extensionResponseDTO,
                                                    boolean mediateExtensionFaultSequence) {
@@ -275,7 +277,25 @@ public class ExtensionListenerUtil {
         //set Additional analytics Properties to the message context.
         if (customProperty != null && customProperty.get(APIMgtGatewayConstants.ADDITIONAL_ANALYTICS_PROPS) != null) {
             Object customElkAttributes = customProperty.get(APIMgtGatewayConstants.ADDITIONAL_ANALYTICS_PROPS);
-            messageContext.setProperty(APIMgtGatewayConstants.ADDITIONAL_ANALYTICS_PROPS, customElkAttributes);
+            // The aiTokenUsage section is owned by the AI mediator. A listener must not set it, so drop it here.
+            if (customElkAttributes instanceof Map
+                    && ((Map<?, ?>) customElkAttributes).containsKey(org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.AI_TOKEN_USAGE)) {
+                Map<String, Object> withoutAiSection = new LinkedHashMap<>((Map<String, Object>) customElkAttributes);
+                withoutAiSection.remove(org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.AI_TOKEN_USAGE);
+                customElkAttributes = withoutAiSection;
+                log.warn("An extension listener returned the reserved analytics key '" + org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.AI_TOKEN_USAGE
+                        + "'. It was ignored.");
+            }
+            // Merge with whatever another contributor (e.g. the AI mediator) already placed under this same
+            // property, instead of replacing it outright, so neither contribution is silently dropped.
+            Object existing = messageContext.getProperty(APIMgtGatewayConstants.ADDITIONAL_ANALYTICS_PROPS);
+            if (existing instanceof Map && customElkAttributes instanceof Map) {
+                Map<String, Object> merged = new LinkedHashMap<>((Map<String, Object>) existing);
+                merged.putAll((Map<String, Object>) customElkAttributes); // the listener's own keys win on overlap
+                messageContext.setProperty(APIMgtGatewayConstants.ADDITIONAL_ANALYTICS_PROPS, merged);
+            } else {
+                messageContext.setProperty(APIMgtGatewayConstants.ADDITIONAL_ANALYTICS_PROPS, customElkAttributes);
+            }
             //removing additional analytics props as those are irrelevant to throttle stream
             customProperty.remove(APIMgtGatewayConstants.ADDITIONAL_ANALYTICS_PROPS);
         }

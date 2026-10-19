@@ -71,8 +71,10 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -103,6 +105,11 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     private Boolean buildResponseMessage = null;
     private static Map<String, String> reporterProperties = null;
     private static final Gson gson = new Gson();
+
+    /** Core {@code aiTokenUsage} fields that a contributed section must never overwrite. */
+    private static final Set<String> CORE_AI_TOKEN_USAGE_KEYS = Collections.unmodifiableSet(new HashSet<>(
+            Arrays.asList(Constants.AI_PROMPT_TOKEN_USAGE, Constants.AI_COMPLETION_TOKEN_USAGE,
+                    Constants.AI_TOTAL_TOKEN_USAGE, Constants.HOUR)));
 
     public SynapseAnalyticsDataProvider(MessageContext messageContext) {
 
@@ -570,8 +577,113 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
             getMCPAnalyticsData(custom);
         }
 
+        // Analytics-only contributions (AI token usage, and any THROTTLING/AUTHENTICATION extension listener's own
+        // ADDITIONAL_ANALYTICS_PROPS_TO_PUBLISH data -- see DESIGN-DOC-17932-V2.md §8.4). Listener data is
+        // published only when publish_additional_properties is enabled.
+        mergeAdditionalAnalyticsProps(messageContext, custom);
+
         return custom;
     }
+
+    /**
+     * Returns true if a contributed value can safely be serialised into the analytics event: a string, boolean or
+     * finite number, or a map (string keys) / collection of those, nested at most three levels. Anything else
+     * (NaN, infinity, arbitrary objects, Optional, self-referencing structures) would make the event fail to
+     * serialise in the reporter and be lost, so it is skipped instead.
+     */
+    private static boolean isPublishable(Object value, int depth) {
+
+        if (value instanceof String || value instanceof Boolean) {
+            return true;
+        }
+        if (value instanceof Number) {
+            double d = ((Number) value).doubleValue();
+            return !Double.isNaN(d) && !Double.isInfinite(d);
+        }
+        if (depth >= 3) {
+            return false;
+        }
+        if (value instanceof Map) {
+            for (Map.Entry<?, ?> e : ((Map<?, ?>) value).entrySet()) {
+                if (!(e.getKey() instanceof String) || !isPublishable(e.getValue(), depth + 1)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        if (value instanceof Collection) {
+            for (Object o : (Collection<?>) value) {
+                if (!isPublishable(o, depth + 1)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void mergeAdditionalAnalyticsProps(MessageContext messageContext, Map<String, Object> custom) {
+
+        try {
+            Object bucket = messageContext.getProperty(APIMgtGatewayConstants.ADDITIONAL_ANALYTICS_PROPS);
+            if (!(bucket instanceof Map)) {
+                return;
+            }
+            Map<?, ?> contributions = (Map<?, ?>) bucket;
+
+            // The aiTokenUsage section is folded into the object built from AI_API_RESPONSE_METADATA, and only into
+            // an existing one: a contribution must not create an aiTokenUsage that lacks the core fields (the cloud
+            // reporter reads them unconditionally), nor overwrite a core field.
+            Object aiSection = contributions.get(Constants.AI_TOKEN_USAGE);
+            if (aiSection instanceof Map) {
+                Object builtAiTokenUsage = custom.get(Constants.AI_TOKEN_USAGE);
+                if (builtAiTokenUsage instanceof Map) {
+                    for (Map.Entry<String, Object> entry : ((Map<String, Object>) aiSection).entrySet()) {
+                        if (!CORE_AI_TOKEN_USAGE_KEYS.contains(entry.getKey())
+                                && isPublishable(entry.getValue(), 0)) {
+                            ((Map<String, Object>) builtAiTokenUsage).put(entry.getKey(), entry.getValue());
+                        }
+                    }
+                } else if (log.isDebugEnabled()) {
+                    log.debug("Ignoring the aiTokenUsage contribution: no AI usage was built for this request.");
+                }
+            }
+
+            // Every other contribution comes from extension listeners and is published only when the operator opts
+            // in, so upgrading never starts publishing listener data that was not published before.
+            if (!shouldPublishAdditionalProperties()) {
+                return;
+            }
+
+            // Every other contribution is published together, under a single object. Keeping them out of the
+            // top level means a contribution can never collide with, or replace, a field getProperties() builds.
+            Map<String, Object> additionalProperties = new LinkedHashMap<>();
+            for (Map.Entry<?, ?> entry : contributions.entrySet()) {
+                Object key = entry.getKey();
+                if (!(key instanceof String) || Constants.AI_TOKEN_USAGE.equals(key) || entry.getValue() == null) {
+                    continue;
+                }
+                if (isPublishable(entry.getValue(), 0)) {
+                    additionalProperties.put((String) key, entry.getValue());
+                } else if (log.isDebugEnabled()) {
+                    log.debug("Skipping additional analytics property '" + key + "': value of type "
+                            + entry.getValue().getClass().getName()
+                            + " (or a value nested in it) cannot be published.");
+                }
+            }
+            if (!additionalProperties.isEmpty()
+                    && custom.putIfAbsent(Constants.ADDITIONAL_PROPERTIES, additionalProperties) != null
+                    && log.isDebugEnabled()) {
+                log.debug("A '" + Constants.ADDITIONAL_PROPERTIES + "' property is already set by the analytics "
+                        + "custom data provider. Ignoring the contributed entries.");
+            }
+        } catch (Exception e) {
+            log.warn("Error merging ADDITIONAL_ANALYTICS_PROPS_TO_PUBLISH into the analytics event. Continuing "
+                    + "with the core event only.", e);
+        }
+    }
+
 
     public static int getHourByUTC(long timestampMillis) {
         OffsetDateTime offsetDateTime = OffsetDateTime
@@ -960,6 +1072,21 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
                     .getAPIAnalyticsConfiguration().getReporterProperties();
         }
         String v = reporterProperties.get(SEND_HEADER);
+        return v != null && Boolean.parseBoolean(v);
+    }
+
+    /**
+     * Check whether extension listener ADDITIONAL_ANALYTICS_PROPS_TO_PUBLISH entries are published under
+     * additionalProperties. This does not affect a custom analytics data provider, which reads the message
+     * context itself.
+     * Default: false
+     */
+    private boolean shouldPublishAdditionalProperties() {
+        if (reporterProperties == null) {
+            reporterProperties = ServiceReferenceHolder.getInstance().getApiManagerConfigurationService()
+                    .getAPIAnalyticsConfiguration().getReporterProperties();
+        }
+        String v = reporterProperties != null ? reporterProperties.get(Constants.PUBLISH_ADDITIONAL_PROPERTIES) : null;
         return v != null && Boolean.parseBoolean(v);
     }
 

@@ -48,6 +48,8 @@ import org.wso2.carbon.apimgt.api.gateway.FailoverPolicyDeploymentConfigDTO;
 import org.wso2.carbon.apimgt.api.gateway.ModelEndpointDTO;
 import org.wso2.carbon.apimgt.api.model.LLMProviderInfo;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.AnalyticsMessageContextUtil;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
@@ -56,6 +58,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.MediaType;
@@ -680,6 +683,15 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
         llmProviderService.getResponseMetadata(llmResponseMetaData, providerConfigs.getMetadata(), metadataMap);
         messageContext.setProperty(APIConstants.AIAPIConstants.AI_API_RESPONSE_METADATA, metadataMap);
 
+        // Publish the provider's TOKEN_USAGE counters (e.g. cache and reasoning tokens) to analytics through the
+        // ADDITIONAL_ANALYTICS_PROPS_TO_PUBLISH channel. The section is replaced on every backend attempt, so only
+        // the last attempt's usage is published.
+        if (APIUtil.isAnalyticsEnabled()) {
+            AnalyticsMessageContextUtil.mergeSection(messageContext,
+                    APIMgtGatewayConstants.ADDITIONAL_ANALYTICS_PROPS, Constants.AI_TOKEN_USAGE,
+                    extractTokenUsageCounters(metadataMap, providerConfigs.getMetadata()));
+        }
+
         // Read target model configs from the new generic property first, then fall back for compatibility
         Map<String, Object> roundRobinConfigs = null;
         if (messageContext.getProperty(APIConstants.AIAPIConstants.TARGET_MODEL_CONFIGS) != null) {
@@ -1158,6 +1170,41 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
     public void setDirection(String direction) {
 
         this.direction = direction;
+    }
+
+    /**
+     * Extracts the token usage counters published to analytics as the aiTokenUsage section: every response metadata
+     * attribute whose provider rule is tagged {@code analyticsCategory: "TOKEN_USAGE"}, as an Integer. Attributes
+     * that are missing or not a whole number are left out.
+     *
+     * @param metadataMap   Response metadata extracted from the LLM response (attribute name to value).
+     * @param providerRules The provider's metadata rules.
+     * @return The token usage counters; never null.
+     */
+    static Map<String, Object> extractTokenUsageCounters(Map<String, String> metadataMap,
+                                                         List<LLMProviderMetadata> providerRules) {
+
+        Map<String, Object> counters = new LinkedHashMap<>();
+        if (metadataMap == null || providerRules == null) {
+            return counters;
+        }
+        for (LLMProviderMetadata rule : providerRules) {
+            if (rule == null || !APIConstants.AIAPIConstants.ANALYTICS_CATEGORY_TOKEN_USAGE
+                    .equals(rule.getAnalyticsCategory())) {
+                continue;
+            }
+            String name = rule.getAttributeName();
+            String raw = name != null ? metadataMap.get(name) : null;
+            if (raw == null) {
+                continue;
+            }
+            try {
+                counters.put(name, Integer.parseInt(raw.trim()));
+            } catch (NumberFormatException e) {
+                // Not a whole number (e.g. a rule pointing at an object); leave the counter out.
+            }
+        }
+        return counters;
     }
 
     /**

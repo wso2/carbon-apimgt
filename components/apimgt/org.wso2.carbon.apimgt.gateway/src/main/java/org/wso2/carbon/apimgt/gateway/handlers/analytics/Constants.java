@@ -84,6 +84,9 @@ public class Constants {
     public static final String CERTIFICATE_COMMON_NAME = "commonName";
     public static final String NOT_APPLICABLE_VALUE = "N/A";
     public static final String SEND_HEADER = "send_headers";
+    // Reporter property that enables publishing extension listener ADDITIONAL_ANALYTICS_PROPS_TO_PUBLISH entries
+    // under additionalProperties. Default: false.
+    public static final String PUBLISH_ADDITIONAL_PROPERTIES = "publish_additional_properties";
     public static final String REQUEST_HEADERS = "requestHeaders";
     public static final String RESPONSE_HEADERS = "responseHeaders";
     public static final String RESPONSE_HEADER_MASK = "response_headers";
@@ -117,6 +120,8 @@ public class Constants {
     public static final String AI_COMPLETION_TOKEN_USAGE = "completionTokens";
     public static final String HOUR = "hour";
     public static final String AI_TOTAL_TOKEN_USAGE = "totalTokens";
+    // Top-level object that holds every ADDITIONAL_ANALYTICS_PROPS_TO_PUBLISH contribution other than aiTokenUsage.
+    public static final String ADDITIONAL_PROPERTIES = "additionalProperties";
     public static final String IS_EGRESS = "isEgress";
     public static final String SUBTYPE = "subtype";
 

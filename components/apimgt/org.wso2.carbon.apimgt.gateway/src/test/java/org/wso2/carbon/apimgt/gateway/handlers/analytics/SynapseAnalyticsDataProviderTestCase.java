@@ -378,6 +378,113 @@ public class SynapseAnalyticsDataProviderTestCase {
         Assert.assertFalse(mcpAnalytics.containsKey(APIMgtGatewayConstants.MCP_CAPABILITY));
     }
 
+    /**
+     * Verifies listener contributions are not published when publish_additional_properties is not configured,
+     * while the AI token usage counters still are.
+     */
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testGetPropertiesSkipsAdditionalPropertiesByDefault() throws Exception {
+        setReporterProperties(singleProperty(Constants.SEND_HEADER, "false"));
+
+        Map<String, Object> customProperties = getPropertiesForAiRequestWithListenerContribution();
+
+        Assert.assertFalse(customProperties.containsKey(Constants.ADDITIONAL_PROPERTIES));
+        Assert.assertFalse(customProperties.containsKey("salesRegion"));
+        Map<String, Object> aiTokenUsage = (Map<String, Object>) customProperties.get(Constants.AI_TOKEN_USAGE);
+        Assert.assertEquals(800, aiTokenUsage.get("cacheReadInputTokens"));
+    }
+
+    /**
+     * Verifies listener contributions are not published when publish_additional_properties is false.
+     */
+    @Test
+    public void testGetPropertiesSkipsAdditionalPropertiesWhenDisabled() throws Exception {
+        Map<String, Object> reporterProperties = new HashMap<>();
+        reporterProperties.put(Constants.SEND_HEADER, "false");
+        reporterProperties.put(Constants.PUBLISH_ADDITIONAL_PROPERTIES, "false");
+        setReporterProperties(reporterProperties);
+
+        Map<String, Object> customProperties = getPropertiesForAiRequestWithListenerContribution();
+
+        Assert.assertFalse(customProperties.containsKey(Constants.ADDITIONAL_PROPERTIES));
+    }
+
+    /**
+     * Verifies listener contributions are published under additionalProperties when publish_additional_properties
+     * is true, and the aiTokenUsage section is not duplicated there.
+     */
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testGetPropertiesPublishesAdditionalPropertiesWhenEnabled() throws Exception {
+        Map<String, Object> reporterProperties = new HashMap<>();
+        reporterProperties.put(Constants.SEND_HEADER, "false");
+        reporterProperties.put(Constants.PUBLISH_ADDITIONAL_PROPERTIES, "true");
+        setReporterProperties(reporterProperties);
+
+        Map<String, Object> customProperties = getPropertiesForAiRequestWithListenerContribution();
+
+        Map<String, Object> additionalProperties =
+                (Map<String, Object>) customProperties.get(Constants.ADDITIONAL_PROPERTIES);
+        Assert.assertNotNull(additionalProperties);
+        Assert.assertEquals(Collections.singletonMap("salesRegion", "EMEA"), additionalProperties);
+        Map<String, Object> aiTokenUsage = (Map<String, Object>) customProperties.get(Constants.AI_TOKEN_USAGE);
+        Assert.assertEquals(800, aiTokenUsage.get("cacheReadInputTokens"));
+    }
+
+    /**
+     * Verifies a listener entry that cannot be serialised (here, a map holding a Date) is skipped, while the other
+     * entries are still published.
+     */
+    @Test
+    public void testGetPropertiesSkipsUnpublishableAdditionalProperty() throws Exception {
+        Map<String, Object> reporterProperties = new HashMap<>();
+        reporterProperties.put(Constants.SEND_HEADER, "false");
+        reporterProperties.put(Constants.PUBLISH_ADDITIONAL_PROPERTIES, "true");
+        setReporterProperties(reporterProperties);
+
+        Map<String, Object> client = new LinkedHashMap<>();
+        client.put("id", "app-42");
+        client.put("seenAt", new java.util.Date());
+        Map<String, Object> contributions = new LinkedHashMap<>();
+        contributions.put("salesRegion", "EMEA");
+        contributions.put("client", client);
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(APIConstants.API_TYPE, "REST");
+        properties.put(APIMgtGatewayConstants.ADDITIONAL_ANALYTICS_PROPS, contributions);
+
+        Axis2MessageContext messageContext = mockAxis2MessageContext(properties, Collections.emptyMap());
+        SynapseAnalyticsDataProvider provider = new SynapseAnalyticsDataProvider(messageContext);
+        setBuildResponseMessage(provider, false);
+        Map<String, Object> customProperties = provider.getProperties();
+
+        Assert.assertEquals(Collections.singletonMap("salesRegion", "EMEA"),
+                customProperties.get(Constants.ADDITIONAL_PROPERTIES));
+    }
+
+    private static Map<String, Object> getPropertiesForAiRequestWithListenerContribution() throws Exception {
+        Map<String, Object> aiResponseMetadata = new HashMap<>();
+        aiResponseMetadata.put(org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants.NAME, "OpenAI");
+        aiResponseMetadata.put(org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants.API_VERSION, "1.0.0");
+
+        Map<String, Object> aiSection = new LinkedHashMap<>();
+        aiSection.put("cacheReadInputTokens", 800);
+        Map<String, Object> contributions = new LinkedHashMap<>();
+        contributions.put("salesRegion", "EMEA");
+        contributions.put(Constants.AI_TOKEN_USAGE, aiSection);
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(APIConstants.API_TYPE, "REST");
+        properties.put(org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants.AI_API_RESPONSE_METADATA,
+                aiResponseMetadata);
+        properties.put(APIMgtGatewayConstants.ADDITIONAL_ANALYTICS_PROPS, contributions);
+
+        Axis2MessageContext messageContext = mockAxis2MessageContext(properties, Collections.emptyMap());
+        SynapseAnalyticsDataProvider provider = new SynapseAnalyticsDataProvider(messageContext);
+        setBuildResponseMessage(provider, false);
+        return provider.getProperties();
+    }
+
     private static Axis2MessageContext mockAxis2MessageContext(Map<String, Object> properties,
                                                                Map<String, Object> transportHeaders) {
         Axis2MessageContext messageContext = Mockito.mock(Axis2MessageContext.class);

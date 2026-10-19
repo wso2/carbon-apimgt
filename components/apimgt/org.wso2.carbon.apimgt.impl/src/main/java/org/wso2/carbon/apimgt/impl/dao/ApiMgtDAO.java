@@ -15793,6 +15793,41 @@ public class ApiMgtDAO {
         return null;
     }
 
+    /**
+     * Updates only the configurations of an LLM provider. Unlike {@link #updateLLMProvider(String, LLMProvider)},
+     * this does not touch the description, API definition or the registered models of the provider.
+     *
+     * @param organization   Organization of the provider.
+     * @param providerId     UUID of the provider.
+     * @param configurations New configurations JSON.
+     * @return true if a provider row was updated.
+     * @throws APIManagementException if an error occurs while updating the provider.
+     */
+    public boolean updateLLMProviderConfigurations(String organization, String providerId, String configurations)
+            throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try (PreparedStatement prepStmt = connection.prepareStatement(
+                    SQLConstants.UPDATE_LLM_PROVIDER_CONFIGURATIONS_SQL)) {
+                prepStmt.setBinaryStream(1, new ByteArrayInputStream(configurations.getBytes()));
+                prepStmt.setString(2, organization);
+                prepStmt.setString(3, providerId);
+                int updated = prepStmt.executeUpdate();
+                connection.commit();
+                return updated > 0;
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Error while updating LLM Provider configurations in tenant domain: "
+                        + organization, e);
+            }
+        } catch (SQLException e) {
+            handleException("DB connection error while updating LLM Provider configurations in tenant domain: "
+                    + organization, e);
+        }
+        return false;
+    }
+
     private void addLLMModels(Connection connection, LLMProvider llmProvider) throws SQLException {
         if (llmProvider.getModelList() != null && !llmProvider.getModelList().isEmpty()) {
             try (PreparedStatement prepStmtInsertModels = connection.prepareStatement(

@@ -98,6 +98,32 @@ public class VertexAIAnthropicLLMProviderService extends BuiltInLLMProviderServi
                     APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_OUTPUT_TOKEN, true));
             // Anthropic's Messages response has no single "total" token field; total is derived downstream
             // from prompt + completion, so no TOTAL_TOKEN_COUNT metadata is mapped here.
+            // Optional usage counters, published to analytics under aiTokenUsage
+            llmProviderMetadata.add(new LLMProviderMetadata(
+                    APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_CACHE_READ_TOKEN_COUNT,
+                    APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD,
+                    APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_ANTHROPIC_IDENTIFIER_CACHE_READ_TOKEN_COUNT, false,
+                    APIConstants.AIAPIConstants.ANALYTICS_CATEGORY_TOKEN_USAGE));
+            llmProviderMetadata.add(new LLMProviderMetadata(
+                    APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_CACHE_WRITE_TOKEN_COUNT,
+                    APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD,
+                    APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_ANTHROPIC_IDENTIFIER_CACHE_WRITE_TOKEN_COUNT, false,
+                    APIConstants.AIAPIConstants.ANALYTICS_CATEGORY_TOKEN_USAGE));
+            llmProviderMetadata.add(new LLMProviderMetadata(
+                    APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_CACHE_WRITE_5M_TOKEN_COUNT,
+                    APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD,
+                    APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_ANTHROPIC_IDENTIFIER_CACHE_WRITE_5M_TOKEN_COUNT, false,
+                    APIConstants.AIAPIConstants.ANALYTICS_CATEGORY_TOKEN_USAGE));
+            llmProviderMetadata.add(new LLMProviderMetadata(
+                    APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_CACHE_WRITE_1H_TOKEN_COUNT,
+                    APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD,
+                    APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_ANTHROPIC_IDENTIFIER_CACHE_WRITE_1H_TOKEN_COUNT, false,
+                    APIConstants.AIAPIConstants.ANALYTICS_CATEGORY_TOKEN_USAGE));
+            llmProviderMetadata.add(new LLMProviderMetadata(
+                    APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_REASONING_TOKEN_COUNT,
+                    APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD,
+                    APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_ANTHROPIC_IDENTIFIER_REASONING_TOKEN_COUNT, false,
+                    APIConstants.AIAPIConstants.ANALYTICS_CATEGORY_TOKEN_USAGE));
             llmProviderConfiguration.setMetadata(llmProviderMetadata);
 
             // The model-group name must equal the provider's own name: the admin UI populates the

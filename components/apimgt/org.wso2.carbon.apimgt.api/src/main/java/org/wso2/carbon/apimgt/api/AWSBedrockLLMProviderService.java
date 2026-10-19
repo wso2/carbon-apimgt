@@ -89,6 +89,17 @@ public class AWSBedrockLLMProviderService extends BuiltInLLMProviderService {
                     APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_TOTAL_TOKEN_COUNT,
                     APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD,
                     APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_AWS_METADATA_IDENTIFIER_TOTAL_TOKEN_COUNT, true));
+            // Optional usage counters, published to analytics under aiTokenUsage
+            llmProviderMetadata.add(new LLMProviderMetadata(
+                    APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_CACHE_READ_TOKEN_COUNT,
+                    APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD,
+                    APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_AWS_METADATA_IDENTIFIER_CACHE_READ_TOKEN_COUNT, false,
+                    APIConstants.AIAPIConstants.ANALYTICS_CATEGORY_TOKEN_USAGE));
+            llmProviderMetadata.add(new LLMProviderMetadata(
+                    APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_CACHE_WRITE_TOKEN_COUNT,
+                    APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD,
+                    APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_AWS_METADATA_IDENTIFIER_CACHE_WRITE_TOKEN_COUNT, false,
+                    APIConstants.AIAPIConstants.ANALYTICS_CATEGORY_TOKEN_USAGE));
             llmProviderConfiguration.setMetadata(llmProviderMetadata);
 
             // Set default model List
