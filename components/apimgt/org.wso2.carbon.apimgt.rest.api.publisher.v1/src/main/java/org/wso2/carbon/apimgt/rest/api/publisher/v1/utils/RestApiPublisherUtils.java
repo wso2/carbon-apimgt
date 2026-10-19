@@ -99,22 +99,44 @@ public class RestApiPublisherUtils {
             "apim:api_import_export", "apim:mcp_server_import_export", "apim:api_product_import_export");
 
     /**
-     * Determines whether the current caller may receive backend credentials in an export.
+     * Resolves the effective {@code preserveCredentials} value for a Publisher export.
      * <p>
-     * This is the governing check for the export flows: the caller must hold at least one scope from the tenant's
-     * {@code ScopesToExposeCredentials} list. When it does, the existing behaviour is unchanged (credentials
-     * are exported if {@code ExposeEndpointPassword} is enabled or {@code preserveCredentials=true} is requested).
-     * When it does not, credentials are masked regardless of {@code ExposeEndpointPassword} or
-     * {@code preserveCredentials}. The list is read from tenant-conf; when the key is absent the code-defined
-     * default list applies, and when it is present (including an empty list, which denies everyone) it is used
-     * as-is.
+     * Credentials are exported only when the caller holds at least one scope from the tenant's
+     * {@code ScopesToExposeCredentials} list, and then only if {@code preserveCredentials=true} is requested or
+     * {@code ExposeEndpointPassword} is enabled. The result is passed down as {@code preserveCredentials}; when it
+     * is false, the export masks endpoint security even if {@code ExposeEndpointPassword} is enabled.
      *
-     * @param tokenScopes  the scopes the caller holds for the export request (from the authenticated context)
+     * @param tokenScopes         the scopes the caller holds for the export request (from the authenticated context)
+     * @param tenantDomain        the tenant whose configuration governs the decision
+     * @param preserveCredentials the requested preserveCredentials value
+     * @param exportedArtifact    description of the exported artifact, used for logging
+     * @return the effective preserveCredentials value for the export
+     * @throws APIManagementException if the tenant configuration cannot be read
+     */
+    public static boolean resolvePreserveCredentialsForExport(String[] tokenScopes, String tenantDomain,
+            boolean preserveCredentials, String exportedArtifact) throws APIManagementException {
+
+        if (!isCredentialExportAllowed(tokenScopes, tenantDomain)) {
+            if (preserveCredentials) {
+                log.warn("Credential export not permitted (caller lacks a scope in ScopesToExposeCredentials). "
+                        + "Exporting " + exportedArtifact + " with credentials masked.");
+            }
+            return false;
+        }
+        return preserveCredentials || APIMappingUtil.checkEndpointSecurityPasswordEnabled(tenantDomain);
+    }
+
+    /**
+     * Determines whether the caller holds at least one scope from the tenant's {@code ScopesToExposeCredentials}
+     * list. The list is read from tenant-conf; when the key is absent the code-defined default list applies, and
+     * when it is present (including an empty list, which denies everyone) it is used as-is.
+     *
+     * @param tokenScopes  the scopes the caller holds for the export request
      * @param tenantDomain the tenant whose configuration governs the decision
      * @return true if the caller is permitted to receive credentials in an export
      * @throws APIManagementException if the tenant configuration cannot be read
      */
-    public static boolean isCredentialExportAllowed(String[] tokenScopes, String tenantDomain)
+    private static boolean isCredentialExportAllowed(String[] tokenScopes, String tenantDomain)
             throws APIManagementException {
 
         if (tokenScopes == null || tokenScopes.length == 0) {

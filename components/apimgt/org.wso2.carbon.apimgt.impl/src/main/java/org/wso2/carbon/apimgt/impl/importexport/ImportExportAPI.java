@@ -80,100 +80,35 @@ public interface ImportExportAPI {
      * @throws APIManagementException
      * @throws APIImportExportException
      */
-    default File exportAPI(String apiId, String name, String version, String revisionNum, String providerName,
+    public File exportAPI(String apiId, String name, String version, String revisionNum, String providerName,
             boolean preserveStatus, ExportFormat format, boolean preserveDocs, boolean preserveCredentials,
             boolean exportLatestRevision, String originalDevPortalUrl, String organization, boolean exploded)
-            throws APIManagementException, APIImportExportException {
-        return exportAPI(apiId, name, version, revisionNum, providerName, preserveStatus, format, preserveDocs,
-                preserveCredentials, exportLatestRevision, originalDevPortalUrl, organization, exploded, true);
-    }
-
-    /**
-     * Used to export API artifact
-     *
-     * @param apiId                UUID of API.
-     * @param name                 name of API.
-     * @param version              version of API.
-     * @param revisionNum          revision number.
-     * @param providerName         provider of API.
-     * @param preserveStatus       Preserve API status on export
-     * @param format               Format of output documents. Can be YAML or JSON
-     * @param preserveDocs         Preserve documentation on Export.
-     * @param preserveCredentials  Preserve credentials on Export.
-     * @param exportLatestRevision Export the latest revision.
-     * @param originalDevPortalUrl Original DevPortal URL (redirect URL) for the original Store
-     *                             (This is used for advertise only APIs).
-     * @param organization         Organization
-     * @param exploded             Return an exploded (unarchived) export directory instead of a zip.
-     * @param credentialExportAllowed Whether the caller holds a scope in ScopesToExposeCredentials. When
-     *                             false, endpoint credentials are masked regardless of ExposeEndpointPassword and
-     *                             preserveCredentials
-     * @return API artifact.
-     * @throws APIManagementException
-     * @throws APIImportExportException
-     */
-    File exportAPI(String apiId, String name, String version, String revisionNum, String providerName,
-            boolean preserveStatus, ExportFormat format, boolean preserveDocs, boolean preserveCredentials,
-            boolean exportLatestRevision, String originalDevPortalUrl, String organization, boolean exploded,
-            boolean credentialExportAllowed) throws APIManagementException, APIImportExportException;
-
-    /**
-     * Used to export MCP Server artifact
-     *
-     * @param apiId                UUID of MCP Server.
-     * @param name                 name of MCP Server.
-     * @param version              version of MCP Server.
-     * @param revisionNum          revision number.
-     * @param providerName         provider of MCP Server.
-     * @param preserveStatus       Preserve MCP Server status on export
-     * @param format               Format of output documents. Can be YAML or JSON
-     * @param preserveDocs         Preserve documentation on Export.
-     * @param preserveCredentials  Preserve credentials on Export.
-     * @param exportLatestRevision Export the latest revision.
-     * @param originalDevPortalUrl Original DevPortal URL (redirect URL) for the original Store
-     *                             (This is used for advertise only APIs).
-     * @param organization         Organization
-     * @return MCP Server artifact.
-     * @throws APIManagementException
-     * @throws APIImportExportException
-     */
-    default File exportMCPServer(String apiId, String name, String version, String revisionNum, String providerName,
-                                 boolean preserveStatus, ExportFormat format, boolean preserveDocs,
-                                 boolean preserveCredentials, boolean exportLatestRevision,
-                                 String originalDevPortalUrl, String organization)
-            throws APIManagementException, APIImportExportException {
-        return exportMCPServer(apiId, name, version, revisionNum, providerName, preserveStatus, format, preserveDocs,
-                preserveCredentials, exportLatestRevision, originalDevPortalUrl, organization, true);
-    }
-
-    /**
-     * Used to export MCP Server artifact
-     *
-     * @param apiId                UUID of MCP Server.
-     * @param name                 name of MCP Server.
-     * @param version              version of MCP Server.
-     * @param revisionNum          revision number.
-     * @param providerName         provider of MCP Server.
-     * @param preserveStatus       Preserve MCP Server status on export
-     * @param format               Format of output documents. Can be YAML or JSON
-     * @param preserveDocs         Preserve documentation on Export.
-     * @param preserveCredentials  Preserve credentials on Export.
-     * @param exportLatestRevision Export the latest revision.
-     * @param originalDevPortalUrl Original DevPortal URL (redirect URL) for the original Store
-     *                             (This is used for advertise only APIs).
-     * @param organization         Organization
-     * @param credentialExportAllowed Whether the caller holds a scope in ScopesToExposeCredentials. When
-     *                             false, endpoint credentials are masked regardless of ExposeEndpointPassword and
-     *                             preserveCredentials
-     * @return MCP Server artifact.
-     * @throws APIManagementException
-     * @throws APIImportExportException
-     */
-    File exportMCPServer(String apiId, String name, String version, String revisionNum, String providerName,
-                         boolean preserveStatus, ExportFormat format, boolean preserveDocs,
-                         boolean preserveCredentials, boolean exportLatestRevision, String originalDevPortalUrl,
-                         String organization, boolean credentialExportAllowed)
             throws APIManagementException, APIImportExportException;
+
+    /**
+     * Used to export MCP Server artifact
+     *
+     * @param apiId                UUID of MCP Server.
+     * @param name                 name of MCP Server.
+     * @param version              version of MCP Server.
+     * @param revisionNum          revision number.
+     * @param providerName         provider of MCP Server.
+     * @param preserveStatus       Preserve MCP Server status on export
+     * @param format               Format of output documents. Can be YAML or JSON
+     * @param preserveDocs         Preserve documentation on Export.
+     * @param preserveCredentials  Preserve credentials on Export.
+     * @param exportLatestRevision Export the latest revision.
+     * @param originalDevPortalUrl Original DevPortal URL (redirect URL) for the original Store
+     *                             (This is used for advertise only APIs).
+     * @param organization         Organization
+     * @return MCP Server artifact.
+     * @throws APIManagementException
+     * @throws APIImportExportException
+     */
+    public File exportMCPServer(String apiId, String name, String version, String revisionNum, String providerName,
+                                boolean preserveStatus, ExportFormat format, boolean preserveDocs,
+                                boolean preserveCredentials, boolean exportLatestRevision, String originalDevPortalUrl,
+                                String organization) throws APIManagementException, APIImportExportException;
 
     /**
      * Used to export API artifact
@@ -200,23 +135,19 @@ public interface ImportExportAPI {
      * @return API artifact.
      * @throws APIManagementException if an error occurs while exporting APIs.
      */
-    default File exportAPIs(String organization, boolean allRevisions, ExportFormat format)
-            throws APIManagementException {
-        return exportAPIs(organization, allRevisions, format, true);
-    }
+    File exportAPIs(String organization, boolean allRevisions, ExportFormat format) throws APIManagementException;
 
     /**
      * Used to export API artifacts of all APIs for a given organization, as a single zip archive.
      *
-     * @param organization    Organization
-     * @param allRevisions    Whether to export all revisions of each API or not.
-     * @param format          Format of output documents. Can be YAML or JSON
-     * @param credentialExportAllowed Whether the caller holds a scope in ScopesToExposeCredentials. When
-     *                        false, endpoint credentials are masked regardless of ExposeEndpointPassword
+     * @param organization        Organization
+     * @param allRevisions        Whether to export all revisions of each API or not.
+     * @param format              Format of output documents. Can be YAML or JSON
+     * @param preserveCredentials Preserve credentials on export
      * @return API artifact.
      * @throws APIManagementException if an error occurs while exporting APIs.
      */
-    File exportAPIs(String organization, boolean allRevisions, ExportFormat format, boolean credentialExportAllowed)
+    File exportAPIs(String organization, boolean allRevisions, ExportFormat format, boolean preserveCredentials)
             throws APIManagementException;
 
     /**
@@ -253,39 +184,10 @@ public interface ImportExportAPI {
      * @throws APIManagementException
      * @throws APIImportExportException
      */
-    default File exportAPIProduct(String apiId, String name, String version, String providerName,
-                                  String revisionNum, ExportFormat format, boolean preserveStatus,
-                                  boolean preserveDocs, boolean preserveCredentials, boolean exportLatestRevision,
-                                  String organization) throws APIManagementException, APIImportExportException {
-        return exportAPIProduct(apiId, name, version, providerName, revisionNum, format, preserveStatus, preserveDocs,
-                preserveCredentials, exportLatestRevision, organization, true);
-    }
-
-    /**
-     * Used to export API product artifact.
-     *
-     * @param apiId                 UUID of API.
-     * @param name                  name of API.
-     * @param version               version of API.
-     * @param providerName          provider of API.
-     * @param revisionNum           Revision number.
-     * @param format                Format of output documents. Can be YAML or JSON
-     * @param preserveStatus        Preserve API status on export
-     * @param preserveDocs          Preserve documentation on Export.
-     * @param preserveCredentials   Preserve credentials on Export.
-     * @param exportLatestRevision  Export the most recent revision.
-     * @param organization          Organization
-     * @param credentialExportAllowed Whether the caller holds a scope in ScopesToExposeCredentials. When
-     *                              false, endpoint credentials of the dependent APIs are masked regardless of
-     *                              ExposeEndpointPassword and preserveCredentials
-     * @return APIProduct Artifact.
-     * @throws APIManagementException
-     * @throws APIImportExportException
-     */
-    File exportAPIProduct(String apiId, String name, String version, String providerName, String revisionNum,
-                          ExportFormat format, boolean preserveStatus, boolean preserveDocs,
-                          boolean preserveCredentials, boolean exportLatestRevision, String organization,
-                          boolean credentialExportAllowed) throws APIManagementException, APIImportExportException;
+    public File exportAPIProduct(String apiId, String name, String version, String providerName, String revisionNum,
+                                 ExportFormat format,boolean preserveStatus, boolean preserveDocs,
+                                 boolean preserveCredentials, boolean exportLatestRevision, String organization)
+            throws APIManagementException, APIImportExportException;
 
     /**
      * Used to import an API artifact.

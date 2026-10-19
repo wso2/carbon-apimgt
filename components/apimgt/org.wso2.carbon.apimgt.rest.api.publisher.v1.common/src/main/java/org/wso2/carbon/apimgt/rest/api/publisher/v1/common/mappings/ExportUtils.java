@@ -207,45 +207,12 @@ public class ExportUtils {
                                  boolean preserveCredentials, boolean exploded)
             throws APIManagementException, APIImportExportException {
 
-        return exportAPI(apiProvider, apiIdentifier, apiDtoToReturn, api, userName, exportFormat, preserveStatus,
-                preserveDocs, originalDevPortalUrl, organization, preserveCredentials, exploded, true);
-    }
-
-    /**
-     * Exports an API from API Manager for a given API. Meta information, API icon, documentation,
-     * WSDL and sequences are exported.
-     *
-     * @param apiProvider          API Provider
-     * @param apiIdentifier        API Identifier
-     * @param apiDtoToReturn       API DTO
-     * @param api                  API
-     * @param userName             Username
-     * @param exportFormat         Format of output documents. Can be YAML or JSON
-     * @param preserveStatus       Preserve API status on export
-     * @param preserveDocs         Preserve documentation on Export.
-     * @param originalDevPortalUrl Original DevPortal URL (redirect URL) for the original Store
-     *                             (This is used for advertise only APIs).
-     * @param organization         Organization
-     * @param preserveCredentials  Preserve credentials on export
-     * @param exploded             Return an exploded (unarchived) export directory instead of a zip.
-     * @param credentialExportAllowed Whether the caller holds a scope in ScopesToExposeCredentials. When
-     *                             false, endpoint credentials are masked regardless of ExposeEndpointPassword and
-     *                             preserveCredentials
-     * @return File containing the exported API artifact.
-     * @throws APIManagementException If an error occurs while getting governance registry
-     */
-    public static File exportAPI(APIProvider apiProvider, APIIdentifier apiIdentifier, APIDTOTypeWrapper apiDtoToReturn,
-                                 API api, String userName, ExportFormat exportFormat, boolean preserveStatus,
-                                 boolean preserveDocs, String originalDevPortalUrl, String organization,
-                                 boolean preserveCredentials, boolean exploded, boolean credentialExportAllowed)
-            throws APIManagementException, APIImportExportException {
-
         int tenantId;
         String currentApiUuid;
 
-        // When the caller is not permitted to export credentials (ScopesToExposeCredentials), mask the
-        // endpoint security of the main endpoint config so that ExposeEndpointPassword cannot expose it either.
-        if (!credentialExportAllowed && apiDtoToReturn.getEndpointConfig() instanceof Map) {
+        // When credentials are not preserved, mask the endpoint security of the main endpoint config so that
+        // ExposeEndpointPassword cannot expose it on export.
+        if (!preserveCredentials && apiDtoToReturn.getEndpointConfig() instanceof Map) {
             APIMappingUtil.maskEndpointSecurityOnExport((Map) apiDtoToReturn.getEndpointConfig());
         }
 
@@ -293,11 +260,9 @@ public class ExportUtils {
         addOperationPoliciesToArchive(archivePath, tenantDomain, exportFormat, apiProvider, api, currentApiUuid);
 
         if (apiDtoToReturn.isAPIDTO()) {
-            addAPIEndpointsToArchive(archivePath, api, exportFormat, apiProvider, organization, preserveCredentials,
-                    credentialExportAllowed);
+            addAPIEndpointsToArchive(archivePath, api, exportFormat, apiProvider, organization, preserveCredentials);
         } else if (apiDtoToReturn.isMCPServerDTO()) {
-            addBackendsToArchive(archivePath, api, exportFormat, apiProvider, organization, preserveCredentials,
-                    credentialExportAllowed);
+            addBackendsToArchive(archivePath, api, exportFormat, apiProvider, organization, preserveCredentials);
         }
 
         if (api != null && !StringUtils.isEmpty(api.getEndpointConfig())) {
@@ -392,34 +357,6 @@ public class ExportUtils {
             boolean preserveDocs, boolean preserveCredentials, String organization)
             throws APIManagementException, APIImportExportException {
 
-        return exportApiProduct(apiProvider, apiProductIdentifier, apiProductDtoToReturn, userName, exportFormat,
-                preserveStatus, preserveDocs, preserveCredentials, organization, true);
-    }
-
-    /**
-     * Exports an API Product from API Manager for a given API Product. Meta information, API Product icon,
-     * documentation, client certificates and dependent APIs are exported.
-     *
-     * @param apiProvider           API Provider
-     * @param apiProductIdentifier  API Product Identifier
-     * @param apiProductDtoToReturn API Product DTO
-     * @param userName              Username
-     * @param exportFormat          Format of output documents. Can be YAML or JSON
-     * @param preserveStatus        Preserve API Product status on export
-     * @param preserveDocs          Preserve documentation on export
-     * @param preserveCredentials   Preserve credentials on export
-     * @param organization          Organization Identifier
-     * @param credentialExportAllowed Whether the caller holds a scope in ScopesToExposeCredentials. When
-     *                              false, endpoint credentials of the dependent APIs are masked regardless of
-     *                              ExposeEndpointPassword and preserveCredentials
-     * @return File containing the exported API Product artifact
-     * @throws APIManagementException If an error occurs while getting governance registry
-     */
-    public static File exportApiProduct(APIProvider apiProvider, APIProductIdentifier apiProductIdentifier,
-            APIProductDTO apiProductDtoToReturn, String userName, ExportFormat exportFormat, Boolean preserveStatus,
-            boolean preserveDocs, boolean preserveCredentials, String organization, boolean credentialExportAllowed)
-            throws APIManagementException, APIImportExportException {
-
         int tenantId = 0;
         // Create temp location for storing API Product data
         File exportFolder = CommonUtil.createTempDirectory(apiProductIdentifier);
@@ -444,7 +381,7 @@ public class ExportUtils {
         addAPIProductMetaInformationToArchive(archivePath, apiProductDtoToReturn, exportFormat,
                 apiProvider, organization);
         addDependentAPIsToArchive(archivePath, apiProductDtoToReturn, exportFormat, apiProvider, userName,
-                Boolean.TRUE, preserveDocs, preserveCredentials, organization, credentialExportAllowed);
+                Boolean.TRUE, preserveDocs, preserveCredentials, organization);
 
         // Export mTLS authentication related certificates
         if (log.isDebugEnabled()) {
@@ -1001,29 +938,6 @@ public class ExportUtils {
                                                 APIProvider apiProvider, String organization,
                                                 boolean preserveCredentials) throws APIManagementException {
 
-        addAPIEndpointsToArchive(archivePath, api, exportFormat, apiProvider, organization, preserveCredentials,
-                true);
-    }
-
-    /**
-     * Adds API endpoint definitions to the export archive for the given API.
-     *
-     * @param archivePath         the file system path where the archive is being created
-     * @param api                 the {@link API} object whose endpoints should be exported
-     * @param exportFormat        the {@link ExportFormat} specifying how data should be written
-     * @param apiProvider         the {@link APIProvider} used to retrieve endpoint information
-     * @param organization        the organization context for the API retrieval
-     * @param preserveCredentials whether sensitive credentials should be retained in the exported data
-     * @param credentialExportAllowed whether the caller holds a scope in ScopesToExposeCredentials; when
-     *                            false, endpoint credentials are masked regardless of ExposeEndpointPassword and
-     *                            preserveCredentials
-     * @throws APIManagementException if an error occurs while retrieving or writing endpoint data
-     */
-    public static void addAPIEndpointsToArchive(String archivePath, API api, ExportFormat exportFormat,
-                                                APIProvider apiProvider, String organization,
-                                                boolean preserveCredentials, boolean credentialExportAllowed)
-            throws APIManagementException {
-
         String apiUuid = api.getUuid();
         try {
             List<APIEndpointInfo> apiEndpointList = apiProvider.getAllAPIEndpointsByUUID(apiUuid, organization);
@@ -1032,9 +946,9 @@ public class ExportUtils {
                 apiEndpointDTOList.add(
                         APIMappingUtil.fromAPIEndpointToDTO(apiEndpointInfo, organization, preserveCredentials));
             }
-            // Mask endpoint security when the caller is not permitted to export credentials, so that
-            // ExposeEndpointPassword cannot expose it in the separate endpoint files either.
-            if (!credentialExportAllowed) {
+            // When credentials are not preserved, mask endpoint security so that ExposeEndpointPassword cannot
+            // expose it in the separate endpoint files either.
+            if (!preserveCredentials) {
                 for (APIEndpointDTO apiEndpointDTO : apiEndpointDTOList) {
                     if (apiEndpointDTO.getEndpointConfig() instanceof Map) {
                         APIMappingUtil.maskEndpointSecurityOnExport((Map) apiEndpointDTO.getEndpointConfig());
@@ -1068,27 +982,6 @@ public class ExportUtils {
                                             APIProvider apiProvider, String organization, boolean preserveCredentials)
             throws APIManagementException {
 
-        addBackendsToArchive(archivePath, api, exportFormat, apiProvider, organization, preserveCredentials, true);
-    }
-
-    /**
-     * Adds backend APIs to the export archive for the given API.
-     *
-     * @param archivePath         the file system path where the archive is being created
-     * @param api                 the {@link API} object whose backend APIs should be exported
-     * @param exportFormat        the {@link ExportFormat} specifying how data should be written
-     * @param apiProvider         the {@link APIProvider} used to retrieve backend information
-     * @param organization        the organization context for the API retrieval
-     * @param preserveCredentials whether sensitive credentials should be retained in the exported data
-     * @param credentialExportAllowed whether the caller holds a scope in ScopesToExposeCredentials; when
-     *                            false, endpoint credentials are masked regardless of ExposeEndpointPassword and
-     *                            preserveCredentials
-     * @throws APIManagementException if an error occurs while retrieving or writing backend data
-     */
-    public static void addBackendsToArchive(String archivePath, API api, ExportFormat exportFormat,
-                                            APIProvider apiProvider, String organization, boolean preserveCredentials,
-                                            boolean credentialExportAllowed) throws APIManagementException {
-
         String apiUuid = api.getUuid();
         try {
             if (APIConstants.API_SUBTYPE_DIRECT_BACKEND.equals(api.getSubtype())
@@ -1099,9 +992,9 @@ public class ExportUtils {
                     backendAPIDTOList.add(APIMappingUtil.fromBackendAPIToDTO(backend, organization,
                             preserveCredentials));
                 }
-                // Mask endpoint security when the caller is not permitted to export credentials, so that
-                // ExposeEndpointPassword cannot expose it in the separate backend files either.
-                if (!credentialExportAllowed) {
+                // When credentials are not preserved, mask endpoint security so that ExposeEndpointPassword cannot
+                // expose it in the separate backend files either.
+                if (!preserveCredentials) {
                     for (BackendDTO backendDTO : backendAPIDTOList) {
                         Object backendConfig = backendDTO.getEndpointConfig();
                         if (backendConfig instanceof String) {
@@ -1618,35 +1511,6 @@ public class ExportUtils {
                                                  boolean preserveCredentials, String organization)
             throws APIImportExportException, APIManagementException {
 
-        addDependentAPIsToArchive(archivePath, apiProductDtoToReturn, exportFormat, provider, userName,
-                isStatusPreserved, preserveDocs, preserveCredentials, organization, true);
-    }
-
-    /**
-     * Retrieve dependent APIs by checking the resources of the API Product and store those in the archive directory.
-     *
-     * @param archivePath           Temp location to save the API artifacts
-     * @param apiProductDtoToReturn API Product DTO which the resources should be considered
-     * @param exportFormat          Export format of the API meta data, could be yaml or json
-     * @param provider              API Product Provider
-     * @param userName              User name of the requester
-     * @param isStatusPreserved     Whether API status is preserved while export
-     * @param preserveDocs          Whether documentation is preserved while export
-     * @param preserveCredentials   Whether credentials are preserved while export
-     * @param organization          Organization
-     * @param credentialExportAllowed Whether the caller holds a scope in ScopesToExposeCredentials; when
-     *                              false, endpoint credentials are masked regardless of ExposeEndpointPassword and
-     *                              preserveCredentials
-     * @throws APIImportExportException If an error occurs while creating the directory or extracting the archive
-     * @throws APIManagementException   If an error occurs while retrieving API related resources
-     */
-    public static void addDependentAPIsToArchive(String archivePath, APIProductDTO apiProductDtoToReturn,
-                                                 ExportFormat exportFormat, APIProvider provider, String userName,
-                                                 Boolean isStatusPreserved, boolean preserveDocs,
-                                                 boolean preserveCredentials, String organization,
-                                                 boolean credentialExportAllowed)
-            throws APIImportExportException, APIManagementException {
-
         String apisDirectoryPath = archivePath + File.separator + ImportExportConstants.APIS_DIRECTORY;
         CommonUtil.createDirectory(apisDirectoryPath);
 
@@ -1657,7 +1521,7 @@ public class ExportUtils {
             APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, null);
             File dependentAPI = exportAPI(provider, api.getId(), new APIDTOTypeWrapper(apiDtoToReturn), api, userName,
                     exportFormat, isStatusPreserved, preserveDocs, StringUtils.EMPTY, organization,
-                    preserveCredentials, false, credentialExportAllowed);
+                    preserveCredentials, false);
             CommonUtil.extractArchive(dependentAPI, apisDirectoryPath);
         }
     }

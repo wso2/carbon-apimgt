@@ -2051,24 +2051,17 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                     ExportFormat.YAML;
             try {
                 String organization = RestApiUtil.getValidatedOrganization(messageContext);
-                // ScopesToExposeCredentials governs credential export. A caller holding an allowed scope
-                // gets the existing behaviour (ExposeEndpointPassword or preserveCredentials); otherwise
-                // credentials are masked regardless of both.
-                boolean credentialExportAllowed = RestApiPublisherUtils.isCredentialExportAllowed(
+                // ScopesToExposeCredentials and ExposeEndpointPassword govern credential export. The resolved
+                // value is passed down as preserveCredentials.
+                preserveCredentials = RestApiPublisherUtils.resolvePreserveCredentialsForExport(
                         (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
                                 .get(RestApiConstants.USER_REST_API_SCOPES),
-                        RestApiCommonUtil.getLoggedInUserTenantDomain());
-                if (!credentialExportAllowed && preserveCredentials) {
-                    log.warn("Credential export not permitted (caller lacks a scope in "
-                            + "ScopesToExposeCredentials). Exporting MCP Server " + mcpServerId
-                            + " with credentials masked.");
-                    preserveCredentials = false;
-                }
+                        organization, preserveCredentials, "MCP Server " + mcpServerId);
                 ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
                 File file = importExportAPI
                         .exportMCPServer(mcpServerId, name, version, revisionNumber, providerName, preserveStatus,
                                 exportFormat, Boolean.TRUE, preserveCredentials, latestRevision, StringUtils.EMPTY,
-                                organization, credentialExportAllowed);
+                                organization);
                 return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
                         "attachment; filename=\"" + file.getName() + "\"").build();
             } catch (APIImportExportException e) {

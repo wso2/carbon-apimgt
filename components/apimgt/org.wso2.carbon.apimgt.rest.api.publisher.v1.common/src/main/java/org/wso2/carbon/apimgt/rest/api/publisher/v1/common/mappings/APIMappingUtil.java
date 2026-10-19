@@ -2816,7 +2816,7 @@ public class APIMappingUtil {
      * @return boolean as config enabled or not
      * @throws APIManagementException
      */
-    private static boolean checkEndpointSecurityPasswordEnabled(String tenantDomainName) throws APIManagementException {
+    public static boolean checkEndpointSecurityPasswordEnabled(String tenantDomainName) throws APIManagementException {
 
         JSONObject apiTenantConfig;
         apiTenantConfig = APIUtil.getTenantConfig(tenantDomainName);
@@ -5006,12 +5006,11 @@ public class APIMappingUtil {
     /**
      * Masks endpoint-security secrets in an endpoint configuration {@link Map} for the export flow.
      * <p>
-     * This is an export-only safeguard, applied when the caller does not hold a scope from
-     * {@code ScopesToExposeCredentials} (see {@code RestApiPublisherUtils.isCredentialExportAllowed}).
-     * The shared mapper keeps credentials whenever {@code ExposeEndpointPassword} is enabled or
-     * {@code preserveCredentials} is requested; this method blanks the secrets regardless of both. Retrieval (GET)
-     * and the internal export flows do not call this method and are unaffected. Operates in place; no-op when there
-     * is no {@code endpoint_security} block.
+     * This is an export-only safeguard, applied when credentials are not preserved in the export (see
+     * {@code RestApiPublisherUtils.resolvePreserveCredentialsForExport}). The shared mapper keeps endpoint
+     * credentials whenever {@code ExposeEndpointPassword} is enabled; this method blanks the secrets regardless.
+     * Retrieval (GET) does not call this method and is unaffected. Operates in place; no-op when there is no
+     * {@code endpoint_security} block.
      *
      * @param endpointConfig the endpoint configuration map to mask (may be {@code null})
      * @throws APIManagementException if the endpoint security cannot be processed
