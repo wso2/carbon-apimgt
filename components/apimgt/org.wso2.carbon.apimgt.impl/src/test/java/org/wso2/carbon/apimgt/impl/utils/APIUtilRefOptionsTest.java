@@ -474,6 +474,68 @@ public class APIUtilRefOptionsTest {
         }
     }
 
+    @Test
+    public void testWildcardMatchesAgreesWithRegex() throws Exception {
+        // The pattern-coverage check must give the same answers as the policy's regex matching, including for texts
+        // that contain '*' as a literal character.
+        java.util.List<String> patterns = new java.util.ArrayList<>();
+        enumerate(patterns, "", new char[]{'a', 'b', '*'}, 4);
+        for (String pattern : patterns) {
+            java.util.regex.Pattern regex = java.util.regex.Pattern.compile(
+                    (String) Whitebox.invokeMethod(APIUtil.class, "toWildcardRegex", pattern));
+            for (String text : patterns) {
+                boolean expected = regex.matcher(text).matches();
+                boolean actual = Whitebox.invokeMethod(APIUtil.class, "wildcardMatches", pattern, text);
+                Assert.assertEquals("'" + pattern + "' against '" + text + "'", expected, actual);
+            }
+        }
+    }
+
+    @Test
+    public void testRepeatedLetterWildcardsCombineToTheNeededPatterns() throws Exception {
+        // Repeated letters give many equivalent ways to line the patterns up. Only the needed patterns are carried
+        // forward, so these combine to a single pattern instead of being built in every possible arrangement.
+        String run = "aaaaaaaaaaaaaaaa";
+        String joined = run + "*" + run + "*" + run + "*" + run;
+        Assert.assertEquals(Arrays.asList(joined),
+                Whitebox.invokeMethod(APIUtil.class, "intersectHostPatterns", "*" + joined, joined + "*"));
+        Assert.assertEquals(Arrays.asList("*" + joined),
+                Whitebox.invokeMethod(APIUtil.class, "intersectHostPatterns", "*" + joined, "*" + joined));
+    }
+
+    @Test
+    public void testBothAllowModeEntriesNeedingTooManyPatternsDropped() throws Exception {
+        // Hosts containing g, h and i in order and k, l and m in order need one pattern per interleaving: 20.
+        java.util.List<String> combined = Whitebox.invokeMethod(APIUtil.class, "intersectHostPatterns",
+                "*g*h*i*", "*k*l*m*");
+        Assert.assertEquals(20, combined.size());
+        // These two patterns are within the wildcard limit, but their common hosts need 287 patterns, which is more
+        // than are combined.
+        Assert.assertNull(Whitebox.invokeMethod(APIUtil.class, "intersectHostPatterns",
+                "*bca*bba*ac*", "b*aaa*abb*aba*cbc"));
+        // A pattern longer than any host name is not combined either.
+        Assert.assertNull(Whitebox.invokeMethod(APIUtil.class, "intersectHostPatterns",
+                "*." + org.apache.commons.lang3.StringUtils.repeat("b", 252), "*.b*"));
+        assertBothAllowIntersection(Arrays.asList("*bca*bba*ac*", "*.partner.com"),
+                Arrays.asList("b*aaa*abb*aba*cbc", "api.partner.com"), Arrays.asList("api.partner.com"));
+    }
+
+    @Test
+    public void testAllowEntriesWithOverlongLabelsDropped() throws Exception {
+        // The resolver cannot load a pattern with a label longer than 63 characters, whether it is configured directly
+        // or produced by combining two patterns, so such patterns are not applied.
+        String longLabel = org.apache.commons.lang3.StringUtils.repeat("a", 64) + ".partner.com";
+        assertBothAllowIntersection(Arrays.asList(longLabel, "api.partner.com"), Arrays.asList("*"),
+                Arrays.asList("api.partner.com"));
+        String left = org.apache.commons.lang3.StringUtils.repeat("x", 40) + "*";
+        String right = "*" + org.apache.commons.lang3.StringUtils.repeat("y", 40);
+        assertBothAllowIntersection(Arrays.asList(left, "api.partner.com"), Arrays.asList(right, "api.partner.com"),
+                Arrays.asList("api.partner.com"));
+        // A label of exactly 63 characters is still applied.
+        String maxLabel = org.apache.commons.lang3.StringUtils.repeat("a", 63) + ".partner.com";
+        assertBothAllowIntersection(Arrays.asList(maxLabel), Arrays.asList("*"), Arrays.asList(maxLabel));
+    }
+
     private static void enumerate(java.util.List<String> out, String prefix, char[] alphabet, int maxLength) {
         out.add(prefix);
         if (prefix.length() == maxLength) {

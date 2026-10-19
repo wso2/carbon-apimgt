@@ -284,6 +284,7 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.net.IDN;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -473,6 +474,11 @@ public final class APIUtil {
     // Host patterns with more wildcards than this are not combined, since the number of combined patterns grows
     // quickly with the wildcard count; such entries are not applied to remote $ref resolution.
     private static final int MAX_WILDCARDS_PER_HOST_PATTERN = 4;
+    // Host pattern pairs that need more combined patterns than this are not combined; such entries are not applied
+    // to remote $ref resolution.
+    private static final int MAX_COMBINED_HOST_PATTERNS = 64;
+    // Host patterns longer than the longest valid host name are not combined.
+    private static final int MAX_HOST_PATTERN_LENGTH = 253;
 
     private static final Pattern URL_TEMPLATE_PATTERN = Pattern.compile("\\{[^{}]*}");
     // Prefix of the per-call placeholder that stands in for a template segment while a URL is parsed.
@@ -13003,24 +13009,28 @@ public final class APIUtil {
      * @param first  the first host pattern
      * @param second the second host pattern
      * @return the patterns matching the common hosts (empty if the patterns have no host in common), or {@code null}
-     *         if a pattern has too many wildcards to be combined
+     *         if a pattern is too long or has too many wildcards, or the common hosts need too many patterns, to be
+     *         combined
      */
     private static List<String> intersectHostPatterns(String first, String second) {
         String firstPattern = normalizeHostPattern(first);
         String secondPattern = normalizeHostPattern(second);
-        if (StringUtils.countMatches(firstPattern, APIConstants.NetworkSecurityAccessControl.MATCH_ALL_HOSTS)
+        if (firstPattern.length() > MAX_HOST_PATTERN_LENGTH || secondPattern.length() > MAX_HOST_PATTERN_LENGTH
+                || StringUtils.countMatches(firstPattern, APIConstants.NetworkSecurityAccessControl.MATCH_ALL_HOSTS)
                 > MAX_WILDCARDS_PER_HOST_PATTERN
                 || StringUtils.countMatches(secondPattern, APIConstants.NetworkSecurityAccessControl.MATCH_ALL_HOSTS)
                 > MAX_WILDCARDS_PER_HOST_PATTERN) {
             return null;
         }
-        return removeSubsumedHostPatterns(
-                intersectHostPatternSuffixes(firstPattern, 0, secondPattern, 0, new HashMap<>()));
+        Set<String> combined = intersectHostPatternSuffixes(firstPattern, 0, secondPattern, 0, new HashMap<>());
+        return combined != null ? new ArrayList<>(combined) : null;
     }
 
     /**
      * Returns the patterns matching exactly the strings matched by both {@code first.substring(i)} and
-     * {@code second.substring(j)}. Both patterns must be normalized (see {@link #normalizeHostPattern(String)}).
+     * {@code second.substring(j)}, without patterns covered by another, or {@code null} if more than
+     * {@link #MAX_COMBINED_HOST_PATTERNS} patterns are needed. Both patterns must be normalized (see
+     * {@link #normalizeHostPattern(String)}).
      */
     private static Set<String> intersectHostPatternSuffixes(String first, int i, String second, int j,
                                                             Map<Long, Set<String>> memo) {
@@ -13041,32 +13051,53 @@ public final class APIUtil {
         } else {
             char a = first.charAt(i);
             char b = second.charAt(j);
+            boolean combined;
             if (a != '*' && b != '*') {
-                if (a == b) {
-                    addWithPrefix(result, a, intersectHostPatternSuffixes(first, i + 1, second, j + 1, memo));
-                }
+                combined = a != b
+                        || addWithPrefix(result, a, intersectHostPatternSuffixes(first, i + 1, second, j + 1, memo));
             } else if (a == '*' && b == '*') {
                 // Whichever wildcard starts matching later ends first; branch on which one that is.
-                addWithPrefix(result, '*', intersectHostPatternSuffixes(first, i, second, j + 1, memo));
-                addWithPrefix(result, '*', intersectHostPatternSuffixes(first, i + 1, second, j, memo));
+                combined = addWithPrefix(result, '*', intersectHostPatternSuffixes(first, i, second, j + 1, memo))
+                        && addWithPrefix(result, '*', intersectHostPatternSuffixes(first, i + 1, second, j, memo));
             } else if (a == '*') {
                 // The wildcard either matches nothing more, or consumes the literal character b.
-                result.addAll(intersectHostPatternSuffixes(first, i + 1, second, j, memo));
-                addWithPrefix(result, b, intersectHostPatternSuffixes(first, i, second, j + 1, memo));
+                combined = addAll(result, intersectHostPatternSuffixes(first, i + 1, second, j, memo))
+                        && addWithPrefix(result, b, intersectHostPatternSuffixes(first, i, second, j + 1, memo));
             } else {
-                result.addAll(intersectHostPatternSuffixes(first, i, second, j + 1, memo));
-                addWithPrefix(result, a, intersectHostPatternSuffixes(first, i + 1, second, j, memo));
+                combined = addAll(result, intersectHostPatternSuffixes(first, i, second, j + 1, memo))
+                        && addWithPrefix(result, a, intersectHostPatternSuffixes(first, i + 1, second, j, memo));
+            }
+            if (!combined) {
+                return null;
             }
         }
-        memo.put(key, result);
-        return result;
+        // Remove covered patterns at every step, so that only the patterns that are needed are carried forward.
+        List<String> needed = removeSubsumedHostPatterns(result);
+        if (needed.size() > MAX_COMBINED_HOST_PATTERNS) {
+            return null;
+        }
+        Set<String> neededSet = new LinkedHashSet<>(needed);
+        memo.put(key, neededSet);
+        return neededSet;
     }
 
-    private static void addWithPrefix(Set<String> target, char prefix, Set<String> suffixes) {
+    private static boolean addWithPrefix(Set<String> target, char prefix, Set<String> suffixes) {
+        if (suffixes == null) {
+            return false;
+        }
         for (String suffix : suffixes) {
             // Adjacent wildcards are equivalent to one.
             target.add(prefix == '*' && suffix.startsWith("*") ? suffix : prefix + suffix);
         }
+        return true;
+    }
+
+    private static boolean addAll(Set<String> target, Set<String> patterns) {
+        if (patterns == null) {
+            return false;
+        }
+        target.addAll(patterns);
+        return true;
     }
 
     /**
@@ -13090,11 +13121,11 @@ public final class APIUtil {
         for (String candidate : candidates) {
             boolean covered = false;
             for (String other : candidates) {
-                if (other.equals(candidate) || !candidate.matches(toWildcardRegex(other))) {
+                if (other.equals(candidate) || !wildcardMatches(other, candidate)) {
                     continue;
                 }
                 // Two patterns covering each other match the same hosts; keep the first of them.
-                if (!other.matches(toWildcardRegex(candidate))
+                if (!wildcardMatches(candidate, other)
                         || candidates.indexOf(other) < candidates.indexOf(candidate)) {
                     covered = true;
                     break;
@@ -13108,9 +13139,45 @@ public final class APIUtil {
     }
 
     /**
+     * Checks whether a text matches a wildcard pattern in which {@code *} matches any sequence of characters, and any
+     * other character matches itself. Runs in time proportional to the product of the two lengths at most.
+     *
+     * @param pattern the wildcard pattern
+     * @param text    the text to match; a {@code *} in it is taken as a literal character
+     * @return {@code true} if the whole text matches the pattern
+     */
+    private static boolean wildcardMatches(String pattern, String text) {
+        int p = 0;
+        int t = 0;
+        int lastStar = -1;
+        int resumeAt = 0;
+        while (t < text.length()) {
+            if (p < pattern.length() && pattern.charAt(p) == '*') {
+                lastStar = p++;
+                resumeAt = t;
+            } else if (p < pattern.length() && pattern.charAt(p) == text.charAt(t)) {
+                p++;
+                t++;
+            } else if (lastStar >= 0) {
+                // Let the last wildcard take one more character and retry from there.
+                p = lastStar + 1;
+                t = ++resumeAt;
+            } else {
+                return false;
+            }
+        }
+        while (p < pattern.length() && pattern.charAt(p) == '*') {
+            p++;
+        }
+        return p == pattern.length();
+    }
+
+    /**
      * Checks whether an allow-list entry is read the same way by the remote-$ref resolver as by the network
      * access-control policy. The resolver treats {@code ?} as a single-character wildcard and {@code :} as a port
-     * separator, while the policy matches both literally, so such entries are not applied.
+     * separator, while the policy matches both literally, so such entries are not applied. The resolver also converts
+     * each entry that does not start with a digit to its ASCII form and fails to load any entry it cannot convert, such
+     * as one with a label longer than 63 characters; such entries are not applied either.
      *
      * @param allowListEntry the allow-list entry
      * @return {@code true} if the entry can be passed to the resolver
@@ -13123,6 +13190,16 @@ public final class APIUtil {
             log.warn("Allow-list entry '" + allowListEntry + "' contains '?' or ':' and is not applied to remote $ref "
                     + "resolution.");
             return false;
+        }
+        String normalizedEntry = allowListEntry.toLowerCase(Locale.ROOT);
+        if (!Character.isDigit(normalizedEntry.charAt(0))) {
+            try {
+                IDN.toASCII(normalizedEntry, IDN.ALLOW_UNASSIGNED);
+            } catch (IllegalArgumentException e) {
+                log.warn("Allow-list entry '" + allowListEntry + "' is not a valid host pattern (" + e.getMessage()
+                        + ") and is not applied to remote $ref resolution.");
+                return false;
+            }
         }
         return true;
     }
