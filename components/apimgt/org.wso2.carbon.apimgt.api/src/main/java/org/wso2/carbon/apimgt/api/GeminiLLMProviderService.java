@@ -92,6 +92,7 @@ public class GeminiLLMProviderService extends BuiltInLLMProviderService {
                     APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_TOTAL_TOKEN_COUNT,
                     APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD,
                     APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_GEMINI_METADATA_IDENTIFIER_TOTAL_TOKEN_COUNT, false));
+            llmProviderMetadata.addAll(getDefaultResponseMetadata());
             llmProviderConfiguration.setMetadata(llmProviderMetadata);
 
             // Set default model List
@@ -122,5 +123,28 @@ public class GeminiLLMProviderService extends BuiltInLLMProviderService {
         llmProviderAuthenticationConfiguration.setParameters(parameters);
         llmProviderAuthenticationConfiguration.setEnabled(true);
         return llmProviderAuthenticationConfiguration;
+    }
+
+    @Override
+    public List<LLMProviderMetadata> getDefaultResponseMetadata() {
+
+        // Optional usage counters, published to analytics under aiTokenUsage
+        List<LLMProviderMetadata> defaults = new ArrayList<>();
+        defaults.add(new LLMProviderMetadata(
+                APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_CACHE_READ_TOKEN_COUNT,
+                APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD,
+                APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_GEMINI_METADATA_IDENTIFIER_CACHE_READ_TOKEN_COUNT,
+                false, APIConstants.AIAPIConstants.ANALYTICS_CATEGORY_TOKEN_USAGE));
+        defaults.add(new LLMProviderMetadata(
+                APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_THOUGHTS_TOKEN_COUNT,
+                APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD,
+                APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_GEMINI_METADATA_IDENTIFIER_REASONING_TOKEN_COUNT,
+                false, APIConstants.AIAPIConstants.ANALYTICS_CATEGORY_TOKEN_USAGE));
+        defaults.add(new LLMProviderMetadata(
+                APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_TOOL_USE_PROMPT_TOKEN_COUNT,
+                APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD,
+                APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_GEMINI_METADATA_IDENTIFIER_TOOL_USE_PROMPT_TOKEN_COUNT,
+                false, APIConstants.AIAPIConstants.ANALYTICS_CATEGORY_TOKEN_USAGE));
+        return defaults;
     }
 }

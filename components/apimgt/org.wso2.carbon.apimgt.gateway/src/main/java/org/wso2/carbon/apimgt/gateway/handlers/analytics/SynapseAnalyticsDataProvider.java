@@ -570,7 +570,65 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
             getMCPAnalyticsData(custom);
         }
 
+        // Sections product features contribute through PRODUCT_ANALYTICS_PROPS_TO_PUBLISH.
+        mergeProductAnalyticsProps(messageContext, custom);
+
         return custom;
+    }
+
+    /**
+     * Adds the sections product features contribute through PRODUCT_ANALYTICS_PROPS_TO_PUBLISH to the event. The
+     * aiTokenUsage section is folded into the event's aiTokenUsage; every other section is published together under
+     * a single additionalProperties object at the root of the event.
+     */
+    private void mergeProductAnalyticsProps(MessageContext messageContext, Map<String, Object> custom) {
+
+        Object bucket = messageContext.getProperty(APIMgtGatewayConstants.PRODUCT_ANALYTICS_PROPS);
+        if (!(bucket instanceof Map)) {
+            return;
+        }
+        Map<String, Object> additionalProperties = new LinkedHashMap<>();
+        for (Map.Entry<?, ?> section : ((Map<?, ?>) bucket).entrySet()) {
+            if (!(section.getKey() instanceof String) || section.getValue() == null) {
+                continue;
+            }
+            if (Constants.AI_TOKEN_USAGE.equals(section.getKey())) {
+                mergeAiTokenUsage(section.getValue(), custom);
+            } else {
+                additionalProperties.put((String) section.getKey(), section.getValue());
+            }
+        }
+        if (!additionalProperties.isEmpty()
+                && custom.putIfAbsent(Constants.ADDITIONAL_PROPERTIES, additionalProperties) != null
+                && log.isDebugEnabled()) {
+            log.debug("Analytics property '" + Constants.ADDITIONAL_PROPERTIES + "' is already set. Ignoring the "
+                    + "product analytics sections.");
+        }
+    }
+
+    /**
+     * Adds the aiTokenUsage section's counters to the aiTokenUsage object built from AI_API_RESPONSE_METADATA, and
+     * only to an existing one: a contribution must not create an aiTokenUsage that lacks the core fields (the cloud
+     * reporter reads them unconditionally), nor overwrite a field already there.
+     */
+    @SuppressWarnings("unchecked")
+    private void mergeAiTokenUsage(Object aiSection, Map<String, Object> custom) {
+
+        if (!(aiSection instanceof Map)) {
+            return;
+        }
+        Object builtAiTokenUsage = custom.get(Constants.AI_TOKEN_USAGE);
+        if (!(builtAiTokenUsage instanceof Map)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Ignoring the aiTokenUsage contribution: no AI usage was built for this request.");
+            }
+            return;
+        }
+        for (Map.Entry<?, ?> entry : ((Map<?, ?>) aiSection).entrySet()) {
+            if (entry.getKey() instanceof String) {
+                ((Map<String, Object>) builtAiTokenUsage).putIfAbsent((String) entry.getKey(), entry.getValue());
+            }
+        }
     }
 
     public static int getHourByUTC(long timestampMillis) {

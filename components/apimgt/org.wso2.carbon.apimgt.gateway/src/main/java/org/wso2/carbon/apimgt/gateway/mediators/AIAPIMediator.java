@@ -48,16 +48,22 @@ import org.wso2.carbon.apimgt.api.gateway.FailoverPolicyDeploymentConfigDTO;
 import org.wso2.carbon.apimgt.api.gateway.ModelEndpointDTO;
 import org.wso2.carbon.apimgt.api.model.LLMProviderInfo;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.AnalyticsMessageContextUtil;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.ws.rs.core.MediaType;
 import javax.xml.stream.XMLStreamException;
 
@@ -672,13 +678,30 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
                                          LLMProviderInfo provider)
             throws APIManagementException, XMLStreamException, IOException {
 
-        String payload = extractPayloadFromContext(messageContext, providerConfigs);
+        // With analytics enabled, the stored rules plus the provider service's shipped defaults for attributes the
+        // stored rules lack, so attributes added in later versions also apply to providers registered before them.
+        // The defaults are analytics-only counters, so they are not extracted when analytics is disabled.
+        boolean analyticsEnabled = APIUtil.isAnalyticsEnabled();
+        List<LLMProviderMetadata> responseMetadataRules = analyticsEnabled
+                ? withDefaultResponseMetadata(providerConfigs.getMetadata(),
+                        llmProviderService.getDefaultResponseMetadata())
+                : providerConfigs.getMetadata();
+        String payload = extractPayloadFromContext(messageContext, responseMetadataRules);
         Map<String, String> queryParams = extractQueryParamsFromContext(messageContext);
         Map<String, String> headers = extractHeadersFromContext(messageContext);
         String requestPath = (String) messageContext.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
         LLMResponseMetaData llmResponseMetaData = new LLMResponseMetaData(payload, headers, queryParams, requestPath);
-        llmProviderService.getResponseMetadata(llmResponseMetaData, providerConfigs.getMetadata(), metadataMap);
+        llmProviderService.getResponseMetadata(llmResponseMetaData, responseMetadataRules, metadataMap);
         messageContext.setProperty(APIConstants.AIAPIConstants.AI_API_RESPONSE_METADATA, metadataMap);
+
+        // Publish the provider's TOKEN_USAGE counters (e.g. cache and reasoning tokens) to analytics through the
+        // PRODUCT_ANALYTICS_PROPS_TO_PUBLISH channel. The section is replaced on every backend attempt, so only the
+        // last attempt's usage is published.
+        if (analyticsEnabled) {
+            AnalyticsMessageContextUtil.mergeSection(messageContext,
+                    APIMgtGatewayConstants.PRODUCT_ANALYTICS_PROPS, Constants.AI_TOKEN_USAGE,
+                    extractTokenUsageCounters(metadataMap, responseMetadataRules));
+        }
 
         // Read target model configs from the new generic property first, then fall back for compatibility
         Map<String, Object> roundRobinConfigs = null;
@@ -1161,19 +1184,84 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
     }
 
     /**
+     * Returns the stored response metadata rules plus each default rule whose attribute name the stored rules do not
+     * have. A stored rule always takes precedence, even if its identifier differs or is blank. Nothing is written
+     * back to the stored provider configuration.
+     *
+     * @param storedRules  Response metadata rules from the stored provider configuration.
+     * @param defaultRules Default response metadata rules shipped with the provider service.
+     * @return The rules to apply; never null.
+     */
+    static List<LLMProviderMetadata> withDefaultResponseMetadata(List<LLMProviderMetadata> storedRules,
+                                                                 List<LLMProviderMetadata> defaultRules) {
+
+        List<LLMProviderMetadata> rules = storedRules != null ? new ArrayList<>(storedRules) : new ArrayList<>();
+        if (defaultRules == null || defaultRules.isEmpty()) {
+            return rules;
+        }
+        Set<String> attributeNames = new HashSet<>();
+        for (LLMProviderMetadata rule : rules) {
+            if (rule != null && rule.getAttributeName() != null) {
+                attributeNames.add(rule.getAttributeName());
+            }
+        }
+        for (LLMProviderMetadata rule : defaultRules) {
+            if (rule != null && rule.getAttributeName() != null && attributeNames.add(rule.getAttributeName())) {
+                rules.add(rule);
+            }
+        }
+        return rules;
+    }
+
+    /**
+     * Extracts the token usage counters published to analytics as the aiTokenUsage section: every response metadata
+     * attribute whose provider rule is tagged {@code analyticsCategory: "TOKEN_USAGE"}, as an Integer. Attributes
+     * that are missing or not a whole number are left out.
+     *
+     * @param metadataMap   Response metadata extracted from the LLM response (attribute name to value).
+     * @param providerRules The provider's metadata rules.
+     * @return The token usage counters; never null.
+     */
+    static Map<String, Object> extractTokenUsageCounters(Map<String, String> metadataMap,
+                                                         List<LLMProviderMetadata> providerRules) {
+
+        Map<String, Object> counters = new LinkedHashMap<>();
+        if (metadataMap == null || providerRules == null) {
+            return counters;
+        }
+        for (LLMProviderMetadata rule : providerRules) {
+            if (rule == null || !APIConstants.AIAPIConstants.ANALYTICS_CATEGORY_TOKEN_USAGE
+                    .equals(rule.getAnalyticsCategory())) {
+                continue;
+            }
+            String name = rule.getAttributeName();
+            String raw = name != null ? metadataMap.get(name) : null;
+            if (raw == null) {
+                continue;
+            }
+            try {
+                counters.put(name, Integer.parseInt(raw.trim()));
+            } catch (NumberFormatException e) {
+                // Not a whole number (e.g. a rule pointing at an object); leave the counter out.
+            }
+        }
+        return counters;
+    }
+
+    /**
      * Extracts the payload from the message context.
      *
      * @param messageContext the Synapse MessageContext
-     * @param config         LLM provider configuration
+     * @param metadataRules  Response metadata rules of the LLM provider
      * @return extracted payload
      */
-    private String extractPayloadFromContext(MessageContext messageContext, LLMProviderConfiguration config)
+    private String extractPayloadFromContext(MessageContext messageContext, List<LLMProviderMetadata> metadataRules)
             throws XMLStreamException, IOException {
 
         org.apache.axis2.context.MessageContext axis2MessageContext =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
 
-        for (LLMProviderMetadata metadata : config.getMetadata()) {
+        for (LLMProviderMetadata metadata : metadataRules) {
             if (APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD.equals(metadata.getInputSource())) {
                 return getPayload(axis2MessageContext);
             }
