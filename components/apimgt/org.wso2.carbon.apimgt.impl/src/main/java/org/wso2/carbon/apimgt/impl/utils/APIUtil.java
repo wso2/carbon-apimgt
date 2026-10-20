@@ -12948,7 +12948,12 @@ public final class APIUtil {
         if (tenantRestrictsAllowList) {
             retainEntriesPermittedByPolicy(allowList, tenantMode, tenantHosts, tenantBlockPrivateNetworkAccess);
         }
-        List<String> blockList = new ArrayList<>(denyHosts);
+        List<String> blockList = new ArrayList<>();
+        for (String denyHost : denyHosts) {
+            if (isResolverCompatibleBlockEntry(denyHost)) {
+                blockList.add(denyHost);
+            }
+        }
         // Allow-mode is a restrictive whitelist (deny everything not explicitly allowed). The resolver's allow-list
         // only exempts hosts, so a wildcard deny is what enforces "block the rest".
         if (!allowModeHostSets.isEmpty()) {
@@ -13191,17 +13196,66 @@ public final class APIUtil {
                     + "resolution.");
             return false;
         }
-        String normalizedEntry = allowListEntry.toLowerCase(Locale.ROOT);
-        if (!Character.isDigit(normalizedEntry.charAt(0))) {
-            try {
-                IDN.toASCII(normalizedEntry, IDN.ALLOW_UNASSIGNED);
-            } catch (IllegalArgumentException e) {
-                log.warn("Allow-list entry '" + allowListEntry + "' is not a valid host pattern (" + e.getMessage()
-                        + ") and is not applied to remote $ref resolution.");
-                return false;
-            }
+        String conversionError = getResolverConversionError(allowListEntry);
+        if (conversionError != null) {
+            log.warn("Allow-list entry '" + allowListEntry + "' is not a valid host pattern (" + conversionError
+                    + ") and is not applied to remote $ref resolution.");
+            return false;
         }
         return true;
+    }
+
+    /**
+     * Checks whether a block-list entry can be loaded by the remote-$ref resolver, which fails to load the whole
+     * block-list if it cannot convert an entry to its ASCII form. An entry without a {@code *} that cannot be converted,
+     * such as one with a label longer than 63 characters or an empty label, cannot match any host name, so it is not
+     * applied. An entry with a {@code *} could still match a host name, so it is reported as a misconfiguration instead.
+     *
+     * @param blockListEntry the block-list entry
+     * @return {@code true} if the entry can be passed to the resolver, {@code false} if it matches no host name
+     * @throws APIManagementException with {@code NETWORK_SECURITY_ACCESS_CONTROL_MISCONFIGURED} if a wildcard entry
+     *                                cannot be loaded by the resolver
+     */
+    private static boolean isResolverCompatibleBlockEntry(String blockListEntry) throws APIManagementException {
+        String conversionError = getResolverConversionError(blockListEntry);
+        if (conversionError == null) {
+            return true;
+        }
+        if (!blockListEntry.contains(APIConstants.NetworkSecurityAccessControl.MATCH_ALL_HOSTS)) {
+            log.warn("Deny-list entry '" + blockListEntry + "' is not a valid host pattern (" + conversionError
+                    + ") and matches no host, so it is not applied to remote $ref resolution.");
+            return false;
+        }
+        APIManagementException ex = new APIManagementException(
+                ExceptionCodes.NETWORK_SECURITY_ACCESS_CONTROL_MISCONFIGURED.getErrorMessage(),
+                ExceptionCodes.NETWORK_SECURITY_ACCESS_CONTROL_MISCONFIGURED);
+        log.error("Network security access control misconfiguration: deny-list entry '" + blockListEntry
+                + "' is not a valid host pattern (" + conversionError + ") and cannot be applied to remote reference "
+                + "resolution.", ex);
+        throw ex;
+    }
+
+    /**
+     * Converts a host pattern to its ASCII form as the remote-$ref resolver does, which skips patterns that start with
+     * a digit.
+     *
+     * @param hostPattern the host pattern
+     * @return the reason the resolver cannot convert the pattern, or {@code null} if it can
+     */
+    private static String getResolverConversionError(String hostPattern) {
+        if (StringUtils.isBlank(hostPattern)) {
+            return null;
+        }
+        String normalizedPattern = hostPattern.toLowerCase(Locale.ROOT);
+        if (Character.isDigit(normalizedPattern.charAt(0))) {
+            return null;
+        }
+        try {
+            IDN.toASCII(normalizedPattern, IDN.ALLOW_UNASSIGNED);
+            return null;
+        } catch (IllegalArgumentException e) {
+            return e.getMessage();
+        }
     }
 
     /**

@@ -536,6 +536,39 @@ public class APIUtilRefOptionsTest {
         assertBothAllowIntersection(Arrays.asList(maxLabel), Arrays.asList("*"), Arrays.asList(maxLabel));
     }
 
+    @Test
+    public void testDenyEntriesThatMatchNoHostDropped() throws Exception {
+        // A deny entry without a '*' that the resolver cannot load matches no host name, so it is not applied, and
+        // the remaining deny entries still are.
+        String longLabel = org.apache.commons.lang3.StringUtils.repeat("a", 64) + ".internal.com";
+        String maxLabel = org.apache.commons.lang3.StringUtils.repeat("a", 63) + ".internal.com";
+        PowerMockito.spy(APIUtil.class);
+        PowerMockito.doReturn(tenantPolicy("deny", "a..b.com", maxLabel))
+                .when(APIUtil.class, "getTenantConfig", TENANT);
+        setPlatform(true, "deny", Arrays.asList(longLabel, "*.internal"));
+
+        OASParserOptions out = APIUtil.buildRefResolutionOptions(new OASParserOptions(), TENANT);
+
+        assertSameElements(Arrays.asList("*.internal", maxLabel), out.getRemoteRefBlockList());
+    }
+
+    @Test
+    public void testWildcardDenyEntryResolverCannotLoadThrowsMisconfigured() throws Exception {
+        // A deny entry with a '*' that the resolver cannot load could still match a host name, such as one with a
+        // 63-character label, so it is reported as a misconfiguration instead of being dropped.
+        String wildcardLongLabel = "*" + org.apache.commons.lang3.StringUtils.repeat("a", 63) + ".com";
+        PowerMockito.spy(APIUtil.class);
+        PowerMockito.doReturn(tenantPolicy("deny", wildcardLongLabel)).when(APIUtil.class, "getTenantConfig", TENANT);
+        setPlatform(false, null, null);
+
+        try {
+            APIUtil.buildRefResolutionOptions(new OASParserOptions(), TENANT);
+            Assert.fail("A wildcard deny entry that the resolver cannot load must raise a misconfiguration error");
+        } catch (APIManagementException e) {
+            Assert.assertEquals(ExceptionCodes.NETWORK_SECURITY_ACCESS_CONTROL_MISCONFIGURED, e.getErrorHandler());
+        }
+    }
+
     private static void enumerate(java.util.List<String> out, String prefix, char[] alphabet, int maxLength) {
         out.add(prefix);
         if (prefix.length() == maxLength) {
