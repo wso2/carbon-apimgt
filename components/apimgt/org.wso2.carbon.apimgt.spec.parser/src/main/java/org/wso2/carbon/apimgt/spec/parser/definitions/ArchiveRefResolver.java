@@ -230,7 +230,8 @@ final class ArchiveRefResolver {
      */
     private static boolean isRemoteRef(String ref, String archiveRoot, File baseDirectory) {
         String lowerCaseRef = ref.toLowerCase(Locale.ROOT);
-        if (lowerCaseRef.startsWith("http://") || lowerCaseRef.startsWith("https://")) {
+        if (lowerCaseRef.startsWith(APISpecParserConstants.HTTP_PROTOCOL_URL_PREFIX)
+                || lowerCaseRef.startsWith(APISpecParserConstants.HTTPS_PROTOCOL_URL_PREFIX)) {
             return true;
         }
         // A reference with another scheme (file:, jar:, a drive letter) or an absolute path does not point to a file

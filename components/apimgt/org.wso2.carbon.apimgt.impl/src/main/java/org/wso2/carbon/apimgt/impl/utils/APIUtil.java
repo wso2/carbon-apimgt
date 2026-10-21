@@ -471,14 +471,6 @@ public final class APIUtil {
     private static String networkSecurityMode;
     private static List<String> networkSecurityHosts;
     private static boolean networkSecurityBlockPrivateAccess;
-    // Host patterns with more wildcards than this are not combined, since the number of combined patterns grows
-    // quickly with the wildcard count; such entries are not applied to remote $ref resolution.
-    private static final int MAX_WILDCARDS_PER_HOST_PATTERN = 4;
-    // Host pattern pairs that need more combined patterns than this are not combined; such entries are not applied
-    // to remote $ref resolution.
-    private static final int MAX_COMBINED_HOST_PATTERNS = 64;
-    // Host patterns longer than the longest valid host name are not combined.
-    private static final int MAX_HOST_PATTERN_LENGTH = 253;
 
     private static final Pattern URL_TEMPLATE_PATTERN = Pattern.compile("\\{[^{}]*}");
     // Prefix of the per-call placeholder that stands in for a template segment while a URL is parsed.
@@ -13020,11 +13012,12 @@ public final class APIUtil {
     private static List<String> intersectHostPatterns(String first, String second) {
         String firstPattern = normalizeHostPattern(first);
         String secondPattern = normalizeHostPattern(second);
-        if (firstPattern.length() > MAX_HOST_PATTERN_LENGTH || secondPattern.length() > MAX_HOST_PATTERN_LENGTH
+        if (firstPattern.length() > APIConstants.NetworkSecurityAccessControl.MAX_HOST_PATTERN_LENGTH
+                || secondPattern.length() > APIConstants.NetworkSecurityAccessControl.MAX_HOST_PATTERN_LENGTH
                 || StringUtils.countMatches(firstPattern, APIConstants.NetworkSecurityAccessControl.MATCH_ALL_HOSTS)
-                > MAX_WILDCARDS_PER_HOST_PATTERN
+                > APIConstants.NetworkSecurityAccessControl.MAX_WILDCARDS_PER_HOST_PATTERN
                 || StringUtils.countMatches(secondPattern, APIConstants.NetworkSecurityAccessControl.MATCH_ALL_HOSTS)
-                > MAX_WILDCARDS_PER_HOST_PATTERN) {
+                > APIConstants.NetworkSecurityAccessControl.MAX_WILDCARDS_PER_HOST_PATTERN) {
             return null;
         }
         Set<String> combined = intersectHostPatternSuffixes(firstPattern, 0, secondPattern, 0, new HashMap<>());
@@ -13034,8 +13027,8 @@ public final class APIUtil {
     /**
      * Returns the patterns matching exactly the strings matched by both {@code first.substring(i)} and
      * {@code second.substring(j)}, without patterns covered by another, or {@code null} if more than
-     * {@link #MAX_COMBINED_HOST_PATTERNS} patterns are needed. Both patterns must be normalized (see
-     * {@link #normalizeHostPattern(String)}).
+     * {@link APIConstants.NetworkSecurityAccessControl#MAX_COMBINED_HOST_PATTERNS} patterns are needed. Both
+     * patterns must be normalized (see {@link #normalizeHostPattern(String)}).
      */
     private static Set<String> intersectHostPatternSuffixes(String first, int i, String second, int j,
                                                             Map<Long, Set<String>> memo) {
@@ -13078,7 +13071,7 @@ public final class APIUtil {
         }
         // Remove covered patterns at every step, so that only the patterns that are needed are carried forward.
         List<String> needed = removeSubsumedHostPatterns(result);
-        if (needed.size() > MAX_COMBINED_HOST_PATTERNS) {
+        if (needed.size() > APIConstants.NetworkSecurityAccessControl.MAX_COMBINED_HOST_PATTERNS) {
             return null;
         }
         Set<String> neededSet = new LinkedHashSet<>(needed);
