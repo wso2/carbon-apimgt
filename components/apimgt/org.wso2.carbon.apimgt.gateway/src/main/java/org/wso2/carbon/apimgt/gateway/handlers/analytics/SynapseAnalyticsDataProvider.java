@@ -65,12 +65,15 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -103,6 +106,8 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     private Boolean buildResponseMessage = null;
     private static Map<String, String> reporterProperties = null;
     private static final Gson gson = new Gson();
+    // Nesting limit for contributed analytics values; also stops self-referencing structures.
+    private static final int MAX_PUBLISHABLE_DEPTH = 10;
 
     public SynapseAnalyticsDataProvider(MessageContext messageContext) {
 
@@ -589,13 +594,16 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         }
         Map<String, Object> additionalProperties = new LinkedHashMap<>();
         for (Map.Entry<?, ?> section : ((Map<?, ?>) bucket).entrySet()) {
-            if (!(section.getKey() instanceof String) || section.getValue() == null) {
+            if (!isPublishableKey(section.getKey()) || section.getValue() == null) {
                 continue;
             }
             if (Constants.AI_TOKEN_USAGE.equals(section.getKey())) {
                 mergeAiTokenUsage(section.getValue(), custom);
-            } else {
+            } else if (isPublishable(section.getValue(), 0)) {
                 additionalProperties.put((String) section.getKey(), section.getValue());
+            } else if (log.isDebugEnabled()) {
+                log.debug("Skipping product analytics section '" + section.getKey() + "': it holds a value that "
+                        + "cannot be published.");
             }
         }
         if (!additionalProperties.isEmpty()
@@ -625,10 +633,67 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
             return;
         }
         for (Map.Entry<?, ?> entry : ((Map<?, ?>) aiSection).entrySet()) {
-            if (entry.getKey() instanceof String) {
+            if (isPublishableKey(entry.getKey()) && entry.getValue() != null && isPublishable(entry.getValue(), 0)) {
                 ((Map<String, Object>) builtAiTokenUsage).putIfAbsent((String) entry.getKey(), entry.getValue());
             }
         }
+    }
+
+    /**
+     * Returns true if a contributed key can be stored as a field name by every analytics back end: a non-blank string
+     * without empty dot-separated segments (Elasticsearch rejects the whole document for an empty field name).
+     */
+    private static boolean isPublishableKey(Object key) {
+
+        if (!(key instanceof String)) {
+            return false;
+        }
+        String name = (String) key;
+        return !name.trim().isEmpty() && !name.startsWith(".") && !name.endsWith(".") && !name.contains("..");
+    }
+
+    /**
+     * Returns true if a contributed value can be serialised into the analytics event by every reporter: a string,
+     * boolean or finite number, or a map (publishable keys) / collection of those, nested at most
+     * MAX_PUBLISHABLE_DEPTH levels. Anything else (NaN, infinity, arbitrary objects, Optional, dates, arrays,
+     * self-referencing structures) makes the whole event fail to publish, so it is left out instead.
+     */
+    private static boolean isPublishable(Object value, int depth) {
+
+        if (value == null) {
+            return depth > 0;
+        }
+        if (value instanceof String || value instanceof Boolean) {
+            return true;
+        }
+        if (value instanceof Double || value instanceof Float) {
+            double d = ((Number) value).doubleValue();
+            return !Double.isNaN(d) && !Double.isInfinite(d);
+        }
+        if (value instanceof Integer || value instanceof Long || value instanceof Short || value instanceof Byte
+                || value instanceof BigInteger || value instanceof BigDecimal) {
+            return true;
+        }
+        if (depth >= MAX_PUBLISHABLE_DEPTH) {
+            return false;
+        }
+        if (value instanceof Map) {
+            for (Map.Entry<?, ?> entry : ((Map<?, ?>) value).entrySet()) {
+                if (!isPublishableKey(entry.getKey()) || !isPublishable(entry.getValue(), depth + 1)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        if (value instanceof Collection) {
+            for (Object element : (Collection<?>) value) {
+                if (!isPublishable(element, depth + 1)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
     }
 
     public static int getHourByUTC(long timestampMillis) {

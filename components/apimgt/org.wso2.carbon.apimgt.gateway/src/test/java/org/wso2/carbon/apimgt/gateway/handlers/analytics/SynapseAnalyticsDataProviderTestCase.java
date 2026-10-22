@@ -672,6 +672,153 @@ public class SynapseAnalyticsDataProviderTestCase {
     }
 
     /**
+     * Verifies a product section holding a value the reporters cannot serialise is left out, while the other sections
+     * and the rest of the event are still published, and the resulting event serialises with both Jackson (used by
+     * the analytics publisher) and Gson (used by the ELK reporter).
+     */
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testGetPropertiesSkipsProductSectionsThatCannotBePublished() throws Exception {
+
+        Map<String, Object> selfReferencing = new LinkedHashMap<>();
+        selfReferencing.put("ok", 1);
+        selfReferencing.put("self", selfReferencing);
+        Map<Object, Object> nonStringKey = new LinkedHashMap<>();
+        nonStringKey.put(1, "v");
+        Map<String, Object> sections = new LinkedHashMap<>();
+        sections.put("featureUsage", Collections.singletonMap("requests", 1));
+        sections.put("nan", Collections.singletonMap("v", Double.NaN));
+        sections.put("infinity", Collections.singletonMap("v", Float.POSITIVE_INFINITY));
+        sections.put("object", Collections.singletonMap("v", new Object()));
+        sections.put("optional", Collections.singletonMap("v", java.util.Optional.of("v")));
+        sections.put("date", Collections.singletonMap("v", new java.util.Date(0)));
+        sections.put("array", Collections.singletonMap("v", new byte[]{1, 2}));
+        sections.put("selfReferencing", selfReferencing);
+        sections.put("nonStringKey", Collections.singletonMap("v", nonStringKey));
+        sections.put("tooDeep", nested(MAX_DEPTH_OF_PUBLISHABLE_MAPS + 1));
+        sections.put("notAMap", Double.NaN);
+        Map<String, Object> properties = aiRequestProperties();
+        properties.put(APIMgtGatewayConstants.PRODUCT_ANALYTICS_PROPS, sections);
+
+        Map<String, Object> customProperties = buildProperties(properties, null);
+
+        Assert.assertEquals(Collections.singletonMap("featureUsage", Collections.singletonMap("requests", 1)),
+                customProperties.get(Constants.ADDITIONAL_PROPERTIES));
+        Assert.assertEquals(CORE_AI_TOKEN_USAGE_KEYS,
+                ((Map<String, Object>) customProperties.get(Constants.AI_TOKEN_USAGE)).keySet());
+        assertSerialisable(customProperties);
+    }
+
+    /**
+     * Verifies JSON-compatible section values are published as they are: strings, booleans, whole and decimal numbers
+     * of any standard type, empty containers, nested nulls, lists of maps, and maps nested up to the limit.
+     */
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testGetPropertiesPublishesJsonCompatibleProductSectionValues() throws Exception {
+
+        Map<String, Object> typed = new LinkedHashMap<>();
+        typed.put("string", "ünïcödé");
+        typed.put("bool", true);
+        typed.put("int", 7);
+        typed.put("long", 9007199254740993L);
+        typed.put("double", 1.5);
+        typed.put("decimal", new java.math.BigDecimal("12.3400"));
+        typed.put("bigInteger", java.math.BigInteger.TEN.pow(30));
+        typed.put("emptyMap", new HashMap<>());
+        typed.put("emptyList", new ArrayList<>());
+        typed.put("nullValue", null);
+        typed.put("listOfMaps", Arrays.asList(Collections.singletonMap("id", 1), Collections.singletonMap("id", 2)));
+        Map<String, Object> sections = new LinkedHashMap<>();
+        sections.put("typed", typed);
+        sections.put("deepest", nested(MAX_DEPTH_OF_PUBLISHABLE_MAPS));
+        Map<String, Object> properties = aiRequestProperties();
+        properties.put(APIMgtGatewayConstants.PRODUCT_ANALYTICS_PROPS, sections);
+
+        Map<String, Object> customProperties = buildProperties(properties, null);
+
+        Map<String, Object> additionalProperties =
+                (Map<String, Object>) customProperties.get(Constants.ADDITIONAL_PROPERTIES);
+        Assert.assertEquals(typed, additionalProperties.get("typed"));
+        Assert.assertEquals(nested(MAX_DEPTH_OF_PUBLISHABLE_MAPS), additionalProperties.get("deepest"));
+        assertSerialisable(customProperties);
+    }
+
+    /**
+     * Verifies aiTokenUsage section entries that cannot be serialised, or are null, are left out while the other
+     * counters are added.
+     */
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testGetPropertiesSkipsProductTokenUsageCountersThatCannotBePublished() throws Exception {
+
+        Map<String, Object> counters = new LinkedHashMap<>();
+        counters.put("cacheReadInputTokens", 800);
+        counters.put("nanCounter", Double.NaN);
+        counters.put("objectCounter", new Object());
+        counters.put("nullCounter", null);
+        Map<String, Object> properties = aiRequestProperties();
+        properties.put(APIMgtGatewayConstants.PRODUCT_ANALYTICS_PROPS,
+                Collections.singletonMap(Constants.AI_TOKEN_USAGE, counters));
+
+        Map<String, Object> customProperties = buildProperties(properties, null);
+
+        Map<String, Object> aiTokenUsage = (Map<String, Object>) customProperties.get(Constants.AI_TOKEN_USAGE);
+        Assert.assertEquals(800, aiTokenUsage.get("cacheReadInputTokens"));
+        Assert.assertFalse(aiTokenUsage.containsKey("nanCounter"));
+        Assert.assertFalse(aiTokenUsage.containsKey("objectCounter"));
+        Assert.assertFalse(aiTokenUsage.containsKey("nullCounter"));
+        assertSerialisable(customProperties);
+    }
+
+    /**
+     * Verifies sections and nested keys that cannot be stored as field names (blank, or with an empty dot-separated
+     * segment — Elasticsearch rejects the whole document for an empty field name) are left out, while ordinary dotted
+     * and non-ASCII names are published.
+     */
+    @Test
+    public void testGetPropertiesSkipsProductSectionsWithUnstorableKeys() throws Exception {
+
+        Map<String, Object> sections = new LinkedHashMap<>();
+        sections.put("", Collections.singletonMap("v", 1));
+        sections.put("  ", Collections.singletonMap("v", 1));
+        sections.put(".leading", Collections.singletonMap("v", 1));
+        sections.put("trailing.", Collections.singletonMap("v", 1));
+        sections.put("double..dot", Collections.singletonMap("v", 1));
+        sections.put("nestedEmptyKey", Collections.singletonMap("", 1));
+        sections.put("feature.usage", Collections.singletonMap("ünï", 1));
+        Map<String, Object> properties = aiRequestProperties();
+        properties.put(APIMgtGatewayConstants.PRODUCT_ANALYTICS_PROPS, sections);
+
+        Map<String, Object> customProperties = buildProperties(properties, null);
+
+        Assert.assertEquals(Collections.singletonMap("feature.usage", Collections.singletonMap("ünï", 1)),
+                customProperties.get(Constants.ADDITIONAL_PROPERTIES));
+        assertSerialisable(customProperties);
+    }
+
+    // Number of nested maps a section may hold: the section itself plus nine levels below it.
+    private static final int MAX_DEPTH_OF_PUBLISHABLE_MAPS = 10;
+
+    /**
+     * A section value made of {@code maps} nested maps ending in a string leaf.
+     */
+    private static Map<String, Object> nested(int maps) {
+
+        Map<String, Object> value = Collections.singletonMap("leaf", "x");
+        for (int i = 1; i < maps; i++) {
+            value = Collections.singletonMap("level" + i, value);
+        }
+        return value;
+    }
+
+    private static void assertSerialisable(Map<String, Object> customProperties) {
+
+        new com.fasterxml.jackson.databind.ObjectMapper().convertValue(customProperties, Map.class);
+        new com.google.gson.Gson().toJson(customProperties);
+    }
+
+    /**
      * Message context properties of an AI API request whose response reported 1200 prompt, 300 completion and 1500
      * total tokens.
      */
