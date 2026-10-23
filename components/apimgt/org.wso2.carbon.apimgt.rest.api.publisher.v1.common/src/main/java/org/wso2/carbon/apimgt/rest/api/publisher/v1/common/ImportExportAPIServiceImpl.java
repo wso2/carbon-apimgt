@@ -128,6 +128,13 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
     @Override
     public File exportAPIs(String organization, boolean allRevisions, ExportFormat format)
             throws APIManagementException {
+
+        return exportAPIs(organization, allRevisions, format, true);
+    }
+
+    @Override
+    public File exportAPIs(String organization, boolean allRevisions, ExportFormat format,
+                           boolean preserveCredentials) throws APIManagementException {
         // Switch the thread's carbon context to the TARGET organization before touching the registry/governance
         // layer below - without this, per-API artifact lookups resolve against the caller's own tenant context
         // and fail (or, if the caller isn't legitimately authorized for `organization`, silently operate on the
@@ -153,7 +160,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
                         try {
                             path = Files.createDirectory(Path.of(apiDirectory.toString(), apiResult.getId()));
                             currentCopy = exportAPI(apiResult.getId(), null, null, null, null, true, format,
-                                    true, true, false, null, organization, true);
+                                    true, preserveCredentials, false, null, organization, true);
                             FileUtils.copyDirectory(currentCopy, path.toAbsolutePath().toFile(), true);
                         } finally {
                             if (currentCopy != null) {
@@ -172,7 +179,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
                                     try {
                                         revisionExportedFile = exportAPI(apiResult.getId(), null, null,
                                                 Integer.toString(revisionDto.getId()), null, true, format,
-                                                true, true, false, null, organization, true);
+                                                true, preserveCredentials, false, null, organization, true);
                                         if (revisionExportedFile != null) {
                                             FileUtils.copyDirectory(revisionExportedFile,
                                                     revisionDirectoryPath.toAbsolutePath().toFile(), true);

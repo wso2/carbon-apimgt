@@ -3919,15 +3919,24 @@ public class ApisApiServiceImpl implements ApisApiService {
             ExportFormat exportFormat = StringUtils.isNotEmpty(format) ?
                     ExportFormat.valueOf(format.toUpperCase()) :
                     ExportFormat.YAML;
+            String organization = RestApiCommonUtil.validateTenantDomain(xWSO2Tenant);
+            // ScopesToExposeCredentials and ExposeEndpointPassword of the exported organization govern credential
+            // export. The resolved value is passed down as preserveCredentials.
+            String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
+                    .get(RestApiConstants.USER_REST_API_SCOPES);
             if (Boolean.TRUE.equals(all)) {
-                String organization = RestApiCommonUtil.validateTenantDomain(xWSO2Tenant);
+                // Bulk export always requests credentials; they are included only for a permitted caller.
+                boolean preserveAllCredentials = RestApiPublisherUtils.resolvePreserveCredentialsForExport(
+                        tokenScopes, organization, true, "all APIs of organization " + organization);
                 ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
-                File file = importExportAPI.exportAPIs(organization, Boolean.TRUE.equals(allRevisions), exportFormat);
+                File file = importExportAPI.exportAPIs(organization, Boolean.TRUE.equals(allRevisions), exportFormat,
+                        preserveAllCredentials);
                 return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
                         "attachment; filename=\"" + file.getName() + "\"").build();
             }
             try {
-                String organization = RestApiCommonUtil.validateTenantDomain(xWSO2Tenant);
+                preserveCredentials = RestApiPublisherUtils.resolvePreserveCredentialsForExport(tokenScopes,
+                        organization, preserveCredentials, "API " + apiId);
                 // Cross-tenant requests (organization differs from the caller's own tenant, which
                 // validateTenantDomain() only allows for callers holding the super-admin protected
                 // permission) must run under the target tenant's carbon context - otherwise the

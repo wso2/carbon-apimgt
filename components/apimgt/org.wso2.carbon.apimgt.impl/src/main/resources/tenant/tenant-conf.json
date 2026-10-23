@@ -3,6 +3,11 @@
   "EnableRecommendation" : false,
   "IsUnlimitedTierPaid" : false,
   "ExtensionHandlerPosition": "bottom",
+  "ScopesToExposeCredentials" : [
+    "apim:api_import_export",
+    "apim:mcp_server_import_export",
+    "apim:api_product_import_export"
+  ],
   "RESTAPIScopes": {
     "Scope": [
       {
