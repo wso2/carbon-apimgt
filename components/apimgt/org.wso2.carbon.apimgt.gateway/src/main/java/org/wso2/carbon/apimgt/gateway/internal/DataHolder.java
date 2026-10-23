@@ -60,7 +60,8 @@ public class DataHolder {
     private Map<String, List<String>> apiToKeyManagersMap = new HashMap<>();
     private Map<String, Map<String, API>> tenantAPIMap = new ConcurrentHashMap<>();
     // tenantDomain -> (API context -> deployed revision) of APIs deployed before their metadata was loaded
-    // (e.g. APIs of eager loaded tenants). An empty revision is stored when the revision is unknown.
+    // (e.g. APIs of eager loaded tenants). An empty revision is stored when the revision is unknown. The per tenant
+    // maps are only modified within compute operations on the tenant entry, and are dropped once they are empty.
     private final Map<String, Map<String, String>> deployedBeforeMetadataMap = new ConcurrentHashMap<>();
     private Map<String, Boolean> tenantDeployStatus = new HashMap<>();
     private Map<String, LLMProviderInfo> llmProviderMap = new HashMap<>();
@@ -324,72 +325,95 @@ public class DataHolder {
         if (api.isDefaultVersion()) {
             apiMap.put(defaultContext, api);
         }
-        // Apply a deployment that happened before the metadata was loaded. This is done after the API is added to
-        // the map, so that a concurrent markAPIAsDeployed call either finds the API or is seen here.
+        // The deployed state is read only after the new object is added to the map, so that a concurrent
+        // markAPIAsDeployed call either updates the old object before this point or finds the new object.
+        if (oldAPI != null && oldAPI.isDeployed() && !api.isDeployed()) {
+            // Reloading the metadata of an API (e.g. on API_UPDATE) does not change its deployed artifact
+            markAsDeployed(api, oldAPI.getRevisionId());
+        }
         applyDeploymentBeforeMetadata(api);
     }
 
     /**
-     * Mark the API as deployed. If the API metadata is not loaded yet and on demand loading is enabled, the
-     * deployment is tracked and applied once the metadata is loaded, so that the API is not redeployed on its first
-     * request. If the metadata is not loaded and on demand loading is disabled, this is a no-op.
+     * Mark the API as deployed. If the API metadata is not loaded yet (e.g. APIs of eager loaded tenants at
+     * startup), the deployment is tracked and applied once the metadata is loaded, so that the API is not
+     * redeployed on its first request.
      *
      * @param gatewayAPIDTO GatewayAPIDTO of the deployed API
      */
     public void markAPIAsDeployed(GatewayAPIDTO gatewayAPIDTO) {
-        if (gatewayAPIDTO.getApiContext() == null) {
+        String tenantDomain = gatewayAPIDTO.getTenantDomain();
+        String apiContext = gatewayAPIDTO.getApiContext();
+        if (apiContext == null || StringUtils.isEmpty(tenantDomain)) {
             // Internal/special-purpose APIs (e.g. JWKS endpoint) may not have an API context set;
             // they are not tracked in tenantAPIMap, so nothing to mark.
             return;
         }
-        API api = getAPI(gatewayAPIDTO.getTenantDomain(), gatewayAPIDTO.getApiContext());
-        if (api != null) {
-            api.setDeployed(true);
-            if (log.isDebugEnabled()) {
-                log.debug("API : " + api.getApiName() + " is deployed successfully");
-            }
-            api.setRevisionId(gatewayAPIDTO.getRevision());
-        } else if (GatewayUtils.isOnDemandLoading() && StringUtils.isNotEmpty(gatewayAPIDTO.getTenantDomain())) {
+        API api = getAPI(tenantDomain, apiContext);
+        if (api == null) {
             // API metadata is not loaded yet. Keep track of the deployment so that the API is marked as deployed
             // once its metadata is loaded, avoiding a redeployment on the first request.
-            deployedBeforeMetadataMap.computeIfAbsent(gatewayAPIDTO.getTenantDomain(),
-                    k -> new ConcurrentHashMap<>()).put(gatewayAPIDTO.getApiContext(),
-                    StringUtils.defaultString(gatewayAPIDTO.getRevision()));
+            deployedBeforeMetadataMap.compute(tenantDomain, (tenant, deployments) -> {
+                Map<String, String> tenantDeployments = deployments != null ? deployments : new ConcurrentHashMap<>();
+                tenantDeployments.put(apiContext, StringUtils.defaultString(gatewayAPIDTO.getRevision()));
+                return tenantDeployments;
+            });
             if (log.isDebugEnabled()) {
                 log.debug("API : " + gatewayAPIDTO.getName() + " is deployed before its metadata is loaded");
             }
             // The metadata may have been added after the lookup above. Apply the deployment in that case.
-            api = getAPI(gatewayAPIDTO.getTenantDomain(), gatewayAPIDTO.getApiContext());
+            api = getAPI(tenantDomain, apiContext);
             if (api != null) {
                 applyDeploymentBeforeMetadata(api);
             }
+            return;
+        }
+        markAsDeployed(api, gatewayAPIDTO.getRevision());
+        if (log.isDebugEnabled()) {
+            log.debug("API : " + api.getApiName() + " is deployed successfully");
+        }
+        // The metadata may have been replaced after the lookup above. Mark the new object as well in that case.
+        API currentAPI = getAPI(tenantDomain, apiContext);
+        if (currentAPI != null && currentAPI != api) {
+            markAsDeployed(currentAPI, gatewayAPIDTO.getRevision());
         }
     }
 
     private API getAPI(String tenantDomain, String apiContext) {
-        if (tenantDomain == null) {
+        if (tenantDomain == null || apiContext == null) {
             return null;
         }
         Map<String, API> apiMap = tenantAPIMap.get(tenantDomain);
         return apiMap != null ? apiMap.get(apiContext) : null;
     }
 
+    private void markAsDeployed(API api, String revisionId) {
+        // The revision is set first, so that it is visible to any thread that sees the (volatile) deployed flag
+        api.setRevisionId(revisionId);
+        api.setDeployed(true);
+    }
+
     private void applyDeploymentBeforeMetadata(API api) {
-        Map<String, String> deployedBeforeMetadata = deployedBeforeMetadataMap.get(api.getOrganization());
-        if (deployedBeforeMetadata == null) {
-            return;
-        }
-        String revision = deployedBeforeMetadata.remove(api.getContext());
-        if (revision != null) {
-            api.setDeployed(true);
-            if (StringUtils.isNotEmpty(revision)) {
-                api.setRevisionId(revision);
-            }
+        String[] revision = new String[1];
+        deployedBeforeMetadataMap.computeIfPresent(api.getOrganization(), (tenant, deployments) -> {
+            revision[0] = deployments.remove(api.getContext());
+            return deployments.isEmpty() ? null : deployments;
+        });
+        if (revision[0] != null) {
+            markAsDeployed(api, StringUtils.defaultIfEmpty(revision[0], null));
             if (log.isDebugEnabled()) {
                 log.debug("API : " + api.getApiName() + " was deployed before its metadata was loaded. "
                         + "Hence marking it as deployed");
             }
         }
+    }
+
+    private boolean isDeployedBeforeMetadata(String tenantDomain, String apiContext) {
+        if (tenantDomain == null) {
+            return false;
+        }
+        Map<String, String> deployments = deployedBeforeMetadataMap.get(tenantDomain);
+        return deployments != null && deployments.containsKey(apiContext);
     }
 
     /**
@@ -401,19 +425,18 @@ public class DataHolder {
      *
      * @param gatewayAPIDTO the DTO identifying the API by tenant domain and API context
      * @return {@code true} if the API exists in the map and its {@code deployed} flag is
-     *         {@code true}; {@code false} otherwise
+     *         {@code true}, or if the API was deployed before its metadata was loaded; {@code false} otherwise
      */
     public boolean isDeployed(GatewayAPIDTO gatewayAPIDTO) {
         if (gatewayAPIDTO.getApiContext() == null) {
             // Internal/special-purpose APIs (e.g. JWKS endpoint) are not tracked in tenantAPIMap.
             return false;
         }
-        Map<String, API> apiMap = tenantAPIMap.get(gatewayAPIDTO.getTenantDomain());
-        if (apiMap != null) {
-            API api = apiMap.get(gatewayAPIDTO.getApiContext());
-            return api != null && api.isDeployed();
+        API api = getAPI(gatewayAPIDTO.getTenantDomain(), gatewayAPIDTO.getApiContext());
+        if (api != null) {
+            return api.isDeployed();
         }
-        return false;
+        return isDeployedBeforeMetadata(gatewayAPIDTO.getTenantDomain(), gatewayAPIDTO.getApiContext());
     }
 
     public boolean isDuplicateEvent(String tenantDomain, String apiContext, String lastUpdatedEventId) {
@@ -470,22 +493,24 @@ public class DataHolder {
     }
 
     public void removeAPIFromAllTenantMap(String apiContext, String tenantDomain) {
-        Map<String, String> deployedBeforeMetadata = deployedBeforeMetadataMap.get(tenantDomain);
-        if (deployedBeforeMetadata != null) {
-            deployedBeforeMetadata.remove(apiContext);
+        if (tenantDomain == null) {
+            return;
         }
+        deployedBeforeMetadataMap.computeIfPresent(tenantDomain, (tenant, deployments) -> {
+            deployments.remove(apiContext);
+            return deployments.isEmpty() ? null : deployments;
+        });
         Map<String, API> apiMap = tenantAPIMap.get(tenantDomain);
         if (apiMap != null) {
             API api = apiMap.get(apiContext);
             if (api != null) {
                 apiMap.remove(apiContext);
                 if (api.isDefaultVersion()) {
-                    if (api.isDefaultVersion()) {
-                        String context = api.getContext();
-                        int index = context.lastIndexOf("/" + api.getApiVersion());
+                    String context = api.getContext();
+                    int index = context.lastIndexOf("/" + api.getApiVersion());
+                    if (index != -1) {
                         apiMap.remove(context.substring(0, index));
                     }
-
                 }
             }
         }

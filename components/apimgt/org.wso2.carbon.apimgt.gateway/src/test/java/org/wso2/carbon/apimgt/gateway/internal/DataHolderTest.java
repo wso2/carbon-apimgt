@@ -20,17 +20,14 @@ package org.wso2.carbon.apimgt.gateway.internal;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.reflect.Whitebox;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
-import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -38,10 +35,8 @@ import java.util.concurrent.Future;
 
 /**
  * Tests for tracking the deployed state of APIs in {@link DataHolder}, including APIs that get deployed before
- * their metadata is loaded (e.g. APIs of eager loaded tenants when on demand loading is enabled).
+ * their metadata is loaded (e.g. APIs of eager loaded tenants) and APIs whose metadata is reloaded.
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({GatewayUtils.class})
 public class DataHolderTest {
 
     private static final String TENANT_A = "tenant1.example.com";
@@ -50,15 +45,16 @@ public class DataHolderTest {
     private static final String API_VERSION = "1.0.0";
     private static final String CONTEXT_A = "/t/tenant1.example.com/petstore/1.0.0";
     private static final String DEFAULT_CONTEXT_A = "/t/tenant1.example.com/petstore";
+    private static final String CONTEXT_B = "/t/tenant2.example.com/petstore/1.0.0";
 
     private DataHolder dataHolder;
 
     @Before
     public void init() throws Exception {
-        PowerMockito.mockStatic(GatewayUtils.class);
-        PowerMockito.when(GatewayUtils.isOnDemandLoading()).thenReturn(true);
         // Use a fresh instance per test since DataHolder is a singleton
-        dataHolder = Whitebox.invokeConstructor(DataHolder.class);
+        Constructor<DataHolder> constructor = DataHolder.class.getDeclaredConstructor();
+        constructor.setAccessible(true);
+        dataHolder = constructor.newInstance();
     }
 
     @Test
@@ -66,9 +62,12 @@ public class DataHolderTest {
         dataHolder.addAPIMetaData(createAPI(TENANT_A, CONTEXT_A, false));
         Assert.assertFalse(dataHolder.isDeployed(createGatewayAPIDTO(TENANT_A, CONTEXT_A)));
 
-        dataHolder.markAPIAsDeployed(createGatewayAPIDTO(TENANT_A, CONTEXT_A));
+        dataHolder.markAPIAsDeployed(createGatewayAPIDTO(TENANT_A, CONTEXT_A, "revision-1"));
 
-        Assert.assertTrue(dataHolder.isDeployed(createGatewayAPIDTO(TENANT_A, CONTEXT_A)));
+        API api = getAPI(TENANT_A, CONTEXT_A);
+        Assert.assertTrue(api.isDeployed());
+        Assert.assertEquals("revision-1", api.getRevisionId());
+        Assert.assertNull(getDeploymentsBeforeMetadata(TENANT_A));
     }
 
     @Test
@@ -76,19 +75,50 @@ public class DataHolderTest {
         dataHolder.addAPIMetaData(createAPI(TENANT_A, CONTEXT_A, false));
 
         Assert.assertFalse(dataHolder.isDeployed(createGatewayAPIDTO(TENANT_A, CONTEXT_A)));
-        Assert.assertFalse(dataHolder.getTenantAPIMap().get(TENANT_A).get(CONTEXT_A).isDeployed());
+        Assert.assertFalse(getAPI(TENANT_A, CONTEXT_A).isDeployed());
     }
 
     @Test
     public void testAPIDeployedBeforeMetadataIsMarkedAsDeployedOnceMetadataIsLoaded() {
         // API gets deployed (e.g. eager tenant loading at startup) before the API metadata is loaded
-        dataHolder.markAPIAsDeployed(createGatewayAPIDTO(TENANT_A, CONTEXT_A));
-        Assert.assertFalse(dataHolder.isDeployed(createGatewayAPIDTO(TENANT_A, CONTEXT_A)));
+        dataHolder.markAPIAsDeployed(createGatewayAPIDTO(TENANT_A, CONTEXT_A, "revision-1"));
+        Assert.assertNotNull(getDeploymentsBeforeMetadata(TENANT_A));
 
         dataHolder.addAPIMetaData(createAPI(TENANT_A, CONTEXT_A, false));
 
+        API api = getAPI(TENANT_A, CONTEXT_A);
+        Assert.assertTrue(api.isDeployed());
+        Assert.assertEquals("revision-1", api.getRevisionId());
+        // The tracked deployment is consumed and the empty per tenant map is dropped
+        Assert.assertNull(getDeploymentsBeforeMetadata(TENANT_A));
+    }
+
+    @Test
+    public void testAPIDeployedBeforeMetadataIsReportedAsDeployed() {
+        // Used by the tenant loading (and retry) flow to skip APIs that are already deployed
+        dataHolder.markAPIAsDeployed(createGatewayAPIDTO(TENANT_A, CONTEXT_A));
+
         Assert.assertTrue(dataHolder.isDeployed(createGatewayAPIDTO(TENANT_A, CONTEXT_A)));
-        Assert.assertTrue(dataHolder.getTenantAPIMap().get(TENANT_A).get(CONTEXT_A).isDeployed());
+        Assert.assertFalse(dataHolder.isDeployed(createGatewayAPIDTO(TENANT_B, CONTEXT_A)));
+    }
+
+    @Test
+    public void testRevisionRuleIsSameWithAndWithoutMetadata() {
+        // A deployment without a revision clears the revision, whether or not the metadata was loaded first
+        API loadedFirst = createAPI(TENANT_A, CONTEXT_A, false);
+        loadedFirst.setRevisionId("stale-revision");
+        dataHolder.addAPIMetaData(loadedFirst);
+        dataHolder.markAPIAsDeployed(createGatewayAPIDTO(TENANT_A, CONTEXT_A));
+
+        dataHolder.markAPIAsDeployed(createGatewayAPIDTO(TENANT_B, CONTEXT_B));
+        API loadedLater = createAPI(TENANT_B, CONTEXT_B, false);
+        loadedLater.setRevisionId("stale-revision");
+        dataHolder.addAPIMetaData(loadedLater);
+
+        Assert.assertTrue(getAPI(TENANT_A, CONTEXT_A).isDeployed());
+        Assert.assertNull(getAPI(TENANT_A, CONTEXT_A).getRevisionId());
+        Assert.assertTrue(getAPI(TENANT_B, CONTEXT_B).isDeployed());
+        Assert.assertNull(getAPI(TENANT_B, CONTEXT_B).getRevisionId());
     }
 
     @Test
@@ -97,14 +127,27 @@ public class DataHolderTest {
 
         dataHolder.addAPIMetaData(createAPI(TENANT_A, CONTEXT_A, true));
 
-        Assert.assertTrue(dataHolder.getTenantAPIMap().get(TENANT_A).get(CONTEXT_A).isDeployed());
-        Assert.assertTrue(dataHolder.getTenantAPIMap().get(TENANT_A).get(DEFAULT_CONTEXT_A).isDeployed());
+        Assert.assertTrue(getAPI(TENANT_A, CONTEXT_A).isDeployed());
+        Assert.assertTrue(getAPI(TENANT_A, DEFAULT_CONTEXT_A).isDeployed());
     }
 
     @Test
-    public void testAPIDeployedBeforeMetadataIsNotTrackedWhenOnDemandLoadingIsDisabled() {
-        PowerMockito.when(GatewayUtils.isOnDemandLoading()).thenReturn(false);
-        dataHolder.markAPIAsDeployed(createGatewayAPIDTO(TENANT_A, CONTEXT_A));
+    public void testReloadedMetadataKeepsDeployedStateAndRevision() {
+        // e.g. an API_UPDATE event replaces the metadata of an API that is already deployed
+        dataHolder.addAPIMetaData(createAPI(TENANT_A, CONTEXT_A, false));
+        dataHolder.markAPIAsDeployed(createGatewayAPIDTO(TENANT_A, CONTEXT_A, "revision-1"));
+
+        API reloaded = createAPI(TENANT_A, CONTEXT_A, false);
+        dataHolder.addAPIMetaData(reloaded);
+
+        Assert.assertSame(reloaded, getAPI(TENANT_A, CONTEXT_A));
+        Assert.assertTrue(reloaded.isDeployed());
+        Assert.assertEquals("revision-1", reloaded.getRevisionId());
+    }
+
+    @Test
+    public void testReloadedMetadataOfUndeployedAPIIsNotMarkedAsDeployed() {
+        dataHolder.addAPIMetaData(createAPI(TENANT_A, CONTEXT_A, false));
 
         dataHolder.addAPIMetaData(createAPI(TENANT_A, CONTEXT_A, false));
 
@@ -112,9 +155,20 @@ public class DataHolderTest {
     }
 
     @Test
+    public void testDeploymentBeforeMetadataIsTrackedWhenOnDemandLoadingIsDisabled() {
+        // Tracking does not depend on the on demand loading configuration. The deployed flag is accurate either way.
+        dataHolder.markAPIAsDeployed(createGatewayAPIDTO(TENANT_A, CONTEXT_A));
+
+        dataHolder.addAPIMetaData(createAPI(TENANT_A, CONTEXT_A, false));
+
+        Assert.assertTrue(dataHolder.isDeployed(createGatewayAPIDTO(TENANT_A, CONTEXT_A)));
+    }
+
+    @Test
     public void testAPIUndeployedBeforeMetadataIsNotMarkedAsDeployed() {
         dataHolder.markAPIAsDeployed(createGatewayAPIDTO(TENANT_A, CONTEXT_A));
         dataHolder.removeAPIFromAllTenantMap(CONTEXT_A, TENANT_A);
+        Assert.assertNull(getDeploymentsBeforeMetadata(TENANT_A));
 
         dataHolder.addAPIMetaData(createAPI(TENANT_A, CONTEXT_A, false));
 
@@ -125,6 +179,7 @@ public class DataHolderTest {
     public void testTenantUnloadedBeforeMetadataIsNotMarkedAsDeployed() {
         dataHolder.markAPIAsDeployed(createGatewayAPIDTO(TENANT_A, CONTEXT_A));
         dataHolder.markApisAsUnDeployedInTenant(TENANT_A);
+        Assert.assertNull(getDeploymentsBeforeMetadata(TENANT_A));
 
         dataHolder.addAPIMetaData(createAPI(TENANT_A, CONTEXT_A, false));
 
@@ -143,20 +198,20 @@ public class DataHolderTest {
 
         Assert.assertFalse(dataHolder.isDeployed(createGatewayAPIDTO(TENANT_A, CONTEXT_A)));
         Assert.assertTrue(dataHolder.isDeployed(createGatewayAPIDTO(TENANT_A, otherContext)));
+        Assert.assertNull(getDeploymentsBeforeMetadata(TENANT_A));
     }
 
     @Test
     public void testTenantUnloadedBeforeMetadataDoesNotAffectOtherTenants() {
-        String contextB = "/t/tenant2.example.com/petstore/1.0.0";
         dataHolder.markAPIAsDeployed(createGatewayAPIDTO(TENANT_A, CONTEXT_A));
-        dataHolder.markAPIAsDeployed(createGatewayAPIDTO(TENANT_B, contextB));
+        dataHolder.markAPIAsDeployed(createGatewayAPIDTO(TENANT_B, CONTEXT_B));
         dataHolder.markApisAsUnDeployedInTenant(TENANT_A);
 
         dataHolder.addAPIMetaData(createAPI(TENANT_A, CONTEXT_A, false));
-        dataHolder.addAPIMetaData(createAPI(TENANT_B, contextB, false));
+        dataHolder.addAPIMetaData(createAPI(TENANT_B, CONTEXT_B, false));
 
         Assert.assertFalse(dataHolder.isDeployed(createGatewayAPIDTO(TENANT_A, CONTEXT_A)));
-        Assert.assertTrue(dataHolder.isDeployed(createGatewayAPIDTO(TENANT_B, contextB)));
+        Assert.assertTrue(dataHolder.isDeployed(createGatewayAPIDTO(TENANT_B, CONTEXT_B)));
     }
 
     @Test
@@ -179,6 +234,7 @@ public class DataHolderTest {
         dataHolder.addAPIMetaData(createAPI(TENANT_B, CONTEXT_A, false));
 
         Assert.assertFalse(dataHolder.isDeployed(createGatewayAPIDTO(TENANT_B, CONTEXT_A)));
+        Assert.assertNotNull(getDeploymentsBeforeMetadata(TENANT_A));
     }
 
     @Test
@@ -190,6 +246,7 @@ public class DataHolderTest {
         dataHolder.markAPIAsDeployed(jwksAPIDTO);
 
         Assert.assertFalse(dataHolder.isDeployed(jwksAPIDTO));
+        Assert.assertNull(getDeploymentsBeforeMetadata(TENANT_A));
     }
 
     @Test
@@ -199,6 +256,7 @@ public class DataHolderTest {
         dataHolder.markAPIAsDeployed(gatewayAPIDTO);
         dataHolder.addAPIMetaData(createAPI(TENANT_A, CONTEXT_A, false));
 
+        Assert.assertFalse(dataHolder.isDeployed(gatewayAPIDTO));
         Assert.assertFalse(dataHolder.isDeployed(createGatewayAPIDTO(TENANT_A, CONTEXT_A)));
     }
 
@@ -216,25 +274,29 @@ public class DataHolderTest {
     }
 
     @Test
+    public void testRemoveDefaultVersionAPIWithContextWithoutVersion() {
+        // e.g. versionless contexts, for which addAPIMetaData does not derive a separate default context
+        String context = "/t/tenant1.example.com/petstore";
+        dataHolder.addAPIMetaData(createAPI(TENANT_A, context, true));
+
+        dataHolder.removeAPIFromAllTenantMap(context, TENANT_A);
+
+        Assert.assertNull(getAPI(TENANT_A, context));
+    }
+
+    @Test
     public void testConcurrentDeploymentsBeforeMetadataAreMarkedAsDeployed() throws Exception {
         int apiCount = 200;
-        ExecutorService executorService = Executors.newFixedThreadPool(8);
-        try {
-            List<Callable<Void>> tasks = new ArrayList<>();
-            for (int i = 0; i < apiCount; i++) {
-                String tenant = (i % 2 == 0) ? TENANT_A : TENANT_B;
-                String context = "/t/" + tenant + "/api" + i + "/" + API_VERSION;
-                tasks.add(() -> {
-                    dataHolder.markAPIAsDeployed(createGatewayAPIDTO(tenant, context));
-                    return null;
-                });
-            }
-            for (Future<Void> future : executorService.invokeAll(tasks)) {
-                future.get();
-            }
-        } finally {
-            executorService.shutdown();
+        List<Callable<Void>> tasks = new ArrayList<>();
+        for (int i = 0; i < apiCount; i++) {
+            String tenant = (i % 2 == 0) ? TENANT_A : TENANT_B;
+            String context = "/t/" + tenant + "/api" + i + "/" + API_VERSION;
+            tasks.add(() -> {
+                dataHolder.markAPIAsDeployed(createGatewayAPIDTO(tenant, context));
+                return null;
+            });
         }
+        runConcurrently(tasks);
 
         for (int i = 0; i < apiCount; i++) {
             String tenant = (i % 2 == 0) ? TENANT_A : TENANT_B;
@@ -242,6 +304,90 @@ public class DataHolderTest {
             dataHolder.addAPIMetaData(createAPI(tenant, context, false));
             Assert.assertTrue("API with context " + context + " should be marked as deployed",
                     dataHolder.isDeployed(createGatewayAPIDTO(tenant, context)));
+        }
+        Assert.assertNull(getDeploymentsBeforeMetadata(TENANT_A));
+        Assert.assertNull(getDeploymentsBeforeMetadata(TENANT_B));
+    }
+
+    @Test
+    public void testConcurrentDeploymentsAndMetadataLoadingMarkAllAPIsAsDeployed() throws Exception {
+        // Deployments and metadata loading run in parallel, as with eager tenant loading at startup. Every API must
+        // end up marked as deployed regardless of the order in which the two operations run for it.
+        int apiCount = 500;
+        List<Callable<Void>> tasks = new ArrayList<>();
+        for (int i = 0; i < apiCount; i++) {
+            String context = "/t/" + TENANT_A + "/api" + i + "/" + API_VERSION;
+            tasks.add(() -> {
+                dataHolder.markAPIAsDeployed(createGatewayAPIDTO(TENANT_A, context));
+                return null;
+            });
+            tasks.add(() -> {
+                dataHolder.addAPIMetaData(createAPI(TENANT_A, context, false));
+                return null;
+            });
+        }
+        runConcurrently(tasks);
+
+        for (int i = 0; i < apiCount; i++) {
+            String context = "/t/" + TENANT_A + "/api" + i + "/" + API_VERSION;
+            Assert.assertTrue("API with context " + context + " should be marked as deployed",
+                    getAPI(TENANT_A, context).isDeployed());
+        }
+        Assert.assertNull(getDeploymentsBeforeMetadata(TENANT_A));
+    }
+
+    @Test
+    public void testConcurrentDeploymentsAndMetadataReloadsKeepAPIsDeployed() throws Exception {
+        // Metadata of deployed APIs is reloaded (e.g. API_UPDATE) while the APIs are being marked as deployed
+        int apiCount = 500;
+        for (int i = 0; i < apiCount; i++) {
+            dataHolder.addAPIMetaData(createAPI(TENANT_A, "/t/" + TENANT_A + "/api" + i + "/" + API_VERSION, false));
+        }
+        List<Callable<Void>> tasks = new ArrayList<>();
+        for (int i = 0; i < apiCount; i++) {
+            String context = "/t/" + TENANT_A + "/api" + i + "/" + API_VERSION;
+            tasks.add(() -> {
+                dataHolder.markAPIAsDeployed(createGatewayAPIDTO(TENANT_A, context));
+                return null;
+            });
+            tasks.add(() -> {
+                dataHolder.addAPIMetaData(createAPI(TENANT_A, context, false));
+                return null;
+            });
+        }
+        runConcurrently(tasks);
+
+        for (int i = 0; i < apiCount; i++) {
+            String context = "/t/" + TENANT_A + "/api" + i + "/" + API_VERSION;
+            Assert.assertTrue("API with context " + context + " should be marked as deployed",
+                    getAPI(TENANT_A, context).isDeployed());
+        }
+    }
+
+    private void runConcurrently(List<Callable<Void>> tasks) throws Exception {
+        ExecutorService executorService = Executors.newFixedThreadPool(8);
+        try {
+            for (Future<Void> future : executorService.invokeAll(tasks)) {
+                future.get();
+            }
+        } finally {
+            executorService.shutdown();
+        }
+    }
+
+    private API getAPI(String tenantDomain, String context) {
+        Map<String, API> apiMap = dataHolder.getTenantAPIMap().get(tenantDomain);
+        return apiMap != null ? apiMap.get(context) : null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, String> getDeploymentsBeforeMetadata(String tenantDomain) {
+        try {
+            Field field = DataHolder.class.getDeclaredField("deployedBeforeMetadataMap");
+            field.setAccessible(true);
+            return ((Map<String, Map<String, String>>) field.get(dataHolder)).get(tenantDomain);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new IllegalStateException("Unable to read the deployments tracked before metadata", e);
         }
     }
 
@@ -256,80 +402,16 @@ public class DataHolderTest {
         return api;
     }
 
-    @Test
-    public void testRevisionOfDeploymentBeforeMetadataIsAppliedOnceMetadataIsLoaded() {
-        GatewayAPIDTO gatewayAPIDTO = createGatewayAPIDTO(TENANT_A, CONTEXT_A);
-        gatewayAPIDTO.setRevision("revision-1");
-        dataHolder.markAPIAsDeployed(gatewayAPIDTO);
-
-        dataHolder.addAPIMetaData(createAPI(TENANT_A, CONTEXT_A, false));
-
-        API api = dataHolder.getTenantAPIMap().get(TENANT_A).get(CONTEXT_A);
-        Assert.assertTrue(api.isDeployed());
-        Assert.assertEquals("revision-1", api.getRevisionId());
-    }
-
-    @Test
-    public void testDeploymentBeforeMetadataWithoutRevisionKeepsLoadedRevision() {
-        dataHolder.markAPIAsDeployed(createGatewayAPIDTO(TENANT_A, CONTEXT_A));
-        API api = createAPI(TENANT_A, CONTEXT_A, false);
-        api.setRevisionId("revision-2");
-
-        dataHolder.addAPIMetaData(api);
-
-        Assert.assertTrue(dataHolder.isDeployed(createGatewayAPIDTO(TENANT_A, CONTEXT_A)));
-        Assert.assertEquals("revision-2", dataHolder.getTenantAPIMap().get(TENANT_A).get(CONTEXT_A).getRevisionId());
-    }
-
-    @Test
-    public void testRevisionIsUpdatedWhenMetadataIsAvailable() {
-        dataHolder.addAPIMetaData(createAPI(TENANT_A, CONTEXT_A, false));
-        GatewayAPIDTO gatewayAPIDTO = createGatewayAPIDTO(TENANT_A, CONTEXT_A);
-        gatewayAPIDTO.setRevision("revision-3");
-
-        dataHolder.markAPIAsDeployed(gatewayAPIDTO);
-
-        Assert.assertEquals("revision-3", dataHolder.getTenantAPIMap().get(TENANT_A).get(CONTEXT_A).getRevisionId());
-    }
-
-    @Test
-    public void testConcurrentDeploymentsAndMetadataLoadingMarkAllAPIsAsDeployed() throws Exception {
-        // Deployments and metadata loading run in parallel, as with eager tenant loading at startup. Every API must
-        // end up marked as deployed regardless of the order in which the two operations run for it.
-        int apiCount = 500;
-        ExecutorService executorService = Executors.newFixedThreadPool(8);
-        try {
-            List<Callable<Void>> tasks = new ArrayList<>();
-            for (int i = 0; i < apiCount; i++) {
-                String context = "/t/" + TENANT_A + "/api" + i + "/" + API_VERSION;
-                tasks.add(() -> {
-                    dataHolder.markAPIAsDeployed(createGatewayAPIDTO(TENANT_A, context));
-                    return null;
-                });
-                tasks.add(() -> {
-                    dataHolder.addAPIMetaData(createAPI(TENANT_A, context, false));
-                    return null;
-                });
-            }
-            for (Future<Void> future : executorService.invokeAll(tasks)) {
-                future.get();
-            }
-        } finally {
-            executorService.shutdown();
-        }
-
-        for (int i = 0; i < apiCount; i++) {
-            String context = "/t/" + TENANT_A + "/api" + i + "/" + API_VERSION;
-            Assert.assertTrue("API with context " + context + " should be marked as deployed",
-                    dataHolder.isDeployed(createGatewayAPIDTO(TENANT_A, context)));
-        }
-    }
-
     private GatewayAPIDTO createGatewayAPIDTO(String tenantDomain, String context) {
+        return createGatewayAPIDTO(tenantDomain, context, null);
+    }
+
+    private GatewayAPIDTO createGatewayAPIDTO(String tenantDomain, String context, String revision) {
         GatewayAPIDTO gatewayAPIDTO = new GatewayAPIDTO();
         gatewayAPIDTO.setName(API_NAME);
         gatewayAPIDTO.setTenantDomain(tenantDomain);
         gatewayAPIDTO.setApiContext(context);
+        gatewayAPIDTO.setRevision(revision);
         return gatewayAPIDTO;
     }
 }
