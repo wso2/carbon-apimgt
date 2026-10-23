@@ -176,8 +176,6 @@ public class APIConstants {
         public static final String LLM_PROVIDER_SERVICE_METADATA_CACHE_WRITE_1H_TOKEN_COUNT =
                 "cacheWrite1hInputTokens";
         public static final String LLM_PROVIDER_SERVICE_METADATA_REASONING_TOKEN_COUNT = "reasoningTokens";
-        // Gemini reports thinking tokens separately from candidatesTokenCount, so it gets its own name.
-        public static final String LLM_PROVIDER_SERVICE_METADATA_THOUGHTS_TOKEN_COUNT = "thoughtsTokens";
 
         // Marks an LLMProviderMetadata entry as a token-usage counter published to analytics (see
         // LLMProviderMetadata#analyticsCategory).

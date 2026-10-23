@@ -151,7 +151,7 @@ public class VertexAIGeminiLLMProviderService extends BuiltInLLMProviderService 
                 APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_GEMINI_METADATA_IDENTIFIER_CACHE_READ_TOKEN_COUNT,
                 false, APIConstants.AIAPIConstants.ANALYTICS_CATEGORY_TOKEN_USAGE));
         defaults.add(new LLMProviderMetadata(
-                APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_THOUGHTS_TOKEN_COUNT,
+                APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_REASONING_TOKEN_COUNT,
                 APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD,
                 APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_GEMINI_METADATA_IDENTIFIER_REASONING_TOKEN_COUNT,
                 false, APIConstants.AIAPIConstants.ANALYTICS_CATEGORY_TOKEN_USAGE));

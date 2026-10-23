@@ -173,11 +173,11 @@ public class LLMProviderDefaultResponseMetadataTest {
     }
 
     @Test
-    public void testGeminiProvidersExtractCacheThoughtsAndToolUseTokens() throws APIManagementException {
+    public void testGeminiProvidersExtractCacheReasoningAndToolUseTokens() throws APIManagementException {
 
         Map<String, String> expected = new LinkedHashMap<>();
         expected.put("cacheReadInputTokens", "800");
-        expected.put("thoughtsTokens", "50");
+        expected.put("reasoningTokens", "50");
         expected.put("toolUsePromptTokens", "10");
 
         assertExtracted(new GeminiLLMProviderService(), GEMINI_RESPONSE, expected);
