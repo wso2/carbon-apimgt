@@ -327,9 +327,14 @@ public class DataHolder {
         }
         // The deployed state is read only after the new object is added to the map, so that a concurrent
         // markAPIAsDeployed call either updates the old object before this point or finds the new object.
-        if (oldAPI != null && oldAPI.isDeployed() && !api.isDeployed()) {
-            // Reloading the metadata of an API (e.g. on API_UPDATE) does not change its deployed artifact
-            markAsDeployed(api, oldAPI.getRevisionId());
+        if (oldAPI != null && oldAPI.isDeployed()) {
+            // Reloading the metadata of an API (e.g. on API_UPDATE) does not change its deployed artifact. The check
+            // and the update are done under the API lock, so that a newer revision marked concurrently is kept.
+            synchronized (api) {
+                if (!api.isDeployed()) {
+                    markAsDeployed(api, oldAPI.getRevisionId());
+                }
+            }
         }
         applyDeploymentBeforeMetadata(api);
     }
@@ -389,8 +394,10 @@ public class DataHolder {
 
     private void markAsDeployed(API api, String revisionId) {
         // The revision is set first, so that it is visible to any thread that sees the (volatile) deployed flag
-        api.setRevisionId(revisionId);
-        api.setDeployed(true);
+        synchronized (api) {
+            api.setRevisionId(revisionId);
+            api.setDeployed(true);
+        }
     }
 
     private void applyDeploymentBeforeMetadata(API api) {

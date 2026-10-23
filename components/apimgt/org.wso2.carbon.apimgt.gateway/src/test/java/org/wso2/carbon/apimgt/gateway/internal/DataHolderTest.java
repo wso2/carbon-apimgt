@@ -146,6 +146,22 @@ public class DataHolderTest {
     }
 
     @Test
+    public void testReloadedMetadataKeepsNewerRevisionMarkedOnReplacement() {
+        // A newer revision marked on the replacement object (e.g. by a concurrent deployment) must not be
+        // overwritten with the revision of the replaced object
+        dataHolder.addAPIMetaData(createAPI(TENANT_A, CONTEXT_A, false));
+        dataHolder.markAPIAsDeployed(createGatewayAPIDTO(TENANT_A, CONTEXT_A, "revision-1"));
+        API reloaded = createAPI(TENANT_A, CONTEXT_A, false);
+        reloaded.setRevisionId("revision-2");
+        reloaded.setDeployed(true);
+
+        dataHolder.addAPIMetaData(reloaded);
+
+        Assert.assertTrue(reloaded.isDeployed());
+        Assert.assertEquals("revision-2", reloaded.getRevisionId());
+    }
+
+    @Test
     public void testReloadedMetadataOfUndeployedAPIIsNotMarkedAsDeployed() {
         dataHolder.addAPIMetaData(createAPI(TENANT_A, CONTEXT_A, false));
 
