@@ -1027,15 +1027,28 @@ public class OASParserUtil {
         // Gate remote (http/https) $refs in the archive through the policy gate before parsing with resolution
         // enabled, so the parser can't fetch them without host validation; local/relative sibling refs are untouched.
         gateArchiveRemoteRefs(archiveDirectory, oasParserOptions, maxContentSizeStr);
+        // With a policy configured, references are also validated during resolution, including references inside
+        // fetched remote documents.
+        boolean policyConfigured = oasParserOptions != null && oasParserOptions.isNetworkAccessControlEnabled();
         if (SwaggerVersion.OPEN_API.equals(version)) {
-            OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
-            ParseOptions options = new ParseOptions();
-            options.setResolve(true);
-            OpenAPI openAPI = openAPIV3Parser.read(filePath, null, options);
+            OpenAPI openAPI;
+            if (policyConfigured) {
+                openAPI = ArchiveRefResolver.resolveOpenAPI(filePath, archiveDirectory, oasParserOptions);
+            } else {
+                OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
+                ParseOptions options = new ParseOptions();
+                options.setResolve(true);
+                openAPI = openAPIV3Parser.read(filePath, null, options);
+            }
             openAPIContent = convertOAStoJSON(openAPI);
         } else if (SwaggerVersion.SWAGGER.equals(version)) {
-            SwaggerParser parser = new SwaggerParser();
-            Swagger swagger = parser.read(filePath, null, true);
+            Swagger swagger;
+            if (policyConfigured) {
+                swagger = ArchiveRefResolver.resolveSwagger(filePath, archiveDirectory, oasParserOptions);
+            } else {
+                SwaggerParser parser = new SwaggerParser();
+                swagger = parser.read(filePath, null, true);
+            }
             try {
                 openAPIContent = Yaml.pretty().writeValueAsString(swagger);
             } catch (IOException e) {
