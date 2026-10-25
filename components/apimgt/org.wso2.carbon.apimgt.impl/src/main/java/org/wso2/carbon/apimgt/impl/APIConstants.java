@@ -2205,6 +2205,12 @@ public final class APIConstants {
     public static final String CONNECTION_TIMEOUT_DEFAULT = "-1";
     public static final String ENDPOINT_SPECIFIC_CONFIG = "config";
     public static final String ENDPOINT_CONFIG_ACTION_DURATION = "actionDuration";
+    public static final String ENDPOINT_CONFIG_SUSPEND_DURATION = "suspendDuration";
+    public static final String ENDPOINT_CONFIG_SUSPEND_MAX_DURATION = "suspendMaxDuration";
+    public static final String ENDPOINT_CONFIG_RETRY_TIMEOUT = "retryTimeOut";
+    public static final String ENDPOINT_CONFIG_RETRY_DELAY = "retryDelay";
+    public static final String ENDPOINT_CONFIG_SUSPEND_ERROR_CODE = "suspendErrorCode";
+    public static final String ENDPOINT_CONFIG_RETRY_ERROR_CODE = "retryErroCode";
     public static final String ENDPOINT_TYPE_GRAPHQL = "graphql";
     public static final String ENABLE_RETRY_CALL_WITH_NEW_OAUTH_TOKEN = "enableRetryCallWithNewOauthToken";
 
@@ -4089,6 +4095,14 @@ public final class APIConstants {
         // Wildcard deny-list entry for the remote-$ref resolver: matches every host, so an allow-mode policy denies
         // everything not on its allow-list (a restrictive whitelist).
         public static final String MATCH_ALL_HOSTS = "*";
+        // Host patterns with more wildcards than this are not combined, since the number of combined patterns grows
+        // quickly with the wildcard count; such entries are not applied to remote $ref resolution.
+        public static final int MAX_WILDCARDS_PER_HOST_PATTERN = 4;
+        // Host pattern pairs that need more combined patterns than this are not combined; such entries are not
+        // applied to remote $ref resolution.
+        public static final int MAX_COMBINED_HOST_PATTERNS = 64;
+        // Host patterns longer than the longest valid host name are not combined.
+        public static final int MAX_HOST_PATTERN_LENGTH = 253;
 
         // Tenant config JSON keys (under "NetworkSecurityAccessControl" in tenant-conf.json)
         public static final String TENANT_CONFIG_KEY = "NetworkSecurityAccessControl";

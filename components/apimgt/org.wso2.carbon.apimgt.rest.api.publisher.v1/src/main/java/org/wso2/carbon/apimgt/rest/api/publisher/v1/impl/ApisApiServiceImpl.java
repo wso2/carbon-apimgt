@@ -251,6 +251,13 @@ public class ApisApiServiceImpl implements ApisApiService {
             throws APIManagementException {
         URI createdApiUri;
         APIDTO createdApiDTO;
+        if (APIDTO.TypeEnum.GRAPHQL.equals(body.getType())) {
+            // A GraphQL API cannot be complete without a schema, which this endpoint has no way to carry
+            throw new APIManagementException("GraphQL API type does not support API creation from scratch. "
+                    + "Use /apis/import-graphql-schema instead.",
+                    ExceptionCodes.from(ExceptionCodes.API_TYPE_INCOMPATIBLE_WITH_RESOURCE,
+                            "API creation from scratch", APIDTO.TypeEnum.GRAPHQL.toString()));
+        }
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
@@ -4515,6 +4522,16 @@ public class ApisApiServiceImpl implements ApisApiService {
                     ExceptionCodes.from(ExceptionCodes.THIRD_PARTY_API_REVISION_DEPLOYMENT_UNSUPPORTED, apiId));
         }
 
+        // Reject an unknown revision up front with API_REVISION_NOT_FOUND (900347). Otherwise the
+        // getAPIByID(revisionId) lookup below treats the non-existent revision UUID as an API and fails with
+        // a generic "API not found" error. Resolve the revision's DTO once (its frozen endpoints, not the
+        // working copy's, are what the gateway deploys), rather than once per environment.
+        if (apiProvider.getAPIRevision(revisionId) == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Revision with Revision UUID: "
+                    + revisionId, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, revisionId));
+        }
+        APIDTO apiRevisionDto = getAPIByID(revisionId, apiProvider, organization);
+
         Map<String, Environment> environments = APIUtil.getEnvironments(organization);
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
         for (APIRevisionDeploymentDTO apiRevisionDeploymentDTO : apIRevisionDeploymentDTOList) {
@@ -4524,7 +4541,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIRevisionDeployment apiRevisionDeployment = ApisApiServiceImplUtils.mapAPIRevisionDeploymentWithValidation(revisionId,
                     environments, environment, displayOnDevportal, vhost, true);
 
-            APIDTO apiRevisionDto = getAPIByID(revisionId, apiProvider, organization);
             validateEndpointsForGatewayEnvironmentType(environments.get(environment), apiRevisionDto);
             apiRevisionDeployments.add(apiRevisionDeployment);
         }
