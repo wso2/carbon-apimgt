@@ -169,6 +169,19 @@ public class APIConstants {
         public static final String LLM_PROVIDER_SERVICE_METADATA_COMPLETION_TOKEN_COUNT = "completionTokenCount";
         public static final String LLM_PROVIDER_SERVICE_METADATA_TOTAL_TOKEN_COUNT = "totalTokenCount";
         public static final String LLM_PROVIDER_SERVICE_METADATA_REMAINING_TOKEN_COUNT = "remainingTokenCount";
+        public static final String LLM_PROVIDER_SERVICE_METADATA_CACHE_READ_TOKEN_COUNT = "cacheReadInputTokens";
+        public static final String LLM_PROVIDER_SERVICE_METADATA_CACHE_WRITE_TOKEN_COUNT = "cacheWriteInputTokens";
+        public static final String LLM_PROVIDER_SERVICE_METADATA_CACHE_WRITE_5M_TOKEN_COUNT =
+                "cacheWrite5mInputTokens";
+        public static final String LLM_PROVIDER_SERVICE_METADATA_CACHE_WRITE_1H_TOKEN_COUNT =
+                "cacheWrite1hInputTokens";
+        public static final String LLM_PROVIDER_SERVICE_METADATA_REASONING_TOKEN_COUNT = "reasoningTokens";
+
+        // Marks an LLMProviderMetadata entry as a token-usage counter published to analytics (see
+        // LLMProviderMetadata#analyticsCategory).
+        public static final String ANALYTICS_CATEGORY_TOKEN_USAGE = "TOKEN_USAGE";
+        public static final String LLM_PROVIDER_SERVICE_METADATA_TOOL_USE_PROMPT_TOKEN_COUNT =
+                "toolUsePromptTokens";
         public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_MODEL = "$.model";
         public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_PROMPT_TOKEN_COUNT = "$.usage" +
                 ".prompt_tokens";
@@ -274,6 +287,51 @@ public class APIConstants {
                 "$.usage.outputTokens";
         public static final String LLM_PROVIDER_SERVICE_AWS_METADATA_IDENTIFIER_TOTAL_TOKEN_COUNT =
                 "$.usage.totalTokens";
+        public static final String LLM_PROVIDER_SERVICE_AWS_METADATA_IDENTIFIER_CACHE_READ_TOKEN_COUNT =
+                "$.usage.cacheReadInputTokens";
+        public static final String LLM_PROVIDER_SERVICE_AWS_METADATA_IDENTIFIER_CACHE_WRITE_TOKEN_COUNT =
+                "$.usage.cacheWriteInputTokens";
+
+        // Cache / reasoning usage identifiers - OpenAI-compatible responses (OpenAI, Azure OpenAI, Azure AI
+        // Foundry, Mistral). cached_tokens is a subset of prompt_tokens; reasoning_tokens is a subset of
+        // completion_tokens.
+        public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_CACHE_READ_TOKEN_COUNT =
+                "$.usage.prompt_tokens_details.cached_tokens";
+        public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_CACHE_WRITE_TOKEN_COUNT =
+                "$.usage.prompt_tokens_details.cache_write_tokens";
+        public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_REASONING_TOKEN_COUNT =
+                "$.usage.completion_tokens_details.reasoning_tokens";
+
+        // Cache / reasoning usage identifiers - OpenAI Responses API shape (Azure OpenAI v2). cached_tokens is a
+        // subset of input_tokens; reasoning_tokens is a subset of output_tokens.
+        public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_RESPONSES_CACHE_READ_TOKEN_COUNT =
+                "$.usage.input_tokens_details.cached_tokens";
+        public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_RESPONSES_REASONING_TOKEN_COUNT =
+                "$.usage.output_tokens_details.reasoning_tokens";
+        public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_RESPONSES_CACHE_WRITE_TOKEN_COUNT =
+                "$.usage.input_tokens_details.cache_write_tokens";
+
+        // Cache / reasoning usage identifiers - Anthropic Messages responses (Anthropic, Vertex AI Anthropic).
+        // input_tokens excludes cache read/creation tokens; they are reported separately.
+        public static final String LLM_PROVIDER_SERVICE_ANTHROPIC_IDENTIFIER_CACHE_READ_TOKEN_COUNT =
+                "$.usage.cache_read_input_tokens";
+        public static final String LLM_PROVIDER_SERVICE_ANTHROPIC_IDENTIFIER_CACHE_WRITE_TOKEN_COUNT =
+                "$.usage.cache_creation_input_tokens";
+        public static final String LLM_PROVIDER_SERVICE_ANTHROPIC_IDENTIFIER_CACHE_WRITE_5M_TOKEN_COUNT =
+                "$.usage.cache_creation.ephemeral_5m_input_tokens";
+        public static final String LLM_PROVIDER_SERVICE_ANTHROPIC_IDENTIFIER_CACHE_WRITE_1H_TOKEN_COUNT =
+                "$.usage.cache_creation.ephemeral_1h_input_tokens";
+        public static final String LLM_PROVIDER_SERVICE_ANTHROPIC_IDENTIFIER_REASONING_TOKEN_COUNT =
+                "$.usage.output_tokens_details.thinking_tokens";
+
+        // Cache / reasoning usage identifiers - Gemini. cachedContentTokenCount is a subset of
+        // promptTokenCount; thoughtsTokenCount is NOT included in candidatesTokenCount.
+        public static final String LLM_PROVIDER_SERVICE_GEMINI_METADATA_IDENTIFIER_CACHE_READ_TOKEN_COUNT =
+                "$.usageMetadata.cachedContentTokenCount";
+        public static final String LLM_PROVIDER_SERVICE_GEMINI_METADATA_IDENTIFIER_REASONING_TOKEN_COUNT =
+                "$.usageMetadata.thoughtsTokenCount";
+        public static final String LLM_PROVIDER_SERVICE_GEMINI_METADATA_IDENTIFIER_TOOL_USE_PROMPT_TOKEN_COUNT =
+                "$.usageMetadata.toolUsePromptTokenCount";
         public static final String LLM_MODEL_PROVIDER_AWS_BEDROCK_ANTHROPIC = "Anthropic";
         public static final String LLM_MODEL_PROVIDER_AWS_BEDROCK_DEEPSEEK = "DeepSeek";
         public static final String LLM_MODEL_PROVIDER_AWS_BEDROCK_META = "Meta";

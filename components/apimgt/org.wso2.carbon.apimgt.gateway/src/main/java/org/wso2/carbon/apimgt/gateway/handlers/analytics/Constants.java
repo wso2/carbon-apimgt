@@ -117,6 +117,8 @@ public class Constants {
     public static final String AI_COMPLETION_TOKEN_USAGE = "completionTokens";
     public static final String HOUR = "hour";
     public static final String AI_TOTAL_TOKEN_USAGE = "totalTokens";
+    // Root-level object holding the PRODUCT_ANALYTICS_PROPS_TO_PUBLISH sections other than aiTokenUsage.
+    public static final String ADDITIONAL_PROPERTIES = "additionalProperties";
     public static final String IS_EGRESS = "isEgress";
     public static final String SUBTYPE = "subtype";
 

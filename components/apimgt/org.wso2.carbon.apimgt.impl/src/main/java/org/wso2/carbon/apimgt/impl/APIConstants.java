@@ -3878,7 +3878,19 @@ public final class APIConstants {
         public static final String PROTOCOL_VERSION_2024_NOVEMBER = "2024-11-05";
         public static final String PROTOCOL_VERSION_2025_MARCH = "2025-03-26";
         public static final String PROTOCOL_VERSION_2025_JUNE = "2025-06-18";
+        public static final String PROTOCOL_VERSION_2025_NOVEMBER = "2025-11-25";
         public static final List<String> SUPPORTED_PROTOCOL_VERSIONS = Arrays.asList(PROTOCOL_VERSION_2025_JUNE);
+        /**
+         * Protocol revisions accepted in the MCP-Protocol-Version request header. A client declaring a revision
+         * outside this list is answered with a bare HTTP 400 so that it falls back to the initialize handshake.
+         * Kept separate from SUPPORTED_PROTOCOL_VERSIONS, which only supplies the "supported" set reported in an
+         * initialize error body. The gateway does not validate the protocolVersion sent in initialize params, and
+         * for an MCP server proxying a third party backend the revision is settled by that backend, so the two
+         * lists are not required to hold the same values.
+         */
+        public static final List<String> SUPPORTED_PROTOCOL_VERSION_HEADERS =
+                Arrays.asList(PROTOCOL_VERSION_2024_NOVEMBER, PROTOCOL_VERSION_2025_MARCH,
+                        PROTOCOL_VERSION_2025_JUNE, PROTOCOL_VERSION_2025_NOVEMBER);
         public static final String PROTOCOL_VERSION_REQUESTED = "requested";
         public static final String PROTOCOL_VERSION_SUPPORTED = "supported";
         public static final String PROTOCOL_MISMATCH_ERROR = "Unsupported protocol version";
@@ -4083,6 +4095,14 @@ public final class APIConstants {
         // Wildcard deny-list entry for the remote-$ref resolver: matches every host, so an allow-mode policy denies
         // everything not on its allow-list (a restrictive whitelist).
         public static final String MATCH_ALL_HOSTS = "*";
+        // Host patterns with more wildcards than this are not combined, since the number of combined patterns grows
+        // quickly with the wildcard count; such entries are not applied to remote $ref resolution.
+        public static final int MAX_WILDCARDS_PER_HOST_PATTERN = 4;
+        // Host pattern pairs that need more combined patterns than this are not combined; such entries are not
+        // applied to remote $ref resolution.
+        public static final int MAX_COMBINED_HOST_PATTERNS = 64;
+        // Host patterns longer than the longest valid host name are not combined.
+        public static final int MAX_HOST_PATTERN_LENGTH = 253;
 
         // Tenant config JSON keys (under "NetworkSecurityAccessControl" in tenant-conf.json)
         public static final String TENANT_CONFIG_KEY = "NetworkSecurityAccessControl";
