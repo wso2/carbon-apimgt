@@ -324,7 +324,7 @@ return null;
   
   @ApiModelProperty(example = "admin", value = "If the provider value is not given, the user invoking the API will be used as the provider. ")
   @JsonProperty("provider")
- @Size(max=50)  public String getProvider() {
+ @Size(max=200)  public String getProvider() {
     return provider;
   }
   public void setProvider(String provider) {
