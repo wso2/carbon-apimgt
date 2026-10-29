@@ -21,6 +21,7 @@ import graphql.introspection.Introspection;
 import graphql.language.Definition;
 import graphql.language.Document;
 import graphql.language.Field;
+import graphql.language.FragmentDefinition;
 import graphql.language.OperationDefinition;
 import graphql.language.Selection;
 import graphql.parser.InvalidSyntaxException;
@@ -144,6 +145,13 @@ public class GraphQLAPIHandler extends AbstractHandler {
 
             if (validatePayloadWithSchema(messageContext, document)) {
                 supportForBasicAndAuthentication(messageContext);
+                HashMap<String, FragmentDefinition> fragmentDefinitions = new HashMap<>();
+                for (Definition def : document.getDefinitions()) {
+                    if (def instanceof FragmentDefinition) {
+                        FragmentDefinition fd = (FragmentDefinition) def;
+                        fragmentDefinitions.put(fd.getName(), fd);
+                    }
+                }
 
                 // Extract the operation type and operations from the payload
                 for (Definition definition : document.getDefinitions()) {
@@ -156,7 +164,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
                             ((Axis2MessageContext) messageContext).getAxis2MessageContext().setProperty(HTTP_METHOD,
                                     operation.getOperation().toString());
                             String operationList = GraphQLProcessorUtil.getOperationListAsString(operation,
-                                    graphQLSchemaDTO.getTypeDefinitionRegistry());
+                                    graphQLSchemaDTO.getTypeDefinitionRegistry(), fragmentDefinitions);
                             // Only a request that elects no operation is affected here. Such a request already
                             // fails downstream, in the authentication handler, with the generic REST-shaped
                             // "no matching resource" error - which is the misleading error this change is about.
