@@ -26,14 +26,6 @@ import java.io.File;
 public class APIMGovernanceConstants {
     public static final String MIGRATE = "migrate";
 
-    /**
-     * api-manager.xml path for the governance compliance evaluation scheduler toggle, set from
-     * deployment.toml via [apim.governance.scheduler] enable = false.
-     * Only the exact value "false" disables the scheduler; when the element is absent or holds
-     * any other value the scheduler starts as before, so existing deployments are unaffected.
-     * Intended for multi-node / multi-DC deployments where exactly one Control Plane node
-     * should process pending compliance evaluation requests.
-     */
     public static final String SCHEDULER_ENABLED_CONFIG =
             "APIMGovernance.SchedulerConfigurations.Enabled";
 
