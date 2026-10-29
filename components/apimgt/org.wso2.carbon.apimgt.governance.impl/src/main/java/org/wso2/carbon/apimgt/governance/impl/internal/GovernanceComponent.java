@@ -82,9 +82,9 @@ public class GovernanceComponent {
             if (!Boolean.FALSE.toString().equalsIgnoreCase(schedulerEnabled)) {
                 ComplianceEvaluationScheduler.initialize();
             } else {
-                log.info("Governance compliance evaluation scheduler is disabled on this node via "
-                        + "[apim.governance.scheduler] enable = false. Pending compliance evaluation "
-                        + "requests will be processed by a node that has it enabled.");
+                log.info("Governance compliance evaluation scheduler is disabled on this node. "
+                        + "Pending compliance evaluation requests will be processed by a node "
+                        + "where the scheduler is enabled.");
             }
             APIMGovernanceConfigDeployer configDeployer = new APIMGovernanceConfigDeployer();
             bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), configDeployer, null);
