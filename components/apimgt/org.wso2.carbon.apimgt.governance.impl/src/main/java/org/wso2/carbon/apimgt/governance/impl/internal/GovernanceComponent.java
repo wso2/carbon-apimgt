@@ -79,7 +79,7 @@ public class GovernanceComponent {
             String schedulerEnabled = ServiceReferenceHolder.getInstance().getAPIMConfigurationService()
                     .getAPIManagerConfiguration()
                     .getFirstProperty(APIMGovernanceConstants.SCHEDULER_ENABLED_CONFIG);
-            if (!"false".equalsIgnoreCase(schedulerEnabled)) {
+            if (!Boolean.FALSE.toString().equalsIgnoreCase(schedulerEnabled)) {
                 ComplianceEvaluationScheduler.initialize();
             } else {
                 log.info("Governance compliance evaluation scheduler is disabled on this node via "
