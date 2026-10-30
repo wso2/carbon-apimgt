@@ -76,7 +76,16 @@ public class GovernanceComponent {
 
         String migrationEnabled = System.getProperty(APIMGovernanceConstants.MIGRATE);
         if (migrationEnabled == null) {
-            ComplianceEvaluationScheduler.initialize();
+            String schedulerEnabled = ServiceReferenceHolder.getInstance().getAPIMConfigurationService()
+                    .getAPIManagerConfiguration()
+                    .getFirstProperty(APIMGovernanceConstants.SCHEDULER_ENABLED_CONFIG);
+            if (!Boolean.FALSE.toString().equalsIgnoreCase(schedulerEnabled)) {
+                ComplianceEvaluationScheduler.initialize();
+            } else {
+                log.info("Governance compliance evaluation scheduler is disabled on this node. "
+                        + "Pending compliance evaluation requests will be processed by a node "
+                        + "where the scheduler is enabled.");
+            }
             APIMGovernanceConfigDeployer configDeployer = new APIMGovernanceConfigDeployer();
             bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), configDeployer, null);
         }
