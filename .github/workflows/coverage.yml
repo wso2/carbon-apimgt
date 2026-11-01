@@ -3,13 +3,14 @@ name: Test Coverage Uploader
 on:
   schedule:
     - cron:  '0 20 * * *'
+  workflow_dispatch:
 
 permissions:
   contents: read # to fetch code (actions/checkout)
 
 jobs:
   build-carbon:
-    runs-on: ubuntu-latest
+    runs-on: codebuild-wso2_carbon-apimgt-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - name: Run hostname
         run: hostname
@@ -18,85 +19,304 @@ jobs:
       - name: Show hosts
         run: cat /etc/hosts
       - name: Checkout master
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
         with:
           fetch-depth: '10'
       - name: Set up JDK 21
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v6
         with:
           java-version: 21
           distribution: 'temurin'
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '14.x'
       - name: Cache Maven packages
-        uses: actions/cache@v3
+        uses: actions/cache@v6
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2
           restore-keys: ${{ runner.os }}-m2
-      - name: Build carbon-apimgt with Tests, skipping AspectJ
-        run: mvn clean install --file pom.xml -Dskip.aspectj=true
-      - name: Upload unit test coverage to Codecov
-        uses: codecov/codecov-action@v3
+      - name: Build carbon-apimgt with Tests
+        run: mvn clean install --file pom.xml
+      # The v2 jobs build the product against exactly these unit-tested artifacts instead of rebuilding them.
+      - name: Package carbon-apimgt build for the integration jobs
+        run: |
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "$VERSION" > carbon-apimgt-version.txt
+          cd ~/.m2/repository
+          tar -czf "$GITHUB_WORKSPACE/carbon-apimgt-build.tar.gz" org/wso2/carbon/apimgt/*/"$VERSION"
+      - name: Upload carbon-apimgt build
+        uses: actions/upload-artifact@v7
         with:
+          name: carbon-apimgt-build
+          path: |
+            carbon-apimgt-build.tar.gz
+            carbon-apimgt-version.txt
+          retention-days: 3
+          if-no-files-found: error
+      # Only the per-module unit reports; the jacoco-aggregate reports repeat the same data.
+      - name: List unit test coverage reports
+        id: unit-coverage
+        run: |
+          files=$(find components features -path '*/target/coverage-reports/site/jacoco-ut/jacoco.xml' | sort | paste -sd, -)
+          if [ -z "$files" ]; then
+            echo "::error::No unit test coverage reports found."
+            exit 1
+          fi
+          echo "files=$files" >> "$GITHUB_OUTPUT"
+      - name: Upload unit test coverage to Codecov
+        uses: codecov/codecov-action@v7
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true
+          files: ${{ steps.unit-coverage.outputs.files }}
+          disable_search: true
           flags: unit_tests
 
-  build-product:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - id: 1
-            segment: group1
-          - id: 2
-            segment: group2
-      fail-fast: false
+  # Builds the all-in-one distribution and integration-v2 images once, for the test jobs to reuse.
+  v2-build-images:
+    needs: build-carbon
+    runs-on: codebuild-wso2_carbon-apimgt-${{ github.run_id }}-${{ github.run_attempt }}
+    env:
+      V2_DIR: product-apim/all-in-one-apim/modules/integration-v2
     steps:
       - name: Run hostname
         run: hostname
       - name: Fix host entry
         run: sudo echo "127.0.0.1 $(hostname)" | sudo tee -a /etc/hosts
-      - name: Show hosts
-        run: cat /etc/hosts
-      - name: Checkout master
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: '10'
-      - name: Set up JDK 21
-        uses: actions/setup-java@v2
-        with:
-          java-version: 21
-          distribution: 'temurin'
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '14.x'
-      - name: Cache maven packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2
-          restore-keys: ${{ runner.os }}-m2
-      - name: Build carbon-apimgt without tests, skip AspectJ, skip portal builds
-        run: mvn clean install --file pom.xml -Dmaven.test.skip=true -Dskip.aspectj=true -Dnpm.build.skip=true
-      - name: Get carbon.apimgt.version
-        run: mvn help:evaluate -Dexpression=project.version -q -DforceStdout > ../CARBON_APIMGT_VERSION_FILE
-      - name: Print carbon.apimgt.version
-        run: |
-          echo $(cat ../CARBON_APIMGT_VERSION_FILE)
       - name: Checkout Product-APIM
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
         with:
           repository: wso2/product-apim
           ref: refs/heads/master
           fetch-depth: '10'
           path: product-apim
-      - name: Build product-apim with tests
-        run: mvn clean install -Dcarbon.apimgt.version=$(cat ../CARBON_APIMGT_VERSION_FILE) -fae --file product-apim/all-in-one-apim/pom.xml -DskipBenchMarkTest=true
-        env:
-          PRODUCT_APIM_TEST_GROUPS: ${{ matrix.segment }}
-      - name: Upload integration test coverage to Codecov
-        uses: codecov/codecov-action@v3
+      - name: Set up JDK 21
+        uses: actions/setup-java@v6
         with:
+          java-version: 21
+          distribution: 'temurin'
+      - name: Cache Maven repository
+        uses: actions/cache@v6
+        with:
+          path: ~/.m2
+          key: m2-v2-${{ github.run_id }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: Download carbon-apimgt build
+        uses: actions/download-artifact@v8
+        with:
+          name: carbon-apimgt-build
+          path: ${{ runner.temp }}/carbon-apimgt-build
+      - name: Install carbon-apimgt build into the Maven repository
+        run: |
+          mkdir -p ~/.m2/repository
+          tar -xzf "$RUNNER_TEMP/carbon-apimgt-build/carbon-apimgt-build.tar.gz" -C ~/.m2/repository
+          echo "CARBON_APIMGT_VERSION=$(cat "$RUNNER_TEMP/carbon-apimgt-build/carbon-apimgt-version.txt")" >> "$GITHUB_ENV"
+      # Resolved on its own line so a failing Maven call fails the step, and the version is never published empty.
+      - name: Resolve APIM product version
+        run: |
+          APIM_VERSION=$(mvn -q -f product-apim/all-in-one-apim/pom.xml help:evaluate -Dexpression=project.version -DforceStdout)
+          if [ -z "$APIM_VERSION" ]; then
+            echo "::error::Could not resolve APIM_VERSION from the product-apim POMs."
+            exit 1
+          fi
+          echo "APIM_VERSION=$APIM_VERSION" >> "$GITHUB_ENV"
+      - name: Build the all-in-one APIM distribution with this carbon-apimgt (skip tests)
+        run: >
+          mvn clean install --file product-apim/all-in-one-apim/pom.xml
+          -Dcarbon.apimgt.version="$CARBON_APIMGT_VERSION"
+          -Dmaven.test.skip=true -DskipBenchMarkTest=true -DskipRestartTests=true
+          -Dapim.server.version="$APIM_VERSION"
+      # Docker builds reach the runner's zip server at the runner's own address, since host-gateway is the Docker host.
+      - name: Resolve runner address for Docker builds
+        run: echo "DOCKER_EXTRA_HOSTS=--add-host=host.docker.internal:$(hostname -I | awk '{print $1}')" >> "$GITHUB_ENV"
+      - name: Build integration Docker images (no suite)
+        working-directory: ${{ env.V2_DIR }}
+        run: >
+          mvn install -pl tests-integration/cucumber-tests -am -DskipTests
+          -Dapim.server.version="$APIM_VERSION"
+          -Ddocker.extra.hosts="$DOCKER_EXTRA_HOSTS"
+      - name: Resolve Docker image names
+        working-directory: ${{ env.V2_DIR }}
+        run: |
+          echo "APIM_IMAGE=$(mvn -q -N help:evaluate -Dexpression=apim.docker.image.name -Dapim.server.version="$APIM_VERSION" -DforceStdout)" >> "$GITHUB_ENV"
+          echo "SOLACE_SHIM_IMAGE=$(mvn -q -N help:evaluate -Dexpression=solace.shim.docker.image.name -DforceStdout)" >> "$GITHUB_ENV"
+          echo "SQUID_IMAGE=$(mvn -q -N help:evaluate -Dexpression=squid.docker.image.name -DforceStdout)" >> "$GITHUB_ENV"
+      # Only locally built images travel by tar; public images are pulled by the test jobs.
+      - name: Save Docker images and staging
+        run: |
+          mkdir -p "$RUNNER_TEMP/v2-images"
+          docker save \
+            "$APIM_IMAGE" \
+            node-app-server:latest \
+            "$SOLACE_SHIM_IMAGE" \
+            "$SQUID_IMAGE" | gzip > "$RUNNER_TEMP/v2-images/images.tar.gz"
+          tar -C "$V2_DIR/tests-common/testcontainers/target" -czf "$RUNNER_TEMP/v2-images/is7-staging.tar.gz" is7
+      - name: Upload Docker images and staging
+        uses: actions/upload-artifact@v7
+        with:
+          name: v2-images
+          path: ${{ runner.temp }}/v2-images/
+          retention-days: 3
+          if-no-files-found: error
+
+  # Runs the product-apim all-in-one integration-v2 suite against this carbon-apimgt build, split into two jobs by the
+  # blocks' group parameter, and uploads its coverage of carbon-apimgt.
+  build-product:
+    needs: v2-build-images
+    runs-on: codebuild-wso2_carbon-apimgt-${{ github.run_id }}-${{ github.run_attempt }}
+    strategy:
+      matrix:
+        include:
+          - id: v2-all-in-one-group1
+            group: group1
+          - id: v2-all-in-one-group2
+            group: group2
+      fail-fast: false
+    env:
+      V2_DIR: product-apim/all-in-one-apim/modules/integration-v2
+    steps:
+      - name: Run hostname
+        run: hostname
+      - name: Fix host entry
+        run: sudo echo "127.0.0.1 $(hostname)" | sudo tee -a /etc/hosts
+      - name: Show hosts
+        run: cat /etc/hosts
+      # carbon-apimgt sources let Codecov map the integration coverage report onto this repository.
+      - name: Checkout master
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: '10'
+      - name: Checkout Product-APIM
+        uses: actions/checkout@v7
+        with:
+          repository: wso2/product-apim
+          ref: refs/heads/master
+          fetch-depth: '10'
+          path: product-apim
+      - name: Set up JDK 21
+        uses: actions/setup-java@v6
+        with:
+          java-version: 21
+          distribution: 'temurin'
+      - name: Restore Maven repository
+        uses: actions/cache@v6
+        with:
+          path: ~/.m2
+          key: m2-v2-${{ github.run_id }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: Download Docker images and staging
+        uses: actions/download-artifact@v8
+        with:
+          name: v2-images
+          path: ${{ runner.temp }}/v2-images
+      - name: Load Docker images
+        run: docker load < "$RUNNER_TEMP/v2-images/images.tar.gz"
+      # Resolved on its own line so a failing Maven call fails the step, and the version is never published empty.
+      - name: Resolve APIM product version
+        run: |
+          APIM_VERSION=$(mvn -q -f product-apim/all-in-one-apim/pom.xml help:evaluate -Dexpression=project.version -DforceStdout)
+          if [ -z "$APIM_VERSION" ]; then
+            echo "::error::Could not resolve APIM_VERSION from the product-apim POMs."
+            exit 1
+          fi
+          echo "APIM_VERSION=$APIM_VERSION" >> "$GITHUB_ENV"
+      # `mvn test` never runs the pre-integration-test executions, so the suite reads the image build's staging.
+      - name: Restore testcontainers staging (target/is7)
+        run: |
+          mkdir -p "$V2_DIR/tests-common/testcontainers/target"
+          tar -C "$V2_DIR/tests-common/testcontainers/target" -xzf "$RUNNER_TEMP/v2-images/is7-staging.tar.gz"
+      # The coverage report is built from the class files of the image that ran, so JaCoCo class ids match.
+      - name: Extract APIM class files from image (for coverage report)
+        working-directory: ${{ env.V2_DIR }}
+        run: |
+          APIM_IMAGE=$(mvn -q -N help:evaluate -Dexpression=apim.docker.image.name -Dapim.server.version="$APIM_VERSION" -DforceStdout)
+          APIM_SERVER_NAME=$(mvn -q -N help:evaluate -Dexpression=apim.server.name -DforceStdout)
+          SRC="$RUNNER_TEMP/cov-classfiles"
+          mkdir -p "$SRC"
+          cid=$(docker create "$APIM_IMAGE")
+          trap 'docker rm -f "$cid" >/dev/null 2>&1 || true' EXIT
+          BASE="/home/wso2carbon/$APIM_SERVER_NAME/repository"
+          docker cp "$cid:$BASE/components/plugins"        "$SRC/plugins"
+          docker cp "$cid:$BASE/deployment/server/webapps" "$SRC/webapps"
+          echo "APIM_COVERAGE_CLASSFILES=$SRC" >> "$GITHUB_ENV"
+      # Bind mounts resolve on the host, which shares $RUNNER_TEMP; `mvn test` reuses the loaded images and staging.
+      - name: Run all-in-one integration-v2 suite
+        working-directory: ${{ env.V2_DIR }}
+        run: >
+          python3 tests-integration/cucumber-tests/src/test/resources/host-diagnostics/run-with-host-diagnostics.py
+          --output tests-integration/cucumber-tests/target/logs/host-diagnostics --
+          mvn test -pl tests-integration/cucumber-tests -am
+          -Dsurefire.suite.xml=testng-v2.xml
+          -Dapim.v2.test.groups=${{ matrix.group }}
+          -Dapim.server.version="$APIM_VERSION"
+          -Dplaywright.sso=true
+          -Dpg.gateway.work.dir="$RUNNER_TEMP/platform-gateway"
+          -Dapim.coverage=true
+          -Dapim.coverage.classfiles="$APIM_COVERAGE_CLASSFILES"
+      - name: Stop host diagnostics collector
+        if: always()
+        working-directory: ${{ env.V2_DIR }}
+        run: >
+          python3 tests-integration/cucumber-tests/src/test/resources/host-diagnostics/run-with-host-diagnostics.py
+          --output tests-integration/cucumber-tests/target/logs/host-diagnostics --stop
+      - name: Archive test reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: integration-v2-reports-${{ matrix.id }}
+          path: |
+            ${{ env.V2_DIR }}/tests-integration/cucumber-tests/target/surefire-reports/**
+            ${{ env.V2_DIR }}/tests-integration/cucumber-tests/target/block-timeline.json
+            ${{ env.V2_DIR }}/tests-integration/cucumber-tests/target/cucumber-report/**
+            ${{ env.V2_DIR }}/tests-integration/cucumber-tests/target/logs/**
+            ${{ env.V2_DIR }}/tests-integration/cucumber-tests/target/coverage/output/**
+          if-no-files-found: warn
+      # A partial report would upload without error, so the report and every block's coverage dump are checked first.
+      - name: Verify coverage report was generated
+        id: verify-coverage
+        if: always()
+        run: |
+          REPORT=$V2_DIR/tests-integration/cucumber-tests/target/coverage/output/txt/jacoco-it.xml
+          if [ ! -s "$REPORT" ] || ! grep -q '<counter type="LINE"' "$REPORT"; then
+            echo "::error::Coverage report missing, empty, or malformed at $REPORT."
+            exit 1
+          fi
+          echo "Coverage report present and valid ($(wc -c <"$REPORT") bytes)"
+          SUMMARY=$V2_DIR/tests-integration/cucumber-tests/target/coverage/output/txt/coverage-summary.properties
+          if [ ! -s "$SUMMARY" ]; then
+            echo "::error::Coverage dump summary missing at $SUMMARY; cannot confirm every block was dumped."
+            exit 1
+          fi
+          expected=$(sed -n 's/^blocks\.expected=//p' "$SUMMARY")
+          dumped=$(sed -n 's/^blocks\.dumped=//p' "$SUMMARY")
+          missing=$(sed -n 's/^blocks\.missing=//p' "$SUMMARY")
+          restarts=$(sed -n 's/^restart\.dumps=//p' "$SUMMARY")
+          if [ -z "$expected" ] || [ "$expected" != "$dumped" ] || [ -n "$missing" ]; then
+            echo "::error::Coverage dumped ${dumped:-?} of ${expected:-?} blocks; missing: ${missing:-unknown}."
+            exit 1
+          fi
+          failedRestarts=$(sed -n 's/^restart\.dumps\.failed=//p' "$SUMMARY")
+          failedRestartList=$(sed -n 's/^restart\.dumps\.failedList=//p' "$SUMMARY")
+          if [ "$failedRestarts" != "0" ]; then
+            echo "::error::Coverage lost ${failedRestarts:-an unknown number of} pre-restart dump(s): ${failedRestartList:-unknown}."
+            exit 1
+          fi
+          echo "Coverage dumps: $dumped/$expected blocks, $restarts pre-restart dump(s)"
+      - name: Upload integration test coverage to Codecov
+        if: ${{ always() && steps.verify-coverage.outcome == 'success' }}
+        uses: codecov/codecov-action@v7
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true
+          files: ${{ env.V2_DIR }}/tests-integration/cucumber-tests/target/coverage/output/txt/jacoco-it.xml
+          disable_search: true
           flags: integration_tests
-          directory: product-apim/all-in-one-apim/
+      - name: Publish Test Report
+        if: always()
+        uses: ScalableCapital/action-surefire-report@v2
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
+        with:
+          report_paths: '${{ env.V2_DIR }}/tests-integration/cucumber-tests/target/surefire-reports/TEST-*.xml'
+          report_mode: workflow
+          fail_on_test_failures: false
+          fail_if_no_tests: true
+          check_name: 'integration-v2 results (${{ matrix.id }})'
