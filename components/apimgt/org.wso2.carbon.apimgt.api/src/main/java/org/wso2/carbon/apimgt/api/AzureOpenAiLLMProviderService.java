@@ -95,6 +95,7 @@ public class AzureOpenAiLLMProviderService extends BuiltInLLMProviderService {
                     APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_REMAINING_TOKEN_COUNT,
                     APIConstants.AIAPIConstants.INPUT_SOURCE_HEADER,
                     APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_REMAINING_TOKEN_COUNT, false));
+            llmProviderMetadata.addAll(getDefaultResponseMetadata());
             llmProviderConfiguration.setMetadata(llmProviderMetadata);
 
             // Set default model List
@@ -122,5 +123,28 @@ public class AzureOpenAiLLMProviderService extends BuiltInLLMProviderService {
         llmProviderAuthenticationConfiguration.setParameters(parameters);
         llmProviderAuthenticationConfiguration.setEnabled(true);
         return llmProviderAuthenticationConfiguration;
+    }
+
+    @Override
+    public List<LLMProviderMetadata> getDefaultResponseMetadata() {
+
+        // Optional usage counters, published to analytics under aiTokenUsage
+        List<LLMProviderMetadata> defaults = new ArrayList<>();
+        defaults.add(new LLMProviderMetadata(
+                APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_CACHE_READ_TOKEN_COUNT,
+                APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD,
+                APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_CACHE_READ_TOKEN_COUNT, false,
+                APIConstants.AIAPIConstants.ANALYTICS_CATEGORY_TOKEN_USAGE));
+        defaults.add(new LLMProviderMetadata(
+                APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_CACHE_WRITE_TOKEN_COUNT,
+                APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD,
+                APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_CACHE_WRITE_TOKEN_COUNT, false,
+                APIConstants.AIAPIConstants.ANALYTICS_CATEGORY_TOKEN_USAGE));
+        defaults.add(new LLMProviderMetadata(
+                APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_REASONING_TOKEN_COUNT,
+                APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD,
+                APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_REASONING_TOKEN_COUNT, false,
+                APIConstants.AIAPIConstants.ANALYTICS_CATEGORY_TOKEN_USAGE));
+        return defaults;
     }
 }

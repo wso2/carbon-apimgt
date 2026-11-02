@@ -26,6 +26,9 @@ import java.io.File;
 public class APIMGovernanceConstants {
     public static final String MIGRATE = "migrate";
 
+    public static final String SCHEDULER_ENABLED_CONFIG =
+            "APIMGovernance.SchedulerConfigurations.Enabled";
+
     public static final String DEFINITIONS_FOLDER = "Definitions/";
     public static final String DOCS_FOLDER = "Docs";
     public static final String SWAGGER_FILE_NAME = "swagger.yaml";

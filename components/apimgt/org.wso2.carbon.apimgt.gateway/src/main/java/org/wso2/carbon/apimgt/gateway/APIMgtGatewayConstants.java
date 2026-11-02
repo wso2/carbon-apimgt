@@ -229,6 +229,9 @@ public class APIMgtGatewayConstants {
 
     //This will be a reserved name for the synapse message context properties.
     public static final String ADDITIONAL_ANALYTICS_PROPS = "ADDITIONAL_ANALYTICS_PROPS_TO_PUBLISH";
+    // Product-internal property for publishing additional data to analytics, as named sections (e.g. aiTokenUsage).
+    // Not exposed to extension listeners or custom code, unlike ADDITIONAL_ANALYTICS_PROPS.
+    public static final String PRODUCT_ANALYTICS_PROPS = "PRODUCT_ANALYTICS_PROPS_TO_PUBLISH";
 
     public static final String AZP_JWT_CLAIM = "azp";
     public static final String ENTITY_ID_JWT_CLAIM = "entity_id";

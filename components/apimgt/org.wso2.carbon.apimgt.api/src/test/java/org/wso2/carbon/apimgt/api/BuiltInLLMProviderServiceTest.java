@@ -264,7 +264,113 @@ public class BuiltInLLMProviderServiceTest {
     @Test
     public void testGetResponseMetadataWithGsonJsonProviderReturnsUnquotedValues() throws APIManagementException {
 
-        // Synapse sets Gson as the default JsonPath provider at runtime.
+        useGsonJsonProvider();
+        try {
+            String payload = "{\"model\":\"gpt-4.1-2025-04-14\",\"usage\":{\"inputTokens\":100}}";
+            LLMResponseMetaData responseMetadata = new LLMResponseMetaData(payload, null, null, null);
+
+            List<LLMProviderMetadata> metadataList = new ArrayList<>();
+            metadataList.add(new LLMProviderMetadata("responseModel",
+                    APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD, "$.model", true));
+            metadataList.add(new LLMProviderMetadata("promptTokenCount",
+                    APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD, "$.usage.inputTokens", true));
+
+            Map<String, String> result = service.getResponseMetadata(responseMetadata, metadataList,
+                    new HashMap<>());
+
+            Assert.assertEquals("gpt-4.1-2025-04-14", result.get("responseModel"));
+            Assert.assertEquals("100", result.get("promptTokenCount"));
+        } finally {
+            Configuration.setDefaults(null);
+        }
+    }
+
+    @Test
+    public void testGetResponseMetadataSkipsBlankIdentifierWithoutStoppingLaterAttributes()
+            throws APIManagementException {
+
+        String payload = "{\"usage\":{\"inputTokens\":100,\"outputTokens\":50}}";
+        LLMResponseMetaData responseMetadata = new LLMResponseMetaData(payload, null, null, "/v1/chat");
+
+        List<LLMProviderMetadata> metadataList = new ArrayList<>();
+        metadataList.add(new LLMProviderMetadata("emptyIdentifier",
+                APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD, "", false));
+        metadataList.add(new LLMProviderMetadata("whitespaceIdentifier",
+                APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD, "   ", false));
+        metadataList.add(new LLMProviderMetadata("nullIdentifier",
+                APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD, null, false));
+        metadataList.add(new LLMProviderMetadata("blankPathIdentifier",
+                APIConstants.AIAPIConstants.INPUT_SOURCE_PATH, " ", false));
+        metadataList.add(new LLMProviderMetadata("promptTokenCount",
+                APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD, "$.usage.inputTokens", true));
+        metadataList.add(new LLMProviderMetadata("completionTokenCount",
+                APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD, "$.usage.outputTokens", true));
+
+        Map<String, String> result = service.getResponseMetadata(responseMetadata, metadataList, new HashMap<>());
+
+        Assert.assertFalse(result.containsKey("emptyIdentifier"));
+        Assert.assertFalse(result.containsKey("whitespaceIdentifier"));
+        Assert.assertFalse(result.containsKey("nullIdentifier"));
+        Assert.assertFalse(result.containsKey("blankPathIdentifier"));
+        Assert.assertEquals("100", result.get("promptTokenCount"));
+        Assert.assertEquals("50", result.get("completionTokenCount"));
+    }
+
+    @Test
+    public void testGetResponseMetadataTreatsJsonNullAsNotReported() throws APIManagementException {
+
+        Map<String, String> result = service.getResponseMetadata(jsonNullResponse(), jsonNullMetadataList(),
+                new HashMap<>());
+
+        Assert.assertFalse(result.containsKey("cacheReadInputTokens"));
+        Assert.assertFalse(result.containsKey("reasoningTokens"));
+        Assert.assertEquals("100", result.get("promptTokenCount"));
+    }
+
+    @Test
+    public void testGetResponseMetadataWithGsonJsonProviderTreatsJsonNullAsNotReported()
+            throws APIManagementException {
+
+        useGsonJsonProvider();
+        try {
+            Map<String, String> result = service.getResponseMetadata(jsonNullResponse(), jsonNullMetadataList(),
+                    new HashMap<>());
+
+            Assert.assertFalse(result.containsKey("cacheReadInputTokens"));
+            Assert.assertFalse(result.containsKey("reasoningTokens"));
+            Assert.assertEquals("100", result.get("promptTokenCount"));
+        } finally {
+            Configuration.setDefaults(null);
+        }
+    }
+
+    private static LLMResponseMetaData jsonNullResponse() {
+
+        // A null leaf (cacheReadInputTokens) and a null parent object (output_tokens_details).
+        String payload = "{\"usage\":{\"inputTokens\":100,\"cacheReadInputTokens\":null,"
+                + "\"output_tokens_details\":null}}";
+        return new LLMResponseMetaData(payload, null, null, null);
+    }
+
+    private static List<LLMProviderMetadata> jsonNullMetadataList() {
+
+        List<LLMProviderMetadata> metadataList = new ArrayList<>();
+        metadataList.add(new LLMProviderMetadata("cacheReadInputTokens",
+                APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD, "$.usage.cacheReadInputTokens", false));
+        metadataList.add(new LLMProviderMetadata("reasoningTokens",
+                APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD, "$.usage.output_tokens_details.thinking_tokens",
+                false));
+        metadataList.add(new LLMProviderMetadata("promptTokenCount",
+                APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD, "$.usage.inputTokens", true));
+        return metadataList;
+    }
+
+    /**
+     * Sets Gson as the default JsonPath provider, as Synapse does at runtime. Callers reset it with
+     * {@code Configuration.setDefaults(null)}.
+     */
+    static void useGsonJsonProvider() {
+
         Configuration.setDefaults(new Configuration.Defaults() {
 
             private final JsonProvider jsonProvider = new GsonJsonProvider();
@@ -285,23 +391,5 @@ public class BuiltInLLMProviderServiceTest {
                 return EnumSet.noneOf(Option.class);
             }
         });
-        try {
-            String payload = "{\"model\":\"gpt-4.1-2025-04-14\",\"usage\":{\"inputTokens\":100}}";
-            LLMResponseMetaData responseMetadata = new LLMResponseMetaData(payload, null, null, null);
-
-            List<LLMProviderMetadata> metadataList = new ArrayList<>();
-            metadataList.add(new LLMProviderMetadata("responseModel",
-                    APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD, "$.model", true));
-            metadataList.add(new LLMProviderMetadata("promptTokenCount",
-                    APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD, "$.usage.inputTokens", true));
-
-            Map<String, String> result = service.getResponseMetadata(responseMetadata, metadataList,
-                    new HashMap<>());
-
-            Assert.assertEquals("gpt-4.1-2025-04-14", result.get("responseModel"));
-            Assert.assertEquals("100", result.get("promptTokenCount"));
-        } finally {
-            Configuration.setDefaults(null);
-        }
     }
 }

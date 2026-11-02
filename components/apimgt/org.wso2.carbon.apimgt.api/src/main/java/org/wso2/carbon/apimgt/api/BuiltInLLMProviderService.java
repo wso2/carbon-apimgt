@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.api;
 
+import com.google.gson.JsonNull;
 import com.google.gson.JsonPrimitive;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
@@ -54,16 +55,26 @@ public abstract class BuiltInLLMProviderService implements LLMProviderService {
                 String attributeName = metadata.getAttributeName();
                 String inputSource = metadata.getInputSource();
                 String attributeIdentifier = metadata.getAttributeIdentifier();
+                if (StringUtils.isBlank(attributeIdentifier)) {
+                    // A blank identifier means the attribute is not extracted.
+                    log.debug("No identifier configured for metadata attribute: " + attributeName);
+                    continue;
+                }
                 if (APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD.equalsIgnoreCase(inputSource)) {
                     if (responseMetadata.getPayload() != null) {
                         try {
                             Object value = JsonPath.read(responseMetadata.getPayload(), attributeIdentifier);
-                            // JsonPath is configured with the Gson provider, so unwrap primitives to avoid
-                            // the JSON-quoted form returned by JsonPrimitive#toString()
-                            String extractedValue = (value instanceof JsonPrimitive)
-                                    ? ((JsonPrimitive) value).getAsString()
-                                    : String.valueOf(value);
-                            metadataMap.put(attributeName, extractedValue);
+                            if (value == null || value instanceof JsonNull) {
+                                // A JSON null means the attribute was not reported.
+                                log.debug("Attribute is null in the payload for identifier: " + attributeIdentifier);
+                            } else {
+                                // JsonPath is configured with the Gson provider, so unwrap primitives to avoid
+                                // the JSON-quoted form returned by JsonPrimitive#toString()
+                                String extractedValue = (value instanceof JsonPrimitive)
+                                        ? ((JsonPrimitive) value).getAsString()
+                                        : String.valueOf(value);
+                                metadataMap.put(attributeName, extractedValue);
+                            }
                         } catch (PathNotFoundException e) {
                             log.debug("Attribute not found in the payload for identifier: " + attributeIdentifier);
                         }

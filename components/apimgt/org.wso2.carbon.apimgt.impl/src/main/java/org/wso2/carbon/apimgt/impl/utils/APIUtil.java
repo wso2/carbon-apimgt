@@ -284,6 +284,7 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.net.IDN;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -12838,13 +12839,20 @@ public final class APIUtil {
      * whose block-list is a wildcard-capable denylist:
      * <ul>
      *   <li>deny-mode hosts (from either policy) are unioned into the block-list;</li>
-     *   <li>allow-mode hosts go to the allow-list - the intersection when both policies are allow-mode, otherwise the
-     *       single allow-mode list;</li>
-     *   <li>any denied host is removed from the allow-list so it cannot short-circuit the block-list;</li>
+     *   <li>allow-mode hosts go to the allow-list - when both policies are allow-mode, the patterns matching exactly
+     *       the hosts that both lists match (for example {@code *.a.com} and {@code *.b.a.com} give {@code *.b.a.com}),
+     *       otherwise the single allow-mode list;</li>
+     *   <li>entries containing {@code ?} or {@code :} are dropped, since the resolver reads them as a wildcard or a
+     *       port while the policy treats them literally;</li>
+     *   <li>when one policy is allow-mode and the other is a deny-mode or private-network-only policy, an allow-list
+     *       entry is kept only if that other policy also permits it, since the allow-list short-circuits the
+     *       resolver's block-list and private-network check. A wildcard entry is kept only when that policy does not
+     *       block private network access, has no deny pattern that could match an IP address, and has no deny
+     *       pattern that matches any host the entry matches;</li>
      *   <li>if either policy is allow-mode, a {@code "*"} entry is added to the block-list so everything not on the
      *       allow-list is denied - a restrictive whitelist, matching {@code applyAccessControlPolicy}.</li>
      * </ul>
-     * Private-network blocking is handled by the resolver itself and needs no list entry here.
+     * Private-network blocking for hosts not on the allow-list is handled by the resolver itself.
      *
      * @param base         base options to copy non-access-control settings from (may be null)
      * @param tenantDomain the tenant domain whose config should be merged in
@@ -12873,43 +12881,71 @@ public final class APIUtil {
             }
         }
 
-        // Tenant policy. Only the config read is guarded; a misconfigured tenant policy must surface, not be swallowed.
+        // Tenant policy. A tenant policy that cannot be read, or is malformed, is a misconfiguration: skipping it would
+        // resolve remote refs without the tenant's restrictions.
         JSONObject tenantConfig;
         try {
             tenantConfig = getTenantConfig(tenantDomain);
         } catch (APIManagementException e) {
-            log.warn("Could not read tenant network access-control policy for $ref resolution; "
-                    + "proceeding with platform policy only.", e);
-            tenantConfig = null;
+            throw buildTenantPolicyMisconfiguredException("the tenant configuration could not be read", e);
         }
+        boolean tenantPolicyConfigured = false;
+        String tenantMode = null;
+        List<String> tenantHosts = new ArrayList<>();
+        boolean tenantBlockPrivateNetworkAccess = false;
         if (tenantConfig != null) {
-            Object nsac = tenantConfig.get(APIConstants.NetworkSecurityAccessControl.TENANT_CONFIG_KEY);
-            if (nsac instanceof JSONObject) {
+            Object tenantPolicyValue = tenantConfig.get(APIConstants.NetworkSecurityAccessControl.TENANT_CONFIG_KEY);
+            if (tenantPolicyValue != null && !(tenantPolicyValue instanceof JSONObject)) {
+                throw buildTenantPolicyMisconfiguredException("the policy is not a JSON object", null);
+            }
+            if (tenantPolicyValue instanceof JSONObject) {
                 policyConfigured = true;
-                JSONObject policy = (JSONObject) nsac;
-                String tMode = (String) policy.get(APIConstants.NetworkSecurityAccessControl.TENANT_MODE);
-                Object tHostsObj = policy.get(APIConstants.NetworkSecurityAccessControl.TENANT_HOSTS);
-                List<String> tHosts = new ArrayList<>();
-                if (tHostsObj instanceof JSONArray) {
-                    for (Object h : (JSONArray) tHostsObj) {
-                        tHosts.add(h.toString());
+                tenantPolicyConfigured = true;
+                JSONObject tenantPolicy = (JSONObject) tenantPolicyValue;
+                tenantMode = (String) tenantPolicy.get(APIConstants.NetworkSecurityAccessControl.TENANT_MODE);
+                tenantBlockPrivateNetworkAccess = Boolean.TRUE.equals(tenantPolicy.get(
+                        APIConstants.NetworkSecurityAccessControl.TENANT_BLOCK_PRIVATE_NETWORK_ACCESS));
+                Object tenantHostsValue = tenantPolicy.get(APIConstants.NetworkSecurityAccessControl.TENANT_HOSTS);
+                if (tenantHostsValue != null && !(tenantHostsValue instanceof JSONArray)) {
+                    throw buildTenantPolicyMisconfiguredException("the hosts value is not a JSON array", null);
+                }
+                if (tenantHostsValue instanceof JSONArray) {
+                    for (Object host : (JSONArray) tenantHostsValue) {
+                        tenantHosts.add(host.toString());
                     }
                 }
-                validateNetworkSecurityMode(tMode);
-                if (APIConstants.NetworkSecurityAccessControl.MODE_ALLOW.equalsIgnoreCase(tMode)) {
-                    allowModeHostSets.add(tHosts);
-                } else if (APIConstants.NetworkSecurityAccessControl.MODE_DENY.equalsIgnoreCase(tMode)) {
-                    denyHosts.addAll(tHosts);
+                validateNetworkSecurityMode(tenantMode);
+                if (APIConstants.NetworkSecurityAccessControl.MODE_ALLOW.equalsIgnoreCase(tenantMode)) {
+                    allowModeHostSets.add(tenantHosts);
+                } else if (APIConstants.NetworkSecurityAccessControl.MODE_DENY.equalsIgnoreCase(tenantMode)) {
+                    denyHosts.addAll(tenantHosts);
                 }
             }
         }
 
         // Intersect the allow-mode host sets (a host must be allowed by every allow-mode policy under the AND policy).
         List<String> allowList = intersectAllowModeHostSets(allowModeHostSets);
-        // A denied host must never remain on the allow-list: the resolver's allow-list short-circuits to ALLOW and
-        // would otherwise bypass the block-list for a host that another policy denies.
-        allowList.removeAll(denyHosts);
-        List<String> blockList = new ArrayList<>(denyHosts);
+        allowList.removeIf(entry -> !isResolverCompatibleAllowEntry(entry));
+        // The allow-list short-circuits the resolver's block-list and private-network check, so an entry allowed by one
+        // policy must still be permitted by the other policy when that one is a deny-mode or private-network-only
+        // policy. This also removes any entry that the other policy denies.
+        boolean platformRestrictsAllowList = networkSecurityEnabled
+                && !APIConstants.NetworkSecurityAccessControl.MODE_ALLOW.equalsIgnoreCase(networkSecurityMode);
+        boolean tenantRestrictsAllowList = tenantPolicyConfigured
+                && !APIConstants.NetworkSecurityAccessControl.MODE_ALLOW.equalsIgnoreCase(tenantMode);
+        if (platformRestrictsAllowList) {
+            retainEntriesPermittedByPolicy(allowList, networkSecurityMode, networkSecurityHosts,
+                    networkSecurityBlockPrivateAccess);
+        }
+        if (tenantRestrictsAllowList) {
+            retainEntriesPermittedByPolicy(allowList, tenantMode, tenantHosts, tenantBlockPrivateNetworkAccess);
+        }
+        List<String> blockList = new ArrayList<>();
+        for (String denyHost : denyHosts) {
+            if (isResolverCompatibleBlockEntry(denyHost)) {
+                blockList.add(denyHost);
+            }
+        }
         // Allow-mode is a restrictive whitelist (deny everything not explicitly allowed). The resolver's allow-list
         // only exempts hosts, so a wildcard deny is what enforces "block the rest".
         if (!allowModeHostSets.isEmpty()) {
@@ -12928,8 +12964,9 @@ public final class APIUtil {
 
     /**
      * Intersects the allow-mode host sets collected from the platform and tenant policies for the remote-$ref
-     * resolver. With both policies in allow mode the result is their intersection (a host must be allowed by both
-     * under the AND policy); with a single allow-mode policy it is that policy's list; with none it is empty.
+     * resolver. With both policies in allow mode the result is a list of patterns that together match exactly the
+     * hosts matched by both lists (a host must be allowed by both under the AND policy); with a single allow-mode
+     * policy it is that policy's list; with none it is empty.
      *
      * @param allowModeHostSets one host set per allow-mode policy (may be empty)
      * @return a new, mutable list holding the intersection of the given sets; empty if none were provided
@@ -12940,9 +12977,405 @@ public final class APIUtil {
         }
         List<String> combined = new ArrayList<>(allowModeHostSets.get(0));
         for (int i = 1; i < allowModeHostSets.size(); i++) {
-            combined.retainAll(allowModeHostSets.get(i));
+            Set<String> intersection = new LinkedHashSet<>();
+            for (String first : combined) {
+                for (String second : allowModeHostSets.get(i)) {
+                    if (StringUtils.isBlank(first) || StringUtils.isBlank(second)) {
+                        continue;
+                    }
+                    List<String> overlap = intersectHostPatterns(first, second);
+                    if (overlap == null) {
+                        log.warn("Allow-list entries '" + first + "' and '" + second + "' are too complex to combine "
+                                + "and are not applied to remote $ref resolution.");
+                        continue;
+                    }
+                    intersection.addAll(overlap);
+                }
+            }
+            combined = removeSubsumedHostPatterns(intersection);
         }
         return combined;
+    }
+
+    /**
+     * Computes the host patterns that together match exactly the hosts matched by both given patterns, using the
+     * same matching rules as {@code isHostInList} (case-insensitive, {@code *} matches any sequence of characters).
+     * For example, {@code *.a.com} and {@code *.b.a.com} give {@code *.b.a.com}, and {@code *.partner.com} and
+     * {@code api.partner.com} give {@code api.partner.com}.
+     *
+     * @param first  the first host pattern
+     * @param second the second host pattern
+     * @return the patterns matching the common hosts (empty if the patterns have no host in common), or {@code null}
+     *         if a pattern is too long or has too many wildcards, or the common hosts need too many patterns, to be
+     *         combined
+     */
+    private static List<String> intersectHostPatterns(String first, String second) {
+        String firstPattern = normalizeHostPattern(first);
+        String secondPattern = normalizeHostPattern(second);
+        if (firstPattern.length() > APIConstants.NetworkSecurityAccessControl.MAX_HOST_PATTERN_LENGTH
+                || secondPattern.length() > APIConstants.NetworkSecurityAccessControl.MAX_HOST_PATTERN_LENGTH
+                || StringUtils.countMatches(firstPattern, APIConstants.NetworkSecurityAccessControl.MATCH_ALL_HOSTS)
+                > APIConstants.NetworkSecurityAccessControl.MAX_WILDCARDS_PER_HOST_PATTERN
+                || StringUtils.countMatches(secondPattern, APIConstants.NetworkSecurityAccessControl.MATCH_ALL_HOSTS)
+                > APIConstants.NetworkSecurityAccessControl.MAX_WILDCARDS_PER_HOST_PATTERN) {
+            return null;
+        }
+        Set<String> combined = intersectHostPatternSuffixes(firstPattern, 0, secondPattern, 0, new HashMap<>());
+        return combined != null ? new ArrayList<>(combined) : null;
+    }
+
+    /**
+     * Returns the patterns matching exactly the strings matched by both {@code first.substring(i)} and
+     * {@code second.substring(j)}, without patterns covered by another, or {@code null} if more than
+     * {@link APIConstants.NetworkSecurityAccessControl#MAX_COMBINED_HOST_PATTERNS} patterns are needed. Both
+     * patterns must be normalized (see {@link #normalizeHostPattern(String)}).
+     */
+    private static Set<String> intersectHostPatternSuffixes(String first, int i, String second, int j,
+                                                            Map<Long, Set<String>> memo) {
+        long key = ((long) i << 32) | j;
+        Set<String> cached = memo.get(key);
+        if (cached != null) {
+            return cached;
+        }
+        Set<String> result = new LinkedHashSet<>();
+        boolean firstEnded = i == first.length();
+        boolean secondEnded = j == second.length();
+        if (firstEnded || secondEnded) {
+            // An empty pattern matches only the empty string; the other pattern must be able to match it too.
+            String rest = firstEnded ? second.substring(j) : first.substring(i);
+            if (rest.isEmpty() || rest.equals(APIConstants.NetworkSecurityAccessControl.MATCH_ALL_HOSTS)) {
+                result.add("");
+            }
+        } else {
+            char a = first.charAt(i);
+            char b = second.charAt(j);
+            boolean combined;
+            if (a != '*' && b != '*') {
+                combined = a != b
+                        || addWithPrefix(result, a, intersectHostPatternSuffixes(first, i + 1, second, j + 1, memo));
+            } else if (a == '*' && b == '*') {
+                // Whichever wildcard starts matching later ends first; branch on which one that is.
+                combined = addWithPrefix(result, '*', intersectHostPatternSuffixes(first, i, second, j + 1, memo))
+                        && addWithPrefix(result, '*', intersectHostPatternSuffixes(first, i + 1, second, j, memo));
+            } else if (a == '*') {
+                // The wildcard either matches nothing more, or consumes the literal character b.
+                combined = addAll(result, intersectHostPatternSuffixes(first, i + 1, second, j, memo))
+                        && addWithPrefix(result, b, intersectHostPatternSuffixes(first, i, second, j + 1, memo));
+            } else {
+                combined = addAll(result, intersectHostPatternSuffixes(first, i, second, j + 1, memo))
+                        && addWithPrefix(result, a, intersectHostPatternSuffixes(first, i + 1, second, j, memo));
+            }
+            if (!combined) {
+                return null;
+            }
+        }
+        // Remove covered patterns at every step, so that only the patterns that are needed are carried forward.
+        List<String> needed = removeSubsumedHostPatterns(result);
+        if (needed.size() > APIConstants.NetworkSecurityAccessControl.MAX_COMBINED_HOST_PATTERNS) {
+            return null;
+        }
+        Set<String> neededSet = new LinkedHashSet<>(needed);
+        memo.put(key, neededSet);
+        return neededSet;
+    }
+
+    private static boolean addWithPrefix(Set<String> target, char prefix, Set<String> suffixes) {
+        if (suffixes == null) {
+            return false;
+        }
+        for (String suffix : suffixes) {
+            // Adjacent wildcards are equivalent to one.
+            target.add(prefix == '*' && suffix.startsWith("*") ? suffix : prefix + suffix);
+        }
+        return true;
+    }
+
+    private static boolean addAll(Set<String> target, Set<String> patterns) {
+        if (patterns == null) {
+            return false;
+        }
+        target.addAll(patterns);
+        return true;
+    }
+
+    /**
+     * Lower-cases and trims a host pattern and collapses consecutive wildcards, which match the same hosts as one.
+     */
+    private static String normalizeHostPattern(String pattern) {
+        return pattern.trim().toLowerCase(Locale.ROOT).replaceAll("\\*+", "*");
+    }
+
+    /**
+     * Removes the patterns that only match hosts another pattern in the set already matches. A pattern {@code a} is
+     * covered by {@code b} when the text of {@code a}, with each {@code *} taken as a literal character, matches
+     * {@code b}.
+     *
+     * @param patterns normalized host patterns
+     * @return a new, mutable list of the remaining patterns, in their original order
+     */
+    private static List<String> removeSubsumedHostPatterns(Collection<String> patterns) {
+        List<String> candidates = new ArrayList<>(new LinkedHashSet<>(patterns));
+        List<String> result = new ArrayList<>();
+        for (String candidate : candidates) {
+            boolean covered = false;
+            for (String other : candidates) {
+                if (other.equals(candidate) || !wildcardMatches(other, candidate)) {
+                    continue;
+                }
+                // Two patterns covering each other match the same hosts; keep the first of them.
+                if (!wildcardMatches(candidate, other)
+                        || candidates.indexOf(other) < candidates.indexOf(candidate)) {
+                    covered = true;
+                    break;
+                }
+            }
+            if (!covered) {
+                result.add(candidate);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Checks whether a text matches a wildcard pattern in which {@code *} matches any sequence of characters, and any
+     * other character matches itself. Runs in time proportional to the product of the two lengths at most.
+     *
+     * @param pattern the wildcard pattern
+     * @param text    the text to match; a {@code *} in it is taken as a literal character
+     * @return {@code true} if the whole text matches the pattern
+     */
+    private static boolean wildcardMatches(String pattern, String text) {
+        int p = 0;
+        int t = 0;
+        int lastStar = -1;
+        int resumeAt = 0;
+        while (t < text.length()) {
+            if (p < pattern.length() && pattern.charAt(p) == '*') {
+                lastStar = p++;
+                resumeAt = t;
+            } else if (p < pattern.length() && pattern.charAt(p) == text.charAt(t)) {
+                p++;
+                t++;
+            } else if (lastStar >= 0) {
+                // Let the last wildcard take one more character and retry from there.
+                p = lastStar + 1;
+                t = ++resumeAt;
+            } else {
+                return false;
+            }
+        }
+        while (p < pattern.length() && pattern.charAt(p) == '*') {
+            p++;
+        }
+        return p == pattern.length();
+    }
+
+    /**
+     * Checks whether an allow-list entry is read the same way by the remote-$ref resolver as by the network
+     * access-control policy. The resolver treats {@code ?} as a single-character wildcard and {@code :} as a port
+     * separator, while the policy matches both literally, so such entries are not applied. The resolver also converts
+     * each entry that does not start with a digit to its ASCII form and fails to load any entry it cannot convert, such
+     * as one with a label longer than 63 characters; such entries are not applied either.
+     *
+     * @param allowListEntry the allow-list entry
+     * @return {@code true} if the entry can be passed to the resolver
+     */
+    private static boolean isResolverCompatibleAllowEntry(String allowListEntry) {
+        if (StringUtils.isBlank(allowListEntry)) {
+            return false;
+        }
+        if (allowListEntry.contains("?") || allowListEntry.contains(":")) {
+            log.warn("Allow-list entry '" + allowListEntry + "' contains '?' or ':' and is not applied to remote $ref "
+                    + "resolution.");
+            return false;
+        }
+        String conversionError = getResolverConversionError(allowListEntry);
+        if (conversionError != null) {
+            log.warn("Allow-list entry '" + allowListEntry + "' is not a valid host pattern (" + conversionError
+                    + ") and is not applied to remote $ref resolution.");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Checks whether a block-list entry can be loaded by the remote-$ref resolver, which fails to load the whole
+     * block-list if it cannot convert an entry to its ASCII form. An entry without a {@code *} that cannot be converted,
+     * such as one with a label longer than 63 characters or an empty label, cannot match any host name, so it is not
+     * applied. An entry with a {@code *} could still match a host name, so it is reported as a misconfiguration instead.
+     *
+     * @param blockListEntry the block-list entry
+     * @return {@code true} if the entry can be passed to the resolver, {@code false} if it matches no host name
+     * @throws APIManagementException with {@code NETWORK_SECURITY_ACCESS_CONTROL_MISCONFIGURED} if a wildcard entry
+     *                                cannot be loaded by the resolver
+     */
+    private static boolean isResolverCompatibleBlockEntry(String blockListEntry) throws APIManagementException {
+        String conversionError = getResolverConversionError(blockListEntry);
+        if (conversionError == null) {
+            return true;
+        }
+        if (!blockListEntry.contains(APIConstants.NetworkSecurityAccessControl.MATCH_ALL_HOSTS)) {
+            log.warn("Deny-list entry '" + blockListEntry + "' is not a valid host pattern (" + conversionError
+                    + ") and matches no host, so it is not applied to remote $ref resolution.");
+            return false;
+        }
+        APIManagementException ex = new APIManagementException(
+                ExceptionCodes.NETWORK_SECURITY_ACCESS_CONTROL_MISCONFIGURED.getErrorMessage(),
+                ExceptionCodes.NETWORK_SECURITY_ACCESS_CONTROL_MISCONFIGURED);
+        log.error("Network security access control misconfiguration: deny-list entry '" + blockListEntry
+                + "' is not a valid host pattern (" + conversionError + ") and cannot be applied to remote reference "
+                + "resolution.", ex);
+        throw ex;
+    }
+
+    /**
+     * Converts a host pattern to its ASCII form as the remote-$ref resolver does, which skips patterns that start with
+     * a digit.
+     *
+     * @param hostPattern the host pattern
+     * @return the reason the resolver cannot convert the pattern, or {@code null} if it can
+     */
+    private static String getResolverConversionError(String hostPattern) {
+        if (StringUtils.isBlank(hostPattern)) {
+            return null;
+        }
+        String normalizedPattern = hostPattern.toLowerCase(Locale.ROOT);
+        if (Character.isDigit(normalizedPattern.charAt(0))) {
+            return null;
+        }
+        try {
+            IDN.toASCII(normalizedPattern, IDN.ALLOW_UNASSIGNED);
+            return null;
+        } catch (IllegalArgumentException e) {
+            return e.getMessage();
+        }
+    }
+
+    /**
+     * Keeps only the allow-list entries that a deny-mode or private-network-only policy also permits, evaluated as
+     * {@code applyAccessControlPolicy} would evaluate them for a top-level URL. A policy that restricts nothing (no
+     * deny-mode hosts and private-network blocking off) leaves the list unchanged.
+     *
+     * @param allowList                 the remote-$ref allow-list to filter in place
+     * @param mode                      the policy mode ({@code deny}, or blank for the private-network-only policy)
+     * @param policyHosts               the policy's host patterns
+     * @param blockPrivateNetworkAccess whether the policy blocks private network addresses
+     */
+    private static void retainEntriesPermittedByPolicy(List<String> allowList, String mode, List<String> policyHosts,
+                                                       boolean blockPrivateNetworkAccess) {
+        boolean denyModeWithHosts = APIConstants.NetworkSecurityAccessControl.MODE_DENY.equalsIgnoreCase(mode)
+                && policyHosts != null && !policyHosts.isEmpty();
+        if (allowList.isEmpty() || (!denyModeWithHosts && !blockPrivateNetworkAccess)) {
+            return;
+        }
+        allowList.removeIf(entry -> !isEntryPermittedByPolicy(entry, mode, policyHosts, blockPrivateNetworkAccess));
+    }
+
+    /**
+     * Checks whether a single allow-list entry is permitted by a deny-mode or private-network-only policy. A wildcard
+     * pattern is checked with {@link #isWildcardEntryPermittedByPolicy}.
+     *
+     * @param allowListEntry            the allow-list entry
+     * @param mode                      the policy mode
+     * @param policyHosts               the policy's host patterns
+     * @param blockPrivateNetworkAccess whether the policy blocks private network addresses
+     * @return {@code true} if the policy permits the entry
+     */
+    private static boolean isEntryPermittedByPolicy(String allowListEntry, String mode, List<String> policyHosts,
+                                                    boolean blockPrivateNetworkAccess) {
+        if (StringUtils.isBlank(allowListEntry)) {
+            return false;
+        }
+        if (allowListEntry.contains(APIConstants.NetworkSecurityAccessControl.MATCH_ALL_HOSTS)) {
+            return isWildcardEntryPermittedByPolicy(allowListEntry, mode, policyHosts, blockPrivateNetworkAccess);
+        }
+        try {
+            applyAccessControlPolicy(allowListEntry, mode, policyHosts, blockPrivateNetworkAccess);
+            return true;
+        } catch (APIManagementException e) {
+            log.warn("Allow-list entry '" + allowListEntry + "' is not permitted by the other network access-control "
+                    + "policy and is not applied to remote $ref resolution.");
+            return false;
+        }
+    }
+
+    /**
+     * Checks whether a wildcard allow-list entry is permitted by a deny-mode or private-network-only policy. The
+     * resolver allows a host that matches the entry by name without resolving it, so the entry is kept only when the
+     * policy has no check that depends on the resolved address and none of its deny patterns matches a host the
+     * entry matches:
+     * <ul>
+     *   <li>the policy does not block private network access;</li>
+     *   <li>no deny pattern could match an IP address;</li>
+     *   <li>no deny pattern has a host in common with the entry.</li>
+     * </ul>
+     *
+     * @param allowListEntry            the wildcard allow-list entry
+     * @param mode                      the policy mode
+     * @param policyHosts               the policy's host patterns
+     * @param blockPrivateNetworkAccess whether the policy blocks private network addresses
+     * @return {@code true} if every host the entry matches is permitted by the policy
+     */
+    private static boolean isWildcardEntryPermittedByPolicy(String allowListEntry, String mode,
+                                                            List<String> policyHosts,
+                                                            boolean blockPrivateNetworkAccess) {
+        if (blockPrivateNetworkAccess) {
+            log.warn("Allow-list entry '" + allowListEntry + "' is a wildcard pattern and is not applied to remote $ref "
+                    + "resolution while the other network access-control policy blocks private network access.");
+            return false;
+        }
+        if (!APIConstants.NetworkSecurityAccessControl.MODE_DENY.equalsIgnoreCase(mode) || policyHosts == null) {
+            return true;
+        }
+        for (String denyPattern : policyHosts) {
+            if (StringUtils.isBlank(denyPattern)) {
+                continue;
+            }
+            if (couldMatchIpAddress(denyPattern)) {
+                log.warn("Allow-list entry '" + allowListEntry + "' is a wildcard pattern and is not applied to remote "
+                        + "$ref resolution while the other network access-control policy denies '" + denyPattern
+                        + "', which can match an IP address.");
+                return false;
+            }
+            List<String> overlap = intersectHostPatterns(allowListEntry, denyPattern);
+            if (overlap == null || !overlap.isEmpty()) {
+                log.warn("Allow-list entry '" + allowListEntry + "' matches hosts that the other network "
+                        + "access-control policy denies through '" + denyPattern + "' and is not applied to remote "
+                        + "$ref resolution.");
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Checks whether a host pattern could match an IPv4 or IPv6 address, judged from its literal characters: digits
+     * and dots for IPv4, or hexadecimal digits and colons for IPv6. A pattern made only of wildcards matches any
+     * address.
+     *
+     * @param pattern the host pattern
+     * @return {@code true} if the pattern could match an IP address
+     */
+    private static boolean couldMatchIpAddress(String pattern) {
+        String literals = normalizeHostPattern(pattern)
+                .replace(APIConstants.NetworkSecurityAccessControl.MATCH_ALL_HOSTS, "");
+        return literals.matches("[0-9.]*") || literals.matches("[0-9a-f:]*");
+    }
+
+    /**
+     * Builds the error raised when the tenant network access-control policy cannot be read or is malformed.
+     *
+     * @param reason short description of the problem, used in the log message
+     * @param cause  the underlying exception, or {@code null}
+     * @return an exception with {@code NETWORK_SECURITY_ACCESS_CONTROL_MISCONFIGURED}
+     */
+    private static APIManagementException buildTenantPolicyMisconfiguredException(String reason, Throwable cause) {
+        APIManagementException ex = new APIManagementException(
+                ExceptionCodes.NETWORK_SECURITY_ACCESS_CONTROL_MISCONFIGURED.getErrorMessage(), cause,
+                ExceptionCodes.NETWORK_SECURITY_ACCESS_CONTROL_MISCONFIGURED);
+        log.error("Network security access control misconfiguration: the tenant policy could not be applied to "
+                + "remote reference resolution because " + reason + ".", ex);
+        return ex;
     }
 
     /**

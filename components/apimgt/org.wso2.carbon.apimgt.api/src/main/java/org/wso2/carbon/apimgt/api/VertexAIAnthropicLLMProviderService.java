@@ -98,6 +98,7 @@ public class VertexAIAnthropicLLMProviderService extends BuiltInLLMProviderServi
                     APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_OUTPUT_TOKEN, true));
             // Anthropic's Messages response has no single "total" token field; total is derived downstream
             // from prompt + completion, so no TOTAL_TOKEN_COUNT metadata is mapped here.
+            llmProviderMetadata.addAll(getDefaultResponseMetadata());
             llmProviderConfiguration.setMetadata(llmProviderMetadata);
 
             // The model-group name must equal the provider's own name: the admin UI populates the
@@ -137,5 +138,38 @@ public class VertexAIAnthropicLLMProviderService extends BuiltInLLMProviderServi
         parameters.put("scope", APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_VERTEX_AI_SCOPE);
         llmProviderAuthenticationConfiguration.setParameters(parameters);
         return llmProviderAuthenticationConfiguration;
+    }
+
+    @Override
+    public List<LLMProviderMetadata> getDefaultResponseMetadata() {
+
+        // Optional usage counters, published to analytics under aiTokenUsage
+        List<LLMProviderMetadata> defaults = new ArrayList<>();
+        defaults.add(new LLMProviderMetadata(
+                APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_CACHE_READ_TOKEN_COUNT,
+                APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD,
+                APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_ANTHROPIC_IDENTIFIER_CACHE_READ_TOKEN_COUNT, false,
+                APIConstants.AIAPIConstants.ANALYTICS_CATEGORY_TOKEN_USAGE));
+        defaults.add(new LLMProviderMetadata(
+                APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_CACHE_WRITE_TOKEN_COUNT,
+                APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD,
+                APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_ANTHROPIC_IDENTIFIER_CACHE_WRITE_TOKEN_COUNT, false,
+                APIConstants.AIAPIConstants.ANALYTICS_CATEGORY_TOKEN_USAGE));
+        defaults.add(new LLMProviderMetadata(
+                APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_CACHE_WRITE_5M_TOKEN_COUNT,
+                APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD,
+                APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_ANTHROPIC_IDENTIFIER_CACHE_WRITE_5M_TOKEN_COUNT, false,
+                APIConstants.AIAPIConstants.ANALYTICS_CATEGORY_TOKEN_USAGE));
+        defaults.add(new LLMProviderMetadata(
+                APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_CACHE_WRITE_1H_TOKEN_COUNT,
+                APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD,
+                APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_ANTHROPIC_IDENTIFIER_CACHE_WRITE_1H_TOKEN_COUNT, false,
+                APIConstants.AIAPIConstants.ANALYTICS_CATEGORY_TOKEN_USAGE));
+        defaults.add(new LLMProviderMetadata(
+                APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_REASONING_TOKEN_COUNT,
+                APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD,
+                APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_ANTHROPIC_IDENTIFIER_REASONING_TOKEN_COUNT, false,
+                APIConstants.AIAPIConstants.ANALYTICS_CATEGORY_TOKEN_USAGE));
+        return defaults;
     }
 }
