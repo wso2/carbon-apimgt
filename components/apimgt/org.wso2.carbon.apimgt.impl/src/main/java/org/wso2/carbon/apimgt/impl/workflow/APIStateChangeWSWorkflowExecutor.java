@@ -53,6 +53,7 @@ import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
+import org.wso2.carbon.apimgt.api.model.Workflow;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
@@ -258,7 +259,11 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
             String uuid = apiMgtDAO.getUUIDFromIdentifier(apiIdentifier, tenantDomain);
             if (StringUtils.isNotEmpty(uuid)) {
                 ApiTypeWrapper apIorAPIProductByUUID = apiProvider.getAPIorAPIProductByUUID(uuid, tenantDomain);
-                apiProvider.changeLifeCycleStatus(tenantDomain, apIorAPIProductByUUID, action, Collections.emptyMap());
+                Workflow workflow = apiMgtDAO.getworkflowReferenceByExternalWorkflowReference(
+                        workflowDTO.getExternalWorkflowReference());
+                Map<String, Boolean> checklist = workflow != null ? WorkflowUtils.getLifecycleChecklist(workflow)
+                        : Collections.emptyMap();
+                apiProvider.changeLifeCycleStatus(tenantDomain, apIorAPIProductByUUID, action, checklist);
                 if (log.isDebugEnabled()) {
                     String logMessage = "API Status changed successfully. API Name: " + apiIdentifier.getApiName()
                             + ", API Version " + apiIdentifier.getVersion() + ", New Status : " + action;

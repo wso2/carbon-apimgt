@@ -4328,7 +4328,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             // if the workflow has started, then executor should not fire again
             if (!WorkflowStatus.CREATED.equals(apiWFState)) {
                 response = executeStateChangeWorkflow(currentStatus, action, apiName, apiContext, apiType,
-                        apiVersion, providerName, apiOrApiProductId, uuid, gatewayVendor, workflowType);
+                        apiVersion, providerName, apiOrApiProductId, uuid, gatewayVendor, workflowType, checklist);
                 // get the workflow state once the executor is executed.
                 wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiOrApiProductId),
                         workflowType);
@@ -4375,13 +4375,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param uuid              UUID of the API or API Product
      * @param gatewayVendor     Gateway vendor
      * @param workflowType      Workflow Type
+     * @param checklist         Lifecycle checklist items selected for the state change
      * @return APIStateChangeResponse
      * @throws APIManagementException Error when executing the state change workflow
      */
     private APIStateChangeResponse executeStateChangeWorkflow(String currentStatus, String action, String apiName,
                                                               String apiContext, String apiType, String apiVersion,
                                                               String providerName, int apiOrApiProductId, String uuid,
-                                                              String gatewayVendor, String workflowType)
+                                                              String gatewayVendor, String workflowType,
+                                                              Map<String, Boolean> checklist)
             throws APIManagementException {
 
         APIStateChangeResponse response = new APIStateChangeResponse();
@@ -4390,7 +4392,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     WorkflowExecutorFactory.getInstance().getWorkflowExecutor(workflowType);
             APIStateWorkflowDTO apiStateWorkflow = setAPIStateWorkflowDTOParameters(currentStatus, action, apiName,
                     apiContext, apiType, apiVersion, providerName, apiOrApiProductId, uuid, gatewayVendor, workflowType,
-                    apiStateWFExecutor);
+                    apiStateWFExecutor, checklist);
             WorkflowResponse workflowResponse = apiStateWFExecutor.execute(apiStateWorkflow);
             response.setWorkflowResponse(workflowResponse);
         } catch (WorkflowException e) {
@@ -4414,13 +4416,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param gatewayVendor      Gateway Vendor
      * @param workflowType       Workflow Type
      * @param apiStateWFExecutor WorkflowExecutor
+     * @param checklist          Lifecycle checklist items selected for the state change
      * @return APIStateWorkflowDTO Object
      */
     private APIStateWorkflowDTO setAPIStateWorkflowDTOParameters(String currentStatus, String action, String name,
                                                                  String context, String apiType, String version,
                                                                  String providerName, int apiOrApiProductId,
                                                                  String uuid, String gatewayVendor, String workflowType,
-                                                                 WorkflowExecutor apiStateWFExecutor) {
+                                                                 WorkflowExecutor apiStateWFExecutor,
+                                                                 Map<String, Boolean> checklist) {
 
         WorkflowProperties workflowProperties = getAPIManagerConfiguration().getWorkflowProperties();
         APIStateWorkflowDTO stateWorkflowDTO = new APIStateWorkflowDTO();
@@ -4454,6 +4458,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 stateWorkflowDTO.getApiProvider()
         );
         stateWorkflowDTO.setWorkflowDescription(workflowDescription);
+        // Persist the checklist with the workflow so that it can be honoured when the state change is approved
+        if (checklist != null && !checklist.isEmpty()) {
+            stateWorkflowDTO.setMetadata(WorkflowConstants.WF_METADATA_LIFECYCLE_CHECKLIST,
+                    new JSONObject(checklist).toJSONString());
+        }
 
         return stateWorkflowDTO;
     }

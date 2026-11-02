@@ -39,6 +39,7 @@ public class WorkflowConstants {
     public static final String WF_TYPE_AM_API_STATE = "AM_API_STATE";
 
     public static final String WF_TYPE_AM_API_PRODUCT_STATE = "AM_API_PRODUCT_STATE";
+    public static final String WF_METADATA_LIFECYCLE_CHECKLIST = "LifecycleChecklist";
 
     public static final String WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION =
             "AM_APPLICATION_REGISTRATION_PRODUCTION";
