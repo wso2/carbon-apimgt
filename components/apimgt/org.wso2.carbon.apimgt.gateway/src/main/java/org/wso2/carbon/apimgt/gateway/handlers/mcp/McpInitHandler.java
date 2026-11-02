@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.gateway.handlers.mcp;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
+import org.apache.axis2.AxisFault;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,6 +34,7 @@ import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.core.axis2.Axis2Sender;
 import org.apache.synapse.rest.AbstractHandler;
+import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.api.model.APIOperationMapping;
 import org.wso2.carbon.apimgt.api.model.BackendOperation;
@@ -329,13 +331,15 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
     private void handleUnsupportedMCPProtocolVersion(MessageContext messageContext) {
         org.apache.axis2.context.MessageContext axis2MC =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+        // Drain the request body without building it, so that the pass-through pipe is not left holding
+        // unconsumed content when the request is answered here instead of being forwarded. Marking the message
+        // as built keeps the request content in the pipe from being sent back as the response.
+        axis2MC.setProperty(PassThroughConstants.MESSAGE_BUILDER_INVOKED, Boolean.TRUE);
         try {
-            // Drain the request body, so that the pass-through pipe is not left holding unconsumed content when
-            // the request is answered here instead of being forwarded.
-            RelayUtils.buildMessage(axis2MC);
-        } catch (IOException | XMLStreamException e) {
+            RelayUtils.discardRequestMessage(axis2MC);
+        } catch (AxisFault e) {
             if (log.isDebugEnabled()) {
-                log.debug("Failed to build the request message while rejecting an unsupported MCP protocol "
+                log.debug("Failed to discard the request message while rejecting an unsupported MCP protocol "
                         + "version", e);
             }
         }
