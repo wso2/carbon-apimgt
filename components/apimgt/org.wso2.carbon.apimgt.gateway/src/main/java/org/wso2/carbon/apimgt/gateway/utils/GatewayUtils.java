@@ -27,6 +27,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.proc.BadJWTException;
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
+import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.StatusCode;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -1285,7 +1286,7 @@ public class GatewayUtils {
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext();
 
             setHTTPMethodAndStatus(tracingSpan, axis2MessageContext, messageContext);
-            setErrorStatus(tracingSpan, axis2MessageContext.getProperty(HTTP_SC));
+            setErrorStatus(tracingSpan, axis2MessageContext.getProperty(HTTP_SC), SpanKind.CLIENT);
 
             Object backendUrlObject =
                     messageContext.getProperty(APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS);
@@ -1339,7 +1340,7 @@ public class GatewayUtils {
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext();
 
             setHTTPMethodAndStatus(tracingSpan, axis2MessageContext, messageContext);
-            setErrorStatus(tracingSpan, axis2MessageContext.getProperty(HTTP_SC));
+            setErrorStatus(tracingSpan, axis2MessageContext.getProperty(HTTP_SC), SpanKind.CLIENT);
         } catch (Exception e) {
             if (log.isDebugEnabled()) {
                 log.debug("Error while setting backend response HTTP attributes on the tracing span.", e);
@@ -1433,10 +1434,13 @@ public class GatewayUtils {
         return "https".equalsIgnoreCase(scheme) ? 443 : 80;
     }
 
-    private static void setErrorStatus(TelemetrySpan tracingSpan, Object httpStatusCode) {
+    private static void setErrorStatus(TelemetrySpan tracingSpan, Object httpStatusCode, SpanKind spanKind) {
 
         Long statusCode = getStatusCode(httpStatusCode);
-        if (statusCode != null && statusCode >= 400) {
+        // Per OpenTelemetry semantic conventions only 5xx marks a SERVER span as an error, while a CLIENT span
+        // treats 4xx responses as errors too.
+        long errorThreshold = SpanKind.SERVER.equals(spanKind) ? 500 : 400;
+        if (statusCode != null && statusCode >= errorThreshold) {
             TelemetryUtil.setStatus(tracingSpan, StatusCode.ERROR);
             TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.ERROR_TYPE_ATTRIBUTE,
                     Long.toString(statusCode));
@@ -1462,7 +1466,7 @@ public class GatewayUtils {
             TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_HTTP_RESPONSE_STATUS_CODE,
                     httpStatusCode.toString());
         }
-        setErrorStatus(tracingSpan, httpStatusCode);
+        setErrorStatus(tracingSpan, httpStatusCode, SpanKind.SERVER);
         Object httpStatusCodeDescription =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext().getProperty(HTTP_SC_DESC);
         if (httpStatusCodeDescription != null) {
