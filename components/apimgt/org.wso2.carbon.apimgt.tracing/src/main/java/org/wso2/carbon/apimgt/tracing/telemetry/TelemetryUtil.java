@@ -24,6 +24,7 @@ import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.context.propagation.TextMapGetter;
@@ -58,6 +59,43 @@ public class TelemetryUtil {
      * @param spanName   Operation name of the span.
      * @param parentSpan Root span of the new span to be created.
      * @param tracer     Initialized {@link io.opentelemetry.api.trace.Tracer}.
+     * @return TelemetrySpan object.
+     */
+    @Deprecated
+    public static TelemetrySpan startSpan(String spanName, TelemetrySpan parentSpan, TelemetryTracer tracer) {
+
+        Span childSpan;
+        if (parentSpan == null) {
+            Span span = tracer.getTelemetryTracingTracer().spanBuilder(spanName).startSpan();
+            return new TelemetrySpan(span);
+        } else {
+            Object sp = parentSpan.getSpan();
+            if (sp != null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Parent span exist");
+                }
+                if (sp instanceof Span) {
+                    childSpan = tracer.getTelemetryTracingTracer().spanBuilder(spanName).setParent(Context.current()
+                            .with((Span) sp)).startSpan();
+                } else {
+                    childSpan =
+                            tracer.getTelemetryTracingTracer().spanBuilder(spanName)
+                                    .setParent((Context) sp).startSpan();
+                }
+            } else {
+                childSpan = tracer.getTelemetryTracingTracer().spanBuilder(spanName).startSpan();
+            }
+        }
+        return new TelemetrySpan(childSpan);
+    }
+
+    /**
+     * Start the telemetry tracing span.
+     *
+     * @param spanName   Operation name of the span.
+     * @param parentSpan Root span of the new span to be created.
+     * @param tracer     Initialized {@link io.opentelemetry.api.trace.Tracer}.
+     * @param spanKind   Span kind.
      * @return TelemetrySpan object.
      */
     public static TelemetrySpan startSpan(String spanName, TelemetrySpan parentSpan,
@@ -96,6 +134,24 @@ public class TelemetryUtil {
      * @param tracer     Initialized {@link io.opentelemetry.api.trace.Tracer}.
      * @return TelemetrySpan object.
      */
+    @Deprecated 
+    public static TelemetrySpan startSpan(String spanName, Context parentSpan, TelemetryTracer tracer) {
+
+        Span childSpan;
+        childSpan = tracer.getTelemetryTracingTracer().spanBuilder(spanName).setParent(parentSpan).startSpan();
+
+        return new TelemetrySpan(childSpan);
+    }
+
+    /**
+     * Start telemetry tracing span after extracting a context.
+     *
+     * @param spanName   Operation name of the span.
+     * @param parentSpan Root context of the new span to be created.
+     * @param tracer     Initialized {@link io.opentelemetry.api.trace.Tracer}.
+     * @param spanKind   Span kind.
+     * @return TelemetrySpan object.
+     */
     public static TelemetrySpan startSpan(String spanName, Context parentSpan,
                                           TelemetryTracer tracer, SpanKind spanKind) {
 
@@ -129,6 +185,20 @@ public class TelemetryUtil {
         Object sp = span.getSpan();
         if (sp instanceof Span) {
             ((Span) sp).setAttribute(key, value);
+        }
+    }
+
+    /**
+     * Set the status of the span.
+     *
+     * @param span       Span which the status is set.
+     * @param statusCode Status to be set.
+     */
+    public static void setStatus(TelemetrySpan span, StatusCode statusCode) {
+
+        Object sp = span.getSpan();
+        if (sp instanceof Span) {
+            ((Span) sp).setStatus(statusCode);
         }
     }
 

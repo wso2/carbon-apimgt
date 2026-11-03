@@ -28,7 +28,6 @@ import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporterBuilder;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
-import io.opentelemetry.sdk.trace.SpanLimits;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
@@ -84,15 +83,10 @@ public class OTLPTelemetry implements APIMOpenTelemetry {
         if (StringUtils.isNotEmpty(endPointURL)) {
             SpanExporter spanExporter = buildSpanExporter(useHttp, endPointURL, headerKey, headerValue);
 
-            SpanLimits spanLimits = SpanLimits.builder()
-                    .setMaxNumberOfAttributes(256)
-                    .build();
-
             sdkTracerProvider = SdkTracerProvider.builder()
                     .addSpanProcessor(BatchSpanProcessor.builder(spanExporter).build())
                     .setResource(TelemetryUtil.getTracerProviderResource(serviceName))
                     .setSampler(getConfiguredSampler())
-                    .setSpanLimits(spanLimits)
                     .build();
 
             openTelemetry = OpenTelemetrySdk.builder()

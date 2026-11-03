@@ -95,7 +95,7 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
                     (TelemetrySpan) msgCtx.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
             tracer = ServiceReferenceHolder.getInstance().getTelemetryTracer();
             span = TelemetryUtil.startSpan(APIMgtGatewayConstants.GOOGLE_ANALYTICS_HANDLER, responseLatencySpan,
-                    tracer, SpanKind.CLIENT);
+                    tracer, SpanKind.INTERNAL);
         } else if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =
                     (TracingSpan) msgCtx.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);

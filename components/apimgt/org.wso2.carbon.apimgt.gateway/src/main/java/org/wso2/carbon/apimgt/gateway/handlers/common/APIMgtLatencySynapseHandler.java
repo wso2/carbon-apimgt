@@ -141,7 +141,7 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
             TelemetrySpan backendLatencySpan =
                     (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN);
             if (backendLatencySpan != null) {
-                GatewayUtils.setBackendHTTPAttributes(backendLatencySpan, messageContext);
+                GatewayUtils.setBackendResponseAttributes(backendLatencySpan, messageContext);
                 GatewayUtils.setEndpointRelatedInformation(backendLatencySpan, messageContext);
                 TelemetryUtil.finishSpan(backendLatencySpan);
             }
