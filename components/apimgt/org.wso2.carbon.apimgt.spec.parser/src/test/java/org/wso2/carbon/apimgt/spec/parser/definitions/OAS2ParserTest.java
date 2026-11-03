@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.models.HttpMethod;
 import io.swagger.models.Operation;
 import io.swagger.models.Path;
+import io.swagger.models.Scheme;
 import io.swagger.models.Swagger;
 import io.swagger.models.auth.OAuth2Definition;
 import io.swagger.parser.SwaggerParser;
@@ -417,6 +418,48 @@ public class OAS2ParserTest extends OASTestBase {
                         + File.separator + "devportal" + File.separator + "oas2_with_apikey_response.json"),
                 String.valueOf(StandardCharsets.UTF_8));
         Assert.assertEquals(oasDefinitionExpected, response);
+    }
+
+    @Test
+    public void testGetOASDefinitionForStoreWithEmptyGatewayHost() throws Exception {
+
+        String swagger = IOUtils.toString(
+                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas2"
+                        + File.separator + "publisher" + File.separator + "oas2_mig_without_sec_extensions.json"),
+                String.valueOf(StandardCharsets.UTF_8));
+        APIIdentifier apiIdentifier = new APIIdentifier("admin", "PizzaShackAPI", "1.0.0");
+        API api = new API(apiIdentifier);
+        api.setApiSecurity("oauth_basic_auth_api_key_mandatory,oauth2");
+        api.setTransports("http,https");
+        api.setContext("/pizzashack/1.0.0");
+        api.setScopes(new HashSet<>());
+
+        Map<String, String> hostWithSchemes = new HashMap<>();
+        hostWithSchemes.put(APISpecParserConstants.HTTP_PROTOCOL, "");
+        hostWithSchemes.put(APISpecParserConstants.HTTPS_PROTOCOL, "");
+
+        String response = oas2Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes, null);
+        assertEmptyGatewayHostIsNotPublished(response);
+
+        // Matches APIConsumerImpl when the API is not deployed: only an empty HTTP host is provided.
+        api.setTransports("http");
+        hostWithSchemes = new HashMap<>();
+        hostWithSchemes.put(APISpecParserConstants.HTTP_PROTOCOL, "");
+        response = oas2Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes, null);
+        assertEmptyGatewayHostIsNotPublished(response);
+    }
+
+    private void assertEmptyGatewayHostIsNotPublished(String response) {
+        Swagger parsedSwagger = new SwaggerParser().parse(response);
+        Assert.assertNotNull(parsedSwagger);
+        Assert.assertTrue("Expected empty host when gateway host is empty",
+                parsedSwagger.getHost() == null || parsedSwagger.getHost().isEmpty());
+        if (parsedSwagger.getSchemes() != null) {
+            Assert.assertFalse("HTTP scheme should not be added when gateway host is empty",
+                    parsedSwagger.getSchemes().contains(Scheme.HTTP));
+            Assert.assertFalse("HTTPS scheme should not be added when gateway host is empty",
+                    parsedSwagger.getSchemes().contains(Scheme.HTTPS));
+        }
     }
 
     private Set<Scope> getAPITestScopes() {

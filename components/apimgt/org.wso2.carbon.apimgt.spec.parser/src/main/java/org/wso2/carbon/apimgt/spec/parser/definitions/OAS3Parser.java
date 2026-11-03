@@ -1951,21 +1951,31 @@ public class OAS3Parser extends APIDefinition {
             String[] apiTransports = transports.split(",");
             if (ArrayUtils.contains(apiTransports, APISpecParserConstants.HTTPS_PROTOCOL) && hostsWithSchemes
                     .containsKey(APISpecParserConstants.HTTPS_PROTOCOL)) {
-                String host = hostsWithSchemes.get(APISpecParserConstants.HTTPS_PROTOCOL).trim()
-                        .replace(APISpecParserConstants.HTTPS_PROTOCOL_URL_PREFIX, "");
-                String httpsURL = APISpecParserConstants.HTTPS_PROTOCOL + "://" + host + basePath;
-                Server httpsServer = new Server();
-                httpsServer.setUrl(httpsURL);
-                servers.add(httpsServer);
+                String hostValue = hostsWithSchemes.get(APISpecParserConstants.HTTPS_PROTOCOL);
+                if (StringUtils.isNotEmpty(hostValue)) {
+                    String host = hostValue.trim()
+                            .replace(APISpecParserConstants.HTTPS_PROTOCOL_URL_PREFIX, "");
+                    if (StringUtils.isNotEmpty(host)) {
+                        String httpsURL = APISpecParserConstants.HTTPS_PROTOCOL + "://" + host + basePath;
+                        Server httpsServer = new Server();
+                        httpsServer.setUrl(httpsURL);
+                        servers.add(httpsServer);
+                    }
+                }
             }
             if (ArrayUtils.contains(apiTransports, APISpecParserConstants.HTTP_PROTOCOL) && hostsWithSchemes
                     .containsKey(APISpecParserConstants.HTTP_PROTOCOL)) {
-                String host = hostsWithSchemes.get(APISpecParserConstants.HTTP_PROTOCOL).trim()
-                        .replace(APISpecParserConstants.HTTP_PROTOCOL_URL_PREFIX, "");
-                String httpURL = APISpecParserConstants.HTTP_PROTOCOL + "://" + host + basePath;
-                Server httpsServer = new Server();
-                httpsServer.setUrl(httpURL);
-                servers.add(httpsServer);
+                String hostValue = hostsWithSchemes.get(APISpecParserConstants.HTTP_PROTOCOL);
+                if (StringUtils.isNotEmpty(hostValue)) {
+                    String host = hostValue.trim()
+                            .replace(APISpecParserConstants.HTTP_PROTOCOL_URL_PREFIX, "");
+                    if (StringUtils.isNotEmpty(host)) {
+                        String httpURL = APISpecParserConstants.HTTP_PROTOCOL + "://" + host + basePath;
+                        Server httpServer = new Server();
+                        httpServer.setUrl(httpURL);
+                        servers.add(httpServer);
+                    }
+                }
             }
             openAPI.setServers(servers);
         }
