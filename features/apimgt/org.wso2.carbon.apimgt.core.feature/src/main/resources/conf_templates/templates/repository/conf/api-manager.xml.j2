@@ -329,6 +329,10 @@
         {% if apim.cache.restapi_token.expiry_time is defined %}
         <RESTAPITokenCacheExpiry>{{apim.cache.restapi_token.expiry_time}}</RESTAPITokenCacheExpiry>
         {% endif %}
+        <!-- Expiry time in seconds to keep the subscriptions not found in the control plane, in the gateway -->
+        {% if apim.cache.subscription_not_found.expiry_time is defined %}
+        <SubscriptionNotFoundCacheExpiry>{{apim.cache.subscription_not_found.expiry_time}}</SubscriptionNotFoundCacheExpiry>
+        {% endif %}
         <!-- Enable/Disable cache control headers of the Product REST APIs-->
         <EnableRESTAPICacheControlHeaders>{{apim.cache.restapi_cache_control_headers.enable}}</EnableRESTAPICacheControlHeaders>
         <!-- MaxAge for the cache control headers of the Product REST APIs -->
