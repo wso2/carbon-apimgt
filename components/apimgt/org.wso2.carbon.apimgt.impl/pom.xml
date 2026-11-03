@@ -556,8 +556,8 @@
                             <value>${basedir}/src/test/resources</value>
                         </property>
                         <property>
-                            <name>apim.conf.templates.dir</name>
-                            <value>${basedir}/../../../features/apimgt/org.wso2.carbon.apimgt.core.feature/src/main/resources/conf_templates</value>
+                            <name>apim.features.dir</name>
+                            <value>${basedir}/../../../features</value>
                         </property>
                     </systemProperties>
                     <classpathDependencyExcludes>
