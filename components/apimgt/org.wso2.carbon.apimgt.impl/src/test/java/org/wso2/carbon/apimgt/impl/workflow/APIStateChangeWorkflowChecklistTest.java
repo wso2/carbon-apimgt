@@ -128,6 +128,13 @@ public class APIStateChangeWorkflowChecklistTest {
     }
 
     @Test
+    public void nonObjectChecklistMetadataReturnsEmptyChecklist() {
+        // Valid JSON that is not an object must not fail the approval of the state change.
+        Assert.assertTrue(WorkflowUtils.getLifecycleChecklist(buildWorkflow("null")).isEmpty());
+        Assert.assertTrue(WorkflowUtils.getLifecycleChecklist(buildWorkflow("[]")).isEmpty());
+    }
+
+    @Test
     public void approvedStateChangeAppliesRequestedChecklist() throws Exception {
         Map<String, Boolean> checklist = buildChecklist(true, true);
         completeApprovalWorkflow(buildWorkflow(new JSONObject(checklist).toJSONString()), WorkflowStatus.APPROVED);
@@ -156,25 +163,22 @@ public class APIStateChangeWorkflowChecklistTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     public void approvedWSStateChangeAppliesRequestedChecklist() throws Exception {
         Map<String, Boolean> checklist = buildChecklist(true, false);
         Mockito.when(apiMgtDAO.getworkflowReferenceByExternalWorkflowReference(EXT_WF_REF))
                 .thenReturn(buildWorkflow(new JSONObject(checklist).toJSONString()));
 
-        WorkflowDTO workflowDTO = buildWorkflowDTO(WorkflowStatus.APPROVED);
-        workflowDTO.getAttributes().put(WorkflowConstants.PayloadConstants.VARIABLE_API_LC_ACTION, PUBLISH);
-        workflowDTO.getAttributes().put(WorkflowConstants.PayloadConstants.VARIABLE_APINAME, API_NAME);
-        workflowDTO.getAttributes().put(WorkflowConstants.PayloadConstants.VARIABLE_APIPROVIDER, PROVIDER);
-        workflowDTO.getAttributes().put(WorkflowConstants.PayloadConstants.VARIABLE_APIVERSION, API_VERSION);
-        workflowDTO.getAttributes().put(WorkflowConstants.PayloadConstants.VARIABLE_INVOKER, PROVIDER);
-        new APIStateChangeWSWorkflowExecutor().complete(workflowDTO);
-
-        ArgumentCaptor<Map> captor = ArgumentCaptor.forClass(Map.class);
-        Mockito.verify(apiProvider).changeLifeCycleStatus(Mockito.eq(TENANT_DOMAIN), Mockito.eq(apiTypeWrapper),
-                Mockito.eq(PUBLISH), captor.capture());
         Assert.assertEquals("Checklist selected in the Publisher must be applied on approval",
-                checklist, captor.getValue());
+                checklist, completeWSWorkflowAndCaptureChecklist(WorkflowStatus.APPROVED));
+    }
+
+    @Test
+    public void rejectedWSStateChangeDoesNotApplyRequestedChecklist() throws Exception {
+        Mockito.when(apiMgtDAO.getworkflowReferenceByExternalWorkflowReference(EXT_WF_REF))
+                .thenReturn(buildWorkflow(new JSONObject(buildChecklist(true, true)).toJSONString()));
+
+        Assert.assertTrue("Checklist must not be applied when the state change is rejected",
+                completeWSWorkflowAndCaptureChecklist(WorkflowStatus.REJECTED).isEmpty());
     }
 
     // ---- helpers -----------------------------------------------------------
@@ -213,6 +217,22 @@ public class APIStateChangeWorkflowChecklistTest {
     private void completeApprovalWorkflow(Workflow workflow, WorkflowStatus status) throws Exception {
         Mockito.when(apiMgtDAO.getworkflowReferenceByExternalWorkflowReference(EXT_WF_REF)).thenReturn(workflow);
         new APIStateChangeApprovalWorkflowExecutor().complete(buildWorkflowDTO(status));
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Boolean> completeWSWorkflowAndCaptureChecklist(WorkflowStatus status) throws Exception {
+        WorkflowDTO workflowDTO = buildWorkflowDTO(status);
+        workflowDTO.getAttributes().put(WorkflowConstants.PayloadConstants.VARIABLE_API_LC_ACTION, PUBLISH);
+        workflowDTO.getAttributes().put(WorkflowConstants.PayloadConstants.VARIABLE_APINAME, API_NAME);
+        workflowDTO.getAttributes().put(WorkflowConstants.PayloadConstants.VARIABLE_APIPROVIDER, PROVIDER);
+        workflowDTO.getAttributes().put(WorkflowConstants.PayloadConstants.VARIABLE_APIVERSION, API_VERSION);
+        workflowDTO.getAttributes().put(WorkflowConstants.PayloadConstants.VARIABLE_INVOKER, PROVIDER);
+        new APIStateChangeWSWorkflowExecutor().complete(workflowDTO);
+
+        ArgumentCaptor<Map> captor = ArgumentCaptor.forClass(Map.class);
+        Mockito.verify(apiProvider).changeLifeCycleStatus(Mockito.eq(TENANT_DOMAIN), Mockito.eq(apiTypeWrapper),
+                Mockito.eq(PUBLISH), captor.capture());
+        return captor.getValue();
     }
 
     @SuppressWarnings("unchecked")

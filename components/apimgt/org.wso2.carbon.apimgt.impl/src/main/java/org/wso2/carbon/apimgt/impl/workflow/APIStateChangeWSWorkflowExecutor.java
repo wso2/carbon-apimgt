@@ -261,8 +261,10 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
                 ApiTypeWrapper apIorAPIProductByUUID = apiProvider.getAPIorAPIProductByUUID(uuid, tenantDomain);
                 Workflow workflow = apiMgtDAO.getworkflowReferenceByExternalWorkflowReference(
                         workflowDTO.getExternalWorkflowReference());
-                Map<String, Boolean> checklist = workflow != null ? WorkflowUtils.getLifecycleChecklist(workflow)
-                        : Collections.emptyMap();
+                // Apply the checklist selected for the state change only when the request is approved
+                Map<String, Boolean> checklist = workflow != null
+                        && WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())
+                        ? WorkflowUtils.getLifecycleChecklist(workflow) : Collections.emptyMap();
                 apiProvider.changeLifeCycleStatus(tenantDomain, apIorAPIProductByUUID, action, checklist);
                 if (log.isDebugEnabled()) {
                     String logMessage = "API Status changed successfully. API Name: " + apiIdentifier.getApiName()

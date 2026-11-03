@@ -365,11 +365,16 @@ public class WorkflowUtils {
             return checklist;
         }
         try {
-            JSONObject checklistObj = (JSONObject) new JSONParser().parse(checklistJson);
+            Object parsedChecklist = new JSONParser().parse(checklistJson);
+            if (!(parsedChecklist instanceof JSONObject)) {
+                log.error("Invalid lifecycle checklist found in workflow: " + workflow.getExternalWorkflowReference());
+                return checklist;
+            }
+            JSONObject checklistObj = (JSONObject) parsedChecklist;
             for (Object key : checklistObj.keySet()) {
                 checklist.put((String) key, Boolean.parseBoolean(String.valueOf(checklistObj.get(key))));
             }
-        } catch (ParseException | ClassCastException e) {
+        } catch (ParseException e) {
             log.error("Error while parsing the lifecycle checklist of workflow: "
                     + workflow.getExternalWorkflowReference(), e);
         }
