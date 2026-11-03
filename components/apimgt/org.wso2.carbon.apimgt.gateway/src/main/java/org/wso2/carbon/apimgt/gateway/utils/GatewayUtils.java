@@ -27,6 +27,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.proc.BadJWTException;
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
+import io.opentelemetry.api.trace.StatusCode;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONValue;
@@ -110,6 +111,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -1252,8 +1254,16 @@ public class GatewayUtils {
 
             String fullRequestPath = ApiUtils.getFullRequestPath(messageContext);
             if (StringUtils.isNotEmpty(fullRequestPath)) {
-                TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.HTTP_URL_ATTRIBUTE, fullRequestPath);
+                String urlPath = StringUtils.substringBefore(fullRequestPath, "?");
+                TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.HTTP_URL_ATTRIBUTE, urlPath);
             }
+
+            String urlScheme = axis2MessageContext.getIncomingTransportName();
+            if (StringUtils.isNotEmpty(urlScheme)) {
+                TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.HTTP_URL_SCHEME_ATTRIBUTE, urlScheme);
+            }
+
+            setServerAddressAndPortFromHostHeader(tracingSpan, axis2MessageContext, urlScheme);
         } catch (Exception e) {
             if (log.isDebugEnabled()) {
                 log.debug("Error while setting common HTTP attributes on the tracing span.", e);
@@ -1275,16 +1285,64 @@ public class GatewayUtils {
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext();
 
             setHTTPMethodAndStatus(tracingSpan, axis2MessageContext, messageContext);
+            setErrorStatus(tracingSpan, axis2MessageContext.getProperty(HTTP_SC));
 
             Object backendUrlObject =
                     messageContext.getProperty(APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS);
             String backendUrl = backendUrlObject != null ? (String) backendUrlObject : null;
             if (StringUtils.isNotEmpty(backendUrl)) {
-                TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.HTTP_URL_FULL_ATTRIBUTE, backendUrl);
+                Object restUrlPostfixObject = axis2MessageContext.getProperty(NhttpConstants.REST_URL_POSTFIX);
+                String resourcePath = restUrlPostfixObject != null
+                        ? StringUtils.substringBefore(restUrlPostfixObject.toString(), "?")
+                        : StringUtils.EMPTY;
+
+                String urlFull = backendUrl;
+                if (StringUtils.isNotEmpty(resourcePath)) {
+                    if (urlFull.endsWith("/") && resourcePath.startsWith("/")) {
+                        urlFull = urlFull.substring(0, urlFull.length() - 1) + resourcePath;
+                    } else if (!urlFull.endsWith("/") && !resourcePath.startsWith("/")) {
+                        urlFull = urlFull + "/" + resourcePath;
+                    } else {
+                        urlFull = urlFull + resourcePath;
+                    }
+                }
+                urlFull = StringUtils.substringBefore(urlFull, "?");
+                TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.HTTP_URL_FULL_ATTRIBUTE, urlFull);
+
+                URI backendUri = new URI(backendUrl);
+                String backendScheme = backendUri.getScheme();
+                if (StringUtils.isNotEmpty(backendScheme)) {
+                    TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.HTTP_URL_SCHEME_ATTRIBUTE, backendScheme);
+                }
+
+                int backendPort = backendUri.getPort() > 0 ? backendUri.getPort() : getDefaultPort(backendScheme);
+                setServerAddressAndPort(tracingSpan, backendUri.getHost(), backendPort);
             }
         } catch (Exception e) {
             if (log.isDebugEnabled()) {
                 log.debug("Error while setting backend HTTP attributes on the tracing span.", e);
+            }
+        }
+    }
+
+    //for OpenTelemetry
+    public static void setBackendResponseAttributes(TelemetrySpan tracingSpan,
+                                                    org.apache.synapse.MessageContext messageContext) {
+
+        // Skip if the tracing span is null or the message context is not an Axis2MessageContext.
+        if (tracingSpan == null || !(messageContext instanceof Axis2MessageContext)) {
+            return;
+        }
+
+        try {
+            org.apache.axis2.context.MessageContext axis2MessageContext =
+                    ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+
+            setHTTPMethodAndStatus(tracingSpan, axis2MessageContext, messageContext);
+            setErrorStatus(tracingSpan, axis2MessageContext.getProperty(HTTP_SC));
+        } catch (Exception e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Error while setting backend response HTTP attributes on the tracing span.", e);
             }
         }
     }
@@ -1301,10 +1359,87 @@ public class GatewayUtils {
             TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.HTTP_METHOD_ATTRIBUTE, httpMethod);
         }
 
-        Object httpStatusCode = axis2MessageContext.getProperty(HTTP_SC);
+        Long httpStatusCode = getStatusCode(axis2MessageContext.getProperty(HTTP_SC));
+        if (httpStatusCode != null) {
+            TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.HTTP_STATUS_CODE_ATTRIBUTE, httpStatusCode);
+        }
+    }
+
+    /**
+     * Resolve the HTTP status code from the message context property. Fault sequences and custom mediation
+     * policies set HTTP_SC as a string, while the gateway handlers set it as an integer. Non numeric values are
+     * skipped.
+     *
+     * @param httpStatusCode raw value of the HTTP_SC property
+     * @return the status code, or null if it is missing or not numeric
+     */
+    private static Long getStatusCode(Object httpStatusCode) {
+
         if (httpStatusCode instanceof Number) {
-            TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.HTTP_STATUS_CODE_ATTRIBUTE,
-                    ((Number) httpStatusCode).longValue());
+            return ((Number) httpStatusCode).longValue();
+        }
+        if (httpStatusCode instanceof String) {
+            String statusCodeValue = ((String) httpStatusCode).trim();
+            if (StringUtils.isNumeric(statusCodeValue)) {
+                try {
+                    return Long.parseLong(statusCodeValue);
+                } catch (NumberFormatException e) {
+                    return null;
+                }
+            }
+        }
+        return null;
+    }
+
+    private static void setServerAddressAndPort(TelemetrySpan tracingSpan, String host, int port) {
+
+        if (StringUtils.isNotEmpty(host)) {
+            TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.SERVER_ADDRESS_ATTRIBUTE, host);
+        }
+        if (port > 0) {
+            TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.SERVER_PORT_ATTRIBUTE, port);
+        }
+    }
+
+    private static void setServerAddressAndPortFromHostHeader(TelemetrySpan tracingSpan,
+                                                             org.apache.axis2.context.MessageContext axis2MessageContext,
+                                                             String urlScheme) {
+
+        Map headers = (Map) axis2MessageContext.getProperty(
+                org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        Object hostHeaderValue = headers != null ? headers.get(APIMgtGatewayConstants.HOST) : null;
+        if (hostHeaderValue == null || StringUtils.isBlank(hostHeaderValue.toString())) {
+            return;
+        }
+
+        String hostHeader = hostHeaderValue.toString().trim();
+        String host = hostHeader;
+        int port = -1;
+        int colonIndex = hostHeader.lastIndexOf(':');
+        // Do not treat the colons of an IPv6 literal as a port separator.
+        if (colonIndex > 0 && hostHeader.indexOf(':') == colonIndex) {
+            String portPart = hostHeader.substring(colonIndex + 1);
+            if (StringUtils.isNumeric(portPart)) {
+                port = Integer.parseInt(portPart);
+                host = hostHeader.substring(0, colonIndex);
+            }
+        }
+
+        setServerAddressAndPort(tracingSpan, host, port > 0 ? port : getDefaultPort(urlScheme));
+    }
+
+    private static int getDefaultPort(String scheme) {
+
+        return "https".equalsIgnoreCase(scheme) ? 443 : 80;
+    }
+
+    private static void setErrorStatus(TelemetrySpan tracingSpan, Object httpStatusCode) {
+
+        Long statusCode = getStatusCode(httpStatusCode);
+        if (statusCode != null && statusCode >= 400) {
+            TelemetryUtil.setStatus(tracingSpan, StatusCode.ERROR);
+            TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.ERROR_TYPE_ATTRIBUTE,
+                    Long.toString(statusCode));
         }
     }
 
@@ -1315,6 +1450,7 @@ public class GatewayUtils {
         Object electedResource = messageContext.getProperty(APIMgtGatewayConstants.API_ELECTED_RESOURCE);
         if (electedResource != null) {
             TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_RESOURCE, (String) electedResource);
+            TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.HTTP_ROUTE_ATTRIBUTE, (String) electedResource);
         }
         if (api != null) {
             TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_API_NAME, api.getApiName());
@@ -1326,6 +1462,7 @@ public class GatewayUtils {
             TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_HTTP_RESPONSE_STATUS_CODE,
                     httpStatusCode.toString());
         }
+        setErrorStatus(tracingSpan, httpStatusCode);
         Object httpStatusCodeDescription =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext().getProperty(HTTP_SC_DESC);
         if (httpStatusCodeDescription != null) {

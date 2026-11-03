@@ -210,7 +210,12 @@ public class APIMgtGatewayConstants {
     public static final String HTTP_METHOD_ATTRIBUTE = "http.request.method"; // old -> http.method
     public static final String HTTP_URL_ATTRIBUTE = "url.path"; // old -> http.url
     public static final String HTTP_URL_FULL_ATTRIBUTE = "url.full"; // for span.kind = CLIENT
+    public static final String HTTP_URL_SCHEME_ATTRIBUTE = "url.scheme";
+    public static final String HTTP_ROUTE_ATTRIBUTE = "http.route"; // for span.kind = SERVER
+    public static final String ERROR_TYPE_ATTRIBUTE = "error.type";
     public static final String HTTP_STATUS_CODE_ATTRIBUTE = "http.response.status_code"; // old -> http.status_code
+    public static final String SERVER_ADDRESS_ATTRIBUTE = "server.address";
+    public static final String SERVER_PORT_ATTRIBUTE = "server.port";
 
     public static final String INTERNAL_KEY = "Internal-Key";
 
