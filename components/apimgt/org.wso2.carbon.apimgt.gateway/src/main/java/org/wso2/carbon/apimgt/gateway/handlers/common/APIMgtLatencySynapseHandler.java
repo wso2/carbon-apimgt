@@ -152,25 +152,30 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
     @Override
     public boolean handleResponseOutFlow(MessageContext messageContext) {
         if (TelemetryUtil.telemetryEnabled()) {
-            Object resourceSpanObject = messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
-            if (resourceSpanObject != null) {
-                GatewayUtils.setAPIResource((TelemetrySpan) resourceSpanObject, messageContext);
-                TelemetryUtil.finishSpan((TelemetrySpan) resourceSpanObject);
-            }
-            TelemetrySpan responseLatencySpan =
-                    (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
-            if (responseLatencySpan != null) {
-                GatewayUtils.setAPIRelatedTags(responseLatencySpan, messageContext);
-                API api = GatewayUtils.getAPI(messageContext);
-                String tenantDomain = (String) messageContext.getProperty(APIMgtGatewayConstants.TENANT_DOMAIN);
-                if (api != null) {
-                    TelemetryUtil.updateOperation(responseLatencySpan,
-                            api.getApiName().concat("--").concat(api.getApiVersion()).concat("--")
-                                    .concat(tenantDomain));
+            try {
+                Object resourceSpanObject = messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
+                if (resourceSpanObject != null) {
+                    GatewayUtils.setAPIResource((TelemetrySpan) resourceSpanObject, messageContext);
+                    TelemetryUtil.finishSpan((TelemetrySpan) resourceSpanObject);
                 }
-                TelemetryUtil.finishSpan(responseLatencySpan);
+                TelemetrySpan responseLatencySpan =
+                        (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+                if (responseLatencySpan != null) {
+                    GatewayUtils.setAPIRelatedTags(responseLatencySpan, messageContext);
+                    API api = GatewayUtils.getAPI(messageContext);
+                    String tenantDomain = (String) messageContext.getProperty(APIMgtGatewayConstants.TENANT_DOMAIN);
+                    if (api != null) {
+                        TelemetryUtil.updateOperation(responseLatencySpan,
+                                api.getApiName().concat("--").concat(api.getApiVersion()).concat("--")
+                                        .concat(tenantDomain));
+                    }
+                    TelemetryUtil.finishSpan(responseLatencySpan);
+                }
+            } finally {
+                // Remove the IDs even if completing the spans fails, so this thread does not log them for the next
+                // message it mediates
+                TelemetryLogUtil.clearTracingIds();
             }
-            TelemetryLogUtil.clearTracingIds();
         } else if (Util.tracingEnabled()) {
             Object resourceSpanObject = messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
             if (resourceSpanObject != null) {
