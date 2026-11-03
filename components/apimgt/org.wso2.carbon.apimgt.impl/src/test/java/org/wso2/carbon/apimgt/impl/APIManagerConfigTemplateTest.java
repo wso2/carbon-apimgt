@@ -32,12 +32,9 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.AbstractMap;
 import java.util.Collection;
@@ -48,64 +45,48 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 /**
- * Checks that every XML config template (*.xml.j2) of the API Manager features renders well-formed XML for every
- * if/elif/else branch. Most branches are rendered only when a specific deployment.toml config is set, so a malformed
- * tag inside one of them (e.g. a wrong closing tag) is not visible with the default configs but breaks server startup
- * once that config is used. The templates are rendered with Jinjava, the engine used by the config mapper, while the
- * branch taken by each if block is selected in turn.
+ * Checks that the api-manager.xml.j2 template renders well-formed XML for every if/elif/else branch. Most branches are
+ * rendered only when a specific deployment.toml config is set, so a malformed tag inside one of them (e.g. a wrong
+ * closing tag) is not visible with the default configs but breaks server startup once that config is used. The
+ * template is rendered with Jinjava, the engine used by the config mapper, while the branch taken by each if block is
+ * selected in turn.
  */
-public class XMLConfigTemplateTest {
+public class APIManagerConfigTemplateTest {
 
-    private static final String FEATURES_DIR_PROPERTY = "apim.features.dir";
+    private static final String TEMPLATE_PATH_PROPERTY = "apim.config.template";
 
     @Test
     public void testAllBranchesRenderWellFormedXML() throws Exception {
 
-        List<Path> templates = findTemplates();
-        Assert.assertFalse("No XML config templates found", templates.isEmpty());
-
+        String template = new String(Files.readAllBytes(Paths.get(System.getProperty(TEMPLATE_PATH_PROPERTY))),
+                StandardCharsets.UTF_8);
         BranchSelectingIfTag ifTag = new BranchSelectingIfTag();
         Jinjava jinjava = new Jinjava();
         jinjava.getGlobalContext().registerTag(ifTag);
         jinjava.getGlobalContext().registerTag(new AtLeastOnceForTag());
         DocumentBuilder documentBuilder = newDocumentBuilder();
 
+        Map<Map<String, Integer>, String> branchSelections = new LinkedHashMap<>();
+        collectBranchSelections(jinjava.newInterpreter().parse(template), Collections.<String, Integer>emptyMap(),
+                branchSelections);
         Set<String> failures = new LinkedHashSet<>();
-        for (Path template : templates) {
-            String content = new String(Files.readAllBytes(template), StandardCharsets.UTF_8);
-            Map<Map<String, Integer>, String> branchSelections = new LinkedHashMap<>();
-            collectBranchSelections(jinjava.newInterpreter().parse(content), Collections.<String, Integer>emptyMap(),
-                    branchSelections);
-            for (Map.Entry<Map<String, Integer>, String> branchSelection : branchSelections.entrySet()) {
-                ifTag.selectedBranches = branchSelection.getKey();
-                String rendered = jinjava.render(content, new HashMap<String, Object>());
-                try {
-                    documentBuilder.parse(new InputSource(new StringReader(rendered)));
-                } catch (SAXParseException e) {
-                    failures.add(template.getFileName() + " with " + branchSelection.getValue() + ": "
-                            + e.getMessage() + " Rendered line " + e.getLineNumber() + ": "
-                            + rendered.split("\n", -1)[e.getLineNumber() - 1].trim());
-                }
+        for (Map.Entry<Map<String, Integer>, String> branchSelection : branchSelections.entrySet()) {
+            ifTag.selectedBranches = branchSelection.getKey();
+            String rendered = jinjava.render(template, new HashMap<String, Object>());
+            try {
+                documentBuilder.parse(new InputSource(new StringReader(rendered)));
+            } catch (SAXParseException e) {
+                failures.add(branchSelection.getValue() + ": " + e.getMessage() + " Rendered line "
+                        + e.getLineNumber() + ": " + rendered.split("\n", -1)[e.getLineNumber() - 1].trim());
             }
         }
-        Assert.assertTrue("Malformed XML rendered by config templates:\n" + String.join("\n", failures),
+        Assert.assertTrue("Malformed XML rendered by api-manager.xml.j2 with:\n" + String.join("\n", failures),
                 failures.isEmpty());
-    }
-
-    private List<Path> findTemplates() throws IOException {
-
-        try (Stream<Path> paths = Files.walk(Paths.get(System.getProperty(FEATURES_DIR_PROPERTY)))) {
-            return paths.filter(path -> path.toString().replace(File.separatorChar, '/')
-                    .contains("/src/main/resources/conf_templates/") && path.toString().endsWith(".xml.j2"))
-                    .sorted().collect(Collectors.toList());
-        }
     }
 
     private DocumentBuilder newDocumentBuilder() throws ParserConfigurationException {
