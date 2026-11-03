@@ -125,6 +125,8 @@ public class SubscriptionMappingUtil {
             subscriptionDTO.setApiInfo(apiInfo);
         }
         Application application = subscription.getApplication();
+        Application lightweightApplication = apiConsumer.getLightweightApplicationByUUID(application.getUUID());
+        application.setApplicationAttributes(lightweightApplication.getApplicationAttributes());
         subscriptionDTO.setApplicationId(subscription.getApplication().getUUID());
         subscriptionDTO.setStatus(SubscriptionDTO.StatusEnum.valueOf(subscription.getSubStatus()));
         subscriptionDTO.setThrottlingPolicy(subscription.getTier().getName());
