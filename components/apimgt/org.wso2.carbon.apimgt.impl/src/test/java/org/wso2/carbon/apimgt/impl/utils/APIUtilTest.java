@@ -231,6 +231,7 @@ public class APIUtilTest {
             String errorDescription = ex.getErrorHandler().getErrorDescription();
             Assert.assertTrue(errorDescription.contains("Insufficient scopes available in tenant-config"));
             Assert.assertTrue(errorDescription.contains("Missing scopes:"));
+            Assert.assertTrue(errorDescription.contains("apim:api_publish"));
             Assert.assertFalse(errorDescription.contains("%s"));
         }
     }
