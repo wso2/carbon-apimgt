@@ -63,30 +63,7 @@ public class TelemetryUtil {
      */
     @Deprecated
     public static TelemetrySpan startSpan(String spanName, TelemetrySpan parentSpan, TelemetryTracer tracer) {
-
-        Span childSpan;
-        if (parentSpan == null) {
-            Span span = tracer.getTelemetryTracingTracer().spanBuilder(spanName).startSpan();
-            return new TelemetrySpan(span);
-        } else {
-            Object sp = parentSpan.getSpan();
-            if (sp != null) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Parent span exist");
-                }
-                if (sp instanceof Span) {
-                    childSpan = tracer.getTelemetryTracingTracer().spanBuilder(spanName).setParent(Context.current()
-                            .with((Span) sp)).startSpan();
-                } else {
-                    childSpan =
-                            tracer.getTelemetryTracingTracer().spanBuilder(spanName)
-                                    .setParent((Context) sp).startSpan();
-                }
-            } else {
-                childSpan = tracer.getTelemetryTracingTracer().spanBuilder(spanName).startSpan();
-            }
-        }
-        return new TelemetrySpan(childSpan);
+        return startSpan(spanName, parentSpan, tracer, null);
     }
 
     /**
@@ -137,10 +114,7 @@ public class TelemetryUtil {
     @Deprecated 
     public static TelemetrySpan startSpan(String spanName, Context parentSpan, TelemetryTracer tracer) {
 
-        Span childSpan;
-        childSpan = tracer.getTelemetryTracingTracer().spanBuilder(spanName).setParent(parentSpan).startSpan();
-
-        return new TelemetrySpan(childSpan);
+        return startSpan(spanName, parentSpan, tracer, null);
     }
 
     /**
