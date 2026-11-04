@@ -29,6 +29,7 @@ import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.utils.TelemetryLogUtil;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
@@ -106,6 +107,7 @@ public class APIManagerExtensionHandler extends AbstractHandler {
         long executionStartTime = System.nanoTime();
         TracingSpan requestMediationTracingSpan = null;
         TelemetrySpan requestMediationSpan = null;
+        TelemetryLogUtil.TracingIds previousTracingIds = null;
         if (TelemetryUtil.telemetryEnabled()) {
             TelemetrySpan responseLatencySpan =
                     (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
@@ -120,6 +122,7 @@ public class APIManagerExtensionHandler extends AbstractHandler {
                     responseLatencySpan, tracer);
         }
         try {
+            previousTracingIds = TelemetryLogUtil.enterSpan(requestMediationSpan);
             boolean isMediated = mediate(messageContext, DIRECTION_IN);
             if (isMediated) {
                 String requestDestination = null;
@@ -144,6 +147,7 @@ public class APIManagerExtensionHandler extends AbstractHandler {
             throw e;
         } finally {
             if (TelemetryUtil.telemetryEnabled()) {
+                TelemetryLogUtil.exitSpan(previousTracingIds);
                 TelemetryUtil.finishSpan(requestMediationSpan);
 
             } else if (Util.tracingEnabled()) {
@@ -161,6 +165,7 @@ public class APIManagerExtensionHandler extends AbstractHandler {
         long executionStartTime = System.nanoTime();
         TracingSpan responseMediationTracingSpan = null;
         TelemetrySpan responseMediationSpan = null;
+        TelemetryLogUtil.TracingIds previousTracingIds = null;
         if (TelemetryUtil.telemetryEnabled()) {
             TelemetrySpan responseLatencySpan =
                     (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
@@ -175,6 +180,7 @@ public class APIManagerExtensionHandler extends AbstractHandler {
                     Util.startSpan(APIMgtGatewayConstants.RESPONSE_MEDIATION, responseLatencySpan, tracer);
         }
         try {
+            previousTracingIds = TelemetryLogUtil.enterSpan(responseMediationSpan);
             return mediate(messageContext, DIRECTION_OUT);
         } catch (Exception e) {
             if (TelemetryUtil.telemetryEnabled() && responseMediationTracingSpan != null) {
@@ -187,6 +193,7 @@ public class APIManagerExtensionHandler extends AbstractHandler {
             throw e;
         } finally {
             if (TelemetryUtil.telemetryEnabled()) {
+                TelemetryLogUtil.exitSpan(previousTracingIds);
                 TelemetryUtil.finishSpan(responseMediationSpan);
             } else if (Util.tracingEnabled()) {
                 Util.finishSpan(responseMediationTracingSpan);

@@ -164,6 +164,8 @@ public class APIMgtGatewayConstants {
     public static final String SPAN_REQUEST_PATH = "span.request.path";
     public static final String SPAN_REQUEST_METHOD = "span.request.method";
     public static final String SERVER = "server";
+    public static final String TRACE_ID_LOG_KEY = "trace_id";
+    public static final String SPAN_ID_LOG_KEY = "span_id";
     public static final String ERROR = "error";
     public static final String KEY_SPAN_ERROR = "API Authentication Failure";
     public static final String RESPONSE_MEDIATION_ERROR = "Error in Response Mediation";
