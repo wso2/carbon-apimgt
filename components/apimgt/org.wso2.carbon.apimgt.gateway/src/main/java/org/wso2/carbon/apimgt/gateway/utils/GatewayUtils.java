@@ -51,6 +51,7 @@ import org.apache.synapse.Mediator;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.api.ApiUtils;
 import org.apache.synapse.commons.json.JsonUtil;
+import org.apache.synapse.config.xml.rest.VersionStrategyFactory;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
@@ -1317,7 +1318,8 @@ public class GatewayUtils {
                 }
 
                 int backendPort = backendUri.getPort() > 0 ? backendUri.getPort() : getDefaultPort(backendScheme);
-                setServerAddressAndPort(tracingSpan, backendUri.getHost(), backendPort);
+                // URI.getHost() keeps the square brackets of an IPv6 literal, while server.address must not have them.
+                setServerAddressAndPort(tracingSpan, stripIpv6Brackets(backendUri.getHost()), backendPort);
             }
         } catch (Exception e) {
             if (log.isDebugEnabled()) {
@@ -1416,17 +1418,54 @@ public class GatewayUtils {
         String hostHeader = hostHeaderValue.toString().trim();
         String host = hostHeader;
         int port = -1;
-        int colonIndex = hostHeader.lastIndexOf(':');
-        // Do not treat the colons of an IPv6 literal as a port separator.
-        if (colonIndex > 0 && hostHeader.indexOf(':') == colonIndex) {
-            String portPart = hostHeader.substring(colonIndex + 1);
-            if (StringUtils.isNumeric(portPart)) {
-                port = Integer.parseInt(portPart);
-                host = hostHeader.substring(0, colonIndex);
+        if (hostHeader.startsWith("[")) {
+            // An IPv6 literal is enclosed in square brackets, so only a colon after the closing bracket
+            // separates the port: [::1] or [::1]:8243.
+            int closingBracketIndex = hostHeader.indexOf(']');
+            if (closingBracketIndex > 0) {
+                host = hostHeader.substring(1, closingBracketIndex);
+                int portSeparatorIndex = closingBracketIndex + 1;
+                if (portSeparatorIndex < hostHeader.length() && hostHeader.charAt(portSeparatorIndex) == ':') {
+                    port = parsePort(hostHeader.substring(portSeparatorIndex + 1));
+                }
+            }
+        } else {
+            int colonIndex = hostHeader.indexOf(':');
+            // A single colon separates the port from a host name; the colons of an unbracketed IPv6 literal do not.
+            if (colonIndex > 0 && hostHeader.indexOf(':', colonIndex + 1) < 0) {
+                int parsedPort = parsePort(hostHeader.substring(colonIndex + 1));
+                if (parsedPort > 0) {
+                    port = parsedPort;
+                    host = hostHeader.substring(0, colonIndex);
+                }
             }
         }
 
         setServerAddressAndPort(tracingSpan, host, port > 0 ? port : getDefaultPort(urlScheme));
+    }
+
+    private static int parsePort(String portValue) {
+
+        String trimmedPortValue = portValue != null ? portValue.trim() : null;
+        if (StringUtils.isNotEmpty(trimmedPortValue) && StringUtils.isNumeric(trimmedPortValue)) {
+            try {
+                int port = Integer.parseInt(trimmedPortValue);
+                if (port > 0 && port <= 65535) {
+                    return port;
+                }
+            } catch (NumberFormatException e) {
+                return -1;
+            }
+        }
+        return -1;
+    }
+
+    private static String stripIpv6Brackets(String host) {
+
+        if (StringUtils.isNotEmpty(host) && host.startsWith("[") && host.endsWith("]") && host.length() > 2) {
+            return host.substring(1, host.length() - 1);
+        }
+        return host;
     }
 
     private static int getDefaultPort(String scheme) {
@@ -1453,8 +1492,16 @@ public class GatewayUtils {
         API api = GatewayUtils.getAPI(messageContext);
         Object electedResource = messageContext.getProperty(APIMgtGatewayConstants.API_ELECTED_RESOURCE);
         if (electedResource != null) {
-            TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_RESOURCE, (String) electedResource);
-            TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.HTTP_ROUTE_ATTRIBUTE, (String) electedResource);
+            String resource = (String) electedResource;
+            TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_RESOURCE, resource);
+            String httpRoute = buildHttpRoute(
+                    (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT),
+                    (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION),
+                    (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION_STRATEGY),
+                    resource);
+            if (httpRoute != null) {
+                TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.HTTP_ROUTE_ATTRIBUTE, httpRoute);
+            }
         }
         if (api != null) {
             TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_API_NAME, api.getApiName());
@@ -1479,6 +1526,59 @@ public class GatewayUtils {
             TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_APPLICATION_CONSUMER_KEY,
                     (String) consumerKey);
         }
+    }
+
+    /**
+     * Builds the route template recorded in the SERVER span's {@code http.route} attribute.
+     * <p>
+     * The elected resource on its own is only unique within an API, so the API context is prefixed to keep
+     * routes from different APIs apart. The version is added only when it is part of the request path
+     * (URL based versioning), matching how the gateway composes request paths.
+     *
+     * @param apiContext      API context, for example {@code /pizzashack}
+     * @param apiVersion      API version, for example {@code 1.0.0}
+     * @param versionStrategy version strategy of the API, for example {@code url}
+     * @param resource        elected resource template, for example {@code /orders/{id}}
+     * @return the route template, or {@code null} when no resource is available
+     */
+    static String buildHttpRoute(String apiContext, String apiVersion, String versionStrategy, String resource) {
+
+        if (StringUtils.isBlank(resource)) {
+            return null;
+        }
+        // Without a context there is nothing to qualify the resource with, so keep the previous behaviour.
+        if (StringUtils.isBlank(apiContext)) {
+            return resource;
+        }
+
+        StringBuilder route = new StringBuilder();
+        appendRouteSegment(route, apiContext);
+        if (VersionStrategyFactory.TYPE_URL.equals(versionStrategy)) {
+            appendRouteSegment(route, apiVersion);
+        }
+        appendRouteSegment(route, resource);
+        return route.toString();
+    }
+
+    private static void appendRouteSegment(StringBuilder route, String segment) {
+
+        if (StringUtils.isBlank(segment)) {
+            return;
+        }
+        String value = segment.trim();
+        if (route.length() == 0) {
+            if (!value.startsWith("/")) {
+                route.append('/');
+            }
+        } else {
+            if (route.charAt(route.length() - 1) == '/') {
+                route.setLength(route.length() - 1);
+            }
+            if (!value.startsWith("/")) {
+                route.append('/');
+            }
+        }
+        route.append(value);
     }
 
     //for OpenTracing

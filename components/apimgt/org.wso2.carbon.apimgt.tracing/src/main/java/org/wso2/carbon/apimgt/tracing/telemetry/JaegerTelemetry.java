@@ -25,7 +25,6 @@ import io.opentelemetry.context.propagation.ContextPropagators;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
-import io.opentelemetry.sdk.trace.SpanLimits;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -67,14 +66,9 @@ public class JaegerTelemetry implements APIMOpenTelemetry {
                     + hostname + ":" + port);
         }
 
-        SpanLimits spanLimits = SpanLimits.builder()
-                .setMaxNumberOfAttributes(256)
-                .build();
-
         sdkTracerProvider = SdkTracerProvider.builder()
                 .addSpanProcessor(BatchSpanProcessor.builder(jaegerExporter).build())
                 .setResource(TelemetryUtil.getTracerProviderResource(serviceName))
-                .setSpanLimits(spanLimits)
                 .build();
 
         openTelemetry = OpenTelemetrySdk.builder()
