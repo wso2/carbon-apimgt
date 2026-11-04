@@ -745,6 +745,64 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
+     * Validates that the AI configuration of an AI API resolves to an LLM provider in the organization, so that an
+     * invalid configuration is rejected before the API is persisted. The LLM provider is resolved in the same order
+     * as {@link #addAIConfiguration(String, String, AIConfiguration, String)}: by LLM provider name and API version
+     * first, and by LLM provider ID as a fallback.
+     *
+     * @param api AI API to validate
+     * @throws APIManagementException if the AI configuration is missing or does not resolve to an LLM provider in the
+     *                                organization
+     */
+    private void validateAIConfiguration(API api) throws APIManagementException {
+
+        AIConfiguration aiConfiguration = api.getAiConfiguration();
+        if (aiConfiguration == null) {
+            throw new APIManagementException("AI configuration is missing for AI API: " + api.getId().getApiName(),
+                    ExceptionCodes.from(ExceptionCodes.INVALID_AI_API_CONFIGURATION,
+                            "LLM provider details are missing."));
+        }
+        String llmProviderName = aiConfiguration.getLlmProviderName();
+        String llmProviderApiVersion = aiConfiguration.getLlmProviderApiVersion();
+        String llmProviderId = aiConfiguration.getLlmProviderId();
+        String organization = api.getOrganization();
+        boolean hasNameAndApiVersion = StringUtils.isNotBlank(llmProviderName)
+                && StringUtils.isNotBlank(llmProviderApiVersion);
+
+        if (hasNameAndApiVersion
+                && apiMgtDAO.getLLMProvider(organization, llmProviderName, llmProviderApiVersion) != null) {
+            return;
+        }
+        // Fall back to the LLM provider ID, as addAIConfiguration does when name and API version do not resolve
+        if (StringUtils.isNotBlank(llmProviderId)) {
+            if (apiMgtDAO.getLLMProvider(organization, llmProviderId) != null) {
+                return;
+            }
+            String errorDescription = hasNameAndApiVersion
+                    ? "LLM provider with name '" + llmProviderName + "' and API version '" + llmProviderApiVersion
+                    + "' not found, and LLM provider with ID '" + llmProviderId + "' not found."
+                    : "LLM provider with ID '" + llmProviderId + "' not found.";
+            throw new APIManagementException("LLM provider not found for AI API: " + api.getId().getApiName()
+                    + " in organization: " + organization + ". " + errorDescription,
+                    ExceptionCodes.from(ExceptionCodes.INVALID_AI_API_CONFIGURATION, errorDescription));
+        }
+        if (hasNameAndApiVersion) {
+            String errorDescription = "LLM provider with name '" + llmProviderName + "' and API version '"
+                    + llmProviderApiVersion + "' not found.";
+            throw new APIManagementException("LLM provider not found for AI API: " + api.getId().getApiName()
+                    + " in organization: " + organization + ". " + errorDescription,
+                    ExceptionCodes.from(ExceptionCodes.INVALID_AI_API_CONFIGURATION, errorDescription));
+        }
+        String errorDescription = StringUtils.isNotBlank(llmProviderName)
+                || StringUtils.isNotBlank(llmProviderApiVersion)
+                ? "Both llmProviderName and llmProviderApiVersion must be provided."
+                : "Either llmProviderName and llmProviderApiVersion, or llmProviderId must be provided.";
+        throw new APIManagementException("Incomplete LLM provider details for AI API: " + api.getId().getApiName()
+                + ". " + errorDescription,
+                ExceptionCodes.from(ExceptionCodes.INVALID_AI_API_CONFIGURATION, errorDescription));
+    }
+
+    /**
      * Add default primary endpoint mappings for the API.
      *
      * @param api                  API object
@@ -951,6 +1009,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         ) {
             throw new APIManagementException("Character length exceeds the allowable limit",
                     ExceptionCodes.LENGTH_EXCEEDS);
+        }
+        if (API_SUBTYPE_AI_API.equals(api.getSubtype())) {
+            validateAIConfiguration(api);
         }
     }
 
