@@ -11045,7 +11045,9 @@ public final class APIUtil {
         Set<String> uploadedTenantConfigScopes = getRestAPIScopes((JsonObject) new JsonParser().parse(tenantConfig));
         fileBaseScopes.removeAll(uploadedTenantConfigScopes);
         if (fileBaseScopes.size() > 0) {
-            throw new APIManagementException("Insufficient scopes available in tenant-config", ExceptionCodes.INVALID_TENANT_CONFIG);
+            String message = "Insufficient scopes available in tenant-config. Missing scopes: " + fileBaseScopes;
+            throw new APIManagementException(message,
+                    ExceptionCodes.from(ExceptionCodes.INVALID_TENANT_CONFIG, message));
         }
     }
 
