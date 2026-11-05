@@ -15451,7 +15451,7 @@ components:
           description: A brief description about the API
           example: This is a simple API for Pizza Shack online pizza delivery store
         provider:
-          maxLength: 50
+          maxLength: 200
           type: string
           description: |
             If the provider value is not given, the user invoking the API will be used as the provider.

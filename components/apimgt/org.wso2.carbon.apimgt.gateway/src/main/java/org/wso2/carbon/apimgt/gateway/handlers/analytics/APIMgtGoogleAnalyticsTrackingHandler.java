@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.APIMgtGoogleAnalyticsUtils;
+import org.wso2.carbon.apimgt.gateway.utils.TelemetryLogUtil;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
@@ -84,6 +85,7 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
         TracingSpan tracingSpan = null;
         TracingTracer tracingTracer = null;
         TelemetrySpan span = null;
+        TelemetryLogUtil.TracingIds previousTracingIds = null;
         TelemetryTracer tracer = null;
         Map<String, String> tracerSpecificCarrier = new HashMap<>();
         if (TelemetryUtil.telemetryEnabled()) {
@@ -100,6 +102,7 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
                     tracingTracer);
         }
         try {
+            previousTracingIds = TelemetryLogUtil.enterSpan(span);
             if (configKey == null) {
                 throw new SynapseException("Google Analytics configuration unspecified for the API");
             }
@@ -173,6 +176,7 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
             throw e;
         } finally {
             if (TelemetryUtil.telemetryEnabled()) {
+                TelemetryLogUtil.exitSpan(previousTracingIds);
                 TelemetryUtil.finishSpan(span);
             } else if (Util.tracingEnabled()) {
                 Util.finishSpan(tracingSpan);

@@ -56,6 +56,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
+import org.wso2.carbon.apimgt.gateway.utils.TelemetryLogUtil;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIDescriptionGenUtil;
@@ -167,6 +168,7 @@ public class APIThrottleHandler extends AbstractHandler {
         long executionStartTime = System.nanoTime();
         TracingSpan throttlingLatencyTracingSpan = null;
         TelemetrySpan throttlingLatencySpan = null;
+        TelemetryLogUtil.TracingIds previousTracingIds = null;
         if (TelemetryUtil.telemetryEnabled()) {
             TelemetrySpan responseLatencySpan =
                     (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
@@ -182,6 +184,7 @@ public class APIThrottleHandler extends AbstractHandler {
                     tracer);
         }
         try {
+            previousTracingIds = TelemetryLogUtil.enterSpan(throttlingLatencySpan);
             return doThrottle(messageContext);
         } catch (SynapseException e) {
             if (TelemetryUtil.telemetryEnabled()) {
@@ -197,6 +200,7 @@ public class APIThrottleHandler extends AbstractHandler {
                     TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - executionStartTime));
             context.stop();
             if (TelemetryUtil.telemetryEnabled()) {
+                TelemetryLogUtil.exitSpan(previousTracingIds);
                 TelemetryUtil.finishSpan(throttlingLatencySpan);
             } else if (Util.tracingEnabled()) {
                 Util.finishSpan(throttlingLatencyTracingSpan);

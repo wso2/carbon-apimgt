@@ -26,6 +26,7 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
+import org.wso2.carbon.apimgt.gateway.utils.TelemetryLogUtil;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
@@ -45,6 +46,8 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
         TracingTracer tracer = ServiceReferenceHolder.getInstance().getTracer();
         TelemetryTracer telemetryTracer = ServiceReferenceHolder.getInstance().getTelemetryTracer();
 
+        // Remove the trace and span IDs left on this pooled thread by a previously mediated message
+        TelemetryLogUtil.clearTracingIds();
         if (GatewayUtils.checkForFileBasedApiContexts(ApiUtils.getFullRequestPath(messageContext),
                 GatewayUtils.getTenantDomain())) {
             return true;
@@ -62,6 +65,7 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
                         spanContext, telemetryTracer);
                 GatewayUtils.setRequestRelatedTags(responseLatencySpan, messageContext);
                 messageContext.setProperty(APIMgtGatewayConstants.RESPONSE_LATENCY, responseLatencySpan);
+                TelemetryLogUtil.setTracingIds(responseLatencySpan);
             }
         } else if (Util.tracingEnabled()) {
             org.apache.axis2.context.MessageContext axis2MessageContext =
@@ -109,11 +113,24 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
                         .setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
             }
         }
+        // The request leaves the gateway handlers here and the response is handled on another thread, so remove the
+        // IDs to keep this thread from logging them for the next message it mediates
+        TelemetryLogUtil.clearTracingIds();
         return true;
     }
 
     @Override
     public boolean handleResponseInFlow(MessageContext messageContext) {
+        if (TelemetryUtil.telemetryEnabled()) {
+            // The response is mediated on a thread that did not see the request, so set the IDs of this message
+            Object resourceSpan = messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
+            if (resourceSpan instanceof TelemetrySpan) {
+                TelemetryLogUtil.setTracingIds((TelemetrySpan) resourceSpan);
+            } else {
+                TelemetryLogUtil.setTracingIds(
+                        (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY));
+            }
+        }
         if (TelemetryUtil.telemetryEnabled() && messageContext.getProperty(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN) != null) {
             TelemetrySpan backendLatencySpan =
                     (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN);
@@ -135,23 +152,29 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
     @Override
     public boolean handleResponseOutFlow(MessageContext messageContext) {
         if (TelemetryUtil.telemetryEnabled()) {
-            Object resourceSpanObject = messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
-            if (resourceSpanObject != null) {
-                GatewayUtils.setAPIResource((TelemetrySpan) resourceSpanObject, messageContext);
-                TelemetryUtil.finishSpan((TelemetrySpan) resourceSpanObject);
-            }
-            TelemetrySpan responseLatencySpan =
-                    (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
-            if (responseLatencySpan != null) {
-                GatewayUtils.setAPIRelatedTags(responseLatencySpan, messageContext);
-                API api = GatewayUtils.getAPI(messageContext);
-                String tenantDomain = (String) messageContext.getProperty(APIMgtGatewayConstants.TENANT_DOMAIN);
-                if (api != null) {
-                    TelemetryUtil.updateOperation(responseLatencySpan,
-                            api.getApiName().concat("--").concat(api.getApiVersion()).concat("--")
-                                    .concat(tenantDomain));
+            try {
+                Object resourceSpanObject = messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
+                if (resourceSpanObject != null) {
+                    GatewayUtils.setAPIResource((TelemetrySpan) resourceSpanObject, messageContext);
+                    TelemetryUtil.finishSpan((TelemetrySpan) resourceSpanObject);
                 }
-                TelemetryUtil.finishSpan(responseLatencySpan);
+                TelemetrySpan responseLatencySpan =
+                        (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+                if (responseLatencySpan != null) {
+                    GatewayUtils.setAPIRelatedTags(responseLatencySpan, messageContext);
+                    API api = GatewayUtils.getAPI(messageContext);
+                    String tenantDomain = (String) messageContext.getProperty(APIMgtGatewayConstants.TENANT_DOMAIN);
+                    if (api != null) {
+                        TelemetryUtil.updateOperation(responseLatencySpan,
+                                api.getApiName().concat("--").concat(api.getApiVersion()).concat("--")
+                                        .concat(tenantDomain));
+                    }
+                    TelemetryUtil.finishSpan(responseLatencySpan);
+                }
+            } finally {
+                // Remove the IDs even if completing the spans fails, so this thread does not log them for the next
+                // message it mediates
+                TelemetryLogUtil.clearTracingIds();
             }
         } else if (Util.tracingEnabled()) {
             Object resourceSpanObject = messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);

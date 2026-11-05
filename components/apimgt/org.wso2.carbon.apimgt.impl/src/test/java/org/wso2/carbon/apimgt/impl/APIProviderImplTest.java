@@ -39,10 +39,12 @@ import org.powermock.core.classloader.annotations.SuppressStaticInitializationFo
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.BlockConditionNotFoundException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
+import org.wso2.carbon.apimgt.api.model.AIConfiguration;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
@@ -60,6 +62,7 @@ import org.wso2.carbon.apimgt.api.model.Documentation.DocumentSourceType;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentVisibility;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
@@ -2340,5 +2343,159 @@ public class APIProviderImplTest {
         } catch (Exception e) {
             // Downstream of org check — org check passed correctly
         }
+    }
+
+    private static final String VALID_LLM_PROVIDER_NAME = "OpenAI";
+    private static final String VALID_LLM_PROVIDER_API_VERSION = "2.0.0";
+    private static final String VALID_LLM_PROVIDER_ID = "valid-llm-provider-id";
+    private static final String OTHER_LLM_PROVIDER_ID = "other-llm-provider-id";
+    private static final String INVALID_LLM_PROVIDER_ID = "invalid-llm-provider-id";
+
+    private void mockLLMProviders() throws APIManagementException {
+
+        Mockito.when(apimgtDAO.getLLMProvider(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(null);
+        Mockito.when(apimgtDAO.getLLMProvider(Mockito.anyString(), Mockito.anyString())).thenReturn(null);
+        Mockito.when(apimgtDAO.getLLMProvider(superTenantDomain, VALID_LLM_PROVIDER_NAME,
+                VALID_LLM_PROVIDER_API_VERSION)).thenReturn(new LLMProvider());
+        Mockito.when(apimgtDAO.getLLMProvider(superTenantDomain, VALID_LLM_PROVIDER_ID)).thenReturn(new LLMProvider());
+        Mockito.when(apimgtDAO.getLLMProvider(superTenantDomain, OTHER_LLM_PROVIDER_ID)).thenReturn(new LLMProvider());
+    }
+
+    private AIConfiguration createAIConfiguration(String llmProviderName, String llmProviderApiVersion,
+                                                  String llmProviderId) {
+
+        AIConfiguration aiConfiguration = new AIConfiguration();
+        aiConfiguration.setLlmProviderName(llmProviderName);
+        aiConfiguration.setLlmProviderApiVersion(llmProviderApiVersion);
+        aiConfiguration.setLlmProviderId(llmProviderId);
+        return aiConfiguration;
+    }
+
+    private API createAIAPI(String apiName, AIConfiguration aiConfiguration) {
+
+        API api = new API(new APIIdentifier("admin", apiName, "1.0.0"));
+        api.setContext("/" + apiName.toLowerCase());
+        api.setOrganization(superTenantDomain);
+        api.setSubtype(APIConstants.API_SUBTYPE_AI_API);
+        api.setAiConfiguration(aiConfiguration);
+        return api;
+    }
+
+    private void assertAddAIAPIRejected(API api, String expectedDescription) throws Exception {
+
+        mockLLMProviders();
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO);
+        try {
+            apiProvider.addAPI(api);
+            Assert.fail("AI API with invalid AI configuration should not be added");
+        } catch (APIManagementException e) {
+            Assert.assertEquals(ExceptionCodes.INVALID_AI_API_CONFIGURATION.getErrorCode(),
+                    e.getErrorHandler().getErrorCode());
+            Assert.assertEquals(400, e.getErrorHandler().getHttpStatusCode());
+            Assert.assertEquals(String.format(ExceptionCodes.INVALID_AI_API_CONFIGURATION.getErrorDescription(),
+                    expectedDescription), e.getErrorHandler().getErrorDescription());
+        }
+        Mockito.verify(apiPersistenceInstance, Mockito.never())
+                .addAPI(any(Organization.class), any(PublisherAPI.class));
+        Mockito.verify(apimgtDAO, Mockito.never()).addAPI(any(API.class), Mockito.anyInt(), Mockito.anyString());
+    }
+
+    private void assertAIConfigurationAccepted(API api) throws Exception {
+
+        mockLLMProviders();
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO);
+        invokeValidateApiInfo(apiProvider, api);
+    }
+
+    private void invokeValidateApiInfo(APIProviderImpl apiProvider, API api) throws Exception {
+
+        Method method = APIProviderImpl.class.getDeclaredMethod("validateApiInfo", API.class);
+        method.setAccessible(true);
+        method.invoke(apiProvider, api);
+    }
+
+    @Test
+    public void testAddAIAPIWithInvalidLLMProviderNameAndApiVersion() throws Exception {
+
+        assertAddAIAPIRejected(createAIAPI("InvalidProviderNameAPI",
+                createAIConfiguration("OpenAIX", VALID_LLM_PROVIDER_API_VERSION, null)),
+                "LLM provider with name 'OpenAIX' and API version '2.0.0' not found.");
+        assertAddAIAPIRejected(createAIAPI("InvalidProviderApiVersionAPI",
+                createAIConfiguration(VALID_LLM_PROVIDER_NAME, "9.9.9", null)),
+                "LLM provider with name 'OpenAI' and API version '9.9.9' not found.");
+    }
+
+    @Test
+    public void testAddAIAPIWithInvalidLLMProviderId() throws Exception {
+
+        assertAddAIAPIRejected(createAIAPI("InvalidProviderIdAPI",
+                createAIConfiguration(null, null, INVALID_LLM_PROVIDER_ID)),
+                "LLM provider with ID 'invalid-llm-provider-id' not found.");
+    }
+
+    @Test
+    public void testAddAIAPIWithInvalidLLMProviderNameAndInvalidLLMProviderId() throws Exception {
+
+        assertAddAIAPIRejected(createAIAPI("InvalidProviderNameAndIdAPI",
+                createAIConfiguration("OpenAIX", VALID_LLM_PROVIDER_API_VERSION, INVALID_LLM_PROVIDER_ID)),
+                "LLM provider with name 'OpenAIX' and API version '2.0.0' not found, and LLM provider with ID "
+                        + "'invalid-llm-provider-id' not found.");
+    }
+
+    @Test
+    public void testAddAIAPIWithMissingLLMProviderDetails() throws Exception {
+
+        assertAddAIAPIRejected(createAIAPI("MissingProviderDetailsAPI", new AIConfiguration()),
+                "Either llmProviderName and llmProviderApiVersion, or llmProviderId must be provided.");
+        assertAddAIAPIRejected(createAIAPI("MissingAIConfigurationAPI", null),
+                "LLM provider details are missing.");
+    }
+
+    @Test
+    public void testAddAIAPIWithIncompleteLLMProviderNameAndApiVersion() throws Exception {
+
+        assertAddAIAPIRejected(createAIAPI("ProviderNameOnlyAPI",
+                createAIConfiguration(VALID_LLM_PROVIDER_NAME, null, null)),
+                "Both llmProviderName and llmProviderApiVersion must be provided.");
+        assertAddAIAPIRejected(createAIAPI("ProviderApiVersionOnlyAPI",
+                createAIConfiguration(null, VALID_LLM_PROVIDER_API_VERSION, null)),
+                "Both llmProviderName and llmProviderApiVersion must be provided.");
+    }
+
+    @Test
+    public void testValidateApiInfoWithValidLLMProviderNameAndApiVersion() throws Exception {
+
+        assertAIConfigurationAccepted(createAIAPI("ValidProviderNameAPI",
+                createAIConfiguration(VALID_LLM_PROVIDER_NAME, VALID_LLM_PROVIDER_API_VERSION, null)));
+    }
+
+    @Test
+    public void testValidateApiInfoWithValidLLMProviderId() throws Exception {
+
+        assertAIConfigurationAccepted(createAIAPI("ValidProviderIdAPI",
+                createAIConfiguration(null, null, VALID_LLM_PROVIDER_ID)));
+    }
+
+    @Test
+    public void testValidateApiInfoWithValidLLMProviderNameAndApiVersionAndDifferentLLMProviderId()
+            throws Exception {
+
+        // An imported API carries the LLM provider ID of the source environment, which differs from the local one
+        assertAIConfigurationAccepted(createAIAPI("DifferentProviderIdAPI",
+                createAIConfiguration(VALID_LLM_PROVIDER_NAME, VALID_LLM_PROVIDER_API_VERSION,
+                        OTHER_LLM_PROVIDER_ID)));
+        assertAIConfigurationAccepted(createAIAPI("UnknownProviderIdAPI",
+                createAIConfiguration(VALID_LLM_PROVIDER_NAME, VALID_LLM_PROVIDER_API_VERSION,
+                        INVALID_LLM_PROVIDER_ID)));
+    }
+
+    @Test
+    public void testValidateApiInfoWithInvalidLLMProviderNameAndValidLLMProviderId() throws Exception {
+
+        assertAIConfigurationAccepted(createAIAPI("ProviderIdFallbackAPI",
+                createAIConfiguration("OpenAIX", VALID_LLM_PROVIDER_API_VERSION, VALID_LLM_PROVIDER_ID)));
+        assertAIConfigurationAccepted(createAIAPI("ProviderNameOnlyWithIdAPI",
+                createAIConfiguration(VALID_LLM_PROVIDER_NAME, null, VALID_LLM_PROVIDER_ID)));
     }
 }

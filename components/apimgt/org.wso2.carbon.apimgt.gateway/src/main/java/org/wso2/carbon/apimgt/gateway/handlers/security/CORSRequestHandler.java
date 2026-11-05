@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.LogsHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.utils.TelemetryLogUtil;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -134,6 +135,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 
         Timer.Context context = startMetricTimer();
         TelemetrySpan corsRequestHandlerSpan = null;
+        TelemetryLogUtil.TracingIds previousTracingIds = null;
         TracingSpan corsRequestHandlerTracingSpan = null;
         if (TelemetryUtil.telemetryEnabled()) {
             TelemetrySpan responseLatencySpan =
@@ -155,6 +157,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             return true;
         }
         try {
+            previousTracingIds = TelemetryLogUtil.enterSpan(corsRequestHandlerSpan);
             if (!initializeHeaderValues) {
                 initializeHeaders();
             }
@@ -265,6 +268,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
         } finally {
             stopMetricTimer(context);
             if (TelemetryUtil.telemetryEnabled()) {
+                TelemetryLogUtil.exitSpan(previousTracingIds);
                 TelemetryUtil.finishSpan(corsRequestHandlerSpan);
             } else if (Util.tracingEnabled()) {
                 Util.finishSpan(corsRequestHandlerTracingSpan);
