@@ -168,6 +168,21 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
     }
 
     /**
+     * Atomically evicts the aggregator from ACTIVE_AGGREGATORS if the window has expired
+     * and no local unsynced count or reset is pending. Uses computeIfPresent to serialize
+     * the state transition atomically with concurrent processAdd or reset calls.
+     */
+    private void evictIfIdleAndExpired() {
+        ACTIVE_AGGREGATORS.computeIfPresent(key, (k, current) -> {
+            if (unsyncedCounter.get() == 0L && !pendingReset && storedWindowExpiry <= System.currentTimeMillis()) {
+                localCounter.set(0L);
+                return null;
+            }
+            return current;
+        });
+    }
+
+    /**
      * Synchronize the local counter with the key-value store.
      * Pending resets (PSETEX "0") are flushed first and retried on failure; then any
      * accumulated delta is pushed via INCRBY/DECRBY, or the current Redis value is pulled
@@ -202,10 +217,11 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
                 if (currentUnsyncedCount == 0) {
                     long windowExpiry = storedWindowExpiry;
                     long remainingMillis = windowExpiry - System.currentTimeMillis();
-                    if (windowExpiry > 0 && remainingMillis <= 0 && unsyncedCounter.get() == 0L && !pendingReset) {
-                        ACTIVE_AGGREGATORS.remove(key);
-                        localCounter.set(0L);
-                        return;
+                    if (windowExpiry > 0 && remainingMillis <= 0) {
+                        evictIfIdleAndExpired();
+                        if (!ACTIVE_AGGREGATORS.containsKey(key)) {
+                            return;
+                        }
                     }
 
                     String kvStoreValue = kvStoreClient.get(key);
@@ -214,10 +230,7 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
                             keyHasTTL = true;
                             localCounter.set(0L);
                         } else {
-                            if (unsyncedCounter.get() == 0L && !pendingReset) {
-                                ACTIVE_AGGREGATORS.remove(key);
-                            }
-                            localCounter.set(0L);
+                            evictIfIdleAndExpired();
                         }
                     } else if (!pendingReset) {
                         // skip if reset() fired while waiting for the GET response —
@@ -285,10 +298,14 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
     @Override
     public Object processAdd(Object data) {
         try {
-            long newCount = localCounter.incrementAndGet();
+            long newCount;
             if (distributedThrottlingEnabled && kvStoreClient != null && key != null) {
-                ACTIVE_AGGREGATORS.putIfAbsent(key, this);
-                unsyncedCounter.incrementAndGet();
+                ACTIVE_AGGREGATORS.compute(key, (k, current) -> {
+                    unsyncedCounter.incrementAndGet();
+                    localCounter.incrementAndGet();
+                    return this;
+                });
+                newCount = localCounter.get();
                 // Refresh storedWindowExpiry when stale — this happens after one or more empty
                 // windows where reset() was never called (no RESET event → no reset()).
                 if (storedWindowExpiry <= System.currentTimeMillis()) {
@@ -298,6 +315,8 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
                         keyHasTTL = false; // key was created by INCRBY after gap — needs PEXPIRE
                     }
                 }
+            } else {
+                newCount = localCounter.incrementAndGet();
             }
             return newCount;
         } catch (Exception e) {
@@ -335,12 +354,16 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
             log.debug("DistributedCountAggregator: processRemove called with data: " + data);
         }
         try {
-            localCounter.decrementAndGet();
             if (distributedThrottlingEnabled && kvStoreClient != null && key != null) {
-                unsyncedCounter.decrementAndGet();
+                ACTIVE_AGGREGATORS.compute(key, (k, current) -> {
+                    unsyncedCounter.decrementAndGet();
+                    localCounter.decrementAndGet();
+                    return this;
+                });
+                return localCounter.get();
+            } else {
+                return localCounter.decrementAndGet();
             }
-            return localCounter.get();
-
         } catch (Exception e) {
             log.error("Error in processRemove for key " + key, e);
             return localCounter.get();
@@ -365,15 +388,19 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
         if (log.isDebugEnabled()) {
             log.debug("DistributedCountAggregator: reset called");
         }
-        localCounter.set(0L);
         if (distributedThrottlingEnabled && kvStoreClient != null && key != null) {
-            ACTIVE_AGGREGATORS.putIfAbsent(key, this);
-            Long expiry = ThrottleStreamProcessor.getThreadLocalWindowExpiry();
-            if (expiry != null) {
-                storedWindowExpiry = expiry;
-            }
-            unsyncedCounter.set(0L);
-            pendingReset = true;
+            ACTIVE_AGGREGATORS.compute(key, (k, current) -> {
+                localCounter.set(0L);
+                Long expiry = ThrottleStreamProcessor.getThreadLocalWindowExpiry();
+                if (expiry != null) {
+                    storedWindowExpiry = expiry;
+                }
+                unsyncedCounter.set(0L);
+                pendingReset = true;
+                return this;
+            });
+        } else {
+            localCounter.set(0L);
         }
         return 0L;
     }
