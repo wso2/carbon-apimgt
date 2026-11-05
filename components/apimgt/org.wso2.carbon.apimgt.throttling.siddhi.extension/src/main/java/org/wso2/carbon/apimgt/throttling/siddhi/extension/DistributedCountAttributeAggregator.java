@@ -171,15 +171,18 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
      * Atomically evicts the aggregator from ACTIVE_AGGREGATORS if the window has expired
      * and no local unsynced count or reset is pending. Uses computeIfPresent to serialize
      * the state transition atomically with concurrent processAdd or reset calls.
+     *
+     * @return true if the aggregator was evicted or is not present in ACTIVE_AGGREGATORS,
+     *         false if eviction was skipped because new traffic or a reset arrived.
      */
-    private void evictIfIdleAndExpired() {
-        ACTIVE_AGGREGATORS.computeIfPresent(key, (k, current) -> {
+    private boolean evictIfIdleAndExpired() {
+        return ACTIVE_AGGREGATORS.computeIfPresent(key, (k, current) -> {
             if (unsyncedCounter.get() == 0L && !pendingReset && storedWindowExpiry <= System.currentTimeMillis()) {
                 localCounter.set(0L);
                 return null;
             }
             return current;
-        });
+        }) == null;
     }
 
     /**
@@ -218,8 +221,7 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
                     long windowExpiry = storedWindowExpiry;
                     long remainingMillis = windowExpiry - System.currentTimeMillis();
                     if (windowExpiry > 0 && remainingMillis <= 0) {
-                        evictIfIdleAndExpired();
-                        if (!ACTIVE_AGGREGATORS.containsKey(key)) {
+                        if (evictIfIdleAndExpired()) {
                             return;
                         }
                     }
