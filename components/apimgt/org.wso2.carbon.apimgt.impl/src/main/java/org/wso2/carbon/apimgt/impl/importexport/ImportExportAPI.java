@@ -138,6 +138,19 @@ public interface ImportExportAPI {
     File exportAPIs(String organization, boolean allRevisions, ExportFormat format) throws APIManagementException;
 
     /**
+     * Used to export API artifacts of all APIs for a given organization, as a single zip archive.
+     *
+     * @param organization        Organization
+     * @param allRevisions        Whether to export all revisions of each API or not.
+     * @param format              Format of output documents. Can be YAML or JSON
+     * @param preserveCredentials Preserve credentials on export
+     * @return API artifact.
+     * @throws APIManagementException if an error occurs while exporting APIs.
+     */
+    File exportAPIs(String organization, boolean allRevisions, ExportFormat format, boolean preserveCredentials)
+            throws APIManagementException;
+
+    /**
      * Used to export API Product artifact
      *
      * @param apiId          UUID of API Product.
