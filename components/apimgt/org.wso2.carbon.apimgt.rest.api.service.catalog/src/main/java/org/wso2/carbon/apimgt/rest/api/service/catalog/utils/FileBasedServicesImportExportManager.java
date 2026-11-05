@@ -161,6 +161,13 @@ public class FileBasedServicesImportExportManager {
      */
     private void writeArchiveFile(File directoryToZip, List<File> fileList, String archiveLocation,
                                   String archiveName) throws IOException {
+
+        // canonicalize + containment-check the archive write path (archiveName caller-controlled, CWE-22)
+        File baseFile = new File(archiveLocation).getCanonicalFile();
+        File targetFile = new File(baseFile, archiveName + APIConstants.ZIP_FILE_EXTENSION).getCanonicalFile();
+        if (!targetFile.toPath().startsWith(baseFile.toPath())) {
+            throw new IOException("Archive name resolves outside the target directory: " + archiveName);
+        }
         try (FileOutputStream fileOutputStream = new FileOutputStream(archiveLocation + File.separator +
                 archiveName
                 + APIConstants.ZIP_FILE_EXTENSION);

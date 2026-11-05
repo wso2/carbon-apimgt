@@ -99,7 +99,11 @@ public class CommonUtil {
         String currentDirectory = System.getProperty(APIConstants.JAVA_IO_TMPDIR);
         String createdDirectories;
         if (identifier != null) {
-            createdDirectories = File.separator + identifier.toString() + File.separator;
+            // append a random component so the export staging dir name is not
+            // deterministic (defeats predictable-name symlink-redirect / race).
+            createdDirectories = File.separator + identifier.toString() + "-"
+                    + RandomStringUtils.randomAlphanumeric(ImportExportConstants.TEMP_FILENAME_LENGTH)
+                    + File.separator;
         } else {
             createdDirectories =
                     File.separator + RandomStringUtils.randomAlphanumeric(ImportExportConstants.TEMP_FILENAME_LENGTH)
