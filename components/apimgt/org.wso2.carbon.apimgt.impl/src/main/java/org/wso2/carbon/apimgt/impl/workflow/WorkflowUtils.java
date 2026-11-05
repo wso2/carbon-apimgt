@@ -352,7 +352,8 @@ public class WorkflowUtils {
     }
 
     /**
-     * Get the lifecycle checklist items persisted in the metadata of a state change workflow
+     * Get the lifecycle checklist items persisted in the metadata of a state change workflow. Items that cannot be
+     * read are left out, so that the default behaviour of those items is applied.
      *
      * @param workflow Workflow object
      * @return Map of checklist items, or an empty map if none were persisted
@@ -367,16 +368,24 @@ public class WorkflowUtils {
         try {
             Object parsedChecklist = new JSONParser().parse(checklistJson);
             if (!(parsedChecklist instanceof JSONObject)) {
-                log.error("Invalid lifecycle checklist found in workflow: " + workflow.getExternalWorkflowReference());
+                log.error("Invalid lifecycle checklist found in workflow: " + workflow.getExternalWorkflowReference()
+                        + ". The default lifecycle checklist options will be applied.");
                 return checklist;
             }
-            JSONObject checklistObj = (JSONObject) parsedChecklist;
-            for (Object key : checklistObj.keySet()) {
-                checklist.put((String) key, Boolean.parseBoolean(String.valueOf(checklistObj.get(key))));
+            for (Object item : ((JSONObject) parsedChecklist).entrySet()) {
+                Map.Entry<?, ?> checklistItem = (Map.Entry<?, ?>) item;
+                if (checklistItem.getValue() instanceof Boolean) {
+                    checklist.put(String.valueOf(checklistItem.getKey()), (Boolean) checklistItem.getValue());
+                } else {
+                    log.error("Invalid value found for the lifecycle checklist item " + checklistItem.getKey()
+                            + " in workflow: " + workflow.getExternalWorkflowReference()
+                            + ". The default option of the item will be applied.");
+                }
             }
         } catch (ParseException e) {
             log.error("Error while parsing the lifecycle checklist of workflow: "
-                    + workflow.getExternalWorkflowReference(), e);
+                    + workflow.getExternalWorkflowReference() + ". The default lifecycle checklist options will be "
+                    + "applied.", e);
         }
         return checklist;
     }

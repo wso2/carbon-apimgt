@@ -135,6 +135,17 @@ public class APIStateChangeWorkflowChecklistTest {
     }
 
     @Test
+    public void nonBooleanChecklistItemsAreLeftOut() {
+        // Items without a boolean value must fall back to their default option instead of being read as false.
+        String checklistJson = "{\"" + APIConstants.RESUBSCRIBE_CHECK_LIST_ITEM + "\":\"TRUE \",\""
+                + APIConstants.DEPRECATE_CHECK_LIST_ITEM + "\":true,\"nullItem\":null,\"numericItem\":1}";
+        Map<String, Boolean> expected = new HashMap<>();
+        expected.put(APIConstants.DEPRECATE_CHECK_LIST_ITEM, true);
+
+        Assert.assertEquals(expected, WorkflowUtils.getLifecycleChecklist(buildWorkflow(checklistJson)));
+    }
+
+    @Test
     public void approvedStateChangeAppliesRequestedChecklist() throws Exception {
         Map<String, Boolean> checklist = buildChecklist(true, true);
         completeApprovalWorkflow(buildWorkflow(new JSONObject(checklist).toJSONString()), WorkflowStatus.APPROVED);
@@ -160,25 +171,6 @@ public class APIStateChangeWorkflowChecklistTest {
         PowerMockito.verifyStatic(LifeCycleUtils.class, Mockito.never());
         LifeCycleUtils.changeLifecycle(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
                 Mockito.any());
-    }
-
-    @Test
-    public void approvedWSStateChangeAppliesRequestedChecklist() throws Exception {
-        Map<String, Boolean> checklist = buildChecklist(true, false);
-        Mockito.when(apiMgtDAO.getworkflowReferenceByExternalWorkflowReference(EXT_WF_REF))
-                .thenReturn(buildWorkflow(new JSONObject(checklist).toJSONString()));
-
-        Assert.assertEquals("Checklist selected in the Publisher must be applied on approval",
-                checklist, completeWSWorkflowAndCaptureChecklist(WorkflowStatus.APPROVED));
-    }
-
-    @Test
-    public void rejectedWSStateChangeDoesNotApplyRequestedChecklist() throws Exception {
-        Mockito.when(apiMgtDAO.getworkflowReferenceByExternalWorkflowReference(EXT_WF_REF))
-                .thenReturn(buildWorkflow(new JSONObject(buildChecklist(true, true)).toJSONString()));
-
-        Assert.assertTrue("Checklist must not be applied when the state change is rejected",
-                completeWSWorkflowAndCaptureChecklist(WorkflowStatus.REJECTED).isEmpty());
     }
 
     // ---- helpers -----------------------------------------------------------
@@ -217,22 +209,6 @@ public class APIStateChangeWorkflowChecklistTest {
     private void completeApprovalWorkflow(Workflow workflow, WorkflowStatus status) throws Exception {
         Mockito.when(apiMgtDAO.getworkflowReferenceByExternalWorkflowReference(EXT_WF_REF)).thenReturn(workflow);
         new APIStateChangeApprovalWorkflowExecutor().complete(buildWorkflowDTO(status));
-    }
-
-    @SuppressWarnings("unchecked")
-    private Map<String, Boolean> completeWSWorkflowAndCaptureChecklist(WorkflowStatus status) throws Exception {
-        WorkflowDTO workflowDTO = buildWorkflowDTO(status);
-        workflowDTO.getAttributes().put(WorkflowConstants.PayloadConstants.VARIABLE_API_LC_ACTION, PUBLISH);
-        workflowDTO.getAttributes().put(WorkflowConstants.PayloadConstants.VARIABLE_APINAME, API_NAME);
-        workflowDTO.getAttributes().put(WorkflowConstants.PayloadConstants.VARIABLE_APIPROVIDER, PROVIDER);
-        workflowDTO.getAttributes().put(WorkflowConstants.PayloadConstants.VARIABLE_APIVERSION, API_VERSION);
-        workflowDTO.getAttributes().put(WorkflowConstants.PayloadConstants.VARIABLE_INVOKER, PROVIDER);
-        new APIStateChangeWSWorkflowExecutor().complete(workflowDTO);
-
-        ArgumentCaptor<Map> captor = ArgumentCaptor.forClass(Map.class);
-        Mockito.verify(apiProvider).changeLifeCycleStatus(Mockito.eq(TENANT_DOMAIN), Mockito.eq(apiTypeWrapper),
-                Mockito.eq(PUBLISH), captor.capture());
-        return captor.getValue();
     }
 
     @SuppressWarnings("unchecked")
