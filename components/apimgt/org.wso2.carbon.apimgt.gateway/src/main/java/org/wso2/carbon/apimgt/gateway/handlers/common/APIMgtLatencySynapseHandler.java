@@ -137,40 +137,55 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
                         (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY));
             }
         }
-        if (TelemetryUtil.telemetryEnabled() && messageContext.getProperty(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN) != null) {
-            TelemetrySpan backendLatencySpan =
-                    (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN);
-            if (backendLatencySpan != null) {
-                GatewayUtils.setBackendResponseAttributes(backendLatencySpan, messageContext);
-                GatewayUtils.setEndpointRelatedInformation(backendLatencySpan, messageContext);
-                TelemetryUtil.finishSpan(backendLatencySpan);
-            }
-        } else if (Util.tracingEnabled() && messageContext.getProperty(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN) != null) {
-            TracingSpan backendLatencySpan =
-                    (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN);
-            if (backendLatencySpan != null) {
-                GatewayUtils.setEndpointRelatedInformation(backendLatencySpan, messageContext);
-                Util.finishSpan(backendLatencySpan);
-            }
-        }
+        completeBackendLatencySpan(messageContext);
         return true;
+    }
+
+    /**
+     * Completes the backend (CLIENT) span started in {@link #handleRequestOutFlow(MessageContext)}. It is called
+     * from both response flows because a failure raised locally by the transport - connection refused, read
+     * timeout or a DNS resolution failure - never reaches the inbound response flow, and an unfinished span is
+     * never exported. Finishing an already finished span is a no-op, as Span.end() is idempotent.
+     *
+     * @param messageContext message context carrying the backend latency span
+     */
+    private void completeBackendLatencySpan(MessageContext messageContext) {
+
+        Object backendLatencySpanObject = messageContext.getProperty(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN);
+        if (TelemetryUtil.telemetryEnabled()) {
+            if (!(backendLatencySpanObject instanceof TelemetrySpan)) {
+                return;
+            }
+            TelemetrySpan backendLatencySpan = (TelemetrySpan) backendLatencySpanObject;
+            GatewayUtils.setBackendResponseAttributes(backendLatencySpan, messageContext);
+            GatewayUtils.setBackendFaultAttributes(backendLatencySpan, messageContext);
+            GatewayUtils.setEndpointRelatedInformation(backendLatencySpan, messageContext);
+            TelemetryUtil.finishSpan(backendLatencySpan);
+        } else if (Util.tracingEnabled() && backendLatencySpanObject instanceof TracingSpan) {
+            TracingSpan backendLatencySpan = (TracingSpan) backendLatencySpanObject;
+            GatewayUtils.setEndpointRelatedInformation(backendLatencySpan, messageContext);
+            Util.finishSpan(backendLatencySpan);
+        }
     }
 
     @Override
     public boolean handleResponseOutFlow(MessageContext messageContext) {
         if (TelemetryUtil.telemetryEnabled()) {
             try {
+                // The response inbound flow does not run for faults raised locally by the transport, so the backend
+                // span is completed here as well, before its parent spans are finished.
+                completeBackendLatencySpan(messageContext);
                 Object resourceSpanObject = messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
                 if (resourceSpanObject != null) {
                     GatewayUtils.setCommonHTTPAttributes((TelemetrySpan) resourceSpanObject, messageContext);
-                GatewayUtils.setAPIResource((TelemetrySpan) resourceSpanObject, messageContext);
+                    GatewayUtils.setAPIResource((TelemetrySpan) resourceSpanObject, messageContext);
                     TelemetryUtil.finishSpan((TelemetrySpan) resourceSpanObject);
                 }
                 TelemetrySpan responseLatencySpan =
                         (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
                 if (responseLatencySpan != null) {
                     GatewayUtils.setCommonHTTPAttributes(responseLatencySpan, messageContext);
-                GatewayUtils.setAPIRelatedTags(responseLatencySpan, messageContext);
+                    GatewayUtils.setAPIRelatedTags(responseLatencySpan, messageContext);
                     API api = GatewayUtils.getAPI(messageContext);
                     String tenantDomain = (String) messageContext.getProperty(APIMgtGatewayConstants.TENANT_DOMAIN);
                     if (api != null) {
@@ -186,6 +201,7 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
                 TelemetryLogUtil.clearTracingIds();
             }
         } else if (Util.tracingEnabled()) {
+            completeBackendLatencySpan(messageContext);
             Object resourceSpanObject = messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
             if (resourceSpanObject != null) {
                 GatewayUtils.setAPIResource((TracingSpan) resourceSpanObject, messageContext);

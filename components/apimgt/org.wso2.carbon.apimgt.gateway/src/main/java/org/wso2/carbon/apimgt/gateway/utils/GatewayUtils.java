@@ -113,7 +113,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -143,6 +142,7 @@ public class GatewayUtils {
     private static String apiUUID;
     private static final Pattern validHostHeaderPattern =
             Pattern.compile("^[A-Za-z0-9][A-Za-z0-9.-]*(:\\d{1,5})?$");
+    private static final Pattern URI_TEMPLATE_VARIABLE_PATTERN = Pattern.compile("\\{([^{}]+)}");
 
     public static boolean isClusteringEnabled() {
 
@@ -1293,39 +1293,128 @@ public class GatewayUtils {
                     messageContext.getProperty(APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS);
             String backendUrl = backendUrlObject != null ? (String) backendUrlObject : null;
             if (StringUtils.isNotEmpty(backendUrl)) {
+                // The endpoint address can be a URI template such as http://host:port/service/{uri.var.x}, which
+                // Synapse only resolves when the request is sent. Resolve the template here so the span reports
+                // the target that was actually called instead of the unresolved template.
+                String resolvedBackendUrl = resolveUriTemplateVariables(backendUrl, messageContext);
                 Object restUrlPostfixObject = axis2MessageContext.getProperty(NhttpConstants.REST_URL_POSTFIX);
                 String resourcePath = restUrlPostfixObject != null
                         ? StringUtils.substringBefore(restUrlPostfixObject.toString(), "?")
                         : StringUtils.EMPTY;
 
-                String urlFull = backendUrl;
-                if (StringUtils.isNotEmpty(resourcePath)) {
-                    if (urlFull.endsWith("/") && resourcePath.startsWith("/")) {
-                        urlFull = urlFull.substring(0, urlFull.length() - 1) + resourcePath;
-                    } else if (!urlFull.endsWith("/") && !resourcePath.startsWith("/")) {
-                        urlFull = urlFull + "/" + resourcePath;
-                    } else {
-                        urlFull = urlFull + resourcePath;
-                    }
-                }
-                urlFull = StringUtils.substringBefore(urlFull, "?");
-                TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.HTTP_URL_FULL_ATTRIBUTE, urlFull);
+                TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.HTTP_URL_FULL_ATTRIBUTE,
+                        StringUtils.substringBefore(joinUrlPath(resolvedBackendUrl, resourcePath), "?"));
 
-                URI backendUri = new URI(backendUrl);
-                String backendScheme = backendUri.getScheme();
-                if (StringUtils.isNotEmpty(backendScheme)) {
-                    TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.HTTP_URL_SCHEME_ATTRIBUTE, backendScheme);
-                }
-
-                int backendPort = backendUri.getPort() > 0 ? backendUri.getPort() : getDefaultPort(backendScheme);
-                // URI.getHost() keeps the square brackets of an IPv6 literal, while server.address must not have them.
-                setServerAddressAndPort(tracingSpan, stripIpv6Brackets(backendUri.getHost()), backendPort);
+                // The authority never contains template placeholders, so it is parsed on its own: a character
+                // that cannot be parsed in the path must not drop url.scheme, server.address or server.port.
+                setBackendServerAddressAndPort(tracingSpan, resolvedBackendUrl);
             }
         } catch (Exception e) {
             if (log.isDebugEnabled()) {
                 log.debug("Error while setting backend HTTP attributes on the tracing span.", e);
             }
         }
+    }
+
+    /**
+     * Replaces the {uri.var.*} placeholders of an endpoint URI template with the value of the corresponding
+     * message context property, which is how Synapse resolves the template when it sends the request. A
+     * placeholder without a value is kept as it is, so an unresolved variable does not break the reported URL.
+     *
+     * @param url            endpoint address, possibly containing URI template placeholders
+     * @param messageContext message context holding the uri.var.* properties
+     * @return the endpoint address with the resolvable placeholders substituted
+     */
+    private static String resolveUriTemplateVariables(String url, org.apache.synapse.MessageContext messageContext) {
+
+        if (url.indexOf('{') < 0) {
+            return url;
+        }
+        Matcher matcher = URI_TEMPLATE_VARIABLE_PATTERN.matcher(url);
+        StringBuffer resolvedUrl = new StringBuffer();
+        while (matcher.find()) {
+            String variableName = matcher.group(1);
+            Object value = variableName.startsWith(RESTConstants.REST_URI_VARIABLE_PREFIX)
+                    ? messageContext.getProperty(variableName)
+                    : null;
+            matcher.appendReplacement(resolvedUrl,
+                    Matcher.quoteReplacement(value != null ? value.toString() : matcher.group(0)));
+        }
+        matcher.appendTail(resolvedUrl);
+        return resolvedUrl.toString();
+    }
+
+    private static String joinUrlPath(String url, String path) {
+
+        if (StringUtils.isEmpty(path)) {
+            return url;
+        }
+        if (url.endsWith("/") && path.startsWith("/")) {
+            return url.substring(0, url.length() - 1) + path;
+        }
+        if (!url.endsWith("/") && !path.startsWith("/")) {
+            return url + "/" + path;
+        }
+        return url + path;
+    }
+
+    /**
+     * Sets url.scheme, server.address and server.port from the authority of the given URL without parsing the
+     * path, so characters that are not valid in a URI (for example a leftover template placeholder) cannot keep
+     * these attributes from being recorded.
+     *
+     * @param tracingSpan CLIENT span of the backend call
+     * @param url         endpoint address of the backend call
+     */
+    private static void setBackendServerAddressAndPort(TelemetrySpan tracingSpan, String url) {
+
+        int schemeSeparatorIndex = url.indexOf("://");
+        String scheme = schemeSeparatorIndex > 0 ? url.substring(0, schemeSeparatorIndex) : null;
+        if (StringUtils.isNotEmpty(scheme)) {
+            TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.HTTP_URL_SCHEME_ATTRIBUTE, scheme);
+        }
+
+        String authority = url.substring(schemeSeparatorIndex > 0 ? schemeSeparatorIndex + 3 : 0);
+        int authorityEndIndex = authority.length();
+        for (char delimiter : new char[]{'/', '?', '#'}) {
+            int delimiterIndex = authority.indexOf(delimiter);
+            if (delimiterIndex >= 0 && delimiterIndex < authorityEndIndex) {
+                authorityEndIndex = delimiterIndex;
+            }
+        }
+        authority = authority.substring(0, authorityEndIndex);
+
+        int userInfoSeparatorIndex = authority.lastIndexOf('@');
+        if (userInfoSeparatorIndex >= 0) {
+            authority = authority.substring(userInfoSeparatorIndex + 1);
+        }
+
+        String host = authority;
+        int port = -1;
+        if (authority.startsWith("[")) {
+            // An IPv6 literal is enclosed in square brackets, so only a colon after the closing bracket separates
+            // the port: [::1] or [::1]:8243.
+            int closingBracketIndex = authority.indexOf(']');
+            if (closingBracketIndex > 0) {
+                host = authority.substring(1, closingBracketIndex);
+                int portSeparatorIndex = closingBracketIndex + 1;
+                if (portSeparatorIndex < authority.length() && authority.charAt(portSeparatorIndex) == ':') {
+                    port = parsePort(authority.substring(portSeparatorIndex + 1));
+                }
+            }
+        } else {
+            int portSeparatorIndex = authority.lastIndexOf(':');
+            if (portSeparatorIndex > 0) {
+                int parsedPort = parsePort(authority.substring(portSeparatorIndex + 1));
+                if (parsedPort > 0) {
+                    port = parsedPort;
+                    host = authority.substring(0, portSeparatorIndex);
+                }
+            }
+        }
+        // server.address must not keep the square brackets of an IPv6 literal.
+        setServerAddressAndPort(tracingSpan, stripIpv6Brackets(host),
+                port > 0 ? port : (StringUtils.isNotEmpty(scheme) ? getDefaultPort(scheme) : -1));
     }
 
     //for OpenTelemetry
@@ -1698,6 +1787,27 @@ public class GatewayUtils {
         Object endpoint = messageContext.getProperty(APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS);
         if (endpoint != null) {
             TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_ENDPOINT, (String) endpoint);
+        }
+    }
+
+    /**
+     * Marks a backend (CLIENT) span as failed when the gateway did not get a response from the backend, for example
+     * when the connection was refused or a read timeout occurred. Such faults are raised locally by the transport
+     * and never reach the inbound response flow, so the span is completed on the outbound response flow instead.
+     *
+     * @param tracingSpan    CLIENT span of the backend call
+     * @param messageContext message context carrying the Synapse fault properties
+     */
+    public static void setBackendFaultAttributes(TelemetrySpan tracingSpan,
+                                                 org.apache.synapse.MessageContext messageContext) {
+
+        if (tracingSpan == null) {
+            return;
+        }
+        Object errorCode = messageContext.getProperty(SynapseConstants.ERROR_CODE);
+        if (errorCode != null) {
+            TelemetryUtil.setStatus(tracingSpan, StatusCode.ERROR);
+            TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.ERROR_TYPE_ATTRIBUTE, errorCode.toString());
         }
     }
 
