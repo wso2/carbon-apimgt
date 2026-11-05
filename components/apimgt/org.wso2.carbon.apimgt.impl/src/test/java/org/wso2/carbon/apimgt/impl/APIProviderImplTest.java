@@ -29,6 +29,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
+import org.mockito.InOrder;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
@@ -38,10 +39,12 @@ import org.powermock.core.classloader.annotations.SuppressStaticInitializationFo
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.BlockConditionNotFoundException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
+import org.wso2.carbon.apimgt.api.model.AIConfiguration;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
@@ -59,6 +62,7 @@ import org.wso2.carbon.apimgt.api.model.Documentation.DocumentSourceType;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentVisibility;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
@@ -88,6 +92,7 @@ import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.Artifac
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.notifier.events.ScopeEvent;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.MCPUtils;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
@@ -99,6 +104,8 @@ import org.wso2.carbon.apimgt.persistence.APIPersistence;
 import org.wso2.carbon.apimgt.persistence.dto.MediationInfo;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
+import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.api.model.APIInfo;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.UserContext;
@@ -133,6 +140,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -1339,6 +1347,166 @@ public class APIProviderImplTest {
         }
     }
 
+    private static final String RESTORE_API_UUID = "63e1e37e-a5b8-4be6-86a5-d6ae0749f131";
+    private static final String RESTORE_REVISION_UUID = "b55e0fc3-9829-4432-b99e-02056dc91838";
+
+    /**
+     * Creates a provider whose restore reaches the scope cleanup, with the given Key Managers configured for the
+     * tenant and the given local scopes attached to the API before the restore.
+     */
+    private APIProviderImplWrapper prepareRestoreWithScopes(Set<String> scopesBeforeRestore,
+                                                           Map<String, KeyManager> keyManagers) throws Exception {
+
+        APIIdentifier apiId = new APIIdentifier("admin", "PizzaShackAPI", "1.0.0", RESTORE_API_UUID);
+        API revisionedApi = new API(new APIIdentifier("admin", "PizzaShackAPI", "1.0.0", RESTORE_REVISION_UUID));
+        revisionedApi.setUriTemplates(new HashSet<>());
+        APIRevision apiRevision = new APIRevision();
+        apiRevision.setApiUUID(RESTORE_API_UUID);
+        apiRevision.setRevisionUUID(RESTORE_REVISION_UUID);
+        apiRevision.setId(1);
+
+        Mockito.when(APIUtil.getAPIIdentifierFromUUID(RESTORE_API_UUID)).thenReturn(apiId);
+        Mockito.when(APIUtil.getTenantId(Mockito.anyString())).thenReturn(-1234);
+        Mockito.when(APIUtil.getTenantDomainFromTenantId(-1234)).thenReturn(superTenantDomain);
+        Mockito.when(apimgtDAO.getRevisionByRevisionUUID(RESTORE_REVISION_UUID)).thenReturn(apiRevision);
+        Mockito.when(apimgtDAO.getAllLocalScopeKeysForAPI(RESTORE_API_UUID, -1234)).thenReturn(scopesBeforeRestore);
+        PowerMockito.mockStatic(MCPUtils.class);
+
+        Map<String, KeyManagerDto> keyManagerDtos = new LinkedHashMap<>();
+        for (Map.Entry<String, KeyManager> entry : keyManagers.entrySet()) {
+            KeyManagerDto keyManagerDto = new KeyManagerDto();
+            keyManagerDto.setName(entry.getKey());
+            keyManagerDto.setKeyManager(entry.getValue());
+            keyManagerDtos.put(entry.getKey(), keyManagerDto);
+        }
+        PowerMockito.when(KeyManagerHolder.getGlobalAndTenantKeyManagers(superTenantDomain)).thenReturn(keyManagerDtos);
+
+        return new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO) {
+            @Override
+            public API getAPIbyUUID(String uuid, String org) {
+                return revisionedApi;
+            }
+
+            @Override
+            public List<APIResource> getUsedProductResources(String uuid) {
+                return new ArrayList<>();
+            }
+        };
+    }
+
+    /**
+     * A local scope which nothing uses after the restore is removed from every Key Manager that has it, audited and
+     * announced to the gateways. A scope which is still used is left untouched.
+     */
+    @Test
+    public void testRestoreAPIRevisionRemovesUnusedLocalScope() throws Exception {
+        Set<String> scopesBeforeRestore = new HashSet<>();
+        scopesBeforeRestore.add("unused_scope");
+        scopesBeforeRestore.add("used_scope");
+        KeyManager residentKeyManager = Mockito.mock(KeyManager.class);
+        Map<String, KeyManager> keyManagers = new LinkedHashMap<>();
+        keyManagers.put("Resident Key Manager", residentKeyManager);
+        APIProviderImplWrapper apiProvider = prepareRestoreWithScopes(scopesBeforeRestore, keyManagers);
+        Mockito.when(scopesDAO.deleteScopeIfUnused("unused_scope", -1234)).thenReturn(true);
+        Mockito.when(scopesDAO.deleteScopeIfUnused("used_scope", -1234)).thenReturn(false);
+        Mockito.when(residentKeyManager.isScopeExists("unused_scope")).thenReturn(true);
+
+        apiProvider.restoreAPIRevision(RESTORE_API_UUID, RESTORE_REVISION_UUID, superTenantDomain);
+
+        // The scopes are captured before the restore rewrites the resources, and released only after it
+        InOrder inOrder = Mockito.inOrder(apimgtDAO, scopesDAO);
+        inOrder.verify(apimgtDAO).getAllLocalScopeKeysForAPI(RESTORE_API_UUID, -1234);
+        inOrder.verify(apimgtDAO).restoreAPIRevision(Mockito.any(APIRevision.class), Mockito.eq(superTenantDomain));
+        inOrder.verify(scopesDAO, Mockito.atLeastOnce()).deleteScopeIfUnused(Mockito.anyString(), Mockito.eq(-1234));
+
+        Mockito.verify(residentKeyManager).deleteScope("unused_scope");
+        Mockito.verify(residentKeyManager, Mockito.never()).isScopeExists("used_scope");
+        Mockito.verify(residentKeyManager, Mockito.never()).deleteScope("used_scope");
+        Mockito.verify(scopesDAO, Mockito.never()).addScopes(Mockito.anySet(), Mockito.anyInt());
+        PowerMockito.verifyStatic(APIUtil.class, Mockito.times(1));
+        APIUtil.logAuditMessage(Mockito.eq(APIConstants.AuditLogConstants.SCOPE), Mockito.eq("unused_scope"),
+                Mockito.eq(APIConstants.AuditLogConstants.DELETED), Mockito.any());
+        PowerMockito.verifyStatic(APIUtil.class, Mockito.times(1));
+        APIUtil.sendNotification(Mockito.any(ScopeEvent.class), Mockito.eq(APIConstants.NotifierType.SCOPES.name()));
+    }
+
+    /**
+     * A Key Manager which fails does not stop the removal from the other Key Managers, does not put the scope back
+     * and does not fail the restore.
+     */
+    @Test
+    public void testRestoreAPIRevisionContinuesWhenAKeyManagerFails() throws Exception {
+        Set<String> scopesBeforeRestore = new HashSet<>();
+        scopesBeforeRestore.add("unused_scope");
+        KeyManager unreachableKeyManager = Mockito.mock(KeyManager.class);
+        KeyManager residentKeyManager = Mockito.mock(KeyManager.class);
+        Map<String, KeyManager> keyManagers = new LinkedHashMap<>();
+        keyManagers.put("UnreachableKM", unreachableKeyManager);
+        keyManagers.put("Resident Key Manager", residentKeyManager);
+        APIProviderImplWrapper apiProvider = prepareRestoreWithScopes(scopesBeforeRestore, keyManagers);
+        Mockito.when(scopesDAO.deleteScopeIfUnused("unused_scope", -1234)).thenReturn(true);
+        // The Key Manager client throws unchecked exceptions when the Key Manager cannot be reached
+        Mockito.when(unreachableKeyManager.isScopeExists("unused_scope"))
+                .thenThrow(new RuntimeException("Connection refused"));
+        Mockito.when(residentKeyManager.isScopeExists("unused_scope")).thenReturn(true);
+
+        apiProvider.restoreAPIRevision(RESTORE_API_UUID, RESTORE_REVISION_UUID, superTenantDomain);
+
+        Mockito.verify(unreachableKeyManager, Mockito.never()).deleteScope(Mockito.anyString());
+        Mockito.verify(residentKeyManager).deleteScope("unused_scope");
+        Mockito.verify(scopesDAO, Mockito.never()).addScopes(Mockito.anySet(), Mockito.anyInt());
+        PowerMockito.verifyStatic(APIUtil.class, Mockito.times(1));
+        APIUtil.sendNotification(Mockito.any(ScopeEvent.class), Mockito.eq(APIConstants.NotifierType.SCOPES.name()));
+    }
+
+    /**
+     * A Key Manager which does not have the scope (for example, one which rejected its name) is skipped instead of
+     * being asked to delete it.
+     */
+    @Test
+    public void testRestoreAPIRevisionSkipsKeyManagerWithoutScope() throws Exception {
+        Set<String> scopesBeforeRestore = new HashSet<>();
+        scopesBeforeRestore.add("unused_scope");
+        KeyManager residentKeyManager = Mockito.mock(KeyManager.class);
+        Map<String, KeyManager> keyManagers = new LinkedHashMap<>();
+        keyManagers.put("Resident Key Manager", residentKeyManager);
+        APIProviderImplWrapper apiProvider = prepareRestoreWithScopes(scopesBeforeRestore, keyManagers);
+        Mockito.when(scopesDAO.deleteScopeIfUnused("unused_scope", -1234)).thenReturn(true);
+        Mockito.when(residentKeyManager.isScopeExists("unused_scope")).thenReturn(false);
+
+        apiProvider.restoreAPIRevision(RESTORE_API_UUID, RESTORE_REVISION_UUID, superTenantDomain);
+
+        Mockito.verify(residentKeyManager, Mockito.never()).deleteScope(Mockito.anyString());
+        PowerMockito.verifyStatic(APIUtil.class, Mockito.times(1));
+        APIUtil.sendNotification(Mockito.any(ScopeEvent.class), Mockito.eq(APIConstants.NotifierType.SCOPES.name()));
+    }
+
+    /**
+     * Nothing is released when the restore itself fails.
+     */
+    @Test
+    public void testRestoreAPIRevisionFailureReleasesNothing() throws Exception {
+        Set<String> scopesBeforeRestore = new HashSet<>();
+        scopesBeforeRestore.add("unused_scope");
+        KeyManager residentKeyManager = Mockito.mock(KeyManager.class);
+        Map<String, KeyManager> keyManagers = new LinkedHashMap<>();
+        keyManagers.put("Resident Key Manager", residentKeyManager);
+        APIProviderImplWrapper apiProvider = prepareRestoreWithScopes(scopesBeforeRestore, keyManagers);
+        PowerMockito.doThrow(new APIPersistenceException("registry failure")).when(apiPersistenceInstance)
+                .restoreAPIRevision(any(Organization.class), Mockito.anyString(), Mockito.anyString(),
+                        Mockito.anyInt());
+
+        try {
+            apiProvider.restoreAPIRevision(RESTORE_API_UUID, RESTORE_REVISION_UUID, superTenantDomain);
+            Assert.fail("Restore should fail when the registry artifacts cannot be restored");
+        } catch (APIManagementException e) {
+            // expected
+        }
+
+        Mockito.verify(scopesDAO, Mockito.never()).deleteScopeIfUnused(Mockito.anyString(), Mockito.anyInt());
+        Mockito.verify(residentKeyManager, Mockito.never()).deleteScope(Mockito.anyString());
+    }
+
     /**
      * This method tests deleting an API Revision
      *
@@ -2137,5 +2305,197 @@ public class APIProviderImplTest {
             uriTemplate.addUsedByProduct(new APIProductIdentifier("admin", "PizzaShackProduct", "1.0.0"));
         }
         return uriTemplate;
+    }
+
+    @Test
+    public void testGenerateApiKey_APIProductCrossTenantRejected() throws Exception {
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO);
+        APIInfo apiInfo = new APIInfo.Builder()
+                .id("victim-product-uuid").name("VictimProduct").version("1.0.0")
+                .context("/victim-product/1.0.0").apiType(APIConstants.API_PRODUCT)
+                .organization("victim.example").build();
+        Mockito.when(apimgtDAO.getAPIInfoByUUID("victim-product-uuid", null)).thenReturn(apiInfo);
+        Mockito.when(apiPersistenceInstance.getPublisherAPIProduct(
+                Mockito.argThat(org -> "attacker.example".equals(org.getName())), Mockito.eq("victim-product-uuid"))).thenReturn(null);
+        try {
+            apiProvider.generateApiKey("victim-product-uuid", "attacker.example");
+            Assert.fail("Expected APIMgtResourceNotFoundException for cross-tenant API Product key generation");
+        } catch (APIMgtResourceNotFoundException e) {
+            // Registry-scoped lookup found nothing in attacker's org — cross-tenant rejected
+        }
+    }
+
+    @Test
+    public void testGenerateApiKey_APIProductSameOrgAllowed() throws Exception {
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO);
+        APIInfo apiInfo = new APIInfo.Builder()
+                .id("own-product-uuid").name("OwnProduct").version("1.0.0")
+                .context("/own-product/1.0.0").apiType(APIConstants.API_PRODUCT)
+                .organization("victim.example").build();
+        Mockito.when(apimgtDAO.getAPIInfoByUUID("own-product-uuid", null)).thenReturn(apiInfo);
+        Mockito.when(apiPersistenceInstance.getPublisherAPIProduct(
+                Mockito.any(Organization.class), Mockito.eq("own-product-uuid")))
+                .thenThrow(new APIPersistenceException("test"));
+        try {
+            apiProvider.generateApiKey("own-product-uuid", "victim.example");
+        } catch (APIMgtResourceNotFoundException e) {
+            Assert.fail("Same-org API Product key generation was incorrectly rejected by org check");
+        } catch (Exception e) {
+            // Downstream of org check — org check passed correctly
+        }
+    }
+
+    private static final String VALID_LLM_PROVIDER_NAME = "OpenAI";
+    private static final String VALID_LLM_PROVIDER_API_VERSION = "2.0.0";
+    private static final String VALID_LLM_PROVIDER_ID = "valid-llm-provider-id";
+    private static final String OTHER_LLM_PROVIDER_ID = "other-llm-provider-id";
+    private static final String INVALID_LLM_PROVIDER_ID = "invalid-llm-provider-id";
+
+    private void mockLLMProviders() throws APIManagementException {
+
+        Mockito.when(apimgtDAO.getLLMProvider(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(null);
+        Mockito.when(apimgtDAO.getLLMProvider(Mockito.anyString(), Mockito.anyString())).thenReturn(null);
+        Mockito.when(apimgtDAO.getLLMProvider(superTenantDomain, VALID_LLM_PROVIDER_NAME,
+                VALID_LLM_PROVIDER_API_VERSION)).thenReturn(new LLMProvider());
+        Mockito.when(apimgtDAO.getLLMProvider(superTenantDomain, VALID_LLM_PROVIDER_ID)).thenReturn(new LLMProvider());
+        Mockito.when(apimgtDAO.getLLMProvider(superTenantDomain, OTHER_LLM_PROVIDER_ID)).thenReturn(new LLMProvider());
+    }
+
+    private AIConfiguration createAIConfiguration(String llmProviderName, String llmProviderApiVersion,
+                                                  String llmProviderId) {
+
+        AIConfiguration aiConfiguration = new AIConfiguration();
+        aiConfiguration.setLlmProviderName(llmProviderName);
+        aiConfiguration.setLlmProviderApiVersion(llmProviderApiVersion);
+        aiConfiguration.setLlmProviderId(llmProviderId);
+        return aiConfiguration;
+    }
+
+    private API createAIAPI(String apiName, AIConfiguration aiConfiguration) {
+
+        API api = new API(new APIIdentifier("admin", apiName, "1.0.0"));
+        api.setContext("/" + apiName.toLowerCase());
+        api.setOrganization(superTenantDomain);
+        api.setSubtype(APIConstants.API_SUBTYPE_AI_API);
+        api.setAiConfiguration(aiConfiguration);
+        return api;
+    }
+
+    private void assertAddAIAPIRejected(API api, String expectedDescription) throws Exception {
+
+        mockLLMProviders();
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO);
+        try {
+            apiProvider.addAPI(api);
+            Assert.fail("AI API with invalid AI configuration should not be added");
+        } catch (APIManagementException e) {
+            Assert.assertEquals(ExceptionCodes.INVALID_AI_API_CONFIGURATION.getErrorCode(),
+                    e.getErrorHandler().getErrorCode());
+            Assert.assertEquals(400, e.getErrorHandler().getHttpStatusCode());
+            Assert.assertEquals(String.format(ExceptionCodes.INVALID_AI_API_CONFIGURATION.getErrorDescription(),
+                    expectedDescription), e.getErrorHandler().getErrorDescription());
+        }
+        Mockito.verify(apiPersistenceInstance, Mockito.never())
+                .addAPI(any(Organization.class), any(PublisherAPI.class));
+        Mockito.verify(apimgtDAO, Mockito.never()).addAPI(any(API.class), Mockito.anyInt(), Mockito.anyString());
+    }
+
+    private void assertAIConfigurationAccepted(API api) throws Exception {
+
+        mockLLMProviders();
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO);
+        invokeValidateApiInfo(apiProvider, api);
+    }
+
+    private void invokeValidateApiInfo(APIProviderImpl apiProvider, API api) throws Exception {
+
+        Method method = APIProviderImpl.class.getDeclaredMethod("validateApiInfo", API.class);
+        method.setAccessible(true);
+        method.invoke(apiProvider, api);
+    }
+
+    @Test
+    public void testAddAIAPIWithInvalidLLMProviderNameAndApiVersion() throws Exception {
+
+        assertAddAIAPIRejected(createAIAPI("InvalidProviderNameAPI",
+                createAIConfiguration("OpenAIX", VALID_LLM_PROVIDER_API_VERSION, null)),
+                "LLM provider with name 'OpenAIX' and API version '2.0.0' not found.");
+        assertAddAIAPIRejected(createAIAPI("InvalidProviderApiVersionAPI",
+                createAIConfiguration(VALID_LLM_PROVIDER_NAME, "9.9.9", null)),
+                "LLM provider with name 'OpenAI' and API version '9.9.9' not found.");
+    }
+
+    @Test
+    public void testAddAIAPIWithInvalidLLMProviderId() throws Exception {
+
+        assertAddAIAPIRejected(createAIAPI("InvalidProviderIdAPI",
+                createAIConfiguration(null, null, INVALID_LLM_PROVIDER_ID)),
+                "LLM provider with ID 'invalid-llm-provider-id' not found.");
+    }
+
+    @Test
+    public void testAddAIAPIWithInvalidLLMProviderNameAndInvalidLLMProviderId() throws Exception {
+
+        assertAddAIAPIRejected(createAIAPI("InvalidProviderNameAndIdAPI",
+                createAIConfiguration("OpenAIX", VALID_LLM_PROVIDER_API_VERSION, INVALID_LLM_PROVIDER_ID)),
+                "LLM provider with name 'OpenAIX' and API version '2.0.0' not found, and LLM provider with ID "
+                        + "'invalid-llm-provider-id' not found.");
+    }
+
+    @Test
+    public void testAddAIAPIWithMissingLLMProviderDetails() throws Exception {
+
+        assertAddAIAPIRejected(createAIAPI("MissingProviderDetailsAPI", new AIConfiguration()),
+                "Either llmProviderName and llmProviderApiVersion, or llmProviderId must be provided.");
+        assertAddAIAPIRejected(createAIAPI("MissingAIConfigurationAPI", null),
+                "LLM provider details are missing.");
+    }
+
+    @Test
+    public void testAddAIAPIWithIncompleteLLMProviderNameAndApiVersion() throws Exception {
+
+        assertAddAIAPIRejected(createAIAPI("ProviderNameOnlyAPI",
+                createAIConfiguration(VALID_LLM_PROVIDER_NAME, null, null)),
+                "Both llmProviderName and llmProviderApiVersion must be provided.");
+        assertAddAIAPIRejected(createAIAPI("ProviderApiVersionOnlyAPI",
+                createAIConfiguration(null, VALID_LLM_PROVIDER_API_VERSION, null)),
+                "Both llmProviderName and llmProviderApiVersion must be provided.");
+    }
+
+    @Test
+    public void testValidateApiInfoWithValidLLMProviderNameAndApiVersion() throws Exception {
+
+        assertAIConfigurationAccepted(createAIAPI("ValidProviderNameAPI",
+                createAIConfiguration(VALID_LLM_PROVIDER_NAME, VALID_LLM_PROVIDER_API_VERSION, null)));
+    }
+
+    @Test
+    public void testValidateApiInfoWithValidLLMProviderId() throws Exception {
+
+        assertAIConfigurationAccepted(createAIAPI("ValidProviderIdAPI",
+                createAIConfiguration(null, null, VALID_LLM_PROVIDER_ID)));
+    }
+
+    @Test
+    public void testValidateApiInfoWithValidLLMProviderNameAndApiVersionAndDifferentLLMProviderId()
+            throws Exception {
+
+        // An imported API carries the LLM provider ID of the source environment, which differs from the local one
+        assertAIConfigurationAccepted(createAIAPI("DifferentProviderIdAPI",
+                createAIConfiguration(VALID_LLM_PROVIDER_NAME, VALID_LLM_PROVIDER_API_VERSION,
+                        OTHER_LLM_PROVIDER_ID)));
+        assertAIConfigurationAccepted(createAIAPI("UnknownProviderIdAPI",
+                createAIConfiguration(VALID_LLM_PROVIDER_NAME, VALID_LLM_PROVIDER_API_VERSION,
+                        INVALID_LLM_PROVIDER_ID)));
+    }
+
+    @Test
+    public void testValidateApiInfoWithInvalidLLMProviderNameAndValidLLMProviderId() throws Exception {
+
+        assertAIConfigurationAccepted(createAIAPI("ProviderIdFallbackAPI",
+                createAIConfiguration("OpenAIX", VALID_LLM_PROVIDER_API_VERSION, VALID_LLM_PROVIDER_ID)));
+        assertAIConfigurationAccepted(createAIAPI("ProviderNameOnlyWithIdAPI",
+                createAIConfiguration(VALID_LLM_PROVIDER_NAME, null, VALID_LLM_PROVIDER_ID)));
     }
 }

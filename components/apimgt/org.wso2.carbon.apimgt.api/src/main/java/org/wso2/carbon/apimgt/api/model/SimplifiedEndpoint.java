@@ -37,6 +37,13 @@ public class SimplifiedEndpoint {
     private String roleRegion;
     private String roleExternalId;
     private String authType;
+    private String serviceAccountKey;
+    // GCP service-account key delivered to the gateway mediator as a single base64 property that the mediator
+    // base64-decodes. Normal mode: the whole base64 key is emitted as a literal value ({@code serviceAccountKeyBase64}).
+    // Secure-vault mode: the base64 key is split into chunks registered in the vault, and a pipe-joined concat of
+    // vault-lookups ({@code serviceAccountKeyVaultExpression}) is emitted instead (the mediator splits on '|').
+    private String serviceAccountKeyBase64;
+    private String serviceAccountKeyVaultExpression;
     private String endpoint;
     private String deploymentStage;
     private static final String PRODUCTION = "PRODUCTION";
@@ -93,6 +100,7 @@ public class SimplifiedEndpoint {
             this.roleRegion = endpointSecurity.getRoleRegion();
             this.roleExternalId = endpointSecurity.getRoleExternalId();
             this.authType = endpointSecurity.getAuthType();
+            this.serviceAccountKey = endpointSecurity.getServiceAccountKey();
             this.endpoint = endpointDetails.getUrl();
         }
     }
@@ -222,6 +230,30 @@ public class SimplifiedEndpoint {
 
     public void setAuthType(String authType) {
         this.authType = authType;
+    }
+
+    public String getServiceAccountKey() {
+        return serviceAccountKey;
+    }
+
+    public void setServiceAccountKey(String serviceAccountKey) {
+        this.serviceAccountKey = serviceAccountKey;
+    }
+
+    public String getServiceAccountKeyBase64() {
+        return serviceAccountKeyBase64;
+    }
+
+    public void setServiceAccountKeyBase64(String serviceAccountKeyBase64) {
+        this.serviceAccountKeyBase64 = serviceAccountKeyBase64;
+    }
+
+    public String getServiceAccountKeyVaultExpression() {
+        return serviceAccountKeyVaultExpression;
+    }
+
+    public void setServiceAccountKeyVaultExpression(String serviceAccountKeyVaultExpression) {
+        this.serviceAccountKeyVaultExpression = serviceAccountKeyVaultExpression;
     }
 
     public String getEndpoint() {

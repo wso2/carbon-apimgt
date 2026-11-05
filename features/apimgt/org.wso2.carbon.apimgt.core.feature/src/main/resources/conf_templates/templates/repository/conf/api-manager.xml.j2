@@ -796,6 +796,9 @@
         <PerPolicySeverityFilteringEnabled>{{apim.governance.per_policy_severity_filtering_enabled}}</PerPolicySeverityFilteringEnabled>
         {% endif %}
         <SchedulerConfigurations>
+            {% if apim.governance.scheduler.enable is defined %}
+            <Enabled>{{apim.governance.scheduler.enable}}</Enabled>
+            {% endif %}
             <ThreadPoolSize>{{apim.governance.scheduler.thread_pool_size}}</ThreadPoolSize>
             <QueueSize>{{apim.governance.scheduler.queue_size}}</QueueSize>
             <TaskCheckIntervalMinutes>{{apim.governance.scheduler.task_check_interval_minutes}}</TaskCheckIntervalMinutes>

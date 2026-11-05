@@ -23,11 +23,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
+import org.wso2.carbon.apimgt.api.APIDefinition;
+import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
@@ -39,25 +42,33 @@ import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
+import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIMDependencyConfiguration;
+import org.wso2.carbon.apimgt.impl.APIMDependencyConfigurationService;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.MCPUtils;
 import org.wso2.carbon.apimgt.impl.utils.TierNameComparator;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
+import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -70,7 +81,8 @@ import static org.wso2.carbon.apimgt.impl.APIConstants.API_ENDPOINT_CONFIG_PROTO
 import static org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.PublisherCommonUtils.addDocumentationToAPI;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({RestApiCommonUtil.class, WorkflowExecutorFactory.class, APIUtil.class})
+@PrepareForTest({RestApiCommonUtil.class, WorkflowExecutorFactory.class, APIUtil.class, OASParserUtil.class,
+        MCPUtils.class})
 public class PublisherCommonUtilsTest {
 
     private static final String PROVIDER = "admin";
@@ -845,5 +857,317 @@ public class PublisherCommonUtilsTest {
         PowerMockito.when(APIUtil.validateEndpointURLs(Mockito.any())).thenReturn(true);
 
         Assert.assertTrue(PublisherCommonUtils.validateEndpoints(new APIDTOTypeWrapper(apiDto)));
+    }
+
+    @Test
+    public void testUpdateSwaggerSkipsRoleValidationOfSharedScopes() throws Exception {
+
+        APIProvider apiProvider = Mockito.mock(APIProvider.class);
+        APIDefinition oasParser = Mockito.mock(APIDefinition.class);
+        API api = createAPIForSwaggerUpdate();
+        Scope sharedScope = createScope("shared_scope", "APPLICATION/test_role");
+        mockSwaggerUpdate(apiProvider, oasParser, sharedScope);
+        Mockito.when(apiProvider.isSharedScopeNameExists("shared_scope", -1234)).thenReturn(true);
+
+        Whitebox.invokeMethod(PublisherCommonUtils.class, "prepareForUpdateSwagger", API_ID,
+                createValidationResponse(oasParser), false, apiProvider, ORGANIZATION, oasParser, api, false);
+
+        PowerMockito.verifyStatic(APIUtil.class, Mockito.never());
+        APIUtil.isRoleNameExist(Mockito.anyString(), Mockito.eq("APPLICATION/test_role"));
+        Mockito.verify(apiProvider, Mockito.never()).updateSharedScope(Mockito.any(Scope.class), Mockito.anyString());
+        Assert.assertEquals(Collections.singleton(sharedScope), captureValidatedSharedScopes(apiProvider));
+        Mockito.verify(apiProvider).saveSwaggerDefinition(Mockito.eq(api), Mockito.anyString(),
+                Mockito.eq(ORGANIZATION));
+    }
+
+    @Test
+    public void testUpdateSwaggerRejectsLocalScopeWithInvalidRole() throws Exception {
+
+        APIProvider apiProvider = Mockito.mock(APIProvider.class);
+        APIDefinition oasParser = Mockito.mock(APIDefinition.class);
+        API api = createAPIForSwaggerUpdate();
+        Scope localScope = createScope("local_scope", "APPLICATION/test_role");
+        mockSwaggerUpdate(apiProvider, oasParser, localScope);
+        Mockito.when(APIUtil.isRoleNameExist(PROVIDER, "APPLICATION/test_role")).thenReturn(false);
+
+        try {
+            Whitebox.invokeMethod(PublisherCommonUtils.class, "prepareForUpdateSwagger", API_ID,
+                    createValidationResponse(oasParser), false, apiProvider, ORGANIZATION, oasParser, api, false);
+            fail("Expected APIManagementException for a local scope bound to a role that does not exist");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("Role 'APPLICATION/test_role' does not exist."));
+        }
+        Mockito.verify(apiProvider, Mockito.never()).updateSharedScope(Mockito.any(Scope.class), Mockito.anyString());
+        Mockito.verify(apiProvider, Mockito.never()).saveSwaggerDefinition(Mockito.any(API.class), Mockito.anyString(),
+                Mockito.anyString());
+    }
+
+    @Test
+    public void testUpdateSwaggerWithSharedScopeAndValidLocalScope() throws Exception {
+
+        APIProvider apiProvider = Mockito.mock(APIProvider.class);
+        APIDefinition oasParser = Mockito.mock(APIDefinition.class);
+        API api = createAPIForSwaggerUpdate();
+        Scope sharedScope = createScope("shared_scope", "APPLICATION/test_role");
+        Scope localScope = createScope("local_scope", "admin");
+        mockSwaggerUpdate(apiProvider, oasParser, sharedScope, localScope);
+        Mockito.when(apiProvider.isSharedScopeNameExists("shared_scope", -1234)).thenReturn(true);
+        Mockito.when(APIUtil.isRoleNameExist(PROVIDER, "admin")).thenReturn(true);
+
+        Whitebox.invokeMethod(PublisherCommonUtils.class, "prepareForUpdateSwagger", API_ID,
+                createValidationResponse(oasParser), false, apiProvider, ORGANIZATION, oasParser, api, false);
+
+        PowerMockito.verifyStatic(APIUtil.class);
+        APIUtil.isRoleNameExist(PROVIDER, "admin");
+        PowerMockito.verifyStatic(APIUtil.class, Mockito.never());
+        APIUtil.isRoleNameExist(Mockito.anyString(), Mockito.eq("APPLICATION/test_role"));
+        Assert.assertEquals(Collections.singleton(sharedScope), captureValidatedSharedScopes(apiProvider));
+        Mockito.verify(apiProvider, Mockito.never()).updateSharedScope(Mockito.any(Scope.class), Mockito.anyString());
+        Mockito.verify(apiProvider).saveSwaggerDefinition(Mockito.eq(api), Mockito.anyString(),
+                Mockito.eq(ORGANIZATION));
+    }
+
+    @Test
+    public void testUpdateSwaggerWithValidLocalScope() throws Exception {
+
+        APIProvider apiProvider = Mockito.mock(APIProvider.class);
+        APIDefinition oasParser = Mockito.mock(APIDefinition.class);
+        API api = createAPIForSwaggerUpdate();
+        Scope localScope = createScope("local_scope", "Application/test_role");
+        mockSwaggerUpdate(apiProvider, oasParser, localScope);
+        Mockito.when(APIUtil.isRoleNameExist(PROVIDER, "Application/test_role")).thenReturn(true);
+
+        Whitebox.invokeMethod(PublisherCommonUtils.class, "prepareForUpdateSwagger", API_ID,
+                createValidationResponse(oasParser), false, apiProvider, ORGANIZATION, oasParser, api, false);
+
+        PowerMockito.verifyStatic(APIUtil.class);
+        APIUtil.isRoleNameExist(PROVIDER, "Application/test_role");
+        Assert.assertEquals(Collections.singleton(localScope), api.getScopes());
+        Assert.assertEquals("Application/test_role", localScope.getRoles());
+        Assert.assertTrue(captureValidatedSharedScopes(apiProvider).isEmpty());
+        Mockito.verify(apiProvider, Mockito.never()).updateSharedScope(Mockito.any(Scope.class), Mockito.anyString());
+        Mockito.verify(apiProvider).saveSwaggerDefinition(Mockito.eq(api), Mockito.anyString(),
+                Mockito.eq(ORGANIZATION));
+    }
+
+    @Test
+    public void testUpdateSwaggerWithSharedScopeAndInvalidLocalScope() throws Exception {
+
+        APIProvider apiProvider = Mockito.mock(APIProvider.class);
+        APIDefinition oasParser = Mockito.mock(APIDefinition.class);
+        API api = createAPIForSwaggerUpdate();
+        // The shared scope is processed first, so skipping it must not skip validation of the local scope after it.
+        Scope sharedScope = createScope("shared_scope", "APPLICATION/test_role");
+        Scope localScope = createScope("local_scope", "invalid_role");
+        mockSwaggerUpdate(apiProvider, oasParser, sharedScope, localScope);
+        Mockito.when(apiProvider.isSharedScopeNameExists("shared_scope", -1234)).thenReturn(true);
+        Mockito.when(APIUtil.isRoleNameExist(PROVIDER, "invalid_role")).thenReturn(false);
+
+        try {
+            Whitebox.invokeMethod(PublisherCommonUtils.class, "prepareForUpdateSwagger", API_ID,
+                    createValidationResponse(oasParser), false, apiProvider, ORGANIZATION, oasParser, api, false);
+            fail("Expected APIManagementException for a local scope bound to a role that does not exist");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("Role 'invalid_role' does not exist."));
+        }
+        Mockito.verify(apiProvider, Mockito.never()).updateSharedScope(Mockito.any(Scope.class), Mockito.anyString());
+        Mockito.verify(apiProvider, Mockito.never()).saveSwaggerDefinition(Mockito.any(API.class), Mockito.anyString(),
+                Mockito.anyString());
+    }
+
+    @Test
+    public void testUpdateSwaggerRejectsScopeAssignedLocallyByAnotherAPI() throws Exception {
+
+        APIProvider apiProvider = Mockito.mock(APIProvider.class);
+        APIDefinition oasParser = Mockito.mock(APIDefinition.class);
+        API api = createAPIForSwaggerUpdate();
+        Scope otherApiScope = createScope("other_api_scope", "APPLICATION/test_role");
+        mockSwaggerUpdate(apiProvider, oasParser, otherApiScope);
+        Mockito.when(apiProvider.isScopeKeyAssignedLocally("TestAPI", "other_api_scope", ORGANIZATION))
+                .thenReturn(true);
+
+        try {
+            Whitebox.invokeMethod(PublisherCommonUtils.class, "prepareForUpdateSwagger", API_ID,
+                    createValidationResponse(oasParser), false, apiProvider, ORGANIZATION, oasParser, api, false);
+            fail("Expected APIManagementException for a scope assigned locally by another API");
+        } catch (APIManagementException e) {
+            Assert.assertEquals(ExceptionCodes.SCOPE_ALREADY_ASSIGNED.getErrorCode(),
+                    e.getErrorHandler().getErrorCode());
+        }
+        Mockito.verify(apiProvider, Mockito.never()).updateSharedScope(Mockito.any(Scope.class), Mockito.anyString());
+        Mockito.verify(apiProvider, Mockito.never()).saveSwaggerDefinition(Mockito.any(API.class), Mockito.anyString(),
+                Mockito.anyString());
+    }
+
+    @Test
+    public void testUpdateSwaggerRejectsLocalScopeWithOneInvalidRoleOfMany() throws Exception {
+
+        APIProvider apiProvider = Mockito.mock(APIProvider.class);
+        APIDefinition oasParser = Mockito.mock(APIDefinition.class);
+        API api = createAPIForSwaggerUpdate();
+        Scope localScope = createScope("local_scope", "admin,invalid_role");
+        mockSwaggerUpdate(apiProvider, oasParser, localScope);
+        Mockito.when(APIUtil.isRoleNameExist(PROVIDER, "admin")).thenReturn(true);
+        Mockito.when(APIUtil.isRoleNameExist(PROVIDER, "invalid_role")).thenReturn(false);
+
+        try {
+            Whitebox.invokeMethod(PublisherCommonUtils.class, "prepareForUpdateSwagger", API_ID,
+                    createValidationResponse(oasParser), false, apiProvider, ORGANIZATION, oasParser, api, false);
+            fail("Expected APIManagementException for a local scope bound to a role that does not exist");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("Role 'invalid_role' does not exist."));
+        }
+        PowerMockito.verifyStatic(APIUtil.class);
+        APIUtil.isRoleNameExist(PROVIDER, "admin");
+        Mockito.verify(apiProvider, Mockito.never()).saveSwaggerDefinition(Mockito.any(API.class), Mockito.anyString(),
+                Mockito.anyString());
+    }
+
+    @Test
+    public void testValidateScopesSkipsLocalScopeChecksForSharedScope() throws Exception {
+
+        APIProvider apiProvider = Mockito.mock(APIProvider.class);
+        Scope sharedScope = createScope("shared_scope", "invalid_role");
+        sharedScope.setName("");
+        sharedScope.setDescription(null);
+        API api = createAPIForSwaggerUpdate();
+        api.setScopes(new HashSet<>(Collections.singletonList(sharedScope)));
+        mockScopeValidation(apiProvider);
+        Mockito.when(apiProvider.isSharedScopeNameExists("shared_scope", -1234)).thenReturn(true);
+        Mockito.when(APIUtil.hasRestrictedScopePrefix("shared_scope")).thenReturn(true);
+
+        PublisherCommonUtils.validateScopes(api);
+
+        PowerMockito.verifyStatic(APIUtil.class, Mockito.never());
+        APIUtil.isRoleNameExist(Mockito.anyString(), Mockito.anyString());
+        // Display name and description of a shared scope are left for the key manager to replace.
+        Assert.assertEquals("", sharedScope.getName());
+        Assert.assertNull(sharedScope.getDescription());
+        Assert.assertEquals(Collections.singleton(sharedScope), captureValidatedSharedScopes(apiProvider));
+    }
+
+    @Test
+    public void testValidateScopesSetsDefaultsForLocalScope() throws Exception {
+
+        APIProvider apiProvider = Mockito.mock(APIProvider.class);
+        Scope localScope = createScope("local_scope", null);
+        localScope.setName(" ");
+        localScope.setDescription(null);
+        API api = createAPIForSwaggerUpdate();
+        api.setScopes(new HashSet<>(Collections.singletonList(localScope)));
+        mockScopeValidation(apiProvider);
+
+        PublisherCommonUtils.validateScopes(api);
+
+        Assert.assertEquals("local_scope", localScope.getName());
+        Assert.assertEquals("", localScope.getDescription());
+        Assert.assertTrue(captureValidatedSharedScopes(apiProvider).isEmpty());
+    }
+
+    @Test
+    public void testValidateScopesSkipsScopeLookupsForAllowedScope() throws Exception {
+
+        APIProvider apiProvider = Mockito.mock(APIProvider.class);
+        Scope allowedScope = createScope("allowed_scope", null);
+        API api = createAPIForSwaggerUpdate();
+        api.setScopes(new HashSet<>(Collections.singletonList(allowedScope)));
+        mockScopeValidation(apiProvider);
+        Mockito.when(APIUtil.isAllowedScope("allowed_scope")).thenReturn(true);
+
+        PublisherCommonUtils.validateScopes(api);
+
+        Mockito.verify(apiProvider, Mockito.never()).isScopeKeyAssignedLocally(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyString());
+        Mockito.verify(apiProvider, Mockito.never()).isSharedScopeNameExists(Mockito.anyString(), Mockito.anyInt());
+        Assert.assertTrue(captureValidatedSharedScopes(apiProvider).isEmpty());
+    }
+
+    @Test
+    public void testValidateScopesRejectsLocalScopeWithRestrictedPrefix() throws Exception {
+
+        APIProvider apiProvider = Mockito.mock(APIProvider.class);
+        Scope localScope = createScope("restricted_scope", null);
+        API api = createAPIForSwaggerUpdate();
+        api.setScopes(new HashSet<>(Collections.singletonList(localScope)));
+        mockScopeValidation(apiProvider);
+        Mockito.when(APIUtil.hasRestrictedScopePrefix("restricted_scope")).thenReturn(true);
+
+        try {
+            PublisherCommonUtils.validateScopes(api);
+            fail("Expected APIManagementException for a local scope with a restricted prefix");
+        } catch (APIManagementException e) {
+            Assert.assertEquals(ExceptionCodes.INVALID_SCOPE_NAME.getErrorCode(), e.getErrorHandler().getErrorCode());
+        }
+        Mockito.verify(apiProvider, Mockito.never()).validateSharedScopes(Mockito.anySet(), Mockito.anyString());
+    }
+
+    private API createAPIForSwaggerUpdate() {
+
+        API api = new API(new APIIdentifier(PROVIDER, "TestAPI", "1.0.0"));
+        api.setUuid(API_ID);
+        api.setOrganization(ORGANIZATION);
+        api.setType("HTTP");
+        return api;
+    }
+
+    private Scope createScope(String key, String roles) {
+
+        Scope scope = new Scope();
+        scope.setKey(key);
+        scope.setName(key);
+        scope.setDescription("");
+        scope.setRoles(roles);
+        return scope;
+    }
+
+    private APIDefinitionValidationResponse createValidationResponse(APIDefinition oasParser) {
+
+        APIDefinitionValidationResponse response = new APIDefinitionValidationResponse();
+        response.setJsonContent("{}");
+        response.setParser(oasParser);
+        return response;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Set<Scope> captureValidatedSharedScopes(APIProvider apiProvider) throws APIManagementException {
+
+        ArgumentCaptor<Set<Scope>> captor = ArgumentCaptor.forClass(Set.class);
+        Mockito.verify(apiProvider).validateSharedScopes(captor.capture(), Mockito.eq(ORGANIZATION));
+        return captor.getValue();
+    }
+
+    private void mockSwaggerUpdate(APIProvider apiProvider, APIDefinition oasParser, Scope... scopes)
+            throws APIManagementException {
+
+        URITemplate uriTemplate = new URITemplate();
+        uriTemplate.setUriTemplate("/test");
+        uriTemplate.setHTTPVerb("GET");
+        Set<URITemplate> uriTemplates = new HashSet<>();
+        uriTemplates.add(uriTemplate);
+        Mockito.when(oasParser.getURITemplates(Mockito.anyString())).thenReturn(uriTemplates);
+        Mockito.when(oasParser.getScopes(Mockito.anyString())).thenReturn(new LinkedHashSet<>(Arrays.asList(scopes)));
+        Mockito.when(oasParser.populateCustomManagementInfo(Mockito.anyString(), Mockito.any(), Mockito.any()))
+                .thenReturn("{}");
+        Mockito.when(apiProvider.getRemovedProductResources(Mockito.anySet(), Mockito.any(API.class)))
+                .thenReturn(new ArrayList<>());
+        PowerMockito.mockStatic(OASParserUtil.class);
+        Mockito.when(OASParserUtil.preProcess(Mockito.anyString(), Mockito.any())).thenReturn("{}");
+        PowerMockito.mockStatic(MCPUtils.class);
+        APIMDependencyConfigurationService dependencyConfigurationService =
+                Mockito.mock(APIMDependencyConfigurationService.class);
+        Mockito.when(dependencyConfigurationService.getAPIMDependencyConfigurations())
+                .thenReturn(Mockito.mock(APIMDependencyConfiguration.class));
+        ServiceReferenceHolder.getInstance().setAPIMDependencyConfigurationService(dependencyConfigurationService);
+        mockScopeValidation(apiProvider);
+    }
+
+    private void mockScopeValidation(APIProvider apiProvider) throws APIManagementException {
+
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        Mockito.when(RestApiCommonUtil.getLoggedInUsername()).thenReturn(PROVIDER);
+        Mockito.when(RestApiCommonUtil.getProvider(PROVIDER)).thenReturn(apiProvider);
+        PowerMockito.mockStatic(APIUtil.class);
+        Mockito.when(APIUtil.getInternalOrganizationId(ORGANIZATION)).thenReturn(-1234);
+        Mockito.when(APIUtil.getTenantDomainFromTenantId(-1234)).thenReturn(ORGANIZATION);
     }
 }

@@ -29,10 +29,12 @@ import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.CorruptedWebSocketFrameException;
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketCloseStatus;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
+import io.netty.util.ReferenceCountUtil;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.http.HttpHeaders;
@@ -46,6 +48,8 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
+import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketAnalyticsMetricsHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketUtils;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
@@ -112,17 +116,7 @@ public class WebsocketInboundHandlerTestCase {
         Mockito.doNothing().when(apiMgtGoogleAnalyticsUtils).init("carbon.super");
         Mockito.doNothing().when(apiMgtGoogleAnalyticsUtils).publishGATrackingData(Mockito.anyObject(),
                 Mockito.anyObject(), Mockito.anyObject());
-        websocketInboundHandler = new WebsocketInboundHandler() {
-            @Override
-            protected String getRemoteIP(ChannelHandlerContext ctx) {
-                return remoteIP;
-            }
-
-            @Override
-            public WebSocketProcessor initializeWebSocketProcessor() {
-                return inboundWebSocketProcessor;
-            }
-        };
+        websocketInboundHandler = createWebsocketInboundHandler();
         websocketAPI = new API(UUID.randomUUID().toString(), 1, "admin", "WSAPI", "1.0.0", "/wscontext", "Unlimited",
                 APIConstants.API_TYPE_WS, APIConstants.PUBLISHED_STATUS, false);
 
@@ -316,6 +310,50 @@ public class WebsocketInboundHandlerTestCase {
         Assert.assertFalse("Existing connection should be terminated when API becomes blocked",
                 InboundMessageContextDataHolder.getInstance().getInboundMessageContextMap()
                         .containsKey(channelIdString));
+    }
+
+    @Test
+    public void testWSTextFrameSizeCapturedBeforeDispatchWhenAnalyticsEnabled() throws Exception {
+
+        // analytics must be enabled when the handler is created so that the metrics handler is initialized
+        PowerMockito.when(APIUtil.isAnalyticsEnabled()).thenReturn(true);
+        WebSocketAnalyticsMetricsHandler metricsHandler = Mockito.mock(WebSocketAnalyticsMetricsHandler.class);
+        PowerMockito.whenNew(WebSocketAnalyticsMetricsHandler.class).withNoArguments().thenReturn(metricsHandler);
+        WebsocketInboundHandler analyticsEnabledHandler = createWebsocketInboundHandler();
+
+        InboundMessageContext inboundMessageContext = createWebSocketApiMessageContext();
+        InboundMessageContextDataHolder.getInstance().addInboundMessageContextForConnection(channelIdString,
+                inboundMessageContext);
+        TextWebSocketFrame msg = new TextWebSocketFrame("hello");
+        InboundProcessorResponseDTO responseDTO = new InboundProcessorResponseDTO();
+        Mockito.when(inboundWebSocketProcessor.handleRequest(msg, inboundMessageContext)).thenReturn(responseDTO);
+        // the downstream handler releases the frame once it has been dispatched
+        Mockito.doAnswer(invocation -> {
+            ReferenceCountUtil.release(invocation.getArgument(0));
+            return channelHandlerContext;
+        }).when(channelHandlerContext).fireChannelRead(msg);
+
+        analyticsEnabledHandler.channelRead(channelHandlerContext, msg);
+
+        Assert.assertEquals(0, msg.refCnt());
+        PowerMockito.verifyStatic(WebSocketUtils.class);
+        WebSocketUtils.setApiPropertyToChannel(channelHandlerContext, Constants.RESPONSE_SIZE, 5);
+        Mockito.verify(metricsHandler).handlePublish(channelHandlerContext);
+    }
+
+    private WebsocketInboundHandler createWebsocketInboundHandler() {
+
+        return new WebsocketInboundHandler() {
+            @Override
+            protected String getRemoteIP(ChannelHandlerContext ctx) {
+                return remoteIP;
+            }
+
+            @Override
+            public WebSocketProcessor initializeWebSocketProcessor() {
+                return inboundWebSocketProcessor;
+            }
+        };
     }
 
     private InboundMessageContext createWebSocketApiMessageContext() {

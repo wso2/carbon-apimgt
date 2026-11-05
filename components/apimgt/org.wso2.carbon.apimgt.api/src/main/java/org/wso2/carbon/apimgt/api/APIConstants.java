@@ -57,6 +57,7 @@ public class APIConstants {
     public static final String API_PUBLISHER_IMPORT_MCP_FILE_SIZE_LIMIT = API_PUBLISHER_IMPORT_DEFINITION_FILE_SIZE_LIMIT + "MCP";
     public static final String API_PUBLISHER_IMPORT_MCP_FILE_SIZE_LIMIT_DEFAULT_MB = "10";
     public static final String ENDPOINT_SECURITY_TYPE_AWS = "aws";
+    public static final String ENDPOINT_SECURITY_TYPE_GCP = "gcp";
     public static final String ENDPOINT_SECURITY_TYPE_UMI = "umi";
     public static final String LLM_PROVIDER_SERVICE_AWS_BEDROCK_SERVICE_NAME = "bedrock";
 
@@ -168,6 +169,19 @@ public class APIConstants {
         public static final String LLM_PROVIDER_SERVICE_METADATA_COMPLETION_TOKEN_COUNT = "completionTokenCount";
         public static final String LLM_PROVIDER_SERVICE_METADATA_TOTAL_TOKEN_COUNT = "totalTokenCount";
         public static final String LLM_PROVIDER_SERVICE_METADATA_REMAINING_TOKEN_COUNT = "remainingTokenCount";
+        public static final String LLM_PROVIDER_SERVICE_METADATA_CACHE_READ_TOKEN_COUNT = "cacheReadInputTokens";
+        public static final String LLM_PROVIDER_SERVICE_METADATA_CACHE_WRITE_TOKEN_COUNT = "cacheWriteInputTokens";
+        public static final String LLM_PROVIDER_SERVICE_METADATA_CACHE_WRITE_5M_TOKEN_COUNT =
+                "cacheWrite5mInputTokens";
+        public static final String LLM_PROVIDER_SERVICE_METADATA_CACHE_WRITE_1H_TOKEN_COUNT =
+                "cacheWrite1hInputTokens";
+        public static final String LLM_PROVIDER_SERVICE_METADATA_REASONING_TOKEN_COUNT = "reasoningTokens";
+
+        // Marks an LLMProviderMetadata entry as a token-usage counter published to analytics (see
+        // LLMProviderMetadata#analyticsCategory).
+        public static final String ANALYTICS_CATEGORY_TOKEN_USAGE = "TOKEN_USAGE";
+        public static final String LLM_PROVIDER_SERVICE_METADATA_TOOL_USE_PROMPT_TOKEN_COUNT =
+                "toolUsePromptTokens";
         public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_MODEL = "$.model";
         public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_PROMPT_TOKEN_COUNT = "$.usage" +
                 ".prompt_tokens";
@@ -190,6 +204,43 @@ public class APIConstants {
                 "$.usageMetadata.totalTokenCount";
         public static final String LLM_PROVIDER_SERVICE_GEMINI_RESPONSE_METADATA_IDENTIFIER_MODEL =
                 "$.modelVersion";
+
+        // Google Vertex AI - shared. Vertex fronts multiple publishers (Google, Anthropic, ...) behind a
+        // single OAuth2 (gcp) auth scheme. The project/location/publisher portion is baked into the backend
+        // endpoint URL (so consumers never see it); the gateway resource path is just "/{model}:{operation}".
+        // This regex extracts the model as the path segment immediately preceding the ":<operation>" custom
+        // method, for every publisher. Token-usage JSONPaths differ per publisher, hence the separate
+        // provider services below.
+        public static final String LLM_PROVIDER_SERVICE_VERTEX_AI_VERSION = "1.0.0";
+        public static final String LLM_PROVIDER_SERVICE_VERTEX_AI_SCOPE =
+                "https://www.googleapis.com/auth/cloud-platform";
+        public static final String LLM_PROVIDER_SERVICE_VERTEX_AI_METADATA_IDENTIFIER_MODEL =
+                "[a-zA-Z0-9.@\\-]+(?=:[a-zA-Z])";
+        // Max characters per secure-vault chunk of the GCP service-account key. The key is base64-encoded
+        // (ASCII, 1 byte/char) before chunking, so a chunk's plaintext is <= this many bytes - under the
+        // RSA-2048 secure-vault block limit (~214 B) and, once encrypted+base64'd, under
+        // REG_PROPERTY.REG_VALUE (VARCHAR(1000)).
+        public static final int GCP_SERVICE_ACCOUNT_KEY_VAULT_CHUNK_LENGTH = 180;
+
+        // Google Vertex AI - Gemini (publishers/google, :generateContent, usageMetadata.* token counts)
+        public static final String LLM_PROVIDER_SERVICE_VERTEX_AI_GEMINI_NAME = "VertexAI-Gemini";
+        public static final String LLM_PROVIDER_SERVICE_VERTEX_AI_GEMINI_CONNECTOR = "vertexAiGemini_1.0.0";
+        public static final String LLM_PROVIDER_SERVICE_VERTEX_AI_GEMINI_DESCRIPTION =
+                "Google Vertex AI - Gemini service";
+        public static final String LLM_PROVIDER_SERVICE_VERTEX_AI_GEMINI_API_DEFINITION_FILE_NAME =
+                "vertex_ai_gemini_api.yaml";
+
+        // Google Vertex AI - Anthropic Claude (publishers/anthropic, :rawPredict, usage.input/output_tokens)
+        public static final String LLM_PROVIDER_SERVICE_VERTEX_AI_ANTHROPIC_NAME = "VertexAI-Anthropic";
+        public static final String LLM_PROVIDER_SERVICE_VERTEX_AI_ANTHROPIC_CONNECTOR = "vertexAiAnthropic_1.0.0";
+        public static final String LLM_PROVIDER_SERVICE_VERTEX_AI_ANTHROPIC_DESCRIPTION =
+                "Google Vertex AI - Anthropic Claude service";
+        public static final String LLM_PROVIDER_SERVICE_VERTEX_AI_ANTHROPIC_API_DEFINITION_FILE_NAME =
+                "vertex_ai_anthropic_api.yaml";
+
+        // GCP endpoint-security parameter keys (service-account key supplied per-API as endpoint security)
+        public static final String GCP_SERVICE_ACCOUNT_KEY = "serviceAccountKey";
+
         public static final String LLM_PROVIDER_SERVICE_DEFAULT = "default";
         public static final String LLM_PROVIDER_DEPRECATED = "deprecated";
         public static final String NULL = "null";
@@ -236,6 +287,51 @@ public class APIConstants {
                 "$.usage.outputTokens";
         public static final String LLM_PROVIDER_SERVICE_AWS_METADATA_IDENTIFIER_TOTAL_TOKEN_COUNT =
                 "$.usage.totalTokens";
+        public static final String LLM_PROVIDER_SERVICE_AWS_METADATA_IDENTIFIER_CACHE_READ_TOKEN_COUNT =
+                "$.usage.cacheReadInputTokens";
+        public static final String LLM_PROVIDER_SERVICE_AWS_METADATA_IDENTIFIER_CACHE_WRITE_TOKEN_COUNT =
+                "$.usage.cacheWriteInputTokens";
+
+        // Cache / reasoning usage identifiers - OpenAI-compatible responses (OpenAI, Azure OpenAI, Azure AI
+        // Foundry, Mistral). cached_tokens is a subset of prompt_tokens; reasoning_tokens is a subset of
+        // completion_tokens.
+        public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_CACHE_READ_TOKEN_COUNT =
+                "$.usage.prompt_tokens_details.cached_tokens";
+        public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_CACHE_WRITE_TOKEN_COUNT =
+                "$.usage.prompt_tokens_details.cache_write_tokens";
+        public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_REASONING_TOKEN_COUNT =
+                "$.usage.completion_tokens_details.reasoning_tokens";
+
+        // Cache / reasoning usage identifiers - OpenAI Responses API shape (Azure OpenAI v2). cached_tokens is a
+        // subset of input_tokens; reasoning_tokens is a subset of output_tokens.
+        public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_RESPONSES_CACHE_READ_TOKEN_COUNT =
+                "$.usage.input_tokens_details.cached_tokens";
+        public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_RESPONSES_REASONING_TOKEN_COUNT =
+                "$.usage.output_tokens_details.reasoning_tokens";
+        public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_RESPONSES_CACHE_WRITE_TOKEN_COUNT =
+                "$.usage.input_tokens_details.cache_write_tokens";
+
+        // Cache / reasoning usage identifiers - Anthropic Messages responses (Anthropic, Vertex AI Anthropic).
+        // input_tokens excludes cache read/creation tokens; they are reported separately.
+        public static final String LLM_PROVIDER_SERVICE_ANTHROPIC_IDENTIFIER_CACHE_READ_TOKEN_COUNT =
+                "$.usage.cache_read_input_tokens";
+        public static final String LLM_PROVIDER_SERVICE_ANTHROPIC_IDENTIFIER_CACHE_WRITE_TOKEN_COUNT =
+                "$.usage.cache_creation_input_tokens";
+        public static final String LLM_PROVIDER_SERVICE_ANTHROPIC_IDENTIFIER_CACHE_WRITE_5M_TOKEN_COUNT =
+                "$.usage.cache_creation.ephemeral_5m_input_tokens";
+        public static final String LLM_PROVIDER_SERVICE_ANTHROPIC_IDENTIFIER_CACHE_WRITE_1H_TOKEN_COUNT =
+                "$.usage.cache_creation.ephemeral_1h_input_tokens";
+        public static final String LLM_PROVIDER_SERVICE_ANTHROPIC_IDENTIFIER_REASONING_TOKEN_COUNT =
+                "$.usage.output_tokens_details.thinking_tokens";
+
+        // Cache / reasoning usage identifiers - Gemini. cachedContentTokenCount is a subset of
+        // promptTokenCount; thoughtsTokenCount is NOT included in candidatesTokenCount.
+        public static final String LLM_PROVIDER_SERVICE_GEMINI_METADATA_IDENTIFIER_CACHE_READ_TOKEN_COUNT =
+                "$.usageMetadata.cachedContentTokenCount";
+        public static final String LLM_PROVIDER_SERVICE_GEMINI_METADATA_IDENTIFIER_REASONING_TOKEN_COUNT =
+                "$.usageMetadata.thoughtsTokenCount";
+        public static final String LLM_PROVIDER_SERVICE_GEMINI_METADATA_IDENTIFIER_TOOL_USE_PROMPT_TOKEN_COUNT =
+                "$.usageMetadata.toolUsePromptTokenCount";
         public static final String LLM_MODEL_PROVIDER_AWS_BEDROCK_ANTHROPIC = "Anthropic";
         public static final String LLM_MODEL_PROVIDER_AWS_BEDROCK_DEEPSEEK = "DeepSeek";
         public static final String LLM_MODEL_PROVIDER_AWS_BEDROCK_META = "Meta";

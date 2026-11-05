@@ -315,14 +315,20 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                     log.debug(channelId + " -- Websocket API request [inbound] : Sending Inbound Websocket frame." +
                             ctx.channel().toString());
                 }
+                // capture response size before dispatching the frame downstream, since a downstream handler
+                // may release the frame's buffer, making it unsafe to read after fireChannelRead
+                boolean analyticsEnabled = APIUtil.isAnalyticsEnabled();
+                Integer responseSize = null;
+                if (analyticsEnabled && msg instanceof TextWebSocketFrame) {
+                    responseSize = ((TextWebSocketFrame) msg).text().length();
+                }
                 ctx.fireChannelRead(msg);
                 // publish analytics events if analytics is enabled
-                if (APIUtil.isAnalyticsEnabled()) {
+                if (analyticsEnabled) {
                     WebSocketUtils.setApiPropertyToChannel(ctx, Constants.REQUEST_END_TIME_PROPERTY,
                             System.currentTimeMillis());
-                    if (msg instanceof TextWebSocketFrame) {
-                        WebSocketUtils.setApiPropertyToChannel(ctx, Constants.RESPONSE_SIZE,
-                                ((TextWebSocketFrame) msg).text().length());
+                    if (responseSize != null) {
+                        WebSocketUtils.setApiPropertyToChannel(ctx, Constants.RESPONSE_SIZE, responseSize);
                     }
                 }
                 publishPublishEvent(ctx);

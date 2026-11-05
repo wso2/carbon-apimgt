@@ -745,6 +745,64 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
+     * Validates that the AI configuration of an AI API resolves to an LLM provider in the organization, so that an
+     * invalid configuration is rejected before the API is persisted. The LLM provider is resolved in the same order
+     * as {@link #addAIConfiguration(String, String, AIConfiguration, String)}: by LLM provider name and API version
+     * first, and by LLM provider ID as a fallback.
+     *
+     * @param api AI API to validate
+     * @throws APIManagementException if the AI configuration is missing or does not resolve to an LLM provider in the
+     *                                organization
+     */
+    private void validateAIConfiguration(API api) throws APIManagementException {
+
+        AIConfiguration aiConfiguration = api.getAiConfiguration();
+        if (aiConfiguration == null) {
+            throw new APIManagementException("AI configuration is missing for AI API: " + api.getId().getApiName(),
+                    ExceptionCodes.from(ExceptionCodes.INVALID_AI_API_CONFIGURATION,
+                            "LLM provider details are missing."));
+        }
+        String llmProviderName = aiConfiguration.getLlmProviderName();
+        String llmProviderApiVersion = aiConfiguration.getLlmProviderApiVersion();
+        String llmProviderId = aiConfiguration.getLlmProviderId();
+        String organization = api.getOrganization();
+        boolean hasNameAndApiVersion = StringUtils.isNotBlank(llmProviderName)
+                && StringUtils.isNotBlank(llmProviderApiVersion);
+
+        if (hasNameAndApiVersion
+                && apiMgtDAO.getLLMProvider(organization, llmProviderName, llmProviderApiVersion) != null) {
+            return;
+        }
+        // Fall back to the LLM provider ID, as addAIConfiguration does when name and API version do not resolve
+        if (StringUtils.isNotBlank(llmProviderId)) {
+            if (apiMgtDAO.getLLMProvider(organization, llmProviderId) != null) {
+                return;
+            }
+            String errorDescription = hasNameAndApiVersion
+                    ? "LLM provider with name '" + llmProviderName + "' and API version '" + llmProviderApiVersion
+                    + "' not found, and LLM provider with ID '" + llmProviderId + "' not found."
+                    : "LLM provider with ID '" + llmProviderId + "' not found.";
+            throw new APIManagementException("LLM provider not found for AI API: " + api.getId().getApiName()
+                    + " in organization: " + organization + ". " + errorDescription,
+                    ExceptionCodes.from(ExceptionCodes.INVALID_AI_API_CONFIGURATION, errorDescription));
+        }
+        if (hasNameAndApiVersion) {
+            String errorDescription = "LLM provider with name '" + llmProviderName + "' and API version '"
+                    + llmProviderApiVersion + "' not found.";
+            throw new APIManagementException("LLM provider not found for AI API: " + api.getId().getApiName()
+                    + " in organization: " + organization + ". " + errorDescription,
+                    ExceptionCodes.from(ExceptionCodes.INVALID_AI_API_CONFIGURATION, errorDescription));
+        }
+        String errorDescription = StringUtils.isNotBlank(llmProviderName)
+                || StringUtils.isNotBlank(llmProviderApiVersion)
+                ? "Both llmProviderName and llmProviderApiVersion must be provided."
+                : "Either llmProviderName and llmProviderApiVersion, or llmProviderId must be provided.";
+        throw new APIManagementException("Incomplete LLM provider details for AI API: " + api.getId().getApiName()
+                + ". " + errorDescription,
+                ExceptionCodes.from(ExceptionCodes.INVALID_AI_API_CONFIGURATION, errorDescription));
+    }
+
+    /**
      * Add default primary endpoint mappings for the API.
      *
      * @param api                  API object
@@ -951,6 +1009,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         ) {
             throw new APIManagementException("Character length exceeds the allowable limit",
                     ExceptionCodes.LENGTH_EXCEEDS);
+        }
+        if (API_SUBTYPE_AI_API.equals(api.getSubtype())) {
+            validateAIConfiguration(api);
         }
     }
 
@@ -7742,6 +7803,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         log.info("Processing API revision deployment for API: " + apiId + ", revision: " + apiRevisionUUID
                 + ", deployments count: " + dedupedDeployments.size());
 
+        // Capture the user's requested displayOnDevportal per environment before
+        // handlePendingDeployments mutates the deployments to false for the pending state.
+        // The captured value is restored on approval (auto or admin) so the user's intent
+        // is honoured instead of being hard-coded to true.
+        Map<String, Boolean> userDisplayOnDevportal = new HashMap<>();
+        for (APIRevisionDeployment deployment : dedupedDeployments) {
+            userDisplayOnDevportal.put(deployment.getDeployment(), deployment.isDisplayOnDevportal());
+        }
+
         if (!isInitiatedFromGateway) {
             handlePendingDeployments(apiId, apiRevisionUUID, dedupedDeployments);
         }
@@ -7752,8 +7822,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (!isInitiatedFromGateway) {
                 apiMgtDAO.updateAPIRevisionDeploymentStatus(apiRevisionUUID,
                         APIConstants.APIRevisionStatus.API_REVISION_CREATED, deployment.getDeployment());
+                boolean requestedDisplayOnDevportal = userDisplayOnDevportal.getOrDefault(
+                        deployment.getDeployment(), Boolean.TRUE);
                 executeRevisionWorkflow(apiIdentifier, apiRevisionUUID, revisionId, organization, apiRevision,
-                        deployment);
+                        deployment, requestedDisplayOnDevportal);
             } else {
                 apiMgtDAO.updateAPIRevisionDeploymentForDiscoveredAPIs(apiRevisionUUID,
                         APIConstants.APIRevisionStatus.API_REVISION_APPROVED, Collections.singleton(deployment));
@@ -7821,7 +7893,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException if workflow execution fails
      */
     private void executeRevisionWorkflow(APIIdentifier apiIdentifier, String apiRevisionUUID, int revisionId,
-                                         String organization, APIRevision apiRevision, APIRevisionDeployment deployment)
+                                         String organization, APIRevision apiRevision, APIRevisionDeployment deployment,
+                                         boolean userDisplayOnDevportal)
             throws APIManagementException {
 
         WorkflowExecutor executor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT);
@@ -7844,6 +7917,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             workflowDTO.setEnvironment(deployment.getDeployment());
             workflowDTO.setRevisionId(String.valueOf(revisionId));
             workflowDTO.setInvoker(this.username);
+            // Carry the user's requested displayOnDevportal through workflow metadata so the
+            // admin-approval flow (completeDeploymentWorkFlow) can honour it when it resumes.
+            workflowDTO.setMetadata("displayOnDevportal", String.valueOf(userDisplayOnDevportal));
 
             String workflowDescription = String.format(
                     "Approve revision %s deployment request from the user %s for the environment %s of the API %s",
@@ -7858,7 +7934,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             WorkflowDTO persisted = apiMgtDAO.retrieveWorkflow(workflowDTO.getExternalWorkflowReference());
             if (persisted == null || WorkflowStatus.APPROVED.equals(persisted.getStatus())) {
-                deployment.setDisplayOnDevportal(true);
+                deployment.setDisplayOnDevportal(userDisplayOnDevportal);
                 apiMgtDAO.updateAPIRevisionDeployment(apiIdentifier.getUUID(), Collections.singleton(deployment));
                 resumeDeployedAPIRevision(apiIdentifier.getUUID(), organization, apiRevisionUUID,
                         String.valueOf(revisionId), deployment.getDeployment(), false);
@@ -8329,7 +8405,90 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.
                     ERROR_RESTORING_API_REVISION, apiRevision.getApiUUID()));
         }
+        int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+        // Local scopes attached to the current API before the restore. These are the only scopes which can be
+        // orphaned by the restore, and they have to be captured now because the restore removes the resource
+        // mappings which identify them.
+        Set<String> localScopesBeforeRestore = apiMgtDAO.getAllLocalScopeKeysForAPI(apiId, tenantId);
         apiMgtDAO.restoreAPIRevision(apiRevision, organization);
+        removeOrphanedLocalScopes(localScopesBeforeRestore, tenantId);
+    }
+
+    /**
+     * Removes local scopes which are no longer used by the API after a revision restore.
+     * <p>
+     * A scope is removed only when the conditional delete confirms, within a single statement, that no API
+     * resource refers to it any more - neither the restored current API, nor any revision of it, nor any other
+     * API of the tenant. Scopes which are still referenced are left untouched, so restoring a revision cannot
+     * remove scopes another revision depends on.
+     * <p>
+     * The Key Managers are updated only for scopes which were actually deleted. A failure in one Key Manager is logged
+     * and does not stop the removal from the other Key Managers; the scope then has to be removed from that Key
+     * Manager manually. A Key Manager failure never fails the restore itself, which has already been committed at
+     * this point.
+     *
+     * @param candidateScopeKeys local scope keys which were attached to the API before the restore
+     * @param tenantId           tenant id
+     */
+    private void removeOrphanedLocalScopes(Set<String> candidateScopeKeys, int tenantId) {
+
+        if (candidateScopeKeys == null || candidateScopeKeys.isEmpty()) {
+            return;
+        }
+        String scopeTenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
+        for (String scopeKey : candidateScopeKeys) {
+            if (StringUtils.isEmpty(scopeKey)) {
+                continue;
+            }
+            try {
+                if (!scopesDAO.deleteScopeIfUnused(scopeKey, tenantId)) {
+                    // Still attached to an API resource of some revision or API. Nothing to clean up.
+                    continue;
+                }
+                deleteScopeFromKeyManagers(scopeKey, scopeTenantDomain);
+                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SCOPE, scopeKey,
+                        APIConstants.AuditLogConstants.DELETED, this.username);
+                ScopeEvent scopeEvent = new ScopeEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
+                        APIConstants.EventType.SCOPE_DELETE.name(), tenantId, scopeTenantDomain, scopeKey, null,
+                        null);
+                APIUtil.sendNotification(scopeEvent, APIConstants.NotifierType.SCOPES.name());
+                if (log.isDebugEnabled()) {
+                    log.debug("Removed orphaned local scope: " + scopeKey + " after restoring a revision.");
+                }
+            } catch (Exception e) {
+                log.error("Error while removing orphaned local scope: " + scopeKey, e);
+            }
+        }
+    }
+
+    /**
+     * Removes the given scope from every Key Manager of the tenant which has it. A Key Manager which does not have
+     * the scope has nothing to remove and is skipped. A failure in one Key Manager is logged and does not stop the
+     * removal from the others.
+     *
+     * @param scopeKey     scope key
+     * @param tenantDomain tenant domain
+     */
+    private void deleteScopeFromKeyManagers(String scopeKey, String tenantDomain) {
+
+        Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getGlobalAndTenantKeyManagers(tenantDomain);
+        for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
+            KeyManager keyManager = keyManagerDtoEntry.getValue().getKeyManager();
+            if (keyManager == null) {
+                continue;
+            }
+            try {
+                if (keyManager.isScopeExists(scopeKey)) {
+                    keyManager.deleteScope(scopeKey);
+                }
+            } catch (Exception e) {
+                // Catch broadly: the Key Manager client can throw unchecked exceptions when the Key Manager is
+                // unreachable, and those must not stop the removal from the other Key Managers.
+                log.error("Could not remove unused scope: " + scopeKey + " of tenant: " + tenantDomain
+                        + " from Key Manager: " + keyManagerDtoEntry.getKey() + ". Remove the scope from this Key "
+                        + "Manager manually before creating a scope with the same name.", e);
+            }
+        }
     }
 
     /**
@@ -8795,6 +8954,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     // Ignore since we set the default key type previously
                 }
             }
+        } else {
+            // Validate that the API Product belongs to the caller's organization.
+            if (log.isDebugEnabled()) {
+                log.debug("Validating organization ownership for API Product " + apiId
+                        + " against caller organization: " + organization);
+            }
+            getAPIProductbyUUID(apiId, organization);
         }
         jwtTokenInfoDTO.setSubscribedApiDTOList(subscribedApiDTOList);
         jwtTokenInfoDTO.setExpirationTime(60000l);

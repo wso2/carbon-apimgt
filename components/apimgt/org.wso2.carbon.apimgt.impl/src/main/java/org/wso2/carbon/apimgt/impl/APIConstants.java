@@ -536,6 +536,9 @@ public final class APIConstants {
     public static final String ENDPOINT_SECURITY_AWS_AUTH_TYPE = "authType";
     public static final String ENDPOINT_SECURITY_AWS_AUTH_TYPE_STORED = "stored";
     public static final String ENDPOINT_SECURITY_AWS_AUTH_TYPE_ENVIRONMENT = "environment";
+    public static final String ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY =
+            org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants.GCP_SERVICE_ACCOUNT_KEY;
+    public static final String ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY_CLEAR = "clearServiceAccountKey";
     public static final String DEVPORTAL_MODE_HYBRID = "HYBRID";
     public static final String DEVPORTAL_MODE_MCP_ONLY = "MCP_ONLY";
     public static final String DEVPORTAL_MODE_API_ONLY = "API_ONLY";
@@ -2175,6 +2178,8 @@ public final class APIConstants {
     public static final String ENDPOINT_SECURITY_TYPE_API_KEY = "apikey";
     public static final String ENDPOINT_SECURITY_TYPE_AWS =
             org.wso2.carbon.apimgt.api.APIConstants.ENDPOINT_SECURITY_TYPE_AWS;
+    public static final String ENDPOINT_SECURITY_TYPE_GCP =
+            org.wso2.carbon.apimgt.api.APIConstants.ENDPOINT_SECURITY_TYPE_GCP;
     public static final String ENDPOINT_SECURITY_TYPE_UMI =
             org.wso2.carbon.apimgt.api.APIConstants.ENDPOINT_SECURITY_TYPE_UMI;
     public static final String ENDPOINT_SECURITY_API_KEY_IDENTIFIER = "apiKeyIdentifier";
@@ -2200,6 +2205,12 @@ public final class APIConstants {
     public static final String CONNECTION_TIMEOUT_DEFAULT = "-1";
     public static final String ENDPOINT_SPECIFIC_CONFIG = "config";
     public static final String ENDPOINT_CONFIG_ACTION_DURATION = "actionDuration";
+    public static final String ENDPOINT_CONFIG_SUSPEND_DURATION = "suspendDuration";
+    public static final String ENDPOINT_CONFIG_SUSPEND_MAX_DURATION = "suspendMaxDuration";
+    public static final String ENDPOINT_CONFIG_RETRY_TIMEOUT = "retryTimeOut";
+    public static final String ENDPOINT_CONFIG_RETRY_DELAY = "retryDelay";
+    public static final String ENDPOINT_CONFIG_SUSPEND_ERROR_CODE = "suspendErrorCode";
+    public static final String ENDPOINT_CONFIG_RETRY_ERROR_CODE = "retryErroCode";
     public static final String ENDPOINT_TYPE_GRAPHQL = "graphql";
     public static final String ENABLE_RETRY_CALL_WITH_NEW_OAUTH_TOKEN = "enableRetryCallWithNewOauthToken";
 
@@ -3867,7 +3878,19 @@ public final class APIConstants {
         public static final String PROTOCOL_VERSION_2024_NOVEMBER = "2024-11-05";
         public static final String PROTOCOL_VERSION_2025_MARCH = "2025-03-26";
         public static final String PROTOCOL_VERSION_2025_JUNE = "2025-06-18";
+        public static final String PROTOCOL_VERSION_2025_NOVEMBER = "2025-11-25";
         public static final List<String> SUPPORTED_PROTOCOL_VERSIONS = Arrays.asList(PROTOCOL_VERSION_2025_JUNE);
+        /**
+         * Protocol revisions accepted in the MCP-Protocol-Version request header. A client declaring a revision
+         * outside this list is answered with a bare HTTP 400 so that it falls back to the initialize handshake.
+         * Kept separate from SUPPORTED_PROTOCOL_VERSIONS, which only supplies the "supported" set reported in an
+         * initialize error body. The gateway does not validate the protocolVersion sent in initialize params, and
+         * for an MCP server proxying a third party backend the revision is settled by that backend, so the two
+         * lists are not required to hold the same values.
+         */
+        public static final List<String> SUPPORTED_PROTOCOL_VERSION_HEADERS =
+                Arrays.asList(PROTOCOL_VERSION_2024_NOVEMBER, PROTOCOL_VERSION_2025_MARCH,
+                        PROTOCOL_VERSION_2025_JUNE, PROTOCOL_VERSION_2025_NOVEMBER);
         public static final String PROTOCOL_VERSION_REQUESTED = "requested";
         public static final String PROTOCOL_VERSION_SUPPORTED = "supported";
         public static final String PROTOCOL_MISMATCH_ERROR = "Unsupported protocol version";
@@ -4072,6 +4095,14 @@ public final class APIConstants {
         // Wildcard deny-list entry for the remote-$ref resolver: matches every host, so an allow-mode policy denies
         // everything not on its allow-list (a restrictive whitelist).
         public static final String MATCH_ALL_HOSTS = "*";
+        // Host patterns with more wildcards than this are not combined, since the number of combined patterns grows
+        // quickly with the wildcard count; such entries are not applied to remote $ref resolution.
+        public static final int MAX_WILDCARDS_PER_HOST_PATTERN = 4;
+        // Host pattern pairs that need more combined patterns than this are not combined; such entries are not
+        // applied to remote $ref resolution.
+        public static final int MAX_COMBINED_HOST_PATTERNS = 64;
+        // Host patterns longer than the longest valid host name are not combined.
+        public static final int MAX_HOST_PATTERN_LENGTH = 253;
 
         // Tenant config JSON keys (under "NetworkSecurityAccessControl" in tenant-conf.json)
         public static final String TENANT_CONFIG_KEY = "NetworkSecurityAccessControl";
