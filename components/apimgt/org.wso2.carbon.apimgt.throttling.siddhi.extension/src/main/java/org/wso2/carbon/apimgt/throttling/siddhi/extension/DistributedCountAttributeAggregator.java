@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.throttling.siddhi.extension;
 import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -176,13 +177,16 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
      *         false if eviction was skipped because new traffic or a reset arrived.
      */
     private boolean evictIfIdleAndExpired() {
-        return ACTIVE_AGGREGATORS.computeIfPresent(key, (k, current) -> {
-            if (unsyncedCounter.get() == 0L && !pendingReset && storedWindowExpiry <= System.currentTimeMillis()) {
+        AtomicBoolean evicted = new AtomicBoolean(false);
+        ACTIVE_AGGREGATORS.computeIfPresent(key, (k, current) -> {
+            if (current == this && unsyncedCounter.get() == 0L && !pendingReset && storedWindowExpiry <= System.currentTimeMillis()) {
                 localCounter.set(0L);
+                evicted.set(true);
                 return null;
             }
             return current;
-        }) == null;
+        });
+        return evicted.get();
     }
 
     /**
