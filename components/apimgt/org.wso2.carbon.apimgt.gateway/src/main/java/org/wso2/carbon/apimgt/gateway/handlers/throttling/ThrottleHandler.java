@@ -61,6 +61,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
+import org.wso2.carbon.apimgt.gateway.utils.TelemetryLogUtil;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.ConditionDto;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
@@ -645,6 +646,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         Timer.Context context3 = timer3.start();
         TracingSpan throttleLatencyTracingSpan = null;
         TelemetrySpan throttleLatencySpan = null;
+        TelemetryLogUtil.TracingIds previousTracingIds = null;
         if (TelemetryUtil.telemetryEnabled()) {
             TelemetrySpan responseLatencySpan =
                     (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
@@ -663,6 +665,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
             return false;
         }
         try {
+            previousTracingIds = TelemetryLogUtil.enterSpan(throttleLatencySpan);
             boolean throttleResponse = doThrottle(messageContext);
             if (!ExtensionListenerUtil.postProcessRequest(messageContext, type)) {
                 return false;
@@ -682,6 +685,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                     System.currentTimeMillis() - executionStartTime);
             context3.stop();
             if (TelemetryUtil.telemetryEnabled()) {
+                TelemetryLogUtil.exitSpan(previousTracingIds);
                 TelemetryUtil.finishSpan(throttleLatencySpan);
             } else if (Util.tracingEnabled()) {
                 Util.finishSpan(throttleLatencyTracingSpan);
@@ -707,6 +711,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
             Timer.Context context3 = timer3.start();
             TracingSpan throttleLatencyTracingSpan = null;
             TelemetrySpan throttleLatencySpan = null;
+            TelemetryLogUtil.TracingIds previousTracingIds = null;
             if (TelemetryUtil.telemetryEnabled()) {
                 TelemetrySpan responseLatencySpan =
                         (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
@@ -725,6 +730,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 return false;
             }
             try {
+                previousTracingIds = TelemetryLogUtil.enterSpan(throttleLatencySpan);
                 sendNonThrottleEventToThrottlingEngine(messageContext);
                 return ExtensionListenerUtil.postProcessResponse(messageContext, type);
             } catch (Exception e) {
@@ -741,6 +747,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                         System.currentTimeMillis() - executionStartTime);
                 context3.stop();
                 if (TelemetryUtil.telemetryEnabled()) {
+                    TelemetryLogUtil.exitSpan(previousTracingIds);
                     TelemetryUtil.finishSpan(throttleLatencySpan);
                 } else if (Util.tracingEnabled()) {
                     Util.finishSpan(throttleLatencyTracingSpan);

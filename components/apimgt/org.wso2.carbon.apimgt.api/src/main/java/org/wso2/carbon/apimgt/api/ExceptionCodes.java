@@ -677,6 +677,7 @@ public enum ExceptionCodes implements ErrorHandler {
     AI_SERVICE_QUOTA_EXCEEDED(903102, "Quota exceeded for AI service", 429, "Quota exceeded for AI service"),
     AI_SERVICE_PROVIDER_NOT_FOUND(903103,"AI Service Provider Not found for %s in organization" ,404 ,"AI Service Provider Not found for %s in organization" ,false ),
     AI_SERVICE_PROVIDER_INVALID_METADATA_IDENTIFIER(903104, "Invalid metadata identifier", 400, "%s"),
+    INVALID_AI_API_CONFIGURATION(903105, "Invalid AI configuration", 400, "Invalid AI configuration. %s", false),
 
     DOCUMENT_NAME_ILLEGAL_CHARACTERS(902016, "Document name cannot contain illegal characters", 400, "Document name contains one or more illegal characters"),
 
