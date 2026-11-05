@@ -64,6 +64,7 @@ public class DistributedCountAggregatorTest {
         final AtomicInteger setWithExpiryCount = new AtomicInteger();
         final AtomicInteger expireMillisCount = new AtomicInteger();
         final AtomicInteger incrementByCount = new AtomicInteger();
+        final AtomicInteger getCount = new AtomicInteger();
         volatile String lastSetWithExpiryValue;
         volatile long lastSetWithExpiryTTL = -1L;
         volatile long lastExpireMillisTTL = -1L;
@@ -99,6 +100,7 @@ public class DistributedCountAggregatorTest {
 
         @Override
         public String get(String key) {
+            getCount.incrementAndGet();
             return store.get(key);
         }
 
@@ -1685,8 +1687,8 @@ public class DistributedCountAggregatorTest {
                 active.containsKey(fullKey));
         AtomicLong localCounter = (AtomicLong) getInstanceField(aggregator, "localCounter");
         Assert.assertEquals("localCounter must be reset to 0", 0L, localCounter.get());
-        Assert.assertNull("Redis GET must not be called when window has already expired",
-                fakeClient.store.get(fullKey));
+        Assert.assertEquals("Redis GET must not be called when window has already expired",
+                0, fakeClient.getCount.get());
     }
 
     /**

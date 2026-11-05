@@ -414,6 +414,12 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
         }
     }
 
+    /**
+     * Returns the current state of the aggregator as a key-value pair.
+     * Synchronizes with the distributed key-value store before returning state if enabled.
+     *
+     * @return An array containing the current local counter value.
+     */
     @Override
     public Object[] currentState() {
         if (log.isDebugEnabled()) {
@@ -429,6 +435,13 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
         return new Object[]{new AbstractMap.SimpleEntry<String, Object>("Value", localCounter.get())};
     }
 
+    /**
+     * Restores the internal state of the aggregator from a snapshot.
+     * In distributed mode, Redis is treated as authoritative, whereas in non-distributed
+     * mode, the local snapshot value is restored directly.
+     *
+     * @param state The serialized state array containing the aggregator state.
+     */
     @Override
     public void restoreState(Object[] state) {
         if (log.isDebugEnabled()) {
@@ -469,7 +482,9 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
             } else {
                 localCounter.set(counterToRestore);
             }
-            ACTIVE_AGGREGATORS.putIfAbsent(key, this);
+            if (distributedThrottlingEnabled && kvStoreClient != null && key != null) {
+                ACTIVE_AGGREGATORS.putIfAbsent(key, this);
+            }
         }
 
         // Key absent in Redis — attempt to seed with 0; no-op if storedWindowExpiry is not yet known.
