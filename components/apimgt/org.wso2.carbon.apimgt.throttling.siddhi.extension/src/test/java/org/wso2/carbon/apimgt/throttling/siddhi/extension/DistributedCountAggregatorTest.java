@@ -1659,4 +1659,89 @@ public class DistributedCountAggregatorTest {
             runtime.shutdown();
         }
     }
+
+    /**
+     * When a throttling key's window has expired and there are no unsynced changes,
+     * syncWithKVStore() must remove the key from ACTIVE_AGGREGATORS and avoid querying Redis.
+     */
+    @Test
+    public void expiredKeyIsRemovedFromActiveAggregatorsWhenWindowExpires() throws Exception {
+        DistributedCountAttributeAggregator aggregator = createAggregator("expiredKey1");
+        String fullKey = "wso2_throttler:expiredKey1";
+
+        @SuppressWarnings("unchecked")
+        ConcurrentHashMap<String, DistributedCountAttributeAggregator> active =
+                (ConcurrentHashMap<String, DistributedCountAttributeAggregator>)
+                        getStaticField(DistributedCountAttributeAggregator.class, "ACTIVE_AGGREGATORS");
+        active.put(fullKey, aggregator);
+
+        // Window expired 5 seconds ago
+        long pastExpiry = System.currentTimeMillis() - 5000L;
+        setInstanceField(aggregator, "storedWindowExpiry", pastExpiry);
+
+        aggregator.currentState(); // triggers syncWithKVStore()
+
+        Assert.assertFalse("Expired key must be removed from ACTIVE_AGGREGATORS",
+                active.containsKey(fullKey));
+        AtomicLong localCounter = (AtomicLong) getInstanceField(aggregator, "localCounter");
+        Assert.assertEquals("localCounter must be reset to 0", 0L, localCounter.get());
+        Assert.assertNull("Redis GET must not be called when window has already expired",
+                fakeClient.store.get(fullKey));
+    }
+
+    /**
+     * When a key that was previously evicted from ACTIVE_AGGREGATORS receives new traffic
+     * via processAdd(), it must be re-registered in ACTIVE_AGGREGATORS.
+     */
+    @Test
+    public void evictedKeyIsReRegisteredInActiveAggregatorsOnNewEvent() throws Exception {
+        DistributedCountAttributeAggregator aggregator = createAggregator("reActivatedKey1");
+        String fullKey = "wso2_throttler:reActivatedKey1";
+
+        @SuppressWarnings("unchecked")
+        ConcurrentHashMap<String, DistributedCountAttributeAggregator> active =
+                (ConcurrentHashMap<String, DistributedCountAttributeAggregator>)
+                        getStaticField(DistributedCountAttributeAggregator.class, "ACTIVE_AGGREGATORS");
+
+        // Ensure key is NOT in ACTIVE_AGGREGATORS initially (simulating eviction)
+        active.remove(fullKey);
+        Assert.assertFalse(active.containsKey(fullKey));
+
+        long futureExpiry = System.currentTimeMillis() + 60_000L;
+        setWindowExpiryThreadLocal(futureExpiry);
+        try {
+            aggregator.processAdd("message1");
+        } finally {
+            removeWindowExpiryThreadLocal();
+        }
+
+        Assert.assertTrue("Evicted key must be re-added to ACTIVE_AGGREGATORS on processAdd()",
+                active.containsKey(fullKey));
+        AtomicLong unsynced = (AtomicLong) getInstanceField(aggregator, "unsyncedCounter");
+        Assert.assertEquals("unsyncedCounter must reflect the new event", 1L, unsynced.get());
+    }
+
+    /**
+     * When unsyncedCounter is 0 and Redis key is absent and cannot be initialized
+     * because window has expired or is unknown, the key must be evicted from ACTIVE_AGGREGATORS.
+     */
+    @Test
+    public void absentKeyWithExpiredWindowIsEvictedFromActiveAggregators() throws Exception {
+        DistributedCountAttributeAggregator aggregator = createAggregator("absentExpiredKey1");
+        String fullKey = "wso2_throttler:absentExpiredKey1";
+
+        @SuppressWarnings("unchecked")
+        ConcurrentHashMap<String, DistributedCountAttributeAggregator> active =
+                (ConcurrentHashMap<String, DistributedCountAttributeAggregator>)
+                        getStaticField(DistributedCountAttributeAggregator.class, "ACTIVE_AGGREGATORS");
+        active.put(fullKey, aggregator);
+
+        // Window expiry 0 (unknown / not yet known)
+        setInstanceField(aggregator, "storedWindowExpiry", 0L);
+
+        aggregator.currentState(); // triggers syncWithKVStore()
+
+        Assert.assertFalse("Key should be evicted if absent in Redis and window expiry is invalid/expired",
+                active.containsKey(fullKey));
+    }
 }

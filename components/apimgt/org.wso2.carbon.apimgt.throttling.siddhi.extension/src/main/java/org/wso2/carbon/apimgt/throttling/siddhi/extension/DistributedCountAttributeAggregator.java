@@ -200,10 +200,25 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
             long currentUnsyncedCount = unsyncedCounter.getAndSet(0L);
             try {
                 if (currentUnsyncedCount == 0) {
+                    long windowExpiry = storedWindowExpiry;
+                    long remainingMillis = windowExpiry - System.currentTimeMillis();
+                    if (windowExpiry > 0 && remainingMillis <= 0 && unsyncedCounter.get() == 0L && !pendingReset) {
+                        ACTIVE_AGGREGATORS.remove(key);
+                        localCounter.set(0L);
+                        return;
+                    }
+
                     String kvStoreValue = kvStoreClient.get(key);
                     if (kvStoreValue == null) {
-                        writeCounterValue("0");
-                        localCounter.set(0L);
+                        if (writeCounterValue("0")) {
+                            keyHasTTL = true;
+                            localCounter.set(0L);
+                        } else {
+                            if (unsyncedCounter.get() == 0L && !pendingReset) {
+                                ACTIVE_AGGREGATORS.remove(key);
+                            }
+                            localCounter.set(0L);
+                        }
                     } else if (!pendingReset) {
                         // skip if reset() fired while waiting for the GET response —
                         // the returned value is the old-window total and must not overwrite localCounter=0.
@@ -272,6 +287,7 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
         try {
             long newCount = localCounter.incrementAndGet();
             if (distributedThrottlingEnabled && kvStoreClient != null && key != null) {
+                ACTIVE_AGGREGATORS.putIfAbsent(key, this);
                 unsyncedCounter.incrementAndGet();
                 // Refresh storedWindowExpiry when stale — this happens after one or more empty
                 // windows where reset() was never called (no RESET event → no reset()).
@@ -351,6 +367,7 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
         }
         localCounter.set(0L);
         if (distributedThrottlingEnabled && kvStoreClient != null && key != null) {
+            ACTIVE_AGGREGATORS.putIfAbsent(key, this);
             Long expiry = ThrottleStreamProcessor.getThreadLocalWindowExpiry();
             if (expiry != null) {
                 storedWindowExpiry = expiry;
@@ -452,6 +469,7 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
             } else {
                 localCounter.set(counterToRestore);
             }
+            ACTIVE_AGGREGATORS.putIfAbsent(key, this);
         }
 
         // Key absent in Redis — attempt to seed with 0; no-op if storedWindowExpiry is not yet known.
