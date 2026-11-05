@@ -161,8 +161,6 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
         log.debug("Tenant domain for user " + tenantDomain);
         String subject = signedJWTInfo.getJwtClaimsSet().getSubject();
         String clientId = signedJWTInfo.getJwtClaimsSet().getStringClaim(JWTConstants.AUTHORIZED_PARTY);
-        //the service provider lookup is the last check, so it only runs for subjects that already end with the
-        //tenant domain
         boolean isTenantQualified = isTenantQualifiedSubjectEnabled() && isIssuedByResidentIdp()
                 && StringUtils.endsWithIgnoreCase(subject, "@" + tenantDomain)
                 && isTenantDomainInSubjectEnabled(clientId, getClientTenantDomain(signedJWTInfo.getJwtClaimsSet()));
