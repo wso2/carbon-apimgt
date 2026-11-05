@@ -31,7 +31,9 @@ import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants.JwtTokenConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidatorImpl;
 import org.wso2.carbon.apimgt.impl.jwt.RevokedJWTDataHolder;
@@ -46,8 +48,11 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.application.common.model.FederatedAuthenticatorConfig;
 import org.wso2.carbon.identity.application.common.model.IdentityProvider;
+import org.wso2.carbon.identity.application.common.model.ServiceProvider;
 import org.wso2.carbon.identity.application.common.util.IdentityApplicationConstants;
 import org.wso2.carbon.identity.application.common.util.IdentityApplicationManagementUtil;
+import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
+import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
 import org.wso2.carbon.idp.mgt.IdentityProviderManagementException;
 import org.wso2.carbon.idp.mgt.IdentityProviderManager;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -74,6 +79,7 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
             APIConstants.EMAIL_DOMAIN_SEPARATOR + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
     private static final String OIDC_IDP_ENTITY_ID = "IdPEntityId";
     public static final String JWKS_URI = "jwksUri";
+    private static final String USE_TENANT_QUALIFIED_SUBJECT = APIConstants.API_RESTAPI + "UseTenantQualifiedSubject";
     private boolean isRESTApiTokenCacheEnabled;
     private Map<String, TokenIssuerDto> tokenIssuers;
 
@@ -154,10 +160,14 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
         } 
         log.debug("Tenant domain for user " + tenantDomain);
         String subject = signedJWTInfo.getJwtClaimsSet().getSubject();
-        boolean isTenantQualified = StringUtils.endsWithIgnoreCase(subject, "@" + tenantDomain)
-                && tenantDomain.equalsIgnoreCase(MultitenantUtils.getTenantDomain(subject));
+        String clientId = signedJWTInfo.getJwtClaimsSet().getStringClaim(JWTConstants.AUTHORIZED_PARTY);
+        //the service provider lookup is the last check, so it only runs for subjects that already end with the
+        //tenant domain
+        boolean isTenantQualified = isTenantQualifiedSubjectEnabled() && isIssuedByResidentIdp()
+                && StringUtils.endsWithIgnoreCase(subject, "@" + tenantDomain)
+                && isTenantDomainInSubjectEnabled(clientId, getClientTenantDomain(signedJWTInfo.getJwtClaimsSet()));
         oauthTokenInfo.setEndUserName(isTenantQualified ? subject : subject + "@" + tenantDomain);
-        oauthTokenInfo.setConsumerKey(signedJWTInfo.getJwtClaimsSet().getStringClaim(JWTConstants.AUTHORIZED_PARTY));
+        oauthTokenInfo.setConsumerKey(clientId);
         String scopeClaim = signedJWTInfo.getJwtClaimsSet().getStringClaim(JwtTokenConstants.SCOPE);
         if (scopeClaim != null) {
             String orgId = RestApiUtil.resolveOrganization(message);
@@ -377,6 +387,96 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
      */
     private Map<String, TokenIssuerDto> getTokenIssuers() {
         return APIMConfigUtil.getTokenIssuerMap();
+    }
+
+    /**
+     * Checks whether a JWT subject that already contains the tenant domain is used as the end user name, instead of
+     * appending the tenant domain to it. This is enabled only when use tenant qualified subject is set to true in the
+     * REST API configuration.
+     *
+     * @return true if a tenant qualified subject is used as the end user name
+     */
+    private boolean isTenantQualifiedSubjectEnabled() {
+
+        APIManagerConfigurationService configurationService =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
+        if (configurationService == null || configurationService.getAPIManagerConfiguration() == null) {
+            return false;
+        }
+        String useTenantQualifiedSubject = configurationService.getAPIManagerConfiguration()
+                .getFirstProperty(USE_TENANT_QUALIFIED_SUBJECT);
+        //only an explicit true enables it, so a missing or unrecognised value keeps the tenant domain appended
+        return Boolean.TRUE.toString().equalsIgnoreCase(StringUtils.trim(useTenantQualifiedSubject));
+    }
+
+    /**
+     * Checks whether tokens are validated against the resident identity provider, which is the case when no token
+     * issuers are configured for the REST APIs.
+     *
+     * @return true if tokens are validated against the resident identity provider
+     */
+    private boolean isIssuedByResidentIdp() {
+
+        return tokenIssuers == null || tokenIssuers.isEmpty();
+    }
+
+    /**
+     * Resolves the tenant domain that owns the client the token was issued to. The key manager writes it to the
+     * app_td claim, and the super tenant is used when the claim is not present, in the same way as when the
+     * signature of the token is validated.
+     *
+     * @param jwtClaimsSet claims of the token
+     * @return tenant domain that owns the client
+     * @throws ParseException if the app_td claim is not a string
+     */
+    private String getClientTenantDomain(JWTClaimsSet jwtClaimsSet) throws ParseException {
+
+        String appTenantDomain = jwtClaimsSet.getStringClaim(JwtTokenConstants.APP_DOMAIN);
+        return StringUtils.isNotEmpty(appTenantDomain) ? appTenantDomain
+                : MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+    }
+
+    /**
+     * Checks whether the service provider of the given OAuth client has "Use tenant domain in local subject
+     * identifier" enabled. When it is enabled, the key manager appends the tenant domain of local users to the
+     * subject of the tokens it issues for that client.
+     *
+     * @param clientId           client ID the token was issued to
+     * @param clientTenantDomain tenant domain that owns the client
+     * @return true if the option is enabled, false if it is disabled or cannot be determined
+     */
+    private boolean isTenantDomainInSubjectEnabled(String clientId, String clientTenantDomain) {
+
+        if (StringUtils.isEmpty(clientId)) {
+            return false;
+        }
+        try {
+            ServiceProvider serviceProvider = getServiceProvider(clientId, clientTenantDomain);
+            if (serviceProvider == null || serviceProvider.getLocalAndOutBoundAuthenticationConfig() == null) {
+                return false;
+            }
+            return serviceProvider.getLocalAndOutBoundAuthenticationConfig()
+                    .isUseTenantDomainInLocalSubjectIdentifier();
+        } catch (IdentityOAuth2Exception e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Unable to read the subject identifier settings of client: " + clientId, e);
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Retrieves the service provider of the given OAuth client from the given tenant.
+     *
+     * @param clientId     client ID of the OAuth application
+     * @param tenantDomain tenant domain that owns the OAuth application
+     * @return service provider of the client
+     * @throws IdentityOAuth2Exception if the service provider cannot be retrieved
+     */
+    protected ServiceProvider getServiceProvider(String clientId, String tenantDomain)
+            throws IdentityOAuth2Exception {
+
+        return OAuth2Util.getServiceProvider(clientId, tenantDomain);
     }
 
     /**
