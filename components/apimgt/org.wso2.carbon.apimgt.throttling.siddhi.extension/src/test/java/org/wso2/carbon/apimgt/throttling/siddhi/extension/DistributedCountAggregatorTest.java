@@ -34,6 +34,7 @@ import org.wso2.siddhi.core.stream.input.InputHandler;
 import java.lang.reflect.Field;
 import java.util.AbstractMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
@@ -1745,5 +1746,69 @@ public class DistributedCountAggregatorTest {
 
         Assert.assertFalse("Key should be evicted if absent in Redis and window expiry is invalid/expired",
                 active.containsKey(fullKey));
+    }
+
+    /**
+     * When an aggregator is already absent from ACTIVE_AGGREGATORS and window has expired,
+     * currentState() must treat it as already evicted and avoid issuing any Redis GET call.
+     */
+    @Test
+    public void alreadyEvictedKeyDoesNotQueryRedisOnCurrentState() throws Exception {
+        DistributedCountAttributeAggregator aggregator = createAggregator("alreadyEvictedKey1");
+        String fullKey = "wso2_throttler:alreadyEvictedKey1";
+
+        @SuppressWarnings("unchecked")
+        ConcurrentHashMap<String, DistributedCountAttributeAggregator> active =
+                (ConcurrentHashMap<String, DistributedCountAttributeAggregator>)
+                        getStaticField(DistributedCountAttributeAggregator.class, "ACTIVE_AGGREGATORS");
+        active.remove(fullKey); // Ensure absent from active map
+
+        long pastExpiry = System.currentTimeMillis() - 5000L;
+        setInstanceField(aggregator, "storedWindowExpiry", pastExpiry);
+
+        aggregator.currentState(); // triggers syncWithKVStore()
+
+        Assert.assertFalse("Key must remain absent from ACTIVE_AGGREGATORS",
+                active.containsKey(fullKey));
+        Assert.assertEquals("Redis GET must not be called for an already evicted aggregator",
+                0, fakeClient.getCount.get());
+    }
+
+    /**
+     * When one aggregator stops, the scheduler must not shut down if other aggregators
+     * remain attached, even if they have been evicted from ACTIVE_AGGREGATORS due to idle traffic.
+     */
+    @Test
+    public void schedulerIsNotShutDownWhileOtherAggregatorsRemainAttached() throws Exception {
+        DistributedCountAttributeAggregator idleAggregator = createAggregator("idleAggregator");
+        DistributedCountAttributeAggregator activeAggregator = createAggregator("activeAggregator");
+
+        @SuppressWarnings("unchecked")
+        Set<DistributedCountAttributeAggregator> attached =
+                (Set<DistributedCountAttributeAggregator>)
+                        getStaticField(DistributedCountAttributeAggregator.class, "ATTACHED_AGGREGATORS");
+        attached.add(idleAggregator);
+        attached.add(activeAggregator);
+
+        @SuppressWarnings("unchecked")
+        ConcurrentHashMap<String, DistributedCountAttributeAggregator> active =
+                (ConcurrentHashMap<String, DistributedCountAttributeAggregator>)
+                        getStaticField(DistributedCountAttributeAggregator.class, "ACTIVE_AGGREGATORS");
+        active.remove("wso2_throttler:idleAggregator");
+        active.put("wso2_throttler:activeAggregator", activeAggregator);
+
+        setStaticField(DistributedCountAttributeAggregator.class, "schedulerStarted", true);
+
+        // activeAggregator stops
+        activeAggregator.stop();
+
+        Assert.assertTrue("Scheduler must remain started because idleAggregator is still attached",
+                (boolean) getStaticField(DistributedCountAttributeAggregator.class, "schedulerStarted"));
+
+        // idleAggregator stops
+        idleAggregator.stop();
+
+        Assert.assertFalse("Scheduler should shut down when all attached aggregators have stopped",
+                (boolean) getStaticField(DistributedCountAttributeAggregator.class, "schedulerStarted"));
     }
 }
