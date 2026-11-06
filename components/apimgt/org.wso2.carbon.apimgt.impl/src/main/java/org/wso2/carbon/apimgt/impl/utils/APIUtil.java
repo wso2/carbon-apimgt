@@ -11039,13 +11039,22 @@ public final class APIUtil {
         return list.contains(fileType.toLowerCase());
     }
 
+    /**
+     * Validates whether the uploaded tenant configuration contains all REST API scopes
+     * defined in the file-based tenant configuration.
+     *
+     * @param tenantConfig uploaded tenant configuration as a JSON string
+     * @throws APIManagementException if required REST API scopes are missing
+     */
     public static void validateRestAPIScopes(String tenantConfig) throws APIManagementException {
         JsonObject fileBaseTenantConfig = (JsonObject) getFileBaseTenantConfig();
         Set<String> fileBaseScopes = getRestAPIScopes(fileBaseTenantConfig);
         Set<String> uploadedTenantConfigScopes = getRestAPIScopes((JsonObject) new JsonParser().parse(tenantConfig));
         fileBaseScopes.removeAll(uploadedTenantConfigScopes);
         if (fileBaseScopes.size() > 0) {
-            throw new APIManagementException("Insufficient scopes available in tenant-config", ExceptionCodes.INVALID_TENANT_CONFIG);
+            String message = "Insufficient scopes available in tenant-config. Missing scopes: " + fileBaseScopes;
+            throw new APIManagementException(message,
+                    ExceptionCodes.from(ExceptionCodes.INVALID_TENANT_CONFIG, message));
         }
     }
 

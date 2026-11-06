@@ -222,6 +222,21 @@ public class APIUtilTest {
     }
 
     @Test
+    public void testValidateRestAPIScopesIncludesMissingScopesInErrorDescription() throws Exception {
+
+        try {
+            APIUtil.validateRestAPIScopes("{}");
+            Assert.fail("Expected APIManagementException for missing REST API scopes");
+        } catch (APIManagementException ex) {
+            String errorDescription = ex.getErrorHandler().getErrorDescription();
+            Assert.assertTrue(errorDescription.contains("Insufficient scopes available in tenant-config"));
+            Assert.assertTrue(errorDescription.contains("Missing scopes:"));
+            Assert.assertTrue(errorDescription.contains("apim:api_publish"));
+            Assert.assertFalse(errorDescription.contains("%s"));
+        }
+    }
+
+    @Test
     public void testIsSandboxEndpointsExists() throws Exception {
 
         API api = Mockito.mock(API.class);
