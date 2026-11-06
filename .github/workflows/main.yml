@@ -327,6 +327,10 @@ jobs:
           files: ${{ env.V2_DIR }}/tests-integration/cucumber-tests/target/coverage/output/txt/jacoco-it.xml
           disable_search: true
           flags: integration_tests
+      # codecov-action exports CC_TOKEN to the job environment; clear it before any later step can read it.
+      - name: Clear Codecov token
+        if: always()
+        run: echo "CC_TOKEN=" >> "$GITHUB_ENV"
       - name: Publish Test Report
         if: always()
         uses: ScalableCapital/action-surefire-report@v2
