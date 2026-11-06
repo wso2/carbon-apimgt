@@ -23,6 +23,7 @@ import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.io.IOUtils;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -86,6 +87,7 @@ import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
@@ -751,6 +753,35 @@ public class APIProviderImplTest {
         Assert.assertEquals("user2", subscribedAPIs.get(1).getSubscriber().getName());
     }
 
+
+    /**
+     * Mock a state change workflow executor for which the state change request stays pending approval.
+     */
+    private WorkflowExecutor mockPendingStateChangeWorkflow(String workflowType, int apiOrApiProductId)
+            throws APIManagementException, WorkflowException {
+
+        WorkflowExecutorFactory wfe = PowerMockito.mock(WorkflowExecutorFactory.class);
+        Mockito.when(WorkflowExecutorFactory.getInstance()).thenReturn(wfe);
+        WorkflowExecutor stateChangeWFExecutor = Mockito.mock(WorkflowExecutor.class);
+        Mockito.when(wfe.getWorkflowExecutor(workflowType)).thenReturn(stateChangeWFExecutor);
+        APIManagerConfiguration apimConfig = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        Mockito.when(apimConfig.getWorkflowProperties()).thenReturn(new WorkflowProperties());
+
+        // No workflow exists before the state change. Once the executor runs, the request is pending approval.
+        WorkflowDTO pendingWorkflowDTO = new WorkflowDTO();
+        pendingWorkflowDTO.setStatus(WorkflowStatus.CREATED);
+        Mockito.when(apimgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiOrApiProductId),
+                workflowType)).thenReturn(null, pendingWorkflowDTO);
+        return stateChangeWFExecutor;
+    }
+
+    private Object getChecklistStoredInWorkflow(WorkflowExecutor stateChangeWFExecutor) throws WorkflowException {
+
+        ArgumentCaptor<WorkflowDTO> captor = ArgumentCaptor.forClass(WorkflowDTO.class);
+        Mockito.verify(stateChangeWFExecutor).execute(captor.capture());
+        return captor.getValue().getMetadata().get(WorkflowConstants.WF_METADATA_LIFECYCLE_CHECKLIST);
+    }
 
     private APIProduct createMockAPIProduct(String provider) {
 
@@ -1575,6 +1606,61 @@ public class APIProviderImplTest {
         APIStateChangeResponse response = apiProvider.changeLifeCycleStatus("carbon.super",
                 new ApiTypeWrapper(product), "Publish", null);
         Assert.assertNotNull(response);
+    }
+
+    @Test
+    public void testChangeLifeCycleStatusStoresChecklistInStateChangeWorkflow() throws Exception {
+
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        API api = new API(new APIIdentifier("admin", "PizzaShackAPI", "2.0.0", apiUUID));
+        api.setUuid(apiUUID);
+        api.setContext("/pizzashack");
+        api.setStatus(APIConstants.CREATED);
+        Mockito.when(apimgtDAO.getAPIID(apiUUID)).thenReturn(1);
+        WorkflowExecutor apiStateWFExecutor =
+                mockPendingStateChangeWorkflow(WorkflowConstants.WF_TYPE_AM_API_STATE, 1);
+
+        Map<String, Boolean> checklist = new HashMap<>();
+        checklist.put(APIConstants.RESUBSCRIBE_CHECK_LIST_ITEM, true);
+        checklist.put(APIConstants.DEPRECATE_CHECK_LIST_ITEM, false);
+        apiProvider.changeLifeCycleStatus(superTenantDomain, new ApiTypeWrapper(api), "Publish", checklist);
+
+        Object storedChecklist = getChecklistStoredInWorkflow(apiStateWFExecutor);
+        Assert.assertNotNull("Checklist must be stored with the state change workflow", storedChecklist);
+        Assert.assertEquals(checklist, new JSONParser().parse((String) storedChecklist));
+    }
+
+    @Test
+    public void testChangeLifeCycleStatusOfAPIProductStoresChecklistInStateChangeWorkflow() throws Exception {
+
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        APIProduct product = createMockAPIProduct("admin");
+        Mockito.when(apimgtDAO.getAPIProductId(product.getId())).thenReturn(1);
+        WorkflowExecutor productStateWFExecutor =
+                mockPendingStateChangeWorkflow(WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE, 1);
+
+        Map<String, Boolean> checklist = new HashMap<>();
+        checklist.put(APIConstants.RESUBSCRIBE_CHECK_LIST_ITEM_API_PRODUCT, true);
+        checklist.put(APIConstants.DEPRECATE_CHECK_LIST_ITEM_API_PRODUCT, true);
+        apiProvider.changeLifeCycleStatus(superTenantDomain, new ApiTypeWrapper(product), "Publish", checklist);
+
+        Object storedChecklist = getChecklistStoredInWorkflow(productStateWFExecutor);
+        Assert.assertNotNull("Checklist must be stored with the state change workflow", storedChecklist);
+        Assert.assertEquals(checklist, new JSONParser().parse((String) storedChecklist));
+    }
+
+    @Test
+    public void testChangeLifeCycleStatusWithoutChecklistDoesNotStoreChecklistInWorkflow() throws Exception {
+
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        APIProduct product = createMockAPIProduct("admin");
+        Mockito.when(apimgtDAO.getAPIProductId(product.getId())).thenReturn(1);
+        WorkflowExecutor productStateWFExecutor =
+                mockPendingStateChangeWorkflow(WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE, 1);
+
+        apiProvider.changeLifeCycleStatus(superTenantDomain, new ApiTypeWrapper(product), "Publish", null);
+
+        Assert.assertNull(getChecklistStoredInWorkflow(productStateWFExecutor));
     }
 
     @Test
