@@ -75,6 +75,8 @@ jobs:
       - name: Upload unit test coverage to Codecov
         uses: codecov/codecov-action@v7
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true
           files: ${{ steps.unit-coverage.outputs.files }}
           disable_search: true
           flags: unit_tests
@@ -320,6 +322,8 @@ jobs:
         if: ${{ always() && matrix.coverage && steps.verify-coverage.outcome == 'success' }}
         uses: codecov/codecov-action@v7
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true
           files: ${{ env.V2_DIR }}/tests-integration/cucumber-tests/target/coverage/output/txt/jacoco-it.xml
           disable_search: true
           flags: integration_tests
