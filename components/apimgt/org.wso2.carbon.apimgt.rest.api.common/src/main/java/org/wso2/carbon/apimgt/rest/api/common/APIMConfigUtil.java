@@ -46,6 +46,15 @@ public class APIMConfigUtil {
     }
 
     /**
+     * This is to get the value of a property of the API Manager configuration
+     * @param key property key in the API Manager configuration
+     * @return value of the property, or null if it is not configured
+     */
+    public static String getFirstProperty(String key) {
+        return configuration.getFirstProperty(key);
+    }
+
+    /**
      * @return APIManagerConfiguration
      */
     private static APIManagerConfiguration getApiManagerConfiguration() {

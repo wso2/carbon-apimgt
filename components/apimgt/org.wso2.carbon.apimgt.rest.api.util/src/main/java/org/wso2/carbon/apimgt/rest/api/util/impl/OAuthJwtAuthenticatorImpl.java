@@ -31,9 +31,7 @@ import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants.JwtTokenConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidatorImpl;
 import org.wso2.carbon.apimgt.impl.jwt.RevokedJWTDataHolder;
@@ -162,9 +160,11 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
         log.debug("Tenant domain for user " + tenantDomain);
         String subject = signedJWTInfo.getJwtClaimsSet().getSubject();
         String clientId = signedJWTInfo.getJwtClaimsSet().getStringClaim(JWTConstants.AUTHORIZED_PARTY);
-        boolean isTenantQualified = isSubjectAwareUserResolutionEnabled() && isIssuedByResidentIdp()
+        String clientTenantDomain = getClientTenantDomain(signedJWTInfo.getJwtClaimsSet());
+        boolean isTenantQualified = isSubjectAwareUserResolutionEnabled()
                 && StringUtils.endsWithIgnoreCase(subject, "@" + tenantDomain) && !isUsernameUsedAsSubject()
-                && isTenantDomainInSubjectEnabled(clientId, getClientTenantDomain(signedJWTInfo.getJwtClaimsSet()));
+                && isIssuedByResidentIdp(signedJWTInfo.getJwtClaimsSet(), clientTenantDomain)
+                && isTenantDomainInSubjectEnabled(clientId, clientTenantDomain);
         oauthTokenInfo.setEndUserName(isTenantQualified ? subject : subject + "@" + tenantDomain);
         oauthTokenInfo.setConsumerKey(clientId);
         String scopeClaim = signedJWTInfo.getJwtClaimsSet().getStringClaim(JwtTokenConstants.SCOPE);
@@ -397,26 +397,37 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
      */
     private boolean isSubjectAwareUserResolutionEnabled() {
 
-        APIManagerConfigurationService configurationService =
-                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
-        if (configurationService == null || configurationService.getAPIManagerConfiguration() == null) {
-            return false;
-        }
-        String subjectAwareUserResolution = configurationService.getAPIManagerConfiguration()
-                .getFirstProperty(SUBJECT_AWARE_USER_RESOLUTION);
+        String subjectAwareUserResolution = APIMConfigUtil.getFirstProperty(SUBJECT_AWARE_USER_RESOLUTION);
         //only an explicit true enables it, so a missing or unrecognised value keeps the tenant domain appended
         return Boolean.TRUE.toString().equalsIgnoreCase(StringUtils.trim(subjectAwareUserResolution));
     }
 
     /**
-     * Checks whether tokens are validated against the resident identity provider, which is the case when no token
-     * issuers are configured for the REST APIs.
+     * Checks whether the token was issued by the resident identity provider. When no token issuers are configured for
+     * the REST APIs, every token is validated against the resident identity provider. Otherwise the issuer of the
+     * token is compared with the entity ID of the resident identity provider of the tenant that owns the client.
      *
-     * @return true if tokens are validated against the resident identity provider
+     * @param jwtClaimsSet       claims of the token
+     * @param clientTenantDomain tenant domain that owns the client
+     * @return true if the token was issued by the resident identity provider
      */
-    private boolean isIssuedByResidentIdp() {
+    private boolean isIssuedByResidentIdp(JWTClaimsSet jwtClaimsSet, String clientTenantDomain) {
 
-        return tokenIssuers == null || tokenIssuers.isEmpty();
+        if (tokenIssuers == null || tokenIssuers.isEmpty()) {
+            return true;
+        }
+        String issuer = jwtClaimsSet.getIssuer();
+        if (StringUtils.isEmpty(issuer)) {
+            return false;
+        }
+        try {
+            return validateAndGetResidentIDPForIssuer(clientTenantDomain, issuer) != null;
+        } catch (APIManagementException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Unable to resolve the resident identity provider of tenant: " + clientTenantDomain, e);
+            }
+            return false;
+        }
     }
 
     /**
@@ -584,7 +595,7 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
      * @return resident Identity Provider
      * @throws APIManagementException if an error occurs while retrieving resident idp issuer
      */
-    private IdentityProvider validateAndGetResidentIDPForIssuer(String tenantDomain, String jwtIssuer)
+    protected IdentityProvider validateAndGetResidentIDPForIssuer(String tenantDomain, String jwtIssuer)
             throws APIManagementException {
 
         String issuer = StringUtils.EMPTY;
