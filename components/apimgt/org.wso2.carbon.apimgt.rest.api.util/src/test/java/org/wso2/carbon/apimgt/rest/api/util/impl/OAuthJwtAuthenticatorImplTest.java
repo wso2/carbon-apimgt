@@ -29,11 +29,9 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.OAuthTokenInfo;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.APIMConfigUtil;
@@ -42,6 +40,7 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.identity.application.common.model.IdentityProvider;
 import org.wso2.carbon.identity.application.common.model.LocalAndOutboundAuthenticationConfig;
 import org.wso2.carbon.identity.application.common.model.ServiceProvider;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
@@ -59,8 +58,7 @@ import java.util.HashMap;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({APIMConfigUtil.class, RestApiUtil.class, RestApiCommonUtil.class,
-        PrivilegedCarbonContext.class, APIUtil.class, CarbonUtils.class, ServerConfiguration.class,
-        ServiceReferenceHolder.class})
+        PrivilegedCarbonContext.class, APIUtil.class, CarbonUtils.class, ServerConfiguration.class})
 @SuppressStaticInitializationFor({"org.wso2.carbon.context.PrivilegedCarbonContext",
         "org.wso2.carbon.apimgt.impl.utils.APIUtil"})
 public class OAuthJwtAuthenticatorImplTest {
@@ -71,6 +69,8 @@ public class OAuthJwtAuthenticatorImplTest {
     private static final String TOKEN = "header.payload.signature";
     private static final String MASKED_TOKEN = "...XXXXsignature";
     private static final String CLIENT_ID = "client-id";
+    private static final String RESIDENT_ISSUER = "https://localhost:9443/oauth2/token";
+    private static final String EXTERNAL_ISSUER = "https://idp.example.com/token";
     private static final String SUBJECT_AWARE_USER_RESOLUTION = "RESTAPI.EnableSubjectAwareUserResolution";
 
     private OAuthJwtAuthenticatorImpl authenticator;
@@ -140,14 +140,7 @@ public class OAuthJwtAuthenticatorImplTest {
      */
     private void stubSubjectAwareUserResolution(String value) {
 
-        APIManagerConfiguration configuration = Mockito.mock(APIManagerConfiguration.class);
-        Mockito.when(configuration.getFirstProperty(SUBJECT_AWARE_USER_RESOLUTION)).thenReturn(value);
-        APIManagerConfigurationService configurationService = Mockito.mock(APIManagerConfigurationService.class);
-        Mockito.when(configurationService.getAPIManagerConfiguration()).thenReturn(configuration);
-        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
-        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(configurationService);
-        PowerMockito.mockStatic(ServiceReferenceHolder.class);
-        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        PowerMockito.when(APIMConfigUtil.getFirstProperty(SUBJECT_AWARE_USER_RESOLUTION)).thenReturn(value);
     }
 
     /**
@@ -211,6 +204,38 @@ public class OAuthJwtAuthenticatorImplTest {
 
         assertUsername(jwtWithSubject(subject, appTenantDomain, userTenantDomain), isEmailUserNameEnabled,
                 expectedUsername);
+    }
+
+    /**
+     * Configures the given token issuers for the REST APIs and creates the authenticator that reads them. Only the
+     * resident issuer is recognised as the resident identity provider.
+     *
+     * @param issuers names of the configured token issuers
+     */
+    private void configureTokenIssuers(String... issuers) throws Exception {
+
+        HashMap<String, TokenIssuerDto> tokenIssuers = new HashMap<>();
+        for (String issuer : issuers) {
+            tokenIssuers.put(issuer, new TokenIssuerDto(issuer));
+        }
+        PowerMockito.when(APIMConfigUtil.getTokenIssuerMap()).thenReturn(tokenIssuers);
+        authenticator = Mockito.spy(new OAuthJwtAuthenticatorImpl());
+        Mockito.doReturn(false).when(authenticator).isUsernameUsedAsSubject();
+        Mockito.doReturn(null).when(authenticator)
+                .validateAndGetResidentIDPForIssuer(Mockito.anyString(), Mockito.anyString());
+        Mockito.doReturn(new IdentityProvider()).when(authenticator)
+                .validateAndGetResidentIDPForIssuer(SUPER_TENANT, RESIDENT_ISSUER);
+    }
+
+    /**
+     * Builds a signed token info object issued by the given issuer to {@link #CLIENT_ID}.
+     */
+    private SignedJWTInfo jwtWithIssuer(String issuer, String subject, String appTenantDomain,
+                                        String userTenantDomain) {
+
+        JWTClaimsSet claims = new JWTClaimsSet.Builder(
+                jwtWithSubject(subject, appTenantDomain, userTenantDomain).getJwtClaimsSet()).issuer(issuer).build();
+        return new SignedJWTInfo(TOKEN, null, claims);
     }
 
     private void assertServiceProviderIsNotLookedUp() throws Exception {
@@ -421,17 +446,50 @@ public class OAuthJwtAuthenticatorImplTest {
     }
 
     @Test
-    public void testConfiguredTokenIssuersAppendTheTenantDomain() throws Exception {
+    public void testConfiguredExternalIssuerAppendsTheTenantDomain() throws Exception {
 
-        HashMap<String, TokenIssuerDto> tokenIssuers = new HashMap<>();
-        tokenIssuers.put("https://idp.example.com/token", new TokenIssuerDto("https://idp.example.com/token"));
-        PowerMockito.when(APIMConfigUtil.getTokenIssuerMap()).thenReturn(tokenIssuers);
-        authenticator = Mockito.spy(new OAuthJwtAuthenticatorImpl());
+        configureTokenIssuers(EXTERNAL_ISSUER);
         stubSubjectAwareUserResolution("true");
         stubServiceProvider(SUPER_TENANT, true);
-        assertUsername("admin@" + SUPER_TENANT, SUPER_TENANT, SUPER_TENANT, false,
+        assertUsername(jwtWithIssuer(EXTERNAL_ISSUER, "admin@" + SUPER_TENANT, SUPER_TENANT, SUPER_TENANT), false,
                 "admin@" + SUPER_TENANT + "@" + SUPER_TENANT);
         assertServiceProviderIsNotLookedUp();
+    }
+
+    @Test
+    public void testConfiguredResidentIssuerSubjectIsNotQualifiedAgain() throws Exception {
+
+        //the resident key manager is configured as a token issuer of the REST APIs
+        configureTokenIssuers(RESIDENT_ISSUER, EXTERNAL_ISSUER);
+        stubSubjectAwareUserResolution("true");
+        stubServiceProvider(SUPER_TENANT, true);
+        assertUsername(jwtWithIssuer(RESIDENT_ISSUER, "admin@" + SUPER_TENANT, SUPER_TENANT, SUPER_TENANT), false,
+                "admin");
+        Mockito.verify(authenticator).validateAndGetResidentIDPForIssuer(SUPER_TENANT, RESIDENT_ISSUER);
+    }
+
+    @Test
+    public void testResidentIdentityProviderLookupErrorAppendsTheTenantDomain() throws Exception {
+
+        configureTokenIssuers(RESIDENT_ISSUER);
+        Mockito.doThrow(new APIManagementException("lookup failed")).when(authenticator)
+                .validateAndGetResidentIDPForIssuer(SUPER_TENANT, RESIDENT_ISSUER);
+        stubSubjectAwareUserResolution("true");
+        stubServiceProvider(SUPER_TENANT, true);
+        assertUsername(jwtWithIssuer(RESIDENT_ISSUER, "admin@" + SUPER_TENANT, SUPER_TENANT, SUPER_TENANT), false,
+                "admin@" + SUPER_TENANT + "@" + SUPER_TENANT);
+        assertServiceProviderIsNotLookedUp();
+    }
+
+    @Test
+    public void testResidentIdentityProviderIsNotLookedUpWithoutConfiguredIssuers() throws Exception {
+
+        stubSubjectAwareUserResolution("true");
+        stubServiceProvider(SUPER_TENANT, true);
+        assertUsername(jwtWithIssuer(RESIDENT_ISSUER, "admin@" + SUPER_TENANT, SUPER_TENANT, SUPER_TENANT), false,
+                "admin");
+        Mockito.verify(authenticator, Mockito.never())
+                .validateAndGetResidentIDPForIssuer(Mockito.anyString(), Mockito.anyString());
     }
 
     @Test
