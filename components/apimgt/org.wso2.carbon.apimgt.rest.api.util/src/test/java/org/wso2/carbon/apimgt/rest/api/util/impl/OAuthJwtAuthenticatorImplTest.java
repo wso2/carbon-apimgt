@@ -71,7 +71,7 @@ public class OAuthJwtAuthenticatorImplTest {
     private static final String TOKEN = "header.payload.signature";
     private static final String MASKED_TOKEN = "...XXXXsignature";
     private static final String CLIENT_ID = "client-id";
-    private static final String USE_TENANT_QUALIFIED_SUBJECT = "RESTAPI.UseTenantQualifiedSubject";
+    private static final String SUBJECT_AWARE_USER_RESOLUTION = "RESTAPI.EnableSubjectAwareUserResolution";
 
     private OAuthJwtAuthenticatorImpl authenticator;
     private Message message;
@@ -134,14 +134,14 @@ public class OAuthJwtAuthenticatorImplTest {
     }
 
     /**
-     * Sets the RESTAPI.UseTenantQualifiedSubject value of the API Manager configuration.
+     * Sets the RESTAPI.EnableSubjectAwareUserResolution value of the API Manager configuration.
      *
      * @param value configured value, null when it is not configured
      */
-    private void stubUseTenantQualifiedSubject(String value) {
+    private void stubSubjectAwareUserResolution(String value) {
 
         APIManagerConfiguration configuration = Mockito.mock(APIManagerConfiguration.class);
-        Mockito.when(configuration.getFirstProperty(USE_TENANT_QUALIFIED_SUBJECT)).thenReturn(value);
+        Mockito.when(configuration.getFirstProperty(SUBJECT_AWARE_USER_RESOLUTION)).thenReturn(value);
         APIManagerConfigurationService configurationService = Mockito.mock(APIManagerConfigurationService.class);
         Mockito.when(configurationService.getAPIManagerConfiguration()).thenReturn(configuration);
         ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
@@ -219,8 +219,8 @@ public class OAuthJwtAuthenticatorImplTest {
     }
 
     // ------------------------------------------------------------------
-    // The tenant domain is appended to the subject unless use tenant
-    // qualified subject is enabled. When it is enabled, the tenant domain is
+    // The tenant domain is appended to the subject unless subject aware
+    // user resolution is enabled. When it is enabled, the tenant domain is
     // not appended again for tokens of the resident identity provider whose
     // subject already ends with it, when the client's service provider uses
     // the tenant domain in the local subject identifier.
@@ -229,7 +229,7 @@ public class OAuthJwtAuthenticatorImplTest {
     @Test
     public void testTenantDomainIsAppendedByDefault() throws Exception {
 
-        stubUseTenantQualifiedSubject(null);
+        stubSubjectAwareUserResolution(null);
         stubServiceProvider(SUPER_TENANT, true);
         assertUsername("admin@" + SUPER_TENANT, SUPER_TENANT, SUPER_TENANT, false,
                 "admin@" + SUPER_TENANT + "@" + SUPER_TENANT);
@@ -237,9 +237,9 @@ public class OAuthJwtAuthenticatorImplTest {
     }
 
     @Test
-    public void testUnrecognisedUseTenantQualifiedSubjectValueAppendsTheTenantDomain() throws Exception {
+    public void testUnrecognisedSubjectAwareUserResolutionValueAppendsTheTenantDomain() throws Exception {
 
-        stubUseTenantQualifiedSubject("yes");
+        stubSubjectAwareUserResolution("yes");
         stubServiceProvider(SUPER_TENANT, true);
         assertUsername("admin@" + SUPER_TENANT, SUPER_TENANT, SUPER_TENANT, false,
                 "admin@" + SUPER_TENANT + "@" + SUPER_TENANT);
@@ -247,9 +247,9 @@ public class OAuthJwtAuthenticatorImplTest {
     }
 
     @Test
-    public void testTenantDomainIsAlwaysAppendedWhenTenantQualifiedSubjectIsDisabled() throws Exception {
+    public void testTenantDomainIsAlwaysAppendedWhenSubjectAwareUserResolutionIsDisabled() throws Exception {
 
-        stubUseTenantQualifiedSubject("false");
+        stubSubjectAwareUserResolution("false");
         stubServiceProvider(TENANT, true);
         assertUsername("admin@" + TENANT, TENANT, TENANT, false, "admin@" + TENANT + "@" + TENANT);
         assertServiceProviderIsNotLookedUp();
@@ -258,7 +258,7 @@ public class OAuthJwtAuthenticatorImplTest {
     @Test
     public void testSuperTenantPlainSubjectIsResolvedWithoutServiceProviderLookup() throws Exception {
 
-        stubUseTenantQualifiedSubject("true");
+        stubSubjectAwareUserResolution("true");
         assertUsername("admin", SUPER_TENANT, SUPER_TENANT, false, "admin");
         assertServiceProviderIsNotLookedUp();
     }
@@ -266,7 +266,7 @@ public class OAuthJwtAuthenticatorImplTest {
     @Test
     public void testTenantPlainSubjectIsResolvedWithoutServiceProviderLookup() throws Exception {
 
-        stubUseTenantQualifiedSubject("true");
+        stubSubjectAwareUserResolution("true");
         assertUsername("admin", TENANT, TENANT, false, "admin@" + TENANT);
         assertServiceProviderIsNotLookedUp();
     }
@@ -274,7 +274,7 @@ public class OAuthJwtAuthenticatorImplTest {
     @Test
     public void testSuperTenantSubjectIsNotQualifiedAgainWhenServiceProviderUsesTenantDomain() throws Exception {
 
-        stubUseTenantQualifiedSubject("true");
+        stubSubjectAwareUserResolution("true");
         stubServiceProvider(SUPER_TENANT, true);
         assertUsername("admin@" + SUPER_TENANT, SUPER_TENANT, SUPER_TENANT, false, "admin");
     }
@@ -282,7 +282,7 @@ public class OAuthJwtAuthenticatorImplTest {
     @Test
     public void testTenantSubjectIsNotQualifiedAgainWhenServiceProviderUsesTenantDomain() throws Exception {
 
-        stubUseTenantQualifiedSubject("true");
+        stubSubjectAwareUserResolution("true");
         stubServiceProvider(TENANT, true);
         assertUsername("admin@" + TENANT, TENANT, TENANT, false, "admin@" + TENANT);
         Mockito.verify(authenticator).getServiceProvider(CLIENT_ID, TENANT);
@@ -292,7 +292,7 @@ public class OAuthJwtAuthenticatorImplTest {
     public void testTokenWithoutTenantClaimsUsesTheSuperTenantServiceProvider() throws Exception {
 
         //without the app_td and user_td claims, both the user and the client resolve to the super tenant
-        stubUseTenantQualifiedSubject("true");
+        stubSubjectAwareUserResolution("true");
         stubServiceProvider(SUPER_TENANT, true);
         assertUsername("admin@" + SUPER_TENANT, null, null, false, "admin");
         Mockito.verify(authenticator).getServiceProvider(CLIENT_ID, SUPER_TENANT);
@@ -302,7 +302,7 @@ public class OAuthJwtAuthenticatorImplTest {
     public void testSuperTenantUserNameEndingWithTenantDomainIsQualified() throws Exception {
 
         //a user named bob@carbon.super whose service provider does not add the tenant domain to the subject
-        stubUseTenantQualifiedSubject("true");
+        stubSubjectAwareUserResolution("true");
         stubServiceProvider(SUPER_TENANT, false);
         assertUsername("bob@" + SUPER_TENANT, SUPER_TENANT, SUPER_TENANT, false,
                 "bob@" + SUPER_TENANT + "@" + SUPER_TENANT);
@@ -311,7 +311,7 @@ public class OAuthJwtAuthenticatorImplTest {
     @Test
     public void testTenantUserNameEndingWithTenantDomainIsQualified() throws Exception {
 
-        stubUseTenantQualifiedSubject("true");
+        stubSubjectAwareUserResolution("true");
         stubServiceProvider(TENANT, false);
         assertUsername("bob@" + TENANT, TENANT, TENANT, false, "bob@" + TENANT + "@" + TENANT);
     }
@@ -320,7 +320,7 @@ public class OAuthJwtAuthenticatorImplTest {
     public void testServiceProviderIsReadFromTheTenantThatOwnsTheClient() throws Exception {
 
         //a tenant user who signs in through a client owned by the super tenant
-        stubUseTenantQualifiedSubject("true");
+        stubSubjectAwareUserResolution("true");
         stubServiceProvider(SUPER_TENANT, true);
         assertUsername("admin@" + OTHER_TENANT, SUPER_TENANT, OTHER_TENANT, false, "admin@" + OTHER_TENANT);
         Mockito.verify(authenticator).getServiceProvider(CLIENT_ID, SUPER_TENANT);
@@ -330,7 +330,7 @@ public class OAuthJwtAuthenticatorImplTest {
     public void testSuperTenantUserNameEndingWithTenantDomainIsQualifiedWhenUsernameIsTheSubject() throws Exception {
 
         //the key manager uses the username as the subject, so the service provider setting does not apply
-        stubUseTenantQualifiedSubject("true");
+        stubSubjectAwareUserResolution("true");
         Mockito.doReturn(true).when(authenticator).isUsernameUsedAsSubject();
         stubServiceProvider(SUPER_TENANT, true);
         assertUsername("bob@" + SUPER_TENANT, SUPER_TENANT, SUPER_TENANT, false,
@@ -341,7 +341,7 @@ public class OAuthJwtAuthenticatorImplTest {
     @Test
     public void testTenantUserNameEndingWithTenantDomainIsQualifiedWhenUsernameIsTheSubject() throws Exception {
 
-        stubUseTenantQualifiedSubject("true");
+        stubSubjectAwareUserResolution("true");
         Mockito.doReturn(true).when(authenticator).isUsernameUsedAsSubject();
         stubServiceProvider(TENANT, true);
         assertUsername("bob@" + TENANT, TENANT, TENANT, false, "bob@" + TENANT + "@" + TENANT);
@@ -351,7 +351,7 @@ public class OAuthJwtAuthenticatorImplTest {
     @Test
     public void testPlainSubjectIsQualifiedWhenUsernameIsTheSubject() throws Exception {
 
-        stubUseTenantQualifiedSubject("true");
+        stubSubjectAwareUserResolution("true");
         Mockito.doReturn(true).when(authenticator).isUsernameUsedAsSubject();
         assertUsername("bob", TENANT, TENANT, false, "bob@" + TENANT);
         assertServiceProviderIsNotLookedUp();
@@ -361,7 +361,7 @@ public class OAuthJwtAuthenticatorImplTest {
     public void testServiceProviderOfAnotherTenantIsNotUsed() throws Exception {
 
         //the client's service provider is only registered in the super tenant, but the client belongs to a tenant
-        stubUseTenantQualifiedSubject("true");
+        stubSubjectAwareUserResolution("true");
         stubServiceProvider(SUPER_TENANT, true);
         assertUsername("admin@" + TENANT, TENANT, TENANT, false, "admin@" + TENANT + "@" + TENANT);
     }
@@ -369,7 +369,7 @@ public class OAuthJwtAuthenticatorImplTest {
     @Test
     public void testSubjectQualifiedWithAnotherTenantIsQualifiedWithTheUserTenant() throws Exception {
 
-        stubUseTenantQualifiedSubject("true");
+        stubSubjectAwareUserResolution("true");
         assertUsername("admin@" + OTHER_TENANT, TENANT, TENANT, false, "admin@" + OTHER_TENANT + "@" + TENANT);
         assertServiceProviderIsNotLookedUp();
     }
@@ -377,7 +377,7 @@ public class OAuthJwtAuthenticatorImplTest {
     @Test
     public void testServiceProviderLookupErrorAppendsTheTenantDomain() throws Exception {
 
-        stubUseTenantQualifiedSubject("true");
+        stubSubjectAwareUserResolution("true");
         Mockito.doThrow(new IdentityOAuth2Exception("lookup failed")).when(authenticator)
                 .getServiceProvider(CLIENT_ID, SUPER_TENANT);
         assertUsername("admin@" + SUPER_TENANT, SUPER_TENANT, SUPER_TENANT, false,
@@ -388,7 +388,7 @@ public class OAuthJwtAuthenticatorImplTest {
     @Test
     public void testMissingServiceProviderAppendsTheTenantDomain() throws Exception {
 
-        stubUseTenantQualifiedSubject("true");
+        stubSubjectAwareUserResolution("true");
         Mockito.doReturn(null).when(authenticator).getServiceProvider(CLIENT_ID, SUPER_TENANT);
         assertUsername("admin@" + SUPER_TENANT, SUPER_TENANT, SUPER_TENANT, false,
                 "admin@" + SUPER_TENANT + "@" + SUPER_TENANT);
@@ -398,7 +398,7 @@ public class OAuthJwtAuthenticatorImplTest {
     @Test
     public void testServiceProviderWithoutSubjectSettingsAppendsTheTenantDomain() throws Exception {
 
-        stubUseTenantQualifiedSubject("true");
+        stubSubjectAwareUserResolution("true");
         ServiceProvider serviceProvider = new ServiceProvider();
         serviceProvider.setLocalAndOutBoundAuthenticationConfig(null);
         Mockito.doReturn(serviceProvider).when(authenticator).getServiceProvider(CLIENT_ID, SUPER_TENANT);
@@ -410,7 +410,7 @@ public class OAuthJwtAuthenticatorImplTest {
     @Test
     public void testTokenWithoutClientIdAppendsTheTenantDomain() throws Exception {
 
-        stubUseTenantQualifiedSubject("true");
+        stubSubjectAwareUserResolution("true");
         JWTClaimsSet claims = new JWTClaimsSet.Builder()
                 .subject("admin@" + SUPER_TENANT)
                 .claim("user_td", SUPER_TENANT)
@@ -427,7 +427,7 @@ public class OAuthJwtAuthenticatorImplTest {
         tokenIssuers.put("https://idp.example.com/token", new TokenIssuerDto("https://idp.example.com/token"));
         PowerMockito.when(APIMConfigUtil.getTokenIssuerMap()).thenReturn(tokenIssuers);
         authenticator = Mockito.spy(new OAuthJwtAuthenticatorImpl());
-        stubUseTenantQualifiedSubject("true");
+        stubSubjectAwareUserResolution("true");
         stubServiceProvider(SUPER_TENANT, true);
         assertUsername("admin@" + SUPER_TENANT, SUPER_TENANT, SUPER_TENANT, false,
                 "admin@" + SUPER_TENANT + "@" + SUPER_TENANT);
@@ -437,7 +437,7 @@ public class OAuthJwtAuthenticatorImplTest {
     @Test
     public void testSuperTenantEmailSubject() throws Exception {
 
-        stubUseTenantQualifiedSubject("true");
+        stubSubjectAwareUserResolution("true");
         assertUsername("bob@gmail.com", SUPER_TENANT, SUPER_TENANT, true, "bob@gmail.com");
         assertServiceProviderIsNotLookedUp();
     }
@@ -445,7 +445,7 @@ public class OAuthJwtAuthenticatorImplTest {
     @Test
     public void testSuperTenantEmailSubjectIsNotQualifiedAgain() throws Exception {
 
-        stubUseTenantQualifiedSubject("true");
+        stubSubjectAwareUserResolution("true");
         stubServiceProvider(SUPER_TENANT, true);
         assertUsername("bob@gmail.com@" + SUPER_TENANT, SUPER_TENANT, SUPER_TENANT, true, "bob@gmail.com");
     }
@@ -453,7 +453,7 @@ public class OAuthJwtAuthenticatorImplTest {
     @Test
     public void testSuperTenantPlainSubjectWithTenantDomainWhenEmailUserNameIsEnabled() throws Exception {
 
-        stubUseTenantQualifiedSubject("true");
+        stubSubjectAwareUserResolution("true");
         stubServiceProvider(SUPER_TENANT, true);
         assertUsername("admin@" + SUPER_TENANT, SUPER_TENANT, SUPER_TENANT, true, "admin");
     }
@@ -461,7 +461,7 @@ public class OAuthJwtAuthenticatorImplTest {
     @Test
     public void testTenantPlainSubjectWithTenantDomainWhenEmailUserNameIsEnabled() throws Exception {
 
-        stubUseTenantQualifiedSubject("true");
+        stubSubjectAwareUserResolution("true");
         stubServiceProvider(TENANT, true);
         assertUsername("admin@" + TENANT, TENANT, TENANT, true, "admin@" + TENANT);
     }
@@ -469,7 +469,7 @@ public class OAuthJwtAuthenticatorImplTest {
     @Test
     public void testTenantEmailSubject() throws Exception {
 
-        stubUseTenantQualifiedSubject("true");
+        stubSubjectAwareUserResolution("true");
         assertUsername("carol@gmail.com", TENANT, TENANT, true, "carol@gmail.com@" + TENANT);
         assertServiceProviderIsNotLookedUp();
     }
@@ -477,7 +477,7 @@ public class OAuthJwtAuthenticatorImplTest {
     @Test
     public void testTenantEmailSubjectIsNotQualifiedAgain() throws Exception {
 
-        stubUseTenantQualifiedSubject("true");
+        stubSubjectAwareUserResolution("true");
         stubServiceProvider(TENANT, true);
         assertUsername("carol@gmail.com@" + TENANT, TENANT, TENANT, true, "carol@gmail.com@" + TENANT);
     }
@@ -486,7 +486,7 @@ public class OAuthJwtAuthenticatorImplTest {
     public void testTenantEmailSubjectInTheTenantDomainIsQualified() throws Exception {
 
         //an email username in the tenant's own domain, whose service provider does not add the tenant domain
-        stubUseTenantQualifiedSubject("true");
+        stubSubjectAwareUserResolution("true");
         stubServiceProvider(TENANT, false);
         assertUsername("bob@" + TENANT, TENANT, TENANT, true, "bob@" + TENANT + "@" + TENANT);
     }
@@ -494,7 +494,7 @@ public class OAuthJwtAuthenticatorImplTest {
     @Test
     public void testTenantEmailSubjectInTheTenantDomainIsNotQualifiedAgain() throws Exception {
 
-        stubUseTenantQualifiedSubject("true");
+        stubSubjectAwareUserResolution("true");
         stubServiceProvider(TENANT, true);
         assertUsername("bob@" + TENANT + "@" + TENANT, TENANT, TENANT, true, "bob@" + TENANT + "@" + TENANT);
     }
