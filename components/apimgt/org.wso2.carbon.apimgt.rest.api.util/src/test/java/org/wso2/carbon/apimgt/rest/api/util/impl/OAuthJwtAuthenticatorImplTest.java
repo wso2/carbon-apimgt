@@ -262,6 +262,43 @@ public class OAuthJwtAuthenticatorImplTest {
     }
 
     @Test
+    public void testNonStringAppDomainDoesNotAffectTheDefaultConfiguration() throws Exception {
+
+        //a configured issuer whose tokens carry an app_td claim that is not a string
+        configureTokenIssuers(EXTERNAL_ISSUER);
+        stubSubjectAwareUserResolution(null);
+        JWTClaimsSet claims = new JWTClaimsSet.Builder()
+                .issuer(EXTERNAL_ISSUER)
+                .subject("admin@" + SUPER_TENANT)
+                .claim("azp", CLIENT_ID)
+                .claim("app_td", 42)
+                .claim("user_td", SUPER_TENANT)
+                .claim("scope", "apim:admin")
+                .build();
+        assertUsername(new SignedJWTInfo(TOKEN, null, claims), false, "admin@" + SUPER_TENANT + "@" + SUPER_TENANT);
+        Mockito.verify(authenticator, Mockito.never()).isUsernameUsedAsSubject();
+        Mockito.verify(authenticator, Mockito.never())
+                .validateAndGetResidentIDPForIssuer(Mockito.any(), Mockito.any());
+        Mockito.verify(authenticator, Mockito.never()).getServiceProvider(Mockito.any(), Mockito.any());
+    }
+
+    @Test
+    public void testNonStringAppDomainResolvesTheClientToTheSuperTenant() throws Exception {
+
+        stubSubjectAwareUserResolution("true");
+        stubServiceProvider(SUPER_TENANT, true);
+        JWTClaimsSet claims = new JWTClaimsSet.Builder()
+                .subject("admin@" + SUPER_TENANT)
+                .claim("azp", CLIENT_ID)
+                .claim("app_td", 42)
+                .claim("user_td", SUPER_TENANT)
+                .claim("scope", "apim:admin")
+                .build();
+        assertUsername(new SignedJWTInfo(TOKEN, null, claims), false, "admin");
+        Mockito.verify(authenticator).getServiceProvider(CLIENT_ID, SUPER_TENANT);
+    }
+
+    @Test
     public void testUnrecognisedSubjectAwareUserResolutionValueAppendsTheTenantDomain() throws Exception {
 
         stubSubjectAwareUserResolution("yes");
