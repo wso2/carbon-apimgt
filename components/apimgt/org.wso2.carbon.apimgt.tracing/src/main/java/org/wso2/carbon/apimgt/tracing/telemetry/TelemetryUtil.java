@@ -111,11 +111,11 @@ public class TelemetryUtil {
      * @param spanName   Operation name of the span.
      * @param parentSpan Root context of the new span to be created.
      * @param tracer     Initialized {@link io.opentelemetry.api.trace.Tracer}.
-     * @deprecated Use {@link #startSpan(String, TelemetrySpan, TelemetryTracer, SpanKind)}
+     * @deprecated Use {@link #startSpan(String, Context, TelemetryTracer, SpanKind)}
      * to specify the span kind. This overload creates an INTERNAL span.
      * @return TelemetrySpan object.
      */
-    @Deprecated 
+    @Deprecated
     public static TelemetrySpan startSpan(String spanName, Context parentSpan, TelemetryTracer tracer) {
 
         return startSpan(spanName, parentSpan, tracer, null);

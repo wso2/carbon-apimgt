@@ -36,7 +36,6 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.APIMgtGoogleAnalyticsUtils;
 import org.wso2.carbon.apimgt.gateway.utils.TelemetryLogUtil;
-import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
@@ -178,8 +177,6 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
             throw e;
         } finally {
             if (TelemetryUtil.telemetryEnabled()) {
-                // set Http attributes right before finishing the span, so http.status.code is captured
-                GatewayUtils.setCommonHTTPAttributes(span, msgCtx);
                 TelemetryLogUtil.exitSpan(previousTracingIds);
                 TelemetryUtil.finishSpan(span);
             } else if (Util.tracingEnabled()) {
