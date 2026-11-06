@@ -808,6 +808,10 @@
     {% endif %}
 
     <RESTAPI>
+        <!--When true, the user name is resolved according to how the resident key manager built the JWT subject, so the tenant domain is not appended again to a subject that already contains it. -->
+        {% if apim.rest_api.enable_subject_aware_user_resolution is defined %}
+        <EnableSubjectAwareUserResolution>{{apim.rest_api.enable_subject_aware_user_resolution}}</EnableSubjectAwareUserResolution>
+        {% endif %}
         <!--Configure allowed URIs of REST API. Accessing allowed URIs does not require credentials (does not require Authorization header). -->
         <AllowedURIs>
          {% if apim.rest_api.allowed_uri is defined %}
