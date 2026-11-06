@@ -433,15 +433,15 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
     /**
      * Resolves the tenant domain that owns the client the token was issued to. The key manager writes it to the
      * app_td claim, and the super tenant is used when the claim is not present, in the same way as when the
-     * signature of the token is validated.
+     * signature of the token is validated. A claim value that is not a string is ignored.
      *
      * @param jwtClaimsSet claims of the token
      * @return tenant domain that owns the client
-     * @throws ParseException if the app_td claim is not a string
      */
-    private String getClientTenantDomain(JWTClaimsSet jwtClaimsSet) throws ParseException {
+    private String getClientTenantDomain(JWTClaimsSet jwtClaimsSet) {
 
-        String appTenantDomain = jwtClaimsSet.getStringClaim(JwtTokenConstants.APP_DOMAIN);
+        Object appTenantDomainClaim = jwtClaimsSet.getClaim(JwtTokenConstants.APP_DOMAIN);
+        String appTenantDomain = appTenantDomainClaim instanceof String ? (String) appTenantDomainClaim : null;
         return StringUtils.isNotEmpty(appTenantDomain) ? appTenantDomain
                 : MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
     }
