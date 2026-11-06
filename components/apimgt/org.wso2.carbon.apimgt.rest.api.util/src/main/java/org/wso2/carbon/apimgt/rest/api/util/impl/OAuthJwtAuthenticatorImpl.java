@@ -162,7 +162,7 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
         String subject = signedJWTInfo.getJwtClaimsSet().getSubject();
         String clientId = signedJWTInfo.getJwtClaimsSet().getStringClaim(JWTConstants.AUTHORIZED_PARTY);
         boolean isTenantQualified = isTenantQualifiedSubjectEnabled() && isIssuedByResidentIdp()
-                && StringUtils.endsWithIgnoreCase(subject, "@" + tenantDomain)
+                && StringUtils.endsWithIgnoreCase(subject, "@" + tenantDomain) && !isUsernameUsedAsSubject()
                 && isTenantDomainInSubjectEnabled(clientId, getClientTenantDomain(signedJWTInfo.getJwtClaimsSet()));
         oauthTokenInfo.setEndUserName(isTenantQualified ? subject : subject + "@" + tenantDomain);
         oauthTokenInfo.setConsumerKey(clientId);
@@ -432,6 +432,17 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
         String appTenantDomain = jwtClaimsSet.getStringClaim(JwtTokenConstants.APP_DOMAIN);
         return StringUtils.isNotEmpty(appTenantDomain) ? appTenantDomain
                 : MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+    }
+
+    /**
+     * Checks whether the key manager uses the username as the subject of the tokens it issues. In that case the
+     * subject does not carry the tenant domain of the user, whatever the service provider settings are.
+     *
+     * @return true if the username is used as the subject claim
+     */
+    protected boolean isUsernameUsedAsSubject() {
+
+        return OAuth2Util.useUsernameAsSubClaim();
     }
 
     /**

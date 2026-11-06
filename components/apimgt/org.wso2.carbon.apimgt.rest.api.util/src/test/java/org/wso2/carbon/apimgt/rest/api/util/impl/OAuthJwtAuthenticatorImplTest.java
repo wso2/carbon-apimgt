@@ -84,6 +84,7 @@ public class OAuthJwtAuthenticatorImplTest {
         //the constructor reads the configured token issuers
         PowerMockito.when(APIMConfigUtil.getTokenIssuerMap()).thenReturn(new HashMap<>());
         authenticator = Mockito.spy(new OAuthJwtAuthenticatorImpl());
+        Mockito.doReturn(false).when(authenticator).isUsernameUsedAsSubject();
 
         message = Mockito.mock(Message.class);
         Mockito.when(message.get(RestApiConstants.MASKED_TOKEN)).thenReturn(MASKED_TOKEN);
@@ -323,6 +324,37 @@ public class OAuthJwtAuthenticatorImplTest {
         stubServiceProvider(SUPER_TENANT, true);
         assertUsername("admin@" + OTHER_TENANT, SUPER_TENANT, OTHER_TENANT, false, "admin@" + OTHER_TENANT);
         Mockito.verify(authenticator).getServiceProvider(CLIENT_ID, SUPER_TENANT);
+    }
+
+    @Test
+    public void testSuperTenantUserNameEndingWithTenantDomainIsQualifiedWhenUsernameIsTheSubject() throws Exception {
+
+        //the key manager uses the username as the subject, so the service provider setting does not apply
+        stubUseTenantQualifiedSubject("true");
+        Mockito.doReturn(true).when(authenticator).isUsernameUsedAsSubject();
+        stubServiceProvider(SUPER_TENANT, true);
+        assertUsername("bob@" + SUPER_TENANT, SUPER_TENANT, SUPER_TENANT, false,
+                "bob@" + SUPER_TENANT + "@" + SUPER_TENANT);
+        assertServiceProviderIsNotLookedUp();
+    }
+
+    @Test
+    public void testTenantUserNameEndingWithTenantDomainIsQualifiedWhenUsernameIsTheSubject() throws Exception {
+
+        stubUseTenantQualifiedSubject("true");
+        Mockito.doReturn(true).when(authenticator).isUsernameUsedAsSubject();
+        stubServiceProvider(TENANT, true);
+        assertUsername("bob@" + TENANT, TENANT, TENANT, false, "bob@" + TENANT + "@" + TENANT);
+        assertServiceProviderIsNotLookedUp();
+    }
+
+    @Test
+    public void testPlainSubjectIsQualifiedWhenUsernameIsTheSubject() throws Exception {
+
+        stubUseTenantQualifiedSubject("true");
+        Mockito.doReturn(true).when(authenticator).isUsernameUsedAsSubject();
+        assertUsername("bob", TENANT, TENANT, false, "bob@" + TENANT);
+        assertServiceProviderIsNotLookedUp();
     }
 
     @Test
