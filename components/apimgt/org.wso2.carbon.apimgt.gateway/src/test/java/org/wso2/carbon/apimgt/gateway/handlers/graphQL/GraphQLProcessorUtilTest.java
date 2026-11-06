@@ -18,10 +18,13 @@
 package org.wso2.carbon.apimgt.gateway.handlers.graphQL;
 
 import graphql.language.Field;
+import graphql.language.FragmentDefinition;
 import graphql.language.FragmentSpread;
+import graphql.language.InlineFragment;
 import graphql.language.OperationDefinition;
 import graphql.language.Selection;
 import graphql.language.SelectionSet;
+import graphql.language.TypeName;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
 import org.apache.commons.io.IOUtils;
@@ -31,7 +34,10 @@ import org.wso2.carbon.apimgt.common.gateway.graphql.GraphQLProcessorUtil;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 public class GraphQLProcessorUtilTest {
 
@@ -83,5 +89,89 @@ public class GraphQLProcessorUtilTest {
         TypeDefinitionRegistry registry = schemaParser.parse(schema);
         String subscriptionOperation = GraphQLProcessorUtil.getOperationListAsString(operation, registry);
         Assert.assertEquals(subscriptionOperation, "liftStatusChange");
+    }
+
+    @Test
+    public void testNamedFragmentSpreadFieldsAreElected() {
+        // A root field hidden inside a named fragment spread must be included
+        // in the elected resource set so that its scope is enforced.
+        ArrayList<String> supportedFields = new ArrayList<>();
+        supportedFields.add("allowedRoot");
+        supportedFields.add("protectedRoot");
+        Field protectedField = new Field("protectedRoot");
+        SelectionSet fragSelectionSet = new SelectionSet(List.of(protectedField));
+        FragmentDefinition fragmentDef = FragmentDefinition.newFragmentDefinition()
+                .name("ProtectedFrag")
+                .typeCondition(new TypeName("Query"))
+                .selectionSet(fragSelectionSet)
+                .build();
+        Map<String, FragmentDefinition> fragmentDefinitions = new HashMap<>();
+        fragmentDefinitions.put("ProtectedFrag", fragmentDef);
+        List<Selection> selections = new ArrayList<>();
+        selections.add(new Field("allowedRoot"));
+        selections.add(new FragmentSpread("ProtectedFrag"));
+
+        ArrayList<String> operationArray = new ArrayList<>();
+        GraphQLProcessorUtil.getNestedLevelOperations(selections, supportedFields, operationArray,
+                fragmentDefinitions, new HashSet<>());
+
+        Assert.assertTrue("allowedRoot must be elected", operationArray.contains("allowedRoot"));
+        Assert.assertTrue("protectedRoot inside named fragment must be elected",
+                operationArray.contains("protectedRoot"));
+        Assert.assertEquals("Exactly two operations expected", 2, operationArray.size());
+    }
+
+    @Test
+    public void testInlineFragmentFieldsAreElected() {
+        // A root field hidden inside an inline fragment must be included
+        // in the elected resource set so that its scope is enforced.
+        ArrayList<String> supportedFields = new ArrayList<>();
+        supportedFields.add("allowedRoot");
+        supportedFields.add("protectedRoot");
+        Field protectedField = new Field("protectedRoot");
+        SelectionSet inlineSelectionSet = new SelectionSet(List.of(protectedField));
+        InlineFragment inlineFragment = InlineFragment.newInlineFragment()
+                .typeCondition(new TypeName("Query"))
+                .selectionSet(inlineSelectionSet)
+                .build();
+
+        List<Selection> selections = new ArrayList<>();
+        selections.add(new Field("allowedRoot"));
+        selections.add(inlineFragment);
+
+        ArrayList<String> operationArray = new ArrayList<>();
+        GraphQLProcessorUtil.getNestedLevelOperations(selections, supportedFields, operationArray,
+                new HashMap<>(), new HashSet<>());
+
+        Assert.assertTrue("allowedRoot must be elected", operationArray.contains("allowedRoot"));
+        Assert.assertTrue("protectedRoot inside inline fragment must be elected",
+                operationArray.contains("protectedRoot"));
+        Assert.assertEquals("Exactly two operations expected", 2, operationArray.size());
+    }
+
+    @Test
+    public void testCyclicFragmentSpreadDoesNotInfiniteLoop() {
+        ArrayList<String> supportedFields = new ArrayList<>();
+        supportedFields.add("someField");
+
+        SelectionSet setA = new SelectionSet(List.of(new FragmentSpread("fragB")));
+        FragmentDefinition fragA = FragmentDefinition.newFragmentDefinition()
+                .name("fragA").typeCondition(new TypeName("Query")).selectionSet(setA).build();
+        SelectionSet setB = new SelectionSet(List.of(new FragmentSpread("fragA")));
+        FragmentDefinition fragB = FragmentDefinition.newFragmentDefinition()
+                .name("fragB").typeCondition(new TypeName("Query")).selectionSet(setB).build();
+
+        Map<String, FragmentDefinition> fragmentDefinitions = new HashMap<>();
+        fragmentDefinitions.put("fragA", fragA);
+        fragmentDefinitions.put("fragB", fragB);
+
+        List<Selection> selections = new ArrayList<>();
+        selections.add(new FragmentSpread("fragA"));
+
+        ArrayList<String> operationArray = new ArrayList<>();
+        GraphQLProcessorUtil.getNestedLevelOperations(selections, supportedFields, operationArray,
+                fragmentDefinitions, new HashSet<>());
+        Assert.assertTrue("Operation array should be empty (no supported fields in cycle)",
+                operationArray.isEmpty());
     }
 }
