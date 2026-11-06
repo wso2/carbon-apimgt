@@ -1254,7 +1254,13 @@ public class GatewayUtils {
 
             setHTTPMethodAndStatus(tracingSpan, axis2MessageContext, messageContext);
 
-            String fullRequestPath = ApiUtils.getFullRequestPath(messageContext);
+            // Prefer the path the client sent. A default-version alias is rewritten to include the version
+            // before the request reaches the API, so the current full request path can differ from url.path.
+            String fullRequestPath = (String) messageContext.getProperty(
+                    APIMgtGatewayConstants.CLIENT_REQUEST_PATH);
+            if (StringUtils.isEmpty(fullRequestPath)) {
+                fullRequestPath = ApiUtils.getFullRequestPath(messageContext);
+            }
             if (StringUtils.isNotEmpty(fullRequestPath)) {
                 String urlPath = StringUtils.substringBefore(fullRequestPath, "?");
                 TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.HTTP_URL_ATTRIBUTE, urlPath);
@@ -1319,7 +1325,8 @@ public class GatewayUtils {
     /**
      * Replaces the {uri.var.*} placeholders of an endpoint URI template with the value of the corresponding
      * message context property, which is how Synapse resolves the template when it sends the request. A
-     * placeholder without a value is kept as it is, so an unresolved variable does not break the reported URL.
+     * placeholder without a value is removed as well: when it forms a whole path segment, the separator that
+     * introduces the segment is removed too, so the reported URL matches the path the backend receives.
      *
      * @param url            endpoint address, possibly containing URI template placeholders
      * @param messageContext message context holding the uri.var.* properties
@@ -1331,17 +1338,37 @@ public class GatewayUtils {
             return url;
         }
         Matcher matcher = URI_TEMPLATE_VARIABLE_PATTERN.matcher(url);
-        StringBuffer resolvedUrl = new StringBuffer();
+        StringBuilder resolvedUrl = new StringBuilder(url.length());
+        int lastIndex = 0;
         while (matcher.find()) {
-            String variableName = matcher.group(1);
-            Object value = variableName.startsWith(RESTConstants.REST_URI_VARIABLE_PREFIX)
-                    ? messageContext.getProperty(variableName)
-                    : null;
-            matcher.appendReplacement(resolvedUrl,
-                    Matcher.quoteReplacement(value != null ? value.toString() : matcher.group(0)));
+            String expression = matcher.group(1);
+            // A reserved expansion such as {+uri.var.path} is resolved from the same property.
+            String variableName = expression.startsWith("+") ? expression.substring(1) : expression;
+            if (!variableName.startsWith(RESTConstants.REST_URI_VARIABLE_PREFIX)) {
+                continue;
+            }
+            resolvedUrl.append(url, lastIndex, matcher.start());
+            Object value = messageContext.getProperty(variableName);
+            if (value != null) {
+                resolvedUrl.append(value);
+            } else if (isPathSegment(url, matcher.start(), matcher.end())
+                    && resolvedUrl.length() > 0 && resolvedUrl.charAt(resolvedUrl.length() - 1) == '/') {
+                // An unset variable is not sent by Synapse. Drop the separator introducing the empty segment
+                // instead of leaving a dangling template placeholder or a duplicated slash in url.full.
+                resolvedUrl.deleteCharAt(resolvedUrl.length() - 1);
+            }
+            lastIndex = matcher.end();
         }
-        matcher.appendTail(resolvedUrl);
+        resolvedUrl.append(url, lastIndex, url.length());
         return resolvedUrl.toString();
+    }
+
+    private static boolean isPathSegment(String url, int start, int end) {
+
+        boolean startsSegment = start == 0 || url.charAt(start - 1) == '/';
+        boolean endsSegment = end == url.length() || url.charAt(end) == '/'
+                || url.charAt(end) == '?' || url.charAt(end) == '#';
+        return startsSegment && endsSegment;
     }
 
     private static String joinUrlPath(String url, String path) {

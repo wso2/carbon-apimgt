@@ -104,6 +104,11 @@ public class APIMgtGatewayConstants {
     public static final String ENABLED_CHECK_HEADERS = "enabledCheckHeaders";
     public static final String REST_URL_POSTFIX = "REST_URL_POSTFIX";
     public static final String TRANSPORT_HEADERS = "TRANSPORT_HEADERS";
+    /**
+     * Message-context property holding the request path as sent by the client, before the default-version
+     * alias (for example {@code /api} rewritten to {@code /api/1.0.0}) is applied.
+     */
+    public static final String CLIENT_REQUEST_PATH = "CLIENT_REQUEST_PATH";
     public static final String REGEX_THREAT_PROTECTOR_ENABLED_TENANTS = "regexThreatProtectorEnabledTenants";
     public static final String PAYLOAD_SIZE_LIMIT_FOR_REGEX_TREAT_PROTECTOR = "payloadSizeLimitForRegexThreatProtector";
 
