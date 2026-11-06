@@ -23,6 +23,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -325,7 +328,8 @@ public class WorkflowUtils {
             if (WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
                 if (StringUtils.isNotEmpty(uuid)) {
                     ApiTypeWrapper apIorAPIProductByUUID = apiProvider.getAPIorAPIProductByUUID(uuid, tenantDomain);
-                    LifeCycleUtils.changeLifecycle(invoker, apiProvider, tenantDomain, apIorAPIProductByUUID, action, Collections.emptyMap());
+                    LifeCycleUtils.changeLifecycle(invoker, apiProvider, tenantDomain, apIorAPIProductByUUID, action,
+                            getLifecycleChecklist(workflow));
                     if (log.isDebugEnabled()) {
                         String logMessage = "API Status changed successfully. API Name: " + apiIdentifier.getApiName()
                                 + ", API Version " + apiIdentifier.getVersion() + ", New Status : " + action;
@@ -345,6 +349,45 @@ public class WorkflowUtils {
         } catch (APIPersistenceException e) {
             log.error("Error while accessing lifecycle information ", e);
         }
+    }
+
+    /**
+     * Get the lifecycle checklist items persisted in the metadata of a state change workflow. Items that cannot be
+     * read are left out, so that the default behaviour of those items is applied.
+     *
+     * @param workflow Workflow object
+     * @return Map of checklist items, or an empty map if none were persisted
+     */
+    protected static Map<String, Boolean> getLifecycleChecklist(Workflow workflow) {
+
+        Map<String, Boolean> checklist = new HashMap<>();
+        String checklistJson = workflow.getMetadata(WorkflowConstants.WF_METADATA_LIFECYCLE_CHECKLIST);
+        if (StringUtils.isEmpty(checklistJson)) {
+            return checklist;
+        }
+        try {
+            Object parsedChecklist = new JSONParser().parse(checklistJson);
+            if (!(parsedChecklist instanceof JSONObject)) {
+                log.error("Invalid lifecycle checklist found in workflow: " + workflow.getExternalWorkflowReference()
+                        + ". The default lifecycle checklist options will be applied.");
+                return checklist;
+            }
+            for (Object item : ((JSONObject) parsedChecklist).entrySet()) {
+                Map.Entry<?, ?> checklistItem = (Map.Entry<?, ?>) item;
+                if (checklistItem.getValue() instanceof Boolean) {
+                    checklist.put(String.valueOf(checklistItem.getKey()), (Boolean) checklistItem.getValue());
+                } else {
+                    log.error("Invalid value found for the lifecycle checklist item " + checklistItem.getKey()
+                            + " in workflow: " + workflow.getExternalWorkflowReference()
+                            + ". The default option of the item will be applied.");
+                }
+            }
+        } catch (ParseException e) {
+            log.error("Error while parsing the lifecycle checklist of workflow: "
+                    + workflow.getExternalWorkflowReference() + ". The default lifecycle checklist options will be "
+                    + "applied.", e);
+        }
+        return checklist;
     }
 
     /**
