@@ -79,7 +79,8 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
             APIConstants.EMAIL_DOMAIN_SEPARATOR + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
     private static final String OIDC_IDP_ENTITY_ID = "IdPEntityId";
     public static final String JWKS_URI = "jwksUri";
-    private static final String USE_TENANT_QUALIFIED_SUBJECT = APIConstants.API_RESTAPI + "UseTenantQualifiedSubject";
+    private static final String SUBJECT_AWARE_USER_RESOLUTION =
+            APIConstants.API_RESTAPI + "EnableSubjectAwareUserResolution";
     private boolean isRESTApiTokenCacheEnabled;
     private Map<String, TokenIssuerDto> tokenIssuers;
 
@@ -161,7 +162,7 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
         log.debug("Tenant domain for user " + tenantDomain);
         String subject = signedJWTInfo.getJwtClaimsSet().getSubject();
         String clientId = signedJWTInfo.getJwtClaimsSet().getStringClaim(JWTConstants.AUTHORIZED_PARTY);
-        boolean isTenantQualified = isTenantQualifiedSubjectEnabled() && isIssuedByResidentIdp()
+        boolean isTenantQualified = isSubjectAwareUserResolutionEnabled() && isIssuedByResidentIdp()
                 && StringUtils.endsWithIgnoreCase(subject, "@" + tenantDomain) && !isUsernameUsedAsSubject()
                 && isTenantDomainInSubjectEnabled(clientId, getClientTenantDomain(signedJWTInfo.getJwtClaimsSet()));
         oauthTokenInfo.setEndUserName(isTenantQualified ? subject : subject + "@" + tenantDomain);
@@ -388,23 +389,23 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
     }
 
     /**
-     * Checks whether a JWT subject that already contains the tenant domain is used as the end user name, instead of
-     * appending the tenant domain to it. This is enabled only when use tenant qualified subject is set to true in the
-     * REST API configuration.
+     * Checks whether subject aware user resolution is enabled in the REST API configuration. When it is enabled, the
+     * end user name is resolved according to how the key manager built the JWT subject, so the tenant domain is not
+     * appended again to a subject that already contains it. It is disabled unless it is explicitly set to true.
      *
-     * @return true if a tenant qualified subject is used as the end user name
+     * @return true if subject aware user resolution is enabled
      */
-    private boolean isTenantQualifiedSubjectEnabled() {
+    private boolean isSubjectAwareUserResolutionEnabled() {
 
         APIManagerConfigurationService configurationService =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
         if (configurationService == null || configurationService.getAPIManagerConfiguration() == null) {
             return false;
         }
-        String useTenantQualifiedSubject = configurationService.getAPIManagerConfiguration()
-                .getFirstProperty(USE_TENANT_QUALIFIED_SUBJECT);
+        String subjectAwareUserResolution = configurationService.getAPIManagerConfiguration()
+                .getFirstProperty(SUBJECT_AWARE_USER_RESOLUTION);
         //only an explicit true enables it, so a missing or unrecognised value keeps the tenant domain appended
-        return Boolean.TRUE.toString().equalsIgnoreCase(StringUtils.trim(useTenantQualifiedSubject));
+        return Boolean.TRUE.toString().equalsIgnoreCase(StringUtils.trim(subjectAwareUserResolution));
     }
 
     /**
