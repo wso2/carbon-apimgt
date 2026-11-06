@@ -1323,14 +1323,13 @@ public class GatewayUtils {
     }
 
     /**
-     * Replaces the {uri.var.*} placeholders of an endpoint URI template with the value of the corresponding
-     * message context property, which is how Synapse resolves the template when it sends the request. A
-     * placeholder without a value is removed as well: when it forms a whole path segment, the separator that
-     * introduces the segment is removed too, so the reported URL matches the path the backend receives.
+     * Replaces the placeholders of an endpoint URI template with the value of the corresponding message
+     * context property, which is how Synapse resolves the template when it sends the request. An unset
+     * variable is expanded to an empty string and the surrounding separators are kept, matching Synapse.
      *
      * @param url            endpoint address, possibly containing URI template placeholders
-     * @param messageContext message context holding the uri.var.* properties
-     * @return the endpoint address with the resolvable placeholders substituted
+     * @param messageContext message context holding the uri.var.* and uri.query.* properties
+     * @return the endpoint address with the placeholders expanded
      */
     private static String resolveUriTemplateVariables(String url, org.apache.synapse.MessageContext messageContext) {
 
@@ -1338,37 +1337,22 @@ public class GatewayUtils {
             return url;
         }
         Matcher matcher = URI_TEMPLATE_VARIABLE_PATTERN.matcher(url);
-        StringBuilder resolvedUrl = new StringBuilder(url.length());
-        int lastIndex = 0;
+        StringBuffer resolvedUrl = new StringBuffer();
         while (matcher.find()) {
             String expression = matcher.group(1);
             // A reserved expansion such as {+uri.var.path} is resolved from the same property.
             String variableName = expression.startsWith("+") ? expression.substring(1) : expression;
-            if (!variableName.startsWith(RESTConstants.REST_URI_VARIABLE_PREFIX)) {
-                continue;
+            Object value = null;
+            if (variableName.startsWith(RESTConstants.REST_URI_VARIABLE_PREFIX)
+                    || variableName.startsWith(RESTConstants.REST_QUERY_PARAM_PREFIX)) {
+                value = messageContext.getProperty(variableName);
             }
-            resolvedUrl.append(url, lastIndex, matcher.start());
-            Object value = messageContext.getProperty(variableName);
-            if (value != null) {
-                resolvedUrl.append(value);
-            } else if (isPathSegment(url, matcher.start(), matcher.end())
-                    && resolvedUrl.length() > 0 && resolvedUrl.charAt(resolvedUrl.length() - 1) == '/') {
-                // An unset variable is not sent by Synapse. Drop the separator introducing the empty segment
-                // instead of leaving a dangling template placeholder or a duplicated slash in url.full.
-                resolvedUrl.deleteCharAt(resolvedUrl.length() - 1);
-            }
-            lastIndex = matcher.end();
+            // An unset variable is expanded to an empty string; the slashes around it are part of the template.
+            matcher.appendReplacement(resolvedUrl,
+                    Matcher.quoteReplacement(value != null ? value.toString() : StringUtils.EMPTY));
         }
-        resolvedUrl.append(url, lastIndex, url.length());
+        matcher.appendTail(resolvedUrl);
         return resolvedUrl.toString();
-    }
-
-    private static boolean isPathSegment(String url, int start, int end) {
-
-        boolean startsSegment = start == 0 || url.charAt(start - 1) == '/';
-        boolean endsSegment = end == url.length() || url.charAt(end) == '/'
-                || url.charAt(end) == '?' || url.charAt(end) == '#';
-        return startsSegment && endsSegment;
     }
 
     private static String joinUrlPath(String url, String path) {
