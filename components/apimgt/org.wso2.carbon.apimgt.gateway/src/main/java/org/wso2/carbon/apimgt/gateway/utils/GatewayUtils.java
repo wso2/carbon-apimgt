@@ -27,6 +27,8 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.proc.BadJWTException;
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.api.trace.StatusCode;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONValue;
@@ -47,7 +49,9 @@ import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.SynapseConstants;
+import org.apache.synapse.api.ApiUtils;
 import org.apache.synapse.commons.json.JsonUtil;
+import org.apache.synapse.config.xml.rest.VersionStrategyFactory;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
@@ -138,6 +142,7 @@ public class GatewayUtils {
     private static String apiUUID;
     private static final Pattern validHostHeaderPattern =
             Pattern.compile("^[A-Za-z0-9][A-Za-z0-9.-]*(:\\d{1,5})?$");
+    private static final Pattern URI_TEMPLATE_VARIABLE_PATTERN = Pattern.compile("\\{([^{}]+)}");
 
     public static boolean isClusteringEnabled() {
 
@@ -1236,13 +1241,367 @@ public class GatewayUtils {
         }
     }
 
+    public static void setCommonHTTPAttributes(TelemetrySpan tracingSpan,
+                                               org.apache.synapse.MessageContext messageContext) {
+        // Skip if the tracing span is null or the message context is not an Axis2MessageContext.
+        if (tracingSpan == null || !(messageContext instanceof Axis2MessageContext)) {
+            return;
+        }
+
+        try {
+            org.apache.axis2.context.MessageContext axis2MessageContext =
+                    ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+
+            setHTTPMethodAndStatus(tracingSpan, axis2MessageContext, messageContext);
+
+            // Prefer the path the client sent. A default-version alias is rewritten to include the version
+            // before the request reaches the API, so the current full request path can differ from url.path.
+            String fullRequestPath = (String) messageContext.getProperty(
+                    APIMgtGatewayConstants.CLIENT_REQUEST_PATH);
+            if (StringUtils.isEmpty(fullRequestPath)) {
+                fullRequestPath = ApiUtils.getFullRequestPath(messageContext);
+            }
+            if (StringUtils.isNotEmpty(fullRequestPath)) {
+                String urlPath = StringUtils.substringBefore(fullRequestPath, "?");
+                TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.HTTP_URL_ATTRIBUTE, urlPath);
+            }
+
+            String urlScheme = axis2MessageContext.getIncomingTransportName();
+            if (StringUtils.isNotEmpty(urlScheme)) {
+                TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.HTTP_URL_SCHEME_ATTRIBUTE, urlScheme);
+            }
+
+            setServerAddressAndPortFromHostHeader(tracingSpan, axis2MessageContext, urlScheme);
+        } catch (Exception e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Error while setting common HTTP attributes on the tracing span.", e);
+            }
+        }
+    }
+
+    //for OpenTelemetry
+    public static void setBackendHTTPAttributes(TelemetrySpan tracingSpan,
+                                                org.apache.synapse.MessageContext messageContext) {
+
+        // Skip if the tracing span is null or the message context is not an Axis2MessageContext.
+        if (tracingSpan == null || !(messageContext instanceof Axis2MessageContext)) {
+            return;
+        }
+
+        try {
+            org.apache.axis2.context.MessageContext axis2MessageContext =
+                    ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+
+            setHTTPMethodAndStatus(tracingSpan, axis2MessageContext, messageContext);
+            setErrorStatus(tracingSpan, axis2MessageContext.getProperty(HTTP_SC), SpanKind.CLIENT);
+
+            Object backendUrlObject =
+                    messageContext.getProperty(APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS);
+            String backendUrl = backendUrlObject != null ? (String) backendUrlObject : null;
+            if (StringUtils.isNotEmpty(backendUrl)) {
+                // The endpoint address can be a URI template such as http://host:port/service/{uri.var.x}, which
+                // Synapse only resolves when the request is sent. Resolve the template here so the span reports
+                // the target that was actually called instead of the unresolved template.
+                String resolvedBackendUrl = resolveUriTemplateVariables(backendUrl, messageContext);
+                Object restUrlPostfixObject = axis2MessageContext.getProperty(NhttpConstants.REST_URL_POSTFIX);
+                String resourcePath = restUrlPostfixObject != null
+                        ? StringUtils.substringBefore(restUrlPostfixObject.toString(), "?")
+                        : StringUtils.EMPTY;
+
+                TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.HTTP_URL_FULL_ATTRIBUTE,
+                        StringUtils.substringBefore(joinUrlPath(resolvedBackendUrl, resourcePath), "?"));
+
+                // The authority never contains template placeholders, so it is parsed on its own: a character
+                // that cannot be parsed in the path must not drop url.scheme, server.address or server.port.
+                setBackendServerAddressAndPort(tracingSpan, resolvedBackendUrl);
+            }
+        } catch (Exception e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Error while setting backend HTTP attributes on the tracing span.", e);
+            }
+        }
+    }
+
+    /**
+     * Replaces the placeholders of an endpoint URI template with the value of the corresponding message
+     * context property, which is how Synapse resolves the template when it sends the request. An unset
+     * variable is expanded to an empty string and the surrounding separators are kept, matching Synapse.
+     *
+     * @param url            endpoint address, possibly containing URI template placeholders
+     * @param messageContext message context holding the uri.var.* and uri.query.* properties
+     * @return the endpoint address with the placeholders expanded
+     */
+    private static String resolveUriTemplateVariables(String url, org.apache.synapse.MessageContext messageContext) {
+
+        if (url.indexOf('{') < 0) {
+            return url;
+        }
+        Matcher matcher = URI_TEMPLATE_VARIABLE_PATTERN.matcher(url);
+        StringBuffer resolvedUrl = new StringBuffer();
+        while (matcher.find()) {
+            String expression = matcher.group(1);
+            // A reserved expansion such as {+uri.var.path} is resolved from the same property.
+            String variableName = expression.startsWith("+") ? expression.substring(1) : expression;
+            Object value = null;
+            if (variableName.startsWith(RESTConstants.REST_URI_VARIABLE_PREFIX)
+                    || variableName.startsWith(RESTConstants.REST_QUERY_PARAM_PREFIX)) {
+                value = messageContext.getProperty(variableName);
+            }
+            // An unset variable is expanded to an empty string; the slashes around it are part of the template.
+            matcher.appendReplacement(resolvedUrl,
+                    Matcher.quoteReplacement(value != null ? value.toString() : StringUtils.EMPTY));
+        }
+        matcher.appendTail(resolvedUrl);
+        return resolvedUrl.toString();
+    }
+
+    private static String joinUrlPath(String url, String path) {
+
+        if (StringUtils.isEmpty(path)) {
+            return url;
+        }
+        if (url.endsWith("/") && path.startsWith("/")) {
+            return url.substring(0, url.length() - 1) + path;
+        }
+        if (!url.endsWith("/") && !path.startsWith("/")) {
+            return url + "/" + path;
+        }
+        return url + path;
+    }
+
+    /**
+     * Sets url.scheme, server.address and server.port from the authority of the given URL without parsing the
+     * path, so characters that are not valid in a URI (for example a leftover template placeholder) cannot keep
+     * these attributes from being recorded.
+     *
+     * @param tracingSpan CLIENT span of the backend call
+     * @param url         endpoint address of the backend call
+     */
+    private static void setBackendServerAddressAndPort(TelemetrySpan tracingSpan, String url) {
+
+        int schemeSeparatorIndex = url.indexOf("://");
+        String scheme = schemeSeparatorIndex > 0 ? url.substring(0, schemeSeparatorIndex) : null;
+        if (StringUtils.isNotEmpty(scheme)) {
+            TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.HTTP_URL_SCHEME_ATTRIBUTE, scheme);
+        }
+
+        String authority = url.substring(schemeSeparatorIndex > 0 ? schemeSeparatorIndex + 3 : 0);
+        int authorityEndIndex = authority.length();
+        for (char delimiter : new char[]{'/', '?', '#'}) {
+            int delimiterIndex = authority.indexOf(delimiter);
+            if (delimiterIndex >= 0 && delimiterIndex < authorityEndIndex) {
+                authorityEndIndex = delimiterIndex;
+            }
+        }
+        authority = authority.substring(0, authorityEndIndex);
+
+        int userInfoSeparatorIndex = authority.lastIndexOf('@');
+        if (userInfoSeparatorIndex >= 0) {
+            authority = authority.substring(userInfoSeparatorIndex + 1);
+        }
+
+        String host = authority;
+        int port = -1;
+        if (authority.startsWith("[")) {
+            // An IPv6 literal is enclosed in square brackets, so only a colon after the closing bracket separates
+            // the port: [::1] or [::1]:8243.
+            int closingBracketIndex = authority.indexOf(']');
+            if (closingBracketIndex > 0) {
+                host = authority.substring(1, closingBracketIndex);
+                int portSeparatorIndex = closingBracketIndex + 1;
+                if (portSeparatorIndex < authority.length() && authority.charAt(portSeparatorIndex) == ':') {
+                    port = parsePort(authority.substring(portSeparatorIndex + 1));
+                }
+            }
+        } else {
+            int portSeparatorIndex = authority.lastIndexOf(':');
+            if (portSeparatorIndex > 0) {
+                int parsedPort = parsePort(authority.substring(portSeparatorIndex + 1));
+                if (parsedPort > 0) {
+                    port = parsedPort;
+                    host = authority.substring(0, portSeparatorIndex);
+                }
+            }
+        }
+        // server.address must not keep the square brackets of an IPv6 literal.
+        setServerAddressAndPort(tracingSpan, stripIpv6Brackets(host),
+                port > 0 ? port : (StringUtils.isNotEmpty(scheme) ? getDefaultPort(scheme) : -1));
+    }
+
+    //for OpenTelemetry
+    public static void setBackendResponseAttributes(TelemetrySpan tracingSpan,
+                                                    org.apache.synapse.MessageContext messageContext) {
+
+        // Skip if the tracing span is null or the message context is not an Axis2MessageContext.
+        if (tracingSpan == null || !(messageContext instanceof Axis2MessageContext)) {
+            return;
+        }
+
+        try {
+            org.apache.axis2.context.MessageContext axis2MessageContext =
+                    ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+
+            setHTTPMethodAndStatus(tracingSpan, axis2MessageContext, messageContext);
+            setErrorStatus(tracingSpan, axis2MessageContext.getProperty(HTTP_SC), SpanKind.CLIENT);
+        } catch (Exception e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Error while setting backend response HTTP attributes on the tracing span.", e);
+            }
+        }
+    }
+
+    private static void setHTTPMethodAndStatus(TelemetrySpan tracingSpan,
+                                               org.apache.axis2.context.MessageContext axis2MessageContext,
+                                               org.apache.synapse.MessageContext messageContext) {
+
+        String httpMethod = (String) axis2MessageContext.getProperty(Constants.Configuration.HTTP_METHOD);
+        if (StringUtils.isEmpty(httpMethod)) {
+            httpMethod = (String) messageContext.getProperty(RESTConstants.REST_METHOD);
+        }
+        if (StringUtils.isNotEmpty(httpMethod)) {
+            TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.HTTP_METHOD_ATTRIBUTE, httpMethod);
+        }
+
+        Long httpStatusCode = getStatusCode(axis2MessageContext.getProperty(HTTP_SC));
+        if (httpStatusCode != null) {
+            TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.HTTP_STATUS_CODE_ATTRIBUTE, httpStatusCode);
+        }
+    }
+
+    /**
+     * Resolve the HTTP status code from the message context property. Fault sequences and custom mediation
+     * policies set HTTP_SC as a string, while the gateway handlers set it as an integer. Non numeric values are
+     * skipped.
+     *
+     * @param httpStatusCode raw value of the HTTP_SC property
+     * @return the status code, or null if it is missing or not numeric
+     */
+    private static Long getStatusCode(Object httpStatusCode) {
+
+        if (httpStatusCode instanceof Number) {
+            return ((Number) httpStatusCode).longValue();
+        }
+        if (httpStatusCode instanceof String) {
+            String statusCodeValue = ((String) httpStatusCode).trim();
+            if (StringUtils.isNumeric(statusCodeValue)) {
+                try {
+                    return Long.parseLong(statusCodeValue);
+                } catch (NumberFormatException e) {
+                    return null;
+                }
+            }
+        }
+        return null;
+    }
+
+    private static void setServerAddressAndPort(TelemetrySpan tracingSpan, String host, int port) {
+
+        if (StringUtils.isNotEmpty(host)) {
+            TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.SERVER_ADDRESS_ATTRIBUTE, host);
+        }
+        if (port > 0) {
+            TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.SERVER_PORT_ATTRIBUTE, port);
+        }
+    }
+
+    private static void setServerAddressAndPortFromHostHeader(TelemetrySpan tracingSpan,
+                                                             org.apache.axis2.context.MessageContext axis2MessageContext,
+                                                             String urlScheme) {
+
+        Map headers = (Map) axis2MessageContext.getProperty(
+                org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        Object hostHeaderValue = headers != null ? headers.get(APIMgtGatewayConstants.HOST) : null;
+        if (hostHeaderValue == null || StringUtils.isBlank(hostHeaderValue.toString())) {
+            return;
+        }
+
+        String hostHeader = hostHeaderValue.toString().trim();
+        String host = hostHeader;
+        int port = -1;
+        if (hostHeader.startsWith("[")) {
+            // An IPv6 literal is enclosed in square brackets, so only a colon after the closing bracket
+            // separates the port: [::1] or [::1]:8243.
+            int closingBracketIndex = hostHeader.indexOf(']');
+            if (closingBracketIndex > 0) {
+                host = hostHeader.substring(1, closingBracketIndex);
+                int portSeparatorIndex = closingBracketIndex + 1;
+                if (portSeparatorIndex < hostHeader.length() && hostHeader.charAt(portSeparatorIndex) == ':') {
+                    port = parsePort(hostHeader.substring(portSeparatorIndex + 1));
+                }
+            }
+        } else {
+            int colonIndex = hostHeader.indexOf(':');
+            // A single colon separates the port from a host name; the colons of an unbracketed IPv6 literal do not.
+            if (colonIndex > 0 && hostHeader.indexOf(':', colonIndex + 1) < 0) {
+                int parsedPort = parsePort(hostHeader.substring(colonIndex + 1));
+                if (parsedPort > 0) {
+                    port = parsedPort;
+                    host = hostHeader.substring(0, colonIndex);
+                }
+            }
+        }
+
+        setServerAddressAndPort(tracingSpan, host, port > 0 ? port : getDefaultPort(urlScheme));
+    }
+
+    private static int parsePort(String portValue) {
+
+        String trimmedPortValue = portValue != null ? portValue.trim() : null;
+        if (StringUtils.isNotEmpty(trimmedPortValue) && StringUtils.isNumeric(trimmedPortValue)) {
+            try {
+                int port = Integer.parseInt(trimmedPortValue);
+                if (port > 0 && port <= 65535) {
+                    return port;
+                }
+            } catch (NumberFormatException e) {
+                return -1;
+            }
+        }
+        return -1;
+    }
+
+    private static String stripIpv6Brackets(String host) {
+
+        if (StringUtils.isNotEmpty(host) && host.startsWith("[") && host.endsWith("]") && host.length() > 2) {
+            return host.substring(1, host.length() - 1);
+        }
+        return host;
+    }
+
+    private static int getDefaultPort(String scheme) {
+
+        return "https".equalsIgnoreCase(scheme) ? 443 : 80;
+    }
+
+    private static void setErrorStatus(TelemetrySpan tracingSpan, Object httpStatusCode, SpanKind spanKind) {
+
+        Long statusCode = getStatusCode(httpStatusCode);
+        // Per OpenTelemetry semantic conventions only 5xx marks a SERVER span as an error, while a CLIENT span
+        // treats 4xx responses as errors too.
+        long errorThreshold = SpanKind.SERVER.equals(spanKind) ? 500 : 400;
+        if (statusCode != null && statusCode >= errorThreshold) {
+            TelemetryUtil.setStatus(tracingSpan, StatusCode.ERROR);
+            TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.ERROR_TYPE_ATTRIBUTE,
+                    Long.toString(statusCode));
+        }
+    }
+
     //for OpenTelemetry
     public static void setAPIRelatedTags(TelemetrySpan tracingSpan, org.apache.synapse.MessageContext messageContext) {
 
         API api = GatewayUtils.getAPI(messageContext);
         Object electedResource = messageContext.getProperty(APIMgtGatewayConstants.API_ELECTED_RESOURCE);
         if (electedResource != null) {
-            TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_RESOURCE, (String) electedResource);
+            String resource = (String) electedResource;
+            TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_RESOURCE, resource);
+            String httpRoute = buildHttpRoute(
+                    (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT),
+                    (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION),
+                    (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION_STRATEGY),
+                    resource);
+            if (httpRoute != null) {
+                TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.HTTP_ROUTE_ATTRIBUTE, httpRoute);
+            }
         }
         if (api != null) {
             TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_API_NAME, api.getApiName());
@@ -1254,6 +1613,7 @@ public class GatewayUtils {
             TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_HTTP_RESPONSE_STATUS_CODE,
                     httpStatusCode.toString());
         }
+        setErrorStatus(tracingSpan, httpStatusCode, SpanKind.SERVER);
         Object httpStatusCodeDescription =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext().getProperty(HTTP_SC_DESC);
         if (httpStatusCodeDescription != null) {
@@ -1266,6 +1626,59 @@ public class GatewayUtils {
             TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_APPLICATION_CONSUMER_KEY,
                     (String) consumerKey);
         }
+    }
+
+    /**
+     * Builds the route template recorded in the SERVER span's {@code http.route} attribute.
+     * <p>
+     * The elected resource on its own is only unique within an API, so the API context is prefixed to keep
+     * routes from different APIs apart. The version is added only when it is part of the request path
+     * (URL based versioning), matching how the gateway composes request paths.
+     *
+     * @param apiContext      API context, for example {@code /pizzashack}
+     * @param apiVersion      API version, for example {@code 1.0.0}
+     * @param versionStrategy version strategy of the API, for example {@code url}
+     * @param resource        elected resource template, for example {@code /orders/{id}}
+     * @return the route template, or {@code null} when no resource is available
+     */
+    static String buildHttpRoute(String apiContext, String apiVersion, String versionStrategy, String resource) {
+
+        if (StringUtils.isBlank(resource)) {
+            return null;
+        }
+        // Without a context there is nothing to qualify the resource with, so keep the previous behaviour.
+        if (StringUtils.isBlank(apiContext)) {
+            return resource;
+        }
+
+        StringBuilder route = new StringBuilder();
+        appendRouteSegment(route, apiContext);
+        if (VersionStrategyFactory.TYPE_URL.equals(versionStrategy)) {
+            appendRouteSegment(route, apiVersion);
+        }
+        appendRouteSegment(route, resource);
+        return route.toString();
+    }
+
+    private static void appendRouteSegment(StringBuilder route, String segment) {
+
+        if (StringUtils.isBlank(segment)) {
+            return;
+        }
+        String value = segment.trim();
+        if (route.length() == 0) {
+            if (!value.startsWith("/")) {
+                route.append('/');
+            }
+        } else {
+            if (route.charAt(route.length() - 1) == '/') {
+                route.setLength(route.length() - 1);
+            }
+            if (!value.startsWith("/")) {
+                route.append('/');
+            }
+        }
+        route.append(value);
     }
 
     //for OpenTracing
@@ -1385,6 +1798,27 @@ public class GatewayUtils {
         Object endpoint = messageContext.getProperty(APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS);
         if (endpoint != null) {
             TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_ENDPOINT, (String) endpoint);
+        }
+    }
+
+    /**
+     * Marks a backend (CLIENT) span as failed when the gateway did not get a response from the backend, for example
+     * when the connection was refused or a read timeout occurred. Such faults are raised locally by the transport
+     * and never reach the inbound response flow, so the span is completed on the outbound response flow instead.
+     *
+     * @param tracingSpan    CLIENT span of the backend call
+     * @param messageContext message context carrying the Synapse fault properties
+     */
+    public static void setBackendFaultAttributes(TelemetrySpan tracingSpan,
+                                                 org.apache.synapse.MessageContext messageContext) {
+
+        if (tracingSpan == null) {
+            return;
+        }
+        Object errorCode = messageContext.getProperty(SynapseConstants.ERROR_CODE);
+        if (errorCode != null) {
+            TelemetryUtil.setStatus(tracingSpan, StatusCode.ERROR);
+            TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.ERROR_TYPE_ATTRIBUTE, errorCode.toString());
         }
     }
 
