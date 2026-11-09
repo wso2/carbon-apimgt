@@ -277,8 +277,7 @@ public class OAuthJwtAuthenticatorImplTest {
                 .build();
         assertUsername(new SignedJWTInfo(TOKEN, null, claims), false, "admin@" + SUPER_TENANT + "@" + SUPER_TENANT);
         Mockito.verify(authenticator, Mockito.never()).isUsernameUsedAsSubject();
-        Mockito.verify(authenticator, Mockito.never())
-                .validateAndGetResidentIDPForIssuer(Mockito.any(), Mockito.any());
+        Mockito.verify(authenticator).validateAndGetResidentIDPForIssuer(SUPER_TENANT, EXTERNAL_ISSUER);
         Mockito.verify(authenticator, Mockito.never()).getServiceProvider(Mockito.any(), Mockito.any());
     }
 

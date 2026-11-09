@@ -161,9 +161,9 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
         String subject = signedJWTInfo.getJwtClaimsSet().getSubject();
         String clientId = signedJWTInfo.getJwtClaimsSet().getStringClaim(JWTConstants.AUTHORIZED_PARTY);
         String clientTenantDomain = getClientTenantDomain(signedJWTInfo.getJwtClaimsSet());
-        boolean isTenantQualified = isSubjectAwareUserResolutionEnabled()
+        boolean isTenantQualified = isIssuedByResidentIdp(signedJWTInfo.getJwtClaimsSet(), clientTenantDomain)
+                && isSubjectAwareUserResolutionEnabled()
                 && StringUtils.endsWithIgnoreCase(subject, "@" + tenantDomain) && !isUsernameUsedAsSubject()
-                && isIssuedByResidentIdp(signedJWTInfo.getJwtClaimsSet(), clientTenantDomain)
                 && isTenantDomainInSubjectEnabled(clientId, clientTenantDomain);
         oauthTokenInfo.setEndUserName(isTenantQualified ? subject : subject + "@" + tenantDomain);
         oauthTokenInfo.setConsumerKey(clientId);

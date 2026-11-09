@@ -285,6 +285,7 @@
       "http_method": "GET,DELETE,PUT,POST"
     }
   ],
+  "apim.rest_api.enable_subject_aware_user_resolution": true,
   "apim.synapse_artifact_generator.thread_pool.core_pool_size": "4",
   "apim.synapse_artifact_generator.thread_pool.max_pool_size": "4",
   "apim.synapse_artifact_generator.thread_pool.keep_alive_time_ms": "60000",
