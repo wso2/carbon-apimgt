@@ -556,7 +556,7 @@ public class GraphQLRequestProcessorTest {
         int msgSize = 100;
         String msgText = "{\"id\":\"1\",\"type\":\"start\",\"payload\":{\"variables\":{},\"extensions\":{},"
                 + "\"operationName\":null,\"query\":\"subscription {\\n  "
-                + "liftStatusChange {\\n    id\\n    name\\n    liftStatusChange\\n  }\\n}\\n\"}}";
+                + "liftStatusChange {\\n    id\\n    name\\n    trailStatusChange\\n  }\\n}\\n\"}}";
         PowerMockito.mockStatic(InboundWebsocketProcessorUtil.class);
         InboundProcessorResponseDTO responseDTO = new InboundProcessorResponseDTO();
         PowerMockito.when(InboundWebsocketProcessorUtil.authenticateToken(inboundMessageContext))
@@ -565,7 +565,7 @@ public class GraphQLRequestProcessorTest {
         String graphqlDirPath = "graphQL" + File.separator;
         String relativePath = graphqlDirPath + "schema_with_additional_props.graphql";
         String schemaString = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath));
-        schemaString = schemaString.replace("name: String!", "name: String!\n  liftStatusChange: String");
+        schemaString = schemaString.replace("name: String!", "name: String!\n  trailStatusChange: String");
         SchemaParser schemaParser = new SchemaParser();
         TypeDefinitionRegistry registry = schemaParser.parse(schemaString);
         GraphQLSchema schema = UnExecutableSchemaGenerator.makeUnExecutableSchema(registry);
@@ -635,7 +635,8 @@ public class GraphQLRequestProcessorTest {
         errorDTO.setError(true);
         errorDTO.setErrorMessage("Invalid operation. No matching resource found for the subscription");
         PowerMockito.when(InboundWebsocketProcessorUtil.getBadRequestGraphQLFrameErrorDTO(
-                Mockito.anyString(), Mockito.eq("1"))).thenReturn(errorDTO);
+                Mockito.eq("Invalid operation. No matching resource found for the subscription"),
+                Mockito.eq("1"))).thenReturn(errorDTO);
         PowerMockito.when(WebsocketUtil.validateDenyPolicies(Mockito.anyObject())).thenReturn(responseDTO);
 
         GraphQLRequestProcessor graphQLRequestProcessor = new GraphQLRequestProcessor();
