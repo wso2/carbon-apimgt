@@ -106,12 +106,21 @@ public class GraphQLRequestProcessor extends RequestProcessor {
                                 // subscription operation name
                                 String subscriptionOperation = GraphQLProcessorUtil.getOperationListAsString(operation,
                                         inboundMessageContext.getGraphQLSchemaDTO().getTypeDefinitionRegistry());
+                                if (StringUtils.isNotEmpty(subscriptionOperation)) {
+                                    subscriptionOperation = subscriptionOperation.split(",")[0];
+                                }
                                 // set resource name of subscription operation for analytics event publishing
                                 WebSocketUtils.setApiPropertyToChannel(inboundMessageContext.getCtx(),
                                         APIConstants.API_ELECTED_RESOURCE, subscriptionOperation);
                                 // extract verb info dto with throttle policy for matching verb
                                 VerbInfoDTO verbInfoDTO = InboundWebsocketProcessorUtil
                                         .findMatchingVerb(subscriptionOperation, inboundMessageContext);
+                                if (verbInfoDTO == null) {
+                                    responseDTO = InboundWebsocketProcessorUtil.getBadRequestGraphQLFrameErrorDTO(
+                                            "Invalid operation. No matching resource found for the subscription",
+                                            operationId);
+                                    return responseDTO;
+                                }
                                 String authType = verbInfoDTO.getAuthType();
                                 // validate scopes based on subscription payload when security is enabled
                                 if (!StringUtils.capitalize(APIConstants.AUTH_TYPE_NONE.toLowerCase())

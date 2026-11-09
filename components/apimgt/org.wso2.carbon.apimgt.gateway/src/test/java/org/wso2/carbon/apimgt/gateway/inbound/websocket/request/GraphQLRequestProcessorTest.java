@@ -550,6 +550,103 @@ public class GraphQLRequestProcessorTest {
         Assert.assertFalse(processorResponseDTO.isCloseConnection());
     }
 
+    @Test
+    public void testHandleRequestWithNestedFieldSameAsSubscriptionRootField() throws Exception {
+        InboundMessageContext inboundMessageContext = new InboundMessageContext();
+        int msgSize = 100;
+        String msgText = "{\"id\":\"1\",\"type\":\"start\",\"payload\":{\"variables\":{},\"extensions\":{},"
+                + "\"operationName\":null,\"query\":\"subscription {\\n  "
+                + "liftStatusChange {\\n    id\\n    name\\n    liftStatusChange\\n  }\\n}\\n\"}}";
+        PowerMockito.mockStatic(InboundWebsocketProcessorUtil.class);
+        InboundProcessorResponseDTO responseDTO = new InboundProcessorResponseDTO();
+        PowerMockito.when(InboundWebsocketProcessorUtil.authenticateToken(inboundMessageContext))
+                .thenReturn(responseDTO);
+
+        String graphqlDirPath = "graphQL" + File.separator;
+        String relativePath = graphqlDirPath + "schema_with_additional_props.graphql";
+        String schemaString = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath));
+        schemaString = schemaString.replace("name: String!", "name: String!\n  liftStatusChange: String");
+        SchemaParser schemaParser = new SchemaParser();
+        TypeDefinitionRegistry registry = schemaParser.parse(schemaString);
+        GraphQLSchema schema = UnExecutableSchemaGenerator.makeUnExecutableSchema(registry);
+        GraphQLSchemaDTO schemaDTO = new GraphQLSchemaDTO(schema, registry);
+        inboundMessageContext.setGraphQLSchemaDTO(schemaDTO);
+
+        PowerMockito.when(InboundWebsocketProcessorUtil
+                .validateScopes(inboundMessageContext, "liftStatusChange", "1")).thenReturn(responseDTO);
+        VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
+        verbInfoDTO.setHttpVerb("SUBSCRIPTION");
+        verbInfoDTO.setThrottling("Unlimited");
+        verbInfoDTO.setAuthType("Any");
+        PowerMockito.when(InboundWebsocketProcessorUtil.findMatchingVerb("liftStatusChange", inboundMessageContext))
+                .thenReturn(verbInfoDTO);
+        APIKeyValidationInfoDTO infoDTO = new APIKeyValidationInfoDTO();
+        infoDTO.setGraphQLMaxComplexity(4);
+        infoDTO.setGraphQLMaxDepth(3);
+        inboundMessageContext.setInfoDTO(infoDTO);
+
+        PowerMockito.when(InboundWebsocketProcessorUtil.doThrottleForGraphQL(msgSize, verbInfoDTO,
+                inboundMessageContext, "1")).thenReturn(responseDTO);
+        PowerMockito.when(WebsocketUtil.validateDenyPolicies(Mockito.anyObject())).thenReturn(responseDTO);
+        GraphQLRequestProcessor graphQLRequestProcessor = new GraphQLRequestProcessor();
+        setChannelAttributeMap(inboundMessageContext);
+        InboundProcessorResponseDTO processorResponseDTO =
+                graphQLRequestProcessor.handleRequest(msgSize, msgText, inboundMessageContext);
+        Assert.assertFalse(processorResponseDTO.isError());
+        Assert.assertNull(processorResponseDTO.getErrorMessage());
+        Assert.assertNotNull(inboundMessageContext.getVerbInfoForGraphQLMsgId("1"));
+        Assert.assertEquals(inboundMessageContext.getVerbInfoForGraphQLMsgId("1").getOperation(), "liftStatusChange");
+        Assert.assertEquals(inboundMessageContext.getVerbInfoForGraphQLMsgId("1").getVerbInfoDTO().getHttpVerb(),
+                "SUBSCRIPTION");
+        Assert.assertEquals(inboundMessageContext.getVerbInfoForGraphQLMsgId("1").getVerbInfoDTO().getThrottling(),
+                "Unlimited");
+    }
+
+    @Test
+    public void testHandleRequestNoMatchingVerb() throws Exception {
+        InboundMessageContext inboundMessageContext = new InboundMessageContext();
+        int msgSize = 100;
+        String msgText = "{\"id\":\"1\",\"type\":\"start\",\"payload\":{\"variables\":{},\"extensions\":{},"
+                + "\"operationName\":null,\"query\":\"subscription {\\n  "
+                + "unknownOp {\\n    id\\n  }\\n}\\n\"}}";
+        PowerMockito.mockStatic(InboundWebsocketProcessorUtil.class);
+        InboundProcessorResponseDTO responseDTO = new InboundProcessorResponseDTO();
+        PowerMockito.when(InboundWebsocketProcessorUtil.authenticateToken(inboundMessageContext))
+                .thenReturn(responseDTO);
+
+        String schemaString = "type Query {\n"
+                + "  dummy: String\n"
+                + "}\n"
+                + "type Subscription {\n"
+                + "  unknownOp: Dummy\n"
+                + "}\n"
+                + "type Dummy {\n"
+                + "  id: ID!\n"
+                + "}\n";
+        SchemaParser schemaParser = new SchemaParser();
+        TypeDefinitionRegistry registry = schemaParser.parse(schemaString);
+        GraphQLSchema schema = UnExecutableSchemaGenerator.makeUnExecutableSchema(registry);
+        GraphQLSchemaDTO schemaDTO = new GraphQLSchemaDTO(schema, registry);
+        inboundMessageContext.setGraphQLSchemaDTO(schemaDTO);
+
+        PowerMockito.when(InboundWebsocketProcessorUtil.findMatchingVerb("unknownOp", inboundMessageContext))
+                .thenReturn(null);
+        GraphQLProcessorResponseDTO errorDTO = new GraphQLProcessorResponseDTO();
+        errorDTO.setError(true);
+        errorDTO.setErrorMessage("Invalid operation. No matching resource found for the subscription");
+        PowerMockito.when(InboundWebsocketProcessorUtil.getBadRequestGraphQLFrameErrorDTO(
+                Mockito.anyString(), Mockito.eq("1"))).thenReturn(errorDTO);
+        PowerMockito.when(WebsocketUtil.validateDenyPolicies(Mockito.anyObject())).thenReturn(responseDTO);
+
+        GraphQLRequestProcessor graphQLRequestProcessor = new GraphQLRequestProcessor();
+        setChannelAttributeMap(inboundMessageContext);
+        InboundProcessorResponseDTO processorResponseDTO =
+                graphQLRequestProcessor.handleRequest(msgSize, msgText, inboundMessageContext);
+        Assert.assertTrue(processorResponseDTO.isError());
+        Assert.assertEquals(processorResponseDTO.getErrorMessage(),
+                "Invalid operation. No matching resource found for the subscription");
+    }
+
     private Attribute<Map<String, Object>> getChannelAttributeMap() {
         return new Attribute<Map<String, Object>>() {
             @Override

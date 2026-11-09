@@ -158,16 +158,20 @@ public class InboundWebsocketProcessorUtil {
         VerbInfoDTO verbInfoDTO = null;
         if (inboundMessageContext.getResourcesMap() != null) {
             ResourceInfoDTO resourceInfoDTO = inboundMessageContext.getResourcesMap().get(operation);
-            Set<VerbInfoDTO> verbDTOList = resourceInfoDTO.getHttpVerbs();
-            for (VerbInfoDTO verb : verbDTOList) {
-                if (verb.getHttpVerb().equals(GraphQLConstants.SubscriptionConstants.HTTP_METHOD_NAME)) {
-                    if (isResourcePathMatching(operation, resourceInfoDTO)) {
-                        verbInfoDTO = verb;
-                        resourceCacheKey = APIUtil.getResourceInfoDTOCacheKey(
-                                inboundMessageContext.getApiContext(), inboundMessageContext.getVersion(),
-                                operation, GraphQLConstants.SubscriptionConstants.HTTP_METHOD_NAME);
-                        verb.setRequestKey(resourceCacheKey);
-                        break;
+            if (resourceInfoDTO != null) {
+                Set<VerbInfoDTO> verbDTOList = resourceInfoDTO.getHttpVerbs();
+                if (verbDTOList != null) {
+                    for (VerbInfoDTO verb : verbDTOList) {
+                        if (verb.getHttpVerb().equals(GraphQLConstants.SubscriptionConstants.HTTP_METHOD_NAME)) {
+                            if (isResourcePathMatching(operation, resourceInfoDTO)) {
+                                verbInfoDTO = verb;
+                                resourceCacheKey = APIUtil.getResourceInfoDTOCacheKey(
+                                        inboundMessageContext.getApiContext(), inboundMessageContext.getVersion(),
+                                        operation, GraphQLConstants.SubscriptionConstants.HTTP_METHOD_NAME);
+                                verb.setRequestKey(resourceCacheKey);
+                                break;
+                            }
+                        }
                     }
                 }
             }
