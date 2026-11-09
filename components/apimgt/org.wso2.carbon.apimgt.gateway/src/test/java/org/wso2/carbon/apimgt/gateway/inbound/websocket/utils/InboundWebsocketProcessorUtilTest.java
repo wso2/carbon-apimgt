@@ -53,6 +53,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.ResourceInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -63,7 +64,11 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 @RunWith(PowerMockRunner.class)
@@ -545,6 +550,55 @@ public class InboundWebsocketProcessorUtilTest {
         PowerMockito.stub(PowerMockito.method(Utils.class, "getSecuritySchemeOfWebSocketAPI"))
                 .toReturn(securitySchemeList);
         Assert.assertFalse(InboundWebsocketProcessorUtil.isAuthenticated(inboundMessageContext));
+    }
+
+    @Test
+    public void testFindMatchingVerbSuccess() {
+        InboundMessageContext inboundMessageContext = new InboundMessageContext();
+        inboundMessageContext.setApiContext("/graphql");
+        inboundMessageContext.setVersion("1.0.0");
+        ResourceInfoDTO resourceInfoDTO = new ResourceInfoDTO();
+        resourceInfoDTO.setUrlPattern("orderUpdated");
+        Set<VerbInfoDTO> verbs = new HashSet<>();
+        VerbInfoDTO verb = new VerbInfoDTO();
+        verb.setHttpVerb(GraphQLConstants.SubscriptionConstants.HTTP_METHOD_NAME);
+        verbs.add(verb);
+        resourceInfoDTO.setHttpVerbs(verbs);
+        inboundMessageContext.getResourcesMap().put("orderUpdated", resourceInfoDTO);
+
+        Mockito.when(APIUtil.getResourceInfoDTOCacheKey(Mockito.anyString(), Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyString())).thenReturn("cacheKey");
+
+        VerbInfoDTO result = InboundWebsocketProcessorUtil.findMatchingVerb("orderUpdated", inboundMessageContext);
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.getHttpVerb(), GraphQLConstants.SubscriptionConstants.HTTP_METHOD_NAME);
+        Assert.assertEquals(result.getRequestKey(), "cacheKey");
+    }
+
+    @Test
+    public void testFindMatchingVerbNullResourceMap() {
+        InboundMessageContext inboundMessageContext = Mockito.mock(InboundMessageContext.class);
+        Mockito.when(inboundMessageContext.getResourcesMap()).thenReturn(null);
+        VerbInfoDTO result = InboundWebsocketProcessorUtil.findMatchingVerb("orderUpdated", inboundMessageContext);
+        Assert.assertNull(result);
+    }
+
+    @Test
+    public void testFindMatchingVerbResourceNotFound() {
+        InboundMessageContext inboundMessageContext = new InboundMessageContext();
+        VerbInfoDTO result = InboundWebsocketProcessorUtil.findMatchingVerb("unknownOp", inboundMessageContext);
+        Assert.assertNull(result);
+    }
+
+    @Test
+    public void testFindMatchingVerbNullHttpVerbs() {
+        InboundMessageContext inboundMessageContext = new InboundMessageContext();
+        ResourceInfoDTO resourceInfoDTO = new ResourceInfoDTO();
+        resourceInfoDTO.setUrlPattern("orderUpdated");
+        resourceInfoDTO.setHttpVerbs(null);
+        inboundMessageContext.getResourcesMap().put("orderUpdated", resourceInfoDTO);
+        VerbInfoDTO result = InboundWebsocketProcessorUtil.findMatchingVerb("orderUpdated", inboundMessageContext);
+        Assert.assertNull(result);
     }
 
     private InboundMessageContext createWebSocketApiMessageContext() {
