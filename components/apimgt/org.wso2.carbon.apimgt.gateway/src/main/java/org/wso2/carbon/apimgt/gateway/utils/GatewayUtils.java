@@ -40,6 +40,7 @@ import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisService;
+import org.apache.axis2.transport.http.HTTPTransportUtils;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.lang3.StringUtils;
@@ -53,6 +54,8 @@ import org.apache.synapse.api.ApiUtils;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.config.xml.rest.VersionStrategyFactory;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.apache.synapse.endpoints.AbstractEndpoint;
+import org.apache.synapse.endpoints.EndpointDefinition;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
@@ -142,7 +145,9 @@ public class GatewayUtils {
     private static String apiUUID;
     private static final Pattern validHostHeaderPattern =
             Pattern.compile("^[A-Za-z0-9][A-Za-z0-9.-]*(:\\d{1,5})?$");
-    private static final Pattern URI_TEMPLATE_VARIABLE_PATTERN = Pattern.compile("\\{([^{}]+)}");
+    // Set by the Synapse pass-through transport on the response context only when the backend responded.
+    private static final String TARGET_RESPONSE = "pass-through.Target-Response";
+    private static final String ORIGINAL_STATUS_CODE = "ORIGINAL_STATUS_CODE";
 
     public static boolean isClusteringEnabled() {
 
@@ -1292,28 +1297,30 @@ public class GatewayUtils {
             org.apache.axis2.context.MessageContext axis2MessageContext =
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext();
 
-            setHTTPMethodAndStatus(tracingSpan, axis2MessageContext, messageContext);
-            setErrorStatus(tracingSpan, axis2MessageContext.getProperty(HTTP_SC), SpanKind.CLIENT);
+            // The leaf endpoint Synapse selected for this call; its format decides the outbound method and URL.
+            Object endpoint = messageContext.getProperty(SynapseConstants.LAST_ENDPOINT);
+            EndpointDefinition definition = endpoint instanceof AbstractEndpoint
+                    ? ((AbstractEndpoint) endpoint).getDefinition() : null;
 
-            Object backendUrlObject =
-                    messageContext.getProperty(APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS);
-            String backendUrl = backendUrlObject != null ? (String) backendUrlObject : null;
+            String httpMethod = getBackendHTTPMethod(axis2MessageContext, messageContext, definition);
+            if (StringUtils.isNotEmpty(httpMethod)) {
+                TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.HTTP_METHOD_ATTRIBUTE, httpMethod);
+            }
+
+            // getAddress(messageContext) returns the address Synapse sends to, with URI templates already expanded.
+            String backendUrl = definition != null && definition.getAddress() != null
+                    ? definition.getAddress(messageContext)
+                    : (String) messageContext.getProperty(APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS);
             if (StringUtils.isNotEmpty(backendUrl)) {
-                // The endpoint address can be a URI template such as http://host:port/service/{uri.var.x}, which
-                // Synapse only resolves when the request is sent. Resolve the template here so the span reports
-                // the target that was actually called instead of the unresolved template.
-                String resolvedBackendUrl = resolveUriTemplateVariables(backendUrl, messageContext);
                 Object restUrlPostfixObject = axis2MessageContext.getProperty(NhttpConstants.REST_URL_POSTFIX);
                 String resourcePath = restUrlPostfixObject != null
+                        && isRestUrlPostfixAppended(axis2MessageContext, definition)
                         ? StringUtils.substringBefore(restUrlPostfixObject.toString(), "?")
                         : StringUtils.EMPTY;
 
                 TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.HTTP_URL_FULL_ATTRIBUTE,
-                        StringUtils.substringBefore(joinUrlPath(resolvedBackendUrl, resourcePath), "?"));
-
-                // The authority never contains template placeholders, so it is parsed on its own: a character
-                // that cannot be parsed in the path must not drop url.scheme, server.address or server.port.
-                setBackendServerAddressAndPort(tracingSpan, resolvedBackendUrl);
+                        StringUtils.substringBefore(joinUrlPath(backendUrl, resourcePath), "?"));
+                setBackendServerAddressAndPort(tracingSpan, backendUrl);
             }
         } catch (Exception e) {
             if (log.isDebugEnabled()) {
@@ -1323,36 +1330,60 @@ public class GatewayUtils {
     }
 
     /**
-     * Replaces the placeholders of an endpoint URI template with the value of the corresponding message
-     * context property, which is how Synapse resolves the template when it sends the request. An unset
-     * variable is expanded to an empty string and the surrounding separators are kept, matching Synapse.
-     *
-     * @param url            endpoint address, possibly containing URI template placeholders
-     * @param messageContext message context holding the uri.var.* and uri.query.* properties
-     * @return the endpoint address with the placeholders expanded
+     * Returns the method Synapse sends to the backend: a SOAP format forces POST, the get format forces GET and an
+     * HTTP endpoint uses its configured method.
      */
-    private static String resolveUriTemplateVariables(String url, org.apache.synapse.MessageContext messageContext) {
+    private static String getBackendHTTPMethod(org.apache.axis2.context.MessageContext axis2MessageContext,
+                                               org.apache.synapse.MessageContext messageContext,
+                                               EndpointDefinition definition) {
 
-        if (url.indexOf('{') < 0) {
-            return url;
+        String httpMethod = (String) axis2MessageContext.getProperty(Constants.Configuration.HTTP_METHOD);
+        if (StringUtils.isEmpty(httpMethod)) {
+            httpMethod = (String) messageContext.getProperty(RESTConstants.REST_METHOD);
         }
-        Matcher matcher = URI_TEMPLATE_VARIABLE_PATTERN.matcher(url);
-        StringBuffer resolvedUrl = new StringBuffer();
-        while (matcher.find()) {
-            String expression = matcher.group(1);
-            // A reserved expansion such as {+uri.var.path} is resolved from the same property.
-            String variableName = expression.startsWith("+") ? expression.substring(1) : expression;
-            Object value = null;
-            if (variableName.startsWith(RESTConstants.REST_URI_VARIABLE_PREFIX)
-                    || variableName.startsWith(RESTConstants.REST_QUERY_PARAM_PREFIX)) {
-                value = messageContext.getProperty(variableName);
-            }
-            // An unset variable is expanded to an empty string; the slashes around it are part of the template.
-            matcher.appendReplacement(resolvedUrl,
-                    Matcher.quoteReplacement(value != null ? value.toString() : StringUtils.EMPTY));
+        if (definition == null) {
+            return httpMethod;
         }
-        matcher.appendTail(resolvedUrl);
-        return resolvedUrl.toString();
+        String format = definition.getFormat();
+        if (SynapseConstants.FORMAT_SOAP11.equals(format) || SynapseConstants.FORMAT_SOAP12.equals(format)) {
+            httpMethod = "POST";
+        } else if (SynapseConstants.FORMAT_GET.equals(format)) {
+            httpMethod = "GET";
+        }
+        Object endpointMethod = messageContext.getProperty(Constants.Configuration.HTTP_METHOD);
+        if (definition.isHTTPEndpoint() && endpointMethod instanceof String) {
+            httpMethod = (String) endpointMethod;
+        }
+        return httpMethod;
+    }
+
+    /**
+     * Returns whether Synapse appends the resource path to the endpoint address: never for an HTTP endpoint, and
+     * otherwise only for the rest format or a REST request to an endpoint that does not force SOAP.
+     */
+    private static boolean isRestUrlPostfixAppended(org.apache.axis2.context.MessageContext axis2MessageContext,
+                                                    EndpointDefinition definition) {
+
+        if (definition == null) {
+            return true;
+        }
+        if (definition.isHTTPEndpoint()) {
+            return false;
+        }
+        if (SynapseConstants.FORMAT_REST.equals(definition.getFormat())) {
+            return true;
+        }
+        if (definition.isForceSOAP11() || definition.isForceSOAP12()) {
+            return false;
+        }
+        if (axis2MessageContext.getProperty("synapse.internal.rest.contentType") != null) {
+            return true;
+        }
+        Object httpMethod = axis2MessageContext.getProperty(Constants.Configuration.HTTP_METHOD);
+        String messageType = String.valueOf(axis2MessageContext.getProperty(Constants.Configuration.MESSAGE_TYPE));
+        return Arrays.asList("GET", "DELETE", "PUT", "PATCH", "OPTIONS", "HEAD").contains(httpMethod)
+                || ("POST".equals(httpMethod) && HTTPTransportUtils.isRESTRequest(messageType))
+                || ("text/xml".equals(messageType) && axis2MessageContext.getSoapAction() == null);
     }
 
     private static String joinUrlPath(String url, String path) {
@@ -1441,8 +1472,19 @@ public class GatewayUtils {
             org.apache.axis2.context.MessageContext axis2MessageContext =
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext();
 
-            setHTTPMethodAndStatus(tracingSpan, axis2MessageContext, messageContext);
-            setErrorStatus(tracingSpan, axis2MessageContext.getProperty(HTTP_SC), SpanKind.CLIENT);
+            if (axis2MessageContext.getProperty(TARGET_RESPONSE) == null) {
+                return;
+            }
+            // HTTP_SC can be changed by mediation, for example to 500 for a SOAP fault; this is the backend's status.
+            Object statusCode = axis2MessageContext.getProperty(ORIGINAL_STATUS_CODE);
+            if (statusCode == null) {
+                statusCode = axis2MessageContext.getProperty(HTTP_SC);
+            }
+            Long httpStatusCode = getStatusCode(statusCode);
+            if (httpStatusCode != null) {
+                TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.HTTP_STATUS_CODE_ATTRIBUTE, httpStatusCode);
+                setErrorStatus(tracingSpan, httpStatusCode, SpanKind.CLIENT);
+            }
         } catch (Exception e) {
             if (log.isDebugEnabled()) {
                 log.debug("Error while setting backend response HTTP attributes on the tracing span.", e);
@@ -1812,13 +1854,16 @@ public class GatewayUtils {
     public static void setBackendFaultAttributes(TelemetrySpan tracingSpan,
                                                  org.apache.synapse.MessageContext messageContext) {
 
-        if (tracingSpan == null) {
+        if (tracingSpan == null || !(messageContext instanceof Axis2MessageContext) || ((Axis2MessageContext)
+                messageContext).getAxis2MessageContext().getProperty(TARGET_RESPONSE) != null) {
             return;
         }
-        Object errorCode = messageContext.getProperty(SynapseConstants.ERROR_CODE);
-        if (errorCode != null) {
-            TelemetryUtil.setStatus(tracingSpan, StatusCode.ERROR);
-            TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.ERROR_TYPE_ATTRIBUTE, errorCode.toString());
+        TelemetryUtil.setStatus(tracingSpan, StatusCode.ERROR);
+        Object errorException = messageContext.getProperty(SynapseConstants.ERROR_EXCEPTION);
+        Object errorType = errorException != null
+                ? errorException.getClass().getName() : messageContext.getProperty(SynapseConstants.ERROR_CODE);
+        if (errorType != null) {
+            TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.ERROR_TYPE_ATTRIBUTE, errorType.toString());
         }
     }
 
