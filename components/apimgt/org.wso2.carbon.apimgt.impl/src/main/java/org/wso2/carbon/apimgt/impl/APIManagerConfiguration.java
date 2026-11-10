@@ -185,6 +185,7 @@ public class APIManagerConfiguration {
     private boolean isTransactionCounterEnabled;
     private static boolean isMCPSupportEnabled = true;
     private static boolean isMCPEnforceAuthForAllMethods = true;
+    private static boolean isMCPOutboundAuthHeaderEnabled = false;
     private static boolean isAPIProductRevisionBasedResourcesEnabled = true;
     private static String devportalMode = APIConstants.DEVPORTAL_MODE_HYBRID;
     private static volatile boolean isRuntimeReadOnly = false;
@@ -3240,6 +3241,20 @@ public class APIManagerConfiguration {
                         + ". Using default: " + isMCPEnforceAuthForAllMethods);
             }
         }
+
+        OMElement mcpOutboundAuthHeaderElement =
+                omElement.getFirstChildWithName(new QName(APIConstants.AI.MCP_ENABLE_OUTBOUND_AUTH_HEADER));
+        if (mcpOutboundAuthHeaderElement != null
+                && StringUtils.isNotBlank(mcpOutboundAuthHeaderElement.getText())) {
+            String outboundAuthHeaderValue = mcpOutboundAuthHeaderElement.getText().trim();
+            if (Boolean.TRUE.toString().equalsIgnoreCase(outboundAuthHeaderValue)
+                    || Boolean.FALSE.toString().equalsIgnoreCase(outboundAuthHeaderValue)) {
+                isMCPOutboundAuthHeaderEnabled = Boolean.parseBoolean(outboundAuthHeaderValue);
+            } else {
+                log.warn("Invalid value for " + APIConstants.AI.MCP_ENABLE_OUTBOUND_AUTH_HEADER
+                        + ". Using default: " + isMCPOutboundAuthHeaderEnabled);
+            }
+        }
     }
 
     /**
@@ -3261,6 +3276,18 @@ public class APIManagerConfiguration {
     public boolean isMCPEnforceAuthForAllMethods() {
 
         return isMCPEnforceAuthForAllMethods;
+    }
+
+    /**
+     * Returns whether the client's access token (sent in the authorization header) should be forwarded from an
+     * MCP server to its upstream (the proxied MCP server or the backend). Default is false, so the token used to
+     * authenticate at the Gateway is removed before the upstream call.
+     *
+     * @return true if the authorization header should be forwarded upstream, false otherwise.
+     */
+    public boolean isMCPOutboundAuthHeaderEnabled() {
+
+        return isMCPOutboundAuthHeaderEnabled;
     }
 
     /**

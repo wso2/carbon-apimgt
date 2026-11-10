@@ -397,7 +397,8 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             authenticator.init(synapseEnvironment);
             authenticators.add(authenticator);
         }
-        Authenticator authenticator = new InternalAPIKeyAuthenticator(APIMgtGatewayConstants.INTERNAL_KEY);
+        Authenticator authenticator = new InternalAPIKeyAuthenticator(APIMgtGatewayConstants.INTERNAL_KEY,
+                authorizationHeader);
         authenticator.init(synapseEnvironment);
         authenticators.add(authenticator);
         authenticators.sort(new Comparator<Authenticator>() {
@@ -476,24 +477,19 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                 handleNoAuthentication(messageContext);
                 setAPIParametersToMessageContext(messageContext);
 
-                //remove authorization header if exists
+                // The authenticators, which normally remove the client's credentials, do not run for this request
+                org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
+                        getAxis2MessageContext();
+                Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+                String globalAuthHeader = null;
                 try {
-                    org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
-                            getAxis2MessageContext();
-                    Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-                    String authHeader = APIUtil.getOAuthConfigurationFromAPIMConfig(APIConstants.AUTHORIZATION_HEADER);
-                    if (authHeader == null) {
-                        authHeader = HttpHeaders.AUTHORIZATION;
-                    }
-                    
-                    if (headers != null && headers.get(authHeader) != null) {
-                        headers.remove(authHeader);
-                    }
+                    globalAuthHeader = APIUtil.getOAuthConfigurationFromAPIMConfig(APIConstants.AUTHORIZATION_HEADER);
                 } catch (APIManagementException e) {
                     if (log.isDebugEnabled()) {
-                        log.debug("Error while removing authorization header for MCP request", e);
+                        log.debug("Error while reading the authorization header configuration for MCP request", e);
                     }
                 }
+                removeClientCredentialsFromMCPNoAuthRequest(headers, globalAuthHeader, authorizationHeader, subType);
 
                 return ExtensionListenerUtil.postProcessRequest(messageContext, type);
             }
@@ -584,6 +580,37 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
         }
         return false;
+    }
+
+    /**
+     * Removes the client's credentials from an MCP request that skips authentication
+     * ({@link APIMgtGatewayConstants#MCP_NO_AUTH_REQUEST}), so that they are not forwarded to the backend or the
+     * upstream MCP server.
+     * <ul>
+     * <li>The global authorization header ([apim.oauth_config] auth_header, Authorization if not set) and the
+     * API-level authorization header are removed.</li>
+     * <li>The Internal-Key is removed, except for MCP servers of the EXISTING_API subtype, which pass it on to the
+     * existing API.</li>
+     * </ul>
+     *
+     * @param headers          transport headers of the request
+     * @param globalAuthHeader authorization header name from [apim.oauth_config] auth_header, may be null
+     * @param apiAuthHeader    API-level authorization header name, may be null
+     * @param subType          subtype of the MCP server
+     */
+    static void removeClientCredentialsFromMCPNoAuthRequest(Map headers, String globalAuthHeader,
+                                                            String apiAuthHeader, String subType) {
+
+        if (headers == null) {
+            return;
+        }
+        headers.remove(StringUtils.isNotBlank(globalAuthHeader) ? globalAuthHeader : HttpHeaders.AUTHORIZATION);
+        if (StringUtils.isNotBlank(apiAuthHeader)) {
+            headers.remove(apiAuthHeader);
+        }
+        if (!APIConstants.API_SUBTYPE_EXISTING_API.equals(subType)) {
+            headers.remove(APIMgtGatewayConstants.INTERNAL_KEY);
+        }
     }
 
     private void handleNoAuthentication(MessageContext messageContext){

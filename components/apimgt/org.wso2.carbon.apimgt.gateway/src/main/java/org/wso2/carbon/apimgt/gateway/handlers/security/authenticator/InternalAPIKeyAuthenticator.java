@@ -27,6 +27,7 @@ import org.apache.axis2.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
@@ -82,6 +83,7 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
     private static final Log log = LogFactory.getLog(InternalAPIKeyAuthenticator.class);
 
     private String securityParam;
+    private String authorizationHeader;
     private boolean jwtGenerationEnabled;
     private boolean isGatewayTokenCacheEnabled;
     private ExtendedJWTConfigurationDto jwtConfigurationDto;
@@ -89,6 +91,16 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
 
     public InternalAPIKeyAuthenticator(String securityParam) {
         this.securityParam = securityParam;
+    }
+
+    /**
+     * @param securityParam       name of the header carrying the Internal Key
+     * @param authorizationHeader API level authorization header name. When blank, the
+     *                            [apim.oauth_config] auth_header value or "Authorization" is used.
+     */
+    public InternalAPIKeyAuthenticator(String securityParam, String authorizationHeader) {
+        this.securityParam = securityParam;
+        this.authorizationHeader = authorizationHeader;
     }
 
     @Override
@@ -312,6 +324,9 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
 
                     APISecurityUtils.setAuthenticationContext(synCtx, authenticationContext,
                             jwtGenerationEnabled ? getContextHeader() : null);
+                    if (isMCPAuthenticated) {
+                        removeMCPClientTokenFromOutMessage(synCtx);
+                    }
                     synCtx.setProperty(APIMgtGatewayConstants.END_USER_NAME, authenticationContext.getUsername());
                     if (log.isDebugEnabled()) {
                         log.debug("User is authorized to access the resource using Internal Key.");
@@ -617,10 +632,12 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
         if (headers != null) {
             internalKey = (String) headers.get(securityParam);
             if (internalKey != null) {
-                //Remove InternalKey header from the request except for MCP existing_API subtype
+                // Remove InternalKey header from the request except for MCP servers of the EXISTING_API subtype
                 API matchedAPI = GatewayUtils.getAPI(mCtx);
-                if (matchedAPI != null && !APIConstants.API_TYPE_MCP.equals(matchedAPI.getApiType()) &&
-                        !APIConstants.API_SUBTYPE_EXISTING_API.equals(matchedAPI.getSubtype())) {
+                boolean isMCPExistingAPI = matchedAPI != null
+                        && APIConstants.API_TYPE_MCP.equals(matchedAPI.getApiType())
+                        && APIConstants.API_SUBTYPE_EXISTING_API.equals(matchedAPI.getSubtype());
+                if (matchedAPI != null && !isMCPExistingAPI) {
                     if (log.isDebugEnabled()) {
                         log.debug("Removing Internal Key header from request for API: " + matchedAPI.getName());
                     }
@@ -632,7 +649,83 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
         return null;
     }
 
+    /**
+     * A tool call of an MCP server of the EXISTING_API subtype reaches the existing API with two credentials: the
+     * Internal Key minted by the MCP server (used to authenticate here) and the client's access token in the
+     * authorization header (already used to authenticate at the MCP server). OAuthAuthenticator, which normally
+     * strips that token, does not run for this request, so [apim.oauth_config] enable_outbound_auth_header is
+     * applied here before the request is sent to the backend.
+     *
+     * @param synCtx message context
+     */
+    private void removeMCPClientTokenFromOutMessage(MessageContext synCtx) {
 
+        APIManagerConfiguration config = getApiManagerConfiguration();
+        if (!isRemoveOAuthHeadersFromOutMessage(config)) {
+            return;
+        }
+        Map headers = (Map) ((Axis2MessageContext) synCtx).getAxis2MessageContext()
+                .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        if (headers == null) {
+            return;
+        }
+        String headerName = resolveAuthorizationHeader(config);
+        String authHeader = (String) headers.get(headerName);
+        if (authHeader == null) {
+            return;
+        }
+        String remainingAuthHeader = removeBearerToken(authHeader);
+        if (StringUtils.isNotBlank(remainingAuthHeader)) {
+            headers.put(headerName, remainingAuthHeader);
+        } else {
+            headers.remove(headerName);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Removed the MCP client's access token from the " + headerName + " header");
+        }
+    }
+
+    /**
+     * Same default as OAuthAuthenticator: remove the token unless
+     * [apim.oauth_config] enable_outbound_auth_header is true.
+     */
+    private boolean isRemoveOAuthHeadersFromOutMessage(APIManagerConfiguration config) {
+
+        String value = config != null ? config.getFirstProperty(APIConstants.REMOVE_OAUTH_HEADERS_FROM_MESSAGE) : null;
+        return value == null || Boolean.parseBoolean(value.trim());
+    }
+
+    private String resolveAuthorizationHeader(APIManagerConfiguration config) {
+
+        if (StringUtils.isNotBlank(authorizationHeader)) {
+            return authorizationHeader;
+        }
+        String configured = config != null
+                ? config.getFirstProperty(APIConstants.OAUTH_CONFIGS + APIConstants.AUTHORIZATION_HEADER) : null;
+        return StringUtils.isNotBlank(configured) ? configured : HttpHeaders.AUTHORIZATION;
+    }
+
+    /**
+     * Removes the "Bearer &lt;token&gt;" segment from an authorization header value, keeping any other
+     * comma separated segments, in line with OAuthAuthenticator.
+     */
+    private static String removeBearerToken(String authHeader) {
+
+        List<String> remaining = new ArrayList<>();
+        for (String segment : authHeader.split(",")) {
+            String[] parts = segment.trim().split("\\s+");
+            boolean isBearerSegment = parts.length > 1 && "Bearer".equalsIgnoreCase(parts[0]);
+            if (!isBearerSegment) {
+                remaining.add(segment);
+            }
+        }
+        return String.join(",", remaining);
+    }
+
+    protected APIManagerConfiguration getApiManagerConfiguration() {
+
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+    }
 
     //first level cache
     private Cache getGatewayInternalKeyCache() {

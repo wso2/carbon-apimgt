@@ -5,6 +5,7 @@ import com.nimbusds.jwt.SignedJWT;
 import io.swagger.v3.oas.models.OpenAPI;
 import net.minidev.json.JSONObject;
 import org.apache.axis2.Constants;
+import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
@@ -25,13 +26,17 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationResponse;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.utils.OpenAPIUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import javax.cache.Cache;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
+import java.util.Base64;
+import java.util.Map;
 import java.util.TreeMap;
 
 import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
@@ -698,5 +703,272 @@ public class InternalAPIKeyAuthenticatorTest {
         Assert.assertEquals(authenticate.getErrorCode(), APISecurityConstants.API_AUTH_MISSING_OPEN_API_DEF);
         Assert.assertEquals(authenticate.getErrorMessage(),
                 APISecurityConstants.API_AUTH_MISSING_OPEN_API_DEF_ERROR_MESSAGE);
+    }
+
+    private static final String MCP_UPSTREAM_TOKEN_ID = "4b9e0f6a-1c2d-4e5f-8a9b-mcp-upstream";
+    private static final String CLIENT_TOKEN = "Bearer eyJ4NXQiOiJjbGllbnQifQ.eyJzdWIiOiJhZG1pbiJ9.Y2xpZW50";
+    private static final String BASIC_CREDENTIALS = "Basic YWRtaW46YWRtaW4=";
+
+    // Client token sent with an Internal Key minted by an MCP server (EXISTING_API), at the existing API
+
+    @Test
+    public void testMCPClientTokenRemovedAtExistingAPIWhenOutboundAuthHeaderDisabled() throws Exception {
+        Map<String, String> headers = authenticateWithInternalKey(buildInternalKey(true), new API(),
+                config("true", null), null, headers(HttpHeaders.AUTHORIZATION, CLIENT_TOKEN));
+
+        Assert.assertFalse(headers.containsKey(HttpHeaders.AUTHORIZATION));
+        Assert.assertFalse(headers.containsKey(APIMgtGatewayConstants.INTERNAL_KEY));
+    }
+
+    @Test
+    public void testMCPClientTokenForwardedAtExistingAPIWhenOutboundAuthHeaderEnabled() throws Exception {
+        Map<String, String> headers = authenticateWithInternalKey(buildInternalKey(true), new API(),
+                config("false", null), null, headers(HttpHeaders.AUTHORIZATION, CLIENT_TOKEN));
+
+        Assert.assertEquals(CLIENT_TOKEN, headers.get(HttpHeaders.AUTHORIZATION));
+        Assert.assertFalse(headers.containsKey(APIMgtGatewayConstants.INTERNAL_KEY));
+    }
+
+    @Test
+    public void testMCPClientTokenAtExistingAPIIndependentOfMCPOutboundAuthHeader() throws Exception {
+        // Only [apim.oauth_config] enable_outbound_auth_header decides; [apim.mcp] enable_outbound_auth_header = true
+        APIManagerConfiguration stripConfig = config("true", null);
+        Mockito.when(stripConfig.isMCPOutboundAuthHeaderEnabled()).thenReturn(true);
+        Map<String, String> stripped = authenticateWithInternalKey(buildInternalKey(true), new API(),
+                stripConfig, null, headers(HttpHeaders.AUTHORIZATION, CLIENT_TOKEN));
+        Assert.assertFalse(stripped.containsKey(HttpHeaders.AUTHORIZATION));
+
+        // [apim.mcp] enable_outbound_auth_header = false
+        APIManagerConfiguration forwardConfig = config("false", null);
+        Mockito.when(forwardConfig.isMCPOutboundAuthHeaderEnabled()).thenReturn(false);
+        Map<String, String> forwarded = authenticateWithInternalKey(buildInternalKey(true), new API(),
+                forwardConfig, null, headers(HttpHeaders.AUTHORIZATION, CLIENT_TOKEN));
+        Assert.assertEquals(CLIENT_TOKEN, forwarded.get(HttpHeaders.AUTHORIZATION));
+    }
+
+    @Test
+    public void testMCPClientTokenRemovedWhenOutboundAuthHeaderNotConfigured() throws Exception {
+        Map<String, String> headers = authenticateWithInternalKey(buildInternalKey(true), new API(),
+                config(null, null), null, headers(HttpHeaders.AUTHORIZATION, CLIENT_TOKEN));
+
+        Assert.assertFalse(headers.containsKey(HttpHeaders.AUTHORIZATION));
+    }
+
+    @Test
+    public void testMCPClientTokenRemovedWhenConfigurationUnavailable() throws Exception {
+        Map<String, String> headers = authenticateWithInternalKey(buildInternalKey(true), new API(),
+                null, null, headers(HttpHeaders.AUTHORIZATION, CLIENT_TOKEN));
+
+        Assert.assertFalse(headers.containsKey(HttpHeaders.AUTHORIZATION));
+    }
+
+    @Test
+    public void testMCPClientTokenRemovalKeepsOtherAuthorizationSegments() throws Exception {
+        Map<String, String> headers = authenticateWithInternalKey(buildInternalKey(true), new API(),
+                config("true", null), null, headers(HttpHeaders.AUTHORIZATION, CLIENT_TOKEN + ", " + BASIC_CREDENTIALS));
+
+        Assert.assertEquals(BASIC_CREDENTIALS, headers.get(HttpHeaders.AUTHORIZATION).trim());
+    }
+
+    @Test
+    public void testNonBearerAuthorizationHeaderKeptForMCPInternalKey() throws Exception {
+        Map<String, String> headers = authenticateWithInternalKey(buildInternalKey(true), new API(),
+                config("true", null), null, headers(HttpHeaders.AUTHORIZATION, BASIC_CREDENTIALS));
+
+        Assert.assertEquals(BASIC_CREDENTIALS, headers.get(HttpHeaders.AUTHORIZATION));
+    }
+
+    @Test
+    public void testMCPInternalKeyWithoutAuthorizationHeader() throws Exception {
+        Map<String, String> headers = authenticateWithInternalKey(buildInternalKey(true), new API(),
+                config("true", null), null, headers());
+
+        Assert.assertFalse(headers.containsKey(HttpHeaders.AUTHORIZATION));
+        Assert.assertFalse(headers.containsKey(APIMgtGatewayConstants.INTERNAL_KEY));
+    }
+
+    @Test
+    public void testMCPClientTokenRemovedFromAPILevelAuthorizationHeader() throws Exception {
+        String apiLevelHeader = "X-Custom-Authorization";
+        Map<String, String> headers = authenticateWithInternalKey(buildInternalKey(true), new API(),
+                config("true", "X-Configured-Authorization"), apiLevelHeader,
+                headers(apiLevelHeader, CLIENT_TOKEN, HttpHeaders.AUTHORIZATION, BASIC_CREDENTIALS));
+
+        Assert.assertFalse(headers.containsKey(apiLevelHeader));
+        Assert.assertEquals(BASIC_CREDENTIALS, headers.get(HttpHeaders.AUTHORIZATION));
+    }
+
+    @Test
+    public void testMCPClientTokenRemovedFromConfiguredAuthorizationHeader() throws Exception {
+        String configuredHeader = "X-Configured-Authorization";
+        Map<String, String> headers = authenticateWithInternalKey(buildInternalKey(true), new API(),
+                config("true", configuredHeader), null,
+                headers(configuredHeader, CLIENT_TOKEN, HttpHeaders.AUTHORIZATION, BASIC_CREDENTIALS));
+
+        Assert.assertFalse(headers.containsKey(configuredHeader));
+        Assert.assertEquals(BASIC_CREDENTIALS, headers.get(HttpHeaders.AUTHORIZATION));
+    }
+
+    @Test
+    public void testMCPClientTokenRemovedWhenInternalKeyPayloadIsCached() throws Exception {
+        String key = buildInternalKey(true);
+        JWTTokenPayloadInfo cachedPayload = new JWTTokenPayloadInfo();
+        cachedPayload.setPayload(SignedJWT.parse(key).getJWTClaimsSet());
+        cachedPayload.setAccessToken(key);
+
+        // Signature verification fails in this setup, so authentication only succeeds through the cache
+        Map<String, String> headers = authenticateWithInternalKey(key, new API(), config("true", null), null,
+                headers(HttpHeaders.AUTHORIZATION, CLIENT_TOKEN), cachedPayload);
+
+        Assert.assertFalse(headers.containsKey(HttpHeaders.AUTHORIZATION));
+    }
+
+    @Test
+    public void testAuthorizationHeaderUntouchedForNonMCPInternalKey() throws Exception {
+        Map<String, String> headers = authenticateWithInternalKey(buildInternalKey(false), new API(),
+                config("true", null), null, headers(HttpHeaders.AUTHORIZATION, CLIENT_TOKEN));
+
+        Assert.assertEquals(CLIENT_TOKEN, headers.get(HttpHeaders.AUTHORIZATION));
+    }
+
+    // Internal-Key header forwarding
+
+    @Test
+    public void testInternalKeyRemovedForMCPServerProxy() throws Exception {
+        Map<String, String> headers = authenticateWithInternalKey(buildInternalKey(false),
+                mcpServer(APIConstants.API_SUBTYPE_SERVER_PROXY), config("true", null), null, headers());
+
+        Assert.assertFalse(headers.containsKey(APIMgtGatewayConstants.INTERNAL_KEY));
+    }
+
+    @Test
+    public void testInternalKeyRemovedForMCPDirectBackend() throws Exception {
+        Map<String, String> headers = authenticateWithInternalKey(buildInternalKey(false),
+                mcpServer(APIConstants.API_SUBTYPE_DIRECT_BACKEND), config("true", null), null, headers());
+
+        Assert.assertFalse(headers.containsKey(APIMgtGatewayConstants.INTERNAL_KEY));
+    }
+
+    @Test
+    public void testInternalKeyKeptForMCPExistingAPI() throws Exception {
+        String key = buildInternalKey(false);
+        Map<String, String> headers = authenticateWithInternalKey(key,
+                mcpServer(APIConstants.API_SUBTYPE_EXISTING_API), config("true", null), null, headers());
+
+        Assert.assertEquals(key, headers.get(APIMgtGatewayConstants.INTERNAL_KEY));
+    }
+
+    private static API mcpServer(String subtype) {
+        API api = new API();
+        api.setApiType(APIConstants.API_TYPE_MCP);
+        api.setSubtype(subtype);
+        return api;
+    }
+
+    /**
+     * @param removeOAuthHeaders   value of RemoveOAuthHeadersFromOutMessage (null when not configured)
+     * @param configuredAuthHeader value of [apim.oauth_config] auth_header (null when not configured)
+     */
+    private static APIManagerConfiguration config(String removeOAuthHeaders, String configuredAuthHeader) {
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.REMOVE_OAUTH_HEADERS_FROM_MESSAGE))
+                .thenReturn(removeOAuthHeaders);
+        Mockito.when(apiManagerConfiguration.getFirstProperty(
+                APIConstants.OAUTH_CONFIGS + APIConstants.AUTHORIZATION_HEADER)).thenReturn(configuredAuthHeader);
+        return apiManagerConfiguration;
+    }
+
+    private static Map<String, String> headers(String... namesAndValues) {
+        Map<String, String> headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        for (int i = 0; i + 1 < namesAndValues.length; i += 2) {
+            headers.put(namesAndValues[i], namesAndValues[i + 1]);
+        }
+        return headers;
+    }
+
+    /**
+     * Builds an Internal Key. Signature verification is mocked, so the signature segment is a placeholder.
+     *
+     * @param mcpAuthenticated whether the key is the one minted by an MCP server for its upstream call
+     */
+    private String buildInternalKey(boolean mcpAuthenticated) {
+        String header = "{\"kid\":\"gateway_certificate_alias\",\"alg\":\"RS256\"}";
+        String payload = "{\"sub\":\"admin@carbon.super\",\"keytype\":\"PRODUCTION\",\"token_type\":\"InternalKey\","
+                + (mcpAuthenticated ? "\"" + APIMgtGatewayConstants.MCP_AUTH_CLAIM + "\":\"true\"," : "")
+                + "\"exp\":" + (System.currentTimeMillis() / 1000 + 600) + ","
+                + "\"jti\":\"" + MCP_UPSTREAM_TOKEN_ID + "\"}";
+        return base64Url(header) + "." + base64Url(payload) + ".c2lnbmF0dXJl";
+    }
+
+    private static String base64Url(String value) {
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(value.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private Map<String, String> authenticateWithInternalKey(String key, API api, APIManagerConfiguration config,
+                                                            String apiLevelAuthHeader,
+                                                            Map<String, String> requestHeaders) throws Exception {
+        return authenticateWithInternalKey(key, api, config, apiLevelAuthHeader, requestHeaders, null);
+    }
+
+    /**
+     * Authenticates a request carrying the given Internal Key and request headers at an API, asserts that it is
+     * authenticated, and returns the transport headers that would be sent to the backend.
+     *
+     * @param cachedPayload when set, the Internal Key is served from the gateway caches and signature
+     *                      verification fails, so only the cached path can authenticate it
+     */
+    private Map<String, String> authenticateWithInternalKey(String key, API api, APIManagerConfiguration config,
+                                                            String apiLevelAuthHeader,
+                                                            Map<String, String> requestHeaders,
+                                                            JWTTokenPayloadInfo cachedPayload) throws Exception {
+        InternalAPIKeyAuthenticator authenticator =
+                new InternalAPIKeyAuthenticator(APIMgtGatewayConstants.INTERNAL_KEY, apiLevelAuthHeader) {
+                    @Override
+                    protected APIManagerConfiguration getApiManagerConfiguration() {
+                        return config;
+                    }
+                };
+
+        PowerMockito.when(GatewayUtils.isInternalKey(Mockito.any(JWTClaimsSet.class))).thenReturn(true);
+        MessageContext messageContext = Mockito.mock(Axis2MessageContext.class);
+        Mockito.when(messageContext.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("/items/1.0.0");
+        Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION)).thenReturn("1.0.0");
+        Mockito.when(messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE)).thenReturn("/items/{itemId}");
+        PowerMockito.when(GatewayUtils.getAPI(messageContext)).thenReturn(api);
+
+        Map<String, String> transportHeaders = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        transportHeaders.putAll(requestHeaders);
+        transportHeaders.put(APIMgtGatewayConstants.INTERNAL_KEY, key);
+        org.apache.axis2.context.MessageContext axis2MsgCntxt =
+                Mockito.mock(org.apache.axis2.context.MessageContext.class);
+        Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
+                .thenReturn(transportHeaders);
+        Mockito.when(axis2MsgCntxt.getProperty(Constants.Configuration.HTTP_METHOD)).thenReturn("GET");
+        Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
+        OpenAPI openAPI = Mockito.mock(OpenAPI.class);
+        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.OPEN_API_OBJECT)).thenReturn(openAPI);
+
+        PowerMockito.when(GatewayUtils.getTenantDomain()).thenReturn(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        Cache internalKeyCache = Mockito.mock(Cache.class);
+        Cache internalKeyDataCache = Mockito.mock(Cache.class);
+        if (cachedPayload != null) {
+            Mockito.when(internalKeyCache.get(MCP_UPSTREAM_TOKEN_ID))
+                    .thenReturn(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            Mockito.when(internalKeyDataCache.get(Mockito.any())).thenReturn(cachedPayload);
+        }
+        PowerMockito.when(CacheProvider.getGatewayInternalKeyCache()).thenReturn(internalKeyCache);
+        PowerMockito.when(CacheProvider.getGatewayInternalKeyDataCache()).thenReturn(internalKeyDataCache);
+        PowerMockito.when(CacheProvider.getInvalidGatewayInternalKeyCache()).thenReturn(Mockito.mock(Cache.class));
+        PowerMockito.when(GatewayUtils.verifyTokenSignature(Mockito.any(SignedJWT.class), Mockito.anyString()))
+                .thenReturn(cachedPayload == null);
+        PowerMockito.when(GatewayUtils.isJwtTokenExpired(Mockito.any(JWTClaimsSet.class))).thenReturn(false);
+        AuthenticationContext authenticationContext = Mockito.mock(AuthenticationContext.class);
+        PowerMockito.when(GatewayUtils.generateAuthenticationContext(Mockito.eq(MCP_UPSTREAM_TOKEN_ID),
+                Mockito.any(JWTClaimsSet.class), Mockito.<JSONObject>any(), Mockito.<String>any()))
+                .thenReturn(authenticationContext);
+
+        AuthenticationResponse response = authenticator.authenticate(messageContext);
+        Assert.assertTrue(response.isAuthenticated());
+        return transportHeaders;
     }
 }
