@@ -303,6 +303,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>com.hubspot.jinjava</groupId>
+            <artifactId>jinjava</artifactId>
+            <version>${jinjava.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-yaml</artifactId>
         </dependency>
@@ -548,6 +554,10 @@
                         <property>
                             <name>carbon.home</name>
                             <value>${basedir}/src/test/resources</value>
+                        </property>
+                        <property>
+                            <name>apim.config.template</name>
+                            <value>${basedir}/../../../features/apimgt/org.wso2.carbon.apimgt.core.feature/src/main/resources/conf_templates/templates/repository/conf/api-manager.xml.j2</value>
                         </property>
                     </systemProperties>
                     <classpathDependencyExcludes>
