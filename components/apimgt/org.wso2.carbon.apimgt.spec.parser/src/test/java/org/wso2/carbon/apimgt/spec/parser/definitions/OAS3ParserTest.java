@@ -63,7 +63,7 @@ public class OAS3ParserTest extends OASTestBase {
     }
 
     @Test
-    public void testGenerateMCPDefinitionGetAuthentication() throws Exception {
+    public void testGenerateMCPDefinitionDefaultAuthTypes() throws Exception {
         API api = new API(new APIIdentifier("admin", "MCPServer", "1.0.0"));
         api.setType(APISpecParserConstants.MCP_API);
 
@@ -71,10 +71,10 @@ public class OAS3ParserTest extends OASTestBase {
                 oas3Parser.generateAPIDefinition(new SwaggerData(api)), null, null).getOpenAPI();
         PathItem mcpPath = definition.getPaths().get("/mcp");
 
-        Assert.assertEquals("None", mcpPath.getGet().getExtensions().get("x-auth-type"));
+        Assert.assertEquals("None", mcpPath.getGet().getExtensions().get(APISpecParserConstants.SWAGGER_X_AUTH_TYPE));
         // POST carries authenticated JSON-RPC requests, even though the unsupported SSE GET is unauthenticated.
         Assert.assertEquals("Application & Application User",
-                mcpPath.getPost().getExtensions().get("x-auth-type"));
+                mcpPath.getPost().getExtensions().get(APISpecParserConstants.SWAGGER_X_AUTH_TYPE));
     }
 
     @Test
