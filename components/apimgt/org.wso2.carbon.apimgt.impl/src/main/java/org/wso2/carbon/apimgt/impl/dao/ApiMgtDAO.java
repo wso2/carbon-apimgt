@@ -7772,6 +7772,9 @@ public class ApiMgtDAO {
         String deleteURLTemplateQuery = SQLConstants.REMOVE_FROM_API_URL_MAPPINGS_SQL;
         String deleteAPIKeyMappingQuery = SQLConstants.REMOVE_FROM_API_KEY_API_MAPPINGS_SQL;
         String deleteGraphqlComplexityQuery = SQLConstants.REMOVE_FROM_GRAPHQL_COMPLEXITY_SQL;
+        String deletePrimaryEndpointMappingsQuery =
+                SQLConstants.APIEndpointsSQLConstants.DELETE_PRIMARY_ENDPOINT_MAPPING_BY_API_UUID;
+        String deleteAPIEndpointsQuery = SQLConstants.APIEndpointsSQLConstants.DELETE_API_ENDPOINTS_BY_API_UUID;
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
@@ -7836,6 +7839,18 @@ public class ApiMgtDAO {
             prepStmt = connection.prepareStatement(deleteAPIKeyMappingQuery);
             prepStmt.setString(1, uuid);
             prepStmt.execute();
+            prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
+
+            // Delete the primary endpoint mappings and the endpoints of the API
+            prepStmt = connection.prepareStatement(deletePrimaryEndpointMappingsQuery);
+            prepStmt.setString(1, uuid);
+            prepStmt.execute();
+            prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
+
+            prepStmt = connection.prepareStatement(deleteAPIEndpointsQuery);
+            prepStmt.setString(1, uuid);
+            prepStmt.execute();
+            prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
 
             deleteAllAPISpecificOperationPoliciesByAPIUUID(connection, uuid, null);
 

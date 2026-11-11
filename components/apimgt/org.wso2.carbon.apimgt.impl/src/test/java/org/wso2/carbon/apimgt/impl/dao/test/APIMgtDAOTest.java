@@ -2603,7 +2603,6 @@ public class APIMgtDAOTest {
 
         API api = addAPIForDeletionRollbackTest("deleteAPIRollbackOnAPIRecordFailure");
 
-        // Fails at "DELETE FROM AM_API", after the lifecycle events and URL mappings have been deleted
         Connection connection = deleteAPIWithFailingStatement(api.getUuid(), SQLConstants.REMOVE_FROM_API_SQL_BY_UUID);
 
         assertAPIRecordsRetained(api);
@@ -2631,7 +2630,6 @@ public class APIMgtDAOTest {
 
         API api = addAPIForDeletionRollbackTest("deleteAPIRollbackOnCommentFailure");
 
-        // deleteAPIComments reports the failure as an APIManagementException rather than an SQLException
         Connection connection = deleteAPIWithFailingStatement(api.getUuid(), SQLConstants.DELETE_API_CHILD_COMMENTS);
 
         assertAPIRecordsRetained(api);
@@ -2641,8 +2639,9 @@ public class APIMgtDAOTest {
     }
 
     /**
-     * Adds an API marked as the default version, so that it has an AM_API record, a lifecycle event and an
-     * AM_API_DEFAULT_VERSION record.
+     * Adds an API marked as the default version, with a URL template, GraphQL complexity details, metadata and a
+     * primary endpoint, so that it has records in AM_API, AM_API_LC_EVENT, AM_API_DEFAULT_VERSION,
+     * AM_API_URL_MAPPING, AM_GRAPHQL_COMPLEXITY, AM_API_METADATA, AM_API_ENDPOINTS and AM_API_PRIMARY_EP_MAPPING.
      */
     private API addAPIForDeletionRollbackTest(String apiName) throws APIManagementException {
 
@@ -2652,7 +2651,22 @@ public class APIMgtDAOTest {
         api.setUUID(UUID.randomUUID().toString());
         api.setVersionTimestamp(String.valueOf(System.currentTimeMillis()));
         api.setAsDefaultVersion(true);
-        apiMgtDAO.addAPI(api, -1234, "testOrg");
+        Set<URITemplate> uriTemplates = new HashSet<>();
+        uriTemplates.add(getUriTemplate("/" + apiName, "GET", "Any", null, "Unlimited"));
+        api.setUriTemplates(uriTemplates);
+        int apiId = apiMgtDAO.addAPI(api, -1234, "testOrg");
+        apiMgtDAO.addURITemplates(apiId, api, -1234);
+        apiMgtDAO.addOrUpdateComplexityDetails(api.getUuid(), getGraphqlComplexityInfoDetails());
+        apiMgtDAO.addAPIMetadata(api.getUuid(), Collections.singletonMap("protocolVersion", "1.0"));
+        APIEndpointInfo endpoint = new APIEndpointInfo();
+        endpoint.setId(UUID.randomUUID().toString());
+        endpoint.setName(apiName + "-endpoint");
+        endpoint.setDeploymentStage("PRODUCTION");
+        Map<String, Object> endpointConfig = new HashMap<>();
+        endpointConfig.put("endpoint_type", "http");
+        endpoint.setEndpointConfig(endpointConfig);
+        apiMgtDAO.addAPIEndpoints(api.getUuid(), Collections.singletonList(endpoint), "testOrg");
+        apiMgtDAO.addPrimaryEndpointMapping(api.getUuid(), endpoint.getId(), APIConstants.API_REVISION_CURRENT_API);
         assertAPIRecordsRetained(api);
         return api;
     }
@@ -2698,6 +2712,15 @@ public class APIMgtDAOTest {
         assertEquals("Lifecycle events of the API should exist", 1,
                 apiMgtDAO.getLifeCycleEvents(api.getUuid()).size());
         assertEquals("Default version of the API should exist", "1.0.0", apiMgtDAO.getDefaultVersion(api.getId()));
+        assertEquals("URL mappings of the API should exist", 1, apiMgtDAO.getURITemplatesOfAPI(api.getUuid()).size());
+        assertEquals("GraphQL complexity details of the API should exist", 2,
+                apiMgtDAO.getComplexityDetails(api.getUuid()).getList().size());
+        assertEquals("Metadata of the API should exist", "1.0",
+                apiMgtDAO.getCurrentAPIMetadata(api.getUuid()).get("protocolVersion"));
+        assertEquals("Endpoints of the API should exist", 1,
+                apiMgtDAO.getAPIEndpoints(api.getUuid(), "testOrg").size());
+        assertEquals("Primary endpoint mappings of the API should exist", 1,
+                getPrimaryEndpointMappingsOfAPI(api).size());
     }
 
     private void assertAPIDeletionCanBeRetried(API api) throws APIManagementException {
@@ -2706,5 +2729,15 @@ public class APIMgtDAOTest {
         assertFalse("API context should be released", apiMgtDAO.isContextExist("/" + api.getId().getApiName(),
                 "testOrg"));
         assertNull("Default version of the API should be removed", apiMgtDAO.getDefaultVersion(api.getId()));
+        assertTrue("Metadata of the API should be removed", apiMgtDAO.getCurrentAPIMetadata(api.getUuid()).isEmpty());
+        assertTrue("Endpoints of the API should be removed",
+                apiMgtDAO.getAPIEndpoints(api.getUuid(), "testOrg").isEmpty());
+        assertTrue("Primary endpoint mappings of the API should be removed",
+                getPrimaryEndpointMappingsOfAPI(api).isEmpty());
+    }
+
+    private List<String> getPrimaryEndpointMappingsOfAPI(API api) throws APIManagementException {
+
+        return apiMgtDAO.getPrimaryEndpointUUIDByAPIId(api.getUuid(), APIConstants.API_REVISION_CURRENT_API);
     }
 }

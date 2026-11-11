@@ -141,6 +141,7 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -2600,13 +2601,10 @@ public class APIProviderImplTest {
         assertDeleteAPIFails(apiProvider);
 
         Mockito.verify(apimgtDAO).deleteAPI(apiUUID);
-        // The registry artifact and the gateway artifacts must be kept, so that the API does not become a "ghost"
-        // API (hidden from the Publisher while its database record still exists) and the deletion can be retried
-        Mockito.verify(platformGatewayArtifactService, Mockito.never()).deleteAllRevisionArtifactsForApi(
-                Mockito.anyString());
-        Mockito.verify(gatewayArtifactsMgtDAO, Mockito.never()).deleteGatewayArtifacts(Mockito.anyString());
-        Mockito.verify(apiPersistenceInstance, Mockito.never())
-                .deleteAPI(any(Organization.class), Mockito.anyString());
+        // The registry artifact, the gateway artifacts and the other resources of the API must be kept, so that the
+        // API does not become a "ghost" API (hidden from the Publisher while its database record still exists) and
+        // the deletion can be retried
+        assertAPIRetained(platformGatewayArtifactService);
     }
 
     @Test
@@ -2621,11 +2619,25 @@ public class APIProviderImplTest {
         assertDeleteAPIFails(apiProvider);
 
         Mockito.verify(apimgtDAO, Mockito.never()).deleteAPI(Mockito.anyString());
-        Mockito.verify(platformGatewayArtifactService, Mockito.never()).deleteAllRevisionArtifactsForApi(
-                Mockito.anyString());
-        Mockito.verify(gatewayArtifactsMgtDAO, Mockito.never()).deleteGatewayArtifacts(Mockito.anyString());
-        Mockito.verify(apiPersistenceInstance, Mockito.never())
-                .deleteAPI(any(Organization.class), Mockito.anyString());
+        assertAPIRetained(platformGatewayArtifactService);
+    }
+
+    @Test
+    public void testDeleteAPIRetainsAPIWhenAPIIDLookupFailsDueToDBError()
+            throws APIManagementException, APIPersistenceException {
+
+        PlatformGatewayArtifactService platformGatewayArtifactService = mockPlatformGatewayArtifactService();
+        // A database outage fails both the API retrieval and the API ID lookup, so it cannot be confirmed whether
+        // the API record still exists
+        APIProviderImplWrapper apiProvider = getAPIProviderForDeletion(null);
+        Mockito.when(apimgtDAO.getAPIID(apiUUID)).thenThrow(new APIManagementException(
+                "Error while locating API with UUID : " + apiUUID + " from the database",
+                new SQLException("Cannot get a connection, pool error Timeout waiting for idle object")));
+
+        assertDeleteAPIFails(apiProvider);
+
+        Mockito.verify(apimgtDAO, Mockito.never()).deleteAPI(Mockito.anyString());
+        assertAPIRetained(platformGatewayArtifactService);
     }
 
     @Test
@@ -2633,8 +2645,9 @@ public class APIProviderImplTest {
             throws APIManagementException, APIPersistenceException {
 
         PlatformGatewayArtifactService platformGatewayArtifactService = mockPlatformGatewayArtifactService();
-        // The API record is already missing from the database, but the registry artifact still exists
-        APIProviderImplWrapper apiProvider = getAPIProviderForDeletion(getAPIForDeletion());
+        // The API record is already missing from the database, but the registry artifact still exists. Retrieving
+        // the API fails as well, since it reads the API ID from the database.
+        APIProviderImplWrapper apiProvider = getAPIProviderForDeletion(null);
         Mockito.when(apimgtDAO.getAPIID(apiUUID)).thenThrow(new APIManagementException(
                 "Unable to find the API with UUID : " + apiUUID + " in the database"));
 
@@ -2658,14 +2671,23 @@ public class APIProviderImplTest {
         apiProvider.deleteAPI(apiUUID, superTenantDomain);
 
         Mockito.verify(apimgtDAO).deleteAPI(apiUUID);
+        // The API metadata and endpoints are deleted within the transaction of ApiMgtDAO.deleteAPI, not separately
+        Mockito.verify(apimgtDAO, Mockito.never()).deleteAllAPIMetadata(Mockito.anyString());
+        Mockito.verify(apimgtDAO, Mockito.never()).deleteAPIEndpointsByApiUUID(Mockito.anyString());
+        Mockito.verify(apimgtDAO, Mockito.never()).deleteAllAPIPrimaryEndpointMappingsByUUID(Mockito.anyString());
         Mockito.verify(platformGatewayArtifactService).deleteAllRevisionArtifactsForApi(apiUUID);
         Mockito.verify(gatewayArtifactsMgtDAO).deleteGatewayArtifacts(apiUUID);
         Mockito.verify(apiPersistenceInstance).deleteAPI(any(Organization.class), Mockito.eq(apiUUID));
+        Mockito.verify(keyManager).deleteRegisteredResourceByAPIId(Mockito.anyString());
+        Mockito.verify(apimgtDAO).retrieveWorkflowFromInternalReference(Mockito.eq("1111"), Mockito.anyString());
+        PowerMockito.verifyStatic(APIUtil.class, Mockito.times(1));
+        APIUtil.logAuditMessage(Mockito.eq(APIConstants.AuditLogConstants.API), Mockito.anyString(),
+                Mockito.eq(APIConstants.AuditLogConstants.DELETED), Mockito.any());
     }
 
     /**
      * Returns an API provider for the API deletion tests. Its getAPIbyUUID returns the given API, or fails the same
-     * way as when the registry artifact of the API cannot be read if the given API is null.
+     * way as when the API cannot be retrieved if the given API is null.
      */
     private APIProviderImplWrapper getAPIProviderForDeletion(final API api) throws APIManagementException {
 
@@ -2683,6 +2705,12 @@ public class APIProviderImplTest {
         WorkflowExecutorFactory workflowExecutorFactory = PowerMockito.mock(WorkflowExecutorFactory.class);
         Mockito.when(WorkflowExecutorFactory.getInstance()).thenReturn(workflowExecutorFactory);
         Mockito.when(GatewayArtifactsMgtDAO.getInstance()).thenReturn(gatewayArtifactsMgtDAO);
+        KeyManagerDto keyManagerDto = new KeyManagerDto();
+        keyManagerDto.setName("default");
+        keyManagerDto.setKeyManager(keyManager);
+        Map<String, KeyManagerDto> keyManagers = new HashMap<>();
+        keyManagers.put("default", keyManagerDto);
+        PowerMockito.when(KeyManagerHolder.getGlobalAndTenantKeyManagers(Mockito.any())).thenReturn(keyManagers);
         return apiProvider;
     }
 
@@ -2716,5 +2744,25 @@ public class APIProviderImplTest {
             assertEquals("Error while deleting the API " + apiUUID + " on organization " + superTenantDomain,
                     e.getMessage());
         }
+    }
+
+    /**
+     * Asserts that the deletion kept the artifacts and the other resources of the API, which are removed only after
+     * the database record of the API is deleted.
+     */
+    private void assertAPIRetained(PlatformGatewayArtifactService platformGatewayArtifactService)
+            throws APIManagementException, APIPersistenceException {
+
+        Mockito.verify(platformGatewayArtifactService, Mockito.never()).deleteAllRevisionArtifactsForApi(
+                Mockito.anyString());
+        Mockito.verify(gatewayArtifactsMgtDAO, Mockito.never()).deleteGatewayArtifacts(Mockito.anyString());
+        Mockito.verify(apiPersistenceInstance, Mockito.never())
+                .deleteAPI(any(Organization.class), Mockito.anyString());
+        Mockito.verify(keyManager, Mockito.never()).deleteRegisteredResourceByAPIId(Mockito.anyString());
+        Mockito.verify(apimgtDAO, Mockito.never())
+                .retrieveWorkflowFromInternalReference(Mockito.anyString(), Mockito.anyString());
+        PowerMockito.verifyStatic(APIUtil.class, Mockito.never());
+        APIUtil.logAuditMessage(Mockito.eq(APIConstants.AuditLogConstants.API), Mockito.anyString(),
+                Mockito.eq(APIConstants.AuditLogConstants.DELETED), Mockito.any());
     }
 }

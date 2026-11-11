@@ -238,6 +238,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -3425,9 +3426,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     public void deleteAPI(String apiUuid, String organization) throws APIManagementException {
         boolean isError = false;
-        // Set when the API record may still exist in the database after the DB delete step. The gateway artifacts
-        // and the persistence entry are then kept, so that the API stays visible and the deletion can be retried.
         boolean isDBDeletionIncomplete = false;
+        boolean isAPIIDLookupFailed = false;
         int apiId = -1;
         API api = null;
 
@@ -3436,7 +3436,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             api = getAPIbyUUID(apiUuid, organization);
         } catch (APIManagementException e) {
             log.error("Error while getting API by uuid for deleting API " + apiUuid + " on organization "
-                    + organization);
+                    + organization, e);
             log.debug("Following steps will be skipped while deleting API " + apiUuid + "on organization "
                     + organization + " due to api being null. " +
                     "deleting Resource Registration from key managers, deleting on external API stores, " +
@@ -3456,6 +3456,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     + organization + "due to api id being null. cleanup workflow tasks of the API, " +
                     "delete event publishing to gateways");
             isError = true;
+            isAPIIDLookupFailed = e.getCause() instanceof SQLException;
         }
         // Delete event publishing to gateways
         if (api != null && api.isInitiatedFromGateway()) {
@@ -3500,9 +3501,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 // Remove API-Label mappings
                 removeAPILabelMappings(apiUuid);
 
-                // Remove API endpoints
-                removeAPIEndpoints(apiUuid);
-
                 // Remove Custom Backend entries of the API
                 deleteCustomBackendByAPIID(apiUuid);
                 deleteAPIRevisions(apiUuid, organization, true);
@@ -3520,13 +3518,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 isError = true;
                 isDBDeletionIncomplete = true;
             }
-        } else if (apiId != -1) {
-            // The API record exists in the database, but the DB delete step could not be executed
+        } else if (apiId != -1 || isAPIIDLookupFailed) {
+            // The API record exists (or may exist) in the database, but the DB delete step could not be executed
             isDBDeletionIncomplete = true;
         }
 
         // Deleting Resource Registration from key managers
-        if (api != null && api.getId() != null && api.getId().toString() != null) {
+        if (!isDBDeletionIncomplete && api != null && api.getId() != null && api.getId().toString() != null) {
             Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getGlobalAndTenantKeyManagers(tenantDomain);
             for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
                 KeyManager keyManager = keyManagerDtoEntry.getValue().getKeyManager();
@@ -3574,13 +3572,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 isError = true;
             }
         } else {
-            log.warn("Skipped removing the gateway artifacts and the persistence entry of API " + apiUuid
-                    + " on organization " + organization + " since its database record could not be deleted. "
-                    + "The API is retained so that the deletion can be retried.");
+            log.warn("Skipped removing the gateway artifacts, the persistence entry and the other resources of API "
+                    + apiUuid + " on organization " + organization + " since its database record could not be "
+                    + "deleted. The API is retained so that the deletion can be retried.");
         }
 
         // Deleting on external API stores
-        if (api != null) {
+        if (!isDBDeletionIncomplete && api != null) {
             // gatewayType check is required when API Management is deployed on
             // other servers to avoid synapse
             //Check if there are already published external APIStores.If yes,removing APIs from them.
@@ -3600,7 +3598,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
 
-        if (apiId != -1) {
+        if (!isDBDeletionIncomplete && apiId != -1) {
             try {
                 cleanUpPendingAPIStateChangeTask(apiId, false);
             } catch (WorkflowException | APIManagementException e) {
@@ -3612,7 +3610,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
 
         // Logging audit message for API delete
-        if (api != null) {
+        if (!isDBDeletionIncomplete && api != null) {
             JSONObject apiLogObject = new JSONObject();
             apiLogObject.put(APIConstants.AuditLogConstants.NAME, api.getId().getApiName());
             apiLogObject.put(APIConstants.AuditLogConstants.VERSION, api.getId().getVersion());
@@ -3623,7 +3621,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         // Extracting API details for the recommendation system
-        if (api != null && recommendationEnvironment != null) {
+        if (!isDBDeletionIncomplete && api != null && recommendationEnvironment != null) {
             RecommenderEventPublisher
                     extractor = new RecommenderDetailsExtractor(api, organization, APIConstants.DELETE_API);
             Thread recommendationThread = new Thread(extractor);
@@ -3680,7 +3678,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (API_SUBTYPE_AI_API.equals(api.getSubtype())) {
             apiMgtDAO.deleteAIConfiguration(api.getUuid());
         }
-        apiMgtDAO.deleteAllAPIMetadata(api.getUuid());
+        // The API metadata and endpoints are removed by ApiMgtDAO.deleteAPI, within the transaction that is rolled
+        // back on failure
         if (APIConstants.API_TYPE_MCP.equals(api.getType())) {
             if (APIConstants.API_SUBTYPE_EXISTING_API.equals(api.getSubtype())) {
                 apiMgtDAO.removeApiOperationMapping(uriTemplates);
@@ -9988,24 +9987,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             labelsDAO.deleteApiLabelMappings(apiId, labelsDAO.getMappedLabelIDsForApi(apiId));
         } catch (APIManagementException e) {
             throw new APIManagementException("Error while removing label mappings for API " + apiId, e);
-        }
-    }
-
-    /**
-     * This method is used to remove primary endpoint mappings(if any) and API endpoints(if any) for the given API.
-     *
-     * @param apiUUID API identifier
-     * @throws APIManagementException if an error occurs while removing endpoints
-     */
-    private void removeAPIEndpoints(String apiUUID) throws APIManagementException {
-        try {
-            if (log.isDebugEnabled()) {
-                log.debug("Removing endpoints for API: " + apiUUID);
-            }
-            deleteAPIPrimaryEndpointMappings(apiUUID);
-            deleteAPIEndpointsByApiUUID(apiUUID);
-        } catch (APIManagementException e) {
-            throw new APIManagementException("Error while removing endpoints for API " + apiUUID, e);
         }
     }
 
