@@ -24,6 +24,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonArray;
 import feign.Feign;
+import feign.RequestInterceptor;
 import feign.Response;
 import feign.auth.BasicAuthRequestInterceptor;
 import feign.gson.GsonDecoder;
@@ -1036,7 +1037,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 .encoder(new GsonEncoder())
                 .decoder(new GsonDecoder())
                 .logger(new Slf4jLogger())
-                .requestInterceptor(new BasicAuthRequestInterceptor(username, password))
+                .requestInterceptor(createBasicAuthRequestInterceptor(username, password))
                 .errorDecoder(new KMClientErrorDecoder());
 
         Feign.Builder introspectionFeignBuilder = Feign.builder()
@@ -1044,7 +1045,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 .encoder(new GsonEncoder())
                 .decoder(new GsonDecoder())
                 .logger(new Slf4jLogger())
-                .requestInterceptor(new BasicAuthRequestInterceptor(username, password))
+                .requestInterceptor(createBasicAuthRequestInterceptor(username, password))
                 .errorDecoder(new KMClientErrorDecoder())
                 .encoder(new FormEncoder());
 
@@ -1053,7 +1054,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 .encoder(new GsonEncoder())
                 .decoder(new GsonDecoder())
                 .logger(new Slf4jLogger())
-                .requestInterceptor(new BasicAuthRequestInterceptor(username, password))
+                .requestInterceptor(createBasicAuthRequestInterceptor(username, password))
                 .errorDecoder(new KMClientErrorDecoder());
 
         Feign.Builder userFeignBuilder = Feign.builder()
@@ -1061,7 +1062,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 .encoder(new GsonEncoder())
                 .decoder(new GsonDecoder())
                 .logger(new Slf4jLogger())
-                .requestInterceptor(new BasicAuthRequestInterceptor(username, password))
+                .requestInterceptor(createBasicAuthRequestInterceptor(username, password))
                 .errorDecoder(new KMClientErrorDecoder());
 
         if (configuration.getParameter(APIConstants.KEY_MANAGER_TENANT_DOMAIN) != null) {
@@ -1100,11 +1101,27 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                     .encoder(new GsonEncoder())
                     .decoder(new GsonDecoder())
                     .logger(new Slf4jLogger())
-                    .requestInterceptor(new BasicAuthRequestInterceptor(username, password))
+                    .requestInterceptor(createBasicAuthRequestInterceptor(username, password))
                     .requestInterceptor(new TenantHeaderInterceptor(tenantDomain))
                     .errorDecoder(new KMClientErrorDecoder())
                     .target(RevokeClient.class, revokeOneTimeTokenEndpoint);
         }
+    }
+
+    /**
+     * Creates the interceptor that adds the Basic Authorization header to requests sent to the Key Manager.
+     * <p>
+     * The credentials are encoded as UTF-8 before Base64 encoding, as recommended by RFC 7617. Feign's
+     * two-argument {@link BasicAuthRequestInterceptor} constructor uses ISO-8859-1, which corrupts any
+     * non-ASCII character in the username or password, so the Key Manager rejects the request with 401.
+     *
+     * @param username Key Manager username
+     * @param password Key Manager password
+     * @return a request interceptor that sets the Basic Authorization header using UTF-8
+     */
+    static RequestInterceptor createBasicAuthRequestInterceptor(String username, String password) {
+
+        return new BasicAuthRequestInterceptor(username, password, StandardCharsets.UTF_8);
     }
 
     @Override
