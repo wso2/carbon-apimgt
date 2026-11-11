@@ -23,6 +23,7 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
 import org.wso2.carbon.apimgt.api.model.OASParserOptions;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 
 import java.io.File;
@@ -59,6 +60,21 @@ public class OAS3ParserTest extends OASTestBase {
     @Test
     public void testGenerateAPIDefinition() throws Exception {
         testGenerateAPIDefinition(oas3Parser);
+    }
+
+    @Test
+    public void testGenerateMCPDefinitionDefaultAuthTypes() throws Exception {
+        API api = new API(new APIIdentifier("admin", "MCPServer", "1.0.0"));
+        api.setType(APISpecParserConstants.MCP_API);
+
+        OpenAPI definition = new OpenAPIV3Parser().readContents(
+                oas3Parser.generateAPIDefinition(new SwaggerData(api)), null, null).getOpenAPI();
+        PathItem mcpPath = definition.getPaths().get("/mcp");
+
+        Assert.assertEquals("None", mcpPath.getGet().getExtensions().get(APISpecParserConstants.SWAGGER_X_AUTH_TYPE));
+        // POST carries authenticated JSON-RPC requests, even though the unsupported SSE GET is unauthenticated.
+        Assert.assertEquals("Application & Application User",
+                mcpPath.getPost().getExtensions().get(APISpecParserConstants.SWAGGER_X_AUTH_TYPE));
     }
 
     @Test
