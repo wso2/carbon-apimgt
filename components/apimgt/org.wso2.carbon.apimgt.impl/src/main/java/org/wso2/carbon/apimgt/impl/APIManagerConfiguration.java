@@ -3279,11 +3279,9 @@ public class APIManagerConfiguration {
     }
 
     /**
-     * Returns whether the client's access token (sent in the authorization header) should be forwarded from an
-     * MCP server to its upstream (the proxied MCP server or the backend). Default is false, so the token used to
-     * authenticate at the Gateway is removed before the upstream call.
+     * Returns whether MCP servers forward the client's access token to the upstream.
      *
-     * @return true if the authorization header should be forwarded upstream, false otherwise.
+     * @return true if the token is forwarded, false otherwise.
      */
     public boolean isMCPOutboundAuthHeaderEnabled() {
 

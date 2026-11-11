@@ -477,7 +477,6 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                 handleNoAuthentication(messageContext);
                 setAPIParametersToMessageContext(messageContext);
 
-                // The authenticators, which normally remove the client's credentials, do not run for this request
                 org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                         getAxis2MessageContext();
                 Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
@@ -584,14 +583,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
     /**
      * Removes the client's credentials from an MCP request that skips authentication
-     * ({@link APIMgtGatewayConstants#MCP_NO_AUTH_REQUEST}), so that they are not forwarded to the backend or the
-     * upstream MCP server.
-     * <ul>
-     * <li>The global authorization header ([apim.oauth_config] auth_header, Authorization if not set) and the
-     * API-level authorization header are removed.</li>
-     * <li>The Internal-Key is removed, except for MCP servers of the EXISTING_API subtype, which pass it on to the
-     * existing API.</li>
-     * </ul>
+     * EXISTING_API keeps the Internal-Key, as the existing API authenticates with it.
      *
      * @param headers          transport headers of the request
      * @param globalAuthHeader authorization header name from [apim.oauth_config] auth_header, may be null

@@ -865,10 +865,6 @@ public class InternalAPIKeyAuthenticatorTest {
         return api;
     }
 
-    /**
-     * @param removeOAuthHeaders   value of RemoveOAuthHeadersFromOutMessage (null when not configured)
-     * @param configuredAuthHeader value of [apim.oauth_config] auth_header (null when not configured)
-     */
     private static APIManagerConfiguration config(String removeOAuthHeaders, String configuredAuthHeader) {
         APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.REMOVE_OAUTH_HEADERS_FROM_MESSAGE))
@@ -886,11 +882,7 @@ public class InternalAPIKeyAuthenticatorTest {
         return headers;
     }
 
-    /**
-     * Builds an Internal Key. Signature verification is mocked, so the signature segment is a placeholder.
-     *
-     * @param mcpAuthenticated whether the key is the one minted by an MCP server for its upstream call
-     */
+    // Signature verification is mocked, so the signature is a placeholder
     private String buildInternalKey(boolean mcpAuthenticated) {
         String header = "{\"kid\":\"gateway_certificate_alias\",\"alg\":\"RS256\"}";
         String payload = "{\"sub\":\"admin@carbon.super\",\"keytype\":\"PRODUCTION\",\"token_type\":\"InternalKey\","
@@ -910,13 +902,7 @@ public class InternalAPIKeyAuthenticatorTest {
         return authenticateWithInternalKey(key, api, config, apiLevelAuthHeader, requestHeaders, null);
     }
 
-    /**
-     * Authenticates a request carrying the given Internal Key and request headers at an API, asserts that it is
-     * authenticated, and returns the transport headers that would be sent to the backend.
-     *
-     * @param cachedPayload when set, the Internal Key is served from the gateway caches and signature
-     *                      verification fails, so only the cached path can authenticate it
-     */
+    // Returns the headers sent to the backend. With cachedPayload, only the cached path can authenticate the key.
     private Map<String, String> authenticateWithInternalKey(String key, API api, APIManagerConfiguration config,
                                                             String apiLevelAuthHeader,
                                                             Map<String, String> requestHeaders,

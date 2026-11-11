@@ -505,14 +505,8 @@ public class OAuthAuthenticator implements Authenticator {
     }
 
     /**
-     * Decides whether the access token used to authenticate at the Gateway should be removed from the
-     * authorization header before the request leaves the Gateway.
-     * <ul>
-     *     <li>Non-MCP APIs follow [apim.oauth_config] enable_outbound_auth_header.</li>
-     *     <li>MCP servers follow [apim.mcp] enable_outbound_auth_header, except the EXISTING_API subtype. Its tool
-     *     calls are routed to the existing API on this Gateway, which applies the [apim.oauth_config] setting
-     *     before calling the backend, so the token is kept for that internal hop.</li>
-     * </ul>
+     * MCP servers follow [apim.mcp] enable_outbound_auth_header. EXISTING_API keeps the token for the existing API,
+     * which applies [apim.oauth_config] enable_outbound_auth_header.
      *
      * @param synCtx  message context
      * @param apiType type of the API being invoked
@@ -532,8 +526,7 @@ public class OAuthAuthenticator implements Authenticator {
     }
 
     /**
-     * Removes the access token sent for authentication at the Gateway from the authorization header, and passes
-     * any other values of that header to the backend.
+     * Removes the access token sent for authentication at the Gateway from the authorization header
      *
      * @param headers                  transport headers of the request
      * @param remainingAuthHeaderValue the authorization header value without the access token

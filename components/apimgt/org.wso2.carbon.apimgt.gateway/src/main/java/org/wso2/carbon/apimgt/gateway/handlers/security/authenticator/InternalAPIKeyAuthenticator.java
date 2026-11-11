@@ -95,8 +95,7 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
 
     /**
      * @param securityParam       name of the header carrying the Internal Key
-     * @param authorizationHeader API level authorization header name. When blank, the
-     *                            [apim.oauth_config] auth_header value or "Authorization" is used.
+     * @param authorizationHeader API level authorization header name
      */
     public InternalAPIKeyAuthenticator(String securityParam, String authorizationHeader) {
         this.securityParam = securityParam;
@@ -649,15 +648,8 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
         return null;
     }
 
-    /**
-     * A tool call of an MCP server of the EXISTING_API subtype reaches the existing API with two credentials: the
-     * Internal Key minted by the MCP server (used to authenticate here) and the client's access token in the
-     * authorization header (already used to authenticate at the MCP server). OAuthAuthenticator, which normally
-     * strips that token, does not run for this request, so [apim.oauth_config] enable_outbound_auth_header is
-     * applied here before the request is sent to the backend.
-     *
-     * @param synCtx message context
-     */
+    // OAuthAuthenticator doesn't run for EXISTING_API tool calls, apply
+    // [apim.oauth_config] enable_outbound_auth_header to the client's token.
     private void removeMCPClientTokenFromOutMessage(MessageContext synCtx) {
 
         APIManagerConfiguration config = getApiManagerConfiguration();
@@ -685,10 +677,6 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
         }
     }
 
-    /**
-     * Same default as OAuthAuthenticator: remove the token unless
-     * [apim.oauth_config] enable_outbound_auth_header is true.
-     */
     private boolean isRemoveOAuthHeadersFromOutMessage(APIManagerConfiguration config) {
 
         String value = config != null ? config.getFirstProperty(APIConstants.REMOVE_OAUTH_HEADERS_FROM_MESSAGE) : null;
@@ -705,10 +693,7 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
         return StringUtils.isNotBlank(configured) ? configured : HttpHeaders.AUTHORIZATION;
     }
 
-    /**
-     * Removes the "Bearer &lt;token&gt;" segment from an authorization header value, keeping any other
-     * comma separated segments, in line with OAuthAuthenticator.
-     */
+    // Removes the Bearer segment, keeping any other comma separated values
     private static String removeBearerToken(String authHeader) {
 
         List<String> remaining = new ArrayList<>();
