@@ -3425,6 +3425,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     public void deleteAPI(String apiUuid, String organization) throws APIManagementException {
         boolean isError = false;
+        // Set when the API record may still exist in the database after the DB delete step. The gateway artifacts
+        // and the persistence entry are then kept, so that the API stays visible and the deletion can be retried.
+        boolean isDBDeletionIncomplete = false;
         int apiId = -1;
         API api = null;
 
@@ -3515,7 +3518,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 log.error("Error while executing API delete operations on DB for API " + apiUuid +
                         " on organization " + organization, e);
                 isError = true;
+                isDBDeletionIncomplete = true;
             }
+        } else if (apiId != -1) {
+            // The API record exists in the database, but the DB delete step could not be executed
+            isDBDeletionIncomplete = true;
         }
 
         // Deleting Resource Registration from key managers
@@ -3537,33 +3544,39 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
 
-        try {
-            PlatformGatewayArtifactService artifactService =
-                    ServiceReferenceHolder.getInstance().getPlatformGatewayArtifactService();
-            if (artifactService != null) {
-                artifactService.deleteAllRevisionArtifactsForApi(apiUuid);
+        if (!isDBDeletionIncomplete) {
+            try {
+                PlatformGatewayArtifactService artifactService =
+                        ServiceReferenceHolder.getInstance().getPlatformGatewayArtifactService();
+                if (artifactService != null) {
+                    artifactService.deleteAllRevisionArtifactsForApi(apiUuid);
+                }
+            } catch (Exception e) {
+                log.error("Failed to delete platform revision artifacts for API " + apiUuid, e);
+                isError = true;
             }
-        } catch (Exception e) {
-            log.error("Failed to delete platform revision artifacts for API " + apiUuid, e);
-            isError = true;
-        }
-        try {
-            GatewayArtifactsMgtDAO.getInstance().deleteGatewayArtifacts(apiUuid);
-            log.debug("API " + apiUuid + " on organization " + organization +
-                    " has successfully removed from the gateway artifacts.");
-        } catch (APIManagementException e) {
-            log.error("Error while executing API delete operation on gateway artifacts for API " + apiUuid, e);
-            isError = true;
-        }
+            try {
+                GatewayArtifactsMgtDAO.getInstance().deleteGatewayArtifacts(apiUuid);
+                log.debug("API " + apiUuid + " on organization " + organization +
+                        " has successfully removed from the gateway artifacts.");
+            } catch (APIManagementException e) {
+                log.error("Error while executing API delete operation on gateway artifacts for API " + apiUuid, e);
+                isError = true;
+            }
 
-        try {
-            apiPersistenceInstance.deleteAPI(new Organization(organization), apiUuid);
-            log.debug("API " + apiUuid + " on organization " + organization +
-                    " has successfully removed from the persistence instance.");
-        } catch (APIPersistenceException e) {
-            log.error("Error while executing API delete operation on persistence instance for API "
-                    + apiUuid + " on organization " + organization, e);
-            isError = true;
+            try {
+                apiPersistenceInstance.deleteAPI(new Organization(organization), apiUuid);
+                log.debug("API " + apiUuid + " on organization " + organization +
+                        " has successfully removed from the persistence instance.");
+            } catch (APIPersistenceException e) {
+                log.error("Error while executing API delete operation on persistence instance for API "
+                        + apiUuid + " on organization " + organization, e);
+                isError = true;
+            }
+        } else {
+            log.warn("Skipped removing the gateway artifacts and the persistence entry of API " + apiUuid
+                    + " on organization " + organization + " since its database record could not be deleted. "
+                    + "The API is retained so that the deletion can be retried.");
         }
 
         // Deleting on external API stores

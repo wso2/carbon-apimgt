@@ -26,11 +26,13 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.AdditionalAnswers;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.reflect.Whitebox;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
@@ -58,6 +60,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
@@ -86,6 +89,7 @@ import java.util.*;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.sql.DataSource;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
@@ -2592,5 +2596,115 @@ public class APIMgtDAOTest {
                 }
             }
         }
+    }
+
+    @Test
+    public void testDeleteAPIRollsBackWhenAPIRecordDeletionFails() throws Exception {
+
+        API api = addAPIForDeletionRollbackTest("deleteAPIRollbackOnAPIRecordFailure");
+
+        // Fails at "DELETE FROM AM_API", after the lifecycle events and URL mappings have been deleted
+        Connection connection = deleteAPIWithFailingStatement(api.getUuid(), SQLConstants.REMOVE_FROM_API_SQL_BY_UUID);
+
+        assertAPIRecordsRetained(api);
+        Mockito.verify(connection).rollback();
+        Mockito.verify(connection, Mockito.never()).commit();
+        assertAPIDeletionCanBeRetried(api);
+    }
+
+    @Test
+    public void testDeleteAPIRollsBackWhenDefaultVersionCleanupFails() throws Exception {
+
+        API api = addAPIForDeletionRollbackTest("deleteAPIRollbackOnDefaultVersionFailure");
+
+        // Fails while cleaning up the default version, after the API record has been deleted
+        Connection connection = deleteAPIWithFailingStatement(api.getUuid(), SQLConstants.GET_DEFAULT_VERSION_SQL);
+
+        assertAPIRecordsRetained(api);
+        Mockito.verify(connection).rollback();
+        Mockito.verify(connection, Mockito.never()).commit();
+        assertAPIDeletionCanBeRetried(api);
+    }
+
+    @Test
+    public void testDeleteAPIRollsBackWhenCommentDeletionFails() throws Exception {
+
+        API api = addAPIForDeletionRollbackTest("deleteAPIRollbackOnCommentFailure");
+
+        // deleteAPIComments reports the failure as an APIManagementException rather than an SQLException
+        Connection connection = deleteAPIWithFailingStatement(api.getUuid(), SQLConstants.DELETE_API_CHILD_COMMENTS);
+
+        assertAPIRecordsRetained(api);
+        Mockito.verify(connection).rollback();
+        Mockito.verify(connection, Mockito.never()).commit();
+        assertAPIDeletionCanBeRetried(api);
+    }
+
+    /**
+     * Adds an API marked as the default version, so that it has an AM_API record, a lifecycle event and an
+     * AM_API_DEFAULT_VERSION record.
+     */
+    private API addAPIForDeletionRollbackTest(String apiName) throws APIManagementException {
+
+        API api = new API(new APIIdentifier("admin", apiName, "1.0.0"));
+        api.setContext("/" + apiName);
+        api.setContextTemplate("/" + apiName + "/{version}");
+        api.setUUID(UUID.randomUUID().toString());
+        api.setVersionTimestamp(String.valueOf(System.currentTimeMillis()));
+        api.setAsDefaultVersion(true);
+        apiMgtDAO.addAPI(api, -1234, "testOrg");
+        assertAPIRecordsRetained(api);
+        return api;
+    }
+
+    /**
+     * Deletes the API with a database connection that fails when the given statement is prepared, and returns that
+     * connection. When the connection is released, it restores auto-commit, as a pooled connection does when it is
+     * reused with the default datasource configuration ("defaultAutoCommit": true). Restoring auto-commit commits any
+     * work still pending on the connection, which is how a failed API deletion used to get partially committed.
+     */
+    private Connection deleteAPIWithFailingStatement(String uuid, String failingStatement) throws Exception {
+
+        DataSource dataSource = Whitebox.getInternalState(APIMgtDBUtil.class, "dataSource");
+        Connection realConnection = dataSource.getConnection();
+        Connection connection = Mockito.mock(Connection.class, AdditionalAnswers.delegatesTo(realConnection));
+        Mockito.doThrow(new SQLException("Lock wait timeout exceeded; try restarting transaction"))
+                .when(connection).prepareStatement(failingStatement);
+        Mockito.doAnswer(invocation -> {
+            realConnection.setAutoCommit(true);
+            realConnection.close();
+            return null;
+        }).when(connection).close();
+        // Only the connection used for the deletion fails. Other connections are taken from the actual data source.
+        DataSource failingDataSource = Mockito.mock(DataSource.class);
+        Mockito.when(failingDataSource.getConnection()).thenReturn(connection)
+                .thenAnswer(invocation -> dataSource.getConnection());
+        Whitebox.setInternalState(APIMgtDBUtil.class, "dataSource", failingDataSource);
+        try {
+            apiMgtDAO.deleteAPI(uuid);
+            Assert.fail("API deletion should fail when a database statement fails");
+        } catch (APIManagementException e) {
+            // Expected, since the deletion failed
+        } finally {
+            Whitebox.setInternalState(APIMgtDBUtil.class, "dataSource", dataSource);
+        }
+        return connection;
+    }
+
+    private void assertAPIRecordsRetained(API api) throws APIManagementException {
+
+        assertTrue("API record should exist", apiMgtDAO.getAPIID(api.getUuid()) > 0);
+        assertTrue("API context should exist", apiMgtDAO.isContextExist("/" + api.getId().getApiName(), "testOrg"));
+        assertEquals("Lifecycle events of the API should exist", 1,
+                apiMgtDAO.getLifeCycleEvents(api.getUuid()).size());
+        assertEquals("Default version of the API should exist", "1.0.0", apiMgtDAO.getDefaultVersion(api.getId()));
+    }
+
+    private void assertAPIDeletionCanBeRetried(API api) throws APIManagementException {
+
+        apiMgtDAO.deleteAPI(api.getUuid());
+        assertFalse("API context should be released", apiMgtDAO.isContextExist("/" + api.getId().getApiName(),
+                "testOrg"));
+        assertNull("Default version of the API should be removed", apiMgtDAO.getDefaultVersion(api.getId()));
     }
 }

@@ -7857,9 +7857,31 @@ public class ApiMgtDAO {
 
             connection.commit();
         } catch (SQLException e) {
+            rollbackAPIDeletion(connection, uuid);
             handleException("Error while removing the API with UUID: " + uuid + " from the database", e);
+        } catch (APIManagementException e) {
+            rollbackAPIDeletion(connection, uuid);
+            throw e;
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
+        }
+    }
+
+    /**
+     * Rolls back the database changes done while deleting an API, so that a failed deletion does not leave the API
+     * partially deleted.
+     *
+     * @param connection Connection used for the API deletion
+     * @param uuid       UUID of the API being deleted
+     */
+    private void rollbackAPIDeletion(Connection connection, String uuid) {
+
+        if (connection != null) {
+            try {
+                connection.rollback();
+            } catch (SQLException e) {
+                log.error("Failed to rollback the deletion of API with UUID: " + uuid, e);
+            }
         }
     }
 
