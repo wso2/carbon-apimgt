@@ -97,7 +97,11 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
     // Set when a batched read finds the key missing; the next tick creates it with SET NX PX "0".
     // Guarded by kvStoreLock.
     private boolean seedNeeded = false;
-    // Set by stop(). A batch still in flight for this key then flushes a restored delta itself.
+    // True from the tick that collects a batched write (PSETEX, INCRBY/DECRBY, SET NX) for this key until its
+    // reply or failure is applied. syncWithKVStore() writes nothing meanwhile, so its writes cannot interleave
+    // with the batch. Guarded by kvStoreLock.
+    private boolean writeInFlight = false;
+    // Set by stop(). A batched write still in flight for this key then flushes the key itself when it completes.
     private volatile boolean stopped = false;
 
 
@@ -199,10 +203,17 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
      * Pending resets (PSETEX "0") are flushed first and retried on failure; then any
      * accumulated delta is pushed via INCRBY/DECRBY, or the current Redis value is pulled
      * when there is no local change.
+     * Does nothing while a batched write for this key is in flight.
      */
     private void syncWithKVStore() {
         synchronized (kvStoreLock) {
             if (kvStoreClient == null || key == null) {
+                return;
+            }
+            if (writeInFlight) {
+                // Writing now could interleave with the batched write (e.g. its late PSETEX "0" would wipe an
+                // INCRBY sent here). The pending reset and delta stay for the next tick, or for the batch's
+                // completion if the key is stopped.
                 return;
             }
             if (pendingReset) {
@@ -292,6 +303,7 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
      *     <li>key found missing on the last read: SET NX PX "0"</li>
      *     <li>otherwise: read the key (MGET)</li>
      * </ul>
+     * A write marks the key {@code writeInFlight} until its reply or failure is applied.
      */
     private void collectSyncUnit(BatchCollector collector) {
         synchronized (kvStoreLock) {
@@ -306,6 +318,7 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
                 if (remainingMillis > 0) {
                     collector.addWrite(new SyncUnit(this, SyncUnit.Kind.RESET, epoch, windowExpiry, 0L,
                             KeyValueStoreOperation.setWithExpiry(key, "0", remainingMillis)));
+                    writeInFlight = true;
                 } else {
                     // Same as syncWithKVStore(): nothing is written while the window expiry is unknown or past.
                     keyHasTTL = false;
@@ -325,6 +338,7 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
                 } else {
                     collector.addWrite(new SyncUnit(this, SyncUnit.Kind.COUNT, epoch, windowExpiry, delta, count));
                 }
+                writeInFlight = true;
                 return;
             }
             if (seedNeeded) {
@@ -332,6 +346,7 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
                 if (remainingMillis > 0) {
                     collector.addWrite(new SyncUnit(this, SyncUnit.Kind.SEED, epoch, windowExpiry, 0L,
                             KeyValueStoreOperation.setIfAbsentWithExpiry(key, "0", remainingMillis)));
+                    writeInFlight = true;
                     return;
                 }
             }
@@ -350,8 +365,8 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
                 return; // reset() ran after the read was collected: the value is the closed window's total
             }
             if (value == null) {
-                // Same as syncWithKVStore(): the key is missing, so the count is 0. It is created on the next tick.
-                localCounter.set(0L);
+                // The key is missing, so the stored count is 0. It is created on the next tick.
+                setCounterFromStore(unit, 0L);
                 seedNeeded = true;
                 return;
             }
@@ -380,6 +395,7 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
             return;
         }
         synchronized (kvStoreLock) {
+            writeInFlight = false;
             boolean noResetSinceCollect = resetEpoch.get() == unit.resetEpoch;
             if (unit.kind == SyncUnit.Kind.RESET) {
                 // If another reset() ran meanwhile, its PSETEX is still pending and is written on a later tick.
@@ -403,6 +419,10 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
             }
             // SEED: nothing to update. If the key exists now, the next read returns its value.
         }
+        if (stopped) {
+            // stop() skipped its flush while this write was in flight: push what is left now.
+            flushToKVStore();
+        }
     }
 
     /**
@@ -414,6 +434,7 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
      */
     private void applyWriteFailure(SyncUnit unit, Exception cause, boolean logError) {
         synchronized (kvStoreLock) {
+            writeInFlight = false;
             if (logError) {
                 String message;
                 if (unit.kind == SyncUnit.Kind.RESET) {
@@ -429,18 +450,20 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
                 unsyncedCounter.addAndGet(unit.delta);
             }
         }
-        if (stopped && unit.kind == SyncUnit.Kind.COUNT) {
-            // stop() already flushed this key while the batch was in flight: push the restored delta now.
+        if (stopped) {
+            // stop() skipped its flush while this write was in flight: push the restored delta and any
+            // pending reset now.
             flushToKVStore();
         }
     }
 
     /**
-     * Sets the local counter to a value read from the key-value store. The caller holds kvStoreLock and has
-     * checked that no reset happened since the operation was collected.
+     * Sets the local counter to a value read from the key-value store, plus the requests counted since the
+     * operation was collected (still in unsyncedCounter, not yet in the store). The caller holds kvStoreLock
+     * and has checked that no reset happened since the operation was collected.
      */
     private void setCounterFromStore(SyncUnit unit, long value) {
-        localCounter.set(value);
+        localCounter.set(value + unsyncedCounter.get());
         if (resetEpoch.get() != unit.resetEpoch) {
             // reset() does not take kvStoreLock, so it can run between the caller's check and the set above.
             // Drop the closed window's value and keep only the requests counted since the reset.
@@ -591,6 +614,7 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
      * Stops the aggregator instance and performs cleanup.
      * Removes the aggregator from the active aggregator map, synchronizes any unsynced changes
      * with the key-value store, and shuts down the scheduler if there are no more active aggregators.
+     * If a batched write for this key is in flight, the flush runs when that write completes.
      * This method should be called when the aggregator is no longer needed.
      */
     @Override
