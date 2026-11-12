@@ -633,10 +633,8 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
             if (internalKey != null) {
                 // Remove InternalKey header from the request except for MCP servers of the EXISTING_API subtype
                 API matchedAPI = GatewayUtils.getAPI(mCtx);
-                boolean isMCPExistingAPI = matchedAPI != null
-                        && APIConstants.API_TYPE_MCP.equals(matchedAPI.getApiType())
-                        && APIConstants.API_SUBTYPE_EXISTING_API.equals(matchedAPI.getSubtype());
-                if (matchedAPI != null && !isMCPExistingAPI) {
+                if (matchedAPI != null && !(APIConstants.API_TYPE_MCP.equals(matchedAPI.getApiType())
+                        && APIConstants.API_SUBTYPE_EXISTING_API.equals(matchedAPI.getSubtype()))) {
                     if (log.isDebugEnabled()) {
                         log.debug("Removing Internal Key header from request for API: " + matchedAPI.getName());
                     }
@@ -658,9 +656,6 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
         }
         Map headers = (Map) ((Axis2MessageContext) synCtx).getAxis2MessageContext()
                 .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-        if (headers == null) {
-            return;
-        }
         String headerName = resolveAuthorizationHeader(config);
         String authHeader = (String) headers.get(headerName);
         if (authHeader == null) {

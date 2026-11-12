@@ -19,10 +19,19 @@
 package org.wso2.carbon.apimgt.gateway.handlers.security;
 
 import org.apache.http.HttpHeaders;
+import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.powermock.reflect.Whitebox;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.security.authenticator.InternalAPIKeyAuthenticator;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -127,6 +136,81 @@ public class APIAuthenticationHandlerMCPNoAuthTest {
 
         APIAuthenticationHandler.removeClientCredentialsFromMCPNoAuthRequest(null, null, CUSTOM_AUTH_HEADER,
                 APIConstants.API_SUBTYPE_SERVER_PROXY);
+    }
+
+    @Test
+    public void testNoAuthRequestCredentialsRemovedFromMessageContext() {
+
+        APIManagerConfiguration configuration = Mockito.mock(APIManagerConfiguration.class);
+        Mockito.when(configuration.getFirstProperty(APIConstants.OAUTH_CONFIGS + APIConstants.AUTHORIZATION_HEADER))
+                .thenReturn("X-Global-Auth");
+        APIAuthenticationHandler handler = new APIAuthenticationHandler() {
+            @Override
+            protected APIManagerConfiguration getApiManagerConfiguration() {
+                return configuration;
+            }
+        };
+        handler.setAuthorizationHeader(CUSTOM_AUTH_HEADER);
+        handler.setSubType(APIConstants.API_SUBTYPE_SERVER_PROXY);
+        Map<String, String> headers = headers("X-Global-Auth");
+        headers.put(CUSTOM_AUTH_HEADER, CLIENT_TOKEN);
+
+        handler.removeClientCredentialsFromMCPNoAuthRequest(messageContext(headers));
+
+        Assert.assertFalse(headers.containsKey("X-Global-Auth"));
+        Assert.assertFalse(headers.containsKey(CUSTOM_AUTH_HEADER));
+        Assert.assertFalse(headers.containsKey(APIMgtGatewayConstants.INTERNAL_KEY));
+        assertOtherHeadersKept(headers);
+    }
+
+    @Test
+    public void testInternalKeyAuthenticatorGetsAPILevelAuthHeader() {
+
+        APIManagerConfiguration configuration = Mockito.mock(APIManagerConfiguration.class);
+        Mockito.when(configuration.getJwtConfigurationDto()).thenReturn(new ExtendedJWTConfigurationDto());
+        ServiceReferenceHolder holder = ServiceReferenceHolder.getInstance();
+        APIManagerConfigurationService previous = holder.getApiManagerConfigurationService();
+        ThrottleProperties previousThrottleProperties = holder.getThrottleProperties();
+        holder.setAPIManagerConfigurationService(configurationService(configuration));
+        try {
+            APIAuthenticationHandler handler = new APIAuthenticationHandler();
+            // Only the Internal Key authenticator is added for this security setting
+            handler.setAPISecurity(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY);
+            handler.setAuthorizationHeader(CUSTOM_AUTH_HEADER);
+
+            handler.initializeAuthenticators();
+
+            InternalAPIKeyAuthenticator internalKeyAuthenticator = null;
+            for (Authenticator authenticator : handler.authenticators) {
+                if (authenticator instanceof InternalAPIKeyAuthenticator) {
+                    internalKeyAuthenticator = (InternalAPIKeyAuthenticator) authenticator;
+                }
+            }
+            Assert.assertNotNull(internalKeyAuthenticator);
+            Assert.assertEquals(CUSTOM_AUTH_HEADER,
+                    Whitebox.getInternalState(internalKeyAuthenticator, "authorizationHeader"));
+        } finally {
+            holder.setAPIManagerConfigurationService(previous);
+            holder.setThrottleProperties(previousThrottleProperties);
+        }
+    }
+
+    private static APIManagerConfigurationService configurationService(APIManagerConfiguration configuration) {
+
+        APIManagerConfigurationService service = Mockito.mock(APIManagerConfigurationService.class);
+        Mockito.when(service.getAPIManagerConfiguration()).thenReturn(configuration);
+        return service;
+    }
+
+    private static Axis2MessageContext messageContext(Map<String, String> headers) {
+
+        org.apache.axis2.context.MessageContext axis2MessageContext =
+                Mockito.mock(org.apache.axis2.context.MessageContext.class);
+        Mockito.when(axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
+                .thenReturn(headers);
+        Axis2MessageContext messageContext = Mockito.mock(Axis2MessageContext.class);
+        Mockito.when(messageContext.getAxis2MessageContext()).thenReturn(axis2MessageContext);
+        return messageContext;
     }
 
     private static Map<String, String> headers(String clientTokenHeader) {

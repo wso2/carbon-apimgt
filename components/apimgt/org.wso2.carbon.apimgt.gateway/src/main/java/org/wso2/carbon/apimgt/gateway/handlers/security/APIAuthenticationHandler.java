@@ -476,19 +476,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                 }
                 handleNoAuthentication(messageContext);
                 setAPIParametersToMessageContext(messageContext);
-
-                org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
-                        getAxis2MessageContext();
-                Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-                String globalAuthHeader = null;
-                try {
-                    globalAuthHeader = APIUtil.getOAuthConfigurationFromAPIMConfig(APIConstants.AUTHORIZATION_HEADER);
-                } catch (APIManagementException e) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Error while reading the authorization header configuration for MCP request", e);
-                    }
-                }
-                removeClientCredentialsFromMCPNoAuthRequest(headers, globalAuthHeader, authorizationHeader, subType);
+                removeClientCredentialsFromMCPNoAuthRequest(messageContext);
 
                 return ExtensionListenerUtil.postProcessRequest(messageContext, type);
             }
@@ -579,6 +567,15 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
         }
         return false;
+    }
+
+    void removeClientCredentialsFromMCPNoAuthRequest(MessageContext messageContext) {
+
+        Map headers = (Map) ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        String globalAuthHeader = getApiManagerConfiguration()
+                .getFirstProperty(APIConstants.OAUTH_CONFIGS + APIConstants.AUTHORIZATION_HEADER);
+        removeClientCredentialsFromMCPNoAuthRequest(headers, globalAuthHeader, authorizationHeader, subType);
     }
 
     /**

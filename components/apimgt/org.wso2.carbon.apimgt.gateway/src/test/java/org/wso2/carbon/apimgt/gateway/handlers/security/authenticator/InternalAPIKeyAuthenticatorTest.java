@@ -23,11 +23,14 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationResponse;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.utils.OpenAPIUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -768,6 +771,32 @@ public class InternalAPIKeyAuthenticatorTest {
                 config("true", null), null, headers(HttpHeaders.AUTHORIZATION, CLIENT_TOKEN + ", " + BASIC_CREDENTIALS));
 
         Assert.assertEquals(BASIC_CREDENTIALS, headers.get(HttpHeaders.AUTHORIZATION).trim());
+    }
+
+    @Test
+    public void testMCPClientTokenRemovalKeepsSingleValueSegments() throws Exception {
+        Map<String, String> headers = authenticateWithInternalKey(buildInternalKey(true), new API(),
+                config("true", null), null, headers(HttpHeaders.AUTHORIZATION, CLIENT_TOKEN + ", Negotiate"));
+
+        Assert.assertEquals("Negotiate", headers.get(HttpHeaders.AUTHORIZATION).trim());
+    }
+
+    @Test
+    public void testAPIManagerConfigurationReadFromServiceReferenceHolder() {
+        APIManagerConfiguration configuration = Mockito.mock(APIManagerConfiguration.class);
+        APIManagerConfigurationService service = Mockito.mock(APIManagerConfigurationService.class);
+        Mockito.when(service.getAPIManagerConfiguration()).thenReturn(configuration);
+        ServiceReferenceHolder holder = ServiceReferenceHolder.getInstance();
+        APIManagerConfigurationService previous = holder.getApiManagerConfigurationService();
+        ThrottleProperties previousThrottleProperties = holder.getThrottleProperties();
+        holder.setAPIManagerConfigurationService(service);
+        try {
+            Assert.assertSame(configuration,
+                    new InternalAPIKeyAuthenticator(APIMgtGatewayConstants.INTERNAL_KEY).getApiManagerConfiguration());
+        } finally {
+            holder.setAPIManagerConfigurationService(previous);
+            holder.setThrottleProperties(previousThrottleProperties);
+        }
     }
 
     @Test

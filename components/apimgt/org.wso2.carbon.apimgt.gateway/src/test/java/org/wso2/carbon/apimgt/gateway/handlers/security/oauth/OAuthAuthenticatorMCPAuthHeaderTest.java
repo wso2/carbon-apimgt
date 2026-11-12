@@ -20,21 +20,31 @@ package org.wso2.carbon.apimgt.gateway.handlers.security.oauth;
 
 import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APIKeyValidator;
+import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
+import org.wso2.carbon.apimgt.keymgt.model.entity.API;
+import org.wso2.carbon.metrics.manager.Timer;
 
 import java.util.Map;
 import java.util.TreeMap;
+
+import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
 
 /**
  * Tests whether OAuthAuthenticator removes the client's access token from the outbound request, based on the API
  * type, the MCP subtype and the [apim.mcp] enable_outbound_auth_header configuration.
  */
 public class OAuthAuthenticatorMCPAuthHeaderTest {
+
+    private static final String CLIENT_TOKEN = "Bearer client-token";
 
     @Test
     public void testNonMCPAPIFollowsOAuthConfigOnly() {
@@ -150,6 +160,75 @@ public class OAuthAuthenticatorMCPAuthHeaderTest {
 
         // Must not fail when the request carries no transport headers
         authenticator(false).removeAuthHeaderFromOutMessage(null, "");
+    }
+
+    @Test
+    public void testAuthenticateRemovesTokenForMCPServerProxy() throws Exception {
+
+        Map<String, String> headers = authenticateUntilHeaderDecision(false);
+
+        Assert.assertFalse(headers.containsKey(HttpHeaders.AUTHORIZATION));
+    }
+
+    @Test
+    public void testAuthenticateForwardsTokenForMCPServerProxyWhenOutboundAuthHeaderEnabled() throws Exception {
+
+        Map<String, String> headers = authenticateUntilHeaderDecision(true);
+
+        Assert.assertEquals(CLIENT_TOKEN, headers.get(HttpHeaders.AUTHORIZATION));
+    }
+
+    // Runs authenticate() for an MCP SERVER_PROXY request up to the token validation, which starts with getTimer
+    private static Map<String, String> authenticateUntilHeaderDecision(boolean mcpOutboundAuthHeaderEnabled)
+            throws Exception {
+
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        Mockito.when(apiManagerConfiguration.isMCPOutboundAuthHeaderEnabled()).thenReturn(mcpOutboundAuthHeaderEnabled);
+        Mockito.when(apiManagerConfiguration.getJwtConfigurationDto()).thenReturn(new ExtendedJWTConfigurationDto());
+        OAuthAuthenticator authenticator = new OAuthAuthenticator(HttpHeaders.AUTHORIZATION, true, true) {
+            @Override
+            protected APIManagerConfiguration getApiManagerConfiguration() {
+                return apiManagerConfiguration;
+            }
+
+            @Override
+            protected Timer getTimer(String name) {
+                throw new TokenValidationReached();
+            }
+        };
+        authenticator.keyValidator = Mockito.mock(APIKeyValidator.class);
+        authenticator.jwtValidator = Mockito.mock(JWTValidator.class);
+
+        Map<String, String> headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        headers.put(HttpHeaders.AUTHORIZATION, CLIENT_TOKEN);
+        org.apache.axis2.context.MessageContext axis2MessageContext =
+                Mockito.mock(org.apache.axis2.context.MessageContext.class);
+        Mockito.when(axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
+                .thenReturn(headers);
+        Axis2MessageContext messageContext = Mockito.mock(Axis2MessageContext.class);
+        Mockito.when(messageContext.getAxis2MessageContext()).thenReturn(axis2MessageContext);
+        API api = new API();
+        api.setUuid("mcp-server-uuid");
+        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.API_OBJECT)).thenReturn(api);
+        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.API_TYPE)).thenReturn(APIConstants.API_TYPE_MCP);
+        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.SUB_TYPE))
+                .thenReturn(APIConstants.API_SUBTYPE_SERVER_PROXY);
+        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.MCP_HTTP_METHOD_KEY)).thenReturn("POST");
+
+        // Needed by PrivilegedCarbonContext, which resolves the tenant domain
+        if (System.getProperty(CARBON_HOME) == null) {
+            System.setProperty(CARBON_HOME, "");
+        }
+        try {
+            authenticator.authenticate(messageContext);
+            Assert.fail("Token validation was not reached");
+        } catch (TokenValidationReached expected) {
+            // The authorization header has been handled by this point
+        }
+        return headers;
+    }
+
+    private static class TokenValidationReached extends RuntimeException {
     }
 
     private static OAuthAuthenticator authenticator(boolean mcpOutboundAuthHeaderEnabled) {
