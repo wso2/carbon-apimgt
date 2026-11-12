@@ -375,6 +375,9 @@ public class JedisKeyValueStoreClient implements KeyValueStoreClient {
     /**
      * Sends all the given operations in one pipeline round trip. A command that Redis rejects
      * gets a {@link KeyValueStoreException} as its reply; the other replies are not affected.
+     * Throws {@link KeyValueStoreUnavailableException} only when no connection was obtained, so nothing was sent.
+     * Any other failure may come after Redis applied some or all of the commands: Jedis writes queued commands
+     * to the socket whenever its 8 KB buffer fills, and a connection can drop while the replies are read.
      */
     @Override
     public List<Object> executeBatch(List<KeyValueStoreOperation> operations) {
@@ -385,7 +388,8 @@ public class JedisKeyValueStoreClient implements KeyValueStoreClient {
         try {
             jedis = getJedis();
             if (jedis == null) {
-                throw new KeyValueStoreException("Failed to get connection from KeyValue pool for pipeline operation.");
+                throw new KeyValueStoreUnavailableException(
+                        "Failed to get connection from KeyValue pool for pipeline operation.");
             }
             Pipeline pipeline = jedis.pipelined();
             List<Response<?>> responses = new ArrayList<>(operations.size());
