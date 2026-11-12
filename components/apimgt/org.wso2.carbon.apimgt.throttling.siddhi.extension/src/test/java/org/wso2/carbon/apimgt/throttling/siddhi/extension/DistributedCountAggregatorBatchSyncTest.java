@@ -556,13 +556,43 @@ public class DistributedCountAggregatorBatchSyncTest {
         client.release.countDown();
         running.get(5, TimeUnit.SECONDS);
 
-        Assert.assertEquals("reply applied", 115L, counter(aggregator, "localCounter"));
+        Assert.assertEquals("reply (115) plus the 2 in-flight requests", 117L, counter(aggregator, "localCounter"));
         Assert.assertEquals("the 2 in-flight requests are still queued", 2L, counter(aggregator, "unsyncedCounter"));
         client.blockWrites = false;
         tick();
         Assert.assertEquals("117", client.store.get("K"));
         Assert.assertEquals(117L, counter(aggregator, "localCounter"));
         Assert.assertEquals(0L, counter(aggregator, "unsyncedCounter"));
+    }
+
+    /**
+     * Requests counted while an MGET is in flight are not in its reply: the applied value keeps them, for a key
+     * found in the store and for a missing one, and they stay queued for the next tick.
+     */
+    @Test(timeout = TEST_TIMEOUT_MS)
+    public void testRequestsArrivingWhileAReadIsInFlightAreKeptInTheLocalCount() throws Exception {
+        FakeBatchClient client = new FakeBatchClient();
+        DistributedCountAttributeAggregator present = aggregator("P", client);
+        DistributedCountAttributeAggregator missing = aggregator("M", client);
+        client.store.put("P", "50");
+        client.blockReads = true;
+
+        Future<?> running = tickInFlight(client); // MGET P, M in flight
+        requests(present, 2);
+        requests(missing, 3);
+        client.release.countDown();
+        running.get(5, TimeUnit.SECONDS);
+
+        Assert.assertEquals("stored 50 plus the 2 in-flight requests", 52L, counter(present, "localCounter"));
+        Assert.assertEquals(2L, counter(present, "unsyncedCounter"));
+        Assert.assertEquals("missing key (0) plus the 3 in-flight requests", 3L, counter(missing, "localCounter"));
+        Assert.assertEquals(3L, counter(missing, "unsyncedCounter"));
+        client.blockReads = false;
+        tick();
+        Assert.assertEquals("52", client.store.get("P"));
+        Assert.assertEquals(52L, counter(present, "localCounter"));
+        Assert.assertEquals("3", client.store.get("M"));
+        Assert.assertEquals(3L, counter(missing, "localCounter"));
     }
 
     /**
@@ -736,6 +766,79 @@ public class DistributedCountAggregatorBatchSyncTest {
         running.get(5, TimeUnit.SECONDS);
 
         Assert.assertEquals("the restored delta is flushed although the key was stopped", "6", client.store.get("A"));
+    }
+
+    /**
+     * stop() while the tick's PSETEX "0" is in flight: if stop() wrote the key itself (PSETEX "0", then INCRBY of
+     * the new window's requests), the late PSETEX "0" of the batch would wipe that INCRBY. The flush must wait for
+     * the batch to complete.
+     */
+    @Test(timeout = TEST_TIMEOUT_MS)
+    public void testStopWhileAResetIsInFlightKeepsTheNewWindowsCount() throws Exception {
+        FakeBatchClient client = new FakeBatchClient();
+        DistributedCountAttributeAggregator aggregator = aggregator("A", client);
+        aggregator("OTHER", client); // keeps the map non-empty, so stop() does not shut the scheduler down
+        client.store.put("A", "100"); // the closed window's total
+        aggregator.reset();
+        client.blockWrites = true;
+
+        Future<?> running = tickInFlight(client); // PSETEX "0" in flight
+        requests(aggregator, 3);                  // the new window's first requests
+        aggregator.stop();
+        Assert.assertEquals("stop() does not write the key while a batched write is in flight",
+                0, client.singleKeyCalls.get());
+        client.release.countDown();
+        running.get(5, TimeUnit.SECONDS);
+
+        Assert.assertEquals("the new window's 3 requests are flushed after the PSETEX", "3", client.store.get("A"));
+        Assert.assertEquals(false, get(aggregator, "pendingReset"));
+        Assert.assertEquals(0L, counter(aggregator, "unsyncedCounter"));
+    }
+
+    /**
+     * stop() while an INCRBY is in flight and it succeeds: the requests counted after the tick collected the key are
+     * flushed when the batch completes, since stop() left them for the batch.
+     */
+    @Test(timeout = TEST_TIMEOUT_MS)
+    public void testStopWhileAWriteIsInFlightFlushesTheRestAfterItSucceeds() throws Exception {
+        FakeBatchClient client = new FakeBatchClient();
+        DistributedCountAttributeAggregator aggregator = aggregator("A", client);
+        aggregator("OTHER", client); // keeps the map non-empty, so stop() does not shut the scheduler down
+        set(aggregator, "keyHasTTL", true);
+        requests(aggregator, 3);
+        client.blockWrites = true;
+
+        Future<?> running = tickInFlight(client); // INCRBY 3 in flight
+        requests(aggregator, 2);
+        aggregator.stop();
+        client.release.countDown();
+        running.get(5, TimeUnit.SECONDS);
+
+        Assert.assertEquals("both the in-flight 3 and the later 2 are in the store", "5", client.store.get("A"));
+        Assert.assertEquals(0L, counter(aggregator, "unsyncedCounter"));
+    }
+
+    /**
+     * currentState() while a batched write for the key is in flight must not write the key: for a key missing in
+     * the store, its GET then PSETEX "0" could otherwise wipe the in-flight INCRBY if it lands in between.
+     */
+    @Test(timeout = TEST_TIMEOUT_MS)
+    public void testCurrentStateDoesNotWriteTheKeyWhileABatchedWriteIsInFlight() throws Exception {
+        FakeBatchClient client = new FakeBatchClient();
+        DistributedCountAttributeAggregator aggregator = aggregator("A", client); // missing in the store
+        requests(aggregator, 3);
+        client.blockWrites = true;
+
+        Future<?> running = tickInFlight(client); // INCRBY 3 + PEXPIRE in flight
+        aggregator.currentState();
+        Assert.assertEquals("no single-key GET / PSETEX while the write is in flight", 0, client.singleKeyCalls.get());
+        client.release.countDown();
+        running.get(5, TimeUnit.SECONDS);
+
+        Assert.assertEquals("3", client.store.get("A"));
+        aggregator.currentState();
+        Assert.assertTrue("currentState() syncs again once the write is applied", client.singleKeyCalls.get() > 0);
+        Assert.assertEquals(3L, counter(aggregator, "localCounter"));
     }
 
     // -----------------------------------------------------------------------
