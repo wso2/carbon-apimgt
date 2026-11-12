@@ -7772,6 +7772,9 @@ public class ApiMgtDAO {
         String deleteURLTemplateQuery = SQLConstants.REMOVE_FROM_API_URL_MAPPINGS_SQL;
         String deleteAPIKeyMappingQuery = SQLConstants.REMOVE_FROM_API_KEY_API_MAPPINGS_SQL;
         String deleteGraphqlComplexityQuery = SQLConstants.REMOVE_FROM_GRAPHQL_COMPLEXITY_SQL;
+        String deletePrimaryEndpointMappingsQuery =
+                SQLConstants.APIEndpointsSQLConstants.DELETE_PRIMARY_ENDPOINT_MAPPING_BY_API_UUID;
+        String deleteAPIEndpointsQuery = SQLConstants.APIEndpointsSQLConstants.DELETE_API_ENDPOINTS_BY_API_UUID;
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
@@ -7836,6 +7839,18 @@ public class ApiMgtDAO {
             prepStmt = connection.prepareStatement(deleteAPIKeyMappingQuery);
             prepStmt.setString(1, uuid);
             prepStmt.execute();
+            prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
+
+            // Delete the primary endpoint mappings and the endpoints of the API
+            prepStmt = connection.prepareStatement(deletePrimaryEndpointMappingsQuery);
+            prepStmt.setString(1, uuid);
+            prepStmt.execute();
+            prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
+
+            prepStmt = connection.prepareStatement(deleteAPIEndpointsQuery);
+            prepStmt.setString(1, uuid);
+            prepStmt.execute();
+            prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
 
             deleteAllAPISpecificOperationPoliciesByAPIUUID(connection, uuid, null);
 
@@ -7857,9 +7872,31 @@ public class ApiMgtDAO {
 
             connection.commit();
         } catch (SQLException e) {
+            rollbackAPIDeletion(connection, uuid);
             handleException("Error while removing the API with UUID: " + uuid + " from the database", e);
+        } catch (APIManagementException e) {
+            rollbackAPIDeletion(connection, uuid);
+            throw e;
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
+        }
+    }
+
+    /**
+     * Rolls back the database changes done while deleting an API, so that a failed deletion does not leave the API
+     * partially deleted.
+     *
+     * @param connection Connection used for the API deletion
+     * @param uuid       UUID of the API being deleted
+     */
+    private void rollbackAPIDeletion(Connection connection, String uuid) {
+
+        if (connection != null) {
+            try {
+                connection.rollback();
+            } catch (SQLException e) {
+                log.error("Failed to rollback the deletion of API with UUID: " + uuid, e);
+            }
         }
     }
 
