@@ -102,6 +102,11 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
     // reply or failure is applied. syncWithKVStore() writes nothing meanwhile, so its writes cannot interleave
     // with the batch. Guarded by kvStoreLock.
     private boolean writeInFlight = false;
+    // Incremented by every direct sync (syncWithKVStore(), e.g. from currentState() or stop()). A batched read is
+    // applied only if no direct sync ran after it was collected: the direct sync may have sent the unsynced count
+    // with INCRBY, so the read's older value plus the unsynced count would leave those requests out.
+    // Guarded by kvStoreLock.
+    private long directSyncEpoch = 0L;
     // Set by stop(). A batched write still in flight for this key then flushes the key itself when it completes.
     private volatile boolean stopped = false;
 
@@ -204,7 +209,7 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
      * Pending resets (PSETEX "0") are flushed first and retried on failure; then any
      * accumulated delta is pushed via INCRBY/DECRBY, or the current Redis value is pulled
      * when there is no local change.
-     * Does nothing while a batched write for this key is in flight.
+     * Does nothing while a batched write for this key is in flight, and makes a batched read in flight stale.
      */
     private void syncWithKVStore() {
         synchronized (kvStoreLock) {
@@ -217,6 +222,7 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
                 // completion if the key is stopped.
                 return;
             }
+            directSyncEpoch++; // a batched read in flight for this key is older than this sync: drop its reply
             if (pendingReset) {
                 try {
                     // Do NOT reset localCounter here — reset() already zeroed it at window boundary.
@@ -317,8 +323,8 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
             if (pendingReset) {
                 seedNeeded = false; // the reset writes the key
                 if (remainingMillis > 0) {
-                    collector.addWrite(new SyncUnit(this, SyncUnit.Kind.RESET, epoch, windowExpiry, 0L,
-                            KeyValueStoreOperation.setWithExpiry(key, "0", remainingMillis)));
+                    collector.addWrite(new SyncUnit(this, SyncUnit.Kind.RESET, epoch, directSyncEpoch, windowExpiry,
+                            0L, KeyValueStoreOperation.setWithExpiry(key, "0", remainingMillis)));
                     writeInFlight = true;
                 } else {
                     // Same as syncWithKVStore(): nothing is written while the window expiry is unknown or past.
@@ -334,10 +340,11 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
                 // INCRBY/DECRBY never sets a TTL. Stamp one the first time after a gap
                 // (empty windows) where the key was recreated without a TTL.
                 if (!keyHasTTL && remainingMillis > 0) {
-                    collector.addWrite(new SyncUnit(this, SyncUnit.Kind.COUNT, epoch, windowExpiry, delta, count,
-                            KeyValueStoreOperation.expireMillis(key, remainingMillis)));
+                    collector.addWrite(new SyncUnit(this, SyncUnit.Kind.COUNT, epoch, directSyncEpoch, windowExpiry,
+                            delta, count, KeyValueStoreOperation.expireMillis(key, remainingMillis)));
                 } else {
-                    collector.addWrite(new SyncUnit(this, SyncUnit.Kind.COUNT, epoch, windowExpiry, delta, count));
+                    collector.addWrite(new SyncUnit(this, SyncUnit.Kind.COUNT, epoch, directSyncEpoch, windowExpiry,
+                            delta, count));
                 }
                 writeInFlight = true;
                 return;
@@ -345,13 +352,13 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
             if (seedNeeded) {
                 seedNeeded = false;
                 if (remainingMillis > 0) {
-                    collector.addWrite(new SyncUnit(this, SyncUnit.Kind.SEED, epoch, windowExpiry, 0L,
-                            KeyValueStoreOperation.setIfAbsentWithExpiry(key, "0", remainingMillis)));
+                    collector.addWrite(new SyncUnit(this, SyncUnit.Kind.SEED, epoch, directSyncEpoch, windowExpiry,
+                            0L, KeyValueStoreOperation.setIfAbsentWithExpiry(key, "0", remainingMillis)));
                     writeInFlight = true;
                     return;
                 }
             }
-            collector.addRead(new SyncUnit(this, SyncUnit.Kind.READ, epoch, windowExpiry, 0L));
+            collector.addRead(new SyncUnit(this, SyncUnit.Kind.READ, epoch, directSyncEpoch, windowExpiry, 0L));
         }
     }
 
@@ -365,10 +372,17 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
             if (resetEpoch.get() != unit.resetEpoch) {
                 return; // reset() ran after the read was collected: the value is the closed window's total
             }
+            if (directSyncEpoch != unit.directSyncEpoch) {
+                // currentState() or stop() synced the key directly after the read was collected and already set
+                // the local count from a newer value. The next tick reads the key again.
+                return;
+            }
             if (value == null) {
                 // The key is missing, so the stored count is 0. It is created on the next tick.
                 setCounterFromStore(unit, 0L);
                 seedNeeded = true;
+                // If requests arrive first, their INCRBY/DECRBY recreates the key instead, so it must send PEXPIRE.
+                keyHasTTL = false;
                 return;
             }
             try {
@@ -937,18 +951,20 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
 
         final DistributedCountAttributeAggregator owner;
         final Kind kind;
-        // The owner's reset epoch and window expiry when the unit was collected
+        // The owner's reset epoch, direct sync epoch and window expiry when the unit was collected
         final long resetEpoch;
+        final long directSyncEpoch;
         final long windowExpiry;
         // The delta taken from the unsynced counter (COUNT only)
         final long delta;
         final List<KeyValueStoreOperation> operations;
 
-        SyncUnit(DistributedCountAttributeAggregator owner, Kind kind, long resetEpoch, long windowExpiry,
-                 long delta, KeyValueStoreOperation... operations) {
+        SyncUnit(DistributedCountAttributeAggregator owner, Kind kind, long resetEpoch, long directSyncEpoch,
+                 long windowExpiry, long delta, KeyValueStoreOperation... operations) {
             this.owner = owner;
             this.kind = kind;
             this.resetEpoch = resetEpoch;
+            this.directSyncEpoch = directSyncEpoch;
             this.windowExpiry = windowExpiry;
             this.delta = delta;
             this.operations = operations.length == 0

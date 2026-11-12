@@ -104,15 +104,16 @@ public class DistributedCountAggregatorBatchSyncTest {
         @Override
         public List<String> getMultiple(List<String> keys) {
             mgetCalls.add(new ArrayList<>(keys));
+            // The store answers first; a blocked read holds the reply on its way back.
+            List<String> values = new ArrayList<>();
+            for (String key : keys) {
+                values.add(store.get(key));
+            }
             maybeBlock(blockReads);
             RuntimeException failure = failNextRead;
             if (failure != null) {
                 failNextRead = null;
                 throw failure;
-            }
-            List<String> values = new ArrayList<>();
-            for (String key : keys) {
-                values.add(store.get(key));
             }
             return values;
         }
@@ -492,6 +493,29 @@ public class DistributedCountAggregatorBatchSyncTest {
         Assert.assertEquals("no SET NX for a window that already ended", 0, client.pipelineCalls.size());
         Assert.assertEquals("the key is read again instead", 2, client.mgetCalls.size());
         Assert.assertNull(client.store.get("K"));
+    }
+
+    /**
+     * The key disappears mid-window (Redis restart, failover or eviction) while this node still knows it had a TTL.
+     * When requests arrive before the seed, their INCRBY recreates the key, so it must also send PEXPIRE; otherwise
+     * the key would keep this window's count after the window ends.
+     */
+    @Test(timeout = TEST_TIMEOUT_MS)
+    public void testKeyFoundMissingGetsATtlWhenIncrbyRecreatesIt() throws Exception {
+        FakeBatchClient client = new FakeBatchClient();
+        DistributedCountAttributeAggregator aggregator = aggregator("K", client); // missing in the store
+        set(aggregator, "keyHasTTL", true);
+
+        tick(); // MGET finds the key missing
+        requests(aggregator, 3);
+        tick(); // INCRBY 3 recreates it
+
+        Assert.assertEquals("3", client.store.get("K"));
+        List<KeyValueStoreOperation> pipeline = client.pipelineCalls.get(client.pipelineCalls.size() - 1);
+        Assert.assertEquals("INCRBY is sent with PEXPIRE", 2, pipeline.size());
+        Assert.assertEquals(KeyValueStoreOperation.Type.PEXPIRE, pipeline.get(1).getType());
+        Assert.assertNotNull(client.ttls.get("K"));
+        Assert.assertEquals(true, get(aggregator, "keyHasTTL"));
     }
 
     // -----------------------------------------------------------------------
@@ -903,6 +927,37 @@ public class DistributedCountAggregatorBatchSyncTest {
         aggregator.currentState();
         Assert.assertTrue("currentState() syncs again once the write is applied", client.singleKeyCalls.get() > 0);
         Assert.assertEquals(3L, counter(aggregator, "localCounter"));
+    }
+
+    /**
+     * currentState() while a batched read for the key is in flight: its direct sync sends the requests counted
+     * meanwhile with INCRBY. The read's older value must not then replace the count, or those requests would be
+     * missing from the local count until the next tick.
+     */
+    @Test(timeout = TEST_TIMEOUT_MS)
+    public void testCurrentStateWhileAReadIsInFlightMakesTheReadStale() throws Exception {
+        FakeBatchClient client = new FakeBatchClient();
+        DistributedCountAttributeAggregator aggregator = aggregator("A", client);
+        client.store.put("A", "0");
+        set(aggregator, "keyHasTTL", true);
+        client.blockReads = true;
+
+        Future<?> running = tickInFlight(client); // the MGET has read "0"; its reply is on the way back
+        requests(aggregator, 5);
+        aggregator.currentState();                // INCRBY 5 directly
+        Assert.assertEquals("5", client.store.get("A"));
+        Assert.assertEquals(0L, counter(aggregator, "unsyncedCounter"));
+        client.release.countDown();
+        running.get(5, TimeUnit.SECONDS);
+
+        Assert.assertEquals("the read's older value (0) does not replace the count", 5L,
+                counter(aggregator, "localCounter"));
+        client.blockReads = false;
+        tick();
+        Assert.assertEquals("the next read applies normally", 5L, counter(aggregator, "localCounter"));
+        client.store.put("A", "9");
+        tick();
+        Assert.assertEquals(9L, counter(aggregator, "localCounter"));
     }
 
     // -----------------------------------------------------------------------
