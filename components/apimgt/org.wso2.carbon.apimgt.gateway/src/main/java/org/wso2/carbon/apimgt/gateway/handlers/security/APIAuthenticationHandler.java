@@ -503,6 +503,9 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                     }
                     handleNoAuthentication(messageContext);
                     setAPIParametersToMessageContext(messageContext);
+                    if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(apiType)) {
+                        removeClientCredentialsFromMCPNoAuthRequest(messageContext);
+                    }
                     return ExtensionListenerUtil.postProcessRequest(messageContext, type);
                 }
                 try {

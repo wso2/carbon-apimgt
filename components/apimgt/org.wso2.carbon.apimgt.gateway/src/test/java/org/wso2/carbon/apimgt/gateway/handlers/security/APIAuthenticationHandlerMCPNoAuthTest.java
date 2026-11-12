@@ -195,6 +195,96 @@ public class APIAuthenticationHandlerMCPNoAuthTest {
         }
     }
 
+    @Test
+    public void testMCPToolWithoutSecurityRemovesClientCredentials() throws Exception {
+
+        Map<String, String> headers = headers(CUSTOM_AUTH_HEADER);
+        headers.put(HttpHeaders.AUTHORIZATION, CLIENT_TOKEN);
+
+        Assert.assertTrue(handleRequestForResourceWithoutSecurity(APIConstants.API_TYPE_MCP,
+                APIConstants.API_SUBTYPE_SERVER_PROXY, headers));
+
+        Assert.assertFalse(headers.containsKey(HttpHeaders.AUTHORIZATION));
+        Assert.assertFalse(headers.containsKey(CUSTOM_AUTH_HEADER));
+        Assert.assertFalse(headers.containsKey(APIMgtGatewayConstants.INTERNAL_KEY));
+        assertOtherHeadersKept(headers);
+    }
+
+    @Test
+    public void testRESTResourceWithoutSecurityKeepsHeaders() throws Exception {
+
+        Map<String, String> headers = headers(CUSTOM_AUTH_HEADER);
+        headers.put(HttpHeaders.AUTHORIZATION, CLIENT_TOKEN);
+
+        Assert.assertTrue(handleRequestForResourceWithoutSecurity(APIConstants.ApiTypes.API.name(), null, headers));
+
+        Assert.assertEquals(CLIENT_TOKEN, headers.get(HttpHeaders.AUTHORIZATION));
+        Assert.assertEquals(CLIENT_TOKEN, headers.get(CUSTOM_AUTH_HEADER));
+        Assert.assertEquals(INTERNAL_KEY, headers.get(APIMgtGatewayConstants.INTERNAL_KEY));
+    }
+
+    // Runs handleRequest for a tools/call (or a REST call) whose resource-level security is None
+    private static boolean handleRequestForResourceWithoutSecurity(String apiType, String subType,
+                                                                   Map<String, String> headers) throws Exception {
+
+        APIManagerConfiguration configuration = Mockito.mock(APIManagerConfiguration.class);
+        Mockito.when(configuration.getExtensionListenerMap()).thenReturn(new TreeMap<>());
+        Mockito.when(configuration.getDoMediateExtensionFaultSequenceMap()).thenReturn(new TreeMap<>());
+        APIKeyValidator validator = Mockito.mock(APIKeyValidator.class);
+        Mockito.when(validator.getResourceAuthenticationScheme(Mockito.any()))
+                .thenReturn(APIConstants.AUTH_NO_AUTHENTICATION);
+        APIAuthenticationHandler handler = new APIAuthenticationHandler() {
+            @Override
+            protected APIManagerConfiguration getApiManagerConfiguration() {
+                return configuration;
+            }
+
+            @Override
+            protected APIKeyValidator getAPIKeyValidator() {
+                return validator;
+            }
+
+            @Override
+            protected org.wso2.carbon.metrics.manager.Timer.Context startMetricTimer() {
+                return Mockito.mock(org.wso2.carbon.metrics.manager.Timer.Context.class);
+            }
+
+            @Override
+            protected void stopMetricTimer(org.wso2.carbon.metrics.manager.Timer.Context context) {
+            }
+
+            @Override
+            protected boolean isAnalyticsEnabled() {
+                return false;
+            }
+
+            @Override
+            protected void setAPIParametersToMessageContext(org.apache.synapse.MessageContext messageContext) {
+            }
+        };
+        handler.isAuthenticatorsInitialized = true;
+        handler.isOauthParamsInitialized = true;
+        handler.setApiType(apiType);
+        handler.setSubType(subType);
+        handler.setAuthorizationHeader(CUSTOM_AUTH_HEADER);
+
+        Axis2MessageContext messageContext = messageContext(headers);
+        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD))
+                .thenReturn(APIConstants.MCP.METHOD_TOOL_CALL);
+        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.MCP_NO_AUTH_REQUEST)).thenReturn(false);
+
+        // ExtensionListenerUtil reads the configuration from the impl component's holder
+        org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder holder =
+                org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance();
+        APIManagerConfigurationService previous = holder.getAPIManagerConfigurationService();
+        holder.setAPIManagerConfigurationService(configurationService(configuration));
+        try {
+            return handler.handleRequest(messageContext);
+        } finally {
+            holder.setAPIManagerConfigurationService(previous);
+        }
+    }
+
     private static APIManagerConfigurationService configurationService(APIManagerConfiguration configuration) {
 
         APIManagerConfigurationService service = Mockito.mock(APIManagerConfigurationService.class);
