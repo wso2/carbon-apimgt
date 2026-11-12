@@ -184,6 +184,13 @@
   "apim.open_tracer.remote_tracer.properties.proxy_port": "",
   "apim.open_tracer.remote_tracer.properties.endpoint_url": "",
   "apim.open_tracer.log_tracer.enable": false,
+  "apim.open_telemetry.remote_tracer.enable": "false",
+  "apim.open_telemetry.remote_tracer.name": "",
+  "apim.open_telemetry.remote_tracer.properties.hostname": "",
+  "apim.open_telemetry.remote_tracer.properties.port": "",
+  "apim.open_telemetry.remote_tracer.properties.endpoint_url": "",
+  "apim.open_telemetry.log_tracer.enable": "false",
+
   "apim.sdk.group_id": "org.wso2",
   "apim.sdk.artifact_id": "org.wso2.client.",
   "apim.sdk.model_package": "org.wso2.client.model.",
