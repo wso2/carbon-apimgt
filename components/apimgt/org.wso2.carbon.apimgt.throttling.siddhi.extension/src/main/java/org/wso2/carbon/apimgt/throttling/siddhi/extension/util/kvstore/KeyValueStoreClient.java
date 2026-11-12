@@ -132,7 +132,10 @@ public interface KeyValueStoreClient {
      * @return one reply per operation, in the same order. INCRBY and DECRBY reply with the new value
      *         as a {@link Long}. For the other types any reply that is not an exception means success.
      *         An operation that failed has a {@link KeyValueStoreException} as its reply.
-     * @throws KeyValueStoreException if the batch could not be sent at all.
+     * @throws KeyValueStoreUnavailableException if the batch was not sent (for example no connection could be
+     *         obtained): none of the operations was applied.
+     * @throws KeyValueStoreException if the batch failed after it may have been sent (for example the connection
+     *         dropped while the replies were read): each operation may or may not have been applied.
      */
     default List<Object> executeBatch(List<KeyValueStoreOperation> operations) {
         List<Object> replies = new ArrayList<>(operations.size());

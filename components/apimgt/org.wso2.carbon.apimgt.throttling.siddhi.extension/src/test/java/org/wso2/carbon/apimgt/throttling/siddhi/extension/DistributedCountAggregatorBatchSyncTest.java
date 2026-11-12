@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.throttling.siddhi.extension.util.kvstore.KeyValueS
 import org.wso2.carbon.apimgt.throttling.siddhi.extension.util.kvstore.KeyValueStoreException;
 import org.wso2.carbon.apimgt.throttling.siddhi.extension.util.kvstore.KeyValueStoreManager;
 import org.wso2.carbon.apimgt.throttling.siddhi.extension.util.kvstore.KeyValueStoreOperation;
+import org.wso2.carbon.apimgt.throttling.siddhi.extension.util.kvstore.KeyValueStoreUnavailableException;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -80,6 +81,8 @@ public class DistributedCountAggregatorBatchSyncTest {
         final CountDownLatch release = new CountDownLatch(1);
         volatile RuntimeException failNextRead;
         volatile RuntimeException failNextWrite;
+        // Applies the next pipeline, then throws: the connection dropped before the replies arrived
+        volatile RuntimeException failAfterApplyingNextWrite;
         volatile boolean dropLastReply;
 
         @Override
@@ -159,6 +162,11 @@ public class DistributedCountAggregatorBatchSyncTest {
             }
             if (dropLastReply && !replies.isEmpty()) {
                 replies.remove(replies.size() - 1);
+            }
+            RuntimeException lostReplies = failAfterApplyingNextWrite;
+            if (lostReplies != null) {
+                failAfterApplyingNextWrite = null;
+                throw lostReplies;
             }
             return replies;
         }
@@ -661,14 +669,14 @@ public class DistributedCountAggregatorBatchSyncTest {
     // -----------------------------------------------------------------------
 
     @Test(timeout = TEST_TIMEOUT_MS)
-    public void testFailedPipelineRestoresTheDeltaAndKeepsTheResetPending() throws Exception {
+    public void testUnsentPipelineRestoresTheDeltaAndKeepsTheResetPending() throws Exception {
         FakeBatchClient client = new FakeBatchClient();
         DistributedCountAttributeAggregator counted = aggregator("A", client);
         DistributedCountAttributeAggregator resetKey = aggregator("R", client);
         set(counted, "keyHasTTL", true);
         requests(counted, 4);
         resetKey.reset();
-        client.failNextWrite = new KeyValueStoreException("simulated connection reset");
+        client.failNextWrite = new KeyValueStoreUnavailableException("simulated: no connection");
 
         tick();
 
@@ -688,7 +696,7 @@ public class DistributedCountAggregatorBatchSyncTest {
         set(aggregator, "keyHasTTL", true);
         requests(aggregator, 4);
         client.blockWrites = true;
-        client.failNextWrite = new KeyValueStoreException("simulated timeout");
+        client.failNextWrite = new KeyValueStoreUnavailableException("simulated: no connection");
 
         Future<?> running = tickInFlight(client);
         aggregator.reset();
@@ -730,7 +738,63 @@ public class DistributedCountAggregatorBatchSyncTest {
 
         tick();
 
-        Assert.assertEquals("delta restored", 3L, counter(aggregator, "unsyncedCounter"));
+        Assert.assertEquals("the pipeline reached the store: not sent again", 0L,
+                counter(aggregator, "unsyncedCounter"));
+        Assert.assertEquals("3", client.store.get("K"));
+    }
+
+    /**
+     * Two TMs. T2's INCRBY 50 reaches Redis, but the connection drops before the reply. T1 keeps serving while
+     * Redis is unreachable for T2, and T2 keeps counting locally. When T2 reconnects, Redis must hold
+     * 50 + 50 + 30: sending the 50 again would make it 180 and throttle every TM early.
+     */
+    @Test(timeout = TEST_TIMEOUT_MS)
+    public void testPipelineThatMayHaveBeenAppliedIsNotSentAgain() throws Exception {
+        FakeBatchClient client = new FakeBatchClient();
+        DistributedCountAttributeAggregator t2 = aggregator("K", client);
+        set(t2, "keyHasTTL", true);
+        requests(t2, 50);
+        client.failAfterApplyingNextWrite = new KeyValueStoreException("simulated: connection dropped");
+
+        tick();                         // INCRBY 50 applied in Redis, the reply is lost
+        Assert.assertEquals("50", client.store.get("K"));
+        Assert.assertEquals("the 50 are not queued again", 0L, counter(t2, "unsyncedCounter"));
+        Assert.assertEquals("T2 keeps its local count", 50L, counter(t2, "localCounter"));
+
+        client.add("K", 50);            // T1 serves 50
+        requests(t2, 30);               // T2 keeps counting locally while Redis is unreachable
+        client.failNextWrite = new KeyValueStoreUnavailableException("simulated: still no connection");
+        tick();
+        Assert.assertEquals("a pipeline that was not sent keeps its delta", 30L, counter(t2, "unsyncedCounter"));
+        Assert.assertEquals(80L, counter(t2, "localCounter"));
+
+        tick();                         // the connection is back
+        Assert.assertEquals("50 + 50 + 30", "130", client.store.get("K"));
+        Assert.assertEquals(130L, counter(t2, "localCounter"));
+        Assert.assertEquals(0L, counter(t2, "unsyncedCounter"));
+    }
+
+    /**
+     * The other side of the trade-off: the pipeline fails after it may have been sent, but the store did not
+     * apply it. The delta is not sent again, so the store undercounts by it; the local count keeps it.
+     */
+    @Test(timeout = TEST_TIMEOUT_MS)
+    public void testPipelineThatMayHaveBeenAppliedButWasNotIsUndercountedOnlyInTheStore() throws Exception {
+        FakeBatchClient client = new FakeBatchClient();
+        DistributedCountAttributeAggregator aggregator = aggregator("K", client);
+        client.store.put("K", "10");
+        set(aggregator, "keyHasTTL", true);
+        requests(aggregator, 5);
+        client.failNextWrite = new KeyValueStoreException("simulated: read timed out");
+
+        tick();
+        Assert.assertEquals("not applied by the store", "10", client.store.get("K"));
+        Assert.assertEquals(0L, counter(aggregator, "unsyncedCounter"));
+        Assert.assertEquals("the local count keeps the 5", 5L, counter(aggregator, "localCounter"));
+
+        tick();
+        Assert.assertEquals("10", client.store.get("K"));
+        Assert.assertEquals("the next read takes the store's count", 10L, counter(aggregator, "localCounter"));
     }
 
     @Test(timeout = TEST_TIMEOUT_MS)
@@ -757,7 +821,7 @@ public class DistributedCountAggregatorBatchSyncTest {
         set(aggregator, "keyHasTTL", true);
         requests(aggregator, 6);
         client.blockWrites = true;
-        client.failNextWrite = new KeyValueStoreException("simulated failure");
+        client.failNextWrite = new KeyValueStoreUnavailableException("simulated: no connection");
 
         Future<?> running = tickInFlight(client);
         aggregator.stop(); // the 6 are in flight, so there is nothing to flush yet

@@ -41,6 +41,7 @@ import org.wso2.carbon.apimgt.throttling.siddhi.extension.util.kvstore.KeyValueS
 import org.wso2.carbon.apimgt.throttling.siddhi.extension.util.kvstore.KeyValueStoreException;
 import org.wso2.carbon.apimgt.throttling.siddhi.extension.util.kvstore.KeyValueStoreManager;
 import org.wso2.carbon.apimgt.throttling.siddhi.extension.util.kvstore.KeyValueStoreOperation;
+import org.wso2.carbon.apimgt.throttling.siddhi.extension.util.kvstore.KeyValueStoreUnavailableException;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.query.selector.attribute.aggregator.AttributeAggregator;
@@ -386,12 +387,13 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
     private void applyWriteReplies(SyncUnit unit, List<Object> replies) {
         Object reply = replies.get(0);
         if (reply instanceof Exception) {
-            applyWriteFailure(unit, (Exception) reply, true);
+            // The store rejected the command, so it was not applied.
+            applyWriteFailure(unit, (Exception) reply, true, false);
             return;
         }
         if (unit.kind == SyncUnit.Kind.COUNT && !(reply instanceof Number)) {
             applyWriteFailure(unit, new KeyValueStoreException("Unexpected reply for " + unit.operations.get(0)
-                    + ": " + reply), true);
+                    + ": " + reply), true, false);
             return;
         }
         synchronized (kvStoreLock) {
@@ -427,12 +429,18 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
 
     /**
      * Batch sync, step 3 (apply) for a failed write. A failed reset stays pending and is retried on the
-     * next tick. A failed INCRBY/DECRBY delta is added back to the unsynced counter, unless a reset made
-     * it part of the closed window.
+     * next tick. A failed INCRBY/DECRBY delta is added back to the unsynced counter only when it was
+     * certainly not applied, and no reset made it part of the closed window.
+     * <p>
+     * When the batch may have reached the store (for example the connection dropped while the replies were
+     * read), the delta is dropped instead. Sending it again would count it twice whenever the store had
+     * applied it, and every node would throttle early for the rest of the window. Dropping it undercounts by
+     * this delta only when the store had not applied it. The local counter keeps these requests either way.
      *
-     * @param logError false when the whole batch failed and was already logged once for all its keys.
+     * @param logError           false when the whole batch failed and was already logged once for all its keys.
+     * @param mayHaveBeenApplied true when the store may have applied the write despite the failure.
      */
-    private void applyWriteFailure(SyncUnit unit, Exception cause, boolean logError) {
+    private void applyWriteFailure(SyncUnit unit, Exception cause, boolean logError, boolean mayHaveBeenApplied) {
         synchronized (kvStoreLock) {
             writeInFlight = false;
             if (logError) {
@@ -446,12 +454,12 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
                 }
                 logRateLimited(message, cause, false);
             }
-            if (unit.kind == SyncUnit.Kind.COUNT && resetEpoch.get() == unit.resetEpoch) {
+            if (unit.kind == SyncUnit.Kind.COUNT && resetEpoch.get() == unit.resetEpoch && !mayHaveBeenApplied) {
                 unsyncedCounter.addAndGet(unit.delta);
             }
         }
         if (stopped) {
-            // stop() skipped its flush while this write was in flight: push the restored delta and any
+            // stop() skipped its flush while this write was in flight: push the unsynced delta and any
             // pending reset now.
             flushToKVStore();
         }
@@ -1085,19 +1093,24 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
 
         /**
          * Handles a chunk that could not be sent or whose replies could not be read: logs once for the whole
-         * chunk and applies the failure to every key in it (deltas are restored and resets stay pending).
+         * chunk and applies the failure to every key in it. Resets stay pending. Deltas are restored only when
+         * the chunk was certainly not sent (no connection, or the scheduler is shutting down); otherwise the
+         * store may have applied them, so they are not sent again (see applyWriteFailure).
          */
         void fail(Exception cause) {
             SYNC_STATS.failedBatches.incrementAndGet();
+            boolean mayHaveBeenApplied = write && !(cause instanceof KeyValueStoreUnavailableException)
+                    && !(cause instanceof RejectedExecutionException);
             logBatchError(write
                     ? "Error writing " + operationCount + " operations of " + units.size() + " keys to the key-value store"
+                    + (mayHaveBeenApplied ? ". They may have been applied, so their counts are not sent again" : "")
                     : "Error reading " + units.size() + " keys from the key-value store", cause);
             if (!write) {
                 return; // a failed read changes nothing; the keys are read again on the next tick
             }
             for (SyncUnit unit : units) {
                 try {
-                    unit.owner.applyWriteFailure(unit, cause, false);
+                    unit.owner.applyWriteFailure(unit, cause, false, mayHaveBeenApplied);
                 } catch (RuntimeException e) {
                     log.error("Error restoring unsynced count for key " + unit.owner.key, e);
                 }
