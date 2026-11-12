@@ -25,6 +25,7 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.reflect.Whitebox;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
@@ -36,6 +37,8 @@ import org.wso2.carbon.apimgt.keymgt.model.exception.DataLoadingException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -111,6 +114,36 @@ public class SubscriptionDataStoreImplTest {
     }
 
     /**
+     * Waits until the given number of threads are blocked on a lock of the datastore.
+     *
+     * @param threads threads to check
+     * @param count   expected number of blocked threads
+     * @return true if the given number of threads are blocked within 10 seconds
+     */
+    private boolean waitForThreadsBlockedInDataStore(List<Thread> threads, int count) throws InterruptedException {
+
+        long deadline = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(10);
+        while (System.currentTimeMillis() < deadline) {
+            int blockedThreads = 0;
+            for (Thread thread : threads) {
+                if (thread.getState() != Thread.State.BLOCKED) {
+                    continue;
+                }
+                StackTraceElement[] stackTrace = thread.getStackTrace();
+                if (stackTrace.length > 0
+                        && SubscriptionDataStoreImpl.class.getName().equals(stackTrace[0].getClassName())) {
+                    blockedThreads++;
+                }
+            }
+            if (blockedThreads >= count) {
+                return true;
+            }
+            Thread.sleep(10);
+        }
+        return false;
+    }
+
+    /**
      * Tests that the subscription not found entries are not kept when the expiry is not configured.
      */
     @Test
@@ -168,6 +201,43 @@ public class SubscriptionDataStoreImplTest {
         Assert.assertNull(store.getSubscriptionById(APP_ID, API_ID + 1));
         Mockito.verify(subscriptionDataLoader, Mockito.times(1))
                 .getSubscriptionById(Integer.toString(API_ID + 1), Integer.toString(APP_ID));
+    }
+
+    /**
+     * Tests that the subscription not found entries are not kept beyond the maximum size, while the existing entries
+     * are still used.
+     */
+    @Test
+    public void testSubscriptionNotFoundIsNotKeptBeyondMaximumSize() throws Exception {
+
+        int maximumSize = 10000;
+        SubscriptionDataStoreImpl store = createStore("30");
+        Assert.assertNull(store.getSubscriptionById(APP_ID, API_ID));
+        verifyControlPlaneCalls(1);
+        Map<String, Long> subscriptionNotFoundMap = Whitebox.getInternalState(store, "subscriptionNotFoundMap");
+        long expiryTime = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(1);
+        for (int i = 0; subscriptionNotFoundMap.size() < maximumSize; i++) {
+            subscriptionNotFoundMap.put("other-subscription-" + i, expiryTime);
+        }
+        // The existing entry is still used when the map is full.
+        Assert.assertNull(store.getSubscriptionById(APP_ID, API_ID));
+        verifyControlPlaneCalls(1);
+
+        // The map is full, hence a new subscription not found entry is not kept.
+        int otherApiId = API_ID + 1;
+        Assert.assertNull(store.getSubscriptionById(APP_ID, otherApiId));
+        Assert.assertNull(store.getSubscriptionById(APP_ID, otherApiId));
+        Mockito.verify(subscriptionDataLoader, Mockito.times(2))
+                .getSubscriptionById(Integer.toString(otherApiId), Integer.toString(APP_ID));
+        Assert.assertEquals(maximumSize, subscriptionNotFoundMap.size());
+
+        // Once the other entries are expired, they are removed and the new entry is kept.
+        subscriptionNotFoundMap.replaceAll((key, value) -> key.startsWith("other-subscription-") ? 0L : value);
+        Assert.assertNull(store.getSubscriptionById(APP_ID, otherApiId));
+        Assert.assertNull(store.getSubscriptionById(APP_ID, otherApiId));
+        Mockito.verify(subscriptionDataLoader, Mockito.times(3))
+                .getSubscriptionById(Integer.toString(otherApiId), Integer.toString(APP_ID));
+        Assert.assertEquals(2, subscriptionNotFoundMap.size());
     }
 
     /**
@@ -302,14 +372,20 @@ public class SubscriptionDataStoreImplTest {
 
         int threadCount = 20;
         CountDownLatch controlPlaneCallStarted = new CountDownLatch(1);
+        CountDownLatch controlPlaneCallReleased = new CountDownLatch(1);
         Mockito.when(subscriptionDataLoader.getSubscriptionById(anyString(), anyString())).thenAnswer(invocation -> {
             controlPlaneCallStarted.countDown();
-            // Keeps the lock while the other threads are waiting on it.
-            Thread.sleep(500);
+            // Keeps the lock until the other threads are waiting on it.
+            controlPlaneCallReleased.await(10, TimeUnit.SECONDS);
             return null;
         });
         SubscriptionDataStoreImpl store = createStore("30");
-        ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+        List<Thread> threads = new CopyOnWriteArrayList<>();
+        ExecutorService executor = Executors.newFixedThreadPool(threadCount, runnable -> {
+            Thread thread = new Thread(runnable);
+            threads.add(thread);
+            return thread;
+        });
         try {
             List<Future<Subscription>> results = new ArrayList<>();
             results.add(executor.submit(() -> store.getSubscriptionById(APP_ID, API_ID)));
@@ -317,6 +393,10 @@ public class SubscriptionDataStoreImplTest {
             for (int i = 1; i < threadCount; i++) {
                 results.add(executor.submit(() -> store.getSubscriptionById(APP_ID, API_ID)));
             }
+            // The control plane call returns only after all the other threads are waiting on the lock, hence they
+            // check the subscription not found entry inside the lock.
+            Assert.assertTrue(waitForThreadsBlockedInDataStore(threads, threadCount - 1));
+            controlPlaneCallReleased.countDown();
             for (Future<Subscription> result : results) {
                 Assert.assertNull(result.get(10, TimeUnit.SECONDS));
             }

@@ -76,6 +76,8 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     // Keeps the subscriptions recently reported as not found by the control plane, against their expiry time in
     // milliseconds. This is used only when SubscriptionNotFoundCacheExpiry is configured with a positive value.
     private Map<String, Long> subscriptionNotFoundMap;
+    // Lock to check the size of the subscription not found map and add an entry to it atomically.
+    private final Object subscriptionNotFoundMapLock = new Object();
     private long subscriptionNotFoundExpiryInMillis;
     private boolean apisInitialized;
     private boolean apiPoliciesInitialized;
@@ -501,22 +503,27 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
             return;
         }
         long currentTime = System.currentTimeMillis();
-        if (subscriptionNotFoundMap.size() >= SUBSCRIPTION_NOT_FOUND_MAP_MAX_SIZE) {
-            // Expired entries are removed only when the map is full. Each call reaching here has already called the
-            // control plane, hence the cost of this scan is negligible compared to that.
-            subscriptionNotFoundMap.values().removeIf(expiryTime -> expiryTime <= currentTime);
-            if (subscriptionNotFoundMap.size() >= SUBSCRIPTION_NOT_FOUND_MAP_MAX_SIZE) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Subscription not found map reached the maximum size in tenant " + tenantDomain
-                            + ". Hence not keeping " + subscriptionCacheKey);
-                }
-                return;
-            }
-        }
         // Avoids an overflow of the expiry time when a very large expiry is configured.
         long expiryTime = subscriptionNotFoundExpiryInMillis > Long.MAX_VALUE - currentTime ? Long.MAX_VALUE :
                 currentTime + subscriptionNotFoundExpiryInMillis;
-        subscriptionNotFoundMap.put(subscriptionCacheKey, expiryTime);
+        // The size is checked and the entry is added under a lock, so that concurrent misses of different
+        // subscriptions do not exceed the maximum size. Entries are removed without this lock, as removals only
+        // reduce the size.
+        synchronized (subscriptionNotFoundMapLock) {
+            if (subscriptionNotFoundMap.size() >= SUBSCRIPTION_NOT_FOUND_MAP_MAX_SIZE) {
+                // Expired entries are removed only when the map is full. Each call reaching here has already called
+                // the control plane, hence the cost of this scan is negligible compared to that.
+                subscriptionNotFoundMap.values().removeIf(entryExpiryTime -> entryExpiryTime <= currentTime);
+                if (subscriptionNotFoundMap.size() >= SUBSCRIPTION_NOT_FOUND_MAP_MAX_SIZE) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Subscription not found map reached the maximum size in tenant " + tenantDomain
+                                + ". Hence not keeping " + subscriptionCacheKey);
+                    }
+                    return;
+                }
+            }
+            subscriptionNotFoundMap.put(subscriptionCacheKey, expiryTime);
+        }
         if (log.isDebugEnabled()) {
             log.debug("Subscription " + subscriptionCacheKey + " was not found in the control plane. Hence keeping "
                     + "it as not found for " + subscriptionNotFoundExpiryInMillis + " milliseconds.");
