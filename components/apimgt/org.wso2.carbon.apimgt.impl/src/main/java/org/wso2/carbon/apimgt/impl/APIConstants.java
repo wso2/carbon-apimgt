@@ -1851,6 +1851,8 @@ public final class APIConstants {
     public static final String DISTRIBUTED_THROTTLE_TYPE = "Type";
     public static final String DISTRIBUTED_THROTTLE_SYNC_INTERVAL = "SyncInterval";
     public static final String DISTRIBUTED_THROTTLE_CORE_POOL_SIZE = "CorePoolSize";
+    public static final String DISTRIBUTED_THROTTLE_ENABLE_BATCH_SYNC = "EnableBatchSync";
+    public static final String DISTRIBUTED_THROTTLE_BATCH_SIZE = "BatchSize";
     public static final String DISTRIBUTED_THROTTLE_PROPERTIES = "KeyValueStoreOptions";
     public static final String DISTRIBUTED_THROTTLE_HOST = "Host";
     public static final String DISTRIBUTED_THROTTLE_PORT =  "Port";

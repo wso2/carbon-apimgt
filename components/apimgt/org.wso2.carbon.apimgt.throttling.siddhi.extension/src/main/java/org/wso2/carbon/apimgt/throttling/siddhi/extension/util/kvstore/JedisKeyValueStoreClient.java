@@ -27,8 +27,16 @@ import org.wso2.carbon.apimgt.throttling.siddhi.extension.internal.ServiceRefere
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Protocol;
+import redis.clients.jedis.Response;
+import redis.clients.jedis.exceptions.JedisDataException;
 import redis.clients.jedis.exceptions.JedisException;
+import redis.clients.jedis.params.SetParams;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -334,6 +342,90 @@ public class JedisKeyValueStoreClient implements KeyValueStoreClient {
             throw new KeyValueStoreException("Error during KeyValue DELETE for key: " + key, e);
         } finally {
             closeJedis(jedis);
+        }
+    }
+
+    @Override
+    public boolean supportsBatchOperations() {
+        return true;
+    }
+
+    /**
+     * Reads all the given keys in one MGET round trip.
+     */
+    @Override
+    public List<String> getMultiple(List<String> keys) {
+        if (keys == null || keys.isEmpty()) {
+            return Collections.emptyList();
+        }
+        Jedis jedis = null;
+        try {
+            jedis = getJedis();
+            if (jedis == null) {
+                throw new KeyValueStoreException("Failed to get connection from KeyValue pool for MGET operation.");
+            }
+            return jedis.mget(keys.toArray(new String[0]));
+        } catch (JedisException e) {
+            throw new KeyValueStoreException("Error during KeyValue MGET for " + keys.size() + " keys", e);
+        } finally {
+            closeJedis(jedis);
+        }
+    }
+
+    /**
+     * Sends all the given operations in one pipeline round trip. A command that Redis rejects
+     * gets a {@link KeyValueStoreException} as its reply; the other replies are not affected.
+     */
+    @Override
+    public List<Object> executeBatch(List<KeyValueStoreOperation> operations) {
+        if (operations == null || operations.isEmpty()) {
+            return Collections.emptyList();
+        }
+        Jedis jedis = null;
+        try {
+            jedis = getJedis();
+            if (jedis == null) {
+                throw new KeyValueStoreException("Failed to get connection from KeyValue pool for pipeline operation.");
+            }
+            Pipeline pipeline = jedis.pipelined();
+            List<Response<?>> responses = new ArrayList<>(operations.size());
+            for (KeyValueStoreOperation operation : operations) {
+                responses.add(queue(pipeline, operation));
+            }
+            pipeline.sync();
+
+            List<Object> replies = new ArrayList<>(operations.size());
+            for (int i = 0; i < responses.size(); i++) {
+                try {
+                    replies.add(responses.get(i).get());
+                } catch (JedisDataException e) {
+                    replies.add(new KeyValueStoreException("Error during KeyValue " + operations.get(i), e));
+                }
+            }
+            return replies;
+        } catch (JedisException e) {
+            throw new KeyValueStoreException("Error during KeyValue pipeline of " + operations.size()
+                    + " operations", e);
+        } finally {
+            closeJedis(jedis);
+        }
+    }
+
+    private static Response<?> queue(Pipeline pipeline, KeyValueStoreOperation operation) {
+        String key = operation.getKey();
+        switch (operation.getType()) {
+            case INCRBY:
+                return pipeline.incrBy(key, operation.getAmount());
+            case DECRBY:
+                return pipeline.decrBy(key, operation.getAmount());
+            case PEXPIRE:
+                return pipeline.pexpire(key, operation.getTtlMillis());
+            case PSETEX:
+                return pipeline.psetex(key, operation.getTtlMillis(), operation.getValue());
+            case SET_NX_PX:
+                return pipeline.set(key, operation.getValue(), SetParams.setParams().nx().px(operation.getTtlMillis()));
+            default:
+                throw new KeyValueStoreException("Unsupported operation: " + operation);
         }
     }
 }

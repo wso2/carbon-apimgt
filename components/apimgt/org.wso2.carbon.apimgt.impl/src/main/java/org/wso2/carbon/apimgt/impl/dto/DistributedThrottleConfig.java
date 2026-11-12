@@ -23,12 +23,18 @@ package org.wso2.carbon.apimgt.impl.dto;
  */
 public class DistributedThrottleConfig {
 
+    public static final int DEFAULT_BATCH_SIZE = 500;
+
     private boolean enabled = false;
     private String type = "redis";
     // Sync frequency with the key-value store in milliseconds
     private int syncInterval = 10;
     // Size for the thread pool for scheduled syncing
     private int corePoolSize = 200;
+    // Sync the keys with the key-value store in batches (MGET and pipelines) instead of one call per key
+    private boolean batchSyncEnabled = true;
+    // Maximum number of keys per MGET and of commands per pipeline when batch sync is enabled
+    private int batchSize = DEFAULT_BATCH_SIZE;
 
     private String host;
     private int port;
@@ -215,6 +221,22 @@ public class DistributedThrottleConfig {
 
     public void setCorePoolSize(int corePoolSize) {
         this.corePoolSize = corePoolSize;
+    }
+
+    public boolean isBatchSyncEnabled() {
+        return batchSyncEnabled;
+    }
+
+    public void setBatchSyncEnabled(boolean batchSyncEnabled) {
+        this.batchSyncEnabled = batchSyncEnabled;
+    }
+
+    public int getBatchSize() {
+        return batchSize;
+    }
+
+    public void setBatchSize(int batchSize) {
+        this.batchSize = batchSize;
     }
 
     public int getDatabaseId() {

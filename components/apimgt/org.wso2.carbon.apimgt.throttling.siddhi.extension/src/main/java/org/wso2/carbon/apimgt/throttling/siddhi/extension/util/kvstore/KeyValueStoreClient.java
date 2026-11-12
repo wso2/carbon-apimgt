@@ -17,8 +17,15 @@
  */
 package org.wso2.carbon.apimgt.throttling.siddhi.extension.util.kvstore;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Interface for a generic Key-Value store client.
+ * <p>
+ * The batch methods ({@link #supportsBatchOperations()}, {@link #getMultiple(List)} and
+ * {@link #executeBatch(List)}) are default methods, so existing implementations keep working
+ * without any change. Such clients are synced one key at a time, as before.
  */
 public interface KeyValueStoreClient {
 
@@ -89,4 +96,80 @@ public interface KeyValueStoreClient {
      * @param key The key whose mapping is to be removed from the store.
      */
     void delete(String key);
+
+    /**
+     * Tells whether this client sends {@link #getMultiple(List)} and {@link #executeBatch(List)}
+     * as real batches (for example Redis MGET and pipelining). Only such clients are synced in
+     * batches; the others are synced one key at a time.
+     *
+     * @return true if batch operations are supported natively, false otherwise (the default).
+     */
+    default boolean supportsBatchOperations() {
+        return false;
+    }
+
+    /**
+     * Retrieves the values of several keys (Redis MGET).
+     * The default implementation calls {@link #get(String)} once per key.
+     *
+     * @param keys The keys whose values are to be returned.
+     * @return the values in the same order as the keys, with null for a key that does not exist.
+     * @throws KeyValueStoreException if the values could not be read.
+     */
+    default List<String> getMultiple(List<String> keys) {
+        List<String> values = new ArrayList<>(keys.size());
+        for (String key : keys) {
+            values.add(get(key));
+        }
+        return values;
+    }
+
+    /**
+     * Executes several write operations in one batch (Redis pipeline).
+     * The default implementation runs each operation through the single-key methods.
+     *
+     * @param operations The operations to execute, in order.
+     * @return one reply per operation, in the same order. INCRBY and DECRBY reply with the new value
+     *         as a {@link Long}. For the other types any reply that is not an exception means success.
+     *         An operation that failed has a {@link KeyValueStoreException} as its reply.
+     * @throws KeyValueStoreException if the batch could not be sent at all.
+     */
+    default List<Object> executeBatch(List<KeyValueStoreOperation> operations) {
+        List<Object> replies = new ArrayList<>(operations.size());
+        for (KeyValueStoreOperation operation : operations) {
+            String key = operation.getKey();
+            try {
+                switch (operation.getType()) {
+                    case INCRBY:
+                        replies.add(incrementBy(key, operation.getAmount()));
+                        break;
+                    case DECRBY:
+                        replies.add(decrementBy(key, operation.getAmount()));
+                        break;
+                    case PEXPIRE:
+                        expireMillis(key, operation.getTtlMillis());
+                        replies.add(Boolean.TRUE);
+                        break;
+                    case PSETEX:
+                        setWithExpiry(key, operation.getValue(), operation.getTtlMillis());
+                        replies.add(Boolean.TRUE);
+                        break;
+                    case SET_NX_PX:
+                        // Not atomic here; clients that support batching do it in one command.
+                        if (get(key) == null) {
+                            setWithExpiry(key, operation.getValue(), operation.getTtlMillis());
+                        }
+                        replies.add(Boolean.TRUE);
+                        break;
+                    default:
+                        replies.add(new KeyValueStoreException("Unsupported operation: " + operation));
+                }
+            } catch (KeyValueStoreException e) {
+                replies.add(e);
+            } catch (RuntimeException e) {
+                replies.add(new KeyValueStoreException("Error during " + operation, e));
+            }
+        }
+        return replies;
+    }
 }
