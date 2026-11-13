@@ -1377,6 +1377,12 @@
             {% if apim.distributed_throttling.core_pool_size is defined %}
             <CorePoolSize>{{apim.distributed_throttling.core_pool_size}}</CorePoolSize>
             {% endif %}
+            {% if apim.distributed_throttling.enable_batch_sync is defined %}
+            <EnableBatchSync>{{apim.distributed_throttling.enable_batch_sync}}</EnableBatchSync>
+            {% endif %}
+            {% if apim.distributed_throttling.batch_size is defined %}
+            <BatchSize>{{apim.distributed_throttling.batch_size}}</BatchSize>
+            {% endif %}
             {% if apim.distributed_throttling.keyvalue_store is defined %}
             <KeyValueStoreOptions>
                 {% if apim.distributed_throttling.keyvalue_store.host is defined %}

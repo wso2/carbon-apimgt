@@ -18,12 +18,17 @@
 package org.wso2.carbon.apimgt.throttling.siddhi.extension;
 
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -35,6 +40,8 @@ import org.wso2.carbon.apimgt.throttling.siddhi.extension.internal.ServiceRefere
 import org.wso2.carbon.apimgt.throttling.siddhi.extension.util.kvstore.KeyValueStoreClient;
 import org.wso2.carbon.apimgt.throttling.siddhi.extension.util.kvstore.KeyValueStoreException;
 import org.wso2.carbon.apimgt.throttling.siddhi.extension.util.kvstore.KeyValueStoreManager;
+import org.wso2.carbon.apimgt.throttling.siddhi.extension.util.kvstore.KeyValueStoreOperation;
+import org.wso2.carbon.apimgt.throttling.siddhi.extension.util.kvstore.KeyValueStoreUnavailableException;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.query.selector.attribute.aggregator.AttributeAggregator;
@@ -63,6 +70,15 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
     private static boolean distributedThrottlingEnabled = false;
     private static int corePoolSize = 10;
     private static int kvStoreSyncIntervalMilliseconds = 10;
+    // Batch sync configs ([apim.distributed_throttling] enable_batch_sync and batch_size in deployment.toml)
+    private static boolean batchSyncEnabled = true;
+    private static int batchSize = DistributedThrottleConfig.DEFAULT_BATCH_SIZE;
+
+    // Rate-limits the error log of a failed batch (one log covers every key in it)
+    private static final AtomicLong lastBatchErrorLogTimestamp = new AtomicLong(0L);
+    // Sync statistics, logged at DEBUG level every SYNC_STATS_LOG_INTERVAL_MS
+    private static final long SYNC_STATS_LOG_INTERVAL_MS = 30000L; // 30 seconds
+    private static final SyncStats SYNC_STATS = new SyncStats();
 
     // Scheduler initialization control
     private static volatile boolean schedulerStarted = false;
@@ -75,6 +91,24 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
     private volatile boolean pendingReset = false;
     private volatile long storedWindowExpiry = 0L;
     private volatile boolean keyHasTTL = false;
+
+    // Incremented by every reset(). A batched reply is applied only if no reset happened after its
+    // operation was collected; otherwise the reply belongs to the closed window and is dropped.
+    private final AtomicLong resetEpoch = new AtomicLong(0L);
+    // Set when a batched read finds the key missing; the next tick creates it with SET NX PX "0".
+    // Guarded by kvStoreLock.
+    private boolean seedNeeded = false;
+    // True from the tick that collects a batched write (PSETEX, INCRBY/DECRBY, SET NX) for this key until its
+    // reply or failure is applied. syncWithKVStore() writes nothing meanwhile, so its writes cannot interleave
+    // with the batch. Guarded by kvStoreLock.
+    private boolean writeInFlight = false;
+    // Incremented by every direct sync (syncWithKVStore(), e.g. from currentState() or stop()). A batched read is
+    // applied only if no direct sync ran after it was collected: the direct sync may have sent the unsynced count
+    // with INCRBY, so the read's older value plus the unsynced count would leave those requests out.
+    // Guarded by kvStoreLock.
+    private long directSyncEpoch = 0L;
+    // Set by stop(). A batched write still in flight for this key then flushes the key itself when it completes.
+    private volatile boolean stopped = false;
 
 
     /**
@@ -95,6 +129,9 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
                         distributedThrottlingEnabled = config.isEnabled();
                         corePoolSize = config.getCorePoolSize();
                         kvStoreSyncIntervalMilliseconds = config.getSyncInterval();
+                        batchSyncEnabled = config.isBatchSyncEnabled();
+                        batchSize = config.getBatchSize() > 0
+                                ? config.getBatchSize() : DistributedThrottleConfig.DEFAULT_BATCH_SIZE;
                         DISTRIBUTED_THROTTLE_CONFIG = config; // volatile write last
                     }
                 }
@@ -172,12 +209,20 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
      * Pending resets (PSETEX "0") are flushed first and retried on failure; then any
      * accumulated delta is pushed via INCRBY/DECRBY, or the current Redis value is pulled
      * when there is no local change.
+     * Does nothing while a batched write for this key is in flight, and makes a batched read in flight stale.
      */
     private void syncWithKVStore() {
         synchronized (kvStoreLock) {
             if (kvStoreClient == null || key == null) {
                 return;
             }
+            if (writeInFlight) {
+                // Writing now could interleave with the batched write (e.g. its late PSETEX "0" would wipe an
+                // INCRBY sent here). The pending reset and delta stay for the next tick, or for the batch's
+                // completion if the key is stopped.
+                return;
+            }
+            directSyncEpoch++; // a batched read in flight for this key is older than this sync: drop its reply
             if (pendingReset) {
                 try {
                     // Do NOT reset localCounter here — reset() already zeroed it at window boundary.
@@ -252,6 +297,225 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
                     unsyncedCounter.addAndGet(currentUnsyncedCount);
                 }
             }
+        }
+    }
+
+    /**
+     * Batch sync, step 1 (collect): decides this key's operation for the current tick and adds it to the
+     * collector. Uses the same rules as {@link #syncWithKVStore()}, but does no I/O, so the lock is held
+     * only briefly.
+     * <ul>
+     *     <li>pending reset: PSETEX "0" with the remaining window TTL</li>
+     *     <li>unsynced delta: INCRBY/DECRBY, plus PEXPIRE if the key has no known TTL</li>
+     *     <li>key found missing on the last read: SET NX PX "0"</li>
+     *     <li>otherwise: read the key (MGET)</li>
+     * </ul>
+     * A write marks the key {@code writeInFlight} until its reply or failure is applied.
+     */
+    private void collectSyncUnit(BatchCollector collector) {
+        synchronized (kvStoreLock) {
+            if (kvStoreClient == null || key == null) {
+                return;
+            }
+            long epoch = resetEpoch.get();
+            long windowExpiry = storedWindowExpiry;
+            long remainingMillis = windowExpiry > 0 ? windowExpiry - System.currentTimeMillis() : 0L;
+            if (pendingReset) {
+                seedNeeded = false; // the reset writes the key
+                if (remainingMillis > 0) {
+                    collector.addWrite(new SyncUnit(this, SyncUnit.Kind.RESET, epoch, directSyncEpoch, windowExpiry,
+                            0L, KeyValueStoreOperation.setWithExpiry(key, "0", remainingMillis)));
+                    writeInFlight = true;
+                } else {
+                    // Same as syncWithKVStore(): nothing is written while the window expiry is unknown or past.
+                    keyHasTTL = false;
+                }
+                return;
+            }
+            long delta = unsyncedCounter.getAndSet(0L);
+            if (delta != 0) {
+                KeyValueStoreOperation count = delta > 0
+                        ? KeyValueStoreOperation.incrementBy(key, delta)
+                        : KeyValueStoreOperation.decrementBy(key, Math.abs(delta));
+                // INCRBY/DECRBY never sets a TTL. Stamp one the first time after a gap
+                // (empty windows) where the key was recreated without a TTL.
+                if (!keyHasTTL && remainingMillis > 0) {
+                    collector.addWrite(new SyncUnit(this, SyncUnit.Kind.COUNT, epoch, directSyncEpoch, windowExpiry,
+                            delta, count, KeyValueStoreOperation.expireMillis(key, remainingMillis)));
+                } else {
+                    collector.addWrite(new SyncUnit(this, SyncUnit.Kind.COUNT, epoch, directSyncEpoch, windowExpiry,
+                            delta, count));
+                }
+                writeInFlight = true;
+                return;
+            }
+            if (seedNeeded) {
+                seedNeeded = false;
+                if (remainingMillis > 0) {
+                    collector.addWrite(new SyncUnit(this, SyncUnit.Kind.SEED, epoch, directSyncEpoch, windowExpiry,
+                            0L, KeyValueStoreOperation.setIfAbsentWithExpiry(key, "0", remainingMillis)));
+                    writeInFlight = true;
+                    return;
+                }
+            }
+            collector.addRead(new SyncUnit(this, SyncUnit.Kind.READ, epoch, directSyncEpoch, windowExpiry, 0L));
+        }
+    }
+
+    /**
+     * Batch sync, step 3 (apply) for a read: takes the cluster-wide count from the MGET reply.
+     *
+     * @param value the key's value in the key-value store, or null if the key does not exist.
+     */
+    private void applyRead(SyncUnit unit, String value) {
+        synchronized (kvStoreLock) {
+            if (resetEpoch.get() != unit.resetEpoch) {
+                return; // reset() ran after the read was collected: the value is the closed window's total
+            }
+            if (directSyncEpoch != unit.directSyncEpoch) {
+                // currentState() or stop() synced the key directly after the read was collected and already set
+                // the local count from a newer value. The next tick reads the key again.
+                return;
+            }
+            if (value == null) {
+                // The key is missing, so the stored count is 0. It is created on the next tick.
+                setCounterFromStore(unit, 0L);
+                seedNeeded = true;
+                // If requests arrive first, their INCRBY/DECRBY recreates the key instead, so it must send PEXPIRE.
+                keyHasTTL = false;
+                return;
+            }
+            try {
+                setCounterFromStore(unit, Long.parseLong(value));
+            } catch (NumberFormatException e) {
+                logRateLimited("Error syncing with key-value store for the key " + key, e, false);
+            }
+        }
+    }
+
+    /**
+     * Batch sync, step 3 (apply) for a write: handles the pipeline replies of this key's operations.
+     *
+     * @param replies the replies of {@code unit.operations}, in the same order.
+     */
+    private void applyWriteReplies(SyncUnit unit, List<Object> replies) {
+        Object reply = replies.get(0);
+        if (reply instanceof Exception) {
+            // The store rejected the command, so it was not applied.
+            applyWriteFailure(unit, (Exception) reply, true, false);
+            return;
+        }
+        if (unit.kind == SyncUnit.Kind.COUNT && !(reply instanceof Number)) {
+            applyWriteFailure(unit, new KeyValueStoreException("Unexpected reply for " + unit.operations.get(0)
+                    + ": " + reply), true, false);
+            return;
+        }
+        synchronized (kvStoreLock) {
+            writeInFlight = false;
+            boolean noResetSinceCollect = resetEpoch.get() == unit.resetEpoch;
+            if (unit.kind == SyncUnit.Kind.RESET) {
+                // If another reset() ran meanwhile, its PSETEX is still pending and is written on a later tick.
+                if (noResetSinceCollect) {
+                    pendingReset = false;
+                    keyHasTTL = storedWindowExpiry == unit.windowExpiry;
+                }
+            } else if (unit.kind == SyncUnit.Kind.COUNT) {
+                if (replies.size() > 1) {
+                    Object ttlReply = replies.get(1);
+                    if (ttlReply instanceof Exception) {
+                        // Non-fatal: retried with the next INCRBY/DECRBY while keyHasTTL is false.
+                        logRateLimited("Could not set TTL via PEXPIRE for key " + key, (Exception) ttlReply, true);
+                    } else if (storedWindowExpiry == unit.windowExpiry) {
+                        keyHasTTL = true;
+                    }
+                }
+                if (noResetSinceCollect) {
+                    setCounterFromStore(unit, ((Number) reply).longValue());
+                }
+            }
+            // SEED: nothing to update. If the key exists now, the next read returns its value.
+        }
+        if (stopped) {
+            // stop() skipped its flush while this write was in flight: push what is left now.
+            flushToKVStore();
+        }
+    }
+
+    /**
+     * Batch sync, step 3 (apply) for a failed write. A failed reset stays pending and is retried on the
+     * next tick. A failed INCRBY/DECRBY delta is added back to the unsynced counter only when it was
+     * certainly not applied, and no reset made it part of the closed window.
+     * <p>
+     * When the batch may have reached the store (for example the connection dropped while the replies were
+     * read), the delta is dropped instead. Sending it again would count it twice whenever the store had
+     * applied it, and every node would throttle early for the rest of the window. Dropping it undercounts by
+     * this delta only when the store had not applied it. The local counter keeps these requests either way.
+     *
+     * @param logError           false when the whole batch failed and was already logged once for all its keys.
+     * @param mayHaveBeenApplied true when the store may have applied the write despite the failure.
+     */
+    private void applyWriteFailure(SyncUnit unit, Exception cause, boolean logError, boolean mayHaveBeenApplied) {
+        synchronized (kvStoreLock) {
+            writeInFlight = false;
+            if (logError) {
+                String message;
+                if (unit.kind == SyncUnit.Kind.RESET) {
+                    message = "Error resetting counter in key-value store for key " + key;
+                } else if (unit.kind == SyncUnit.Kind.SEED) {
+                    message = "Error seeding key-value store with 0 for key " + key;
+                } else {
+                    message = "Error syncing with key-value store for the key " + key;
+                }
+                logRateLimited(message, cause, false);
+            }
+            if (unit.kind == SyncUnit.Kind.COUNT && resetEpoch.get() == unit.resetEpoch && !mayHaveBeenApplied) {
+                unsyncedCounter.addAndGet(unit.delta);
+            }
+        }
+        if (stopped) {
+            // stop() skipped its flush while this write was in flight: push the unsynced delta and any
+            // pending reset now.
+            flushToKVStore();
+        }
+    }
+
+    /**
+     * Sets the local counter to a value read from the key-value store, plus the requests counted since the
+     * operation was collected (still in unsyncedCounter, not yet in the store). The caller holds kvStoreLock
+     * and has checked that no reset happened since the operation was collected.
+     */
+    private void setCounterFromStore(SyncUnit unit, long value) {
+        localCounter.set(value + unsyncedCounter.get());
+        if (resetEpoch.get() != unit.resetEpoch) {
+            // reset() does not take kvStoreLock, so it can run between the caller's check and the set above.
+            // Drop the closed window's value and keep only the requests counted since the reset.
+            localCounter.set(unsyncedCounter.get());
+        }
+    }
+
+    /**
+     * Logs a sync error for this key at most once per {@link #ERROR_LOG_INTERVAL_MS}.
+     */
+    private void logRateLimited(String message, Throwable t, boolean warnOnly) {
+        long currentTimeMillis = System.currentTimeMillis();
+        if (currentTimeMillis - lastErrorLogTimestamp.get() > ERROR_LOG_INTERVAL_MS) {
+            if (warnOnly) {
+                log.warn(message, t);
+            } else {
+                log.error(message, t);
+            }
+            lastErrorLogTimestamp.set(currentTimeMillis);
+        }
+    }
+
+    /**
+     * Best-effort flush of a pending reset and then of the unsynced delta. Both may be no-ops if the
+     * key-value store is down.
+     */
+    private void flushToKVStore() {
+        syncWithKVStore(); // flush pendingReset (PSETEX 0) if pending
+        if (!pendingReset) {
+            syncWithKVStore(); // push the new-window delta
         }
     }
 
@@ -349,6 +613,8 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
         if (log.isDebugEnabled()) {
             log.debug("DistributedCountAggregator: reset called");
         }
+        // Before zeroing the counter: a batched reply collected before this reset must see the new epoch.
+        resetEpoch.incrementAndGet();
         localCounter.set(0L);
         if (distributedThrottlingEnabled && kvStoreClient != null && key != null) {
             Long expiry = ThrottleStreamProcessor.getThreadLocalWindowExpiry();
@@ -370,6 +636,7 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
      * Stops the aggregator instance and performs cleanup.
      * Removes the aggregator from the active aggregator map, synchronizes any unsynced changes
      * with the key-value store, and shuts down the scheduler if there are no more active aggregators.
+     * If a batched write for this key is in flight, the flush runs when that write completes.
      * This method should be called when the aggregator is no longer needed.
      */
     @Override
@@ -380,12 +647,10 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
         try {
             // Only remove if key is not null and distributed throttling is enabled
             if (distributedThrottlingEnabled && key != null) {
+                stopped = true;
                 ACTIVE_AGGREGATORS.remove(key);
                 if (kvStoreClient != null) {
-                    syncWithKVStore(); // best-effort: flush pendingReset (PSETEX 0) if pending
-                    if (!pendingReset) {
-                        syncWithKVStore(); // best-effort: push new-window delta; both may be no-ops if Redis is down
-                    }
+                    flushToKVStore();
                 }
                 // Shutdown scheduler if no active aggregators exist
                 if (ACTIVE_AGGREGATORS.isEmpty()) {
@@ -508,30 +773,108 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
             }
 
             log.debug("Starting key-value store sync scheduler with interval: "
-                    + kvStoreSyncIntervalMilliseconds + " ms, pool size: " + corePoolSize);
+                    + kvStoreSyncIntervalMilliseconds + " ms, pool size: " + corePoolSize
+                    + ", batch sync: " + (batchSyncEnabled ? "enabled, batch size: " + batchSize : "disabled"));
 
             masterSyncTask = masterScheduler.scheduleAtFixedRate(() -> {
                 try {
-                    CompletableFuture<?>[] futures = ACTIVE_AGGREGATORS.values().stream()
-                            .map(aggregator -> CompletableFuture.runAsync(() -> {
-                                try {
-                                    aggregator.syncWithKVStore();
-                                } catch (Throwable t) {
-                                    log.error("Error syncing with key-value store for key " + aggregator.key, t);
-                                }
-                            }, kvStoreSyncScheduler))
-                            .toArray(CompletableFuture[]::new);
-                    if (futures.length == 0) {
-                        return;
-                    }
-                    CompletableFuture.allOf(futures).join();
-
+                    runSyncTick();
                 } catch (Throwable t) {
                     log.error("Error in key-value store sync scheduler task", t);
                 }
             }, kvStoreSyncIntervalMilliseconds, kvStoreSyncIntervalMilliseconds, TimeUnit.MILLISECONDS);
 
             schedulerStarted = true;
+        }
+    }
+
+    /**
+     * One sync tick over all active aggregators.
+     * <p>
+     * Keys whose client supports batch operations (and when batch sync is enabled) are synced in three steps:
+     * <ol>
+     *     <li>collect: each key's operation is added to a read list or a write list (brief lock, no I/O)</li>
+     *     <li>send: the lists are split into chunks of at most {@code batchSize} keys or commands, and the
+     *     chunks are sent in parallel on the sync pool, one MGET or one pipeline each</li>
+     *     <li>apply: each reply is given back to its key (brief lock, reset-epoch check)</li>
+     * </ol>
+     * The other keys are synced one by one with {@link #syncWithKVStore()}, as before.
+     */
+    private static void runSyncTick() {
+        long startNanos = System.nanoTime();
+        ScheduledExecutorService executor = kvStoreSyncScheduler;
+        if (executor == null) {
+            return;
+        }
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
+        Map<KeyValueStoreClient, BatchCollector> collectors = new IdentityHashMap<>();
+        int keyCount = 0;
+        int perKeySyncs = 0;
+        for (DistributedCountAttributeAggregator aggregator : ACTIVE_AGGREGATORS.values()) {
+            keyCount++;
+            KeyValueStoreClient client = aggregator.kvStoreClient;
+            if (batchSyncEnabled && client != null && client.supportsBatchOperations()) {
+                BatchCollector collector = collectors.get(client);
+                if (collector == null) {
+                    collector = new BatchCollector(client);
+                    collectors.put(client, collector);
+                }
+                try {
+                    aggregator.collectSyncUnit(collector);
+                } catch (Throwable t) {
+                    log.error("Error preparing key-value store sync for key " + aggregator.key, t);
+                }
+            } else {
+                perKeySyncs++;
+                try {
+                    futures.add(CompletableFuture.runAsync(() -> {
+                        try {
+                            aggregator.syncWithKVStore();
+                        } catch (Throwable t) {
+                            log.error("Error syncing with key-value store for key " + aggregator.key, t);
+                        }
+                    }, executor));
+                } catch (RejectedExecutionException e) {
+                    // The scheduler is shutting down. Nothing was taken from this key, so nothing is lost.
+                    log.debug("Key-value store sync skipped for key " + aggregator.key + ": scheduler is shutting down");
+                }
+            }
+        }
+
+        int readBatches = 0;
+        int writeBatches = 0;
+        int writeCommands = 0;
+        for (BatchCollector collector : collectors.values()) {
+            for (BatchChunk chunk : collector.toChunks(batchSize)) {
+                if (chunk.write) {
+                    writeBatches++;
+                    writeCommands += chunk.operationCount;
+                } else {
+                    readBatches++;
+                }
+                try {
+                    futures.add(CompletableFuture.runAsync(chunk, executor));
+                } catch (RejectedExecutionException e) {
+                    chunk.fail(e); // the scheduler is shutting down
+                }
+            }
+        }
+        if (!futures.isEmpty()) {
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture<?>[0])).join();
+        }
+        SYNC_STATS.record(keyCount, perKeySyncs, readBatches, writeBatches, writeCommands,
+                System.nanoTime() - startNanos);
+    }
+
+    /**
+     * Logs the error of a failed batch at most once per {@link #ERROR_LOG_INTERVAL_MS}.
+     */
+    private static void logBatchError(String message, Throwable t) {
+        long currentTimeMillis = System.currentTimeMillis();
+        long previous = lastBatchErrorLogTimestamp.get();
+        if (currentTimeMillis - previous > ERROR_LOG_INTERVAL_MS
+                && lastBatchErrorLogTimestamp.compareAndSet(previous, currentTimeMillis)) {
+            log.error(message, t);
         }
     }
 
@@ -590,5 +933,261 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
         return data != null && data.length > 1 && Boolean.TRUE.equals(data[1]);
     }
 
+    /**
+     * One key's work in a batched sync tick: a read, or one or two write operations.
+     */
+    private static final class SyncUnit {
+
+        enum Kind {
+            /** MGET the key. */
+            READ,
+            /** PSETEX "0" for a pending reset. */
+            RESET,
+            /** INCRBY/DECRBY the unsynced delta, plus PEXPIRE when the key has no known TTL. */
+            COUNT,
+            /** SET NX PX "0" for a key found missing. */
+            SEED
+        }
+
+        final DistributedCountAttributeAggregator owner;
+        final Kind kind;
+        // The owner's reset epoch, direct sync epoch and window expiry when the unit was collected
+        final long resetEpoch;
+        final long directSyncEpoch;
+        final long windowExpiry;
+        // The delta taken from the unsynced counter (COUNT only)
+        final long delta;
+        final List<KeyValueStoreOperation> operations;
+
+        SyncUnit(DistributedCountAttributeAggregator owner, Kind kind, long resetEpoch, long directSyncEpoch,
+                 long windowExpiry, long delta, KeyValueStoreOperation... operations) {
+            this.owner = owner;
+            this.kind = kind;
+            this.resetEpoch = resetEpoch;
+            this.directSyncEpoch = directSyncEpoch;
+            this.windowExpiry = windowExpiry;
+            this.delta = delta;
+            this.operations = operations.length == 0
+                    ? Collections.<KeyValueStoreOperation>emptyList() : Arrays.asList(operations);
+        }
+    }
+
+    /**
+     * The reads and writes collected in one tick for one key-value store client.
+     */
+    private static final class BatchCollector {
+
+        private final KeyValueStoreClient client;
+        private final List<SyncUnit> reads = new ArrayList<>();
+        private final List<SyncUnit> writes = new ArrayList<>();
+
+        BatchCollector(KeyValueStoreClient client) {
+            this.client = client;
+        }
+
+        void addRead(SyncUnit unit) {
+            reads.add(unit);
+        }
+
+        void addWrite(SyncUnit unit) {
+            writes.add(unit);
+        }
+
+        /**
+         * Splits the reads into chunks of at most {@code maxSize} keys and the writes into chunks of at most
+         * {@code maxSize} commands. A key's write operations (INCRBY and its PEXPIRE) stay in the same chunk.
+         */
+        List<BatchChunk> toChunks(int maxSize) {
+            List<BatchChunk> chunks = new ArrayList<>();
+            for (int from = 0; from < reads.size(); from += maxSize) {
+                List<SyncUnit> units = reads.subList(from, Math.min(from + maxSize, reads.size()));
+                chunks.add(new BatchChunk(client, units, false, 0));
+            }
+            List<SyncUnit> units = new ArrayList<>();
+            int operationCount = 0;
+            for (SyncUnit unit : writes) {
+                int unitOperations = unit.operations.size();
+                if (operationCount > 0 && operationCount + unitOperations > maxSize) {
+                    chunks.add(new BatchChunk(client, units, true, operationCount));
+                    units = new ArrayList<>();
+                    operationCount = 0;
+                }
+                units.add(unit);
+                operationCount += unitOperations;
+            }
+            if (!units.isEmpty()) {
+                chunks.add(new BatchChunk(client, units, true, operationCount));
+            }
+            return chunks;
+        }
+    }
+
+    /**
+     * One round trip of a batched tick: an MGET of up to batchSize keys, or a pipeline of up to batchSize
+     * write commands. Runs on the sync pool, then applies each reply to its key.
+     */
+    private static final class BatchChunk implements Runnable {
+
+        private final KeyValueStoreClient client;
+        private final List<SyncUnit> units;
+        final boolean write;
+        final int operationCount;
+
+        BatchChunk(KeyValueStoreClient client, List<SyncUnit> units, boolean write, int operationCount) {
+            this.client = client;
+            this.units = units;
+            this.write = write;
+            this.operationCount = operationCount;
+        }
+
+        @Override
+        public void run() {
+            try {
+                if (write) {
+                    sendWrites();
+                } else {
+                    sendReads();
+                }
+            } catch (Throwable t) {
+                log.error("Error in batched key-value store sync", t);
+            }
+        }
+
+        private void sendReads() {
+            List<String> keys = new ArrayList<>(units.size());
+            for (SyncUnit unit : units) {
+                keys.add(unit.owner.key);
+            }
+            List<String> values;
+            try {
+                values = client.getMultiple(keys);
+                if (values == null || values.size() != keys.size()) {
+                    throw new KeyValueStoreException("Expected " + keys.size() + " values from the key-value store"
+                            + " but got " + (values == null ? "none" : values.size()));
+                }
+            } catch (RuntimeException e) {
+                fail(e);
+                return;
+            }
+            for (int i = 0; i < units.size(); i++) {
+                SyncUnit unit = units.get(i);
+                try {
+                    unit.owner.applyRead(unit, values.get(i));
+                } catch (RuntimeException e) {
+                    log.error("Error applying key-value store value for key " + unit.owner.key, e);
+                }
+            }
+        }
+
+        private void sendWrites() {
+            List<KeyValueStoreOperation> operations = new ArrayList<>(operationCount);
+            for (SyncUnit unit : units) {
+                operations.addAll(unit.operations);
+            }
+            List<Object> replies;
+            try {
+                replies = client.executeBatch(operations);
+                if (replies == null || replies.size() != operations.size()) {
+                    throw new KeyValueStoreException("Expected " + operations.size() + " replies from the key-value"
+                            + " store but got " + (replies == null ? "none" : replies.size()));
+                }
+            } catch (RuntimeException e) {
+                fail(e);
+                return;
+            }
+            int index = 0;
+            for (SyncUnit unit : units) {
+                int unitOperations = unit.operations.size();
+                try {
+                    unit.owner.applyWriteReplies(unit, replies.subList(index, index + unitOperations));
+                } catch (RuntimeException e) {
+                    log.error("Error applying key-value store reply for key " + unit.owner.key, e);
+                }
+                index += unitOperations;
+            }
+        }
+
+        /**
+         * Handles a chunk that could not be sent or whose replies could not be read: logs once for the whole
+         * chunk and applies the failure to every key in it. Resets stay pending. Deltas are restored only when
+         * the chunk was certainly not sent (no connection, or the scheduler is shutting down); otherwise the
+         * store may have applied them, so they are not sent again (see applyWriteFailure).
+         */
+        void fail(Exception cause) {
+            SYNC_STATS.failedBatches.incrementAndGet();
+            boolean mayHaveBeenApplied = write && !(cause instanceof KeyValueStoreUnavailableException)
+                    && !(cause instanceof RejectedExecutionException);
+            logBatchError(write
+                    ? "Error writing " + operationCount + " operations of " + units.size() + " keys to the key-value store"
+                    + (mayHaveBeenApplied ? ". They may have been applied, so their counts are not sent again" : "")
+                    : "Error reading " + units.size() + " keys from the key-value store", cause);
+            if (!write) {
+                return; // a failed read changes nothing; the keys are read again on the next tick
+            }
+            for (SyncUnit unit : units) {
+                try {
+                    unit.owner.applyWriteFailure(unit, cause, false, mayHaveBeenApplied);
+                } catch (RuntimeException e) {
+                    log.error("Error restoring unsynced count for key " + unit.owner.key, e);
+                }
+            }
+        }
+    }
+
+    /**
+     * Sync statistics for the DEBUG summary logged every {@link #SYNC_STATS_LOG_INTERVAL_MS}.
+     * Updated by the master sync thread only, except {@code failedBatches}.
+     */
+    private static final class SyncStats {
+
+        private final AtomicLong failedBatches = new AtomicLong(0L);
+        private long windowStartMillis = System.currentTimeMillis();
+        private long ticks;
+        private long keys;
+        private long perKeySyncs;
+        private long readBatches;
+        private long writeBatches;
+        private long writeCommands;
+        private long totalTickNanos;
+        private long maxTickNanos;
+
+        void record(int keyCount, int perKeySyncCount, int readBatchCount, int writeBatchCount,
+                    int writeCommandCount, long tickNanos) {
+            ticks++;
+            keys += keyCount;
+            perKeySyncs += perKeySyncCount;
+            readBatches += readBatchCount;
+            writeBatches += writeBatchCount;
+            writeCommands += writeCommandCount;
+            totalTickNanos += tickNanos;
+            maxTickNanos = Math.max(maxTickNanos, tickNanos);
+
+            long now = System.currentTimeMillis();
+            if (now - windowStartMillis < SYNC_STATS_LOG_INTERVAL_MS) {
+                return;
+            }
+            if (log.isDebugEnabled()) {
+                log.debug(String.format("Distributed throttling sync in the last %d s: %d ticks, %.1f keys per tick,"
+                                + " %.1f MGET and %.1f pipeline round trips per tick, %.1f pipelined commands per"
+                                + " tick, %.1f per-key syncs per tick, %d failed batches, tick duration avg %.2f ms,"
+                                + " max %.2f ms",
+                        (now - windowStartMillis) / 1000, ticks, (double) keys / ticks,
+                        (double) readBatches / ticks, (double) writeBatches / ticks,
+                        (double) writeCommands / ticks, (double) perKeySyncs / ticks, failedBatches.getAndSet(0L),
+                        totalTickNanos / 1e6 / ticks, maxTickNanos / 1e6));
+            } else {
+                failedBatches.set(0L);
+            }
+            windowStartMillis = now;
+            ticks = 0;
+            keys = 0;
+            perKeySyncs = 0;
+            readBatches = 0;
+            writeBatches = 0;
+            writeCommands = 0;
+            totalTickNanos = 0;
+            maxTickNanos = 0;
+        }
+    }
 }
 
