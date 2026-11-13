@@ -256,17 +256,35 @@ public class GatewayUtils {
      * @param gatewayAPIDTO The DTO containing gateway API configurations, where the sequences
      *                      to be removed will be updated.
      */
+    /**
+     * Returns the key used to name an API's endpoints and endpoint sequences on deploy and undeploy.
+     *
+     * @param api The API.
+     * @return The key, in the form {@code <name>--v<version>}.
+     */
+    public static String getEndpointKey(API api) {
+
+        return api.getId().getApiName() + "--v" + api.getId().getVersion();
+    }
+
     public static void setEndpointSequencesToBeRemoved(API api, GatewayAPIDTO gatewayAPIDTO) {
 
+        String endpointKey = getEndpointKey(api);
         String productionEndpointSequence =
-                APIUtil.getEndpointSequenceName(api) + AIAPIConstants.ENDPOINT_SEQUENCE
-                        + APIConstants.APIEndpoint.PRODUCTION;
+                endpointKey + AIAPIConstants.ENDPOINT_SEQUENCE + APIConstants.APIEndpoint.PRODUCTION;
         gatewayAPIDTO.setSequencesToBeRemove(
                 addStringToList(productionEndpointSequence, gatewayAPIDTO.getSequencesToBeRemove()));
         String sandboxEndpointSequence =
-                APIUtil.getEndpointSequenceName(api) + AIAPIConstants.ENDPOINT_SEQUENCE
-                        + APIConstants.APIEndpoint.SANDBOX;
+                endpointKey + AIAPIConstants.ENDPOINT_SEQUENCE + APIConstants.APIEndpoint.SANDBOX;
         gatewayAPIDTO.setSequencesToBeRemove(
                 addStringToList(sandboxEndpointSequence, gatewayAPIDTO.getSequencesToBeRemove()));
+
+        String faultSequencePrefix = endpointKey + AIAPIConstants.ENDPOINT_FAULT_SEQUENCE;
+        String productionFaultSequence = faultSequencePrefix + APIConstants.APIEndpoint.PRODUCTION;
+        gatewayAPIDTO.setSequencesToBeRemove(
+                addStringToList(productionFaultSequence, gatewayAPIDTO.getSequencesToBeRemove()));
+        String sandboxFaultSequence = faultSequencePrefix + APIConstants.APIEndpoint.SANDBOX;
+        gatewayAPIDTO.setSequencesToBeRemove(
+                addStringToList(sandboxFaultSequence, gatewayAPIDTO.getSequencesToBeRemove()));
     }
 }

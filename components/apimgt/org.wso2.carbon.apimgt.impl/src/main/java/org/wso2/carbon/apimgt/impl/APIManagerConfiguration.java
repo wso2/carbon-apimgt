@@ -3174,6 +3174,33 @@ public class APIManagerConfiguration {
                         log.warn("Invalid value for defaultRequestTimeout.", e);
                     }
                 }
+                OMElement enableFaultFailoverElement =
+                        failoverConfigurationsElement.getFirstChildWithName(new QName(APIConstants.AI
+                                .AI_CONFIGURATION_FAILOVER_CONFIGURATIONS_HANDLE_TRANSPORT_FAILURES));
+                if (enableFaultFailoverElement != null) {
+                    String enableFaultFailoverText = StringUtils.trimToEmpty(enableFaultFailoverElement.getText());
+                    if (enableFaultFailoverText.isEmpty()) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Model failover on timeouts and connection errors "
+                                    + "(apim.ai.failover_configurations.handle_transport_failures) is not set. "
+                                    + "Using the default: " + failoverConfigurations.isFaultFailoverEnabled());
+                        }
+                    } else if (Boolean.TRUE.toString().equalsIgnoreCase(enableFaultFailoverText)
+                            || Boolean.FALSE.toString().equalsIgnoreCase(enableFaultFailoverText)) {
+                        boolean enableFaultFailover = Boolean.parseBoolean(enableFaultFailoverText);
+                        failoverConfigurations.setFaultFailoverEnabled(enableFaultFailover);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Model failover on timeouts and connection errors "
+                                    + "(apim.ai.failover_configurations.handle_transport_failures) is set to: "
+                                    + enableFaultFailover);
+                        }
+                    } else {
+                        log.warn("Invalid value '" + enableFaultFailoverText + "' for "
+                                + "apim.ai.failover_configurations.handle_transport_failures (model failover on "
+                                + "timeouts and connection errors). Expected true or false. Using the default: "
+                                + failoverConfigurations.isFaultFailoverEnabled());
+                    }
+                }
                 aiapiConfigurationsDTO.setFailoverConfigurations(failoverConfigurations);
             } else {
                 log.debug("Failover configurations are not defined in AI configuration.");

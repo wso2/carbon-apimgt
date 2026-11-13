@@ -22,11 +22,14 @@ import org.json.simple.parser.JSONParser;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.powermock.reflect.Whitebox;
+import org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.WebSocketTopicMappingConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -34,6 +37,7 @@ import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.TemplateBuilderUtil;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -345,6 +349,80 @@ public class TemplateBuilderUtilTest {
         }
     }
 
+    // --- Fault-path failover (timeouts / connection errors) ---
+
+    @Test
+    public void testHasModelFailoverPolicyIsFalseWhenApiHasNoPolicies() throws Exception {
+
+        API api = new API(new APIIdentifier("admin", "OpenAIAPI", "1.0"));
+
+        Assert.assertFalse(invokeHasModelFailoverPolicy(api));
+    }
+
+    @Test
+    public void testHasModelFailoverPolicyIsTrueWhenAttachedAtApiLevel() throws Exception {
+
+        API api = apiWithModelFailoverPolicyAtApiLevel(
+                "{\"production\":{\"targetModel\":{\"model\":\"gpt-4o\"}}}");
+
+        Assert.assertTrue(invokeHasModelFailoverPolicy(api));
+    }
+
+    @Test
+    public void testHasModelFailoverPolicyIsTrueWhenAttachedOnlyAtResourceLevel() throws Exception {
+
+        API api = new API(new APIIdentifier("admin", "OpenAIAPI", "1.0"));
+        // No API-level policy at all; only one resource has it.
+        URITemplate chatResource = uriTemplateWithModelFailoverPolicy(
+                "{\"production\":{\"targetModel\":{\"model\":\"gpt-4o\"}}}");
+        Set<URITemplate> uriTemplates = new HashSet<>(Collections.singletonList(chatResource));
+        api.setUriTemplates(uriTemplates);
+
+        Assert.assertTrue(invokeHasModelFailoverPolicy(api));
+    }
+
+    @Test
+    public void testHasModelFailoverPolicyIgnoresOtherPolicyTypes() throws Exception {
+
+        API api = new API(new APIIdentifier("admin", "OpenAIAPI", "1.0"));
+        OperationPolicy rateLimitPolicy = new OperationPolicy();
+        rateLimitPolicy.setPolicyName("rateLimiting");
+        api.setApiPolicies(Collections.singletonList(rateLimitPolicy));
+
+        Assert.assertFalse(invokeHasModelFailoverPolicy(api));
+    }
+
+    private boolean invokeHasModelFailoverPolicy(API api) throws Exception {
+
+        return Whitebox.invokeMethod(TemplateBuilderUtil.class, "hasModelFailoverPolicy", api);
+    }
+
+    private API apiWithModelFailoverPolicyAtApiLevel(String failoverConfigsJson) {
+
+        API api = new API(new APIIdentifier("admin", "OpenAIAPI", "1.0"));
+        OperationPolicy policy = modelFailoverPolicy(failoverConfigsJson);
+        api.setApiPolicies(Collections.singletonList(policy));
+        return api;
+    }
+
+    private URITemplate uriTemplateWithModelFailoverPolicy(String failoverConfigsJson) {
+
+        URITemplate template = new URITemplate();
+        template.setUriTemplate("/chat/completions");
+        template.setOperationPolicies(Collections.singletonList(modelFailoverPolicy(failoverConfigsJson)));
+        return template;
+    }
+
+    private OperationPolicy modelFailoverPolicy(String failoverConfigsJson) {
+
+        OperationPolicy policy = new OperationPolicy();
+        policy.setPolicyName(AIAPIConstants.MODEL_FAILOVER_POLICY_NAME);
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("failoverConfigs", failoverConfigsJson);
+        policy.setParameters(parameters);
+        return policy;
+    }
+
     private void assertWSGqlSubEpConfig(JSONObject newEpConfigJson, JSONObject oldEpConfigJson) {
         Assert.assertEquals(APIConstants.ENDPOINT_TYPE_GRAPHQL,
                 newEpConfigJson.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE));
@@ -388,4 +466,165 @@ public class TemplateBuilderUtilTest {
                     APIConstants.WS_PROTOCOL_URL_PREFIX), wsSandboxUrl);
         }
     }
+
+    @Test
+    public void testDeployWithoutFaultFailoverWhenTheFaultTemplateIsMissing() throws Exception {
+
+        API api = apiWithModelFailoverPolicyAtApiLevel("{\"production\":{\"targetModel\":{\"model\":\"gpt-4o\"}}}");
+        APITemplateBuilder builder = Mockito.mock(APITemplateBuilder.class);
+        // An older or customised api_templates folder without the fault template.
+        Mockito.when(builder.getStringForEndpointsFaultSequence(Mockito.anyString()))
+                .thenThrow(new org.wso2.carbon.apimgt.impl.template.APITemplateException("Velocity Error",
+                        new org.apache.velocity.exception.ResourceNotFoundException("Unable to find resource")));
+        Mockito.when(builder.getStringForEndpoints(Mockito.anyString(), Mockito.anyList(), Mockito.any(),
+                Mockito.anyBoolean())).thenReturn("<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"x\"/>");
+        GatewayAPIDTO gatewayAPIDTO = new GatewayAPIDTO();
+
+        Whitebox.invokeMethod(TemplateBuilderUtil.class, "addEndpointsSequence", "PRODUCTION",
+                new ArrayList<>(), null, api, gatewayAPIDTO, builder);
+
+        // Deployed as before the feature: the endpoints sequence without onError, and no fault sequence.
+        Mockito.verify(builder).getStringForEndpoints(Mockito.eq("PRODUCTION"), Mockito.anyList(), Mockito.any(),
+                Mockito.eq(false));
+        Assert.assertEquals(1, gatewayAPIDTO.getSequenceToBeAdd().length);
+        Assert.assertFalse(gatewayAPIDTO.getSequenceToBeAdd()[0].getName().contains("_EndpointsFaultSeq"));
+    }
+
+    @Test
+    public void testDeployFailsWhenTheFaultTemplateCannotBeRendered() throws Exception {
+
+        API api = apiWithModelFailoverPolicyAtApiLevel("{\"production\":{\"targetModel\":{\"model\":\"gpt-4o\"}}}");
+        APITemplateBuilder builder = Mockito.mock(APITemplateBuilder.class);
+        // A customised or migrated api_templates folder without the fault template.
+        Mockito.when(builder.getStringForEndpointsFaultSequence(Mockito.anyString()))
+                .thenThrow(new org.wso2.carbon.apimgt.impl.template.APITemplateException("missing"));
+        GatewayAPIDTO gatewayAPIDTO = new GatewayAPIDTO();
+
+        try {
+            Whitebox.invokeMethod(TemplateBuilderUtil.class, "addEndpointsSequence", "PRODUCTION",
+                    new ArrayList<>(), null, api, gatewayAPIDTO, builder);
+            Assert.fail("The deployment must fail when the fault sequence cannot be rendered");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("Could not render the fault failover sequence"));
+        }
+
+        // Nothing is deployed: the endpoints sequence is not rendered and no sequence is added.
+        Mockito.verify(builder, Mockito.never()).getStringForEndpoints(Mockito.anyString(), Mockito.anyList(),
+                Mockito.any(), Mockito.anyBoolean());
+        Assert.assertNull(gatewayAPIDTO.getSequenceToBeAdd());
+    }
+
+    @Test
+    public void testATemplateBuilderWrittenAgainstTheOldInterfaceStillWorks() throws Exception {
+
+        // Only the original 3-argument method is implemented; the new methods are defaults.
+        APITemplateBuilder oldBuilder = new APITemplateBuilder() {
+            public String getConfigStringForTemplate(org.wso2.carbon.apimgt.api.model.Environment e) {
+                return null;
+            }
+
+            public String getConfigStringForAIAPI(org.wso2.carbon.apimgt.api.model.Environment e,
+                    org.wso2.carbon.apimgt.api.model.SimplifiedEndpoint p,
+                    org.wso2.carbon.apimgt.api.model.SimplifiedEndpoint sb) {
+                return null;
+            }
+
+            public String getConfigStringForPrototypeScriptAPI(org.wso2.carbon.apimgt.api.model.Environment e) {
+                return null;
+            }
+
+            public String getConfigStringEndpointConfigTemplate(String t, String u,
+                    org.wso2.carbon.apimgt.api.dto.EndpointConfigDTO c) {
+                return null;
+            }
+
+            public String getConfigStringForWebSocketEndpointTemplate(String t, String r, String u) {
+                return null;
+            }
+
+            public String getStringForEndpoints(String stage,
+                    java.util.List<org.wso2.carbon.apimgt.api.model.SimplifiedEndpoint> eps,
+                    org.wso2.carbon.apimgt.api.model.SimplifiedEndpoint d) {
+                return "<old/>";
+            }
+        };
+
+        Assert.assertEquals("<old/>", oldBuilder.getStringForEndpoints("PRODUCTION", new ArrayList<>(), null, true));
+        try {
+            oldBuilder.getStringForEndpointsFaultSequence("PRODUCTION");
+            Assert.fail("expected an APITemplateException");
+        } catch (org.wso2.carbon.apimgt.impl.template.APITemplateException e) {
+            Assert.assertTrue(e.getMessage().contains("not supported"));
+        }
+    }
+
+    @Test
+    public void testDeployFailsWhenTheFaultTemplateIsNotValidXml() throws Exception {
+
+        API api = apiWithModelFailoverPolicyAtApiLevel("{\"production\":{\"targetModel\":{\"model\":\"gpt-4o\"}}}");
+        APITemplateBuilder builder = Mockito.mock(APITemplateBuilder.class);
+        // A fault template that is broken partway down: the XML cannot be parsed.
+        Mockito.when(builder.getStringForEndpointsFaultSequence(Mockito.anyString()))
+                .thenReturn("<sequence xmlns=\"http://ws.apache.org/ns/synapse\"><unclosed>");
+        GatewayAPIDTO gatewayAPIDTO = new GatewayAPIDTO();
+
+        try {
+            Whitebox.invokeMethod(TemplateBuilderUtil.class, "addEndpointsSequence", "PRODUCTION",
+                    new ArrayList<>(), null, api, gatewayAPIDTO, builder);
+            Assert.fail("The deployment must fail when the fault sequence is not valid XML");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("fault failover sequence"));
+        }
+
+        Mockito.verify(builder, Mockito.never()).getStringForEndpoints(Mockito.anyString(), Mockito.anyList(),
+                Mockito.any(), Mockito.anyBoolean());
+        Assert.assertNull(gatewayAPIDTO.getSequenceToBeAdd());
+    }
+
+    @Test
+    public void testDeployStillSucceedsWhenACustomisedEndpointsTemplateHasNoOnError() throws Exception {
+
+        API api = apiWithModelFailoverPolicyAtApiLevel("{\"production\":{\"targetModel\":{\"model\":\"gpt-4o\"}}}");
+        APITemplateBuilder builder = Mockito.mock(APITemplateBuilder.class);
+        Mockito.when(builder.getStringForEndpointsFaultSequence(Mockito.anyString()))
+                .thenReturn("<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"f\"/>");
+        // An older customised endpoints template: no onError attribute.
+        Mockito.when(builder.getStringForEndpoints(Mockito.anyString(), Mockito.anyList(), Mockito.any(),
+                Mockito.anyBoolean())).thenReturn("<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"x\"/>");
+        GatewayAPIDTO gatewayAPIDTO = new GatewayAPIDTO();
+
+        Whitebox.invokeMethod(TemplateBuilderUtil.class, "addEndpointsSequence", "PRODUCTION",
+                new ArrayList<>(), null, api, gatewayAPIDTO, builder);
+
+        // Only a warning is logged; both sequences are still deployed.
+        Assert.assertEquals(2, gatewayAPIDTO.getSequenceToBeAdd().length);
+    }
+
+    @Test
+    public void testDeployStillSucceedsWhenACustomisedEndpointsTemplateRoutesFaultsElsewhere() throws Exception {
+
+        API api = apiWithModelFailoverPolicyAtApiLevel("{\"production\":{\"targetModel\":{\"model\":\"gpt-4o\"}}}");
+        APITemplateBuilder builder = Mockito.mock(APITemplateBuilder.class);
+        Mockito.when(builder.getStringForEndpointsFaultSequence(Mockito.anyString()))
+                .thenReturn("<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"f\"/>");
+        // A customised endpoints template whose onError names another sequence.
+        Mockito.when(builder.getStringForEndpoints(Mockito.anyString(), Mockito.anyList(), Mockito.any(),
+                Mockito.anyBoolean())).thenReturn("<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"x\" "
+                + "onError=\"customErrorSeq\"/>");
+        GatewayAPIDTO gatewayAPIDTO = new GatewayAPIDTO();
+
+        Whitebox.invokeMethod(TemplateBuilderUtil.class, "addEndpointsSequence", "PRODUCTION",
+                new ArrayList<>(), null, api, gatewayAPIDTO, builder);
+
+        // Only a warning is logged; both sequences are still deployed and the custom onError is kept.
+        Assert.assertEquals(2, gatewayAPIDTO.getSequenceToBeAdd().length);
+        boolean customOnErrorKept = false;
+        for (org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO sequence : gatewayAPIDTO.getSequenceToBeAdd()) {
+            if (sequence.getName().contains("_EndpointsSeq")) {
+                customOnErrorKept = sequence.getContent().contains("customErrorSeq");
+            }
+        }
+        Assert.assertTrue("the customised onError must be left as it is", customOnErrorKept);
+    }
+
 }
