@@ -323,7 +323,7 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.com.atlassian.oai</groupId>
-            <artifactId>swagger-request-validator-core-v3</artifactId>
+            <artifactId>openapi-request-validator-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
