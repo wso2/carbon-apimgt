@@ -2115,4 +2115,18 @@ public class GatewayUtils {
         }
         return null;
     }
+
+    /**
+     * Removes the given properties from the message context.
+     *
+     * @param messageContext The message context to remove the properties from.
+     * @param propertyNames  The names of the properties to remove.
+     */
+    public static void removeProperties(org.apache.synapse.MessageContext messageContext, String... propertyNames) {
+
+        Set keySet = messageContext.getPropertyKeySet();
+        for (String propertyName : propertyNames) {
+            keySet.remove(propertyName);
+        }
+    }
 }
