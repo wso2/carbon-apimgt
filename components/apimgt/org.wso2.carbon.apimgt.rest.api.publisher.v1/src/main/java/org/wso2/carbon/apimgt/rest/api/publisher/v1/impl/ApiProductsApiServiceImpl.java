@@ -690,19 +690,28 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     @Override
     public Response exportAPIProduct(String name, String version, String providerName, String revisionNumber,
                                      String format, Boolean preserveStatus, Boolean exportLatestRevision,
-                                     MessageContext messageContext) throws APIManagementException {
+                                     Boolean preserveCredentials, MessageContext messageContext)
+            throws APIManagementException {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         //If not specified status is preserved by default
         preserveStatus = preserveStatus == null || preserveStatus;
+        //If not specified preserveCredentials is set to false by default
+        preserveCredentials = preserveCredentials != null && preserveCredentials;
 
         // Default export format is YAML
         ExportFormat exportFormat = StringUtils.isNotEmpty(format) ? ExportFormat.valueOf(format.toUpperCase()) :
                 ExportFormat.YAML;
+        // ScopesToExposeCredentials and ExposeEndpointPassword govern credential export. The resolved value is
+        // passed down as preserveCredentials.
+        preserveCredentials = RestApiPublisherUtils.resolvePreserveCredentialsForExport(
+                (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
+                        .get(RestApiConstants.USER_REST_API_SCOPES),
+                organization, preserveCredentials, "API Product " + name + "-" + version);
         ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
         try {
             File file = importExportAPI
                     .exportAPIProduct(null, name, version, providerName, revisionNumber, exportFormat, preserveStatus,
-                            true, true, exportLatestRevision, organization);
+                            true, preserveCredentials, exportLatestRevision, organization);
             return Response.ok(file)
                     .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\""
                             + file.getName() + "\"")

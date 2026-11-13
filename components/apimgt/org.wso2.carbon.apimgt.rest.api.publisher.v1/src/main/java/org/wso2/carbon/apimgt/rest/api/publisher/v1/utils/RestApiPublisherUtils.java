@@ -35,6 +35,8 @@ import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MimeType;
 import org.apache.tika.mime.MimeTypeException;
 import org.apache.tika.mime.MimeTypes;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIComplianceException;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -75,6 +77,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.HashSet;
@@ -86,6 +89,83 @@ import static org.wso2.carbon.apimgt.impl.APIConstants.GOVERNANCE_COMPLIANCE_ERR
 public class RestApiPublisherUtils {
 
     private static final Log log = LogFactory.getLog(RestApiPublisherUtils.class);
+
+    /**
+     * Code-defined default set of scopes permitted to export decrypted credentials, used when the
+     * tenant-conf does not define {@code ScopesToExposeCredentials}. By default these scopes
+     * map only to the admin and Internal/devops roles.
+     */
+    private static final List<String> DEFAULT_SCOPES_TO_EXPOSE_CREDENTIALS = Arrays.asList(
+            "apim:api_import_export", "apim:mcp_server_import_export", "apim:api_product_import_export");
+
+    /**
+     * Resolves the effective {@code preserveCredentials} value for a Publisher export.
+     * <p>
+     * Credentials are exported only when the caller holds at least one scope from the tenant's
+     * {@code ScopesToExposeCredentials} list, and then only if {@code preserveCredentials=true} is requested or
+     * {@code ExposeEndpointPassword} is enabled. The result is passed down as {@code preserveCredentials}; when it
+     * is false, the export masks endpoint security even if {@code ExposeEndpointPassword} is enabled.
+     *
+     * @param tokenScopes         the scopes the caller holds for the export request (from the authenticated context)
+     * @param tenantDomain        the tenant whose configuration governs the decision
+     * @param preserveCredentials the requested preserveCredentials value
+     * @param exportedArtifact    description of the exported artifact, used for logging
+     * @return the effective preserveCredentials value for the export
+     * @throws APIManagementException if the tenant configuration cannot be read
+     */
+    public static boolean resolvePreserveCredentialsForExport(String[] tokenScopes, String tenantDomain,
+            boolean preserveCredentials, String exportedArtifact) throws APIManagementException {
+
+        if (!isCredentialExportAllowed(tokenScopes, tenantDomain)) {
+            if (preserveCredentials) {
+                log.warn("Credential export not permitted (caller lacks a scope in ScopesToExposeCredentials). "
+                        + "Exporting " + exportedArtifact + " with credentials masked.");
+            }
+            return false;
+        }
+        return preserveCredentials || APIMappingUtil.checkEndpointSecurityPasswordEnabled(tenantDomain);
+    }
+
+    /**
+     * Determines whether the caller holds at least one scope from the tenant's {@code ScopesToExposeCredentials}
+     * list. The list is read from tenant-conf; when the key is absent the code-defined default list applies, and
+     * when it is present (including an empty list, which denies everyone) it is used as-is.
+     *
+     * @param tokenScopes  the scopes the caller holds for the export request
+     * @param tenantDomain the tenant whose configuration governs the decision
+     * @return true if the caller is permitted to receive credentials in an export
+     * @throws APIManagementException if the tenant configuration cannot be read
+     */
+    private static boolean isCredentialExportAllowed(String[] tokenScopes, String tenantDomain)
+            throws APIManagementException {
+
+        if (tokenScopes == null || tokenScopes.length == 0) {
+            return false;
+        }
+        JSONObject tenantConfig = APIUtil.getTenantConfig(tenantDomain);
+        // Allowed scopes: absent => code default list; present (including empty) => use exactly as defined.
+        List<String> allowedScopes;
+        Object scopesValue = tenantConfig.get(APIConstants.API_TENANT_CONF_SCOPES_TO_EXPOSE_CREDENTIALS);
+        if (scopesValue == null) {
+            allowedScopes = DEFAULT_SCOPES_TO_EXPOSE_CREDENTIALS;
+        } else {
+            allowedScopes = new ArrayList<>();
+            if (scopesValue instanceof JSONArray) {
+                for (Object scope : (JSONArray) scopesValue) {
+                    if (scope != null) {
+                        allowedScopes.add(scope.toString());
+                    }
+                }
+            }
+        }
+        Set<String> callerScopes = new HashSet<>(Arrays.asList(tokenScopes));
+        for (String allowedScope : allowedScopes) {
+            if (callerScopes.contains(allowedScope)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * Attaches a file to the specified document

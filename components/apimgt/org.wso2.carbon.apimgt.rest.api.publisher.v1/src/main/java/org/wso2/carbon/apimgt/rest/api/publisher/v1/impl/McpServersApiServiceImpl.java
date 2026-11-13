@@ -2051,6 +2051,12 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                     ExportFormat.YAML;
             try {
                 String organization = RestApiUtil.getValidatedOrganization(messageContext);
+                // ScopesToExposeCredentials and ExposeEndpointPassword govern credential export. The resolved
+                // value is passed down as preserveCredentials.
+                preserveCredentials = RestApiPublisherUtils.resolvePreserveCredentialsForExport(
+                        (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
+                                .get(RestApiConstants.USER_REST_API_SCOPES),
+                        organization, preserveCredentials, "MCP Server " + mcpServerId);
                 ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
                 File file = importExportAPI
                         .exportMCPServer(mcpServerId, name, version, revisionNumber, providerName, preserveStatus,

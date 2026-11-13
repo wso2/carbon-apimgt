@@ -210,6 +210,12 @@ public class ExportUtils {
         int tenantId;
         String currentApiUuid;
 
+        // When credentials are not preserved, mask the endpoint security of the main endpoint config so that
+        // ExposeEndpointPassword cannot expose it on export.
+        if (!preserveCredentials && apiDtoToReturn.getEndpointConfig() instanceof Map) {
+            APIMappingUtil.maskEndpointSecurityOnExport((Map) apiDtoToReturn.getEndpointConfig());
+        }
+
         if (apiDtoToReturn.isAPIDTO() && StringUtils.isNotBlank(originalDevPortalUrl)) {
             setAdvertiseOnlySpecificPropertiesToDTO((APIDTO) apiDtoToReturn.getWrappedDTO(), originalDevPortalUrl);
         }
@@ -940,6 +946,15 @@ public class ExportUtils {
                 apiEndpointDTOList.add(
                         APIMappingUtil.fromAPIEndpointToDTO(apiEndpointInfo, organization, preserveCredentials));
             }
+            // When credentials are not preserved, mask endpoint security so that ExposeEndpointPassword cannot
+            // expose it in the separate endpoint files either.
+            if (!preserveCredentials) {
+                for (APIEndpointDTO apiEndpointDTO : apiEndpointDTOList) {
+                    if (apiEndpointDTO.getEndpointConfig() instanceof Map) {
+                        APIMappingUtil.maskEndpointSecurityOnExport((Map) apiEndpointDTO.getEndpointConfig());
+                    }
+                }
+            }
             writeDTOListToFile(apiEndpointDTOList, archivePath, ImportExportConstants.API_ENDPOINTS_FILE_LOCATION,
                     ImportExportConstants.API_ENDPOINTS_TYPE, exportFormat);
         } catch (APIImportExportException e) {
@@ -976,6 +991,17 @@ public class ExportUtils {
                 for (Backend backend : backends) {
                     backendAPIDTOList.add(APIMappingUtil.fromBackendAPIToDTO(backend, organization,
                             preserveCredentials));
+                }
+                // When credentials are not preserved, mask endpoint security so that ExposeEndpointPassword cannot
+                // expose it in the separate backend files either.
+                if (!preserveCredentials) {
+                    for (BackendDTO backendDTO : backendAPIDTOList) {
+                        Object backendConfig = backendDTO.getEndpointConfig();
+                        if (backendConfig instanceof String) {
+                            backendDTO.setEndpointConfig(
+                                    APIMappingUtil.maskEndpointSecurityOnExport((String) backendConfig));
+                        }
+                    }
                 }
                 writeDTOListToFile(backendAPIDTOList, archivePath, ImportExportConstants.BACKENDS_FILE_LOCATION,
                         ImportExportConstants.BACKENDS_TYPE, exportFormat);
