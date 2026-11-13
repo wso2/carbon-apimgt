@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.impl.dto.SoapToRestMediationDto;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.SequenceUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.internal.ServiceReferenceHolder;
@@ -59,6 +60,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
     public static final String TEMPLATE_TYPE_PROTOTYPE = "prototype_template";
     public static final String TEMPLATE_AI_API = "ai_api_template";
     public static final String TEMPLATE_AI_API_ENDPOINTS_SEQUENCE = "ai_api_endpoints_seq_template";
+    public static final String TEMPLATE_AI_API_ENDPOINTS_FAULT_SEQUENCE = "ai_api_endpoints_fault_seq_template";
     public static final String TEMPLATE_DEFAULT_API = "default_api_template";
     public static final String TEMPLATE_DEFAULT_WS_API = "default_ws_api_template";
     private static final Log log = LogFactory.getLog(APITemplateBuilderImpl.class);
@@ -376,7 +378,14 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
      */
     @Override
     public String getStringForEndpoints(String deploymentStage, List<SimplifiedEndpoint> endpoints,
-                                        SimplifiedEndpoint defaultEndpoint)
+                                        SimplifiedEndpoint defaultEndpoint) throws APITemplateException {
+
+        return getStringForEndpoints(deploymentStage, endpoints, defaultEndpoint, false);
+    }
+
+    @Override
+    public String getStringForEndpoints(String deploymentStage, List<SimplifiedEndpoint> endpoints,
+                                        SimplifiedEndpoint defaultEndpoint, boolean faultFailoverEnabled)
             throws APITemplateException {
 
         StringWriter writer = new StringWriter();
@@ -405,12 +414,66 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             context.put("llmProviderId", api.getAiConfiguration().getLlmProviderId());
             context.put("deploymentStage", deploymentStage);
             context.put("retryCount", APIUtil.getRetryAttemptsForFailoverConfigurations());
+            context.put("faultFailoverEnabled", faultFailoverEnabled);
             t.merge(context, writer);
         } catch (Exception e) {
             log.error("Velocity Error", e);
             throw new APITemplateException("Velocity Error", e);
         }
         return writer.toString();
+    }
+
+    /**
+     * Renders the fault sequence the endpoints sequence's onError attribute points to. It needs only the API
+     * and the stage, so it builds a small context instead of the full endpoint one.
+     *
+     * @param deploymentStage The stage of deployment (PRODUCTION / SANDBOX).
+     * @return The rendered fault sequence.
+     * @throws APITemplateException If an error occurs during rendering.
+     */
+    @Override
+    public String getStringForEndpointsFaultSequence(String deploymentStage) throws APITemplateException {
+
+        if (api == null) {
+            throw new APITemplateException("Cannot render the fault sequence: no API is set on the builder.");
+        }
+
+        StringWriter writer = new StringWriter();
+        try {
+            ConfigContext configcontext = new APIConfigContext(api);
+            configcontext.validate();
+            // Same decorator the API resource uses, so a request that is not failed over reaches the same
+            // fault sequence. Its validate() doesn't call the inner one, hence both calls.
+            configcontext = new ResourceConfigContext(configcontext, api);
+            configcontext.validate();
+
+            VelocityContext context = configcontext.getContext();
+            context.internalGetKeys();
+            context.put("endpointKey", GatewayUtils.getEndpointKey(api));
+            VelocityEngine velocityengine = new VelocityEngine();
+            APIUtil.initializeVelocityContext(velocityengine);
+
+            velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
+            initVelocityEngine(velocityengine);
+
+            Template t = velocityengine.getTemplate(getEndpointsFaultSequenceTemplatePath());
+            context.put("deploymentStage", deploymentStage);
+            t.merge(context, writer);
+        } catch (Exception e) {
+            throw new APITemplateException("Velocity Error", e);
+        }
+        return writer.toString();
+    }
+
+    /**
+     * Returns the path to the fault sequence template.
+     *
+     * @return The classpath-relative path to the fault sequence template.
+     */
+    public String getEndpointsFaultSequenceTemplatePath() {
+
+        return "repository" + File.separator + "resources" + File.separator + "api_templates" +
+                File.separator + APITemplateBuilderImpl.TEMPLATE_AI_API_ENDPOINTS_FAULT_SEQUENCE + ".xml";
     }
 
     /**

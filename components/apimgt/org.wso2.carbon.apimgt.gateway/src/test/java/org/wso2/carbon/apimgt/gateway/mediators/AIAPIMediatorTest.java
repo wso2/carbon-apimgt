@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.gateway.mediators;
 
+import org.apache.synapse.SynapseConstants;
+import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.junit.Assert;
@@ -34,6 +36,8 @@ import org.wso2.carbon.apimgt.api.LLMProviderConfiguration;
 import org.wso2.carbon.apimgt.api.LLMProviderMetadata;
 import org.wso2.carbon.apimgt.api.LLMProviderService;
 import org.wso2.carbon.apimgt.api.LLMResponseMetaData;
+import org.wso2.carbon.apimgt.api.gateway.FailoverPolicyConfigDTO;
+import org.wso2.carbon.apimgt.api.gateway.ModelEndpointDTO;
 import org.wso2.carbon.apimgt.api.model.LLMProviderInfo;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
@@ -53,11 +57,12 @@ import java.util.Map;
  * PRODUCT_ANALYTICS_PROPS_TO_PUBLISH.
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({APIUtil.class, RelayUtils.class})
+@PrepareForTest({APIUtil.class, RelayUtils.class, JsonUtil.class, AIAPIMediator.class})
 public class AIAPIMediatorTest {
 
     private Map<String, Object> properties;
     private Axis2MessageContext messageContext;
+    private org.apache.axis2.context.MessageContext axis2MessageContext;
     private LLMProviderService llmProviderService;
     // Values in the simulated LLM response, by attribute name.
     private Map<String, String> responseValues;
@@ -69,15 +74,20 @@ public class AIAPIMediatorTest {
 
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.mockStatic(RelayUtils.class);
+        PowerMockito.mockStatic(JsonUtil.class);
+        // Fault failover on by default (the real default); tests for the off switch override this.
+        PowerMockito.when(APIUtil.isFaultFailoverEnabled()).thenReturn(true);
 
         properties = new HashMap<>();
         messageContext = Mockito.mock(Axis2MessageContext.class);
-        Mockito.when(messageContext.getAxis2MessageContext())
-                .thenReturn(Mockito.mock(org.apache.axis2.context.MessageContext.class));
+        axis2MessageContext = Mockito.mock(org.apache.axis2.context.MessageContext.class);
+        Mockito.when(messageContext.getAxis2MessageContext()).thenReturn(axis2MessageContext);
         Mockito.when(messageContext.getProperty(Mockito.anyString()))
                 .thenAnswer(invocation -> properties.get((String) invocation.getArguments()[0]));
         Mockito.doAnswer(invocation -> properties.put((String) invocation.getArguments()[0],
                 invocation.getArguments()[1])).when(messageContext).setProperty(Mockito.anyString(), Mockito.any());
+        // A live view of the property map, as in Synapse: removing a key also removes its value.
+        Mockito.when(messageContext.getPropertyKeySet()).thenReturn(properties.keySet());
 
         responseValues = new HashMap<>();
         llmProviderService = Mockito.mock(LLMProviderService.class);
@@ -390,4 +400,345 @@ public class AIAPIMediatorTest {
         }
         return names;
     }
+
+    // --- Fault-path failover (timeouts / connection errors) ---
+
+    @Test
+    public void testClearFaultPropertiesRemovesOnlyTheErrorMarkers() throws Exception {
+
+        properties.put(SynapseConstants.ERROR_CODE, 101504);
+        properties.put(SynapseConstants.BASE_ERROR_CODE, 101504);
+        properties.put(SynapseConstants.ERROR_MESSAGE, "Connection timed out");
+        properties.put(SynapseConstants.ERROR_DETAIL, "stack trace");
+        properties.put(SynapseConstants.ERROR_EXCEPTION, new RuntimeException("boom"));
+        properties.put(SynapseConstants.PROTOCOL_STATE_ON_FAILURE, "REQUEST_DONE");
+        properties.put(SynapseConstants.SENDING_FAULT, Boolean.TRUE);
+        properties.put(AIAPIConstants.AI_API_REQUEST_METADATA, new HashMap<>());
+
+        Whitebox.invokeMethod(new AIAPIMediator(), "clearFaultProperties", messageContext);
+
+        Assert.assertNull(messageContext.getProperty(SynapseConstants.ERROR_CODE));
+        Assert.assertNull(messageContext.getProperty(SynapseConstants.BASE_ERROR_CODE));
+        Assert.assertNull(messageContext.getProperty(SynapseConstants.ERROR_MESSAGE));
+        Assert.assertNull(messageContext.getProperty(SynapseConstants.ERROR_DETAIL));
+        Assert.assertNull(messageContext.getProperty(SynapseConstants.ERROR_EXCEPTION));
+        Assert.assertNull(messageContext.getProperty(SynapseConstants.PROTOCOL_STATE_ON_FAILURE));
+        Assert.assertNull(messageContext.getProperty(SynapseConstants.SENDING_FAULT));
+        // A property unrelated to the fault must survive.
+        Assert.assertNotNull(messageContext.getProperty(AIAPIConstants.AI_API_REQUEST_METADATA));
+    }
+
+    @Test
+    public void testProcessFaultFlowDelegatesWhenThereIsNoFailoverPolicy() throws Exception {
+
+        properties.put(SynapseConstants.ERROR_CODE, 101504);
+        // No FAILOVER_CONFIGS property at all: no Model Failover policy applies to this request's model.
+
+        Whitebox.invokeMethod(new AIAPIMediator(), "processFaultFlow", messageContext,
+                new LLMProviderConfiguration(), new LLMProviderInfo());
+
+        Assert.assertEquals(AIAPIConstants.FAULT_FAILOVER_ACTION_DELEGATE,
+                properties.get(AIAPIConstants.FAULT_FAILOVER_ACTION));
+    }
+
+    @Test
+    public void testProcessFaultFlowDelegatesWhenFaultFailoverIsSwitchedOff() throws Exception {
+
+        PowerMockito.when(APIUtil.isFaultFailoverEnabled()).thenReturn(false);
+        properties.put(SynapseConstants.ERROR_CODE, 101504);
+        // A policy applies, but the switch is off (for example turned off after the sequences were deployed).
+        properties.put(AIAPIConstants.FAILOVER_CONFIGS, new HashMap<String, Object>());
+
+        Whitebox.invokeMethod(new AIAPIMediator(), "processFaultFlow", messageContext,
+                new LLMProviderConfiguration(), new LLMProviderInfo());
+
+        Assert.assertEquals("no failover with the switch off",
+                AIAPIConstants.FAULT_FAILOVER_ACTION_DELEGATE, properties.get(AIAPIConstants.FAULT_FAILOVER_ACTION));
+        Assert.assertTrue("the original error must survive for the normal fault sequence",
+                properties.containsKey(SynapseConstants.ERROR_CODE));
+    }
+
+    @Test
+    public void testProcessFaultFlowRetriesAndReusesHandleFailoverWhenAPolicyApplies() throws Exception {
+
+        properties.put(SynapseConstants.ERROR_CODE, 101504);
+        properties.put(SynapseConstants.ERROR_MESSAGE, "Request timed out"); // must be cleared on a successful retry
+        Map<String, Object> failoverConfigs = new HashMap<>();
+        properties.put(AIAPIConstants.FAILOVER_CONFIGS, failoverConfigs);
+
+        AIAPIMediator mediator = PowerMockito.spy(new AIAPIMediator());
+        LLMProviderConfiguration providerConfiguration = new LLMProviderConfiguration();
+        LLMProviderInfo provider = new LLMProviderInfo();
+        // handleFailover is tested elsewhere; here we just check it's called with the right arguments.
+        PowerMockito.doNothing().when(mediator, "handleFailover", Mockito.eq(messageContext),
+                Mockito.eq(providerConfiguration), Mockito.eq(failoverConfigs), Mockito.anyBoolean(),
+                Mockito.eq(true));
+
+        Whitebox.invokeMethod(mediator, "processFaultFlow", messageContext, providerConfiguration, provider);
+
+        PowerMockito.verifyPrivate(mediator).invoke("handleFailover", messageContext, providerConfiguration,
+                failoverConfigs, true, true);
+        Assert.assertEquals(AIAPIConstants.FAULT_FAILOVER_ACTION_RETRY,
+                properties.get(AIAPIConstants.FAULT_FAILOVER_ACTION));
+        Assert.assertNull("stale error markers must be cleared before the retry",
+                messageContext.getProperty(SynapseConstants.ERROR_MESSAGE));
+    }
+
+    @Test
+    public void testProcessFaultFlowDelegatesWhenHandleFailoverExhaustsFallbacks() throws Exception {
+
+        properties.put(SynapseConstants.ERROR_CODE, 101504);
+        properties.put(SynapseConstants.ERROR_MESSAGE, "Request timed out"); // must survive for the API's own
+                                                                              // fault sequence
+        Map<String, Object> failoverConfigs = new HashMap<>();
+        properties.put(AIAPIConstants.FAILOVER_CONFIGS, failoverConfigs);
+
+        AIAPIMediator mediator = PowerMockito.spy(new AIAPIMediator());
+        LLMProviderConfiguration providerConfiguration = new LLMProviderConfiguration();
+        LLMProviderInfo provider = new LLMProviderInfo();
+        // handleFailover exhausted the fallbacks: it rejects instead of retrying, as it does today.
+        PowerMockito.doAnswer(invocation -> {
+            messageContext.setProperty(AIAPIConstants.TARGET_ENDPOINT, AIAPIConstants.REJECT_ENDPOINT);
+            return null;
+        }).when(mediator, "handleFailover", Mockito.eq(messageContext),
+                Mockito.eq(providerConfiguration), Mockito.eq(failoverConfigs), Mockito.anyBoolean(),
+                Mockito.eq(true));
+
+        Whitebox.invokeMethod(mediator, "processFaultFlow", messageContext, providerConfiguration, provider);
+
+        Assert.assertEquals("an exhausted retry must delegate, not retry into a dead end",
+                AIAPIConstants.FAULT_FAILOVER_ACTION_DELEGATE, properties.get(AIAPIConstants.FAULT_FAILOVER_ACTION));
+        Assert.assertNotNull("the original error markers must survive for the API's own fault sequence",
+                messageContext.getProperty(SynapseConstants.ERROR_MESSAGE));
+    }
+
+    @Test
+    public void testPolicyWithNoRequestTimeoutUsesTheDtoDefaultWhenFaultFailoverIsOn() throws Exception {
+
+        PowerMockito.when(APIUtil.isFaultFailoverEnabled()).thenReturn(true);
+        PowerMockito.when(JsonUtil.jsonPayloadToString(axis2MessageContext)).thenReturn("{\"model\":\"gpt-4o\"}");
+        ModelEndpointDTO target = new ModelEndpointDTO();
+        target.setEndpointId("sweden");
+        target.setModel("gpt-4o");
+
+        // No setRequestTimeout: the DTO default (30 s) applies.
+        Whitebox.invokeMethod(new AIAPIMediator(), "preserveFailoverPropertiesInMsgCtx", messageContext,
+                new FailoverPolicyConfigDTO(), target, new ArrayList<ModelEndpointDTO>());
+
+        Assert.assertEquals("30 s in milliseconds", 30000L, properties.get(AIAPIConstants.REQUEST_TIMEOUT));
+    }
+
+    @Test
+    public void testUpdateRequestMetadataRestoresTheSavedHeadersMap() throws Exception {
+
+        Map<String, String> saved = new HashMap<>();
+        saved.put("Authorization", "sweden-secret");
+        Map<String, Object> failoverConfigs = new HashMap<>();
+        failoverConfigs.put(AIAPIConstants.REQUEST_HEADERS, saved);
+
+        Whitebox.invokeMethod(new AIAPIMediator(), "updateRequestMetadata", messageContext, failoverConfigs);
+
+        Mockito.verify(axis2MessageContext).setProperty(
+                Mockito.eq(org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants.TRANSPORT_HEADERS),
+                Mockito.same(saved));
+    }
+
+    @Test
+    public void testPolicyWithNoRequestTimeoutUsesTheDtoDefaultWhenFaultFailoverIsOff() throws Exception {
+
+        PowerMockito.when(APIUtil.isFaultFailoverEnabled()).thenReturn(false);
+        PowerMockito.when(APIUtil.getDefaultRequestTimeoutForFailoverConfigurations()).thenReturn(30L);
+        PowerMockito.when(JsonUtil.jsonPayloadToString(axis2MessageContext)).thenReturn("{\"model\":\"gpt-4o\"}");
+        ModelEndpointDTO target = new ModelEndpointDTO();
+        target.setEndpointId("sweden");
+        target.setModel("gpt-4o");
+
+        Whitebox.invokeMethod(new AIAPIMediator(), "preserveFailoverPropertiesInMsgCtx", messageContext,
+                new FailoverPolicyConfigDTO(), target, new ArrayList<ModelEndpointDTO>());
+
+        Assert.assertEquals("the DTO default (30 s) in milliseconds",
+                30000L, properties.get(AIAPIConstants.REQUEST_TIMEOUT));
+    }
+
+    @Test
+    public void testPreserveFailoverPropertiesKeepsTheLiveHeaders() throws Exception {
+
+        PowerMockito.when(APIUtil.isFaultFailoverEnabled()).thenReturn(false);
+        PowerMockito.when(JsonUtil.jsonPayloadToString(axis2MessageContext)).thenReturn("{\"model\":\"gpt-4o\"}");
+        Map<String, String> liveHeaders = new HashMap<>();
+        liveHeaders.put("Authorization", "sweden-secret");
+        PowerMockito.when(axis2MessageContext.getProperty(
+                org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS)).thenReturn(liveHeaders);
+
+        ModelEndpointDTO target = new ModelEndpointDTO();
+        target.setEndpointId("sweden");
+        target.setModel("gpt-4o");
+
+        Whitebox.invokeMethod(new AIAPIMediator(), "preserveFailoverPropertiesInMsgCtx", messageContext,
+                new FailoverPolicyConfigDTO(), target, new ArrayList<ModelEndpointDTO>());
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> failoverConfigs =
+                (Map<String, Object>) properties.get(AIAPIConstants.FAILOVER_CONFIGS);
+        Assert.assertSame("the headers are saved as the live map, as before",
+                liveHeaders, failoverConfigs.get(AIAPIConstants.REQUEST_HEADERS));
+    }
+
+    @Test
+    public void testApplyFailoverRequestTimeoutRestoresTheSavedValue() throws Exception {
+
+        properties.put(AIAPIConstants.REQUEST_TIMEOUT, 60000L); // the global default, set earlier by mediate()
+        Map<String, Object> failoverConfigs = new HashMap<>();
+        failoverConfigs.put(AIAPIConstants.FAILOVER_REQUEST_TIMEOUT, 10000L); // the policy's own timeout
+
+        Whitebox.invokeMethod(new AIAPIMediator(), "applyFailoverRequestTimeout", messageContext, failoverConfigs);
+
+        Assert.assertEquals(10000L, properties.get(AIAPIConstants.REQUEST_TIMEOUT));
+    }
+
+    @Test
+    public void testApplyFailoverRequestTimeoutDoesNothingWhenNoneWasSaved() throws Exception {
+
+        properties.put(AIAPIConstants.REQUEST_TIMEOUT, 60000L);
+        Map<String, Object> failoverConfigs = new HashMap<>();
+
+        Whitebox.invokeMethod(new AIAPIMediator(), "applyFailoverRequestTimeout", messageContext, failoverConfigs);
+
+        Assert.assertEquals(60000L, properties.get(AIAPIConstants.REQUEST_TIMEOUT));
+    }
+
+    @Test
+    public void testHandleFailoverDoesNotSuspendWhenTheErrorCameBeforeTheCall() throws Exception {
+
+        // An auth mediator failed before the <call>.
+        properties.put(AIAPIConstants.LLM_CALL_SENT, AIAPIConstants.LLM_CALL_NOT_SENT);
+        ModelEndpointDTO target = new ModelEndpointDTO();
+        target.setEndpointId("primary");
+        target.setModel("gpt-4o");
+        Map<String, Object> failoverConfigs = new HashMap<>();
+        failoverConfigs.put(AIAPIConstants.FAILOVER_TARGET_MODEL_ENDPOINT, target);
+        failoverConfigs.put(AIAPIConstants.SUSPEND_DURATION, 30000L);
+        failoverConfigs.put(AIAPIConstants.FAILOVER_ENDPOINTS, new ArrayList<ModelEndpointDTO>()); // exhausted
+
+        AIAPIMediator mediator = PowerMockito.spy(new AIAPIMediator());
+        Whitebox.invokeMethod(mediator, "handleFailover", messageContext, new LLMProviderConfiguration(),
+                failoverConfigs, true, true);
+
+        PowerMockito.verifyPrivate(mediator, Mockito.never()).invoke("suspendTargetEndpoint",
+                Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+        Assert.assertEquals(AIAPIConstants.REJECT_ENDPOINT, properties.get(AIAPIConstants.TARGET_ENDPOINT));
+    }
+
+    private AIAPIMediator exhaustedLastFallbackMediator() throws Exception {
+
+        properties.put(AIAPIConstants.CURRENT_ENDPOINT_INDEX, 1); // the only fallback was already tried
+        ModelEndpointDTO fallback = new ModelEndpointDTO();
+        fallback.setEndpointId("fallback");
+        fallback.setModel("gpt-4o-mini");
+        Map<String, Object> failoverConfigs = new HashMap<>();
+        failoverConfigs.put(AIAPIConstants.SUSPEND_DURATION, 30000L);
+        failoverConfigs.put(AIAPIConstants.FAILOVER_ENDPOINTS, new ArrayList<>(Arrays.asList(fallback)));
+        properties.put(AIAPIConstants.FAILOVER_CONFIGS, failoverConfigs);
+        AIAPIMediator mediator = PowerMockito.spy(new AIAPIMediator());
+        // Suspension needs gateway runtime state; only whether it is called matters here.
+        PowerMockito.doNothing().when(mediator, "suspendTargetEndpoint", Mockito.any(), Mockito.any(),
+                Mockito.any(), Mockito.any());
+        return mediator;
+    }
+
+    @Test
+    public void testHandleFailoverSuspendsTheLastFallbackOnTheFaultPath() throws Exception {
+
+        AIAPIMediator mediator = exhaustedLastFallbackMediator();
+        Whitebox.invokeMethod(mediator, "handleFailover", messageContext, new LLMProviderConfiguration(),
+                properties.get(AIAPIConstants.FAILOVER_CONFIGS), true, true);
+
+        PowerMockito.verifyPrivate(mediator).invoke("suspendTargetEndpoint", Mockito.any(), Mockito.eq("fallback"),
+                Mockito.any(), Mockito.any());
+    }
+
+    @Test
+    public void testHandleFailoverDoesNotSuspendTheLastFallbackOnTheErrorReplyPath() throws Exception {
+
+        AIAPIMediator mediator = exhaustedLastFallbackMediator();
+        Whitebox.invokeMethod(mediator, "handleFailover", messageContext, new LLMProviderConfiguration(),
+                properties.get(AIAPIConstants.FAILOVER_CONFIGS), true);
+
+        PowerMockito.verifyPrivate(mediator, Mockito.never()).invoke("suspendTargetEndpoint", Mockito.any(),
+                Mockito.any(), Mockito.any(), Mockito.any());
+        Assert.assertEquals(AIAPIConstants.REJECT_ENDPOINT, properties.get(AIAPIConstants.TARGET_ENDPOINT));
+    }
+
+    @Test
+    public void testHandleFailoverDoesNotSuspendWhenSynapseRefusedTheCallAsSuspended() throws Exception {
+
+        properties.put(SynapseConstants.ERROR_CODE, SynapseConstants.ENDPOINT_ADDRESS_NONE_READY); // 303001
+        AIAPIMediator mediator = exhaustedLastFallbackMediator();
+        Whitebox.invokeMethod(mediator, "handleFailover", messageContext, new LLMProviderConfiguration(),
+                properties.get(AIAPIConstants.FAILOVER_CONFIGS), true, true);
+
+        PowerMockito.verifyPrivate(mediator, Mockito.never()).invoke("suspendTargetEndpoint", Mockito.any(),
+                Mockito.any(), Mockito.any(), Mockito.any());
+    }
+
+    @Test
+    public void testHandleFailoverStillFailsOverWithoutSuspendingWhenTheErrorCameBeforeTheCall() throws Exception {
+
+        // An auth mediator failed before the <call>: the fallback is still tried, but nothing is suspended.
+        properties.put(AIAPIConstants.LLM_CALL_SENT, AIAPIConstants.LLM_CALL_NOT_SENT);
+        ModelEndpointDTO target = new ModelEndpointDTO();
+        target.setEndpointId("primary");
+        target.setModel("gpt-4o");
+        ModelEndpointDTO fallback = new ModelEndpointDTO();
+        fallback.setEndpointId("fallback");
+        fallback.setModel("gpt-4o-mini");
+        Map<String, Object> failoverConfigs = new HashMap<>();
+        failoverConfigs.put(AIAPIConstants.FAILOVER_TARGET_MODEL_ENDPOINT, target);
+        failoverConfigs.put(AIAPIConstants.SUSPEND_DURATION, 30000L);
+        failoverConfigs.put(AIAPIConstants.FAILOVER_ENDPOINTS, new ArrayList<>(Arrays.asList(fallback)));
+        failoverConfigs.put(AIAPIConstants.REQUEST_PAYLOAD, "{}");
+
+        AIAPIMediator mediator = PowerMockito.spy(new AIAPIMediator());
+        PowerMockito.doNothing().when(mediator, "updateJsonPayloadWithRequestPayload", Mockito.any(), Mockito.any());
+        PowerMockito.doNothing().when(mediator, "updateRequestMetadata", Mockito.any(), Mockito.any());
+        PowerMockito.doNothing().when(mediator, "updateTargetEndpoint", Mockito.any(), Mockito.anyInt(),
+                Mockito.any());
+        PowerMockito.doNothing().when(mediator, "applyFailoverRequestTimeout", Mockito.any(), Mockito.any());
+        LLMProviderConfiguration providerConfiguration = new LLMProviderConfiguration();
+        // An input source handleFailover doesn't act on, so only the suspension and the target switch are tested.
+        PowerMockito.doReturn(new LLMProviderMetadata("model", "unsupported", "$.model", false,
+                AIAPIConstants.ANALYTICS_CATEGORY_TOKEN_USAGE)).when(mediator, "getTargetModelMetadata", Mockito.any());
+
+        Whitebox.invokeMethod(mediator, "handleFailover", messageContext, providerConfiguration, failoverConfigs,
+                false, true);
+
+        PowerMockito.verifyPrivate(mediator, Mockito.never()).invoke("suspendTargetEndpoint", Mockito.any(),
+                Mockito.any(), Mockito.any(), Mockito.any());
+        PowerMockito.verifyPrivate(mediator).invoke("updateTargetEndpoint", Mockito.any(), Mockito.eq(1),
+                Mockito.eq(fallback));
+    }
+
+    @Test
+    public void testHandleFailoverIgnoresTheSuspendedCodeOnTheErrorReplyPath() throws Exception {
+
+        // A stale 303001 must not stop the suspension of a real failure on the error-reply path.
+        properties.put(SynapseConstants.ERROR_CODE, SynapseConstants.ENDPOINT_ADDRESS_NONE_READY);
+        ModelEndpointDTO target = new ModelEndpointDTO();
+        target.setEndpointId("primary");
+        target.setModel("gpt-4o");
+        Map<String, Object> failoverConfigs = new HashMap<>();
+        failoverConfigs.put(AIAPIConstants.FAILOVER_TARGET_MODEL_ENDPOINT, target);
+        failoverConfigs.put(AIAPIConstants.SUSPEND_DURATION, 30000L);
+        failoverConfigs.put(AIAPIConstants.FAILOVER_ENDPOINTS, new ArrayList<ModelEndpointDTO>());
+
+        AIAPIMediator mediator = PowerMockito.spy(new AIAPIMediator());
+        PowerMockito.doNothing().when(mediator, "suspendTargetEndpoint", Mockito.any(), Mockito.any(),
+                Mockito.any(), Mockito.any());
+        Whitebox.invokeMethod(mediator, "handleFailover", messageContext, new LLMProviderConfiguration(),
+                failoverConfigs, true, false);
+
+        PowerMockito.verifyPrivate(mediator).invoke("suspendTargetEndpoint", Mockito.any(), Mockito.eq("primary"),
+                Mockito.any(), Mockito.any());
+    }
+
 }

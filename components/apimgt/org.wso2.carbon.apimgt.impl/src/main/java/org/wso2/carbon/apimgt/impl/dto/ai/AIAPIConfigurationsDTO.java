@@ -117,6 +117,7 @@ public class AIAPIConfigurationsDTO {
 
         private int failoverEndpointsLimit = DEFAULT_FAILOVER_ENDPOINT_LIMIT;
         private long defaultRequestTimeout = DEFAULT_REQUEST_TIMEOUT;
+        private boolean faultFailoverEnabled = true;
 
         /**
          * Gets failover endpoints limit.
@@ -156,6 +157,26 @@ public class AIAPIConfigurationsDTO {
         public void setDefaultRequestTimeout(long defaultRequestTimeout) {
 
             this.defaultRequestTimeout = defaultRequestTimeout;
+        }
+
+        /**
+         * Whether fault-path failover (timeouts and connection errors) is enabled.
+         *
+         * @return {@code true} if fault-path failover is enabled.
+         */
+        public boolean isFaultFailoverEnabled() {
+
+            return faultFailoverEnabled;
+        }
+
+        /**
+         * Sets whether fault-path failover (timeouts and connection errors) is enabled.
+         *
+         * @param faultFailoverEnabled {@code true} to enable fault-path failover.
+         */
+        public void setFaultFailoverEnabled(boolean faultFailoverEnabled) {
+
+            this.faultFailoverEnabled = faultFailoverEnabled;
         }
     }
 }
