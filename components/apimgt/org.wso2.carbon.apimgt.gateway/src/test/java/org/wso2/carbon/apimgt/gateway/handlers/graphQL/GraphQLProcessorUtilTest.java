@@ -17,6 +17,8 @@
  */
 package org.wso2.carbon.apimgt.gateway.handlers.graphQL;
 
+import graphql.language.Definition;
+import graphql.language.Document;
 import graphql.language.Field;
 import graphql.language.FragmentDefinition;
 import graphql.language.FragmentSpread;
@@ -25,6 +27,7 @@ import graphql.language.OperationDefinition;
 import graphql.language.Selection;
 import graphql.language.SelectionSet;
 import graphql.language.TypeName;
+import graphql.parser.Parser;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
 import org.apache.commons.io.IOUtils;
@@ -147,6 +150,83 @@ public class GraphQLProcessorUtilTest {
         Assert.assertTrue("protectedRoot inside inline fragment must be elected",
                 operationArray.contains("protectedRoot"));
         Assert.assertEquals("Exactly two operations expected", 2, operationArray.size());
+    }
+
+    /**
+     * Subscription schema where Review.protectedReviewAdded shares its name with the root subscription field
+     * Subscription.protectedReviewAdded, so the nested field is also listed as an operation.
+     */
+    private static final String SUBSCRIPTION_NAME_COLLISION_SCHEMA =
+            "schema { query: Query subscription: Subscription }\n"
+                    + "type Query { hello: String }\n"
+                    + "type Subscription {\n"
+                    + "  reviewAdded(episode: String): Review\n"
+                    + "  protectedReviewAdded(episode: String): Review\n"
+                    + "}\n"
+                    + "type Review { stars: Int  protectedReviewAdded: Review }";
+
+    private ArrayList<String> getSubscriptionOperationList(String query) {
+        TypeDefinitionRegistry registry = new SchemaParser().parse(SUBSCRIPTION_NAME_COLLISION_SCHEMA);
+        Document document = new Parser().parseDocument(query);
+        OperationDefinition operation = null;
+        Map<String, FragmentDefinition> fragmentDefinitions = new HashMap<>();
+        for (Definition definition : document.getDefinitions()) {
+            if (definition instanceof OperationDefinition) {
+                operation = (OperationDefinition) definition;
+            } else if (definition instanceof FragmentDefinition) {
+                FragmentDefinition fd = (FragmentDefinition) definition;
+                fragmentDefinitions.put(fd.getName(), fd);
+            }
+        }
+        return GraphQLProcessorUtil.getOperationList(operation, registry, fragmentDefinitions);
+    }
+
+    /*
+     * The following tests pin the order of the extracted operation list for subscriptions.
+     * GraphQLRequestProcessor uses only the FIRST entry of the list as the subscription operation, because a
+     * subscription has exactly one root field and any further entries are nested fields that share a root field's
+     * name. The root field must therefore always be the first entry. Do not change these expectations without
+     * updating GraphQLRequestProcessor accordingly.
+     */
+
+    @Test
+    public void testSubscriptionRootFieldIsFirstInOperationListForPlainSubscription() {
+        ArrayList<String> operations = getSubscriptionOperationList(
+                "subscription { reviewAdded(episode: \"JEDI\") { stars } }");
+        Assert.assertEquals("reviewAdded", String.join(",", operations));
+    }
+
+    @Test
+    public void testSubscriptionRootFieldIsFirstInOperationListForInlineNestedField() {
+        ArrayList<String> operations = getSubscriptionOperationList(
+                "subscription { reviewAdded(episode: \"JEDI\") { stars protectedReviewAdded { stars } } }");
+        Assert.assertEquals("Root field must be the first operation", "reviewAdded", operations.get(0));
+        Assert.assertEquals("reviewAdded,protectedReviewAdded", String.join(",", operations));
+    }
+
+    @Test
+    public void testSubscriptionRootFieldIsFirstInOperationListForDeeplyNestedField() {
+        ArrayList<String> operations = getSubscriptionOperationList(
+                "subscription { reviewAdded(episode: \"JEDI\") { protectedReviewAdded { protectedReviewAdded "
+                        + "{ stars } } } }");
+        Assert.assertEquals("Root field must be the first operation", "reviewAdded", operations.get(0));
+        Assert.assertEquals("reviewAdded,protectedReviewAdded", String.join(",", operations));
+    }
+
+    @Test
+    public void testSubscriptionRootFieldIsFirstInOperationListForNestedNamedFragment() {
+        ArrayList<String> operations = getSubscriptionOperationList(
+                "subscription S2 { reviewAdded(episode: \"JEDI\") { ...R } } "
+                        + "fragment R on Review { stars protectedReviewAdded { stars } }");
+        Assert.assertEquals("Root field must be the first operation", "reviewAdded", operations.get(0));
+    }
+
+    @Test
+    public void testSubscriptionRootFieldIsFirstInOperationListForNestedInlineFragment() {
+        ArrayList<String> operations = getSubscriptionOperationList(
+                "subscription S3 { reviewAdded(episode: \"JEDI\") { ... on Review { stars protectedReviewAdded "
+                        + "{ stars } } } }");
+        Assert.assertEquals("Root field must be the first operation", "reviewAdded", operations.get(0));
     }
 
     @Test
