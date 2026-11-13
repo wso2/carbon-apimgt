@@ -46,8 +46,11 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.application.common.model.FederatedAuthenticatorConfig;
 import org.wso2.carbon.identity.application.common.model.IdentityProvider;
+import org.wso2.carbon.identity.application.common.model.ServiceProvider;
 import org.wso2.carbon.identity.application.common.util.IdentityApplicationConstants;
 import org.wso2.carbon.identity.application.common.util.IdentityApplicationManagementUtil;
+import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
+import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
 import org.wso2.carbon.idp.mgt.IdentityProviderManagementException;
 import org.wso2.carbon.idp.mgt.IdentityProviderManager;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -74,6 +77,8 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
             APIConstants.EMAIL_DOMAIN_SEPARATOR + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
     private static final String OIDC_IDP_ENTITY_ID = "IdPEntityId";
     public static final String JWKS_URI = "jwksUri";
+    private static final String SUBJECT_AWARE_USER_RESOLUTION =
+            APIConstants.API_RESTAPI + "EnableSubjectAwareUserResolution";
     private boolean isRESTApiTokenCacheEnabled;
     private Map<String, TokenIssuerDto> tokenIssuers;
 
@@ -153,8 +158,15 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
             tenantDomain = (String) signedJWTInfo.getJwtClaimsSet().getClaim(JwtTokenConstants.USER_DOMAIN);
         } 
         log.debug("Tenant domain for user " + tenantDomain);
-        oauthTokenInfo.setEndUserName(signedJWTInfo.getJwtClaimsSet().getSubject() + "@" + tenantDomain);
-        oauthTokenInfo.setConsumerKey(signedJWTInfo.getJwtClaimsSet().getStringClaim(JWTConstants.AUTHORIZED_PARTY));
+        String subject = signedJWTInfo.getJwtClaimsSet().getSubject();
+        String clientId = signedJWTInfo.getJwtClaimsSet().getStringClaim(JWTConstants.AUTHORIZED_PARTY);
+        String clientTenantDomain = getClientTenantDomain(signedJWTInfo.getJwtClaimsSet());
+        boolean isTenantQualified = isIssuedByResidentIdp(signedJWTInfo.getJwtClaimsSet(), clientTenantDomain)
+                && isSubjectAwareUserResolutionEnabled()
+                && StringUtils.endsWithIgnoreCase(subject, "@" + tenantDomain) && !isUsernameUsedAsSubject()
+                && isTenantDomainInSubjectEnabled(clientId, clientTenantDomain);
+        oauthTokenInfo.setEndUserName(isTenantQualified ? subject : subject + "@" + tenantDomain);
+        oauthTokenInfo.setConsumerKey(clientId);
         String scopeClaim = signedJWTInfo.getJwtClaimsSet().getStringClaim(JwtTokenConstants.SCOPE);
         if (scopeClaim != null) {
             String orgId = RestApiUtil.resolveOrganization(message);
@@ -377,6 +389,118 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
     }
 
     /**
+     * Checks whether subject aware user resolution is enabled in the REST API configuration. When it is enabled, the
+     * end user name is resolved according to how the key manager built the JWT subject, so the tenant domain is not
+     * appended again to a subject that already contains it. It is disabled unless it is explicitly set to true.
+     *
+     * @return true if subject aware user resolution is enabled
+     */
+    private boolean isSubjectAwareUserResolutionEnabled() {
+
+        String subjectAwareUserResolution = APIMConfigUtil.getFirstProperty(SUBJECT_AWARE_USER_RESOLUTION);
+        //only an explicit true enables it, so a missing or unrecognised value keeps the tenant domain appended
+        return Boolean.TRUE.toString().equalsIgnoreCase(StringUtils.trim(subjectAwareUserResolution));
+    }
+
+    /**
+     * Checks whether the token was issued by the resident identity provider. When no token issuers are configured for
+     * the REST APIs, every token is validated against the resident identity provider. Otherwise the issuer of the
+     * token is compared with the entity ID of the resident identity provider of the tenant that owns the client.
+     *
+     * @param jwtClaimsSet       claims of the token
+     * @param clientTenantDomain tenant domain that owns the client
+     * @return true if the token was issued by the resident identity provider
+     */
+    private boolean isIssuedByResidentIdp(JWTClaimsSet jwtClaimsSet, String clientTenantDomain) {
+
+        if (tokenIssuers == null || tokenIssuers.isEmpty()) {
+            return true;
+        }
+        String issuer = jwtClaimsSet.getIssuer();
+        if (StringUtils.isEmpty(issuer)) {
+            return false;
+        }
+        try {
+            return validateAndGetResidentIDPForIssuer(clientTenantDomain, issuer) != null;
+        } catch (APIManagementException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Unable to resolve the resident identity provider of tenant: " + clientTenantDomain, e);
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Resolves the tenant domain that owns the client the token was issued to. The key manager writes it to the
+     * app_td claim, and the super tenant is used when the claim is not present, in the same way as when the
+     * signature of the token is validated. A claim value that is not a string is ignored.
+     *
+     * @param jwtClaimsSet claims of the token
+     * @return tenant domain that owns the client
+     */
+    private String getClientTenantDomain(JWTClaimsSet jwtClaimsSet) {
+
+        Object appTenantDomainClaim = jwtClaimsSet.getClaim(JwtTokenConstants.APP_DOMAIN);
+        String appTenantDomain = appTenantDomainClaim instanceof String ? (String) appTenantDomainClaim : null;
+        return StringUtils.isNotEmpty(appTenantDomain) ? appTenantDomain
+                : MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+    }
+
+    /**
+     * Checks whether the key manager uses the username as the subject of the tokens it issues. In that case the
+     * subject does not carry the tenant domain of the user, whatever the service provider settings are.
+     *
+     * @return true if the username is used as the subject claim
+     */
+    protected boolean isUsernameUsedAsSubject() {
+
+        return OAuth2Util.useUsernameAsSubClaim();
+    }
+
+    /**
+     * Checks whether the service provider of the given OAuth client has "Use tenant domain in local subject
+     * identifier" enabled. When it is enabled, the key manager appends the tenant domain of local users to the
+     * subject of the tokens it issues for that client.
+     *
+     * @param clientId           client ID the token was issued to
+     * @param clientTenantDomain tenant domain that owns the client
+     * @return true if the option is enabled, false if it is disabled or cannot be determined
+     */
+    private boolean isTenantDomainInSubjectEnabled(String clientId, String clientTenantDomain) {
+
+        if (StringUtils.isEmpty(clientId)) {
+            return false;
+        }
+        try {
+            ServiceProvider serviceProvider = getServiceProvider(clientId, clientTenantDomain);
+            if (serviceProvider == null || serviceProvider.getLocalAndOutBoundAuthenticationConfig() == null) {
+                return false;
+            }
+            return serviceProvider.getLocalAndOutBoundAuthenticationConfig()
+                    .isUseTenantDomainInLocalSubjectIdentifier();
+        } catch (IdentityOAuth2Exception e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Unable to read the subject identifier settings of client: " + clientId, e);
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Retrieves the service provider of the given OAuth client from the given tenant.
+     *
+     * @param clientId     client ID of the OAuth application
+     * @param tenantDomain tenant domain that owns the OAuth application
+     * @return service provider of the client
+     * @throws IdentityOAuth2Exception if the service provider cannot be retrieved
+     */
+    protected ServiceProvider getServiceProvider(String clientId, String tenantDomain)
+            throws IdentityOAuth2Exception {
+
+        return OAuth2Util.getServiceProvider(clientId, tenantDomain);
+    }
+
+    /**
      * Check whether the jwt token is expired or not.
      *
      * @param tokenExp The ExpiryTime of the JWT token
@@ -471,7 +595,7 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
      * @return resident Identity Provider
      * @throws APIManagementException if an error occurs while retrieving resident idp issuer
      */
-    private IdentityProvider validateAndGetResidentIDPForIssuer(String tenantDomain, String jwtIssuer)
+    protected IdentityProvider validateAndGetResidentIDPForIssuer(String tenantDomain, String jwtIssuer)
             throws APIManagementException {
 
         String issuer = StringUtils.EMPTY;
