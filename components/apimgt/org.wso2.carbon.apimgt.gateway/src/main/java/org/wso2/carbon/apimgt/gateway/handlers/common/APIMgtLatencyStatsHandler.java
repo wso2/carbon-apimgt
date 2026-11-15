@@ -160,6 +160,9 @@ public class APIMgtLatencyStatsHandler extends AbstractHandler {
                         parseOptions.setResolve(true);
                         parseOptions.setResolveFully(true);
                         parseOptions.setResolveCombinators(false);
+                        // Do not inject type "object" into schemas that declare no type. Schema validation enforces
+                        // the declared types, so an injected type would reject valid values of untyped properties.
+                        parseOptions.setExplicitObjectSchema(false);
                         openAPI = parser.readContents(swagger, null, parseOptions).getOpenAPI();
                         // HTTP headers should be case insensitive as for HTTP 1.1 RFC
                         // Thus converting headers to lowercase for schema validation.
