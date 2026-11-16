@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import feign.RequestTemplate;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONObject;
@@ -51,6 +52,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -566,4 +568,21 @@ public class AMDefaultKeyManagerImplTest {
         return JSONObject.toJSONString(parameters);
     }
 
+    @Test
+    public void testBasicAuthHeaderEncodesNonAsciiCredentialsAsUtf8() {
+
+        String username = "kmlatin";
+        // The pound sign is in ISO-8859-1 but is encoded differently in UTF-8; the euro sign is not in ISO-8859-1
+        String password = "Km@dmin\u00A32026\u20AC";
+        RequestTemplate requestTemplate = new RequestTemplate();
+
+        AMDefaultKeyManagerImpl.createBasicAuthRequestInterceptor(username, password).apply(requestTemplate);
+
+        String expectedHeader = "Basic " + java.util.Base64.getEncoder()
+                .encodeToString((username + ":" + password).getBytes(StandardCharsets.UTF_8));
+        Collection<String> authorizationHeaders = requestTemplate.headers().get("Authorization");
+        Assert.assertNotNull(authorizationHeaders);
+        Assert.assertEquals(1, authorizationHeaders.size());
+        Assert.assertEquals(expectedHeader, authorizationHeaders.iterator().next());
+    }
 }
