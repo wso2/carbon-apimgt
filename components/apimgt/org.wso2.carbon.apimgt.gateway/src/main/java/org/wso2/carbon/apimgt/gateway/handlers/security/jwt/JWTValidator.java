@@ -954,6 +954,21 @@ public class JWTValidator {
         return OAuthServerConfiguration.getInstance().getTimeStampSkewInSeconds();
     }
 
+    /**
+     * Returns the validation result for the given JWT, using the gateway caches when the token cache is enabled.
+     * <p>
+     * For a token already validated as valid and present in the gateway token cache, the cached
+     * {@link JWTValidationInfo} is read once from the key cache, its expiry is checked and certificate-bound
+     * access token validation is applied. A token found in the invalid token cache is rejected. On a cache miss,
+     * including when the key cache entry has been evicted, the token is validated by the
+     * {@link JWTValidationService} and the result is added to the caches.
+     *
+     * @param signedJWTInfo signed JWT and its current validation status
+     * @param jti           token identifier used as the cache key
+     * @return the validation result for the token
+     * @throws APISecurityException if the token has expired, the certificate thumbprint cannot be parsed,
+     *                              or the token cannot be validated
+     */
     private JWTValidationInfo getJwtValidationInfo(SignedJWTInfo signedJWTInfo, String jti)
             throws APISecurityException {
 
