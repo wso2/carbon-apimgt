@@ -959,6 +959,17 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         return expTimeValue;
     }
 
+    /**
+     * Loads the Key Manager configuration and builds the Feign clients used to call the Key Manager
+     * (DCR, introspection, scope, user info and, when a tenant domain is configured, revoke).
+     * <p>
+     * Endpoints that are not set explicitly in the configuration are derived from the authorization
+     * server URL. The clients authenticate with Basic Auth using the configured Key Manager credentials,
+     * encoded as UTF-8 (see {@link #createBasicAuthRequestInterceptor(String, String)}).
+     *
+     * @param configuration Key Manager configuration
+     * @throws APIManagementException if the configuration cannot be loaded
+     */
     @Override
     public void loadConfiguration(KeyManagerConfiguration configuration) throws APIManagementException {
 
