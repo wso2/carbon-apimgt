@@ -20,6 +20,10 @@
 
 package org.wso2.carbon.apimgt.impl.utils;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.axiom.om.OMElement;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
@@ -38,6 +42,8 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ErrorHandler;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -2356,5 +2362,68 @@ public class APIUtilTest {
         // test invalid types
         fileName = "test1.pdf";
         Assert.assertFalse("PDF type should not be allowed", APIUtil.isSupportedFileType(fileName));
+    }
+
+    @Test
+    public void testValidateRestAPIScopesWithAllScopes() throws Exception {
+
+        String tenantConf = getTestTenantConf();
+        mockFileBaseTenantConfig(tenantConf);
+
+        APIUtil.validateRestAPIScopes(tenantConf);
+    }
+
+    @Test
+    public void testValidateRestAPIScopesWithMissingScopes() throws Exception {
+
+        String tenantConf = getTestTenantConf();
+        mockFileBaseTenantConfig(tenantConf);
+        String uploadedTenantConf = removeRestAPIScopes(tenantConf, "apim:api_publish", "apim:api_create");
+
+        try {
+            APIUtil.validateRestAPIScopes(uploadedTenantConf);
+            Assert.fail("Tenant-config with missing REST API scopes should be rejected");
+        } catch (APIManagementException e) {
+            String expectedReason = "Insufficient scopes available in tenant-config. Missing REST API scopes: "
+                    + "apim:api_create, apim:api_publish";
+            ErrorHandler errorHandler = e.getErrorHandler();
+            Assert.assertEquals(ExceptionCodes.INVALID_TENANT_CONFIG.getErrorCode(), errorHandler.getErrorCode());
+            Assert.assertEquals(ExceptionCodes.INVALID_TENANT_CONFIG.getHttpStatusCode(),
+                    errorHandler.getHttpStatusCode());
+            Assert.assertEquals("Invalid tenant-config found with error " + expectedReason,
+                    errorHandler.getErrorDescription());
+            Assert.assertEquals(expectedReason, e.getMessage());
+        }
+    }
+
+    private String getTestTenantConf() throws Exception {
+
+        File tenantConfFile = new File(Thread.currentThread().getContextClassLoader()
+                .getResource("tenant-conf.json").getFile());
+        return FileUtils.readFileToString(tenantConfFile);
+    }
+
+    private void mockFileBaseTenantConfig(String tenantConf) throws Exception {
+
+        PowerMockito.spy(APIUtil.class);
+        PowerMockito.doReturn(new JsonParser().parse(tenantConf)).when(APIUtil.class, "getFileBaseTenantConfig");
+    }
+
+    private String removeRestAPIScopes(String tenantConf, String... scopeNames) {
+
+        Set<String> scopesToRemove = new HashSet<>(Arrays.asList(scopeNames));
+        JsonObject tenantConfig = new JsonParser().parse(tenantConf).getAsJsonObject();
+        JsonArray scopes = tenantConfig.getAsJsonObject(APIConstants.REST_API_SCOPES_CONFIG)
+                .getAsJsonArray(APIConstants.REST_API_SCOPE);
+        JsonArray remainingScopes = new JsonArray();
+        for (JsonElement scope : scopes) {
+            if (!scopesToRemove.contains(scope.getAsJsonObject().get(APIConstants.REST_API_SCOPE_NAME).getAsString())) {
+                remainingScopes.add(scope);
+            }
+        }
+        Assert.assertEquals(scopes.size() - scopesToRemove.size(), remainingScopes.size());
+        tenantConfig.getAsJsonObject(APIConstants.REST_API_SCOPES_CONFIG)
+                .add(APIConstants.REST_API_SCOPE, remainingScopes);
+        return tenantConfig.toString();
     }
 }
