@@ -11044,8 +11044,11 @@ public final class APIUtil {
         Set<String> fileBaseScopes = getRestAPIScopes(fileBaseTenantConfig);
         Set<String> uploadedTenantConfigScopes = getRestAPIScopes((JsonObject) new JsonParser().parse(tenantConfig));
         fileBaseScopes.removeAll(uploadedTenantConfigScopes);
-        if (fileBaseScopes.size() > 0) {
-            throw new APIManagementException("Insufficient scopes available in tenant-config", ExceptionCodes.INVALID_TENANT_CONFIG);
+        if (!fileBaseScopes.isEmpty()) {
+            String errorMessage = "Insufficient scopes available in tenant-config. Missing REST API scopes: "
+                    + String.join(", ", new TreeSet<>(fileBaseScopes));
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.INVALID_TENANT_CONFIG, errorMessage));
         }
     }
 
@@ -11064,7 +11067,7 @@ public final class APIUtil {
                                     && ((JsonObject) scopeElement).get(APIConstants.REST_API_SCOPE_NAME)
                                     instanceof JsonPrimitive) {
                                 JsonElement name = ((JsonObject) scopeElement).get(APIConstants.REST_API_SCOPE_NAME);
-                                scopes.add(name.toString());
+                                scopes.add(name.getAsString());
                             }
                         }
                     }
