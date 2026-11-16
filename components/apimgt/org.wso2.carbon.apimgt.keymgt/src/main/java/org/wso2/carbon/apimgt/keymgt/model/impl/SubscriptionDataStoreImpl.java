@@ -57,6 +57,8 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
     public static final String DELEM_PERIOD = ":";
     public static final int LOADING_POOL_SIZE = 7;
+    // Upper bound for the number of entries kept in the subscription not found map.
+    private static final int SUBSCRIPTION_NOT_FOUND_MAP_MAX_SIZE = 10000;
     private static final Log log = LogFactory.getLog(SubscriptionDataStoreImpl.class);
     private final EventHubConfigurationDto eventHubConfiguration;
     private boolean scopesInitialized;
@@ -71,6 +73,12 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     private Map<String, ApplicationPolicy> appPolicyMap;
     private Map<String, Subscription> subscriptionMap;
     private Map<String, Scope> scopesMap;
+    // Keeps the subscriptions recently reported as not found by the control plane, against their expiry time in
+    // milliseconds. This is used only when SubscriptionNotFoundCacheExpiry is configured with a positive value.
+    private Map<String, Long> subscriptionNotFoundMap;
+    // Lock to check the size of the subscription not found map and add an entry to it atomically.
+    private final Object subscriptionNotFoundMapLock = new Object();
+    private long subscriptionNotFoundExpiryInMillis;
     private boolean apisInitialized;
     private boolean apiPoliciesInitialized;
     private String tenantDomain;
@@ -114,6 +122,8 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         this.subscriptionMap = new ConcurrentHashMap<>();
         this.scopesMap = new ConcurrentHashMap<>();
         this.apiNameVersionMap = new ConcurrentHashMap<>();
+        this.subscriptionNotFoundMap = new ConcurrentHashMap<>();
+        this.subscriptionNotFoundExpiryInMillis = getSubscriptionNotFoundExpiryInMillis();
     }
 
     @Override
@@ -357,18 +367,43 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     @Override
     public Subscription getSubscriptionById(int appId, int apiId) {
 
+        return retrieveSubscription(appId, apiId, false);
+    }
+
+    /**
+     * Retrieves the subscription from the in-memory datastore, or from the control plane if it is not available.
+     *
+     * @param appId                    application id
+     * @param apiId                    API id
+     * @param skipSubscriptionNotFound true to query the control plane even if the subscription was recently reported
+     *                                 as not found, without keeping a not found result
+     * @return the subscription, or null if it is not found
+     */
+    private Subscription retrieveSubscription(int appId, int apiId, boolean skipSubscriptionNotFound) {
+
         String subscriptionCacheKey = SubscriptionDataStoreUtil.getSubscriptionCacheKey(appId, apiId);
         String synchronizeKey = "SubscriptionDataStoreImpl-Subscription-" + subscriptionCacheKey;
         Subscription subscription = subscriptionMap.get(subscriptionCacheKey);
         if (subscription == null) {
+            if (!skipSubscriptionNotFound && isSubscriptionRecentlyNotFound(subscriptionCacheKey)) {
+                return null;
+            }
             synchronized (synchronizeKey.intern()) {
                 subscription = subscriptionMap.get(subscriptionCacheKey);
                 if (subscription != null) {
                     return subscription;
                 }
+                // Threads which waited on the lock while another thread retrieved the subscription from the
+                // control plane, should not call the control plane again if it was reported as not found.
+                if (!skipSubscriptionNotFound && isSubscriptionRecentlyNotFound(subscriptionCacheKey)) {
+                    return null;
+                }
                 try {
                     subscription = new SubscriptionDataLoaderImpl().getSubscriptionById(Integer.toString(apiId),
                             Integer.toString(appId));
+                    if (subscription == null && !skipSubscriptionNotFound) {
+                        markSubscriptionNotFound(subscriptionCacheKey);
+                    }
                 } catch (DataLoadingException e) {
                     log.error("Error while Retrieving Subscription Data From Internal API", e);
                 }
@@ -376,6 +411,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                     // load to the memory
                     log.debug("Loading Subscription to the in-memory datastore.");
                     subscriptionMap.put(subscription.getCacheKey(), subscription);
+                    subscriptionNotFoundMap.remove(subscription.getCacheKey());
                 }
             }
         }
@@ -390,6 +426,108 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         }
 
         return subscription;
+    }
+
+    /**
+     * Reads the expiry time of the subscription not found entries from the API Manager configuration.
+     *
+     * @return expiry time in milliseconds, or 0 if the subscription not found entries should not be kept
+     */
+    private long getSubscriptionNotFoundExpiryInMillis() {
+
+        if (ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService() == null ||
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                        .getAPIManagerConfiguration() == null) {
+            return 0;
+        }
+        String expiry = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getFirstProperty(APIConstants.SUBSCRIPTION_NOT_FOUND_CACHE_EXPIRY);
+        if (StringUtils.isBlank(expiry)) {
+            return 0;
+        }
+        try {
+            long expiryInSeconds = Long.parseLong(expiry.trim());
+            if (expiryInSeconds > 0) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Subscription not found entries are kept for " + expiryInSeconds + " seconds in tenant "
+                            + tenantDomain);
+                }
+                return TimeUnit.SECONDS.toMillis(expiryInSeconds);
+            }
+            if (expiryInSeconds == 0) {
+                return 0;
+            }
+        } catch (NumberFormatException e) {
+            // A warning is logged below.
+        }
+        log.warn("Invalid value " + expiry + " configured for " + APIConstants.SUBSCRIPTION_NOT_FOUND_CACHE_EXPIRY
+                + ". Subscription not found entries will not be kept.");
+        return 0;
+    }
+
+    /**
+     * Checks whether the subscription was reported as not found by the control plane within the configured expiry
+     * time.
+     *
+     * @param subscriptionCacheKey subscription cache key
+     * @return true if the subscription was recently reported as not found
+     */
+    private boolean isSubscriptionRecentlyNotFound(String subscriptionCacheKey) {
+
+        if (subscriptionNotFoundExpiryInMillis <= 0) {
+            return false;
+        }
+        Long expiryTime = subscriptionNotFoundMap.get(subscriptionCacheKey);
+        if (expiryTime == null) {
+            return false;
+        }
+        if (System.currentTimeMillis() < expiryTime) {
+            if (log.isDebugEnabled()) {
+                log.debug("Subscription " + subscriptionCacheKey + " was recently not found in the control plane. "
+                        + "Hence skipping the retrieval of the subscription.");
+            }
+            return true;
+        }
+        subscriptionNotFoundMap.remove(subscriptionCacheKey, expiryTime);
+        return false;
+    }
+
+    /**
+     * Keeps the subscription as not found by the control plane until the configured expiry time.
+     *
+     * @param subscriptionCacheKey subscription cache key
+     */
+    private void markSubscriptionNotFound(String subscriptionCacheKey) {
+
+        if (subscriptionNotFoundExpiryInMillis <= 0) {
+            return;
+        }
+        long currentTime = System.currentTimeMillis();
+        // Avoids an overflow of the expiry time when a very large expiry is configured.
+        long expiryTime = subscriptionNotFoundExpiryInMillis > Long.MAX_VALUE - currentTime ? Long.MAX_VALUE :
+                currentTime + subscriptionNotFoundExpiryInMillis;
+        // The size is checked and the entry is added under a lock, so that concurrent misses of different
+        // subscriptions do not exceed the maximum size. Entries are removed without this lock, as removals only
+        // reduce the size.
+        synchronized (subscriptionNotFoundMapLock) {
+            if (subscriptionNotFoundMap.size() >= SUBSCRIPTION_NOT_FOUND_MAP_MAX_SIZE) {
+                // Expired entries are removed only when the map is full. Each call reaching here has already called
+                // the control plane, hence the cost of this scan is negligible compared to that.
+                subscriptionNotFoundMap.values().removeIf(entryExpiryTime -> entryExpiryTime <= currentTime);
+                if (subscriptionNotFoundMap.size() >= SUBSCRIPTION_NOT_FOUND_MAP_MAX_SIZE) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Subscription not found map reached the maximum size in tenant " + tenantDomain
+                                + ". Hence not keeping " + subscriptionCacheKey);
+                    }
+                    return;
+                }
+            }
+            subscriptionNotFoundMap.put(subscriptionCacheKey, expiryTime);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Subscription " + subscriptionCacheKey + " was not found in the control plane. Hence keeping "
+                    + "it as not found for " + subscriptionNotFoundExpiryInMillis + " milliseconds.");
+        }
     }
 
     @Override
@@ -540,6 +678,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         String synchronizeKey = "SubscriptionDataStoreImpl-API-" + subscription.getCacheKey();
 
         synchronized (synchronizeKey.intern()) {
+            subscriptionNotFoundMap.remove(subscription.getCacheKey());
             Subscription retrievedSubscription = subscriptionMap.get(subscription.getCacheKey());
             if (retrievedSubscription == null) {
                 subscriptionMap.put(subscription.getCacheKey(), subscription);
@@ -578,7 +717,10 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         }
         // Hand over the internal subscription to a separate thread pool to be carried out secretly
         subscriptionExecutorService.submit(() -> {
-            if (getSubscriptionById(app.getId(), api.getApiId()) != null) {
+            // The subscription is checked in the control plane before subscribing, without using the subscription
+            // not found entries, as such an entry may not be cleared by the event of a subscription created
+            // meanwhile (e.g. cross tenant subscriptions).
+            if (retrieveSubscription(app.getId(), api.getApiId(), true) != null) {
                 return;
             }
             new SubscriptionDataLoaderImpl().subscribeToAPIInternally(api, app, tenantDomain);
