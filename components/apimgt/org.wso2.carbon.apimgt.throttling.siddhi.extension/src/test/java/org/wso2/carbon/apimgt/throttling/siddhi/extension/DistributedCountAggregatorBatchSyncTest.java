@@ -27,6 +27,9 @@ import org.wso2.carbon.apimgt.throttling.siddhi.extension.util.kvstore.KeyValueS
 import org.wso2.carbon.apimgt.throttling.siddhi.extension.util.kvstore.KeyValueStoreManager;
 import org.wso2.carbon.apimgt.throttling.siddhi.extension.util.kvstore.KeyValueStoreOperation;
 import org.wso2.carbon.apimgt.throttling.siddhi.extension.util.kvstore.KeyValueStoreUnavailableException;
+import org.wso2.siddhi.core.config.ExecutionPlanContext;
+import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import org.wso2.siddhi.core.query.selector.QuerySelector;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -293,6 +296,31 @@ public class DistributedCountAggregatorBatchSyncTest {
 
     private static void setStatic(String name, Object value) throws Exception {
         field(DCAA, name).set(null, value);
+    }
+
+    private static long resetMinRemainingMillis() throws Exception {
+        return field(DCAA, "RESET_MIN_REMAINING_MILLIS").getLong(null);
+    }
+
+    private static Object getStatic(String name) throws Exception {
+        return field(DCAA, name).get(null);
+    }
+
+    /** Runs init() on the calling thread, as Siddhi does for the first event of a group-by key. */
+    @SuppressWarnings("unchecked")
+    private static void initAs(DistributedCountAttributeAggregator aggregator, String groupByKey) throws Exception {
+        ThreadLocal<String> keyThreadLocal = (ThreadLocal<String>) field(QuerySelector.class, "keyThreadLocal")
+                .get(null);
+        keyThreadLocal.set(groupByKey);
+        try {
+            Method init = DCAA.getDeclaredMethod("init", ExpressionExecutor[].class, ExecutionPlanContext.class);
+            init.setAccessible(true);
+            init.invoke(aggregator, new ExpressionExecutor[0], null);
+        } catch (InvocationTargetException e) {
+            throw (Exception) e.getCause();
+        } finally {
+            keyThreadLocal.remove();
+        }
     }
 
     private static void set(Object aggregator, String name, Object value) throws Exception {
@@ -1175,6 +1203,60 @@ public class DistributedCountAggregatorBatchSyncTest {
         Assert.assertEquals("the other nodes' count is not wiped", "41", client.store.get("K"));
     }
 
+    /**
+     * A reset still owed in the last milliseconds of its window is not written: a batched write reaches the store a
+     * little after it is collected, so the "0" could land after the window ended and wipe the next window's counts.
+     * With no request since the reset, it is dropped and the key leaves, as for a window that has ended.
+     */
+    @Test(timeout = TEST_TIMEOUT_MS)
+    public void testResetOwedInTheLastMillisecondsOfItsWindowIsDroppedAndTheKeyLeaves() throws Exception {
+        FakeBatchClient client = new FakeBatchClient();
+        DistributedCountAttributeAggregator aggregator = aggregator("K", client);
+        aggregator.reset();
+        client.store.put("K", "40"); // the other nodes' count
+        set(aggregator, "storedWindowExpiry", System.currentTimeMillis() + resetMinRemainingMillis() / 2);
+
+        tick();
+
+        Assert.assertEquals("nothing is written", 0, client.pipelineCalls.size());
+        Assert.assertEquals("the other nodes' count is not wiped", "40", client.store.get("K"));
+        Assert.assertEquals(false, get(aggregator, "pendingReset"));
+        Assert.assertFalse("the key left the list", onList("K", aggregator));
+    }
+
+    /**
+     * Same, for a key with requests since its reset: nothing is written (no "0", and no INCRBY while the reset is
+     * owed) and the key stays on the list. At the window end, the next window's reset is written as usual.
+     */
+    @Test(timeout = TEST_TIMEOUT_MS)
+    public void testResetOwedInTheLastMillisecondsOfItsWindowIsNotWrittenForAKeyWithRequests() throws Exception {
+        FakeBatchClient client = new FakeBatchClient();
+        DistributedCountAttributeAggregator aggregator = aggregator("K", client);
+        aggregator.reset();
+        requests(aggregator, 2);
+        client.store.put("K", "40"); // the other nodes' count
+        set(aggregator, "storedWindowExpiry", System.currentTimeMillis() + resetMinRemainingMillis() / 2);
+
+        tick();
+
+        Assert.assertEquals("nothing is written", 0, client.pipelineCalls.size());
+        Assert.assertEquals("the other nodes' count is not wiped", "40", client.store.get("K"));
+        Assert.assertEquals(true, get(aggregator, "pendingReset"));
+        Assert.assertTrue("the key stays on the list", onList("K", aggregator));
+
+        long nextWindowExpiry = System.currentTimeMillis() + 60000L;
+        setWindowExpiryThreadLocal(nextWindowExpiry); // the window ends
+        aggregator.reset();
+        tick();
+
+        List<KeyValueStoreOperation> pipeline = client.pipelineCalls.get(0);
+        Assert.assertEquals(1, pipeline.size());
+        Assert.assertEquals(KeyValueStoreOperation.Type.PSETEX, pipeline.get(0).getType());
+        Assert.assertTrue("the next window's TTL", pipeline.get(0).getTtlMillis() > resetMinRemainingMillis());
+        Assert.assertEquals("0", client.store.get("K"));
+        Assert.assertEquals(false, get(aggregator, "pendingReset"));
+    }
+
     @Test(timeout = TEST_TIMEOUT_MS)
     public void testCurrentStateAndStopOfAKeyOffTheListMakeNoCalls() throws Exception {
         FakeBatchClient client = new FakeBatchClient();
@@ -1210,6 +1292,69 @@ public class DistributedCountAggregatorBatchSyncTest {
     }
 
     /** Two counters with the same key (the same throttle key in two policies) both keep syncing. */
+    /**
+     * Counter B is being set up (in its first read, past its scheduler check) when A, the last live counter, stops
+     * and shuts the scheduler down. B then completes its registration and must start the scheduler again: B is on
+     * the sync list, so its requests would not.
+     */
+    @Test(timeout = TEST_TIMEOUT_MS)
+    public void testCounterRegisteredWhileTheLastCounterStopsStartsTheSchedulerAgain() throws Exception {
+        assertSchedulerRunsWhenRegistrationRacesTheLastStop();
+    }
+
+    /** Same, with the per-key sync, which shuts the scheduler down when the sync list is empty. */
+    @Test(timeout = TEST_TIMEOUT_MS)
+    public void testCounterRegisteredWhileTheLastCounterStopsStartsTheSchedulerAgainWithPerKeySync()
+            throws Exception {
+        setStatic("batchWithEvictionEnabled", false);
+        assertSchedulerRunsWhenRegistrationRacesTheLastStop();
+    }
+
+    private void assertSchedulerRunsWhenRegistrationRacesTheLastStop() throws Exception {
+        String keyB = "wso2_throttler:B";
+        CountDownLatch firstReadEntered = new CountDownLatch(1);
+        CountDownLatch releaseFirstRead = new CountDownLatch(1);
+        FakeBatchClient client = new FakeBatchClient() {
+            @Override
+            public String get(String key) {
+                if (keyB.equals(key) && firstReadEntered.getCount() > 0) {
+                    firstReadEntered.countDown();
+                    try {
+                        releaseFirstRead.await(10, TimeUnit.SECONDS);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+                return super.get(key);
+            }
+        };
+        field(KeyValueStoreManager.class, "clientInstance").set(null, client);
+        DistributedCountAttributeAggregator a = aggregator("A", client); // the only live counter
+        DistributedCountAttributeAggregator b = new DistributedCountAttributeAggregator();
+        ExecutorService siddhiThread = Executors.newSingleThreadExecutor();
+        try {
+            Future<?> registration = siddhiThread.submit(() -> {
+                initAs(b, "B");
+                return null;
+            });
+            Assert.assertTrue("B is in its first read", firstReadEntered.await(5, TimeUnit.SECONDS));
+
+            a.stop();
+            Assert.assertEquals("the last live counter stopped: the scheduler is shut down", false,
+                    getStatic("schedulerStarted"));
+
+            releaseFirstRead.countDown();
+            registration.get(5, TimeUnit.SECONDS);
+            Assert.assertTrue("B is on the sync list", onList(keyB, b));
+            Assert.assertEquals("B started the scheduler again", true, getStatic("schedulerStarted"));
+            Assert.assertNotNull(getStatic("masterSyncTask"));
+        } finally {
+            releaseFirstRead.countDown();
+            siddhiThread.shutdownNow();
+            DistributedCountAttributeAggregator.shutdownScheduler(); // stops the real scheduler B started
+        }
+    }
+
     @Test(timeout = TEST_TIMEOUT_MS)
     public void testTwoCountersWithTheSameKeyBothKeepSyncing() throws Exception {
         FakeBatchClient client = new FakeBatchClient();

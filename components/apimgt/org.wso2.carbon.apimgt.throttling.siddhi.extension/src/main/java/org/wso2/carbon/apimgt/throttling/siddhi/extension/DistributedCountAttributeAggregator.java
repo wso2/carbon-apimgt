@@ -85,6 +85,10 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
     // enable_batch_with_eviction turns on both the batched sync and taking keys off the sync list after their reset.
     private static boolean batchWithEvictionEnabled = true;
     private static int batchSize = DistributedThrottleConfig.DEFAULT_BATCH_SIZE;
+    // Batch sync: a pending reset with this little time left in its window is not written. A batched write reaches
+    // the store a little after it is collected (it waits for a sync thread, then the network), so a "0" collected in
+    // the last milliseconds of its window could land after the window ended and wipe the next window's counts.
+    private static final long RESET_MIN_REMAINING_MILLIS = 100L;
 
     // Rate-limits the error log of a failed batch (one log covers every key in it)
     private static final AtomicLong lastBatchErrorLogTimestamp = new AtomicLong(0L);
@@ -163,9 +167,15 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
                 this.kvStoreClient = KeyValueStoreManager.getClient();
                 if (this.kvStoreClient != null) {
                     initializeFromKVStore();
-                    ACTIVE_AGGREGATORS.put(key, this);
-                    if (live.compareAndSet(false, true)) {
-                        LIVE_AGGREGATOR_COUNT.incrementAndGet();
+                    // Under schedulerLock, as stop() decides on shutdown: if the last counter stopped and shut the
+                    // scheduler down while this one was being set up, this counter starts it again. Otherwise it
+                    // would be on the sync list with no scheduler, and its requests would not restart it.
+                    synchronized (schedulerLock) {
+                        ACTIVE_AGGREGATORS.put(key, this);
+                        if (live.compareAndSet(false, true)) {
+                            LIVE_AGGREGATOR_COUNT.incrementAndGet();
+                        }
+                        startScheduler(); // no-op if it is running
                     }
                 }
             } catch (KeyValueStoreException e) {
@@ -320,8 +330,9 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
      * collector. Uses the same rules as {@link #syncWithKVStore()}, but does no I/O, so the lock is held
      * only briefly.
      * <ul>
-     *     <li>pending reset: PSETEX "0" with the remaining window TTL. If the window it was for has already ended
-     *     and no request came since, the "0" is dropped and the key leaves the sync list.</li>
+     *     <li>pending reset: PSETEX "0" with the remaining window TTL. If the window it was for has ended, or has at
+     *     most {@link #RESET_MIN_REMAINING_MILLIS} left, the "0" is not written. If no request came since, it is
+     *     dropped and the key leaves the sync list.</li>
      *     <li>unsynced delta: INCRBY/DECRBY, plus PEXPIRE if the key has no known TTL</li>
      *     <li>key found missing on the last read: SET NX PX "0"</li>
      *     <li>otherwise: read the key (MGET)</li>
@@ -338,20 +349,23 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
             long remainingMillis = windowExpiry > 0 ? windowExpiry - System.currentTimeMillis() : 0L;
             if (pendingReset) {
                 seedNeeded = false; // the reset writes the key
-                if (remainingMillis > 0) {
+                if (remainingMillis > RESET_MIN_REMAINING_MILLIS) {
                     collector.addWrite(new SyncUnit(this, SyncUnit.Kind.RESET, epoch, directSyncEpoch, windowExpiry,
                             0L, KeyValueStoreOperation.setWithExpiry(key, "0", remainingMillis)));
                     writeInFlight = true;
                 } else if (windowExpiry > 0 && unsyncedCounter.get() == 0) {
-                    // The window this "0" was for ended before it could be written (the store was unreachable), and
-                    // no request came since. Writing it now would wipe the other nodes' counts in the middle of the
-                    // current window, so it is dropped and the key leaves the list. Its next request puts it back
-                    // and sends INCRBY + PEXPIRE.
+                    // The window this "0" was for ended, or is about to end, before it could be written (the store
+                    // was unreachable), and no request came since. Writing it now would wipe the other nodes' counts
+                    // in the middle of the current window, or at the start of the next one if it lands after the
+                    // window ends, so it is dropped and the key leaves the list. Its next request puts it back and
+                    // sends INCRBY + PEXPIRE.
                     pendingReset = false;
                     keyHasTTL = false;
                     leaveListIfIdle();
                 } else {
-                    // Same as syncWithKVStore(): nothing is written while the window expiry is unknown or past.
+                    // Nothing is written while the window expiry is unknown, past (as in syncWithKVStore()) or about
+                    // to pass. The reset at the window end, or the first request of the next window, replaces this
+                    // pending reset.
                     keyHasTTL = false;
                 }
                 return;
@@ -762,8 +776,14 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
                     if (onList) {
                         flushToKVStore();
                     }
-                    if (wasLive && LIVE_AGGREGATOR_COUNT.decrementAndGet() == 0) {
-                        shutdownScheduler();
+                    if (wasLive) {
+                        // Under schedulerLock, as init() registers a counter: a counter being registered either
+                        // counts as live before this decision, or starts the scheduler again after it.
+                        synchronized (schedulerLock) {
+                            if (LIVE_AGGREGATOR_COUNT.decrementAndGet() == 0) {
+                                shutdownScheduler();
+                            }
+                        }
                     }
                     return;
                 }
@@ -775,9 +795,12 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
                 if (kvStoreClient != null) {
                     flushToKVStore();
                 }
-                // Shutdown scheduler if no active aggregators exist
-                if (ACTIVE_AGGREGATORS.isEmpty()) {
-                    shutdownScheduler();
+                // Shutdown scheduler if no active aggregators exist. Under schedulerLock, as init() registers a
+                // counter, so that a counter being registered is either seen here or starts the scheduler again.
+                synchronized (schedulerLock) {
+                    if (ACTIVE_AGGREGATORS.isEmpty()) {
+                        shutdownScheduler();
+                    }
                 }
             }
         } catch (Exception e) {
