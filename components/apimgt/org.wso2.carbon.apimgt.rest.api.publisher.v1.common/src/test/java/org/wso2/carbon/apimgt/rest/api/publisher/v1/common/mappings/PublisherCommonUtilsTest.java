@@ -59,7 +59,9 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
+import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.AsyncApiParseOptions;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
@@ -82,7 +84,7 @@ import static org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.Publi
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({RestApiCommonUtil.class, WorkflowExecutorFactory.class, APIUtil.class, OASParserUtil.class,
-        MCPUtils.class})
+        MCPUtils.class, PublisherCommonUtils.class})
 public class PublisherCommonUtilsTest {
 
     private static final String PROVIDER = "admin";
@@ -1170,4 +1172,510 @@ public class PublisherCommonUtilsTest {
         Mockito.when(APIUtil.getInternalOrganizationId(ORGANIZATION)).thenReturn(-1234);
         Mockito.when(APIUtil.getTenantDomainFromTenantId(-1234)).thenReturn(ORGANIZATION);
     }
+
+    private static final String SSE_DEFINITION_NO_BINDINGS = "{\"asyncapi\":\"2.0.0\",\"info\":{\"title\":"
+            + "\"SseNoBindings\",\"version\":\"1.0.0\"},\"channels\":{\"/notifications\":{\"subscribe\":"
+            + "{\"x-scopes\":[\"shared_scope_1\"],\"message\":{\"payload\":{\"type\":\"string\"}}}}},"
+            + "\"components\":{\"securitySchemes\":{\"oauth2\":{\"type\":\"oauth2\",\"flows\":{\"implicit\":"
+            + "{\"authorizationUrl\":\"http://localhost:9999\",\"scopes\":{\"shared_scope_1\":"
+            + "\"shared scope 1\"}}}}}}}";
+
+    /**
+     * Stubs the async flow collaborators; applySharedScopeRoles sets the given shared scope roles (null: no change)
+     * or fails as if the key manager could not be reached.
+     */
+    @SuppressWarnings("unchecked")
+    private void stubAsyncFlowCollaborators(boolean sharedScopeLookupFails, String sharedRoles) throws Exception {
+
+        PowerMockito.spy(PublisherCommonUtils.class);
+        if (sharedScopeLookupFails) {
+            stubSharedScopeLookupThrowing();
+        } else {
+            PowerMockito.doAnswer(invocation -> {
+                if (sharedRoles != null) {
+                    for (Scope scope : (Set<Scope>) invocation.getArguments()[1]) {
+                        scope.setRoles(sharedRoles);
+                    }
+                }
+                return null;
+            }).when(PublisherCommonUtils.class, "applySharedScopeRoles", Mockito.anyString(), Mockito.anySet());
+        }
+        PowerMockito.stub(PowerMockito.method(PublisherCommonUtils.class, "getParserOptionsFromConfig"))
+                .toReturn(new AsyncApiParseOptions());
+        PowerMockito.stub(PowerMockito.method(PublisherCommonUtils.class, "checkGovernanceComplianceSync"))
+                .toReturn(new HashMap<String, String>());
+        PowerMockito.stub(PowerMockito.method(PublisherCommonUtils.class, "checkGovernanceComplianceAsync"))
+                .toReturn(null);
+    }
+
+    private APIDefinitionValidationResponse sseValidationResponse() {
+
+        return sseValidationResponse(SSE_DEFINITION_NO_BINDINGS);
+    }
+
+    private APIDefinitionValidationResponse sseValidationResponse(String definition) {
+
+        APIDefinitionValidationResponse response = new APIDefinitionValidationResponse();
+        response.setValid(true);
+        response.setJsonContent(definition);
+        response.setProtocol("SSE");
+        return response;
+    }
+
+    private API sseApi() {
+
+        API api = new API(new APIIdentifier(PROVIDER, "SseNoBindings", "1.0.0", UUID));
+        api.setUuid(UUID);
+        api.setType("SSE");
+        api.setGatewayVendor(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
+        api.setOrganization(ORGANIZATION);
+        return api;
+    }
+
+    private void stubPrepareToCreateAPI(API api) throws Exception {
+
+        PowerMockito.stub(PowerMockito.method(PublisherCommonUtils.class, "prepareToCreateAPIByDTO",
+                APIDTOTypeWrapper.class, APIProvider.class, String.class, String.class)).toReturn(api);
+    }
+
+    @Test
+    public void testImportAsyncAPIAddsScopeBindingsToStoredDefinition() throws Exception {
+
+        stubAsyncFlowCollaborators(false, "admin");
+        APIProvider apiProvider = Mockito.mock(APIProvider.class);
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        when(RestApiCommonUtil.getLoggedInUsername()).thenReturn(PROVIDER);
+        API apiToAdd = sseApi();
+        stubPrepareToCreateAPI(apiToAdd);
+        when(apiProvider.getAPIbyUUID(UUID, ORGANIZATION)).thenReturn(apiToAdd);
+        APIDTO apiDto = new APIDTO();
+        apiDto.setGatewayVendor(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
+
+        PublisherCommonUtils.importAsyncAPIWithDefinition(sseValidationResponse(), false, apiDto, null,
+                ORGANIZATION, apiProvider);
+
+        ArgumentCaptor<API> captor = ArgumentCaptor.forClass(API.class);
+        Mockito.verify(apiProvider).addAPI(captor.capture());
+        String stored = captor.getValue().getAsyncApiDefinition();
+        Assert.assertTrue("x-scopes-bindings was not added to the imported definition",
+                stored.contains("x-scopes-bindings"));
+        Set<Scope> scopes = AsyncApiParserUtil.getScopesFromAsyncAPIConfig(stored);
+        Assert.assertEquals(1, scopes.size());
+        Assert.assertEquals("shared_scope_1", scopes.iterator().next().getKey());
+        Assert.assertEquals("admin", scopes.iterator().next().getRoles());
+    }
+
+    @Test
+    public void testImportAsyncAPIKeepsDefinitionWhenSharedScopeLookupFails() throws Exception {
+
+        stubAsyncFlowCollaborators(true, null);
+        APIProvider apiProvider = Mockito.mock(APIProvider.class);
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        when(RestApiCommonUtil.getLoggedInUsername()).thenReturn(PROVIDER);
+        stubPrepareToCreateAPI(sseApi());
+        APIDTO apiDto = new APIDTO();
+        apiDto.setGatewayVendor(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
+
+        PublisherCommonUtils.importAsyncAPIWithDefinition(sseValidationResponse(), false, apiDto, null,
+                ORGANIZATION, apiProvider);
+
+        ArgumentCaptor<API> captor = ArgumentCaptor.forClass(API.class);
+        Mockito.verify(apiProvider).addAPI(captor.capture());
+        Assert.assertEquals("definition should be stored as uploaded", SSE_DEFINITION_NO_BINDINGS,
+                captor.getValue().getAsyncApiDefinition());
+    }
+
+    @Test
+    public void testUpdateAsyncAPIDefinitionAddsScopeBindings() throws Exception {
+
+        stubAsyncFlowCollaborators(false, "admin");
+        APIProvider apiProvider = Mockito.mock(APIProvider.class);
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        when(RestApiCommonUtil.getLoggedInUserProvider()).thenReturn(apiProvider);
+        when(apiProvider.getAPIbyUUID(UUID, ORGANIZATION)).thenReturn(sseApi());
+        when(apiProvider.getAsyncAPIDefinition(UUID, ORGANIZATION)).thenReturn("saved-definition");
+
+        String result = PublisherCommonUtils.updateAsyncAPIDefinition(UUID, sseValidationResponse(), ORGANIZATION);
+
+        ArgumentCaptor<String> definition = ArgumentCaptor.forClass(String.class);
+        Mockito.verify(apiProvider).saveAsyncApiDefinition(Mockito.any(API.class), definition.capture());
+        Assert.assertTrue("x-scopes-bindings was not added to the saved definition",
+                definition.getValue().contains("x-scopes-bindings"));
+        Set<Scope> scopes = AsyncApiParserUtil.getScopesFromAsyncAPIConfig(definition.getValue());
+        Assert.assertEquals("admin", scopes.iterator().next().getRoles());
+        Assert.assertEquals("saved-definition", result);
+    }
+
+    @Test
+    public void testReimportServiceAddsScopeBindings() throws Exception {
+
+        stubAsyncFlowCollaborators(false, "admin");
+        APIProvider apiProvider = mockProviderForAsyncUpdate();
+
+        PublisherCommonUtils.updateAPIDefinition(UUID, sseValidationResponse(), asyncService(), ORGANIZATION);
+
+        ArgumentCaptor<String> definition = ArgumentCaptor.forClass(String.class);
+        Mockito.verify(apiProvider).saveAsyncApiDefinition(Mockito.any(API.class), definition.capture());
+        Assert.assertEquals("admin", firstScopeRoles(definition.getValue()));
+    }
+
+    @Test
+    public void testReimportServiceKeepsDefinitionWhenScopeLookupFails() throws Exception {
+
+        stubAsyncFlowCollaborators(true, null);
+        assertReimportKeepsDefinitionAndScopes();
+    }
+
+    /**
+     * Runs a reimport whose shared scope lookup fails and checks that it behaves as before the fix: the definition
+     * is saved as uploaded, the API keeps its original scopes, and the API is still updated.
+     */
+    private void assertReimportKeepsDefinitionAndScopes() throws Exception {
+
+        API existing = sseApi();
+        Set<Scope> originalScopes = new HashSet<>(Collections.singleton(createScope("existing_scope", "admin")));
+        existing.setScopes(originalScopes);
+        APIProvider apiProvider = mockProviderForAsyncUpdate();
+        when(apiProvider.getAPIbyUUID(UUID, ORGANIZATION)).thenReturn(existing);
+
+        PublisherCommonUtils.updateAPIDefinition(UUID, sseValidationResponse(), asyncService(), ORGANIZATION);
+
+        ArgumentCaptor<API> api = ArgumentCaptor.forClass(API.class);
+        ArgumentCaptor<String> definition = ArgumentCaptor.forClass(String.class);
+        Mockito.verify(apiProvider).saveAsyncApiDefinition(api.capture(), definition.capture());
+        Assert.assertEquals("definition should be saved as uploaded", SSE_DEFINITION_NO_BINDINGS,
+                definition.getValue());
+        Assert.assertSame("the API should keep its original scopes", originalScopes, api.getValue().getScopes());
+        Mockito.verify(apiProvider).updateAPI(Mockito.any(API.class), Mockito.any(API.class));
+    }
+
+    private static final String SSE_DEFINITION_UNKNOWN_ROLE = SSE_DEFINITION_NO_BINDINGS.replace(
+            "\"shared scope 1\"}", "\"shared scope 1\"},\"x-scopes-bindings\":{\"shared_scope_1\":\"nosuchrole\"}");
+
+    @Test
+    public void testImportAsyncAPIDoesNotValidateRoles() throws Exception {
+
+        stubAsyncFlowCollaborators(false, null);
+        stubValidateScopesFailing();
+        APIProvider apiProvider = Mockito.mock(APIProvider.class);
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        when(RestApiCommonUtil.getLoggedInUsername()).thenReturn(PROVIDER);
+        stubPrepareToCreateAPI(sseApi());
+        APIDTO apiDto = new APIDTO();
+        apiDto.setGatewayVendor(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
+
+        PublisherCommonUtils.importAsyncAPIWithDefinition(sseValidationResponse(SSE_DEFINITION_UNKNOWN_ROLE), false,
+                apiDto, null, ORGANIZATION, apiProvider);
+
+        ArgumentCaptor<API> captor = ArgumentCaptor.forClass(API.class);
+        Mockito.verify(apiProvider).addAPI(captor.capture());
+        Assert.assertEquals("nosuchrole", firstScopeRoles(captor.getValue().getAsyncApiDefinition()));
+        assertTemplateScopesHaveRoles(captor.getValue().getUriTemplates(), "nosuchrole");
+    }
+
+    @Test
+    public void testUpdateAsyncAPIDefinitionDoesNotValidateRoles() throws Exception {
+
+        stubAsyncFlowCollaborators(false, null);
+        stubValidateScopesFailing();
+        APIProvider apiProvider = mockProviderForAsyncUpdate();
+
+        PublisherCommonUtils.updateAsyncAPIDefinition(UUID, sseValidationResponse(SSE_DEFINITION_UNKNOWN_ROLE),
+                ORGANIZATION);
+
+        ArgumentCaptor<String> definition = ArgumentCaptor.forClass(String.class);
+        Mockito.verify(apiProvider).saveAsyncApiDefinition(Mockito.any(API.class), definition.capture());
+        Assert.assertEquals("nosuchrole", firstScopeRoles(definition.getValue()));
+    }
+
+    @Test
+    public void testApplySharedScopeRolesSetsRolesOfSharedScopesOnly() throws Exception {
+
+        APIProvider apiProvider = mockSharedScopeLookup();
+        Scope shared = createScope("shared_scope", "role_in_file");
+        Scope local = createScope("local_scope", "nosuchrole");
+        Mockito.when(apiProvider.isSharedScopeNameExists("shared_scope", -1234)).thenReturn(true);
+        Mockito.doAnswer(invocation -> {
+            for (Object scope : (Set<?>) invocation.getArguments()[0]) {
+                ((Scope) scope).setRoles("admin");
+            }
+            return null;
+        }).when(apiProvider).validateSharedScopes(Mockito.anySet(), Mockito.eq(ORGANIZATION));
+
+        org.powermock.reflect.Whitebox.invokeMethod(PublisherCommonUtils.class, "applySharedScopeRoles",
+                ORGANIZATION, new LinkedHashSet<>(Arrays.asList(shared, local)));
+
+        Assert.assertEquals("admin", shared.getRoles());
+        Assert.assertEquals("local roles are not validated or changed", "nosuchrole", local.getRoles());
+        Set<Scope> validated = captureValidatedSharedScopes(apiProvider);
+        Assert.assertEquals(1, validated.size());
+        Assert.assertSame(shared, validated.iterator().next());
+        PowerMockito.verifyStatic(APIUtil.class, Mockito.never());
+        APIUtil.isRoleNameExist(Mockito.anyString(), Mockito.anyString());
+        Mockito.verify(apiProvider, Mockito.never()).isScopeKeyAssignedLocally(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyString());
+    }
+
+    @Test
+    public void testApplySharedScopeRolesSkipsAllowedAndLocalScopes() throws Exception {
+
+        APIProvider apiProvider = mockSharedScopeLookup();
+        Scope allowed = createScope("openid", null);
+        Scope local = createScope("local_scope", "admin");
+        Mockito.when(APIUtil.isAllowedScope("openid")).thenReturn(true);
+
+        org.powermock.reflect.Whitebox.invokeMethod(PublisherCommonUtils.class, "applySharedScopeRoles",
+                ORGANIZATION, new LinkedHashSet<>(Arrays.asList(allowed, local)));
+
+        Mockito.verify(apiProvider, Mockito.never()).isSharedScopeNameExists("openid", -1234);
+        Mockito.verify(apiProvider, Mockito.never()).validateSharedScopes(Mockito.anySet(), Mockito.anyString());
+        Assert.assertNull(allowed.getRoles());
+        Assert.assertEquals("admin", local.getRoles());
+    }
+
+    @Test
+    public void testUpdateAsyncAPIDefinitionChangesNothingWhenKeyManagerIsUnreachable() throws Exception {
+
+        stubAsyncFlowCollaborators(false, null);
+        PowerMockito.doThrow(new RuntimeException("connection refused")).when(PublisherCommonUtils.class,
+                "applySharedScopeRoles", Mockito.anyString(), Mockito.anySet());
+        APIProvider apiProvider = mockProviderForAsyncUpdate();
+
+        // api.yaml declares a role, so a successful run would change both the definition and the operations
+        PublisherCommonUtils.updateAsyncAPIDefinition(UUID, sseValidationResponse(), ORGANIZATION,
+                declaredScopes("shared_scope_1", "admin"));
+
+        ArgumentCaptor<API> savedApi = ArgumentCaptor.forClass(API.class);
+        ArgumentCaptor<String> definition = ArgumentCaptor.forClass(String.class);
+        Mockito.verify(apiProvider).saveAsyncApiDefinition(savedApi.capture(), definition.capture());
+        Assert.assertEquals("definition should be saved as uploaded", SSE_DEFINITION_NO_BINDINGS,
+                definition.getValue());
+        for (URITemplate uriTemplate : savedApi.getValue().getUriTemplates()) {
+            Assert.assertNull("operation scopes should be untouched", uriTemplate.getScope().getRoles());
+        }
+        Mockito.verify(apiProvider).updateAPI(Mockito.any(API.class), Mockito.any(API.class));
+    }
+
+    private APIProvider mockSharedScopeLookup() throws Exception {
+
+        APIProvider apiProvider = Mockito.mock(APIProvider.class);
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        Mockito.when(RestApiCommonUtil.getLoggedInUserProvider()).thenReturn(apiProvider);
+        PowerMockito.mockStatic(APIUtil.class);
+        Mockito.when(APIUtil.getInternalOrganizationId(ORGANIZATION)).thenReturn(-1234);
+        Mockito.when(APIUtil.getTenantDomainFromTenantId(-1234)).thenReturn(ORGANIZATION);
+        return apiProvider;
+    }
+
+    private void stubSharedScopeLookupThrowing() throws Exception {
+
+        PowerMockito.doThrow(new APIManagementException("Cannot read scope : shared_scope_1",
+                new RuntimeException("key manager unavailable"))).when(PublisherCommonUtils.class,
+                "applySharedScopeRoles", Mockito.anyString(), Mockito.anySet());
+    }
+
+    /**
+     * Makes validateScopes fail, to prove that the async flows do not call it.
+     */
+    private void stubValidateScopesFailing() throws Exception {
+
+        PowerMockito.doThrow(new APIManagementException("validateScopes must not be called"))
+                .when(PublisherCommonUtils.class, "validateScopes", Mockito.any(API.class));
+    }
+
+    private APIProvider mockProviderForAsyncUpdate() throws Exception {
+
+        APIProvider apiProvider = Mockito.mock(APIProvider.class);
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        when(RestApiCommonUtil.getLoggedInUserProvider()).thenReturn(apiProvider);
+        when(apiProvider.getAPIbyUUID(UUID, ORGANIZATION)).thenReturn(sseApi());
+        return apiProvider;
+    }
+
+    private org.wso2.carbon.apimgt.api.model.ServiceEntry asyncService() {
+
+        org.wso2.carbon.apimgt.api.model.ServiceEntry service = new org.wso2.carbon.apimgt.api.model.ServiceEntry();
+        service.setDefinitionType(org.wso2.carbon.apimgt.api.model.ServiceEntry.DefinitionType.ASYNC_API);
+        return service;
+    }
+
+    private String firstScopeRoles(String definition) throws Exception {
+
+        return AsyncApiParserUtil.getScopesFromAsyncAPIConfig(definition).iterator().next().getRoles();
+    }
+
+    /**
+     * Asserts the roles of the URI template scopes.
+     */
+    private void assertTemplateScopesHaveRoles(Set<URITemplate> uriTemplates, String expectedRoles) {
+
+        Assert.assertFalse("The API has no URI templates", uriTemplates == null || uriTemplates.isEmpty());
+        for (URITemplate uriTemplate : uriTemplates) {
+            Assert.assertNotNull("The URI template has no scope", uriTemplate.getScope());
+            Assert.assertEquals(expectedRoles, uriTemplate.getScope().getRoles());
+            Assert.assertFalse(uriTemplate.getScopes().isEmpty());
+            for (Scope scope : uriTemplate.getScopes()) {
+                Assert.assertEquals(expectedRoles, scope.getRoles());
+            }
+        }
+    }
+
+    private Set<Scope> declaredScopes(String key, String roles) {
+
+        Scope scope = new Scope();
+        scope.setKey(key);
+        scope.setName(key);
+        scope.setRoles(roles);
+        Set<Scope> scopes = new LinkedHashSet<>();
+        scopes.add(scope);
+        return scopes;
+    }
+
+    @Test
+    public void testImportAsyncAPIRetainsDeclaredScopeRolesWhenDefinitionHasNoBindings() throws Exception {
+
+        stubAsyncFlowCollaborators(false, null);
+        APIProvider apiProvider = Mockito.mock(APIProvider.class);
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        when(RestApiCommonUtil.getLoggedInUsername()).thenReturn(PROVIDER);
+        API apiToAdd = sseApi();
+        // roles from api.yaml
+        apiToAdd.setScopes(declaredScopes("shared_scope_1", "admin"));
+        stubPrepareToCreateAPI(apiToAdd);
+        APIDTO apiDto = new APIDTO();
+        apiDto.setGatewayVendor(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
+
+        PublisherCommonUtils.importAsyncAPIWithDefinition(sseValidationResponse(), false, apiDto, null,
+                ORGANIZATION, apiProvider);
+
+        ArgumentCaptor<API> captor = ArgumentCaptor.forClass(API.class);
+        Mockito.verify(apiProvider).addAPI(captor.capture());
+        Assert.assertEquals("admin",
+                firstScopeRoles(captor.getValue().getAsyncApiDefinition()));
+        assertTemplateScopesHaveRoles(captor.getValue().getUriTemplates(), "admin");
+    }
+
+    @Test
+    public void testImportAsyncAPIKeepsExplicitBindingOverDeclaredScopeRoles() throws Exception {
+
+        stubAsyncFlowCollaborators(false, null);
+        APIProvider apiProvider = Mockito.mock(APIProvider.class);
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        when(RestApiCommonUtil.getLoggedInUsername()).thenReturn(PROVIDER);
+        API apiToAdd = sseApi();
+        apiToAdd.setScopes(declaredScopes("shared_scope_1", "admin"));
+        stubPrepareToCreateAPI(apiToAdd);
+        APIDTO apiDto = new APIDTO();
+        apiDto.setGatewayVendor(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
+        String withExplicitBinding = AsyncApiParserUtil.setScopeBindings(SSE_DEFINITION_NO_BINDINGS,
+                declaredScopes("shared_scope_1", "internal/publisher"));
+
+        PublisherCommonUtils.importAsyncAPIWithDefinition(sseValidationResponse(withExplicitBinding), false, apiDto,
+                null, ORGANIZATION, apiProvider);
+
+        ArgumentCaptor<API> captor = ArgumentCaptor.forClass(API.class);
+        Mockito.verify(apiProvider).addAPI(captor.capture());
+        Assert.assertEquals("internal/publisher",
+                firstScopeRoles(captor.getValue().getAsyncApiDefinition()));
+    }
+
+    @Test
+    public void testUpdateAsyncAPIDefinitionRetainsDeclaredScopeRoles() throws Exception {
+
+        stubAsyncFlowCollaborators(false, null);
+        APIProvider apiProvider = Mockito.mock(APIProvider.class);
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        when(RestApiCommonUtil.getLoggedInUserProvider()).thenReturn(apiProvider);
+        when(apiProvider.getAPIbyUUID(UUID, ORGANIZATION)).thenReturn(sseApi());
+        when(apiProvider.getAsyncAPIDefinition(UUID, ORGANIZATION)).thenReturn("saved-definition");
+
+        PublisherCommonUtils.updateAsyncAPIDefinition(UUID, sseValidationResponse(), ORGANIZATION,
+                declaredScopes("shared_scope_1", "admin"));
+
+        ArgumentCaptor<String> definition = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<API> savedApi = ArgumentCaptor.forClass(API.class);
+        Mockito.verify(apiProvider).saveAsyncApiDefinition(savedApi.capture(), definition.capture());
+        assertTemplateScopesHaveRoles(savedApi.getValue().getUriTemplates(), "admin");
+        Assert.assertEquals("admin", firstScopeRoles(definition.getValue()));
+    }
+
+    @Test
+    public void testUpdateAsyncAPIDefinitionDoesNotRestoreBindingRemovedFromDefinition() throws Exception {
+
+        stubAsyncFlowCollaborators(false, null);
+        APIProvider apiProvider = Mockito.mock(APIProvider.class);
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        when(RestApiCommonUtil.getLoggedInUserProvider()).thenReturn(apiProvider);
+        // the stored API has the role; the new definition has no binding
+        API existingApi = sseApi();
+        existingApi.setScopes(declaredScopes("shared_scope_1", "admin"));
+        when(apiProvider.getAPIbyUUID(UUID, ORGANIZATION)).thenReturn(existingApi);
+        when(apiProvider.getAsyncAPIDefinition(UUID, ORGANIZATION)).thenReturn("saved-definition");
+
+        PublisherCommonUtils.updateAsyncAPIDefinition(UUID, sseValidationResponse(), ORGANIZATION);
+
+        ArgumentCaptor<String> definition = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<API> savedApi = ArgumentCaptor.forClass(API.class);
+        Mockito.verify(apiProvider).saveAsyncApiDefinition(savedApi.capture(), definition.capture());
+        Assert.assertTrue("The removed role was put back into the definition",
+                StringUtils.isBlank(firstScopeRoles(definition.getValue())));
+        for (URITemplate uriTemplate : savedApi.getValue().getUriTemplates()) {
+            Assert.assertTrue("The removed role was put back on an operation scope",
+                    StringUtils.isBlank(uriTemplate.getScope().getRoles()));
+        }
+    }
+
+    @Test
+    public void testImportAsyncAPIKeepsExplicitEmptyBindingOverDeclaredScopeRoles() throws Exception {
+
+        stubAsyncFlowCollaborators(false, null);
+        APIProvider apiProvider = Mockito.mock(APIProvider.class);
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        when(RestApiCommonUtil.getLoggedInUsername()).thenReturn(PROVIDER);
+        API apiToAdd = sseApi();
+        // api.yaml says admin; the definition explicitly binds ""
+        apiToAdd.setScopes(declaredScopes("shared_scope_1", "admin"));
+        stubPrepareToCreateAPI(apiToAdd);
+        APIDTO apiDto = new APIDTO();
+        apiDto.setGatewayVendor(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
+        String explicitEmpty = SSE_DEFINITION_NO_BINDINGS.replace("\"shared scope 1\"}",
+                "\"shared scope 1\"},\"x-scopes-bindings\":{\"shared_scope_1\":\"\"}");
+
+        PublisherCommonUtils.importAsyncAPIWithDefinition(sseValidationResponse(explicitEmpty), false, apiDto, null,
+                ORGANIZATION, apiProvider);
+
+        ArgumentCaptor<API> captor = ArgumentCaptor.forClass(API.class);
+        Mockito.verify(apiProvider).addAPI(captor.capture());
+        // no role: the scope is left out of x-scopes-bindings; the api.yaml role is not applied
+        Assert.assertNull(firstScopeRoles(captor.getValue().getAsyncApiDefinition()));
+        for (URITemplate uriTemplate : captor.getValue().getUriTemplates()) {
+            Assert.assertEquals("", uriTemplate.getScope().getRoles());
+        }
+    }
+
+    @Test
+    public void testImportAsyncAPIAppliesApiYamlRolesToExportedDefinitionWithoutRoles() throws Exception {
+
+        stubAsyncFlowCollaborators(false, null);
+        APIProvider apiProvider = Mockito.mock(APIProvider.class);
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        when(RestApiCommonUtil.getLoggedInUsername()).thenReturn(PROVIDER);
+        API apiToAdd = sseApi();
+        // a role added in api.yaml after exporting an API whose scope had no role
+        apiToAdd.setScopes(declaredScopes("shared_scope_1", "admin"));
+        stubPrepareToCreateAPI(apiToAdd);
+        APIDTO apiDto = new APIDTO();
+        apiDto.setGatewayVendor(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
+        String exported = AsyncApiParserUtil.setScopeBindings(SSE_DEFINITION_NO_BINDINGS,
+                declaredScopes("shared_scope_1", null));
+
+        PublisherCommonUtils.importAsyncAPIWithDefinition(sseValidationResponse(exported), false, apiDto, null,
+                ORGANIZATION, apiProvider);
+
+        ArgumentCaptor<API> captor = ArgumentCaptor.forClass(API.class);
+        Mockito.verify(apiProvider).addAPI(captor.capture());
+        Assert.assertEquals("admin", firstScopeRoles(captor.getValue().getAsyncApiDefinition()));
+        assertTemplateScopesHaveRoles(captor.getValue().getUriTemplates(), "admin");
+    }
+
 }

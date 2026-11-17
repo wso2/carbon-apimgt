@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.api.APIConstants;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.AsyncApiParseOptions;
 
 import java.io.File;
@@ -48,7 +49,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.Assert.*;
 
@@ -303,5 +306,84 @@ public class AsyncApiParserUtilTest {
         }
         return response;
     }
+
+    private static final String SCOPE_DEFINITION_V2_NO_BINDINGS = "{\"asyncapi\":\"2.0.0\",\"info\":{\"title\":"
+            + "\"Sse\",\"version\":\"1.0.0\"},\"channels\":{\"/notifications\":{\"subscribe\":{\"x-scopes\":"
+            + "[\"shared_scope_1\"],\"message\":{\"payload\":{\"type\":\"string\"}}}}},\"components\":"
+            + "{\"securitySchemes\":{\"oauth2\":{\"type\":\"oauth2\",\"flows\":{\"implicit\":"
+            + "{\"authorizationUrl\":\"http://localhost:9999\",\"scopes\":{\"shared_scope_1\":"
+            + "\"shared scope 1\"}}}}}}}";
+
+    private static final String SCOPE_DEFINITION_V3_NO_BINDINGS = "{\"asyncapi\":\"3.0.0\",\"info\":{\"title\":"
+            + "\"Sse\",\"version\":\"1.0.0\"},\"channels\":{\"notifications\":{\"address\":"
+            + "\"/notifications\"}},\"components\":{\"securitySchemes\":{\"oauth2\":{\"type\":\"oauth2\","
+            + "\"flows\":{\"implicit\":{\"authorizationUrl\":\"http://localhost:9999\",\"availableScopes\":"
+            + "{\"shared_scope_1\":\"shared scope 1\"}}}}}}}";
+
+    private Set<Scope> scopeSet(String key, String roles) {
+        Scope scope = new Scope();
+        scope.setKey(key);
+        scope.setName(key);
+        scope.setRoles(roles);
+        Set<Scope> scopes = new LinkedHashSet<>();
+        scopes.add(scope);
+        return scopes;
+    }
+
+    @Test
+    public void testSetScopeBindings_addsBindingsWhenAbsent_v2() throws Exception {
+        String result = AsyncApiParserUtil.setScopeBindings(SCOPE_DEFINITION_V2_NO_BINDINGS,
+                scopeSet("shared_scope_1", "admin"));
+        assertTrue(result.contains("x-scopes-bindings"));
+        Set<Scope> scopes = AsyncApiParserUtil.getScopesFromAsyncAPIConfig(result);
+        assertEquals(1, scopes.size());
+        assertEquals("admin", scopes.iterator().next().getRoles());
+    }
+
+    @Test
+    public void testSetScopeBindings_addsBindingsWhenAbsent_v3() throws Exception {
+        String result = AsyncApiParserUtil.setScopeBindings(SCOPE_DEFINITION_V3_NO_BINDINGS,
+                scopeSet("shared_scope_1", "admin"));
+        assertTrue(result.contains("x-scopes-bindings"));
+        Set<Scope> scopes = AsyncApiParserUtil.getScopesFromAsyncAPIConfig(result);
+        assertEquals(1, scopes.size());
+        assertEquals("admin", scopes.iterator().next().getRoles());
+    }
+
+    @Test
+    public void testSetScopeBindings_replacesExistingBindings() throws Exception {
+        String withAdmin = AsyncApiParserUtil.setScopeBindings(SCOPE_DEFINITION_V2_NO_BINDINGS,
+                scopeSet("shared_scope_1", "admin"));
+        String result = AsyncApiParserUtil.setScopeBindings(withAdmin,
+                scopeSet("shared_scope_1", "internal/publisher"));
+        Set<Scope> scopes = AsyncApiParserUtil.getScopesFromAsyncAPIConfig(result);
+        assertEquals("internal/publisher", scopes.iterator().next().getRoles());
+    }
+
+    @Test
+    public void testSetScopeBindings_leavesOutScopesWithoutRoles() throws Exception {
+        String result = AsyncApiParserUtil.setScopeBindings(SCOPE_DEFINITION_V2_NO_BINDINGS,
+                scopeSet("shared_scope_1", null));
+        assertEquals(SCOPE_DEFINITION_V2_NO_BINDINGS, result);
+        assertNull(AsyncApiParserUtil.getScopesFromAsyncAPIConfig(result).iterator().next().getRoles());
+    }
+
+    @Test
+    public void testSetScopeBindings_removesBindingWhenRoleIsGone() throws Exception {
+        String withAdmin = AsyncApiParserUtil.setScopeBindings(SCOPE_DEFINITION_V2_NO_BINDINGS,
+                scopeSet("shared_scope_1", "admin"));
+        String result = AsyncApiParserUtil.setScopeBindings(withAdmin, scopeSet("shared_scope_1", null));
+        assertNull(AsyncApiParserUtil.getScopesFromAsyncAPIConfig(result).iterator().next().getRoles());
+    }
+
+    @Test
+    public void testSetScopeBindings_withoutOauth2SchemeOrScopes_isUnchanged() throws Exception {
+        String noOauth = "{\"asyncapi\":\"2.0.0\",\"info\":{\"title\":\"A\",\"version\":\"1.0.0\"},"
+                + "\"channels\":{}}";
+        assertEquals(noOauth, AsyncApiParserUtil.setScopeBindings(noOauth, scopeSet("shared_scope_1", "admin")));
+        assertEquals(SCOPE_DEFINITION_V2_NO_BINDINGS,
+                AsyncApiParserUtil.setScopeBindings(SCOPE_DEFINITION_V2_NO_BINDINGS, null));
+    }
+
 
 }
