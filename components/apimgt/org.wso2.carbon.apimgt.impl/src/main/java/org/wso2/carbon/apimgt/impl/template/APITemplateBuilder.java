@@ -36,6 +36,32 @@ public interface APITemplateBuilder {
 
     String getConfigStringForWebSocketEndpointTemplate(String endpointType, String resourceKey, String endpointUrl) throws APITemplateException;
 
-    String getStringForEndpoints(String deploymentStage, List<SimplifiedEndpoint> endpoints, SimplifiedEndpoint defaultEndpoint) throws APITemplateException;
+    String getStringForEndpoints(String deploymentStage, List<SimplifiedEndpoint> endpoints,
+                                 SimplifiedEndpoint defaultEndpoint) throws APITemplateException;
+
+    /**
+     * Renders the endpoints sequence, optionally wiring in the fault sequence with onError. A default, so a builder
+     * written against the 3-argument version still works (it ignores the flag).
+     *
+     * @param faultFailoverEnabled Whether to add the onError attribute.
+     */
+    default String getStringForEndpoints(String deploymentStage, List<SimplifiedEndpoint> endpoints,
+                                         SimplifiedEndpoint defaultEndpoint, boolean faultFailoverEnabled)
+            throws APITemplateException {
+
+        return getStringForEndpoints(deploymentStage, endpoints, defaultEndpoint);
+    }
+
+    /**
+     * Renders the fault sequence the endpoints sequence's onError attribute points to.
+     *
+     * @param deploymentStage The stage of deployment (PRODUCTION / SANDBOX).
+     * @return The rendered fault sequence.
+     * @throws APITemplateException If an error occurs during rendering.
+     */
+    default String getStringForEndpointsFaultSequence(String deploymentStage) throws APITemplateException {
+
+        throw new APITemplateException("Fault failover sequence rendering is not supported.");
+    }
 
 }

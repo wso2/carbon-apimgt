@@ -275,6 +275,15 @@ public class APIConstants {
         public static final String DEFAULT_SANDBOX_ENDPOINT_NAME = "DEFAULT SANDBOX ENDPOINT";
         public static final String ENDPOINT_SEQUENCE = "_EndpointsSeq";
         public static final String REQUEST_TIMEOUT = "REQUEST_TIMEOUT";
+        public static final String TRAFFIC_FLOW_DIRECTION_FAULT = "FAULT";
+        public static final String ENDPOINT_FAULT_SEQUENCE = "_EndpointsFaultSeq";
+        public static final String MODEL_FAILOVER_POLICY_NAME = "modelFailover";
+        public static final String FAULT_FAILOVER_ACTION = "AI_FAULT_FAILOVER_ACTION";
+        public static final String FAULT_FAILOVER_ACTION_RETRY = "RETRY";
+        public static final String FAULT_FAILOVER_ACTION_DELEGATE = "DELEGATE";
+        public static final String FAILOVER_REQUEST_TIMEOUT = "FAILOVER_REQUEST_TIMEOUT";
+        public static final String LLM_CALL_SENT = "LLM_CALL_SENT";
+        public static final String LLM_CALL_NOT_SENT = "false";
         public static final String HTTP_PROTOCOL_TYPE = "HTTP";
         public static final String LLM_PROVIDER_SERVICE_AWSBEDROCK_OPENAI_API_DEFINITION_FILE_NAME =
                 "aws_bedrock_api.yaml";
