@@ -604,7 +604,8 @@ public class APIManagerConfiguration {
                 OMElement typeElement = element.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_TYPE));
                 OMElement syncIntervalElement = element.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_SYNC_INTERVAL));
                 OMElement corePoolSizeElement = element.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_CORE_POOL_SIZE));
-                OMElement enableBatchSyncElement = element.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_ENABLE_BATCH_SYNC));
+                OMElement enableBatchWithEvictionElement = element.getFirstChildWithName(
+                        new QName(APIConstants.DISTRIBUTED_THROTTLE_ENABLE_BATCH_WITH_EVICTION));
                 OMElement batchSizeElement = element.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_BATCH_SIZE));
                 OMElement propertiesElement = element.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_PROPERTIES));
 
@@ -628,9 +629,10 @@ public class APIManagerConfiguration {
                         log.warn("Invalid core pool size specified", e);
                     }
                 }
-                if (enableBatchSyncElement != null && StringUtils.isNotBlank(enableBatchSyncElement.getText())) {
-                    distributedThrottleConfig.setBatchSyncEnabled(
-                            Boolean.parseBoolean(enableBatchSyncElement.getText().trim()));
+                if (enableBatchWithEvictionElement != null
+                        && StringUtils.isNotBlank(enableBatchWithEvictionElement.getText())) {
+                    distributedThrottleConfig.setBatchWithEvictionEnabled(
+                            Boolean.parseBoolean(enableBatchWithEvictionElement.getText().trim()));
                 }
                 if (batchSizeElement != null && StringUtils.isNotBlank(batchSizeElement.getText())) {
                     try {

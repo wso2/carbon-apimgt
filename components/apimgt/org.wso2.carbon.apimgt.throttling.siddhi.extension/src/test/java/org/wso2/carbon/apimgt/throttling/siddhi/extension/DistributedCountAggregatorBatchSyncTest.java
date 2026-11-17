@@ -43,8 +43,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.LockSupport;
 
 /**
  * Unit tests for the batched Redis sync of {@link DistributedCountAttributeAggregator}: one MGET for the keys
@@ -316,6 +318,21 @@ public class DistributedCountAggregatorBatchSyncTest {
         ((ThreadLocal<?>) field(ThrottleStreamProcessor.class, "windowExpiryThreadLocal").get(null)).remove();
     }
 
+    /** Sets the window expiry that ThrottleStreamProcessor would set while it processes an event. */
+    @SuppressWarnings("unchecked")
+    private static void setWindowExpiryThreadLocal(long expiry) throws Exception {
+        ((ThreadLocal<Long>) field(ThrottleStreamProcessor.class, "windowExpiryThreadLocal").get(null)).set(expiry);
+    }
+
+    private static AtomicInteger liveAggregatorCount() throws Exception {
+        return (AtomicInteger) field(DCAA, "LIVE_AGGREGATOR_COUNT").get(null);
+    }
+
+    /** Whether the aggregator is on the sync list, that is, the map holds it under its key. */
+    private static boolean onList(String key, DistributedCountAttributeAggregator aggregator) throws Exception {
+        return activeAggregators().get(key) == aggregator;
+    }
+
     /** Runs one sync tick (Collect, Send, Apply) on the calling thread. */
     private static void tick() throws Exception {
         Method m = DCAA.getDeclaredMethod("runSyncTick");
@@ -335,13 +352,18 @@ public class DistributedCountAggregatorBatchSyncTest {
     private ExecutorService tickThread;
     private final long windowExpiry = System.currentTimeMillis() + 60000L;
 
-    /** Creates an aggregator for the key, with the client injected and the window expiry known, and registers it. */
+    /**
+     * Creates an aggregator for the key, with the client injected and the window expiry known, and registers it as
+     * init() does: on the sync list and counted as live.
+     */
     private DistributedCountAttributeAggregator aggregator(String key, KeyValueStoreClient client) throws Exception {
         DistributedCountAttributeAggregator aggregator = new DistributedCountAttributeAggregator();
         set(aggregator, "key", key);
         set(aggregator, "kvStoreClient", client);
         set(aggregator, "storedWindowExpiry", windowExpiry);
         activeAggregators().put(key, aggregator);
+        ((AtomicBoolean) get(aggregator, "live")).set(true);
+        liveAggregatorCount().incrementAndGet();
         return aggregator;
     }
 
@@ -369,8 +391,9 @@ public class DistributedCountAggregatorBatchSyncTest {
         setStatic("DISTRIBUTED_THROTTLE_CONFIG", config);
         setStatic("distributedThrottlingEnabled", true);
         setStatic("schedulerStarted", true); // never start the real scheduler; ticks are run by the tests
-        setStatic("batchSyncEnabled", true);
+        setStatic("batchWithEvictionEnabled", true);
         setStatic("batchSize", 500);
+        liveAggregatorCount().set(0);
         syncPool = Executors.newScheduledThreadPool(4);
         setStatic("kvStoreSyncScheduler", syncPool);
         tickThread = Executors.newSingleThreadExecutor();
@@ -379,13 +402,14 @@ public class DistributedCountAggregatorBatchSyncTest {
     @After
     public void tearDown() throws Exception {
         activeAggregators().clear();
+        liveAggregatorCount().set(0);
         setStatic("kvStoreSyncScheduler", null);
         syncPool.shutdownNow();
         tickThread.shutdownNow();
         setStatic("DISTRIBUTED_THROTTLE_CONFIG", null);
         setStatic("distributedThrottlingEnabled", false);
         setStatic("schedulerStarted", false);
-        setStatic("batchSyncEnabled", true);
+        setStatic("batchWithEvictionEnabled", true);
         setStatic("batchSize", DistributedThrottleConfig.DEFAULT_BATCH_SIZE);
         field(KeyValueStoreManager.class, "clientInstance").set(null, null);
         clearWindowExpiryThreadLocal();
@@ -439,7 +463,9 @@ public class DistributedCountAggregatorBatchSyncTest {
         Assert.assertEquals("D", seed.getKey());
         Assert.assertTrue("seed TTL is the rest of the window", seed.getTtlMillis() > 0 && seed.getTtlMillis() <= 60000L);
         Assert.assertEquals("0", client.store.get("D"));
-        Assert.assertEquals("tick 2: A, B and R are read", 3, client.mgetCalls.get(0).size());
+        Assert.assertEquals("tick 2: A and B are read", new HashSet<>(Arrays.asList("A", "B")),
+                new HashSet<>(client.mgetCalls.get(0)));
+        Assert.assertFalse("R left the sync list after its reset was written", activeAggregators().containsKey("R"));
 
         requests(active, 1);
         client.pipelineCalls.clear();
@@ -841,7 +867,7 @@ public class DistributedCountAggregatorBatchSyncTest {
     public void testStopWhileABatchIsInFlightStillFlushesARestoredDelta() throws Exception {
         FakeBatchClient client = new FakeBatchClient();
         DistributedCountAttributeAggregator aggregator = aggregator("A", client);
-        aggregator("OTHER", client); // keeps the map non-empty, so stop() does not shut the scheduler down
+        aggregator("OTHER", client); // another live counter, so stop() does not shut the scheduler down
         set(aggregator, "keyHasTTL", true);
         requests(aggregator, 6);
         client.blockWrites = true;
@@ -865,7 +891,7 @@ public class DistributedCountAggregatorBatchSyncTest {
     public void testStopWhileAResetIsInFlightKeepsTheNewWindowsCount() throws Exception {
         FakeBatchClient client = new FakeBatchClient();
         DistributedCountAttributeAggregator aggregator = aggregator("A", client);
-        aggregator("OTHER", client); // keeps the map non-empty, so stop() does not shut the scheduler down
+        aggregator("OTHER", client); // another live counter, so stop() does not shut the scheduler down
         client.store.put("A", "100"); // the closed window's total
         aggregator.reset();
         client.blockWrites = true;
@@ -891,7 +917,7 @@ public class DistributedCountAggregatorBatchSyncTest {
     public void testStopWhileAWriteIsInFlightFlushesTheRestAfterItSucceeds() throws Exception {
         FakeBatchClient client = new FakeBatchClient();
         DistributedCountAttributeAggregator aggregator = aggregator("A", client);
-        aggregator("OTHER", client); // keeps the map non-empty, so stop() does not shut the scheduler down
+        aggregator("OTHER", client); // another live counter, so stop() does not shut the scheduler down
         set(aggregator, "keyHasTTL", true);
         requests(aggregator, 3);
         client.blockWrites = true;
@@ -961,12 +987,272 @@ public class DistributedCountAggregatorBatchSyncTest {
     }
 
     // -----------------------------------------------------------------------
+    // Eviction: a key leaves the sync list after its window reset
+    // -----------------------------------------------------------------------
+
+    /** Counts K in one window, then resets it: K leaves the list once its "0" is written. */
+    private DistributedCountAttributeAggregator keyThatLeftTheList(FakeBatchClient client) throws Exception {
+        DistributedCountAttributeAggregator aggregator = aggregator("K", client);
+        requests(aggregator, 3);
+        tick();                      // INCRBY 3 + PEXPIRE
+        aggregator.reset();          // the window ends
+        tick();                      // PSETEX "0"
+        Assert.assertFalse("K left the sync list", onList("K", aggregator));
+        client.mgetCalls.clear();
+        client.pipelineCalls.clear();
+        return aggregator;
+    }
+
+    @Test(timeout = TEST_TIMEOUT_MS)
+    public void testKeyLeavesTheListAfterItsResetIsWritten() throws Exception {
+        FakeBatchClient client = new FakeBatchClient();
+        DistributedCountAttributeAggregator aggregator = keyThatLeftTheList(client);
+
+        Assert.assertEquals("the reset was written before leaving", "0", client.store.get("K"));
+        Assert.assertEquals(false, get(aggregator, "pendingReset"));
+        Assert.assertEquals(0L, counter(aggregator, "localCounter"));
+        tick();
+        Assert.assertEquals("no reads or writes for a key off the list", 0, client.mgetCalls.size());
+        Assert.assertEquals(0, client.pipelineCalls.size());
+    }
+
+    @Test(timeout = TEST_TIMEOUT_MS)
+    public void testKeyWithARequestSinceItsResetStaysOnTheList() throws Exception {
+        FakeBatchClient client = new FakeBatchClient();
+        DistributedCountAttributeAggregator aggregator = aggregator("K", client);
+        requests(aggregator, 3);
+        tick();
+        aggregator.reset();
+        requests(aggregator, 2);     // the new window's first requests, before the "0" is written
+
+        tick();                      // PSETEX "0" only
+        Assert.assertEquals("0", client.store.get("K"));
+        Assert.assertTrue("a key with requests in the new window stays", onList("K", aggregator));
+        tick();                      // then INCRBY 2
+        Assert.assertEquals("2", client.store.get("K"));
+        Assert.assertEquals(2L, counter(aggregator, "localCounter"));
+    }
+
+    @Test(timeout = TEST_TIMEOUT_MS)
+    public void testRequestsWhileTheResetIsInFlightKeepTheKeyOnTheList() throws Exception {
+        FakeBatchClient client = new FakeBatchClient();
+        DistributedCountAttributeAggregator aggregator = aggregator("K", client);
+        aggregator.reset();
+        client.blockWrites = true;
+
+        Future<?> running = tickInFlight(client); // PSETEX "0" in flight
+        requests(aggregator, 2);
+        client.release.countDown();
+        running.get(5, TimeUnit.SECONDS);
+
+        Assert.assertTrue(onList("K", aggregator));
+        client.blockWrites = false;
+        tick();
+        Assert.assertEquals("2", client.store.get("K"));
+    }
+
+    /** A request that races the removal of its key from the list is never left unsent. */
+    @Test(timeout = TEST_TIMEOUT_MS)
+    public void testRequestsRacingTheRemovalAreNeverLost() throws Exception {
+        FakeBatchClient client = new FakeBatchClient();
+        DistributedCountAttributeAggregator aggregator = aggregator("K", client);
+        ExecutorService requester = Executors.newSingleThreadExecutor();
+        try {
+            for (int round = 0; round < 500; round++) {
+                aggregator.reset();
+                final int count = 1 + round % 4;
+                final long pauseNanos = (round * 7919L) % 20000L;
+                Future<?> sending = requester.submit(() -> {
+                    for (int i = 0; i < count; i++) {
+                        LockSupport.parkNanos(pauseNanos);
+                        aggregator.processAdd((Object) null);
+                    }
+                });
+                tick();              // writes the "0" and may take the key off the list meanwhile
+                sending.get(5, TimeUnit.SECONDS);
+                for (int i = 0; i < 5 && (counter(aggregator, "unsyncedCounter") != 0
+                        || (boolean) get(aggregator, "pendingReset")); i++) {
+                    tick();
+                }
+                Assert.assertEquals("round " + round + ": every request reached the store",
+                        String.valueOf(count), client.store.get("K"));
+                Assert.assertEquals(0L, counter(aggregator, "unsyncedCounter"));
+            }
+        } finally {
+            requester.shutdownNow();
+        }
+    }
+
+    @Test(timeout = TEST_TIMEOUT_MS)
+    public void testResetOfAKeyOffTheListIsLocalOnly() throws Exception {
+        FakeBatchClient client = new FakeBatchClient();
+        DistributedCountAttributeAggregator aggregator = keyThatLeftTheList(client);
+        client.store.put("K", "40"); // the other nodes' count in the next window
+
+        aggregator.reset();
+        Assert.assertEquals("nothing is owed", false, get(aggregator, "pendingReset"));
+        Assert.assertEquals(0L, counter(aggregator, "localCounter"));
+        tick();
+        Assert.assertEquals(0, client.pipelineCalls.size());
+        Assert.assertEquals(0, client.mgetCalls.size());
+        Assert.assertEquals("the other nodes' count is not wiped", "40", client.store.get("K"));
+    }
+
+    @Test(timeout = TEST_TIMEOUT_MS)
+    public void testReturningKeySendsIncrbyWithPexpireAndTakesTheClusterTotal() throws Exception {
+        FakeBatchClient client = new FakeBatchClient();
+        DistributedCountAttributeAggregator aggregator = keyThatLeftTheList(client);
+        aggregator.reset();          // a reset while off the list
+        client.store.put("K", "40"); // the other nodes' count
+
+        requests(aggregator, 2);
+        Assert.assertTrue("the request puts the key back", onList("K", aggregator));
+        Assert.assertEquals("the local count starts from 0", 2L, counter(aggregator, "localCounter"));
+        tick();
+
+        List<KeyValueStoreOperation> pipeline = client.pipelineCalls.get(0);
+        Assert.assertEquals("INCRBY + PEXPIRE, no PSETEX \"0\"", 2, pipeline.size());
+        Assert.assertEquals(KeyValueStoreOperation.Type.INCRBY, pipeline.get(0).getType());
+        Assert.assertEquals(2L, pipeline.get(0).getAmount());
+        Assert.assertEquals(KeyValueStoreOperation.Type.PEXPIRE, pipeline.get(1).getType());
+        Assert.assertEquals("42", client.store.get("K"));
+        Assert.assertEquals("the reply is the cluster-wide total", 42L, counter(aggregator, "localCounter"));
+        Assert.assertEquals(true, get(aggregator, "keyHasTTL"));
+        Assert.assertEquals("no GET on the way back", 0, client.singleKeyCalls.get());
+    }
+
+    /**
+     * The store is unreachable until the window that the "0" was for has ended: the "0" is dropped and the key
+     * leaves. Its next request sends INCRBY + PEXPIRE, not the old "0" that would wipe the other nodes' counts.
+     */
+    @Test(timeout = TEST_TIMEOUT_MS)
+    public void testResetNotWrittenBeforeItsWindowEndsIsDroppedAndTheKeyLeaves() throws Exception {
+        FakeBatchClient client = new FakeBatchClient();
+        DistributedCountAttributeAggregator aggregator = aggregator("K", client);
+        aggregator.reset();
+        client.failNextWrite = new KeyValueStoreUnavailableException("simulated: no connection");
+        tick();
+        Assert.assertEquals("retried while its window lasts", true, get(aggregator, "pendingReset"));
+        Assert.assertTrue(onList("K", aggregator));
+
+        set(aggregator, "storedWindowExpiry", System.currentTimeMillis() - 1000L); // that window has ended
+        client.pipelineCalls.clear();
+        tick();
+        Assert.assertEquals("nothing is written", 0, client.pipelineCalls.size());
+        Assert.assertEquals(false, get(aggregator, "pendingReset"));
+        Assert.assertFalse("the key left the list", onList("K", aggregator));
+
+        client.store.put("K", "40");                                        // the other nodes' count
+        setWindowExpiryThreadLocal(System.currentTimeMillis() + 60000L);    // a request in a new window
+        requests(aggregator, 1);
+        tick();
+        List<KeyValueStoreOperation> pipeline = client.pipelineCalls.get(0);
+        Assert.assertEquals(KeyValueStoreOperation.Type.INCRBY, pipeline.get(0).getType());
+        Assert.assertEquals(KeyValueStoreOperation.Type.PEXPIRE, pipeline.get(1).getType());
+        Assert.assertEquals("41", client.store.get("K"));
+    }
+
+    /** Same, but a request in the new window arrives before the sync tick sees that the window ended. */
+    @Test(timeout = TEST_TIMEOUT_MS)
+    public void testResetOwedForAnEndedWindowIsDroppedWhenARequestArrives() throws Exception {
+        FakeBatchClient client = new FakeBatchClient();
+        DistributedCountAttributeAggregator aggregator = aggregator("K", client);
+        aggregator.reset();
+        client.failNextWrite = new KeyValueStoreUnavailableException("simulated: no connection");
+        tick();
+        set(aggregator, "storedWindowExpiry", System.currentTimeMillis() - 1000L);
+        client.store.put("K", "40");
+        client.pipelineCalls.clear();
+
+        setWindowExpiryThreadLocal(System.currentTimeMillis() + 60000L);
+        requests(aggregator, 1);
+        Assert.assertEquals(false, get(aggregator, "pendingReset"));
+        tick();
+
+        List<KeyValueStoreOperation> pipeline = client.pipelineCalls.get(0);
+        Assert.assertEquals("INCRBY + PEXPIRE, no PSETEX \"0\"", 2, pipeline.size());
+        Assert.assertEquals(KeyValueStoreOperation.Type.INCRBY, pipeline.get(0).getType());
+        Assert.assertEquals("the other nodes' count is not wiped", "41", client.store.get("K"));
+    }
+
+    @Test(timeout = TEST_TIMEOUT_MS)
+    public void testCurrentStateAndStopOfAKeyOffTheListMakeNoCalls() throws Exception {
+        FakeBatchClient client = new FakeBatchClient();
+        DistributedCountAttributeAggregator aggregator = keyThatLeftTheList(client);
+        aggregator("OTHER", client); // another live counter, so stop() does not shut the scheduler down
+        client.store.put("K", "40");
+
+        aggregator.currentState();
+        aggregator.stop();
+
+        Assert.assertEquals(0, client.singleKeyCalls.get());
+        Assert.assertEquals("40", client.store.get("K"));
+    }
+
+    /** The list can be empty while counters are in use: the connection stays open until the last counter stops. */
+    @Test(timeout = TEST_TIMEOUT_MS)
+    public void testStopKeepsTheSchedulerWhileOtherCountersAreAlive() throws Exception {
+        FakeBatchClient client = new FakeBatchClient();
+        DistributedCountAttributeAggregator first = aggregator("A", client);
+        DistributedCountAttributeAggregator second = aggregator("B", client);
+        first.reset();
+        second.reset();
+        tick();
+        Assert.assertTrue("both keys left the list", activeAggregators().isEmpty());
+
+        first.stop();
+        Assert.assertSame("one counter is still alive", syncPool, field(DCAA, "kvStoreSyncScheduler").get(null));
+        Assert.assertFalse(syncPool.isShutdown());
+
+        second.stop();
+        Assert.assertNull("the last counter shuts the scheduler down", field(DCAA, "kvStoreSyncScheduler").get(null));
+        Assert.assertTrue(syncPool.isShutdown());
+    }
+
+    /** Two counters with the same key (the same throttle key in two policies) both keep syncing. */
+    @Test(timeout = TEST_TIMEOUT_MS)
+    public void testTwoCountersWithTheSameKeyBothKeepSyncing() throws Exception {
+        FakeBatchClient client = new FakeBatchClient();
+        DistributedCountAttributeAggregator first = aggregator("K", client);
+        DistributedCountAttributeAggregator second = aggregator("K", client); // takes the slot of K
+
+        requests(first, 2);          // takes the slot back
+        Assert.assertTrue(onList("K", first));
+        tick();
+        requests(second, 3);
+        Assert.assertTrue(onList("K", second));
+        tick();
+
+        Assert.assertEquals("5", client.store.get("K"));
+        Assert.assertEquals(0L, counter(first, "unsyncedCounter"));
+        Assert.assertEquals(0L, counter(second, "unsyncedCounter"));
+    }
+
+    @Test(timeout = TEST_TIMEOUT_MS)
+    public void testKeysNeverLeaveTheListWithEvictionOff() throws Exception {
+        setStatic("batchWithEvictionEnabled", false);
+        FakeBatchClient client = new FakeBatchClient();
+        DistributedCountAttributeAggregator aggregator = aggregator("K", client);
+        requests(aggregator, 2);
+        tick();
+
+        for (int i = 0; i < 3; i++) {
+            aggregator.reset();
+            Assert.assertEquals("every reset is written", true, get(aggregator, "pendingReset"));
+            tick();
+            Assert.assertEquals("0", client.store.get("K"));
+            Assert.assertTrue("the key stays on the list", onList("K", aggregator));
+        }
+        Assert.assertEquals("per-key sync only", 0, client.pipelineCalls.size());
+    }
+
+    // -----------------------------------------------------------------------
     // Fallback to the per-key sync
     // -----------------------------------------------------------------------
 
     @Test(timeout = TEST_TIMEOUT_MS)
     public void testBatchSyncDisabledUsesThePerKeySync() throws Exception {
-        setStatic("batchSyncEnabled", false);
+        setStatic("batchWithEvictionEnabled", false);
         FakeBatchClient client = new FakeBatchClient();
         DistributedCountAttributeAggregator aggregator = aggregator("K", client);
         requests(aggregator, 1);

@@ -24,6 +24,8 @@ import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -57,8 +59,17 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
     private final AtomicLong localCounter = new AtomicLong(0L);
     // Store the net change of local counter since last sync task
     private final AtomicLong unsyncedCounter = new AtomicLong(0L);
+    // The sync list: the counters that the sync tick visits, keyed by their key-value store key.
+    // In batched mode (see isBatchedMode()) a counter is on the list only while the map holds it under its key. It
+    // leaves after its window reset ("0") is written, unless a request came since, and its next request puts it back.
+    // Otherwise a counter leaves only in stop(), as before.
     private static final ConcurrentHashMap<String, DistributedCountAttributeAggregator> ACTIVE_AGGREGATORS =
             new ConcurrentHashMap<>();
+    // The counters that are initialized and not yet stopped, on the sync list or not. In batched mode the scheduler
+    // and the key-value store connection are shut down when this count reaches 0, not when the list is empty.
+    private static final AtomicInteger LIVE_AGGREGATOR_COUNT = new AtomicInteger(0);
+    // True from init(), when this counter is counted in LIVE_AGGREGATOR_COUNT, until stop().
+    private final AtomicBoolean live = new AtomicBoolean(false);
     private final Object kvStoreLock = new Object();
 
     // Track the error logging status of syncing with key-value store
@@ -70,8 +81,9 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
     private static boolean distributedThrottlingEnabled = false;
     private static int corePoolSize = 10;
     private static int kvStoreSyncIntervalMilliseconds = 10;
-    // Batch sync configs ([apim.distributed_throttling] enable_batch_sync and batch_size in deployment.toml)
-    private static boolean batchSyncEnabled = true;
+    // Batch sync configs ([apim.distributed_throttling] enable_batch_with_eviction and batch_size in deployment.toml).
+    // enable_batch_with_eviction turns on both the batched sync and taking keys off the sync list after their reset.
+    private static boolean batchWithEvictionEnabled = true;
     private static int batchSize = DistributedThrottleConfig.DEFAULT_BATCH_SIZE;
 
     // Rate-limits the error log of a failed batch (one log covers every key in it)
@@ -129,7 +141,7 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
                         distributedThrottlingEnabled = config.isEnabled();
                         corePoolSize = config.getCorePoolSize();
                         kvStoreSyncIntervalMilliseconds = config.getSyncInterval();
-                        batchSyncEnabled = config.isBatchSyncEnabled();
+                        batchWithEvictionEnabled = config.isBatchWithEvictionEnabled();
                         batchSize = config.getBatchSize() > 0
                                 ? config.getBatchSize() : DistributedThrottleConfig.DEFAULT_BATCH_SIZE;
                         DISTRIBUTED_THROTTLE_CONFIG = config; // volatile write last
@@ -152,6 +164,9 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
                 if (this.kvStoreClient != null) {
                     initializeFromKVStore();
                     ACTIVE_AGGREGATORS.put(key, this);
+                    if (live.compareAndSet(false, true)) {
+                        LIVE_AGGREGATOR_COUNT.incrementAndGet();
+                    }
                 }
             } catch (KeyValueStoreException e) {
                 log.error("Failed to initialize KeyValueStoreClient for aggregator with key " + key, e);
@@ -305,7 +320,8 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
      * collector. Uses the same rules as {@link #syncWithKVStore()}, but does no I/O, so the lock is held
      * only briefly.
      * <ul>
-     *     <li>pending reset: PSETEX "0" with the remaining window TTL</li>
+     *     <li>pending reset: PSETEX "0" with the remaining window TTL. If the window it was for has already ended
+     *     and no request came since, the "0" is dropped and the key leaves the sync list.</li>
      *     <li>unsynced delta: INCRBY/DECRBY, plus PEXPIRE if the key has no known TTL</li>
      *     <li>key found missing on the last read: SET NX PX "0"</li>
      *     <li>otherwise: read the key (MGET)</li>
@@ -326,6 +342,14 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
                     collector.addWrite(new SyncUnit(this, SyncUnit.Kind.RESET, epoch, directSyncEpoch, windowExpiry,
                             0L, KeyValueStoreOperation.setWithExpiry(key, "0", remainingMillis)));
                     writeInFlight = true;
+                } else if (windowExpiry > 0 && unsyncedCounter.get() == 0) {
+                    // The window this "0" was for ended before it could be written (the store was unreachable), and
+                    // no request came since. Writing it now would wipe the other nodes' counts in the middle of the
+                    // current window, so it is dropped and the key leaves the list. Its next request puts it back
+                    // and sends INCRBY + PEXPIRE.
+                    pendingReset = false;
+                    keyHasTTL = false;
+                    leaveListIfIdle();
                 } else {
                     // Same as syncWithKVStore(): nothing is written while the window expiry is unknown or past.
                     keyHasTTL = false;
@@ -418,6 +442,8 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
                 if (noResetSinceCollect) {
                     pendingReset = false;
                     keyHasTTL = storedWindowExpiry == unit.windowExpiry;
+                    // The window reset is done: the key leaves the sync list unless a request came since the reset.
+                    leaveListIfIdle();
                 }
             } else if (unit.kind == SyncUnit.Kind.COUNT) {
                 if (replies.size() > 1) {
@@ -509,6 +535,66 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
     }
 
     /**
+     * Batched mode: enable_batch_with_eviction is on and the client sends real batches. Only then is this key synced
+     * in batches, and only then does it leave the sync list after its window reset. Otherwise the key is synced one by
+     * one and stays on the list until stop(), as before.
+     */
+    private boolean isBatchedMode() {
+        KeyValueStoreClient client = kvStoreClient;
+        return batchWithEvictionEnabled && client != null && client.supportsBatchOperations();
+    }
+
+    /**
+     * Whether this counter is on the sync list, that is, the map holds this counter under its key. Two counters can
+     * share a key (the same throttle key in two policies), so the key alone is not enough.
+     */
+    private boolean isOnList() {
+        return ACTIVE_AGGREGATORS.get(key) == this;
+    }
+
+    /**
+     * Batched mode: takes this key off the sync list after its window reset, unless a request came since the reset.
+     * The caller holds kvStoreLock.
+     * <p>
+     * Handshake with {@link #processAdd(Object)}, which counts a request first and checks the list after: the key is
+     * taken off first and the unsent requests are checked after. So a request that races the removal either finds
+     * the key off the list and puts it back itself, or is found here and the key is put back. A reset() that races
+     * the removal is found the same way through pendingReset.
+     */
+    private void leaveListIfIdle() {
+        if (stopped || pendingReset || unsyncedCounter.get() != 0) {
+            return; // a request came since the reset, or a newer reset is owed: the key stays
+        }
+        if (!ACTIVE_AGGREGATORS.remove(key, this)) {
+            return; // not on the list: another counter with the same key holds the slot
+        }
+        if (pendingReset || unsyncedCounter.get() != 0) {
+            ACTIVE_AGGREGATORS.put(key, this); // a request or a reset raced the removal
+        }
+    }
+
+    /**
+     * Batched mode: puts this key back on the sync list on its first request after it left. Its local count starts
+     * from the request(s) just counted; the next tick sends them with INCRBY + PEXPIRE, and the reply sets the local
+     * count to the cluster-wide total. A key off the list owes nothing, so a pending reset is cleared.
+     * If another counter with the same key holds the slot, this counter takes it back.
+     */
+    private void returnToList() {
+        synchronized (kvStoreLock) {
+            if (stopped || isOnList()) {
+                return; // stopped, or the removal found this request and kept the key
+            }
+            pendingReset = false;
+            seedNeeded = false;
+            keyHasTTL = false; // the INCRBY may recreate the key, so PEXPIRE is sent with it
+            ACTIVE_AGGREGATORS.put(key, this);
+        }
+        if (!schedulerStarted) {
+            startScheduler();
+        }
+    }
+
+    /**
      * Best-effort flush of a pending reset and then of the unsynced delta. Both may be no-ops if the
      * key-value store is down.
      */
@@ -537,14 +623,26 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
             long newCount = localCounter.incrementAndGet();
             if (distributedThrottlingEnabled && kvStoreClient != null && key != null) {
                 unsyncedCounter.incrementAndGet();
+                boolean batchedMode = isBatchedMode();
                 // Refresh storedWindowExpiry when stale — this happens after one or more empty
                 // windows where reset() was never called (no RESET event → no reset()).
                 if (storedWindowExpiry <= System.currentTimeMillis()) {
                     Long expiry = ThrottleStreamProcessor.getThreadLocalWindowExpiry();
                     if (expiry != null && expiry > storedWindowExpiry) {
+                        if (batchedMode) {
+                            // A reset still owed now is for a window that has ended (the store was unreachable).
+                            // Writing it in the new window would wipe the other nodes' counts, so it is dropped.
+                            // Cleared before the new window end is set, so the sync tick never pairs the two.
+                            pendingReset = false;
+                        }
                         storedWindowExpiry = expiry;
                         keyHasTTL = false; // key was created by INCRBY after gap — needs PEXPIRE
                     }
+                }
+                // Batched mode: a key that left the sync list returns with this request. The request is counted
+                // first and the list checked after (see leaveListIfIdle()), so it is never left unsent.
+                if (batchedMode && !isOnList()) {
+                    returnToList();
                 }
             }
             return newCount;
@@ -622,7 +720,11 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
                 storedWindowExpiry = expiry;
             }
             unsyncedCounter.set(0L);
-            pendingReset = true;
+            // Batched mode: a key off the sync list resets locally only. It had no request in the closed window (a
+            // request would have put it back), so it owes no "0", and its next request puts it back without one.
+            if (!isBatchedMode() || isOnList()) {
+                pendingReset = true;
+            }
         }
         return 0L;
     }
@@ -637,6 +739,8 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
      * Removes the aggregator from the active aggregator map, synchronizes any unsynced changes
      * with the key-value store, and shuts down the scheduler if there are no more active aggregators.
      * If a batched write for this key is in flight, the flush runs when that write completes.
+     * In batched mode only a key on the sync list is flushed (a key off the list owes nothing), and the
+     * scheduler is shut down when no counter is left, since the list can be empty while counters are in use.
      * This method should be called when the aggregator is no longer needed.
      */
     @Override
@@ -647,7 +751,26 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
         try {
             // Only remove if key is not null and distributed throttling is enabled
             if (distributedThrottlingEnabled && key != null) {
+                boolean wasLive = live.compareAndSet(true, false);
+                if (isBatchedMode()) {
+                    boolean onList;
+                    synchronized (kvStoreLock) {
+                        // Under the lock, so that a racing request or reset cannot put the key back on the list
+                        stopped = true;
+                        onList = ACTIVE_AGGREGATORS.remove(key, this);
+                    }
+                    if (onList) {
+                        flushToKVStore();
+                    }
+                    if (wasLive && LIVE_AGGREGATOR_COUNT.decrementAndGet() == 0) {
+                        shutdownScheduler();
+                    }
+                    return;
+                }
                 stopped = true;
+                if (wasLive) {
+                    LIVE_AGGREGATOR_COUNT.decrementAndGet();
+                }
                 ACTIVE_AGGREGATORS.remove(key);
                 if (kvStoreClient != null) {
                     flushToKVStore();
@@ -667,7 +790,8 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
         if (log.isDebugEnabled()) {
             log.debug("DistributedCountAggregator: currentState called");
         }
-        if (distributedThrottlingEnabled && kvStoreClient != null && key != null) {
+        // Batched mode: a key off the sync list owes nothing to the store, so it is not synced.
+        if (distributedThrottlingEnabled && kvStoreClient != null && key != null && (!isBatchedMode() || isOnList())) {
             try {
                 syncWithKVStore();
             } catch (Exception e) {
@@ -774,7 +898,8 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
 
             log.debug("Starting key-value store sync scheduler with interval: "
                     + kvStoreSyncIntervalMilliseconds + " ms, pool size: " + corePoolSize
-                    + ", batch sync: " + (batchSyncEnabled ? "enabled, batch size: " + batchSize : "disabled"));
+                    + ", batch sync with eviction: "
+                    + (batchWithEvictionEnabled ? "enabled, batch size: " + batchSize : "disabled"));
 
             masterSyncTask = masterScheduler.scheduleAtFixedRate(() -> {
                 try {
@@ -791,7 +916,8 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
     /**
      * One sync tick over all active aggregators.
      * <p>
-     * Keys whose client supports batch operations (and when batch sync is enabled) are synced in three steps:
+     * Keys in batched mode (enable_batch_with_eviction on and a client that supports batch operations) are synced
+     * in three steps:
      * <ol>
      *     <li>collect: each key's operation is added to a read list or a write list (brief lock, no I/O)</li>
      *     <li>send: the lists are split into chunks of at most {@code batchSize} keys or commands, and the
@@ -813,7 +939,7 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
         for (DistributedCountAttributeAggregator aggregator : ACTIVE_AGGREGATORS.values()) {
             keyCount++;
             KeyValueStoreClient client = aggregator.kvStoreClient;
-            if (batchSyncEnabled && client != null && client.supportsBatchOperations()) {
+            if (aggregator.isBatchedMode()) {
                 BatchCollector collector = collectors.get(client);
                 if (collector == null) {
                     collector = new BatchCollector(client);

@@ -28,9 +28,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
 /**
- * Tests the batch sync settings of distributed throttling: [apim.distributed_throttling] enable_batch_sync and
- * batch_size in deployment.toml, rendered as EnableBatchSync and BatchSize under DistributedThrottleConfig in
- * api-manager.xml.
+ * Tests the batch sync settings of distributed throttling: [apim.distributed_throttling] enable_batch_with_eviction
+ * and batch_size in deployment.toml, rendered as EnableBatchWithEviction and BatchSize under DistributedThrottleConfig
+ * in api-manager.xml.
  */
 public class DistributedThrottleBatchSyncConfigTest {
 
@@ -52,7 +52,7 @@ public class DistributedThrottleBatchSyncConfigTest {
     @Test
     public void testDefaults() {
         DistributedThrottleConfig config = new DistributedThrottleConfig();
-        Assert.assertTrue("batch sync is on by default", config.isBatchSyncEnabled());
+        Assert.assertTrue("batch sync with eviction is on by default", config.isBatchWithEvictionEnabled());
         Assert.assertEquals(500, config.getBatchSize());
         Assert.assertEquals(500, DistributedThrottleConfig.DEFAULT_BATCH_SIZE);
     }
@@ -61,21 +61,23 @@ public class DistributedThrottleBatchSyncConfigTest {
     public void testDefaultsApplyWhenTheSettingsAreAbsent() throws Exception {
         DistributedThrottleConfig config = load("");
         Assert.assertTrue(config.isEnabled());
-        Assert.assertTrue(config.isBatchSyncEnabled());
+        Assert.assertTrue(config.isBatchWithEvictionEnabled());
         Assert.assertEquals(DistributedThrottleConfig.DEFAULT_BATCH_SIZE, config.getBatchSize());
     }
 
     @Test
     public void testConfiguredValuesAreRead() throws Exception {
-        DistributedThrottleConfig config = load("<EnableBatchSync>false</EnableBatchSync><BatchSize>250</BatchSize>");
-        Assert.assertFalse(config.isBatchSyncEnabled());
+        DistributedThrottleConfig config = load("<EnableBatchWithEviction>false</EnableBatchWithEviction>"
+                + "<BatchSize>250</BatchSize>");
+        Assert.assertFalse(config.isBatchWithEvictionEnabled());
         Assert.assertEquals(250, config.getBatchSize());
     }
 
     @Test
     public void testValuesAreTrimmedAndCaseInsensitive() throws Exception {
-        DistributedThrottleConfig config = load("<EnableBatchSync> FALSE </EnableBatchSync><BatchSize> 1000 </BatchSize>");
-        Assert.assertFalse(config.isBatchSyncEnabled());
+        DistributedThrottleConfig config = load("<EnableBatchWithEviction> FALSE </EnableBatchWithEviction>"
+                + "<BatchSize> 1000 </BatchSize>");
+        Assert.assertFalse(config.isBatchWithEvictionEnabled());
         Assert.assertEquals(1000, config.getBatchSize());
     }
 
@@ -89,7 +91,7 @@ public class DistributedThrottleBatchSyncConfigTest {
     }
 
     @Test
-    public void testBlankEnableBatchSyncKeepsTheDefault() throws Exception {
-        Assert.assertTrue(load("<EnableBatchSync></EnableBatchSync>").isBatchSyncEnabled());
+    public void testBlankEnableBatchWithEvictionKeepsTheDefault() throws Exception {
+        Assert.assertTrue(load("<EnableBatchWithEviction></EnableBatchWithEviction>").isBatchWithEvictionEnabled());
     }
 }

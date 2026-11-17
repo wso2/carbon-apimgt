@@ -31,9 +31,10 @@ public class DistributedThrottleConfig {
     private int syncInterval = 10;
     // Size for the thread pool for scheduled syncing
     private int corePoolSize = 200;
-    // Sync the keys with the key-value store in batches (MGET and pipelines) instead of one call per key
-    private boolean batchSyncEnabled = true;
-    // Maximum number of keys per MGET and of commands per pipeline when batch sync is enabled
+    // Sync the keys with the key-value store in batches (MGET and pipelines) instead of one call per key, and take a
+    // key off the sync list after its window reset until its next request. false: the per-key sync, keys never leave.
+    private boolean batchWithEvictionEnabled = true;
+    // Maximum number of keys per MGET and of commands per pipeline when batch sync with eviction is enabled
     private int batchSize = DEFAULT_BATCH_SIZE;
 
     private String host;
@@ -223,12 +224,12 @@ public class DistributedThrottleConfig {
         this.corePoolSize = corePoolSize;
     }
 
-    public boolean isBatchSyncEnabled() {
-        return batchSyncEnabled;
+    public boolean isBatchWithEvictionEnabled() {
+        return batchWithEvictionEnabled;
     }
 
-    public void setBatchSyncEnabled(boolean batchSyncEnabled) {
-        this.batchSyncEnabled = batchSyncEnabled;
+    public void setBatchWithEvictionEnabled(boolean batchWithEvictionEnabled) {
+        this.batchWithEvictionEnabled = batchWithEvictionEnabled;
     }
 
     public int getBatchSize() {
