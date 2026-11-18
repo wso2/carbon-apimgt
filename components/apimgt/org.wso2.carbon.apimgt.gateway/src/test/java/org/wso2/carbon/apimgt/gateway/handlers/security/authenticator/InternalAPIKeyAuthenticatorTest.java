@@ -465,6 +465,103 @@ public class InternalAPIKeyAuthenticatorTest {
     }
 
     @Test
+    public void testAuthenticateWhenKeyDataCacheEntryEvictedConcurrently() throws Exception {
+        PowerMockito.when(GatewayUtils.isInternalKey(Mockito.any(JWTClaimsSet.class))).thenReturn(true);
+        InternalAPIKeyAuthenticator internalAPIKeyAuthenticator =
+                new InternalAPIKeyAuthenticator(APIMgtGatewayConstants.INTERNAL_KEY);
+        MessageContext messageContext = Mockito.mock(Axis2MessageContext.class);
+        Mockito.when(messageContext.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("/api1/1.0.0");
+        Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION)).thenReturn("1.0.0");
+        API api = new API();
+        PowerMockito.when(GatewayUtils.getAPI(messageContext)).thenReturn(api);
+        TreeMap transportHeaders = new TreeMap();
+        transportHeaders.put(APIMgtGatewayConstants.INTERNAL_KEY, internalKey);
+        org.apache.axis2.context.MessageContext axis2MsgCntxt =
+                Mockito.mock(org.apache.axis2.context.MessageContext.class);
+        Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS)).thenReturn(transportHeaders);
+        Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
+        Mockito.when(axis2MsgCntxt.getProperty(Constants.Configuration.HTTP_METHOD)).thenReturn("GET");
+        Mockito.when(messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE)).thenReturn("/resource");
+        OpenAPI openAPI = Mockito.mock(OpenAPI.class);
+        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.OPEN_API_OBJECT)).thenReturn(openAPI);
+        PowerMockito.when(OpenAPIUtils.getResourceThrottlingTier(openAPI, messageContext)).thenReturn("GOLD");
+        PowerMockito.when(GatewayUtils.getTenantDomain()).thenReturn("carbon.super");
+        Cache internalKeyCache = Mockito.mock(Cache.class);
+        PowerMockito.when(CacheProvider.getGatewayInternalKeyCache()).thenReturn(internalKeyCache);
+        Mockito.when(internalKeyCache.get("28f8d7b0-9e62-4341-bf17-094453d5ffa4")).thenReturn("carbon.super");
+        Cache internalKeyDataCache = Mockito.mock(Cache.class);
+        PowerMockito.when(CacheProvider.getGatewayInternalKeyDataCache()).thenReturn(internalKeyDataCache);
+        JWTTokenPayloadInfo jwtTokenPayloadInfo = new JWTTokenPayloadInfo();
+        jwtTokenPayloadInfo.setPayload(signedJWT.getJWTClaimsSet());
+        jwtTokenPayloadInfo.setAccessToken(internalKey);
+        String cacheKey = GatewayUtils.getAccessTokenCacheKey("28f8d7b0-9e62-4341-bf17-094453d5ffa4", "/api1/1.0.0",
+                "1.0.0", "/resource", "GET");
+        JSONObject subscribedAPI = Mockito.mock(JSONObject.class);
+        // The key data cache entry is evicted by another thread right after the first read
+        Mockito.when(internalKeyDataCache.get(cacheKey)).thenReturn(jwtTokenPayloadInfo, (Object) null);
+        PowerMockito.when(GatewayUtils.verifyTokenSignature(Mockito.any(SignedJWT.class), Mockito.anyString())).thenReturn(true);
+        PowerMockito.when(GatewayUtils.isJwtTokenExpired(signedJWT.getJWTClaimsSet())).thenReturn(false);
+        PowerMockito.when(GatewayUtils.validateAPISubscription("/api1/1.0.0", "1.0.0", signedJWT.getJWTClaimsSet(),
+                internalKey.split("\\."), false)).thenReturn(subscribedAPI);
+        AuthenticationContext authenticationContext = Mockito.mock(AuthenticationContext.class);
+        PowerMockito.when(GatewayUtils.generateAuthenticationContext("28f8d7b0-9e62-4341-bf17-094453d5ffa4",
+                signedJWT.getJWTClaimsSet(), subscribedAPI, api.getApiTier())).thenReturn(authenticationContext);
+        PowerMockito.doNothing().when(APISecurityUtils.class, "setAuthenticationContext", messageContext,
+                authenticationContext);
+        AuthenticationResponse authenticate = internalAPIKeyAuthenticator.authenticate(messageContext);
+        Assert.assertNotNull(authenticate);
+        Assert.assertTrue(authenticate.isAuthenticated());
+        Assert.assertEquals(authenticate.getErrorCode(), 0);
+    }
+
+    @Test
+    public void testAuthenticateWhenKeyDataCacheHasUnexpectedType() throws Exception {
+        PowerMockito.when(GatewayUtils.isInternalKey(Mockito.any(JWTClaimsSet.class))).thenReturn(true);
+        InternalAPIKeyAuthenticator internalAPIKeyAuthenticator =
+                new InternalAPIKeyAuthenticator(APIMgtGatewayConstants.INTERNAL_KEY);
+        MessageContext messageContext = Mockito.mock(Axis2MessageContext.class);
+        Mockito.when(messageContext.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("/api1/1.0.0");
+        Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION)).thenReturn("1.0.0");
+        API api = new API();
+        PowerMockito.when(GatewayUtils.getAPI(messageContext)).thenReturn(api);
+        TreeMap transportHeaders = new TreeMap();
+        transportHeaders.put(APIMgtGatewayConstants.INTERNAL_KEY, internalKey);
+        org.apache.axis2.context.MessageContext axis2MsgCntxt =
+                Mockito.mock(org.apache.axis2.context.MessageContext.class);
+        Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS)).thenReturn(transportHeaders);
+        Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
+        Mockito.when(axis2MsgCntxt.getProperty(Constants.Configuration.HTTP_METHOD)).thenReturn("GET");
+        Mockito.when(messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE)).thenReturn("/resource");
+        OpenAPI openAPI = Mockito.mock(OpenAPI.class);
+        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.OPEN_API_OBJECT)).thenReturn(openAPI);
+        PowerMockito.when(OpenAPIUtils.getResourceThrottlingTier(openAPI, messageContext)).thenReturn("GOLD");
+        PowerMockito.when(GatewayUtils.getTenantDomain()).thenReturn("carbon.super");
+        Cache internalKeyCache = Mockito.mock(Cache.class);
+        PowerMockito.when(CacheProvider.getGatewayInternalKeyCache()).thenReturn(internalKeyCache);
+        Mockito.when(internalKeyCache.get("28f8d7b0-9e62-4341-bf17-094453d5ffa4")).thenReturn("carbon.super");
+        Cache internalKeyDataCache = Mockito.mock(Cache.class);
+        PowerMockito.when(CacheProvider.getGatewayInternalKeyDataCache()).thenReturn(internalKeyDataCache);
+        String cacheKey = GatewayUtils.getAccessTokenCacheKey("28f8d7b0-9e62-4341-bf17-094453d5ffa4", "/api1/1.0.0",
+                "1.0.0", "/resource", "GET");
+        JSONObject subscribedAPI = Mockito.mock(JSONObject.class);
+        // A value of an unexpected type in the key data cache must not cause a ClassCastException
+        Mockito.when(internalKeyDataCache.get(cacheKey)).thenReturn("unexpected");
+        PowerMockito.when(GatewayUtils.verifyTokenSignature(Mockito.any(SignedJWT.class), Mockito.anyString())).thenReturn(true);
+        PowerMockito.when(GatewayUtils.isJwtTokenExpired(signedJWT.getJWTClaimsSet())).thenReturn(false);
+        PowerMockito.when(GatewayUtils.validateAPISubscription("/api1/1.0.0", "1.0.0", signedJWT.getJWTClaimsSet(),
+                internalKey.split("\\."), false)).thenReturn(subscribedAPI);
+        AuthenticationContext authenticationContext = Mockito.mock(AuthenticationContext.class);
+        PowerMockito.when(GatewayUtils.generateAuthenticationContext("28f8d7b0-9e62-4341-bf17-094453d5ffa4",
+                signedJWT.getJWTClaimsSet(), subscribedAPI, api.getApiTier())).thenReturn(authenticationContext);
+        PowerMockito.doNothing().when(APISecurityUtils.class, "setAuthenticationContext", messageContext,
+                authenticationContext);
+        AuthenticationResponse authenticate = internalAPIKeyAuthenticator.authenticate(messageContext);
+        Assert.assertNotNull(authenticate);
+        Assert.assertTrue(authenticate.isAuthenticated());
+        Assert.assertEquals(authenticate.getErrorCode(), 0);
+    }
+
+    @Test
     public void testAuthenticateWithExpiredToken() throws Exception {
         PowerMockito.when(GatewayUtils.isInternalKey(Mockito.any(JWTClaimsSet.class))).thenReturn(true);
         InternalAPIKeyAuthenticator internalAPIKeyAuthenticator =
