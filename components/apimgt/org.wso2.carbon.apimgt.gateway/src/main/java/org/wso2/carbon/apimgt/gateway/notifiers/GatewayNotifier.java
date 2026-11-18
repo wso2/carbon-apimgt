@@ -24,13 +24,12 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
@@ -201,41 +200,42 @@ public class GatewayNotifier {
                 String serviceURLStr = config.getServiceUrl().concat(
                         APIConstants.GatewayNotification.GATEWAY_NOTIFICATION_ENDPOINT);
                 URL url = new URL(serviceURLStr);
-                HttpClient httpClient = APIUtil.getHttpClient(url.getPort(), url.getProtocol());
-                HttpPost request = new HttpPost(serviceURLStr);
-                request.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
-                                  APIConstants.AUTHORIZATION_BASIC + new String(Base64.encodeBase64(
-                                          (config.getUsername() + APIConstants.DELEM_COLON
-                                                  + config.getPassword()).getBytes(StandardCharsets.UTF_8)),
-                                                                                StandardCharsets.UTF_8));
-                request.setHeader(APIConstants.HEADER_CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
-                request.setEntity(new StringEntity(registrationPayload, ContentType.APPLICATION_JSON));
-                DataHolder.setGatewayRegistrationResponse(GatewayRegistrationResponse.NOT_RESPONDED);
+                // Close the per-call client so its pooled connection does not linger in CLOSE_WAIT.
+                try (CloseableHttpClient httpClient = (CloseableHttpClient) APIUtil.getHttpClient(url.getPort(),
+                        url.getProtocol())) {
+                    HttpPost request = new HttpPost(serviceURLStr);
+                    request.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
+                                      APIConstants.AUTHORIZATION_BASIC + new String(Base64.encodeBase64(
+                                              (config.getUsername() + APIConstants.DELEM_COLON
+                                                      + config.getPassword()).getBytes(StandardCharsets.UTF_8)),
+                                                                                    StandardCharsets.UTF_8));
+                    request.setHeader(APIConstants.HEADER_CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+                    request.setEntity(new StringEntity(registrationPayload, ContentType.APPLICATION_JSON));
+                    DataHolder.setGatewayRegistrationResponse(GatewayRegistrationResponse.NOT_RESPONDED);
 
-                try (CloseableHttpResponse response = APIUtil.executeHTTPRequestWithRetries(request, httpClient,
-                                                                                            retryDuration,
-                                                                                            maxRetryCount,
-                                                                                            retryProgressionFactor)) {
-                    int statusCode = response.getStatusLine().getStatusCode();
-                    String responseBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
-                    String status = null;
-                    try {
-                        JsonObject jsonObject = JsonParser.parseString(responseBody).getAsJsonObject();
-                        status = jsonObject.get("status").getAsString();
-                    } catch (RuntimeException ex) {
-                        log.error("Invalid registration response payload: " + responseBody, ex);
-                    }
-                    if (log.isDebugEnabled()) {
-                        log.debug("/notify-gateway called. Status: " + statusCode + ", Response: " + responseBody);
-                    }
+                    try (CloseableHttpResponse response = APIUtil.executeHTTPRequestWithRetries(request, httpClient,
+                            retryDuration, maxRetryCount, retryProgressionFactor)) {
+                        int statusCode = response.getStatusLine().getStatusCode();
+                        String responseBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+                        String status = null;
+                        try {
+                            JsonObject jsonObject = JsonParser.parseString(responseBody).getAsJsonObject();
+                            status = jsonObject.get("status").getAsString();
+                        } catch (RuntimeException ex) {
+                            log.error("Invalid registration response payload: " + responseBody, ex);
+                        }
+                        if (log.isDebugEnabled()) {
+                            log.debug("/notify-gateway called. Status: " + statusCode + ", Response: " + responseBody);
+                        }
 
-                    if (APIConstants.GatewayNotification.STATUS_REGISTERED.equals(status)) {
-                        DataHolder.setGatewayRegistrationResponse(GatewayRegistrationResponse.REGISTERED);
-                        log.info("Gateway registered successfully with ID: " + gatewayID);
-                    } else if (APIConstants.GatewayNotification.STATUS_ACKNOWLEDGED.equals(status)) {
-                        DataHolder.setGatewayRegistrationResponse(GatewayRegistrationResponse.ACKNOWLEDGED);
-                    }
+                        if (APIConstants.GatewayNotification.STATUS_REGISTERED.equals(status)) {
+                            DataHolder.setGatewayRegistrationResponse(GatewayRegistrationResponse.REGISTERED);
+                            log.info("Gateway registered successfully with ID: " + gatewayID);
+                        } else if (APIConstants.GatewayNotification.STATUS_ACKNOWLEDGED.equals(status)) {
+                            DataHolder.setGatewayRegistrationResponse(GatewayRegistrationResponse.ACKNOWLEDGED);
+                        }
 
+                    }
                 }
             } catch (IOException | APIManagementException e) {
                 log.error("Error occurred while executing Gateway Registration", e);
@@ -258,32 +258,36 @@ public class GatewayNotifier {
                         APIConstants.GatewayNotification.GATEWAY_NOTIFICATION_ENDPOINT);
                 URL url = new URL(serviceURLStr);
 
-                HttpClient httpClient = APIUtil.getHttpClient(url.getPort(), url.getProtocol());
+                // Close the per-call client so its pooled connection does not linger in CLOSE_WAIT.
+                try (CloseableHttpClient httpClient = (CloseableHttpClient) APIUtil.getHttpClient(url.getPort(),
+                        url.getProtocol())) {
 
-                HttpPost request = new HttpPost(serviceURLStr);
-                request.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
-                                  APIConstants.AUTHORIZATION_BASIC + new String(Base64.encodeBase64(
-                                          (config.getUsername() + APIConstants.DELEM_COLON
-                                                  + config.getPassword()).getBytes(StandardCharsets.UTF_8)),
-                                                                                StandardCharsets.UTF_8));
-                request.setHeader(APIConstants.HEADER_CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
-                request.setEntity(new StringEntity(heartbeatPayload, ContentType.APPLICATION_JSON));
-                HttpResponse response = httpClient.execute(request);
+                    HttpPost request = new HttpPost(serviceURLStr);
+                    request.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
+                                      APIConstants.AUTHORIZATION_BASIC + new String(Base64.encodeBase64(
+                                              (config.getUsername() + APIConstants.DELEM_COLON
+                                                      + config.getPassword()).getBytes(StandardCharsets.UTF_8)),
+                                                                                    StandardCharsets.UTF_8));
+                    request.setHeader(APIConstants.HEADER_CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+                    request.setEntity(new StringEntity(heartbeatPayload, ContentType.APPLICATION_JSON));
+                    try (CloseableHttpResponse response = httpClient.execute(request)) {
 
-                int statusCode = response.getStatusLine().getStatusCode();
-                String responseBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
-                if (log.isDebugEnabled()) {
-                    log.debug("/notify-gateway called. Status: " + statusCode + ", Response: " + responseBody);
-                }
-                if (statusCode != HttpStatus.SC_OK) {
-                    // Log authentication, authorization, and server errors at error level
-                    if (statusCode == HttpStatus.SC_UNAUTHORIZED || statusCode == HttpStatus.SC_FORBIDDEN ||
-                            +statusCode >= HttpStatus.SC_INTERNAL_SERVER_ERROR) {
-                        log.error("Failed to send heartbeat notification. Status: " + statusCode + ", Response: "
-                                + responseBody);
-                    } else if (log.isDebugEnabled()) {
-                        log.debug("Failed to send heartbeat notification. Status: " + statusCode + ", Response: "
-                                + responseBody);
+                        int statusCode = response.getStatusLine().getStatusCode();
+                        String responseBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+                        if (log.isDebugEnabled()) {
+                            log.debug("/notify-gateway called. Status: " + statusCode + ", Response: " + responseBody);
+                        }
+                        if (statusCode != HttpStatus.SC_OK) {
+                            // Log authentication, authorization, and server errors at error level
+                            if (statusCode == HttpStatus.SC_UNAUTHORIZED || statusCode == HttpStatus.SC_FORBIDDEN ||
+                                    +statusCode >= HttpStatus.SC_INTERNAL_SERVER_ERROR) {
+                                log.error("Failed to send heartbeat notification. Status: " + statusCode
+                                        + ", Response: " + responseBody);
+                            } else if (log.isDebugEnabled()) {
+                                log.debug("Failed to send heartbeat notification. Status: " + statusCode
+                                        + ", Response: " + responseBody);
+                            }
+                        }
                     }
                 }
             } catch (IOException e) {
