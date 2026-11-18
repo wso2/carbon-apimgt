@@ -152,7 +152,7 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
                         corePoolSize = config.getCorePoolSize();
                         kvStoreSyncIntervalMilliseconds = config.getSyncInterval();
                         batchWithEvictionEnabled = config.isBatchWithEvictionEnabled();
-                        batchSize = config.getBatchSize() > 0
+                        batchSize = config.getBatchSize() >= DistributedThrottleConfig.MIN_BATCH_SIZE
                                 ? config.getBatchSize() : DistributedThrottleConfig.DEFAULT_BATCH_SIZE;
                         DISTRIBUTED_THROTTLE_CONFIG = config; // volatile write last
                     }
@@ -1156,7 +1156,8 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
 
         /**
          * Splits the reads into chunks of at most {@code maxSize} keys and the writes into chunks of at most
-         * {@code maxSize} commands. A key's write operations (INCRBY and its PEXPIRE) stay in the same chunk.
+         * {@code maxSize} commands. A key's write operations (INCRBY and its PEXPIRE) stay in the same chunk,
+         * which is why {@code maxSize} is at least {@link DistributedThrottleConfig#MIN_BATCH_SIZE}.
          */
         List<BatchChunk> toChunks(int maxSize) {
             List<BatchChunk> chunks = new ArrayList<>();

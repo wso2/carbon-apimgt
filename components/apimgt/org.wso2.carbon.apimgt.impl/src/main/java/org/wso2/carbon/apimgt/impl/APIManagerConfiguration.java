@@ -637,10 +637,11 @@ public class APIManagerConfiguration {
                 if (batchSizeElement != null && StringUtils.isNotBlank(batchSizeElement.getText())) {
                     try {
                         int batchSize = Integer.parseInt(batchSizeElement.getText().trim());
-                        if (batchSize > 0) {
+                        if (batchSize >= DistributedThrottleConfig.MIN_BATCH_SIZE) {
                             distributedThrottleConfig.setBatchSize(batchSize);
                         } else {
                             log.warn("Invalid distributed throttling batch size: " + batchSize
+                                    + ". It must be at least " + DistributedThrottleConfig.MIN_BATCH_SIZE
                                     + ". Using the default: " + DistributedThrottleConfig.DEFAULT_BATCH_SIZE);
                         }
                     } catch (NumberFormatException e) {

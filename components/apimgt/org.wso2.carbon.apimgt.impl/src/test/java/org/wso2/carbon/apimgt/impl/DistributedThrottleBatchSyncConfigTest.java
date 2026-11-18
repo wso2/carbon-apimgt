@@ -83,11 +83,18 @@ public class DistributedThrottleBatchSyncConfigTest {
 
     @Test
     public void testInvalidBatchSizesFallBackToTheDefault() throws Exception {
-        for (String invalid : new String[]{"0", "-5", "abc", "", "   "}) {
+        for (String invalid : new String[]{"1", "0", "-5", "abc", "", "   "}) {
             DistributedThrottleConfig config = load("<BatchSize>" + invalid + "</BatchSize>");
             Assert.assertEquals("BatchSize '" + invalid + "'", DistributedThrottleConfig.DEFAULT_BATCH_SIZE,
                     config.getBatchSize());
         }
+    }
+
+    /** A key's INCRBY and its PEXPIRE are sent in the same pipeline, so the smallest batch size is 2. */
+    @Test
+    public void testSmallestBatchSizeIsTwo() throws Exception {
+        Assert.assertEquals(2, DistributedThrottleConfig.MIN_BATCH_SIZE);
+        Assert.assertEquals(2, load("<BatchSize>2</BatchSize>").getBatchSize());
     }
 
     @Test
