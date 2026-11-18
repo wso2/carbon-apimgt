@@ -619,6 +619,7 @@ public final class APIConstants {
         public static final String MCP = "MCP";
         public static final String MCP_SUPPORT_ENABLED = "Enabled";
         public static final String MCP_ENFORCE_AUTH_FOR_ALL = "EnforceAuthForAllMCPMethods";
+        public static final String MCP_ENABLE_OUTBOUND_AUTH_HEADER = "EnableOutboundAuthHeader";
         public static final String AI_CONFIGURATION_FAILOVER_CONFIGURATIONS = "FailoverConfigurations";
         public static final String AI_CONFIGURATION_ROUND_ROBIN_CONFIGURATIONS = "RoundRobinConfigurations";
         public static final String AI_CONFIGURATION_FAILOVER_CONFIGURATIONS_FAILOVER_ENDPOINTS_LIMIT =
@@ -1085,6 +1086,7 @@ public final class APIConstants {
     public static final String SCOPE_CACHE_ENABLED = CACHE_CONFIGS + "EnableScopeCache";
     public static final String PUBLISHER_ROLE_CACHE_ENABLED = CACHE_CONFIGS + "EnablePublisherRoleCache";
     public static final String GATEWAY_RESOURCE_CACHE_TIMEOUT = CACHE_CONFIGS + "GatewayResourceCacheExpiry";
+    public static final String SUBSCRIPTION_NOT_FOUND_CACHE_EXPIRY = CACHE_CONFIGS + "SubscriptionNotFoundCacheExpiry";
     public static final String DEFAULT_CACHE_TIMEOUT = "Cache.DefaultCacheTimeout";
     public static final String REST_API_SCOPE_CACHE = "REST_API_SCOPE_CACHE";
     public static final long DEFAULT_TIMEOUT = 900;
