@@ -89,6 +89,12 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
     // the store a little after it is collected (it waits for a sync thread, then the network), so a "0" collected in
     // the last milliseconds of its window could land after the window ended and wipe the next window's counts.
     private static final long RESET_MIN_REMAINING_MILLIS = 100L;
+    // Batch sync: a failed INCRBY/DECRBY that was certainly not applied is not added back to the unsynced counter when
+    // its window ends within this time. reset() runs at the window end and clears that counter, so it would drop the
+    // delta within this time anyway. Checked this close to the window end, reset() could run between the window check
+    // and the add-back, and carry the closed window's requests (they build up while the store is unreachable or
+    // refuses writes) into the next window, which would throttle early.
+    private static final long RESTORE_MIN_REMAINING_MILLIS = 100L;
 
     // Rate-limits the error log of a failed batch (one log covers every key in it)
     private static final AtomicLong lastBatchErrorLogTimestamp = new AtomicLong(0L);
@@ -484,7 +490,8 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
     /**
      * Batch sync, step 3 (apply) for a failed write. A failed reset stays pending and is retried on the
      * next tick. A failed INCRBY/DECRBY delta is added back to the unsynced counter only when it was
-     * certainly not applied, and no reset made it part of the closed window.
+     * certainly not applied, no reset made it part of the closed window, and its window does not end within
+     * {@link #RESTORE_MIN_REMAINING_MILLIS}.
      * <p>
      * When the batch may have reached the store (for example the connection dropped while the replies were
      * read), the delta is dropped instead. Sending it again would count it twice whenever the store had
@@ -508,7 +515,12 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
                 }
                 logRateLimited(message, cause, false);
             }
-            if (unit.kind == SyncUnit.Kind.COUNT && resetEpoch.get() == unit.resetEpoch && !mayHaveBeenApplied) {
+            // Checked before the epoch: with at least RESTORE_MIN_REMAINING_MILLIS left, reset() cannot run between
+            // the epoch check and the add-back.
+            boolean windowStillOpen = unit.windowExpiry <= 0
+                    || System.currentTimeMillis() < unit.windowExpiry - RESTORE_MIN_REMAINING_MILLIS;
+            if (unit.kind == SyncUnit.Kind.COUNT && windowStillOpen && resetEpoch.get() == unit.resetEpoch
+                    && !mayHaveBeenApplied) {
                 unsyncedCounter.addAndGet(unit.delta);
             }
         }

@@ -302,6 +302,10 @@ public class DistributedCountAggregatorBatchSyncTest {
         return field(DCAA, "RESET_MIN_REMAINING_MILLIS").getLong(null);
     }
 
+    private static long restoreMinRemainingMillis() throws Exception {
+        return field(DCAA, "RESTORE_MIN_REMAINING_MILLIS").getLong(null);
+    }
+
     private static Object getStatic(String name) throws Exception {
         return field(DCAA, name).get(null);
     }
@@ -804,6 +808,43 @@ public class DistributedCountAggregatorBatchSyncTest {
         Assert.assertEquals("1", client.store.get("GOOD"));
         Assert.assertEquals(1L, counter(good, "localCounter"));
         Assert.assertEquals(0L, counter(good, "unsyncedCounter"));
+    }
+
+    /**
+     * A write that certainly failed in the last milliseconds of its window is not added back: reset() would clear it
+     * within that time, and checked this close to the window end, reset() could run between the window check and the
+     * add-back and carry the closed window's requests into the next window.
+     */
+    @Test(timeout = TEST_TIMEOUT_MS)
+    public void testUnsentPipelineInTheLastMillisecondsOfItsWindowDropsTheDelta() throws Exception {
+        FakeBatchClient client = new FakeBatchClient();
+        DistributedCountAttributeAggregator aggregator = aggregator("A", client);
+        set(aggregator, "keyHasTTL", true);
+        requests(aggregator, 4);
+        set(aggregator, "storedWindowExpiry", System.currentTimeMillis() + restoreMinRemainingMillis() / 2);
+        client.failNextWrite = new KeyValueStoreUnavailableException("simulated: no connection");
+
+        tick();
+
+        Assert.assertEquals("delta dropped, not added back", 0L, counter(aggregator, "unsyncedCounter"));
+        Assert.assertEquals("the local count keeps the requests", 4L, counter(aggregator, "localCounter"));
+        Assert.assertNull(client.store.get("A"));
+    }
+
+    /** Same, for a command the store refused. */
+    @Test(timeout = TEST_TIMEOUT_MS)
+    public void testRefusedCommandInTheLastMillisecondsOfItsWindowDropsTheDelta() throws Exception {
+        FakeBatchClient client = new FakeBatchClient();
+        DistributedCountAttributeAggregator bad = aggregator("BAD", client);
+        client.store.put("BAD", "not-a-number");
+        set(bad, "keyHasTTL", true);
+        requests(bad, 2);
+        set(bad, "storedWindowExpiry", System.currentTimeMillis() + restoreMinRemainingMillis() / 2);
+
+        tick();
+
+        Assert.assertEquals("delta dropped, not added back", 0L, counter(bad, "unsyncedCounter"));
+        Assert.assertEquals(2L, counter(bad, "localCounter"));
     }
 
     @Test(timeout = TEST_TIMEOUT_MS)
