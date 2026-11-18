@@ -213,9 +213,11 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                     if (log.isDebugEnabled()) {
                         log.debug("Internal Key retrieved from the Internal Key cache.");
                     }
-                    if (getGatewayInternalKeyDataCache().get(cacheKey) != null) {
+                    // Read the key cache only once to avoid a null entry if it is evicted between two reads
+                    Object cachedPayloadInfo = getGatewayInternalKeyDataCache().get(cacheKey);
+                    if (cachedPayloadInfo instanceof JWTTokenPayloadInfo) {
                         // Token is found in the key cache
-                        payloadInfo = (JWTTokenPayloadInfo) getGatewayInternalKeyDataCache().get(cacheKey);
+                        payloadInfo = (JWTTokenPayloadInfo) cachedPayloadInfo;
                         String accessToken = payloadInfo.getAccessToken();
                         isVerified = accessToken.equals(internalKey);
                     }
