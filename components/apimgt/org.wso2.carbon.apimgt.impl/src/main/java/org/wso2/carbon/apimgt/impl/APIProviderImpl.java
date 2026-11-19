@@ -4839,19 +4839,29 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     /**
      * Checks whether the given key template is used by any custom (global) policy of the tenant other than the
      * given policy. Gateways keep a single entry per key template, so it must not be removed while it is in use.
+     * If the custom policies cannot be read, the key template is treated as in use, so that it is kept on the
+     * gateways. Keeping a key template that is no longer used does no harm.
      *
      * @param keyTemplate        key template to check
      * @param excludedPolicyName name of the policy to exclude from the check
      * @param tenantId           tenant id
-     * @return true if another custom policy of the tenant uses the key template
-     * @throws APIManagementException if an error occurs while retrieving the custom policies
+     * @return true if another custom policy of the tenant uses the key template, or if this cannot be checked
      */
     private boolean isKeyTemplateUsedByOtherGlobalPolicies(String keyTemplate, String excludedPolicyName,
-                                                           int tenantId) throws APIManagementException {
+                                                           int tenantId) {
         if (keyTemplate == null) {
             return false;
         }
-        for (GlobalPolicy globalPolicy : apiMgtDAO.getGlobalPolicies(tenantId)) {
+        GlobalPolicy[] globalPolicies;
+        try {
+            globalPolicies = apiMgtDAO.getGlobalPolicies(tenantId);
+        } catch (APIManagementException e) {
+            // The policy change is already saved, so do not fail the request. Keep the key template instead.
+            log.warn("Error while checking whether key template " + keyTemplate + " is used by other custom "
+                    + "policies. Keeping it on the gateways.", e);
+            return true;
+        }
+        for (GlobalPolicy globalPolicy : globalPolicies) {
             if (keyTemplate.equals(globalPolicy.getKeyTemplate())
                     && !globalPolicy.getPolicyName().equals(excludedPolicyName)) {
                 return true;

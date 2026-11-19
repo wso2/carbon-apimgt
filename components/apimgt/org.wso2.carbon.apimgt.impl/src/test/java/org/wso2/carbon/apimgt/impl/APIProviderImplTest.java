@@ -714,6 +714,72 @@ public class APIProviderImplTest {
         assertEquals("$appId:$resourceKey:$userId", event.getKeyTemplate());
     }
 
+    @Test
+    public void testUpdateGlobalPolicyKeyTemplateReplacesTemplateNotUsedByOtherPolicies()
+            throws APIManagementException {
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        Mockito.when(apimgtDAO.getGlobalPolicy("policy1"))
+                .thenReturn(createGlobalPolicy("policy1", "$appId:$resourceKey"));
+        Mockito.when(apimgtDAO.getGlobalPolicies(ArgumentMatchers.anyInt())).thenReturn(new GlobalPolicy[]{
+                createGlobalPolicy("policy1", "$appId:$resourceKey:$userId")});
+
+        apiProvider.updatePolicy(createGlobalPolicy("policy1", "$appId:$resourceKey:$userId"));
+
+        // No other policy uses the old key template, so it is replaced as before.
+        KeyTemplateEvent event = captureKeyTemplateEvent();
+        assertEquals(APIConstants.EventType.CUSTOM_POLICY_UPDATE.name(), event.getType());
+        assertEquals("$appId:$resourceKey", event.getOldKeyTemplate());
+        assertEquals("$appId:$resourceKey:$userId", event.getNewKeyTemplate());
+    }
+
+    @Test
+    public void testUpdateGlobalPolicyWithSameKeyTemplate() throws APIManagementException {
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        Mockito.when(apimgtDAO.getGlobalPolicy("policy1"))
+                .thenReturn(createGlobalPolicy("policy1", "$appId:$resourceKey"));
+
+        apiProvider.updatePolicy(createGlobalPolicy("policy1", "$appId:$resourceKey"));
+
+        // The key template did not change, so there is no usage check and the update is sent as before.
+        Mockito.verify(apimgtDAO, Mockito.never()).getGlobalPolicies(ArgumentMatchers.anyInt());
+        KeyTemplateEvent event = captureKeyTemplateEvent();
+        assertEquals(APIConstants.EventType.CUSTOM_POLICY_UPDATE.name(), event.getType());
+        assertEquals("$appId:$resourceKey", event.getOldKeyTemplate());
+        assertEquals("$appId:$resourceKey", event.getNewKeyTemplate());
+    }
+
+    @Test
+    public void testDeleteGlobalPolicyKeepsKeyTemplateWhenUsageCheckFails() throws APIManagementException {
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        Mockito.when(apimgtDAO.getGlobalPolicy("policy1"))
+                .thenReturn(createGlobalPolicy("policy1", "$appId:$resourceKey"));
+        Mockito.when(apimgtDAO.getGlobalPolicies(ArgumentMatchers.anyInt()))
+                .thenThrow(new APIManagementException("Error while retrieving global policies"));
+
+        apiProvider.deletePolicy("admin", PolicyConstants.POLICY_LEVEL_GLOBAL, "policy1");
+
+        // The delete does not fail, and the key template is kept on the gateways.
+        PowerMockito.verifyStatic(APIUtil.class, Mockito.never());
+        APIUtil.sendNotification(any(), ArgumentMatchers.eq(APIConstants.NotifierType.KEY_TEMPLATE.name()));
+    }
+
+    @Test
+    public void testUpdateGlobalPolicyKeyTemplateAddsNewTemplateWhenUsageCheckFails()
+            throws APIManagementException {
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        Mockito.when(apimgtDAO.getGlobalPolicy("policy1"))
+                .thenReturn(createGlobalPolicy("policy1", "$appId:$resourceKey"));
+        Mockito.when(apimgtDAO.getGlobalPolicies(ArgumentMatchers.anyInt()))
+                .thenThrow(new APIManagementException("Error while retrieving global policies"));
+
+        apiProvider.updatePolicy(createGlobalPolicy("policy1", "$appId:$resourceKey:$userId"));
+
+        // The update does not fail. The new key template is added and the old one is kept on the gateways.
+        KeyTemplateEvent event = captureKeyTemplateEvent();
+        assertEquals(APIConstants.EventType.CUSTOM_POLICY_ADD.name(), event.getType());
+        assertEquals("$appId:$resourceKey:$userId", event.getKeyTemplate());
+    }
+
     private GlobalPolicy createGlobalPolicy(String name, String keyTemplate) {
         GlobalPolicy globalPolicy = new GlobalPolicy(name);
         globalPolicy.setKeyTemplate(keyTemplate);
