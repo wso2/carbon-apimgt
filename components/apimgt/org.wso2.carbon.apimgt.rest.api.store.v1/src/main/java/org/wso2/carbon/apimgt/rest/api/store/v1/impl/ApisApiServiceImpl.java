@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -68,6 +69,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -91,6 +93,7 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 
 public class ApisApiServiceImpl implements ApisApiService {
 
@@ -1094,14 +1097,17 @@ public class ApisApiServiceImpl implements ApisApiService {
                         swaggerDefinition);
                 //Create the sdk response.
                 File sdkFile = new File(sdkArtifacts.get("zipFilePath"));
-                // read the SDK into memory and delete the temp staging dir before returning so
-                // it does not leak on the success path. Returned content is unchanged.
-                byte[] sdkBytes = Files.readAllBytes(sdkFile.toPath());
-                // deleteDirectory (not the shipped cleanTempDirectory, which only empties
-                // contents and leaves the dir shell) so no <UUID>/ directory leaks.
-                FileUtils.deleteDirectory(new java.io.File(sdkArtifacts.get("tempDirectoryPath")));
-
-                return Response.ok(sdkBytes, MediaType.APPLICATION_OCTET_STREAM_TYPE).header("Content-Disposition",
+                File sdkTempDirectory = new File(sdkArtifacts.get("tempDirectoryPath"));
+                // Stream the archive to the client and remove the temporary directory holding the generated SDK
+                // once the response body has been written, so nothing is left behind on disk
+                StreamingOutput sdkStream = output -> {
+                    try (InputStream sdkInputStream = Files.newInputStream(sdkFile.toPath())) {
+                        IOUtils.copy(sdkInputStream, output);
+                    } finally {
+                        FileUtils.deleteQuietly(sdkTempDirectory);
+                    }
+                };
+                return Response.ok(sdkStream, MediaType.APPLICATION_OCTET_STREAM_TYPE).header("Content-Disposition",
                         "attachment; filename=\"" + sdkArtifacts.get("zipFileName") + "\"" ).build();
             } catch (APIClientGenerationException e) {
                 String message = "Error generating client sdk for api: " + api.getName() + " for language: " + language;

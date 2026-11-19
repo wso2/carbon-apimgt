@@ -1228,12 +1228,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
 
         File importFolder = CommonUtil.createTempDirectory(null);
 
-        try {  // E16-068: delete the import staging dir on every exit path (CWE-459 temp-leak)
-            String uploadFileName = fileDetail == null ? null : fileDetail.getDataHandler().getName();
-            if (StringUtils.isEmpty(uploadFileName)) {
-                throw new APIImportExportException("Invalid file name. File name cannot be null or empty.");
-            }
-
+        try {
             String uploadFileName = fileDetail == null ? null : fileDetail.getDataHandler().getName();
             if (StringUtils.isEmpty(uploadFileName)) {
                 throw new APIImportExportException("Invalid file name. File name cannot be null or empty.");
@@ -1261,6 +1256,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             FileUtils.copyInputStreamToFile(uploadedInputStream, targetFile);
             return preprocessImportedArtifact(absolutePath, fileType);
         } finally {
+            // Remove the temporary import directory regardless of how the import ended
             FileUtils.deleteQuietly(importFolder);
         }
     }

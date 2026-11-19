@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.service.catalog.impl;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -257,8 +258,7 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         List<ServiceEntry> serviceListToIgnore = new ArrayList<>();
         List<ServiceEntry> servicesWithInvalidDefinition = new ArrayList<>();
 
-        // unzip the uploaded zip
-        try {  // ensure the per-request temp dir is always cleaned up
+        try {
             // unzip the uploaded zip
             try {
                 FileBasedServicesImportExportManager importExportManager =
@@ -343,8 +343,8 @@ public class ServicesApiServiceImpl implements ServicesApiService {
                         .fromServiceInfoDTOToServiceInfoListDTO(serviceList)).build();
             }
         } finally {
-            // delete the per-request staging dir on every exit path (CWE-459 temp-leak)
-            org.apache.commons.io.FileUtils.deleteQuietly(new java.io.File(tempDirPath));
+            // Remove the temporary directory the uploaded archive was extracted into
+            FileUtils.deleteQuietly(new File(tempDirPath));
         }
     }
 
