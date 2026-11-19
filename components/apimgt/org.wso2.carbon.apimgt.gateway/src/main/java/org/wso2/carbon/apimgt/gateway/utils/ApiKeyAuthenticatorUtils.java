@@ -133,9 +133,11 @@ public class ApiKeyAuthenticatorUtils {
             String cacheToken = (String) getGatewayApiKeyCache().get(tokenIdentifier);
             if (cacheToken != null) {
                 log.debug("Api Key retrieved from the Api Key cache.");
-                if (getGatewayApiKeyDataCache().get(cacheKey) != null) {
+                // Read the key cache only once to avoid a null entry if it is evicted between two reads
+                Object cachedPayloadInfo = getGatewayApiKeyDataCache().get(cacheKey);
+                if (cachedPayloadInfo instanceof JWTTokenPayloadInfo) {
                     // Token is found in the key cache
-                    JWTTokenPayloadInfo payloadInfo = (JWTTokenPayloadInfo) getGatewayApiKeyDataCache().get(cacheKey);
+                    JWTTokenPayloadInfo payloadInfo = (JWTTokenPayloadInfo) cachedPayloadInfo;
                     String accessToken = payloadInfo.getAccessToken();
                     isVerified = accessToken.equals(apiKey);
                 }
