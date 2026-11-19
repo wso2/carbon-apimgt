@@ -604,6 +604,9 @@ public class APIManagerConfiguration {
                 OMElement typeElement = element.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_TYPE));
                 OMElement syncIntervalElement = element.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_SYNC_INTERVAL));
                 OMElement corePoolSizeElement = element.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_CORE_POOL_SIZE));
+                OMElement enableBatchWithEvictionElement = element.getFirstChildWithName(
+                        new QName(APIConstants.DISTRIBUTED_THROTTLE_ENABLE_BATCH_WITH_EVICTION));
+                OMElement batchSizeElement = element.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_BATCH_SIZE));
                 OMElement propertiesElement = element.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_PROPERTIES));
 
                 if (enabledElement != null) {
@@ -624,6 +627,26 @@ public class APIManagerConfiguration {
                         distributedThrottleConfig.setCorePoolSize(Integer.parseInt(corePoolSizeElement.getText()));
                     } catch (NumberFormatException e) {
                         log.warn("Invalid core pool size specified", e);
+                    }
+                }
+                if (enableBatchWithEvictionElement != null
+                        && StringUtils.isNotBlank(enableBatchWithEvictionElement.getText())) {
+                    distributedThrottleConfig.setBatchWithEvictionEnabled(
+                            Boolean.parseBoolean(enableBatchWithEvictionElement.getText().trim()));
+                }
+                if (batchSizeElement != null && StringUtils.isNotBlank(batchSizeElement.getText())) {
+                    try {
+                        int batchSize = Integer.parseInt(batchSizeElement.getText().trim());
+                        if (batchSize >= DistributedThrottleConfig.MIN_BATCH_SIZE) {
+                            distributedThrottleConfig.setBatchSize(batchSize);
+                        } else {
+                            log.warn("Invalid distributed throttling batch size: " + batchSize
+                                    + ". It must be at least " + DistributedThrottleConfig.MIN_BATCH_SIZE
+                                    + ". Using the default: " + DistributedThrottleConfig.DEFAULT_BATCH_SIZE);
+                        }
+                    } catch (NumberFormatException e) {
+                        log.warn("Invalid distributed throttling batch size: " + batchSizeElement.getText()
+                                + ". Using the default: " + DistributedThrottleConfig.DEFAULT_BATCH_SIZE, e);
                     }
                 }
                 if (propertiesElement != null) {

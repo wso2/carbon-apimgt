@@ -23,12 +23,23 @@ package org.wso2.carbon.apimgt.impl.dto;
  */
 public class DistributedThrottleConfig {
 
+    public static final int DEFAULT_BATCH_SIZE = 500;
+    // A key's INCRBY/DECRBY and its PEXPIRE are always sent in the same pipeline, so a smaller batch size could not
+    // be kept to. A smaller configured value falls back to DEFAULT_BATCH_SIZE.
+    public static final int MIN_BATCH_SIZE = 2;
+
     private boolean enabled = false;
     private String type = "redis";
     // Sync frequency with the key-value store in milliseconds
     private int syncInterval = 10;
     // Size for the thread pool for scheduled syncing
     private int corePoolSize = 200;
+    // Sync the keys with the key-value store in batches (MGET and pipelines) instead of one call per key, and take a
+    // key off the sync list after its window reset until its next request. false: the per-key sync, keys never leave.
+    private boolean batchWithEvictionEnabled = true;
+    // Maximum number of keys per MGET and of commands per pipeline when batch sync with eviction is enabled.
+    // At least MIN_BATCH_SIZE.
+    private int batchSize = DEFAULT_BATCH_SIZE;
 
     private String host;
     private int port;
@@ -215,6 +226,22 @@ public class DistributedThrottleConfig {
 
     public void setCorePoolSize(int corePoolSize) {
         this.corePoolSize = corePoolSize;
+    }
+
+    public boolean isBatchWithEvictionEnabled() {
+        return batchWithEvictionEnabled;
+    }
+
+    public void setBatchWithEvictionEnabled(boolean batchWithEvictionEnabled) {
+        this.batchWithEvictionEnabled = batchWithEvictionEnabled;
+    }
+
+    public int getBatchSize() {
+        return batchSize;
+    }
+
+    public void setBatchSize(int batchSize) {
+        this.batchSize = batchSize;
     }
 
     public int getDatabaseId() {
