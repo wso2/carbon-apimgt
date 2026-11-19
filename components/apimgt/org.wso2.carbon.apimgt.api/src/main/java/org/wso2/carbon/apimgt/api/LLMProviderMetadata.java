@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.api;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class LLMProviderMetadata {
@@ -35,6 +36,16 @@ public class LLMProviderMetadata {
 
     @JsonProperty("required")
     private boolean required = true;
+
+    /**
+     * Classifies this attribute for analytics publishing. {@code "TOKEN_USAGE"} means the extracted value is
+     * published directly under {@code aiTokenUsage}. {@code null} (the default) means this attribute
+     * is never published as a usage counter -- this is the only signal used for that decision; a well-known name
+     * on its own is not enough.
+     */
+    @JsonProperty("analyticsCategory")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String analyticsCategory;
 
     public LLMProviderMetadata() {}
 
@@ -62,6 +73,12 @@ public class LLMProviderMetadata {
         this.inputSource = inputSource;
         this.attributeIdentifier = attributeIdentifier;
         this.required = required;
+    }
+
+    public LLMProviderMetadata(String attributeName, String inputSource, String attributeIdentifier,
+            boolean required, String analyticsCategory) {
+        this(attributeName, inputSource, attributeIdentifier, required);
+        this.analyticsCategory = analyticsCategory;
     }
 
     public String getAttributeName() {
@@ -100,5 +117,13 @@ public class LLMProviderMetadata {
 
     public void setRequired(boolean required) {
         this.required = required;
+    }
+
+    public String getAnalyticsCategory() {
+        return analyticsCategory;
+    }
+
+    public void setAnalyticsCategory(String analyticsCategory) {
+        this.analyticsCategory = analyticsCategory;
     }
 }

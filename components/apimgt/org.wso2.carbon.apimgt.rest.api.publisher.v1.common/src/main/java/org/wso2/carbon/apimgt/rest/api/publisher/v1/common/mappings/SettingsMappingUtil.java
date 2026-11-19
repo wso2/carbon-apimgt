@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.GatewayFeatureCatalog;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.dto.APIMGovernanceConfigDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
@@ -113,6 +114,9 @@ public class SettingsMappingUtil {
                     config.getDesignAssistantConfigurationDto().isKeyProvided());
             settingsDTO.setIsMCPSupportEnabled(config.isMCPSupportEnabled());
             settingsDTO.setIsGatewayNotificationEnabled(APIUtil.isGatewayNotificationEnabled());
+            APIMGovernanceConfigDTO governanceConfig = config.getAPIMGovernanceConfigurationDto();
+            settingsDTO.setPerPolicySeverityFilteringEnabled(
+                    governanceConfig != null && governanceConfig.isPerPolicySeverityFilteringEnabled());
         }
         return settingsDTO;
     }

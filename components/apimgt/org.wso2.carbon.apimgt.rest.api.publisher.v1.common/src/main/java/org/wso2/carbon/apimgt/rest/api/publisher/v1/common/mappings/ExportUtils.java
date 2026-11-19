@@ -1228,8 +1228,10 @@ public class ExportUtils {
                     } else {
                         schemaContent = apiProvider.getGraphqlSchemaDefinition(currentApiUuid, apiTenantDomain);
                     }
-                    CommonUtil.writeFile(archivePath + ImportExportConstants.GRAPHQL_SCHEMA_DEFINITION_LOCATION,
-                            schemaContent);
+                    if (schemaContent != null) {
+                        CommonUtil.writeFile(archivePath + ImportExportConstants.GRAPHQL_SCHEMA_DEFINITION_LOCATION,
+                                schemaContent);
+                    }
 
                     GraphqlComplexityInfo graphqlComplexityInfo = apiProvider.getComplexityDetails(currentApiUuid);
                     if (!graphqlComplexityInfo.getList().isEmpty()) {

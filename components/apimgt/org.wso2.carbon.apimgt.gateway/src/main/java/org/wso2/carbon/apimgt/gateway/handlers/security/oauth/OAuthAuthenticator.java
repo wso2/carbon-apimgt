@@ -199,20 +199,8 @@ public class OAuthAuthenticator implements Authenticator {
         }
 
         String apiType = (String) synCtx.getProperty(APIMgtGatewayConstants.API_TYPE);
-        if (removeOAuthHeadersFromOutMessage && !APIConstants.API_TYPE_MCP.equals(apiType)) {
-            //Remove authorization headers sent for authentication at the gateway and pass others to the backend
-            if (StringUtils.isNotBlank(remainingAuthHeader.get())) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Removing OAuth key from Authorization header");
-                }
-                headers.put(getSecurityHeader(), remainingAuthHeader.get());
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Removing Authorization header from headers");
-                }
-                headers.remove(getSecurityHeader());
-            }
-
+        if (isRemoveAuthHeaderFromOutMessage(synCtx, apiType)) {
+            removeAuthHeaderFromOutMessage(headers, remainingAuthHeader.get());
         }
         if (removeDefaultAPIHeaderFromOutMessage) {
             headers.remove(defaultAPIHeader);
@@ -514,6 +502,51 @@ public class OAuthAuthenticator implements Authenticator {
 
     public Set<String> getAudiences() {
         return audiences;
+    }
+
+    /**
+     * MCP servers follow [apim.mcp] enable_outbound_auth_header. EXISTING_API keeps the token for the existing API,
+     * which applies [apim.oauth_config] enable_outbound_auth_header.
+     *
+     * @param synCtx  message context
+     * @param apiType type of the API being invoked
+     * @return true if the access token should be removed from the outbound request
+     */
+    boolean isRemoveAuthHeaderFromOutMessage(MessageContext synCtx, String apiType) {
+
+        if (!APIConstants.API_TYPE_MCP.equals(apiType)) {
+            return removeOAuthHeadersFromOutMessage;
+        }
+        String subType = (String) synCtx.getProperty(APIMgtGatewayConstants.SUB_TYPE);
+        if (APIConstants.API_SUBTYPE_EXISTING_API.equals(subType)) {
+            return false;
+        }
+        APIManagerConfiguration apiManagerConfiguration = getApiManagerConfiguration();
+        return apiManagerConfiguration == null || !apiManagerConfiguration.isMCPOutboundAuthHeaderEnabled();
+    }
+
+    /**
+     * Removes the access token sent for authentication at the Gateway from the authorization header
+     *
+     * @param headers                  transport headers of the request
+     * @param remainingAuthHeaderValue the authorization header value without the access token
+     */
+    void removeAuthHeaderFromOutMessage(Map headers, String remainingAuthHeaderValue) {
+
+        if (headers == null) {
+            return;
+        }
+        if (StringUtils.isNotBlank(remainingAuthHeaderValue)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Removing OAuth key from Authorization header");
+            }
+            headers.put(getSecurityHeader(), remainingAuthHeaderValue);
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Removing Authorization header from headers");
+            }
+            headers.remove(getSecurityHeader());
+        }
     }
 
     private boolean isRemoveOAuthHeadersFromOutMessage() {

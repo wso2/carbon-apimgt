@@ -182,6 +182,67 @@ public class TemplateBuilderUtilTest {
     }
 
     @Test
+    public void testGetEndpointTypeWithExplicitlyNullSandboxStage() {
+        API api = new API(new APIIdentifier("admin", "API", "1.0"));
+        api.setEndpointConfig("{\"endpoint_type\":\"http\",\n" +
+                "\"sandbox_endpoints\":null,\n" +
+                "\"production_endpoints\":{\"url\":\"https://production.com\"}}");
+
+        ArrayList<String> endpointTypes = TemplateBuilderUtil.getEndpointType(api);
+        Assert.assertEquals(1, endpointTypes.size());
+        Assert.assertEquals(APIConstants.API_DATA_PRODUCTION_ENDPOINTS, endpointTypes.get(0));
+    }
+
+    @Test
+    public void testGetEndpointTypeWithExplicitlyNullProductionStage() {
+        API api = new API(new APIIdentifier("admin", "API", "1.0"));
+        api.setEndpointConfig("{\"endpoint_type\":\"http\",\n" +
+                "\"production_endpoints\":null,\n" +
+                "\"sandbox_endpoints\":{\"url\":\"https://sandbox.com\"}}");
+
+        ArrayList<String> endpointTypes = TemplateBuilderUtil.getEndpointType(api);
+        Assert.assertEquals(1, endpointTypes.size());
+        Assert.assertEquals(APIConstants.API_DATA_SANDBOX_ENDPOINTS, endpointTypes.get(0));
+    }
+
+    @Test
+    public void testGetEndpointTypeWithBothStagesPopulated() {
+        API api = new API(new APIIdentifier("admin", "API", "1.0"));
+        api.setEndpointConfig("{\"endpoint_type\":\"http\",\n" +
+                "\"production_endpoints\":{\"url\":\"https://production.com\"},\n" +
+                "\"sandbox_endpoints\":{\"url\":\"https://sandbox.com\"}}");
+
+        ArrayList<String> endpointTypes = TemplateBuilderUtil.getEndpointType(api);
+        Assert.assertEquals(2, endpointTypes.size());
+        Assert.assertTrue(endpointTypes.contains(APIConstants.API_DATA_PRODUCTION_ENDPOINTS));
+        Assert.assertTrue(endpointTypes.contains(APIConstants.API_DATA_SANDBOX_ENDPOINTS));
+    }
+
+    @Test
+    public void testGetEndpointTypeWithAbsentSandboxStage() {
+        API api = new API(new APIIdentifier("admin", "API", "1.0"));
+        api.setEndpointConfig("{\"endpoint_type\":\"http\",\n" +
+                "\"production_endpoints\":{\"url\":\"https://production.com\"}}");
+
+        ArrayList<String> endpointTypes = TemplateBuilderUtil.getEndpointType(api);
+        Assert.assertEquals(1, endpointTypes.size());
+        Assert.assertEquals(APIConstants.API_DATA_PRODUCTION_ENDPOINTS, endpointTypes.get(0));
+    }
+
+    @Test
+    public void testGetEndpointTypeWithBothStagesExplicitlyNull() {
+        API api = new API(new APIIdentifier("admin", "API", "1.0"));
+        api.setEndpointConfig("{\"endpoint_type\":\"http\",\n" +
+                "\"production_endpoints\":null,\n" +
+                "\"sandbox_endpoints\":null}");
+
+        ArrayList<String> endpointTypes = TemplateBuilderUtil.getEndpointType(api);
+        Assert.assertEquals(2, endpointTypes.size());
+        Assert.assertTrue(endpointTypes.contains(APIConstants.API_DATA_PRODUCTION_ENDPOINTS));
+        Assert.assertTrue(endpointTypes.contains(APIConstants.API_DATA_SANDBOX_ENDPOINTS));
+    }
+
+    @Test
     public void testSubEPConfigFromSimpleRestEp() throws Exception {
         String endpointConfig = "{\"endpoint_type\": \"http\",\"sandbox_endpoints\": {\n" +
                 "\"url\": \"https://sandbox.com/\"},\n" +

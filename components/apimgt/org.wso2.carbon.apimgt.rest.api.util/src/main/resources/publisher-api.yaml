@@ -11566,7 +11566,7 @@ components:
           pattern: '^[^~!@#;:%^*()+={}|\\<>"'',&/$\[\]\s+\/]+$'
           example: 1.0.0
         provider:
-          maxLength: 50
+          maxLength: 200
           type: string
           description: |
             If the provider value is not given user invoking the api will be used as the provider.
@@ -12646,7 +12646,7 @@ components:
           description: A brief description about the API
           example: This is a simple API for Pizza Shack online pizza delivery store
         provider:
-          maxLength: 50
+          maxLength: 200
           type: string
           description: |
             If the provider value is not given, the user invoking the API will be used as the provider.
@@ -15271,6 +15271,12 @@ components:
           type: boolean
           description: This indicates whether the MCP support is enabled or not.
           default: true
+        perPolicySeverityFilteringEnabled:
+          type: boolean
+          description: |
+            Is per policy compliance affecting severity filtering enabled for governance policies. When enabled a
+            policy can declare which rule severities affect its compliance verdict.
+          example: false
         customProperties:
             type: array
             items:

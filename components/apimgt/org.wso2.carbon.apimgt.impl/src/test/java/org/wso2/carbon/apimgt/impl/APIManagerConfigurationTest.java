@@ -158,4 +158,32 @@ public class APIManagerConfigurationTest {
         Assert.assertTrue(connectConfig.getConnectGateways().get(0).getRegistrationToken().isEmpty());
         Assert.assertEquals("https://gw.example.com:8243", connectConfig.getConnectGateways().get(0).getUrl());
     }
+
+    @Test
+    public void testMCPOutboundAuthHeaderConfig() throws Exception {
+        APIManagerConfiguration config = new APIManagerConfiguration();
+        boolean initial = config.isMCPOutboundAuthHeaderEnabled();
+        try {
+            setMCPConfigurations(config, "<MCP><EnableOutboundAuthHeader> TRUE </EnableOutboundAuthHeader></MCP>");
+            Assert.assertTrue(config.isMCPOutboundAuthHeaderEnabled());
+
+            // An invalid or empty value keeps the current setting
+            setMCPConfigurations(config, "<MCP><EnableOutboundAuthHeader>yes</EnableOutboundAuthHeader></MCP>");
+            Assert.assertTrue(config.isMCPOutboundAuthHeaderEnabled());
+            setMCPConfigurations(config, "<MCP><EnableOutboundAuthHeader> </EnableOutboundAuthHeader></MCP>");
+            Assert.assertTrue(config.isMCPOutboundAuthHeaderEnabled());
+
+            setMCPConfigurations(config, "<MCP><EnableOutboundAuthHeader>false</EnableOutboundAuthHeader></MCP>");
+            Assert.assertFalse(config.isMCPOutboundAuthHeaderEnabled());
+        } finally {
+            setMCPConfigurations(config, "<MCP><EnableOutboundAuthHeader>" + initial
+                    + "</EnableOutboundAuthHeader></MCP>");
+        }
+    }
+
+    private static void setMCPConfigurations(APIManagerConfiguration config, String mcpConfig) throws Exception {
+        Method method = APIManagerConfiguration.class.getDeclaredMethod("setMCPConfigurations", OMElement.class);
+        method.setAccessible(true);
+        method.invoke(config, AXIOMUtil.stringToOM(mcpConfig));
+    }
 }

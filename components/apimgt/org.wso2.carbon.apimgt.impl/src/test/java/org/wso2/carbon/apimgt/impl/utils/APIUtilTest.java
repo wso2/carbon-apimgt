@@ -20,6 +20,10 @@
 
 package org.wso2.carbon.apimgt.impl.utils;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.axiom.om.OMElement;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
@@ -38,6 +42,8 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ErrorHandler;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -367,6 +373,181 @@ public class APIUtilTest {
 
         Assert.assertFalse("Unexpected sandbox endpoint found", APIUtil.isSandboxEndpointsExists(jsonArray
                 .toJSONString()));
+    }
+
+    @Test
+    public void testIsSandboxEndpointsNotExistsWhenValueIsExplicitlyNull() throws Exception {
+
+        JSONObject root = new JSONObject();
+        root.put("endpoint_type", "http");
+        root.put("production_endpoints", buildEndpoint());
+        root.put("sandbox_endpoints", null);
+
+        Assert.assertFalse("A null sandbox_endpoints value must not count as a configured sandbox endpoint",
+                APIUtil.isSandboxEndpointsExists(root.toJSONString()));
+        Assert.assertTrue("Production endpoint must still be detected",
+                APIUtil.isProductionEndpointsExists(root.toJSONString()));
+    }
+
+    @Test
+    public void testIsProductionEndpointsNotExistsWhenValueIsExplicitlyNull() throws Exception {
+
+        JSONObject root = new JSONObject();
+        root.put("endpoint_type", "http");
+        root.put("production_endpoints", null);
+        root.put("sandbox_endpoints", buildEndpoint());
+
+        Assert.assertFalse("A null production_endpoints value must not count as a configured production endpoint",
+                APIUtil.isProductionEndpointsExists(root.toJSONString()));
+        Assert.assertTrue("Sandbox endpoint must still be detected",
+                APIUtil.isSandboxEndpointsExists(root.toJSONString()));
+    }
+
+    @Test
+    public void testBothEndpointStagesExplicitlyNull() throws Exception {
+
+        JSONObject root = new JSONObject();
+        root.put("endpoint_type", "http");
+        root.put("production_endpoints", null);
+        root.put("sandbox_endpoints", null);
+
+        Assert.assertFalse("Unexpected production endpoint found",
+                APIUtil.isProductionEndpointsExists(root.toJSONString()));
+        Assert.assertFalse("Unexpected sandbox endpoint found",
+                APIUtil.isSandboxEndpointsExists(root.toJSONString()));
+    }
+
+    @Test
+    public void testEndpointStagesWithAbsentKeysRemainUnchanged() throws Exception {
+
+        JSONObject productionOnly = new JSONObject();
+        productionOnly.put("endpoint_type", "http");
+        productionOnly.put("production_endpoints", buildEndpoint());
+        Assert.assertTrue(APIUtil.isProductionEndpointsExists(productionOnly.toJSONString()));
+        Assert.assertFalse(APIUtil.isSandboxEndpointsExists(productionOnly.toJSONString()));
+
+        JSONObject sandboxOnly = new JSONObject();
+        sandboxOnly.put("endpoint_type", "http");
+        sandboxOnly.put("sandbox_endpoints", buildEndpoint());
+        Assert.assertFalse(APIUtil.isProductionEndpointsExists(sandboxOnly.toJSONString()));
+        Assert.assertTrue(APIUtil.isSandboxEndpointsExists(sandboxOnly.toJSONString()));
+
+        JSONObject both = new JSONObject();
+        both.put("endpoint_type", "http");
+        both.put("production_endpoints", buildEndpoint());
+        both.put("sandbox_endpoints", buildEndpoint());
+        Assert.assertTrue(APIUtil.isProductionEndpointsExists(both.toJSONString()));
+        Assert.assertTrue(APIUtil.isSandboxEndpointsExists(both.toJSONString()));
+
+        JSONObject neither = new JSONObject();
+        neither.put("endpoint_type", "http");
+        Assert.assertFalse(APIUtil.isProductionEndpointsExists(neither.toJSONString()));
+        Assert.assertFalse(APIUtil.isSandboxEndpointsExists(neither.toJSONString()));
+    }
+
+    @Test
+    public void testIsSandboxEndpointsNotExistsWhenNestedGraphQLValueIsExplicitlyNull() throws Exception {
+
+        JSONObject http = new JSONObject();
+        http.put("endpoint_type", "http");
+        http.put("production_endpoints", buildEndpoint());
+        http.put("sandbox_endpoints", null);
+
+        String config = buildGraphQLConfig(http);
+
+        Assert.assertFalse("A null nested http.sandbox_endpoints value must not count as a configured endpoint",
+                APIUtil.isSandboxEndpointsExists(config));
+        Assert.assertTrue("Nested production endpoint must still be detected",
+                APIUtil.isProductionEndpointsExists(config));
+    }
+
+    @Test
+    public void testIsProductionEndpointsNotExistsWhenNestedGraphQLValueIsExplicitlyNull() throws Exception {
+
+        JSONObject http = new JSONObject();
+        http.put("endpoint_type", "http");
+        http.put("production_endpoints", null);
+        http.put("sandbox_endpoints", buildEndpoint());
+
+        String config = buildGraphQLConfig(http);
+
+        Assert.assertFalse("A null nested http.production_endpoints value must not count as a configured endpoint",
+                APIUtil.isProductionEndpointsExists(config));
+        Assert.assertTrue("Nested sandbox endpoint must still be detected",
+                APIUtil.isSandboxEndpointsExists(config));
+    }
+
+    @Test
+    public void testBothNestedGraphQLEndpointStagesExplicitlyNull() throws Exception {
+
+        JSONObject http = new JSONObject();
+        http.put("endpoint_type", "http");
+        http.put("production_endpoints", null);
+        http.put("sandbox_endpoints", null);
+
+        String config = buildGraphQLConfig(http);
+
+        Assert.assertFalse(APIUtil.isProductionEndpointsExists(config));
+        Assert.assertFalse(APIUtil.isSandboxEndpointsExists(config));
+    }
+
+    @Test
+    public void testNestedGraphQLEndpointStagesWithAbsentKeysRemainUnchanged() throws Exception {
+
+        JSONObject both = new JSONObject();
+        both.put("endpoint_type", "http");
+        both.put("production_endpoints", buildEndpoint());
+        both.put("sandbox_endpoints", buildEndpoint());
+        Assert.assertTrue(APIUtil.isProductionEndpointsExists(buildGraphQLConfig(both)));
+        Assert.assertTrue(APIUtil.isSandboxEndpointsExists(buildGraphQLConfig(both)));
+
+        JSONObject productionOnly = new JSONObject();
+        productionOnly.put("endpoint_type", "http");
+        productionOnly.put("production_endpoints", buildEndpoint());
+        Assert.assertTrue(APIUtil.isProductionEndpointsExists(buildGraphQLConfig(productionOnly)));
+        Assert.assertFalse(APIUtil.isSandboxEndpointsExists(buildGraphQLConfig(productionOnly)));
+
+        JSONObject sandboxOnly = new JSONObject();
+        sandboxOnly.put("endpoint_type", "http");
+        sandboxOnly.put("sandbox_endpoints", buildEndpoint());
+        Assert.assertFalse(APIUtil.isProductionEndpointsExists(buildGraphQLConfig(sandboxOnly)));
+        Assert.assertTrue(APIUtil.isSandboxEndpointsExists(buildGraphQLConfig(sandboxOnly)));
+    }
+
+    @Test
+    public void testGraphQLTopLevelNullStagesFallThroughToNestedEndpoints() throws Exception {
+
+        JSONObject http = new JSONObject();
+        http.put("endpoint_type", "http");
+        http.put("production_endpoints", buildEndpoint());
+        http.put("sandbox_endpoints", buildEndpoint());
+
+        JSONObject root = new JSONObject();
+        root.put("endpoint_type", "graphql");
+        root.put("production_endpoints", null);
+        root.put("sandbox_endpoints", null);
+        root.put("http", http);
+
+        Assert.assertTrue("Null top-level stage must fall through to the nested http endpoints",
+                APIUtil.isProductionEndpointsExists(root.toJSONString()));
+        Assert.assertTrue("Null top-level stage must fall through to the nested http endpoints",
+                APIUtil.isSandboxEndpointsExists(root.toJSONString()));
+    }
+
+    private JSONObject buildEndpoint() {
+
+        JSONObject endpoint = new JSONObject();
+        endpoint.put("url", "https://localhost:9443/am/sample/pizzashack/v1/api/");
+        endpoint.put("config", null);
+        return endpoint;
+    }
+
+    private String buildGraphQLConfig(JSONObject httpConfig) {
+
+        JSONObject root = new JSONObject();
+        root.put("endpoint_type", "graphql");
+        root.put("http", httpConfig);
+        return root.toJSONString();
     }
 
     @Test
@@ -2181,5 +2362,68 @@ public class APIUtilTest {
         // test invalid types
         fileName = "test1.pdf";
         Assert.assertFalse("PDF type should not be allowed", APIUtil.isSupportedFileType(fileName));
+    }
+
+    @Test
+    public void testValidateRestAPIScopesWithAllScopes() throws Exception {
+
+        String tenantConf = getTestTenantConf();
+        mockFileBaseTenantConfig(tenantConf);
+
+        APIUtil.validateRestAPIScopes(tenantConf);
+    }
+
+    @Test
+    public void testValidateRestAPIScopesWithMissingScopes() throws Exception {
+
+        String tenantConf = getTestTenantConf();
+        mockFileBaseTenantConfig(tenantConf);
+        String uploadedTenantConf = removeRestAPIScopes(tenantConf, "apim:api_publish", "apim:api_create");
+
+        try {
+            APIUtil.validateRestAPIScopes(uploadedTenantConf);
+            Assert.fail("Tenant-config with missing REST API scopes should be rejected");
+        } catch (APIManagementException e) {
+            String expectedReason = "Insufficient scopes available in tenant-config. Missing REST API scopes: "
+                    + "apim:api_create, apim:api_publish";
+            ErrorHandler errorHandler = e.getErrorHandler();
+            Assert.assertEquals(ExceptionCodes.INVALID_TENANT_CONFIG.getErrorCode(), errorHandler.getErrorCode());
+            Assert.assertEquals(ExceptionCodes.INVALID_TENANT_CONFIG.getHttpStatusCode(),
+                    errorHandler.getHttpStatusCode());
+            Assert.assertEquals("Invalid tenant-config found with error " + expectedReason,
+                    errorHandler.getErrorDescription());
+            Assert.assertEquals(expectedReason, e.getMessage());
+        }
+    }
+
+    private String getTestTenantConf() throws Exception {
+
+        File tenantConfFile = new File(Thread.currentThread().getContextClassLoader()
+                .getResource("tenant-conf.json").getFile());
+        return FileUtils.readFileToString(tenantConfFile);
+    }
+
+    private void mockFileBaseTenantConfig(String tenantConf) throws Exception {
+
+        PowerMockito.spy(APIUtil.class);
+        PowerMockito.doReturn(new JsonParser().parse(tenantConf)).when(APIUtil.class, "getFileBaseTenantConfig");
+    }
+
+    private String removeRestAPIScopes(String tenantConf, String... scopeNames) {
+
+        Set<String> scopesToRemove = new HashSet<>(Arrays.asList(scopeNames));
+        JsonObject tenantConfig = new JsonParser().parse(tenantConf).getAsJsonObject();
+        JsonArray scopes = tenantConfig.getAsJsonObject(APIConstants.REST_API_SCOPES_CONFIG)
+                .getAsJsonArray(APIConstants.REST_API_SCOPE);
+        JsonArray remainingScopes = new JsonArray();
+        for (JsonElement scope : scopes) {
+            if (!scopesToRemove.contains(scope.getAsJsonObject().get(APIConstants.REST_API_SCOPE_NAME).getAsString())) {
+                remainingScopes.add(scope);
+            }
+        }
+        Assert.assertEquals(scopes.size() - scopesToRemove.size(), remainingScopes.size());
+        tenantConfig.getAsJsonObject(APIConstants.REST_API_SCOPES_CONFIG)
+                .add(APIConstants.REST_API_SCOPE, remainingScopes);
+        return tenantConfig.toString();
     }
 }

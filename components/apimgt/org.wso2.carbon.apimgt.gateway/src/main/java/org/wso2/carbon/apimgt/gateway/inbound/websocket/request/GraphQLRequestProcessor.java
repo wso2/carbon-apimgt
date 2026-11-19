@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.gateway.inbound.websocket.request;
 
 import graphql.language.Definition;
 import graphql.language.Document;
+import graphql.language.FragmentDefinition;
 import graphql.language.OperationDefinition;
 import graphql.parser.Parser;
 import graphql.schema.GraphQLFieldDefinition;
@@ -52,7 +53,9 @@ import org.wso2.carbon.apimgt.gateway.inbound.websocket.utils.InboundWebsocketPr
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A GraphQL subscriptions specific extension of RequestProcessor. This class intercepts the inbound websocket
@@ -97,6 +100,13 @@ public class GraphQLRequestProcessor extends RequestProcessor {
                                     .PAYLOAD_FIELD_NAME_PAYLOAD))
                                     .getString(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_QUERY);
                     Document document = parser.parseDocument(graphQLSubscriptionPayload);
+                    Map<String, FragmentDefinition> fragmentDefinitions = new HashMap<>();
+                    for (Definition def : document.getDefinitions()) {
+                        if (def instanceof FragmentDefinition) {
+                            FragmentDefinition fd = (FragmentDefinition) def;
+                            fragmentDefinitions.put(fd.getName(), fd);
+                        }
+                    }
                     // Extract the operation type and operations from the payload
                     OperationDefinition operation = getOperationFromPayload(document);
                     if (operation != null) {
@@ -105,7 +115,8 @@ public class GraphQLRequestProcessor extends RequestProcessor {
                             if (!responseDTO.isError()) {
                                 // subscription operation name
                                 String subscriptionOperation = GraphQLProcessorUtil.getOperationListAsString(operation,
-                                        inboundMessageContext.getGraphQLSchemaDTO().getTypeDefinitionRegistry());
+                                        inboundMessageContext.getGraphQLSchemaDTO().getTypeDefinitionRegistry(),
+                                        fragmentDefinitions);
                                 // set resource name of subscription operation for analytics event publishing
                                 WebSocketUtils.setApiPropertyToChannel(inboundMessageContext.getCtx(),
                                         APIConstants.API_ELECTED_RESOURCE, subscriptionOperation);

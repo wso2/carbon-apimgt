@@ -113,6 +113,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -402,6 +403,46 @@ public class AsyncApiParserUtil {
             }
         }
         return scopeSet;
+    }
+
+    /**
+     * Sets x-scopes-bindings of the oauth2 implicit flow from the roles of the given scopes. Scopes without roles
+     * are left out.
+     *
+     * @param asyncApiDefinition AsyncAPI definition (JSON)
+     * @param scopes             scopes with roles
+     * @return the definition with x-scopes-bindings
+     */
+    public static String setScopeBindings(String asyncApiDefinition, Set<Scope> scopes) {
+
+        if (scopes == null || scopes.isEmpty()) {
+            return asyncApiDefinition;
+        }
+        AsyncApiDocument document = (AsyncApiDocument) Library.readDocumentFromJSONString(asyncApiDefinition);
+        AsyncApiComponents components = document.getComponents();
+        if (components == null || components.getSecuritySchemes() == null) {
+            return asyncApiDefinition;
+        }
+        AsyncApiSecurityScheme oauth2 = (AsyncApiSecurityScheme) components.getSecuritySchemes().get(
+                APISpecParserConstants.DEFAULT_API_SECURITY_OAUTH2);
+        if (oauth2 == null || oauth2.getFlows() == null || oauth2.getFlows().getImplicit() == null) {
+            return asyncApiDefinition;
+        }
+        Map<String, String> scopeBindings = new LinkedHashMap<>();
+        for (Scope scope : scopes) {
+            if (scope.getRoles() != null && !scope.getRoles().trim().isEmpty()) {
+                scopeBindings.put(scope.getKey(), scope.getRoles());
+            }
+        }
+        AsyncApiExtensible implicitFlow = (AsyncApiExtensible) oauth2.getFlows().getImplicit();
+        boolean hasBindings = implicitFlow.getExtensions() != null
+                && implicitFlow.getExtensions().containsKey(APISpecParserConstants.SWAGGER_X_SCOPES_BINDINGS);
+        if (scopeBindings.isEmpty() && !hasBindings) {
+            return asyncApiDefinition;
+        }
+        implicitFlow.addExtension(APISpecParserConstants.SWAGGER_X_SCOPES_BINDINGS,
+                new ObjectMapper().valueToTree(scopeBindings));
+        return Library.writeDocumentToJSONString(document);
     }
 
 

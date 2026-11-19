@@ -37,11 +37,14 @@ import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.kmclient.KeyManagerClientException;
 import org.wso2.carbon.apimgt.impl.kmclient.model.ClientInfo;
 import org.wso2.carbon.apimgt.impl.kmclient.model.DCRClient;
 import org.wso2.carbon.apimgt.impl.kmclient.model.IntrospectInfo;
 import org.wso2.carbon.apimgt.impl.kmclient.model.IntrospectionClient;
+import org.wso2.carbon.apimgt.impl.kmclient.model.ScopeClient;
+import org.wso2.carbon.apimgt.impl.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -50,7 +53,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({PrivilegedCarbonContext.class, Base64.class, APIUtil.class})
@@ -60,6 +65,8 @@ public class AMDefaultKeyManagerImplTest {
     protected DCRClient dcrClient;
     @Mock
     protected IntrospectionClient introspectionClient;
+    @Mock
+    protected ScopeClient scopeClient;
     @InjectMocks
     AMDefaultKeyManagerImplWrapper keyManager = new AMDefaultKeyManagerImplWrapper();
 
@@ -289,6 +296,35 @@ public class AMDefaultKeyManagerImplTest {
 
         String tokenType = Whitebox.invokeMethod(keyManager, "getTokenTypeToSendInRequest", oauthApplication, false);
         Assert.assertEquals(APIConstants.TOKEN_TYPE_JWT, tokenType);
+    }
+
+    @Test
+    public void testValidateScopesReplacesSharedScopeWithStoredValues() throws Exception {
+
+        ScopeDTO storedScope = new ScopeDTO();
+        storedScope.setName("shared_scope");
+        storedScope.setDisplayName("Shared Scope");
+        storedScope.setDescription("Stored description");
+        storedScope.setBindings(Arrays.asList("Application/role1", "role2"));
+        Mockito.when(scopeClient.getScopeByName(java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(
+                "shared_scope".getBytes(StandardCharsets.UTF_8)))).thenReturn(storedScope);
+
+        // An outdated copy of the shared scope, as it appears in an API definition.
+        Scope definitionScope = new Scope();
+        definitionScope.setKey("shared_scope");
+        definitionScope.setName("shared_scope");
+        definitionScope.setDescription("Outdated description");
+        definitionScope.setRoles("APPLICATION/role1");
+        Set<Scope> scopes = new HashSet<>();
+        scopes.add(definitionScope);
+
+        keyManager.validateScopes(scopes);
+
+        Assert.assertEquals("shared_scope", definitionScope.getKey());
+        Assert.assertEquals("Shared Scope", definitionScope.getName());
+        Assert.assertEquals("Stored description", definitionScope.getDescription());
+        Assert.assertEquals("Application/role1,role2", definitionScope.getRoles());
+        Mockito.verify(scopeClient, Mockito.never()).updateScope(Mockito.any(ScopeDTO.class), Mockito.anyString());
     }
 
     @Test

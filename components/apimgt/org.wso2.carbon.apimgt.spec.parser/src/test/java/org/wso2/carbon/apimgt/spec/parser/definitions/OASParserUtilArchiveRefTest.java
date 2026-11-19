@@ -31,13 +31,16 @@ import org.wso2.carbon.apimgt.api.model.OASParserOptions;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -52,6 +55,8 @@ public class OASParserUtilArchiveRefTest {
     private HttpServer server;
     private int serverPort;
     private final AtomicInteger requestCount = new AtomicInteger(0);
+    private final AtomicInteger nestedRequestCount = new AtomicInteger(0);
+    private final Map<String, String> responses = new ConcurrentHashMap<>();
 
     private static final String FRAGMENT_SCHEMA =
             "type: object\n"
@@ -62,11 +67,17 @@ public class OASParserUtilArchiveRefTest {
     @Before
     public void startServer() throws IOException {
         requestCount.set(0);
+        nestedRequestCount.set(0);
+        responses.clear();
         server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
         // Bind the root context so ANY request path to the loopback server is counted.
         server.createContext("/", exchange -> {
             requestCount.incrementAndGet();
-            byte[] body = FRAGMENT_SCHEMA.getBytes(StandardCharsets.UTF_8);
+            String requestPath = exchange.getRequestURI().getPath();
+            if (requestPath.startsWith("/nested")) {
+                nestedRequestCount.incrementAndGet();
+            }
+            byte[] body = responses.getOrDefault(requestPath, FRAGMENT_SCHEMA).getBytes(StandardCharsets.UTF_8);
             exchange.sendResponseHeaders(200, body.length);
             try (OutputStream os = exchange.getResponseBody()) {
                 os.write(body);
@@ -251,5 +262,234 @@ public class OASParserUtilArchiveRefTest {
             Assert.assertEquals(ExceptionCodes.UNTRUSTED_URL_IN_DEFINITION.getErrorCode(),
                     e.getErrorHandler().getErrorCode());
         }
+    }
+
+    /**
+     * A network access-control policy that allows only the loopback IP literal, so a remote document served from it
+     * can be fetched while any other host, including {@code localhost}, is blocked.
+     */
+    private OASParserOptions allowLoopbackIpOptions() {
+        OASParserOptions options = new OASParserOptions();
+        options.setNetworkAccessControlEnabled(true);
+        options.setRemoteRefAllowList(Arrays.asList("127.0.0.1"));
+        options.setRemoteRefBlockList(Arrays.asList("*"));
+        return options;
+    }
+
+    private String remoteUrl(String path) {
+        return "http://127.0.0.1:" + serverPort + path;
+    }
+
+    private String localFileUrl = "file:///etc/hosts";
+
+    private void serveRemoteDocuments() {
+        responses.put("/remote-clean.yaml",
+                "Order:\n"
+                + "  type: object\n"
+                + "  properties:\n"
+                + "    id:\n"
+                + "      type: integer\n");
+        responses.put("/remote-nested.yaml",
+                "Order:\n"
+                + "  type: object\n"
+                + "  properties:\n"
+                + "    secret:\n"
+                + "      $ref: 'http://localhost:" + serverPort + "/nested.yaml#/Secret'\n");
+        responses.put("/remote-file.yaml",
+                "Order:\n"
+                + "  type: object\n"
+                + "  properties:\n"
+                + "    local:\n"
+                + "      $ref: '" + localFileUrl + "'\n");
+        responses.put("/nested.yaml",
+                "Secret:\n"
+                + "  type: string\n");
+    }
+
+    /**
+     * Build a master document of the given version whose response schema has one property per reference.
+     */
+    private static String masterWithProperties(String version, String... refs) {
+        boolean swagger = "2.0".equals(version);
+        StringBuilder master = new StringBuilder();
+        master.append(swagger ? "swagger: '2.0'\n" : "openapi: " + version + "\n")
+                .append("info:\n")
+                .append("  title: Archive Resolution API\n")
+                .append("  version: 1.0.0\n")
+                .append("paths:\n")
+                .append("  /pets:\n")
+                .append("    get:\n")
+                .append("      summary: list\n")
+                .append("      responses:\n")
+                .append("        '200':\n")
+                .append("          description: OK\n");
+        String indent;
+        if (swagger) {
+            master.append("          schema:\n");
+            indent = "            ";
+        } else {
+            master.append("          content:\n")
+                    .append("            application/json:\n")
+                    .append("              schema:\n");
+            indent = "                ";
+        }
+        master.append(indent).append("type: object\n").append(indent).append("properties:\n");
+        for (int i = 0; i < refs.length; i++) {
+            master.append(indent).append("  p").append(i).append(":\n")
+                    .append(indent).append("    $ref: '").append(refs[i]).append("'\n");
+        }
+        return master.toString();
+    }
+
+    /**
+     * Build an archive holding the master document plus local files that reference each other across folders.
+     */
+    private byte[] buildMultiFileArchive(String master) throws IOException {
+        Map<String, String> entries = new LinkedHashMap<>();
+        entries.put("archive/swagger.yaml", master);
+        entries.put("archive/schemas/common.yaml",
+                "Common:\n"
+                + "  type: object\n"
+                + "  properties:\n"
+                + "    nested:\n"
+                + "      $ref: './nested.yaml#/Nested'\n"
+                + "    shared:\n"
+                + "      $ref: '../shared/types.yaml#/Shared'\n");
+        entries.put("archive/schemas/nested.yaml",
+                "Nested:\n"
+                + "  type: string\n");
+        entries.put("archive/shared/types.yaml",
+                "Shared:\n"
+                + "  type: integer\n");
+        return buildZip(entries);
+    }
+
+    private static final String LOCAL_REF = "./schemas/common.yaml#/Common";
+    private static final String LOCAL_FILE_MARKER = "archive-ref-local-file-marker";
+
+    /**
+     * Assert that the archive resolves under the policy, with the same content as when no policy is configured.
+     */
+    private void assertResolvesAsWithoutPolicy(String version, String... refs) throws Exception {
+        serveRemoteDocuments();
+        byte[] zipBytes = buildMultiFileArchive(masterWithProperties(version, refs));
+
+        APIDefinitionValidationResponse withoutPolicy = OASParserUtil.extractAndValidateOpenAPIArchive(
+                new ByteArrayInputStream(zipBytes), true, null);
+        APIDefinitionValidationResponse withPolicy = OASParserUtil.extractAndValidateOpenAPIArchive(
+                new ByteArrayInputStream(zipBytes), true, allowLoopbackIpOptions());
+
+        Assert.assertTrue("The archive must validate without a policy", withoutPolicy.isValid());
+        Assert.assertTrue("The archive must validate with a policy that allows its references", withPolicy.isValid());
+        Assert.assertEquals("Resolving under the policy must give the same definition as resolving without it",
+                withoutPolicy.getContent(), withPolicy.getContent());
+    }
+
+    private void assertNestedRemoteRefBlocked(String version) throws Exception {
+        serveRemoteDocuments();
+        byte[] zipBytes = buildMultiFileArchive(
+                masterWithProperties(version, LOCAL_REF, remoteUrl("/remote-nested.yaml#/Order")));
+        try {
+            OASParserUtil.extractAndValidateOpenAPIArchive(
+                    new ByteArrayInputStream(zipBytes), false, allowLoopbackIpOptions());
+            Assert.fail("A blocked reference inside a fetched remote document must reject the archive");
+        } catch (APIManagementException e) {
+            Assert.assertEquals("A blocked nested reference must surface as UNTRUSTED_URL_IN_DEFINITION",
+                    ExceptionCodes.UNTRUSTED_URL_IN_DEFINITION.getErrorCode(), e.getErrorHandler().getErrorCode());
+        }
+        Assert.assertEquals("A blocked reference inside a fetched remote document must not be fetched",
+                0, nestedRequestCount.get());
+    }
+
+    @Test
+    public void testOpenAPI30ArchiveLocalRefsResolveUnderPolicy() throws Exception {
+        assertResolvesAsWithoutPolicy("3.0.1", LOCAL_REF);
+        Assert.assertEquals(0, requestCount.get());
+    }
+
+    @Test
+    public void testOpenAPI30ArchiveLocalAndAllowedRemoteRefsResolveUnderPolicy() throws Exception {
+        assertResolvesAsWithoutPolicy("3.0.1", LOCAL_REF, remoteUrl("/remote-clean.yaml#/Order"));
+    }
+
+    @Test
+    public void testOpenAPI30ArchiveNestedRemoteRefIsBlocked() throws Exception {
+        assertNestedRemoteRefBlocked("3.0.1");
+    }
+
+    @Test
+    public void testOpenAPI30ArchiveFileRefInRemoteDocumentIsNotRead() throws Exception {
+        assertFileRefInRemoteDocumentNotRead("3.0.1");
+    }
+
+    @Test
+    public void testOpenAPI30ArchiveWithoutPolicyResolvesAsBefore() throws Exception {
+        serveRemoteDocuments();
+        byte[] zipBytes = buildMultiFileArchive(
+                masterWithProperties("3.0.1", LOCAL_REF, remoteUrl("/remote-nested.yaml#/Order")));
+        APIDefinitionValidationResponse response = OASParserUtil.extractAndValidateOpenAPIArchive(
+                new ByteArrayInputStream(zipBytes), false, null);
+        Assert.assertTrue("Without a policy the archive must resolve as before", response.isValid());
+        Assert.assertEquals("Without a policy nested references must resolve as before", 1,
+                nestedRequestCount.get());
+    }
+
+    @Test
+    public void testSwagger20ArchiveLocalRefsResolveUnderPolicy() throws Exception {
+        assertResolvesAsWithoutPolicy("2.0", LOCAL_REF);
+        Assert.assertEquals(0, requestCount.get());
+    }
+
+    @Test
+    public void testSwagger20ArchiveLocalAndAllowedRemoteRefsResolveUnderPolicy() throws Exception {
+        assertResolvesAsWithoutPolicy("2.0", LOCAL_REF, remoteUrl("/remote-clean.yaml#/Order"));
+    }
+
+    @Test
+    public void testSwagger20ArchiveNestedRemoteRefIsBlocked() throws Exception {
+        assertNestedRemoteRefBlocked("2.0");
+    }
+
+    @Test
+    public void testSwagger20ArchiveFileRefInRemoteDocumentIsNotRead() throws Exception {
+        assertFileRefInRemoteDocumentNotRead("2.0");
+    }
+
+    @Test
+    public void testOpenAPI31ArchiveLocalRefsResolveUnderPolicy() throws Exception {
+        assertResolvesAsWithoutPolicy("3.1.0", LOCAL_REF);
+        Assert.assertEquals(0, requestCount.get());
+    }
+
+    @Test
+    public void testOpenAPI31ArchiveLocalAndAllowedRemoteRefsResolveUnderPolicy() throws Exception {
+        assertResolvesAsWithoutPolicy("3.1.0", LOCAL_REF, remoteUrl("/remote-clean.yaml#/Order"));
+    }
+
+    @Test
+    public void testOpenAPI31ArchiveNestedRemoteRefIsBlocked() throws Exception {
+        assertNestedRemoteRefBlocked("3.1.0");
+    }
+
+    private void assertFileRefInRemoteDocumentNotRead(String version) throws Exception {
+        File localFile = File.createTempFile("archive-ref-local", ".yaml");
+        localFile.deleteOnExit();
+        Files.write(localFile.toPath(), ("Local:\n  type: string\n  description: " + LOCAL_FILE_MARKER + "\n")
+                .getBytes(StandardCharsets.UTF_8));
+        localFileUrl = localFile.toURI().toString() + "#/Local";
+        serveRemoteDocuments();
+        byte[] zipBytes = buildMultiFileArchive(
+                masterWithProperties(version, LOCAL_REF, remoteUrl("/remote-file.yaml#/Order")));
+        String content;
+        try {
+            content = OASParserUtil.extractAndValidateOpenAPIArchive(
+                    new ByteArrayInputStream(zipBytes), true, allowLoopbackIpOptions()).getContent();
+        } catch (APIManagementException e) {
+            Assert.assertEquals(ExceptionCodes.UNTRUSTED_URL_IN_DEFINITION.getErrorCode(),
+                    e.getErrorHandler().getErrorCode());
+            return;
+        }
+        Assert.assertFalse("A file: reference inside a fetched remote document must not be read from disk",
+                content != null && content.contains(LOCAL_FILE_MARKER));
     }
 }

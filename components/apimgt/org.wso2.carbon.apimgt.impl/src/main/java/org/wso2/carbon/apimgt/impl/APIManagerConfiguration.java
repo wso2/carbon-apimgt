@@ -185,6 +185,8 @@ public class APIManagerConfiguration {
     private boolean isTransactionCounterEnabled;
     private static boolean isMCPSupportEnabled = true;
     private static boolean isMCPEnforceAuthForAllMethods = true;
+    private static boolean isMCPOutboundAuthHeaderEnabled = false;
+    private static boolean isAPIProductRevisionBasedResourcesEnabled = true;
     private static String devportalMode = APIConstants.DEVPORTAL_MODE_HYBRID;
     private static volatile boolean isRuntimeReadOnly = false;
 
@@ -911,6 +913,8 @@ public class APIManagerConfiguration {
                 setAiConfiguration(element);
             } else if (APIConstants.AI.MCP.equals(localName)) {
                 setMCPConfigurations(element);
+            } else if (APIConstants.APIProductConfigs.API_PRODUCT.equals(localName)) {
+                setAPIProductConfigurations(element);
             } else if (APIConstants.TokenValidationConstants.TOKEN_VALIDATION_CONFIG.equals(localName)) {
                 setTokenValidation(element);
             } else if (APIConstants.ORG_BASED_ACCESS_CONTROL.equals(localName)) {
@@ -3237,6 +3241,20 @@ public class APIManagerConfiguration {
                         + ". Using default: " + isMCPEnforceAuthForAllMethods);
             }
         }
+
+        OMElement mcpOutboundAuthHeaderElement =
+                omElement.getFirstChildWithName(new QName(APIConstants.AI.MCP_ENABLE_OUTBOUND_AUTH_HEADER));
+        if (mcpOutboundAuthHeaderElement != null
+                && StringUtils.isNotBlank(mcpOutboundAuthHeaderElement.getText())) {
+            String outboundAuthHeaderValue = mcpOutboundAuthHeaderElement.getText().trim();
+            if (Boolean.TRUE.toString().equalsIgnoreCase(outboundAuthHeaderValue)
+                    || Boolean.FALSE.toString().equalsIgnoreCase(outboundAuthHeaderValue)) {
+                isMCPOutboundAuthHeaderEnabled = Boolean.parseBoolean(outboundAuthHeaderValue);
+            } else {
+                log.warn("Invalid value for " + APIConstants.AI.MCP_ENABLE_OUTBOUND_AUTH_HEADER
+                        + ". Using default: " + isMCPOutboundAuthHeaderEnabled);
+            }
+        }
     }
 
     /**
@@ -3258,6 +3276,52 @@ public class APIManagerConfiguration {
     public boolean isMCPEnforceAuthForAllMethods() {
 
         return isMCPEnforceAuthForAllMethods;
+    }
+
+    /**
+     * Returns whether MCP servers forward the client's access token to the upstream.
+     *
+     * @return true if the token is forwarded, false otherwise.
+     */
+    public boolean isMCPOutboundAuthHeaderEnabled() {
+
+        return isMCPOutboundAuthHeaderEnabled;
+    }
+
+    /**
+     * Set API Product Configurations
+     *
+     * @param omElement XML Config
+     */
+    private void setAPIProductConfigurations(OMElement omElement) {
+
+        if (omElement == null) {
+            log.debug("API Product configuration element is null. Skipping configuration parsing.");
+            return;
+        }
+        OMElement revisionBasedResourcesElement = omElement.getFirstChildWithName(
+                new QName(APIConstants.APIProductConfigs.ENABLE_REVISION_BASED_RESOURCES));
+        if (revisionBasedResourcesElement != null && StringUtils.isNotBlank(revisionBasedResourcesElement.getText())) {
+            String revisionBasedResourcesValue = revisionBasedResourcesElement.getText().trim();
+            if (Boolean.TRUE.toString().equalsIgnoreCase(revisionBasedResourcesValue)
+                    || Boolean.FALSE.toString().equalsIgnoreCase(revisionBasedResourcesValue)) {
+                isAPIProductRevisionBasedResourcesEnabled = Boolean.parseBoolean(revisionBasedResourcesValue);
+            } else {
+                log.warn("Invalid value for " + APIConstants.APIProductConfigs.ENABLE_REVISION_BASED_RESOURCES
+                        + ". Using default: " + isAPIProductRevisionBasedResourcesEnabled);
+            }
+        }
+    }
+
+    /**
+     * Returns whether the resource level settings (rate limiting tier, auth scheme and scopes) of an API Product sent
+     * to the Gateway are taken only from the deployed revision of the API Product.
+     *
+     * @return true if revision based API Product resources are enabled, false otherwise.
+     */
+    public boolean isAPIProductRevisionBasedResourcesEnabled() {
+
+        return isAPIProductRevisionBasedResourcesEnabled;
     }
 
     /**
@@ -3433,6 +3497,14 @@ public class APIManagerConfiguration {
             String dataSourceName = dataSource.getText();
             apimGovConfigurationDto.setDataSourceName(dataSourceName);
         }
+
+        // The governance configuration DTO is shared statically, so an absent element is set to false rather than
+        // left alone. Parsing then always reflects the file that was read, instead of whatever a previous parse
+        // happened to leave behind, and the feature stays off unless a deployment asks for it.
+        OMElement perPolicySeverityFiltering = omElement.getFirstChildWithName(
+                new QName(APIConstants.APIMGovernance.PER_POLICY_SEVERITY_FILTERING_ENABLED));
+        apimGovConfigurationDto.setPerPolicySeverityFilteringEnabled(perPolicySeverityFiltering != null
+                && Boolean.parseBoolean(perPolicySeverityFiltering.getText()));
 
         OMElement schedulerConfig = omElement
                 .getFirstChildWithName(new QName(APIConstants.APIMGovernance.SCHEDULER_CONFIG));

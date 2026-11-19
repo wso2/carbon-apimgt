@@ -3660,8 +3660,7 @@ public class OAS3Parser extends APIDefinition {
 
     /**
      * Adds a default HTTP GET resource to the given {@link OpenAPI} definition.
-     * This resource is configured with application or user-level token authentication and unlimited subscription
-     * policy.
+     * This resource is configured with no authentication and unlimited subscription policy.
      *
      * @param openAPI the {@link OpenAPI} object to which the resource will be added
      * @param path    the resource path to add
@@ -3669,7 +3668,7 @@ public class OAS3Parser extends APIDefinition {
     private void addDefaultGetPathToSwagger(OpenAPI openAPI, String path) {
 
         SwaggerData.Resource resource = new SwaggerData.Resource();
-        resource.setAuthType(APISpecParserConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
+        resource.setAuthType(APISpecParserConstants.AUTH_NO_AUTHENTICATION);
         resource.setPolicy(APISpecParserConstants.DEFAULT_SUB_POLICY_UNLIMITED);
         resource.setPath(path);
         resource.setVerb(APISpecParserConstants.HTTP_GET);

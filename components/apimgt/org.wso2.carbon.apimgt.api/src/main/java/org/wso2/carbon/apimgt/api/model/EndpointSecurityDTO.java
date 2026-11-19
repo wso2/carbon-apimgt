@@ -67,6 +67,7 @@ public class EndpointSecurityDTO {
     private String roleRegion;
     private String roleExternalId;
     private String authType;
+    private String serviceAccountKey;
 
     public EndpointSecurityDTO(EndpointSecurityDTO endpointSecurity) {
 
@@ -93,6 +94,7 @@ public class EndpointSecurityDTO {
         this.roleRegion = endpointSecurity.roleRegion;
         this.roleExternalId = endpointSecurity.roleExternalId;
         this.authType = endpointSecurity.authType;
+        this.serviceAccountKey = endpointSecurity.serviceAccountKey;
     }
 
     public EndpointSecurityDTO() {
@@ -390,6 +392,14 @@ public class EndpointSecurityDTO {
 
     public void setAuthType(String authType) {
         this.authType = authType;
+    }
+
+    public String getServiceAccountKey() {
+        return serviceAccountKey;
+    }
+
+    public void setServiceAccountKey(String serviceAccountKey) {
+        this.serviceAccountKey = serviceAccountKey;
     }
 
     @Override

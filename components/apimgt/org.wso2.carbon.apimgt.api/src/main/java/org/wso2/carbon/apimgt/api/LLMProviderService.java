@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -96,5 +97,18 @@ public interface LLMProviderService {
      */
     default boolean isDeprecated() {
         return false;
+    }
+
+    /**
+     * Returns the default response metadata attributes shipped with this provider service. They are applied in
+     * memory, on top of the provider's stored metadata, for every attribute name the stored metadata does not have.
+     * This lets attributes added in later versions (for example token usage counters) reach deployments whose stored
+     * provider configuration predates them, without changing the stored configuration. A stored attribute with the
+     * same name always takes precedence.
+     *
+     * @return Default response metadata attributes; empty by default.
+     */
+    default List<LLMProviderMetadata> getDefaultResponseMetadata() {
+        return Collections.emptyList();
     }
 }

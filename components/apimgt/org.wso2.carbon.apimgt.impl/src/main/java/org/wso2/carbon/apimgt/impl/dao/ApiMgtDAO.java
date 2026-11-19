@@ -17231,6 +17231,7 @@ public class ApiMgtDAO {
             Set<String> usedClonedPolicies = new HashSet<>();
             Map<String, String> clonedPoliciesMap = new HashMap<>();
             Map<String, List<OperationPolicy>> apiToAPIPolicyMap = new HashMap<>();
+            Map<String, String> productLevelPolicies = new HashMap<>();
 
             //add the duplicate resources in each API in the API product.
             for (APIProductResource apiProductResource : productResources) {
@@ -17241,6 +17242,10 @@ public class ApiMgtDAO {
                     uuid = getUUIDFromIdentifier(productIdentifier, organization, connection);
                 }
                 int productId = getAPIID(uuid, connection);
+                if (!productLevelPolicies.containsKey(uuid)) {
+                    productLevelPolicies.put(uuid, getAPIProductLevelPolicy(uuid, connection));
+                }
+                String productLevelPolicy = productLevelPolicies.get(uuid);
                 int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(productIdentifier.getProviderName()));
                 String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
                 URITemplate uriTemplateOriginal = apiProductResource.getUriTemplate();
@@ -17260,7 +17265,9 @@ public class ApiMgtDAO {
                             uriTemplate.setAuthType(rs.getString("AUTH_SCHEME"));
                             uriTemplate.setUriTemplate(rs.getString("URL_PATTERN"));
                             String tier = rs.getString(APIConstants.THROTTLING_TIER);
-                            if (tier == null || tier.isEmpty()) {
+                            if (StringUtils.isNotEmpty(productLevelPolicy)) {
+                                uriTemplate.setThrottlingTier(productLevelPolicy);
+                            } else if (tier == null || tier.isEmpty()) {
                                 uriTemplate.setThrottlingTier(APIConstants.UNLIMITED_TIER);
                             } else {
                                 uriTemplate.setThrottlingTier(tier);
@@ -28617,6 +28624,27 @@ public class ApiMgtDAO {
         for (URITemplate template : templates) {
             if (template.getUriTemplate().equals(uriTemplate) && template.getHttpVerb().equalsIgnoreCase(httpVerb)) {
                 return template;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Get the API Product level throttling policy of an API Product.
+     *
+     * @param productUuid API Product UUID
+     * @param connection  DB connection
+     * @return API Product level policy, or null if the API Product has no product level policy
+     * @throws SQLException if an error occurs while retrieving the policy
+     */
+    private String getAPIProductLevelPolicy(String productUuid, Connection connection) throws SQLException {
+
+        try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_API_PRODUCT_SQL)) {
+            prepStmt.setString(1, productUuid);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("API_TIER");
+                }
             }
         }
         return null;

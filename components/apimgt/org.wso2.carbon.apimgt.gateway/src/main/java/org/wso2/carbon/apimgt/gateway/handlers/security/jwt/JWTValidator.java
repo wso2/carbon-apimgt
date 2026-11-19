@@ -965,8 +965,11 @@ public class JWTValidator {
             String cacheToken = (String) getGatewayTokenCache().get(jti);
             if (SignedJWTInfo.ValidationStatus.VALID.equals(signedJWTInfo.getValidationStatus())
                     && cacheToken != null) {
-                if (getGatewayKeyCache().get(jti) != null) {
-                    JWTValidationInfo tempJWTValidationInfo = (JWTValidationInfo) getGatewayKeyCache().get(jti);
+                // Read the key cache only once. The entry can be expired or evicted between two reads, which
+                // would hand a null JWTValidationInfo to checkTokenExpiration under concurrent load.
+                Object cachedJWTValidationInfo = getGatewayKeyCache().get(jti);
+                if (cachedJWTValidationInfo instanceof JWTValidationInfo) {
+                    JWTValidationInfo tempJWTValidationInfo = (JWTValidationInfo) cachedJWTValidationInfo;
                     checkTokenExpiration(jti, tempJWTValidationInfo, tenantDomain);
                                         /* Only when cnf validation fails the validation info is updated when it passes the other
                      validations are performed */

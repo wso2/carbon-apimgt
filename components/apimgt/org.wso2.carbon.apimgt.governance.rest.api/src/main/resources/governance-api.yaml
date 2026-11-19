@@ -1200,6 +1200,17 @@ components:
           description: Timestamp when the governance policy was last updated.
           readOnly: true
           example: "2024-08-02T12:00:00Z"
+        complianceAffectingSeverities:
+          type: string
+          nullable: true
+          description: |
+            Comma separated rule severities (ERROR, WARN, INFO) that make this policy fail. Other severities
+            are still reported but do not affect the policy adherence status.
+
+            Null means the feature is not enabled on this deployment. Empty means it is enabled but nothing is
+            configured, so every severity applies. Omitting the field on an update preserves the existing value;
+            sending it empty clears the selection.
+          example: "ERROR,WARN"
       required:
         - name
         - rulesets
@@ -1461,6 +1472,18 @@ components:
           description: List of ruleset validation information.
           items:
             $ref: '#/components/schemas/RulesetValidationResultWithoutRules'
+        complianceAffectingSeverities:
+          type: array
+          description: |
+            Severities that a rule violation must have for it to fail this policy. Every severity applies when
+            the policy has none configured, which is the default.
+          items:
+            type: string
+            enum:
+              - ERROR
+              - WARN
+              - INFO
+          example: ["ERROR", "WARN", "INFO"]
     ArtifactComplianceForPolicy:
       type: object
       description: Compliance status of an artifact for a specific policy.
@@ -1493,7 +1516,12 @@ components:
           example: "API Security Ruleset"
         status:
           type: string
-          description: Status of the ruleset validation.
+          nullable: true
+          description: |
+            Status of the ruleset validation. UNAPPLIED means it has not been evaluated yet.
+
+            Null is reported instead of PASSED/FAILED when per policy severity filtering is on, since this
+            ruleset can legitimately pass under one governing policy and fail under another.
           enum:
             - PASSED
             - FAILED

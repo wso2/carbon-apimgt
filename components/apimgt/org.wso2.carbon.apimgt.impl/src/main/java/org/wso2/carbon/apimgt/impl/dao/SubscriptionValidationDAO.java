@@ -1203,10 +1203,15 @@ public class SubscriptionValidationDAO {
 
     private void attachURlMappingDetailsOfApiProduct(Connection connection, API api, String revisionId)
             throws SQLException {
-        // Need API Product revision ID to avoid unnecessary iterations
-        String sql = SubscriptionValidationSQLConstants.GET_ALL_API_PRODUCT_URI_TEMPLATES_SQL;
+        boolean isRevisionBasedResourcesEnabled = isRevisionBasedAPIProductResourcesEnabled();
+        String sql = isRevisionBasedResourcesEnabled ?
+                SubscriptionValidationSQLConstants.GET_API_PRODUCT_URI_TEMPLATES_BY_REVISION_SQL :
+                SubscriptionValidationSQLConstants.GET_ALL_API_PRODUCT_URI_TEMPLATES_SQL;
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setInt(1, api.getApiId());
+            if (isRevisionBasedResourcesEnabled) {
+                preparedStatement.setString(2, revisionId);
+            }
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     String httpMethod = resultSet.getString("HTTP_METHOD");
@@ -1236,6 +1241,12 @@ public class SubscriptionValidationDAO {
                 attachPolicies(connection, revisionId, api);
             }
         }
+    }
+
+    private boolean isRevisionBasedAPIProductResourcesEnabled() {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        return config != null && config.isAPIProductRevisionBasedResourcesEnabled();
     }
 
     public API getAPIByContextAndVersion(String context, String version, String deployment, boolean isExpand) {

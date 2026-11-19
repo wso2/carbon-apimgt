@@ -6825,6 +6825,12 @@ components:
           type: boolean
           description: Whether the ConsumptionDataExportService OSGi service is available
           example: false
+        perPolicySeverityFilteringEnabled:
+          type: boolean
+          description: |
+            Is per policy compliance affecting severity filtering enabled for governance policies. When enabled a
+            policy can declare which rule severities affect its compliance verdict.
+          example: false
     ScopeList:
       title: Scope Role Mapping List
       type: object

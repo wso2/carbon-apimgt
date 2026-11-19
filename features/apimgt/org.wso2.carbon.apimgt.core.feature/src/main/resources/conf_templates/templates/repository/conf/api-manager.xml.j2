@@ -329,6 +329,10 @@
         {% if apim.cache.restapi_token.expiry_time is defined %}
         <RESTAPITokenCacheExpiry>{{apim.cache.restapi_token.expiry_time}}</RESTAPITokenCacheExpiry>
         {% endif %}
+        <!-- Expiry time in seconds to keep the subscriptions not found in the control plane, in the gateway -->
+        {% if apim.cache.subscription_not_found.expiry_time is defined %}
+        <SubscriptionNotFoundCacheExpiry>{{apim.cache.subscription_not_found.expiry_time}}</SubscriptionNotFoundCacheExpiry>
+        {% endif %}
         <!-- Enable/Disable cache control headers of the Product REST APIs-->
         <EnableRESTAPICacheControlHeaders>{{apim.cache.restapi_cache_control_headers.enable}}</EnableRESTAPICacheControlHeaders>
         <!-- MaxAge for the cache control headers of the Product REST APIs -->
@@ -431,7 +435,12 @@
     <MCP>
         <Enabled>{{apim.mcp.enable}}</Enabled>
         <EnforceAuthForAllMCPMethods>{{apim.mcp.enforce_auth_for_all_mcp_methods}}</EnforceAuthForAllMCPMethods>
+        <EnableOutboundAuthHeader>{{apim.mcp.enable_outbound_auth_header}}</EnableOutboundAuthHeader>
     </MCP>
+
+    <APIProduct>
+        <EnableRevisionBasedResources>{{apim.api_product.enable_revision_based_resources}}</EnableRevisionBasedResources>
+    </APIProduct>
 
     <!--
         Configurations relevant to enable rate limit feature.
@@ -784,7 +793,17 @@
     <!-- This property is to configure the API Manager Governance capabilities -->
     <APIMGovernance>
         <DataSource>{{apim.governance.datasource.name}}</DataSource>
+        {% if apim.governance.per_policy_severity_filtering_enabled is defined %}
+        <!-- Allows a policy to declare which rule severities affect compliance. Violations of other severities
+             are still evaluated and reported, but do not violate the policy. This assumes GOV_POLICY already has
+             the COMPLIANCE_AFFECTING_SEVERITIES column, which a fresh install gets automatically; a deployment
+             upgraded from an older schema must add the column before enabling this, or writes will fail. -->
+        <PerPolicySeverityFilteringEnabled>{{apim.governance.per_policy_severity_filtering_enabled}}</PerPolicySeverityFilteringEnabled>
+        {% endif %}
         <SchedulerConfigurations>
+            {% if apim.governance.scheduler.enable is defined %}
+            <Enabled>{{apim.governance.scheduler.enable}}</Enabled>
+            {% endif %}
             <ThreadPoolSize>{{apim.governance.scheduler.thread_pool_size}}</ThreadPoolSize>
             <QueueSize>{{apim.governance.scheduler.queue_size}}</QueueSize>
             <TaskCheckIntervalMinutes>{{apim.governance.scheduler.task_check_interval_minutes}}</TaskCheckIntervalMinutes>
@@ -794,6 +813,10 @@
     {% endif %}
 
     <RESTAPI>
+        <!--When true, the user name is resolved according to how the resident key manager built the JWT subject, so the tenant domain is not appended again to a subject that already contains it. -->
+        {% if apim.rest_api.enable_subject_aware_user_resolution is defined %}
+        <EnableSubjectAwareUserResolution>{{apim.rest_api.enable_subject_aware_user_resolution}}</EnableSubjectAwareUserResolution>
+        {% endif %}
         <!--Configure allowed URIs of REST API. Accessing allowed URIs does not require credentials (does not require Authorization header). -->
         <AllowedURIs>
          {% if apim.rest_api.allowed_uri is defined %}

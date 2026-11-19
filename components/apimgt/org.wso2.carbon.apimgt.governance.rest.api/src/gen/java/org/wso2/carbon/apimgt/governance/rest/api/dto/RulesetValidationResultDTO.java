@@ -101,7 +101,7 @@ return null;
   }
 
   /**
-   * Status of the ruleset validation.
+   * Status of the ruleset validation. UNAPPLIED means it has not been evaluated yet.  Null is reported instead of PASSED/FAILED when per policy severity filtering is on, since this ruleset can legitimately pass under one governing policy and fail under another. 
    **/
   public RulesetValidationResultDTO status(StatusEnum status) {
     this.status = status;
@@ -109,7 +109,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "PASSED", value = "Status of the ruleset validation.")
+  @ApiModelProperty(example = "PASSED", value = "Status of the ruleset validation. UNAPPLIED means it has not been evaluated yet.  Null is reported instead of PASSED/FAILED when per policy severity filtering is on, since this ruleset can legitimately pass under one governing policy and fail under another. ")
   @JsonProperty("status")
   public StatusEnum getStatus() {
     return status;

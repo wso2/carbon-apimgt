@@ -196,6 +196,7 @@ public class PublisherCommonUtils {
 
     private static final Log log = LogFactory.getLog(PublisherCommonUtils.class);
     private static final String UNKNOWN_REFERENCE = "UNKNOWN";
+    private static final Gson GCP_SERVICE_ACCOUNT_KEY_GSON = new Gson();
     public static final String SESSION_TIMEOUT_CONFIG_KEY = "sessionTimeOut";
     static APIMGovernanceService apimGovernanceService = ServiceReferenceHolder.getInstance()
             .getAPIMGovernanceService();
@@ -624,6 +625,8 @@ public class PublisherCommonUtils {
         String oldSandboxApiKeyValue = null;
         String oldProductionAWSSecretKey = null;
         String oldSandboxAWSSecretKey = null;
+        String oldProductionGCPKey = null;
+        String oldSandboxGCPKey = null;
         Object oldProductionCustomParams = null;
         Object oldSandboxCustomParams = null;
 
@@ -653,6 +656,12 @@ public class PublisherCommonUtils {
                         oldProductionAWSSecretKey =
                                 (String) oldEndpointSecurityProduction.get(
                                         APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY);
+                    } else if (oldEndpointSecurityProduction.get(ENDPOINT_SECURITY_TYPE) != null &&
+                            APIConstants.ENDPOINT_SECURITY_TYPE_GCP.equals(
+                                    oldEndpointSecurityProduction.get(ENDPOINT_SECURITY_TYPE).toString())) {
+                        oldProductionGCPKey =
+                                (String) oldEndpointSecurityProduction.get(
+                                        APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY);
                     }
 
                     // Keep old custom parameters data for future usage
@@ -685,6 +694,12 @@ public class PublisherCommonUtils {
                                     oldEndpointSecuritySandbox.get(ENDPOINT_SECURITY_TYPE).toString())) {
                         oldSandboxAWSSecretKey =
                                 (String) oldEndpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY);
+                    } else if (oldEndpointSecuritySandbox.get(ENDPOINT_SECURITY_TYPE) != null &&
+                            APIConstants.ENDPOINT_SECURITY_TYPE_GCP.equals(
+                                    oldEndpointSecuritySandbox.get(ENDPOINT_SECURITY_TYPE).toString())) {
+                        oldSandboxGCPKey =
+                                (String) oldEndpointSecuritySandbox.get(
+                                        APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY);
                     }
 
                     // Keep old custom parameters data for future usage
@@ -711,6 +726,9 @@ public class PublisherCommonUtils {
 
         encryptEndpointSecurityAWSSecretKey(endpointConfig, cryptoUtil, oldProductionAWSSecretKey,
                 oldSandboxAWSSecretKey, apiDtoToUpdate);
+
+        encryptEndpointSecurityGCPServiceAccountKey(endpointConfig, cryptoUtil, oldProductionGCPKey,
+                oldSandboxGCPKey, apiDtoToUpdate);
 
         // AWS Lambda: secret key encryption while updating the API
         if (apiDtoToUpdate.getEndpointConfig() != null) {
@@ -1452,6 +1470,67 @@ public class PublisherCommonUtils {
             }
         }
     }
+
+    /**
+     * Encrypts the GCP service-account key in the endpoint security configuration of an API. Mirrors the AWS
+     * secret-key handling: a newly supplied key is encrypted with the internal crypto provider (AES on 4.7.0+),
+     * while an empty (masked) / unchanged value preserves the previously stored (encrypted) key so the UI mask
+     * never clobbers it.
+     *
+     * @param endpointConfig       Endpoint configuration of the API
+     * @param cryptoUtil           Cryptography utility
+     * @param oldProductionGCPKey  Existing (encrypted) production service-account key
+     * @param oldSandboxGCPKey     Existing (encrypted) sandbox service-account key
+     * @param apidto               API DTO
+     * @throws CryptoException        If an error occurs while encrypting
+     * @throws APIManagementException If an error occurs while processing the endpoint security configuration.
+     *                                A missing key is not an error: it selects keyless GCP auth (ADC /
+     *                                Workload Identity).
+     */
+    public static void encryptEndpointSecurityGCPServiceAccountKey(Map endpointConfig,
+                                                                   CryptoUtil cryptoUtil,
+                                                                   String oldProductionGCPKey,
+                                                                   String oldSandboxGCPKey, APIDTO apidto)
+            throws CryptoException, APIManagementException {
+
+        if (endpointConfig != null) {
+            if ((endpointConfig.get(APIConstants.ENDPOINT_SECURITY) != null)) {
+                Map endpointSecurity = (Map) endpointConfig.get(APIConstants.ENDPOINT_SECURITY);
+                if (endpointSecurity.get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
+                    Map endpointSecurityProduction = (Map) endpointSecurity
+                            .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION);
+                    String productionEndpointType = (String) endpointSecurityProduction
+                            .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
+
+                    if (APIConstants.ENDPOINT_SECURITY_TYPE_GCP.equals(productionEndpointType)) {
+                        // The APIDTO path carries the old key already encrypted at rest, so preserve it as-is.
+                        applyGCPServiceAccountKeyForStage(endpointSecurityProduction, oldProductionGCPKey, true,
+                                cryptoUtil);
+                    }
+                    endpointSecurity
+                            .put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION, endpointSecurityProduction);
+                    endpointConfig.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
+                    apidto.setEndpointConfig(endpointConfig);
+                }
+                if (endpointSecurity.get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
+                    Map endpointSecuritySandbox = (Map) endpointSecurity
+                            .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX);
+                    String sandboxEndpointType = (String) endpointSecuritySandbox
+                            .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
+
+                    if (APIConstants.ENDPOINT_SECURITY_TYPE_GCP.equals(sandboxEndpointType)) {
+                        // The APIDTO path carries the old key already encrypted at rest, so preserve it as-is.
+                        applyGCPServiceAccountKeyForStage(endpointSecuritySandbox, oldSandboxGCPKey, true, cryptoUtil);
+                    }
+                    endpointSecurity
+                            .put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX, endpointSecuritySandbox);
+                    endpointConfig.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
+                    apidto.setEndpointConfig(endpointConfig);
+                }
+            }
+        }
+    }
+
     /**
      * This method will encrypt the OAuth credentials in the endpoint security configuration of an API.
      *
@@ -1765,6 +1844,134 @@ public class PublisherCommonUtils {
                     apiEndpointDTO.setEndpointConfig(endpointConfig);
                 }
             }
+        }
+    }
+
+    /**
+     * Encrypts the GCP service-account key of an AI API endpoint ({@link APIEndpointDTO} path). Mirrors the AWS
+     * secret-key handling and uses the internal crypto provider (AES on 4.7.0+).
+     *
+     * @param apiEndpointDTO APIEndpointDTO
+     * @param cryptoUtil     cryptography util
+     * @param oldApiSecret   existing (encrypted) service-account key
+     * @param endpointConfig endpoint configuration of the API
+     * @throws CryptoException        if an error occurs while encrypting
+     * @throws APIManagementException if an error occurs while processing the endpoint security configuration.
+     *                                A missing key is not an error: it selects keyless GCP auth (ADC /
+     *                                Workload Identity).
+     */
+    public static void encryptEndpointSecurityGCPServiceAccountKey(APIEndpointDTO apiEndpointDTO,
+                                                                   CryptoUtil cryptoUtil,
+                                                                   String oldApiSecret, Map endpointConfig)
+            throws CryptoException, APIManagementException {
+
+        if (endpointConfig != null) {
+            if ((endpointConfig.get(APIConstants.ENDPOINT_SECURITY) != null)) {
+                Map endpointSecurity = (Map) endpointConfig.get(APIConstants.ENDPOINT_SECURITY);
+                if (APIConstants.APIEndpoint.PRODUCTION.equals(
+                        apiEndpointDTO.getDeploymentStage()) && endpointSecurity.get(
+                        APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
+                    Map endpointSecurityProduction = (Map) endpointSecurity.get(
+                            APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION);
+                    String productionEndpointType = (String) endpointSecurityProduction.get(
+                            APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
+
+                    if (APIConstants.ENDPOINT_SECURITY_TYPE_GCP.equals(productionEndpointType)) {
+                        // The APIEndpointDTO path reads the old key decrypted, so re-encrypt it before storing.
+                        applyGCPServiceAccountKeyForStage(endpointSecurityProduction, oldApiSecret, false, cryptoUtil);
+                    }
+                    endpointSecurity.put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION,
+                            endpointSecurityProduction);
+                    endpointConfig.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
+                    apiEndpointDTO.setEndpointConfig(endpointConfig);
+                }
+                if (APIConstants.APIEndpoint.SANDBOX.equals(
+                        apiEndpointDTO.getDeploymentStage()) && endpointSecurity.get(
+                        APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
+                    Map endpointSecuritySandbox = (Map) endpointSecurity
+                            .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX);
+                    String sandboxEndpointType = (String) endpointSecuritySandbox
+                            .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
+
+                    if (APIConstants.ENDPOINT_SECURITY_TYPE_GCP.equals(sandboxEndpointType)) {
+                        // The APIEndpointDTO path reads the old key decrypted, so re-encrypt it before storing.
+                        applyGCPServiceAccountKeyForStage(endpointSecuritySandbox, oldApiSecret, false, cryptoUtil);
+                    }
+                    endpointSecurity
+                            .put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX, endpointSecuritySandbox);
+                    endpointConfig.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
+                    apiEndpointDTO.setEndpointConfig(endpointConfig);
+                }
+            }
+        }
+    }
+
+    /**
+     * Validates that the GCP service-account key is well-formed JSON before it is encrypted and stored, so a
+     * malformed key is rejected at save time rather than failing when the gateway mediator later builds the
+     * token provider. Only the JSON structure is checked here - the key contents (required fields, private key)
+     * are validated by the mediator when it constructs the provider.
+     *
+     * @param serviceAccountKey the plaintext service-account key JSON
+     * @throws APIManagementException if the value is not valid JSON
+     */
+    private static void validateGCPServiceAccountKey(String serviceAccountKey) throws APIManagementException {
+
+        try {
+            // Gson returns null for the JSON literal null (and any non-object is not a valid key), so reject a
+            // null parse result - otherwise the caller would encrypt and store the unchanged non-object value.
+            if (GCP_SERVICE_ACCOUNT_KEY_GSON.fromJson(serviceAccountKey, JsonObject.class) == null) {
+                throw new APIManagementException(
+                        "Invalid GCP service-account key: the provided value is not a JSON object.");
+            }
+        } catch (JsonSyntaxException e) {
+            throw new APIManagementException("Invalid GCP service-account key: the provided value is not valid JSON.",
+                    e);
+        }
+    }
+
+    /**
+     * Applies the GCP service-account key handling for one deployment stage's endpoint-security map: honours the
+     * transient clear flag, encrypts a newly supplied key (after validating it is well-formed JSON), preserves the
+     * previously stored key when unchanged, or leaves the stage keyless when no key is present. Centralised so the
+     * {@link APIDTO} (update) and {@link APIEndpointDTO} (add/update-endpoint) save paths cannot drift, and applied
+     * identically to the production and sandbox stages.
+     *
+     * @param stageSecurity   the endpoint-security map for the stage (production or sandbox)
+     * @param oldKey          the previously stored key - encrypted-at-rest on the {@link APIDTO} path, decrypted on
+     *                        the {@link APIEndpointDTO} path (see {@code oldKeyEncrypted})
+     * @param oldKeyEncrypted whether {@code oldKey} is already the encrypted-at-rest value (store as-is) or the
+     *                        decrypted value (re-encrypt before storing)
+     * @param cryptoUtil      cryptography utility
+     * @throws CryptoException        if an error occurs while encrypting
+     * @throws APIManagementException if the newly supplied key is not valid JSON
+     */
+    private static void applyGCPServiceAccountKeyForStage(Map stageSecurity, String oldKey, boolean oldKeyEncrypted,
+            CryptoUtil cryptoUtil) throws CryptoException, APIManagementException {
+
+        boolean clearGcpKey = Boolean.parseBoolean(String.valueOf(
+                stageSecurity.get(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY_CLEAR)));
+        // Never persist the transient flag.
+        stageSecurity.remove(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY_CLEAR);
+        if (clearGcpKey) {
+            // Explicit clear: drop the stored key so the gateway falls back to keyless (ADC / Workload Identity).
+            stageSecurity.remove(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY);
+            return;
+        }
+        Object currentKey = stageSecurity.get(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY);
+        if (currentKey != null && StringUtils.isNotEmpty(currentKey.toString()) && !currentKey.equals(oldKey)) {
+            // A newly supplied key: validate it is well-formed JSON, then encrypt it at rest.
+            String keyValue = currentKey.toString();
+            validateGCPServiceAccountKey(keyValue);
+            stageSecurity.put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY,
+                    APIUtil.encryptAndBase64EncodeAnySize(cryptoUtil, keyValue.getBytes(StandardCharsets.UTF_8)));
+        } else if (StringUtils.isNotBlank(oldKey)) {
+            // Unchanged key: preserve the previously stored value, re-encrypting it when it was decrypted on read.
+            stageSecurity.put(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY, oldKeyEncrypted ? oldKey
+                    : APIUtil.encryptAndBase64EncodeAnySize(cryptoUtil, oldKey.getBytes(StandardCharsets.UTF_8)));
+        } else {
+            // No service-account key provided: keyless GCP auth. Drop any empty placeholder.
+            stageSecurity.remove(APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY);
         }
     }
 
@@ -2240,6 +2447,119 @@ public class PublisherCommonUtils {
             }
         }
         return "";
+    }
+
+    /**
+     * Copies the resolved roles to the URI template scopes, from which local scopes are registered.
+     *
+     * @param uriTemplates URI templates of the API
+     * @param scopes       scopes with resolved roles
+     */
+    private static void applyScopeRolesToURITemplates(Set<URITemplate> uriTemplates,
+            Set<org.wso2.carbon.apimgt.api.model.Scope> scopes) {
+
+        if (uriTemplates == null || scopes == null || scopes.isEmpty()) {
+            return;
+        }
+        for (URITemplate uriTemplate : uriTemplates) {
+            applyScopeRoles(uriTemplate.getScope(), scopes);
+            if (uriTemplate.getScopes() != null) {
+                for (org.wso2.carbon.apimgt.api.model.Scope templateScope : uriTemplate.getScopes()) {
+                    applyScopeRoles(templateScope, scopes);
+                }
+            }
+        }
+    }
+
+    private static void applyScopeRoles(org.wso2.carbon.apimgt.api.model.Scope templateScope,
+            Set<org.wso2.carbon.apimgt.api.model.Scope> scopes) {
+
+        // keep explicit bindings, even ""
+        if (templateScope == null || templateScope.getRoles() != null) {
+            return;
+        }
+        org.wso2.carbon.apimgt.api.model.Scope resolved = APIUtil.findScopeByKey(scopes, templateScope.getKey());
+        if (resolved != null && StringUtils.isNotBlank(resolved.getRoles())) {
+            templateScope.setRoles(resolved.getRoles());
+        }
+    }
+
+    /**
+     * Resolves the scope roles of an AsyncAPI definition and writes them as x-scopes-bindings. Roles are not
+     * validated. If this fails (e.g. the shared scope roles cannot be read), nothing is changed.
+     *
+     * @param api            API
+     * @param asyncApiParser parser of the definition
+     * @param definition     AsyncAPI definition
+     * @param declaredScopes scopes with declared roles, can be null
+     * @return the definition with x-scopes-bindings
+     * @throws APIManagementException if the definition cannot be parsed
+     */
+    private static String resolveAndBindScopes(API api, AbstractAsyncApiParser asyncApiParser, String definition,
+            Set<org.wso2.carbon.apimgt.api.model.Scope> declaredScopes) throws APIManagementException {
+
+        Set<org.wso2.carbon.apimgt.api.model.Scope> scopes = asyncApiParser.getScopes(definition);
+        try {
+            retainDeclaredScopeRoles(scopes, declaredScopes);
+            applySharedScopeRoles(api.getOrganization(), scopes);
+            String boundDefinition = AsyncApiParserUtil.setScopeBindings(definition, scopes);
+            applyScopeRolesToURITemplates(api.getUriTemplates(), scopes);
+            return boundDefinition;
+        } catch (APIManagementException | RuntimeException e) {
+            log.warn("x-scopes-bindings not added to the AsyncAPI definition of API " + api.getId(), e);
+            return definition;
+        }
+    }
+
+    /**
+     * Sets the roles of shared scopes from the key manager, as validateScopes does.
+     *
+     * @param organization organization
+     * @param scopes       scopes parsed from the definition
+     * @throws APIManagementException if the shared scopes cannot be read
+     */
+    private static void applySharedScopeRoles(String organization, Set<org.wso2.carbon.apimgt.api.model.Scope> scopes)
+            throws APIManagementException {
+
+        if (scopes == null || scopes.isEmpty()) {
+            return;
+        }
+        int tenantId = APIUtil.getInternalOrganizationId(organization);
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        Set<org.wso2.carbon.apimgt.api.model.Scope> sharedScopes = new HashSet<>();
+        for (org.wso2.carbon.apimgt.api.model.Scope scope : scopes) {
+            if (!APIUtil.isAllowedScope(scope.getKey())
+                    && apiProvider.isSharedScopeNameExists(scope.getKey(), tenantId)) {
+                sharedScopes.add(scope);
+            }
+        }
+        if (!sharedScopes.isEmpty()) {
+            apiProvider.validateSharedScopes(sharedScopes, APIUtil.getTenantDomainFromTenantId(tenantId));
+        }
+    }
+
+    /**
+     * Fills the roles of scopes with no binding in the definition from the declared scopes.
+     *
+     * @param parsedScopes   scopes parsed from the definition
+     * @param declaredScopes scopes with declared roles, can be null
+     */
+    private static void retainDeclaredScopeRoles(Set<org.wso2.carbon.apimgt.api.model.Scope> parsedScopes,
+            Set<org.wso2.carbon.apimgt.api.model.Scope> declaredScopes) {
+
+        if (parsedScopes == null || declaredScopes == null || declaredScopes.isEmpty()) {
+            return;
+        }
+        for (org.wso2.carbon.apimgt.api.model.Scope parsed : parsedScopes) {
+            // keep explicit bindings, even ""
+            if (parsed.getRoles() != null) {
+                continue;
+            }
+            org.wso2.carbon.apimgt.api.model.Scope declared = APIUtil.findScopeByKey(declaredScopes, parsed.getKey());
+            if (declared != null && StringUtils.isNotBlank(declared.getRoles())) {
+                parsed.setRoles(declared.getRoles());
+            }
+        }
     }
 
     /**
@@ -2779,10 +3099,7 @@ public class PublisherCommonUtils {
         extractURLsFromEndpointConfig(endpointConfigObj, APIConstants.ENDPOINT_SANDBOX_FAILOVERS, endpoints);
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         for (String endpoint : endpoints) {
-            if (!endpoint.startsWith("jms:") && !endpoint.startsWith("consul(")
-                    && !endpoint.contains("{") && !endpoint.contains("}")) {
-                APIUtil.validateRemoteURL(endpoint, tenantDomain);
-            }
+            APIUtil.validateRemoteURL(endpoint, tenantDomain);
         }
         return APIUtil.validateEndpointURLs(endpoints);
     }
@@ -3238,6 +3555,22 @@ public class PublisherCommonUtils {
                                                   String organization)
             throws APIManagementException, FaultGatewaysException {
 
+        return updateAsyncAPIDefinition(apiId, response, organization, null);
+    }
+
+    /**
+     * Updates the AsyncAPI definition of the given API.
+     *
+     * @param apiId          API Id
+     * @param response       response of an AsyncAPI definition validation call
+     * @param organization   Organization Identifier
+     * @param declaredScopes scopes with declared roles (e.g. from api.yaml), can be null
+     * @return updated AsyncAPI definition
+     */
+    public static String updateAsyncAPIDefinition(String apiId, APIDefinitionValidationResponse response,
+            String organization, Set<org.wso2.carbon.apimgt.api.model.Scope> declaredScopes)
+            throws APIManagementException, FaultGatewaysException {
+
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         //this will fall if user does not have access to the API or the API does not exist
         API oldapi = apiProvider.getAPIbyUUID(apiId, organization);
@@ -3257,6 +3590,9 @@ public class PublisherCommonUtils {
         //set existing operation policies to URI templates
         apiProvider.setOperationPoliciesToURITemplates(apiId, uriTemplates);
         existingAPI.setUriTemplates(uriTemplates);
+
+        // resolve scope roles and write x-scopes-bindings
+        apiDefinition = resolveAndBindScopes(existingAPI, asyncApiParser, apiDefinition, declaredScopes);
 
         // Update ws uri mapping
         existingAPI.setWsUriMapping(asyncApiParser.buildWSUriMapping(apiDefinition));
@@ -3376,44 +3712,6 @@ public class PublisherCommonUtils {
             throw new APIManagementException(ExceptionCodes.NO_RESOURCES_FOUND);
         }
         Set<org.wso2.carbon.apimgt.api.model.Scope> scopes = oasParser.getScopes(apiDefinition);
-        //validating scope roles
-        for (org.wso2.carbon.apimgt.api.model.Scope scope : scopes) {
-            String roles = scope.getRoles();
-            if (roles != null) {
-                boolean scopeBindingNeedsUpdate = false;
-                List<String> correctedRoles = new ArrayList<>();
-                for (String aRole : roles.split(",")) {
-                    String correctedRole = aRole;
-                    boolean prefixCorrected = false;
-                    if (aRole.contains("/")) {
-                        String[] roleParts = aRole.split("/", 2);
-                        String prefix = roleParts[0];
-                        if ("APPLICATION".equalsIgnoreCase(prefix) && !"Application".equals(prefix)) {
-                            correctedRole = "Application/" + roleParts[1];
-                            prefixCorrected = true;
-                        }
-                    }
-
-                    boolean isValidRole = APIUtil.isRoleNameExist(RestApiCommonUtil.getLoggedInUsername(),
-                            correctedRole);
-                    if (!isValidRole) {
-                        String errorMessage = "Role '" + correctedRole + "' Does not exist.";
-                        throw new APIManagementException(errorMessage,
-                                ExceptionCodes.from(ExceptionCodes.ROLE_OF_SCOPE_DOES_NOT_EXIST, correctedRole));
-                    }
-
-                    if (prefixCorrected) {
-                        scopeBindingNeedsUpdate = true;
-                    }
-                    correctedRoles.add(correctedRole);
-                }
-
-                if (scopeBindingNeedsUpdate) {
-                    scope.setRoles(String.join(",", correctedRoles));
-                    apiProvider.updateSharedScope(scope, organization);
-                }
-            }
-        }
 
         List<APIResource> removedProductResources = apiProvider.getRemovedProductResources(uriTemplates, existingAPI);
 
@@ -3533,6 +3831,8 @@ public class PublisherCommonUtils {
             throw new APIManagementException("Error when parsing endpoint configurations ", e);
         }
 
+        // Validates local scope roles. Shared scope bindings in the definition are only a copy, so they are not
+        // validated here, and the stored values are applied by key managers that support it.
         PublisherCommonUtils.validateScopes(existingAPI);
         APIUtil.validateAndUpdateURITemplates(existingAPI, APIUtil.getInternalOrganizationId(organization));
         SwaggerData swaggerData = new SwaggerData(existingAPI);
@@ -4011,6 +4311,13 @@ public class PublisherCommonUtils {
             }
         }
 
+        // The version of an API Product can't be changed. Set the original version so that it is used to build the
+        // context when the request doesn't have a version
+        apiProductDtoToUpdate.setVersion(originalAPIProduct.getId().getVersion());
+
+        // The context of an API Product can't be changed
+        apiProductDtoToUpdate.setContext(originalAPIProduct.getContextTemplate());
+
         APIProduct product = APIMappingUtil.fromDTOtoAPIProduct(apiProductDtoToUpdate, username);
         validateSubscriptionAvailabilityForProduct(originalAPIProduct, product);
         product.setState(originalAPIProduct.getState());
@@ -4100,6 +4407,11 @@ public class PublisherCommonUtils {
 
         if (apiProductDTO.getApiKeyHeader() == null) {
             apiProductDTO.setApiKeyHeader(APIConstants.API_KEY_HEADER_DEFAULT);
+        }
+
+        //set the default version of the API Product
+        if (StringUtils.isBlank(apiProductDTO.getVersion())) {
+            apiProductDTO.setVersion(APIConstants.API_PRODUCT_VERSION_1_0_0);
         }
 
         //isDefaultVersion is true for a new API Product.
@@ -4585,6 +4897,10 @@ public class PublisherCommonUtils {
                                 null) {
                             oldApiEndpointSecret = oldProductionEndpointSecurity.get(
                                     APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY).toString();
+                        } else if (oldProductionEndpointSecurity.get(
+                                APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY) != null) {
+                            oldApiEndpointSecret = oldProductionEndpointSecurity.get(
+                                    APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY).toString();
                         }
                     }
                 } else if (APIConstants.APIEndpoint.SANDBOX.equals(apiEndpointDTO.getDeploymentStage())) {
@@ -4608,6 +4924,10 @@ public class PublisherCommonUtils {
                                 null) {
                             oldApiEndpointSecret = oldSandboxEndpointSecurity.get(
                                     APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY).toString();
+                        } else if (oldSandboxEndpointSecurity.get(
+                                APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY) != null) {
+                            oldApiEndpointSecret = oldSandboxEndpointSecurity.get(
+                                    APIConstants.ENDPOINT_SECURITY_GCP_SERVICE_ACCOUNT_KEY).toString();
                         }
                     }
                 }
@@ -4619,6 +4939,7 @@ public class PublisherCommonUtils {
 
         encryptEndpointSecurityApiKeyCredentials(apiEndpointDTO, cryptoUtil, oldApiEndpointSecret, endpointConfig);
         encryptEndpointSecurityAWSSecretKey(apiEndpointDTO, cryptoUtil, oldApiEndpointSecret, endpointConfig);
+        encryptEndpointSecurityGCPServiceAccountKey(apiEndpointDTO, cryptoUtil, oldApiEndpointSecret, endpointConfig);
         APIEndpointInfo apiEndpoint = APIMappingUtil.fromDTOtoAPIEndpoint(apiEndpointDTO, organization);
         if (apiEndpoint.getId() == null) {
             apiEndpoint.setId(endpointId);
@@ -4643,10 +4964,7 @@ public class PublisherCommonUtils {
             throw new APIManagementException("Invalid/Malformed endpoint URL detected",
                     ExceptionCodes.API_ENDPOINT_URL_INVALID);
         }
-        if (!endpointURL.startsWith("jms:") && !endpointURL.startsWith("consul(")
-                && !endpointURL.contains("{") && !endpointURL.contains("}")) {
-            APIUtil.validateRemoteURL(endpointURL, RestApiCommonUtil.getLoggedInUserTenantDomain());
-        }
+        APIUtil.validateRemoteURL(endpointURL, RestApiCommonUtil.getLoggedInUserTenantDomain());
 
         APIEndpointInfo apiEndpointUpdated = apiProvider.updateAPIEndpoint(apiId, apiEndpoint, organization);
         if (apiEndpointUpdated == null) {
@@ -4675,6 +4993,7 @@ public class PublisherCommonUtils {
         CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
         encryptEndpointSecurityApiKeyCredentials(apiEndpointDTO, cryptoUtil, StringUtils.EMPTY, endpointConfig);
         encryptEndpointSecurityAWSSecretKey(apiEndpointDTO, cryptoUtil, StringUtils.EMPTY, endpointConfig);
+        encryptEndpointSecurityGCPServiceAccountKey(apiEndpointDTO, cryptoUtil, StringUtils.EMPTY, endpointConfig);
         APIEndpointInfo apiEndpoint = APIMappingUtil.fromDTOtoAPIEndpoint(apiEndpointDTO, organization);
 
         // extract endpoint URL
@@ -4696,10 +5015,7 @@ public class PublisherCommonUtils {
             throw new APIManagementException("Invalid/Malformed endpoint URL detected",
                     ExceptionCodes.API_ENDPOINT_URL_INVALID);
         }
-        if (!endpointURL.startsWith("jms:") && !endpointURL.startsWith("consul(")
-                && !endpointURL.contains("{") && !endpointURL.contains("}")) {
-            APIUtil.validateRemoteURL(endpointURL, RestApiCommonUtil.getLoggedInUserTenantDomain());
-        }
+        APIUtil.validateRemoteURL(endpointURL, RestApiCommonUtil.getLoggedInUserTenantDomain());
 
         // validate endpoint name
         if (StringUtils.isBlank(apiEndpoint.getName())) {
@@ -4760,8 +5076,9 @@ public class PublisherCommonUtils {
         apiToAdd.setAsyncApiDefinition(definitionToAdd);
 
         // load topics from AsyncAPI
-        Set<URITemplate> uriTemplates = AsyncApiParserFactory.getAsyncApiParser(
-                AsyncApiParserUtil.getAsyncApiVersion(definitionToAdd), getParserOptionsFromConfig())
+        AbstractAsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
+                AsyncApiParserUtil.getAsyncApiVersion(definitionToAdd), getParserOptionsFromConfig());
+        Set<URITemplate> uriTemplates = asyncApiParser
                 .getURITemplates(definitionToAdd, APIConstants.API_TYPE_WS.equals(apiToAdd.getType())
                                 || !APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(apiToAdd.getGatewayVendor()));
         if (uriTemplates == null || uriTemplates.isEmpty()) {
@@ -4769,6 +5086,9 @@ public class PublisherCommonUtils {
         }
         apiToAdd.setUriTemplates(uriTemplates);
         apiToAdd.setOrganization(organization);
+
+        // resolve scope roles and write x-scopes-bindings
+        definitionToAdd = resolveAndBindScopes(apiToAdd, asyncApiParser, definitionToAdd, apiToAdd.getScopes());
         apiToAdd.setAsyncApiDefinition(definitionToAdd);
 
         Map<String, String> complianceResult = checkGovernanceComplianceSync(apiToAdd.getUuid(),

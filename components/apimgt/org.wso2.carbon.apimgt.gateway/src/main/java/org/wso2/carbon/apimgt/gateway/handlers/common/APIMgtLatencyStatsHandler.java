@@ -36,6 +36,7 @@ import org.apache.synapse.rest.AbstractHandler;
 import org.jetbrains.annotations.NotNull;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.utils.TelemetryLogUtil;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -91,6 +92,7 @@ public class APIMgtLatencyStatsHandler extends AbstractHandler {
             TelemetrySpan span = TelemetryUtil.startSpan(APIMgtGatewayConstants.RESOURCE_SPAN, responseLatencySpan,
                     tracer);
             messageContext.setProperty(APIMgtGatewayConstants.RESOURCE_SPAN, span);
+            TelemetryLogUtil.setTracingIds(span);
         } else if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =
                     (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
@@ -158,6 +160,9 @@ public class APIMgtLatencyStatsHandler extends AbstractHandler {
                         parseOptions.setResolve(true);
                         parseOptions.setResolveFully(true);
                         parseOptions.setResolveCombinators(false);
+                        // Do not inject type "object" into schemas that declare no type. Schema validation enforces
+                        // the declared types, so an injected type would reject valid values of untyped properties.
+                        parseOptions.setExplicitObjectSchema(false);
                         openAPI = parser.readContents(swagger, null, parseOptions).getOpenAPI();
                         // HTTP headers should be case insensitive as for HTTP 1.1 RFC
                         // Thus converting headers to lowercase for schema validation.

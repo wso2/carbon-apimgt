@@ -27,6 +27,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants;
 import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsCustomDataProvider;
 import org.wso2.carbon.apimgt.common.analytics.exceptions.DataNotFoundException;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Application;
@@ -39,12 +40,20 @@ import org.wso2.carbon.apimgt.gateway.mcp.request.Params;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class SynapseAnalyticsDataProviderTestCase {
+
+    private static final Set<String> CORE_AI_TOKEN_USAGE_KEYS = new HashSet<>(Arrays.asList(
+            Constants.AI_PROMPT_TOKEN_USAGE, Constants.AI_COMPLETION_TOKEN_USAGE, Constants.AI_TOTAL_TOKEN_USAGE,
+            Constants.HOUR));
 
     private Map<String, String> previousReporterProperties;
 
@@ -376,6 +385,466 @@ public class SynapseAnalyticsDataProviderTestCase {
         Assert.assertNotNull(mcpAnalytics);
         Assert.assertEquals("tools/list", mcpAnalytics.get(Constants.MCP_METHOD));
         Assert.assertFalse(mcpAnalytics.containsKey(APIMgtGatewayConstants.MCP_CAPABILITY));
+    }
+
+    /**
+     * Verifies an AI API event without any PRODUCT_ANALYTICS_PROPS_TO_PUBLISH sections has only the core
+     * aiTokenUsage fields and no additionalProperties.
+     */
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testGetPropertiesWithoutProductAnalyticsPropsHasOnlyCoreAiTokenUsage() throws Exception {
+
+        Map<String, Object> customProperties = buildProperties(aiRequestProperties(), null);
+
+        Map<String, Object> aiTokenUsage = (Map<String, Object>) customProperties.get(Constants.AI_TOKEN_USAGE);
+        Assert.assertEquals(CORE_AI_TOKEN_USAGE_KEYS, aiTokenUsage.keySet());
+        Assert.assertFalse(customProperties.containsKey(Constants.ADDITIONAL_PROPERTIES));
+    }
+
+    /**
+     * Verifies a PRODUCT_ANALYTICS_PROPS_TO_PUBLISH value that is not a map is ignored without failing the event.
+     */
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testGetPropertiesIgnoresProductAnalyticsPropsThatAreNotAMap() throws Exception {
+
+        for (Object notAMap : Arrays.asList("aiTokenUsage", Collections.singletonList("featureUsage"), 1)) {
+            Map<String, Object> properties = aiRequestProperties();
+            properties.put(APIMgtGatewayConstants.PRODUCT_ANALYTICS_PROPS, notAMap);
+
+            Map<String, Object> customProperties = buildProperties(properties, null);
+
+            Map<String, Object> aiTokenUsage = (Map<String, Object>) customProperties.get(Constants.AI_TOKEN_USAGE);
+            Assert.assertEquals(CORE_AI_TOKEN_USAGE_KEYS, aiTokenUsage.keySet());
+            Assert.assertFalse(customProperties.containsKey(Constants.ADDITIONAL_PROPERTIES));
+        }
+    }
+
+    /**
+     * Verifies the counters of the aiTokenUsage section are added to the event's aiTokenUsage, next to the core
+     * fields.
+     */
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testGetPropertiesAddsProductTokenUsageCounters() throws Exception {
+
+        Map<String, Object> counters = new LinkedHashMap<>();
+        counters.put("cacheReadInputTokens", 800);
+        counters.put("reasoningTokens", 120);
+        Map<String, Object> properties = aiRequestProperties();
+        properties.put(APIMgtGatewayConstants.PRODUCT_ANALYTICS_PROPS,
+                Collections.singletonMap(Constants.AI_TOKEN_USAGE, counters));
+
+        Map<String, Object> customProperties = buildProperties(properties, null);
+
+        Map<String, Object> aiTokenUsage = (Map<String, Object>) customProperties.get(Constants.AI_TOKEN_USAGE);
+        Assert.assertEquals(800, aiTokenUsage.get("cacheReadInputTokens"));
+        Assert.assertEquals(120, aiTokenUsage.get("reasoningTokens"));
+        Assert.assertEquals(1200, aiTokenUsage.get(Constants.AI_PROMPT_TOKEN_USAGE));
+        Assert.assertFalse(customProperties.containsKey(Constants.ADDITIONAL_PROPERTIES));
+    }
+
+    /**
+     * Verifies the aiTokenUsage section never overwrites a field the event's aiTokenUsage already has, such as a
+     * core token count.
+     */
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testGetPropertiesProductTokenUsageDoesNotOverwriteExistingFields() throws Exception {
+
+        Map<String, Object> counters = new LinkedHashMap<>();
+        counters.put(Constants.AI_PROMPT_TOKEN_USAGE, 1);
+        counters.put(Constants.AI_COMPLETION_TOKEN_USAGE, 1);
+        counters.put(Constants.AI_TOTAL_TOKEN_USAGE, 1);
+        counters.put(Constants.HOUR, 99);
+        counters.put("cacheReadInputTokens", 800);
+        Map<String, Object> properties = aiRequestProperties();
+        properties.put(APIMgtGatewayConstants.PRODUCT_ANALYTICS_PROPS,
+                Collections.singletonMap(Constants.AI_TOKEN_USAGE, counters));
+
+        Map<String, Object> aiTokenUsage =
+                (Map<String, Object>) buildProperties(properties, null).get(Constants.AI_TOKEN_USAGE);
+
+        Assert.assertEquals(1200, aiTokenUsage.get(Constants.AI_PROMPT_TOKEN_USAGE));
+        Assert.assertEquals(300, aiTokenUsage.get(Constants.AI_COMPLETION_TOKEN_USAGE));
+        Assert.assertEquals(1500, aiTokenUsage.get(Constants.AI_TOTAL_TOKEN_USAGE));
+        Assert.assertNotEquals(99, aiTokenUsage.get(Constants.HOUR));
+        Assert.assertEquals(800, aiTokenUsage.get("cacheReadInputTokens"));
+    }
+
+    /**
+     * Verifies an aiTokenUsage section that is not a map is ignored, and is not published under
+     * additionalProperties either.
+     */
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testGetPropertiesIgnoresProductTokenUsageSectionThatIsNotAMap() throws Exception {
+
+        for (Object notAMap : Arrays.asList("800", Collections.singletonList(800), 800)) {
+            Map<String, Object> properties = aiRequestProperties();
+            properties.put(APIMgtGatewayConstants.PRODUCT_ANALYTICS_PROPS,
+                    Collections.singletonMap(Constants.AI_TOKEN_USAGE, notAMap));
+
+            Map<String, Object> customProperties = buildProperties(properties, null);
+
+            Map<String, Object> aiTokenUsage = (Map<String, Object>) customProperties.get(Constants.AI_TOKEN_USAGE);
+            Assert.assertEquals(CORE_AI_TOKEN_USAGE_KEYS, aiTokenUsage.keySet());
+            Assert.assertFalse(customProperties.containsKey(Constants.ADDITIONAL_PROPERTIES));
+        }
+    }
+
+    /**
+     * Verifies keys of the aiTokenUsage section that are not strings are skipped while the other counters are added.
+     */
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testGetPropertiesSkipsProductTokenUsageCountersWithNonStringKeys() throws Exception {
+
+        Map<Object, Object> counters = new LinkedHashMap<>();
+        counters.put(1, 100);
+        counters.put("cacheReadInputTokens", 800);
+        Map<String, Object> properties = aiRequestProperties();
+        properties.put(APIMgtGatewayConstants.PRODUCT_ANALYTICS_PROPS,
+                Collections.singletonMap(Constants.AI_TOKEN_USAGE, counters));
+
+        Map<String, Object> aiTokenUsage =
+                (Map<String, Object>) buildProperties(properties, null).get(Constants.AI_TOKEN_USAGE);
+
+        Assert.assertEquals(800, aiTokenUsage.get("cacheReadInputTokens"));
+        Assert.assertFalse(aiTokenUsage.containsKey(1));
+    }
+
+    /**
+     * Verifies the aiTokenUsage section does not create an aiTokenUsage for a request that is not an AI API request
+     * (it would lack the core fields), nor end up under additionalProperties.
+     */
+    @Test
+    public void testGetPropertiesIgnoresProductTokenUsageForNonAiRequest() throws Exception {
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(APIConstants.API_TYPE, "REST");
+        properties.put(APIMgtGatewayConstants.PRODUCT_ANALYTICS_PROPS,
+                Collections.singletonMap(Constants.AI_TOKEN_USAGE,
+                        Collections.singletonMap("cacheReadInputTokens", 800)));
+
+        Map<String, Object> customProperties = buildProperties(properties, null);
+
+        Assert.assertFalse(customProperties.containsKey(Constants.AI_TOKEN_USAGE));
+        Assert.assertFalse(customProperties.containsKey(Constants.ADDITIONAL_PROPERTIES));
+    }
+
+    /**
+     * Verifies every section other than aiTokenUsage is published as is, in order, under a single
+     * additionalProperties object, and not at the root of the event under its own name.
+     */
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testGetPropertiesPublishesOtherProductSectionsUnderAdditionalProperties() throws Exception {
+
+        Map<String, Object> sections = new LinkedHashMap<>();
+        sections.put("featureUsage", Collections.singletonMap("requests", 1));
+        sections.put(Constants.AI_TOKEN_USAGE, Collections.singletonMap("cacheReadInputTokens", 800));
+        sections.put("featureFlags", Collections.singletonList("beta"));
+        sections.put("featureMode", "strict");
+        Map<String, Object> properties = aiRequestProperties();
+        properties.put(APIMgtGatewayConstants.PRODUCT_ANALYTICS_PROPS, sections);
+
+        Map<String, Object> customProperties = buildProperties(properties, null);
+
+        Map<String, Object> expected = new LinkedHashMap<>();
+        expected.put("featureUsage", Collections.singletonMap("requests", 1));
+        expected.put("featureFlags", Collections.singletonList("beta"));
+        expected.put("featureMode", "strict");
+        Map<String, Object> additionalProperties =
+                (Map<String, Object>) customProperties.get(Constants.ADDITIONAL_PROPERTIES);
+        Assert.assertEquals(expected, additionalProperties);
+        Assert.assertEquals(Arrays.asList("featureUsage", "featureFlags", "featureMode"),
+                new ArrayList<>(additionalProperties.keySet()));
+        Assert.assertFalse(customProperties.containsKey("featureUsage"));
+        Assert.assertEquals(800,
+                ((Map<String, Object>) customProperties.get(Constants.AI_TOKEN_USAGE)).get("cacheReadInputTokens"));
+    }
+
+    /**
+     * Verifies sections are published under additionalProperties for a request that is not an AI API request.
+     */
+    @Test
+    public void testGetPropertiesPublishesOtherProductSectionsForNonAiRequest() throws Exception {
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(APIConstants.API_TYPE, "REST");
+        properties.put(APIMgtGatewayConstants.PRODUCT_ANALYTICS_PROPS,
+                Collections.singletonMap("featureUsage", Collections.singletonMap("requests", 1)));
+
+        Map<String, Object> customProperties = buildProperties(properties, null);
+
+        Assert.assertEquals(Collections.singletonMap("featureUsage", Collections.singletonMap("requests", 1)),
+                customProperties.get(Constants.ADDITIONAL_PROPERTIES));
+    }
+
+    /**
+     * Verifies sections with a null value or a key that is not a string are skipped, and that no
+     * additionalProperties object is added when nothing is left to publish.
+     */
+    @Test
+    public void testGetPropertiesSkipsProductSectionsWithNullValueOrNonStringKey() throws Exception {
+
+        Map<Object, Object> sections = new LinkedHashMap<>();
+        sections.put("nullSection", null);
+        sections.put(1, Collections.singletonMap("requests", 1));
+        sections.put(Constants.AI_TOKEN_USAGE, null);
+        Map<String, Object> properties = aiRequestProperties();
+        properties.put(APIMgtGatewayConstants.PRODUCT_ANALYTICS_PROPS, sections);
+
+        Map<String, Object> customProperties = buildProperties(properties, null);
+
+        Assert.assertFalse(customProperties.containsKey(Constants.ADDITIONAL_PROPERTIES));
+        Assert.assertFalse(customProperties.containsKey("nullSection"));
+    }
+
+    /**
+     * Verifies an additionalProperties value already set by a custom analytics data provider is kept as it is.
+     */
+    @Test
+    public void testGetPropertiesKeepsAdditionalPropertiesSetByCustomDataProvider() throws Exception {
+
+        Object customValue = Collections.singletonMap("tenantTier", "gold");
+        AnalyticsCustomDataProvider customDataProvider = Mockito.mock(AnalyticsCustomDataProvider.class);
+        Mockito.when(customDataProvider.getCustomProperties(Mockito.any()))
+                .thenReturn(new HashMap<>(Collections.singletonMap(Constants.ADDITIONAL_PROPERTIES, customValue)));
+        Map<String, Object> properties = aiRequestProperties();
+        properties.put(APIMgtGatewayConstants.PRODUCT_ANALYTICS_PROPS,
+                Collections.singletonMap("featureUsage", Collections.singletonMap("requests", 1)));
+
+        Map<String, Object> customProperties = buildProperties(properties, customDataProvider);
+
+        Assert.assertSame(customValue, customProperties.get(Constants.ADDITIONAL_PROPERTIES));
+    }
+
+    /**
+     * Verifies building the event neither fails on nor changes an unmodifiable PRODUCT_ANALYTICS_PROPS_TO_PUBLISH
+     * map, and publishes copies rather than the message context's own maps.
+     */
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testGetPropertiesDoesNotChangeProductAnalyticsProps() throws Exception {
+
+        Map<String, Object> sections = new LinkedHashMap<>();
+        sections.put(Constants.AI_TOKEN_USAGE,
+                Collections.unmodifiableMap(Collections.singletonMap("cacheReadInputTokens", 800)));
+        sections.put("featureUsage", Collections.singletonMap("requests", 1));
+        Map<String, Object> productProps = Collections.unmodifiableMap(sections);
+        Map<String, Object> snapshot = new LinkedHashMap<>(productProps);
+        Map<String, Object> properties = aiRequestProperties();
+        properties.put(APIMgtGatewayConstants.PRODUCT_ANALYTICS_PROPS, productProps);
+
+        Map<String, Object> customProperties = buildProperties(properties, null);
+        ((Map<String, Object>) customProperties.get(Constants.ADDITIONAL_PROPERTIES)).put("changedLater", true);
+
+        Assert.assertEquals(snapshot, properties.get(APIMgtGatewayConstants.PRODUCT_ANALYTICS_PROPS));
+        Assert.assertNotSame(productProps, customProperties.get(Constants.ADDITIONAL_PROPERTIES));
+        Assert.assertNotSame(productProps.get(Constants.AI_TOKEN_USAGE),
+                customProperties.get(Constants.AI_TOKEN_USAGE));
+    }
+
+    /**
+     * Verifies extension listener data in ADDITIONAL_ANALYTICS_PROPS_TO_PUBLISH is not published, even when it uses
+     * the same names as product sections.
+     */
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testGetPropertiesDoesNotPublishListenerAnalyticsProps() throws Exception {
+
+        Map<String, Object> listenerProps = new LinkedHashMap<>();
+        listenerProps.put("salesRegion", "EMEA");
+        listenerProps.put(Constants.AI_TOKEN_USAGE, Collections.singletonMap("cacheReadInputTokens", 1));
+        listenerProps.put(Constants.ADDITIONAL_PROPERTIES, "listener-value");
+        Map<String, Object> properties = aiRequestProperties();
+        properties.put(APIMgtGatewayConstants.ADDITIONAL_ANALYTICS_PROPS, listenerProps);
+
+        Map<String, Object> customProperties = buildProperties(properties, null);
+
+        Assert.assertFalse(customProperties.containsKey("salesRegion"));
+        Assert.assertFalse(customProperties.containsKey(Constants.ADDITIONAL_PROPERTIES));
+        Map<String, Object> aiTokenUsage = (Map<String, Object>) customProperties.get(Constants.AI_TOKEN_USAGE);
+        Assert.assertEquals(CORE_AI_TOKEN_USAGE_KEYS, aiTokenUsage.keySet());
+    }
+
+    /**
+     * Verifies a product section holding a value the reporters cannot serialise is left out, while the other sections
+     * and the rest of the event are still published, and the resulting event serialises with both Jackson (used by
+     * the analytics publisher) and Gson (used by the ELK reporter).
+     */
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testGetPropertiesSkipsProductSectionsThatCannotBePublished() throws Exception {
+
+        Map<String, Object> selfReferencing = new LinkedHashMap<>();
+        selfReferencing.put("ok", 1);
+        selfReferencing.put("self", selfReferencing);
+        Map<Object, Object> nonStringKey = new LinkedHashMap<>();
+        nonStringKey.put(1, "v");
+        Map<String, Object> sections = new LinkedHashMap<>();
+        sections.put("featureUsage", Collections.singletonMap("requests", 1));
+        sections.put("nan", Collections.singletonMap("v", Double.NaN));
+        sections.put("infinity", Collections.singletonMap("v", Float.POSITIVE_INFINITY));
+        sections.put("object", Collections.singletonMap("v", new Object()));
+        sections.put("optional", Collections.singletonMap("v", java.util.Optional.of("v")));
+        sections.put("date", Collections.singletonMap("v", new java.util.Date(0)));
+        sections.put("array", Collections.singletonMap("v", new byte[]{1, 2}));
+        sections.put("selfReferencing", selfReferencing);
+        sections.put("nonStringKey", Collections.singletonMap("v", nonStringKey));
+        sections.put("tooDeep", nested(MAX_DEPTH_OF_PUBLISHABLE_MAPS + 1));
+        sections.put("notAMap", Double.NaN);
+        Map<String, Object> properties = aiRequestProperties();
+        properties.put(APIMgtGatewayConstants.PRODUCT_ANALYTICS_PROPS, sections);
+
+        Map<String, Object> customProperties = buildProperties(properties, null);
+
+        Assert.assertEquals(Collections.singletonMap("featureUsage", Collections.singletonMap("requests", 1)),
+                customProperties.get(Constants.ADDITIONAL_PROPERTIES));
+        Assert.assertEquals(CORE_AI_TOKEN_USAGE_KEYS,
+                ((Map<String, Object>) customProperties.get(Constants.AI_TOKEN_USAGE)).keySet());
+        assertSerialisable(customProperties);
+    }
+
+    /**
+     * Verifies JSON-compatible section values are published as they are: strings, booleans, whole and decimal numbers
+     * of any standard type, empty containers, nested nulls, lists of maps, and maps nested up to the limit.
+     */
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testGetPropertiesPublishesJsonCompatibleProductSectionValues() throws Exception {
+
+        Map<String, Object> typed = new LinkedHashMap<>();
+        typed.put("string", "ünïcödé");
+        typed.put("bool", true);
+        typed.put("int", 7);
+        typed.put("long", 9007199254740993L);
+        typed.put("double", 1.5);
+        typed.put("decimal", new java.math.BigDecimal("12.3400"));
+        typed.put("bigInteger", java.math.BigInteger.TEN.pow(30));
+        typed.put("emptyMap", new HashMap<>());
+        typed.put("emptyList", new ArrayList<>());
+        typed.put("nullValue", null);
+        typed.put("listOfMaps", Arrays.asList(Collections.singletonMap("id", 1), Collections.singletonMap("id", 2)));
+        Map<String, Object> sections = new LinkedHashMap<>();
+        sections.put("typed", typed);
+        sections.put("deepest", nested(MAX_DEPTH_OF_PUBLISHABLE_MAPS));
+        Map<String, Object> properties = aiRequestProperties();
+        properties.put(APIMgtGatewayConstants.PRODUCT_ANALYTICS_PROPS, sections);
+
+        Map<String, Object> customProperties = buildProperties(properties, null);
+
+        Map<String, Object> additionalProperties =
+                (Map<String, Object>) customProperties.get(Constants.ADDITIONAL_PROPERTIES);
+        Assert.assertEquals(typed, additionalProperties.get("typed"));
+        Assert.assertEquals(nested(MAX_DEPTH_OF_PUBLISHABLE_MAPS), additionalProperties.get("deepest"));
+        assertSerialisable(customProperties);
+    }
+
+    /**
+     * Verifies aiTokenUsage section entries that cannot be serialised, or are null, are left out while the other
+     * counters are added.
+     */
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testGetPropertiesSkipsProductTokenUsageCountersThatCannotBePublished() throws Exception {
+
+        Map<String, Object> counters = new LinkedHashMap<>();
+        counters.put("cacheReadInputTokens", 800);
+        counters.put("nanCounter", Double.NaN);
+        counters.put("objectCounter", new Object());
+        counters.put("nullCounter", null);
+        Map<String, Object> properties = aiRequestProperties();
+        properties.put(APIMgtGatewayConstants.PRODUCT_ANALYTICS_PROPS,
+                Collections.singletonMap(Constants.AI_TOKEN_USAGE, counters));
+
+        Map<String, Object> customProperties = buildProperties(properties, null);
+
+        Map<String, Object> aiTokenUsage = (Map<String, Object>) customProperties.get(Constants.AI_TOKEN_USAGE);
+        Assert.assertEquals(800, aiTokenUsage.get("cacheReadInputTokens"));
+        Assert.assertFalse(aiTokenUsage.containsKey("nanCounter"));
+        Assert.assertFalse(aiTokenUsage.containsKey("objectCounter"));
+        Assert.assertFalse(aiTokenUsage.containsKey("nullCounter"));
+        assertSerialisable(customProperties);
+    }
+
+    /**
+     * Verifies sections and nested keys that cannot be stored as field names (blank, or with an empty dot-separated
+     * segment — Elasticsearch rejects the whole document for an empty field name) are left out, while ordinary dotted
+     * and non-ASCII names are published.
+     */
+    @Test
+    public void testGetPropertiesSkipsProductSectionsWithUnstorableKeys() throws Exception {
+
+        Map<String, Object> sections = new LinkedHashMap<>();
+        sections.put("", Collections.singletonMap("v", 1));
+        sections.put("  ", Collections.singletonMap("v", 1));
+        sections.put(".leading", Collections.singletonMap("v", 1));
+        sections.put("trailing.", Collections.singletonMap("v", 1));
+        sections.put("double..dot", Collections.singletonMap("v", 1));
+        sections.put("nestedEmptyKey", Collections.singletonMap("", 1));
+        sections.put("feature.usage", Collections.singletonMap("ünï", 1));
+        Map<String, Object> properties = aiRequestProperties();
+        properties.put(APIMgtGatewayConstants.PRODUCT_ANALYTICS_PROPS, sections);
+
+        Map<String, Object> customProperties = buildProperties(properties, null);
+
+        Assert.assertEquals(Collections.singletonMap("feature.usage", Collections.singletonMap("ünï", 1)),
+                customProperties.get(Constants.ADDITIONAL_PROPERTIES));
+        assertSerialisable(customProperties);
+    }
+
+    // Number of nested maps a section may hold: the section itself plus nine levels below it.
+    private static final int MAX_DEPTH_OF_PUBLISHABLE_MAPS = 10;
+
+    /**
+     * A section value made of {@code maps} nested maps ending in a string leaf.
+     */
+    private static Map<String, Object> nested(int maps) {
+
+        Map<String, Object> value = Collections.singletonMap("leaf", "x");
+        for (int i = 1; i < maps; i++) {
+            value = Collections.singletonMap("level" + i, value);
+        }
+        return value;
+    }
+
+    private static void assertSerialisable(Map<String, Object> customProperties) {
+
+        new com.fasterxml.jackson.databind.ObjectMapper().convertValue(customProperties, Map.class);
+        new com.google.gson.Gson().toJson(customProperties);
+    }
+
+    /**
+     * Message context properties of an AI API request whose response reported 1200 prompt, 300 completion and 1500
+     * total tokens.
+     */
+    private static Map<String, Object> aiRequestProperties() {
+
+        Map<String, Object> aiResponseMetadata = new HashMap<>();
+        aiResponseMetadata.put(AIAPIConstants.NAME, "OpenAI");
+        aiResponseMetadata.put(AIAPIConstants.API_VERSION, "2.0.0");
+        aiResponseMetadata.put(AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_PROMPT_TOKEN_COUNT, "1200");
+        aiResponseMetadata.put(AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_COMPLETION_TOKEN_COUNT, "300");
+        aiResponseMetadata.put(AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_TOTAL_TOKEN_COUNT, "1500");
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(APIConstants.API_TYPE, "REST");
+        properties.put(AIAPIConstants.AI_API_RESPONSE_METADATA, aiResponseMetadata);
+        return properties;
+    }
+
+    private static Map<String, Object> buildProperties(Map<String, Object> properties,
+                                                       AnalyticsCustomDataProvider customDataProvider)
+            throws Exception {
+
+        setReporterProperties(singleProperty(Constants.SEND_HEADER, "false"));
+        Axis2MessageContext messageContext = mockAxis2MessageContext(properties, Collections.emptyMap());
+        SynapseAnalyticsDataProvider provider = new SynapseAnalyticsDataProvider(messageContext, customDataProvider);
+        setBuildResponseMessage(provider, false);
+        return provider.getProperties();
     }
 
     private static Axis2MessageContext mockAxis2MessageContext(Map<String, Object> properties,
