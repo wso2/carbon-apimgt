@@ -561,7 +561,8 @@ public class ImportUtils {
             // Add/update Async API definition for streaming APIs
             if (PublisherCommonUtils.isStreamingAPI(importedApiDTO)) {
                 // Add the validated Async API definition separately since the UI does the same procedure
-                PublisherCommonUtils.updateAsyncAPIDefinition(importedApi.getUuid(), validationResponse, organization);
+                PublisherCommonUtils.updateAsyncAPIDefinition(importedApi.getUuid(), validationResponse, organization,
+                        importedApiDTO.getScopes() != null ? APIMappingUtil.getScopes(importedApiDTO) : null);
             }
 
             tenantId = APIUtil.getTenantId(RestApiCommonUtil.getLoggedInUsername());

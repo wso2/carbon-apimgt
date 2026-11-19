@@ -2450,6 +2450,119 @@ public class PublisherCommonUtils {
     }
 
     /**
+     * Copies the resolved roles to the URI template scopes, from which local scopes are registered.
+     *
+     * @param uriTemplates URI templates of the API
+     * @param scopes       scopes with resolved roles
+     */
+    private static void applyScopeRolesToURITemplates(Set<URITemplate> uriTemplates,
+            Set<org.wso2.carbon.apimgt.api.model.Scope> scopes) {
+
+        if (uriTemplates == null || scopes == null || scopes.isEmpty()) {
+            return;
+        }
+        for (URITemplate uriTemplate : uriTemplates) {
+            applyScopeRoles(uriTemplate.getScope(), scopes);
+            if (uriTemplate.getScopes() != null) {
+                for (org.wso2.carbon.apimgt.api.model.Scope templateScope : uriTemplate.getScopes()) {
+                    applyScopeRoles(templateScope, scopes);
+                }
+            }
+        }
+    }
+
+    private static void applyScopeRoles(org.wso2.carbon.apimgt.api.model.Scope templateScope,
+            Set<org.wso2.carbon.apimgt.api.model.Scope> scopes) {
+
+        // keep explicit bindings, even ""
+        if (templateScope == null || templateScope.getRoles() != null) {
+            return;
+        }
+        org.wso2.carbon.apimgt.api.model.Scope resolved = APIUtil.findScopeByKey(scopes, templateScope.getKey());
+        if (resolved != null && StringUtils.isNotBlank(resolved.getRoles())) {
+            templateScope.setRoles(resolved.getRoles());
+        }
+    }
+
+    /**
+     * Resolves the scope roles of an AsyncAPI definition and writes them as x-scopes-bindings. Roles are not
+     * validated. If this fails (e.g. the shared scope roles cannot be read), nothing is changed.
+     *
+     * @param api            API
+     * @param asyncApiParser parser of the definition
+     * @param definition     AsyncAPI definition
+     * @param declaredScopes scopes with declared roles, can be null
+     * @return the definition with x-scopes-bindings
+     * @throws APIManagementException if the definition cannot be parsed
+     */
+    private static String resolveAndBindScopes(API api, AbstractAsyncApiParser asyncApiParser, String definition,
+            Set<org.wso2.carbon.apimgt.api.model.Scope> declaredScopes) throws APIManagementException {
+
+        Set<org.wso2.carbon.apimgt.api.model.Scope> scopes = asyncApiParser.getScopes(definition);
+        try {
+            retainDeclaredScopeRoles(scopes, declaredScopes);
+            applySharedScopeRoles(api.getOrganization(), scopes);
+            String boundDefinition = AsyncApiParserUtil.setScopeBindings(definition, scopes);
+            applyScopeRolesToURITemplates(api.getUriTemplates(), scopes);
+            return boundDefinition;
+        } catch (APIManagementException | RuntimeException e) {
+            log.warn("x-scopes-bindings not added to the AsyncAPI definition of API " + api.getId(), e);
+            return definition;
+        }
+    }
+
+    /**
+     * Sets the roles of shared scopes from the key manager, as validateScopes does.
+     *
+     * @param organization organization
+     * @param scopes       scopes parsed from the definition
+     * @throws APIManagementException if the shared scopes cannot be read
+     */
+    private static void applySharedScopeRoles(String organization, Set<org.wso2.carbon.apimgt.api.model.Scope> scopes)
+            throws APIManagementException {
+
+        if (scopes == null || scopes.isEmpty()) {
+            return;
+        }
+        int tenantId = APIUtil.getInternalOrganizationId(organization);
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        Set<org.wso2.carbon.apimgt.api.model.Scope> sharedScopes = new HashSet<>();
+        for (org.wso2.carbon.apimgt.api.model.Scope scope : scopes) {
+            if (!APIUtil.isAllowedScope(scope.getKey())
+                    && apiProvider.isSharedScopeNameExists(scope.getKey(), tenantId)) {
+                sharedScopes.add(scope);
+            }
+        }
+        if (!sharedScopes.isEmpty()) {
+            apiProvider.validateSharedScopes(sharedScopes, APIUtil.getTenantDomainFromTenantId(tenantId));
+        }
+    }
+
+    /**
+     * Fills the roles of scopes with no binding in the definition from the declared scopes.
+     *
+     * @param parsedScopes   scopes parsed from the definition
+     * @param declaredScopes scopes with declared roles, can be null
+     */
+    private static void retainDeclaredScopeRoles(Set<org.wso2.carbon.apimgt.api.model.Scope> parsedScopes,
+            Set<org.wso2.carbon.apimgt.api.model.Scope> declaredScopes) {
+
+        if (parsedScopes == null || declaredScopes == null || declaredScopes.isEmpty()) {
+            return;
+        }
+        for (org.wso2.carbon.apimgt.api.model.Scope parsed : parsedScopes) {
+            // keep explicit bindings, even ""
+            if (parsed.getRoles() != null) {
+                continue;
+            }
+            org.wso2.carbon.apimgt.api.model.Scope declared = APIUtil.findScopeByKey(declaredScopes, parsed.getKey());
+            if (declared != null && StringUtils.isNotBlank(declared.getRoles())) {
+                parsed.setRoles(declared.getRoles());
+            }
+        }
+    }
+
+    /**
      * validate user inout scopes.
      *
      * @param api api information
@@ -3442,6 +3555,22 @@ public class PublisherCommonUtils {
                                                   String organization)
             throws APIManagementException, FaultGatewaysException {
 
+        return updateAsyncAPIDefinition(apiId, response, organization, null);
+    }
+
+    /**
+     * Updates the AsyncAPI definition of the given API.
+     *
+     * @param apiId          API Id
+     * @param response       response of an AsyncAPI definition validation call
+     * @param organization   Organization Identifier
+     * @param declaredScopes scopes with declared roles (e.g. from api.yaml), can be null
+     * @return updated AsyncAPI definition
+     */
+    public static String updateAsyncAPIDefinition(String apiId, APIDefinitionValidationResponse response,
+            String organization, Set<org.wso2.carbon.apimgt.api.model.Scope> declaredScopes)
+            throws APIManagementException, FaultGatewaysException {
+
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         //this will fall if user does not have access to the API or the API does not exist
         API oldapi = apiProvider.getAPIbyUUID(apiId, organization);
@@ -3461,6 +3590,9 @@ public class PublisherCommonUtils {
         //set existing operation policies to URI templates
         apiProvider.setOperationPoliciesToURITemplates(apiId, uriTemplates);
         existingAPI.setUriTemplates(uriTemplates);
+
+        // resolve scope roles and write x-scopes-bindings
+        apiDefinition = resolveAndBindScopes(existingAPI, asyncApiParser, apiDefinition, declaredScopes);
 
         // Update ws uri mapping
         existingAPI.setWsUriMapping(asyncApiParser.buildWSUriMapping(apiDefinition));
@@ -4944,8 +5076,9 @@ public class PublisherCommonUtils {
         apiToAdd.setAsyncApiDefinition(definitionToAdd);
 
         // load topics from AsyncAPI
-        Set<URITemplate> uriTemplates = AsyncApiParserFactory.getAsyncApiParser(
-                AsyncApiParserUtil.getAsyncApiVersion(definitionToAdd), getParserOptionsFromConfig())
+        AbstractAsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
+                AsyncApiParserUtil.getAsyncApiVersion(definitionToAdd), getParserOptionsFromConfig());
+        Set<URITemplate> uriTemplates = asyncApiParser
                 .getURITemplates(definitionToAdd, APIConstants.API_TYPE_WS.equals(apiToAdd.getType())
                                 || !APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(apiToAdd.getGatewayVendor()));
         if (uriTemplates == null || uriTemplates.isEmpty()) {
@@ -4953,6 +5086,9 @@ public class PublisherCommonUtils {
         }
         apiToAdd.setUriTemplates(uriTemplates);
         apiToAdd.setOrganization(organization);
+
+        // resolve scope roles and write x-scopes-bindings
+        definitionToAdd = resolveAndBindScopes(apiToAdd, asyncApiParser, definitionToAdd, apiToAdd.getScopes());
         apiToAdd.setAsyncApiDefinition(definitionToAdd);
 
         Map<String, String> complianceResult = checkGovernanceComplianceSync(apiToAdd.getUuid(),
