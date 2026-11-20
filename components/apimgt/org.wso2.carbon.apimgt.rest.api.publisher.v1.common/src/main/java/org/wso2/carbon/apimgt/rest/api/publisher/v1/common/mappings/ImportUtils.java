@@ -126,11 +126,10 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryIteratorException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -158,6 +157,14 @@ public class ImportUtils {
     public static final String OUT = "out";
     private static final Log log = LogFactory.getLog(ImportUtils.class);
     private static final String SOAPTOREST = "SoapToRest";
+    // Leading bytes that identify the raster image formats accepted as imported thumbnails
+    private static final byte[] PNG_SIGNATURE = {(byte) 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A};
+    private static final byte[] JPEG_SIGNATURE = {(byte) 0xFF, (byte) 0xD8, (byte) 0xFF};
+    private static final byte[] GIF_SIGNATURE = {0x47, 0x49, 0x46, 0x38};
+    private static final byte[] BMP_SIGNATURE = {0x42, 0x4D};
+    private static final byte[] RIFF_SIGNATURE = {0x52, 0x49, 0x46, 0x46};
+    private static final byte[] WEBP_SIGNATURE = {0x57, 0x45, 0x42, 0x50};
+    private static final int WEBP_SIGNATURE_OFFSET = 8;
     // Advanced endpoint config fields that Synapse parses as integers
     private static final String[] ENDPOINT_CONFIG_INTEGER_FIELDS = {APIConstants.ENDPOINT_CONFIG_SUSPEND_DURATION,
             APIConstants.ENDPOINT_CONFIG_RETRY_TIMEOUT, APIConstants.ENDPOINT_CONFIG_RETRY_DELAY};
@@ -3064,8 +3071,7 @@ public class ImportUtils {
         if (imageFolder.isDirectory() && fileArray != null) {
             //This loop locates the icon of the API
             for (File imageFile : fileArray) {
-                if (imageFile != null) {
-                    updateWithThumbnail(imageFile, apiTypeWrapper, apiProvider);
+                if (imageFile != null && updateWithThumbnail(imageFile, apiTypeWrapper, apiProvider)) {
                     //the loop is terminated after successfully locating the icon
                     break;
                 }
@@ -3079,44 +3085,104 @@ public class ImportUtils {
      * @param imageFile      Image file
      * @param apiTypeWrapper API or API Product to update
      * @param apiProvider    API Provider
+     * @return true if the file was set as the thumbnail, false if it was skipped because its content is not a
+     * supported thumbnail type
      * @throws APIManagementException If an error occurs when uploading the thumbnail of the API/API Product
      */
-    private static void updateWithThumbnail(File imageFile, ApiTypeWrapper apiTypeWrapper, APIProvider apiProvider)
-            throws APIManagementException {
+    private static boolean updateWithThumbnail(File imageFile, ApiTypeWrapper apiTypeWrapper,
+                                               APIProvider apiProvider) throws APIManagementException {
 
         Identifier identifier = apiTypeWrapper.getId();
-        String fileName = imageFile.getName();
-        String mimeType = URLConnection.guessContentTypeFromName(fileName);
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-        if (StringUtils.isBlank(mimeType)) {
-            try {
-                // Check whether the icon is in .json format (UI icons are stored as .json)
-                new JsonParser().parse(new FileReader(imageFile));
-                mimeType = APIConstants.APPLICATION_JSON_MEDIA_TYPE;
-            } catch (JsonParseException e) {
-                // Here the exceptions were handled and logged that may arise when parsing the .json file,
-                // and this will not break the flow of importing the API.
-                // If the .json is wrong or cannot be found the API import process will still be carried out.
-                log.error("Failed to read the thumbnail file. ", e);
-            } catch (FileNotFoundException e) {
-                log.error("Failed to find the thumbnail file. ", e);
-            }
-        }
-        try (FileInputStream inputStream = new FileInputStream(imageFile.getAbsolutePath())) {
-            String apiOrApiProductId = (!apiTypeWrapper.isAPIProduct()) ?
-                    apiTypeWrapper.getApi().getUuid() :
-                    apiTypeWrapper.getApiProduct().getUuid();
-            PublisherCommonUtils.updateThumbnail(inputStream, mimeType, apiProvider, apiOrApiProductId, tenantDomain);
-        } catch (FileNotFoundException e) {
-            throw new APIManagementException("Icon for API/API Product: " + identifier.getName() + " is not found.", e,
-                    ExceptionCodes.from(ExceptionCodes.ERROR_UPLOADING_THUMBNAIL, identifier.getName(),
-                            identifier.getVersion()));
+        byte[] imageContent;
+        try {
+            imageContent = FileUtils.readFileToByteArray(imageFile);
         } catch (IOException e) {
             throw new APIManagementException(
                     "Failed to read the image file of API/API Product: " + identifier.getName() + " from the archive.",
                     e, ExceptionCodes
                     .from(ExceptionCodes.ERROR_UPLOADING_THUMBNAIL, identifier.getName(), identifier.getVersion()));
         }
+        // The media type is taken from the file content rather than the file name, so the type stored with the
+        // thumbnail always reflects what the file actually contains
+        String mimeType = detectThumbnailMediaType(imageContent);
+        if (mimeType == null) {
+            log.warn("Skipping thumbnail file " + imageFile.getName() + " of API/API Product: "
+                    + identifier.getName() + " as its content is not a supported image or icon type.");
+            return false;
+        }
+        String apiOrApiProductId = (!apiTypeWrapper.isAPIProduct()) ?
+                apiTypeWrapper.getApi().getUuid() :
+                apiTypeWrapper.getApiProduct().getUuid();
+        try (InputStream inputStream = new ByteArrayInputStream(imageContent)) {
+            PublisherCommonUtils.updateThumbnail(inputStream, mimeType, apiProvider, apiOrApiProductId, tenantDomain);
+        } catch (IOException e) {
+            throw new APIManagementException(
+                    "Failed to read the image file of API/API Product: " + identifier.getName() + " from the archive.",
+                    e, ExceptionCodes
+                    .from(ExceptionCodes.ERROR_UPLOADING_THUMBNAIL, identifier.getName(), identifier.getVersion()));
+        }
+        return true;
+    }
+
+    /**
+     * Detects the media type of an imported thumbnail from its content. Only the raster image formats accepted as
+     * thumbnails and the JSON format used for UI icons are recognised.
+     *
+     * @param content Content of the thumbnail file
+     * @return Detected media type, or null if the content is not a supported thumbnail type
+     */
+    private static String detectThumbnailMediaType(byte[] content) {
+
+        if (matchesSignature(content, PNG_SIGNATURE, 0)) {
+            return "image/png";
+        }
+        if (matchesSignature(content, JPEG_SIGNATURE, 0)) {
+            return "image/jpeg";
+        }
+        if (matchesSignature(content, GIF_SIGNATURE, 0)) {
+            return "image/gif";
+        }
+        if (matchesSignature(content, BMP_SIGNATURE, 0)) {
+            return "image/bmp";
+        }
+        if (matchesSignature(content, RIFF_SIGNATURE, 0)
+                && matchesSignature(content, WEBP_SIGNATURE, WEBP_SIGNATURE_OFFSET)) {
+            return "image/webp";
+        }
+        try {
+            // UI icons are stored as .json objects
+            JsonElement icon = JsonParser.parseString(new String(content, StandardCharsets.UTF_8));
+            if (icon != null && icon.isJsonObject()) {
+                return APIConstants.APPLICATION_JSON_MEDIA_TYPE;
+            }
+        } catch (JsonParseException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Thumbnail content could not be parsed as a JSON icon.", e);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Checks whether the given content carries the given byte signature at the given offset.
+     *
+     * @param content   Content to check
+     * @param signature Expected bytes
+     * @param offset    Position in the content at which the signature is expected
+     * @return true if the signature is present at the offset
+     */
+    private static boolean matchesSignature(byte[] content, byte[] signature, int offset) {
+
+        if (content == null || content.length < offset + signature.length) {
+            return false;
+        }
+        for (int i = 0; i < signature.length; i++) {
+            if (content[offset + i] != signature[i]) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
