@@ -158,6 +158,12 @@ public class InboundWebsocketProcessorUtil {
         VerbInfoDTO verbInfoDTO = null;
         if (inboundMessageContext.getResourcesMap() != null) {
             ResourceInfoDTO resourceInfoDTO = inboundMessageContext.getResourcesMap().get(operation);
+            if (resourceInfoDTO == null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("No matching resource found for GraphQL subscription operation: " + operation);
+                }
+                return null;
+            }
             Set<VerbInfoDTO> verbDTOList = resourceInfoDTO.getHttpVerbs();
             for (VerbInfoDTO verb : verbDTOList) {
                 if (verb.getHttpVerb().equals(GraphQLConstants.SubscriptionConstants.HTTP_METHOD_NAME)) {
