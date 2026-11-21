@@ -940,14 +940,33 @@ public class JWTValidator {
     }
 
     private boolean isValidCertificateBoundAccessToken(SignedJWTInfo signedJWTInfo) throws ParseException { //Holder of Key token
-
-        if (signedJWTInfo.getClientCertificate() == null ||
-                StringUtils.isEmpty(signedJWTInfo.getClientCertificateHash()) ||
-                signedJWTInfo.getCertificateThumbprint() == null) {
-            return true; // If cnf is not available - 200 success
-        }
-        return signedJWTInfo.getClientCertificateHash().equals(signedJWTInfo.getCertificateThumbprint());
+    // Certificate-bound (RFC 8705) enforcement only applies when the feature is enabled,
+    // matching JWTValidatorImpl's behaviour.
+    if (!isCertificateBoundAccessTokenEnabled()) {
+        return true;
     }
+    String certificateThumbprint = signedJWTInfo.getCertificateThumbprint(); // cnf.x5t#S256
+    // No cnf claim -> bearer token semantics.
+    if (StringUtils.isBlank(certificateThumbprint)) {
+        return true;
+    }
+    // cnf present -> a matching client certificate is mandatory.
+    if (signedJWTInfo.getClientCertificate() == null ||
+            StringUtils.isBlank(signedJWTInfo.getClientCertificateHash())) {
+        return false;
+    }
+    return certificateThumbprint.equals(signedJWTInfo.getClientCertificateHash());
+}
+
+private boolean isCertificateBoundAccessTokenEnabled() {
+    APIManagerConfiguration config =
+            ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+    if (config != null) {
+        return Boolean.parseBoolean(
+                config.getFirstProperty(APIConstants.ENABLE_CERTIFICATE_BOUND_ACCESS_TOKEN));
+    }
+    return false;
+}
 
     protected long getTimeStampSkewInSeconds() {
 
