@@ -117,12 +117,25 @@ public class GraphQLRequestProcessor extends RequestProcessor {
                                 String subscriptionOperation = GraphQLProcessorUtil.getOperationListAsString(operation,
                                         inboundMessageContext.getGraphQLSchemaDTO().getTypeDefinitionRegistry(),
                                         fragmentDefinitions);
+                                if (StringUtils.isEmpty(subscriptionOperation)) {
+                                    return InboundWebsocketProcessorUtil.getBadRequestGraphQLFrameErrorDTO(
+                                            "Unable to resolve the subscription operation", operationId);
+                                }
+                                // As per the GraphQL spec, a subscription can have only one root level field,
+                                // so only the first operation is passed downstream. Therefore, the root level
+                                // operation must remain first in the list.
+                                subscriptionOperation = subscriptionOperation.split(",")[0].trim();
                                 // set resource name of subscription operation for analytics event publishing
                                 WebSocketUtils.setApiPropertyToChannel(inboundMessageContext.getCtx(),
                                         APIConstants.API_ELECTED_RESOURCE, subscriptionOperation);
                                 // extract verb info dto with throttle policy for matching verb
                                 VerbInfoDTO verbInfoDTO = InboundWebsocketProcessorUtil
                                         .findMatchingVerb(subscriptionOperation, inboundMessageContext);
+                                if (verbInfoDTO == null) {
+                                    return InboundWebsocketProcessorUtil.getBadRequestGraphQLFrameErrorDTO(
+                                            "No matching resource found for subscription operation: "
+                                                    + subscriptionOperation, operationId);
+                                }
                                 String authType = verbInfoDTO.getAuthType();
                                 // validate scopes based on subscription payload when security is enabled
                                 if (!StringUtils.capitalize(APIConstants.AUTH_TYPE_NONE.toLowerCase())
