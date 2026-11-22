@@ -625,6 +625,33 @@ public class OASParserUtilTest {
     }
 
     @Test
+    public void testParseYamlWithLimitPreservesDateStrings() throws Exception {
+        String yaml =
+                "openapi: \"3.0.0\"\n" +
+                "info:\n" +
+                "  version: 2024-01-01\n" +
+                "  x-released: 2024-01-01T10:00:00Z\n" +
+                "  x-quoted: '2024-01-01'\n" +
+                "x-defaults: &d\n" +
+                "  from: 2023-12-31\n" +
+                "x-merged:\n" +
+                "  <<: *d\n" +
+                "  to: 2024-02-02\n" +
+                "x-by-date:\n" +
+                "  2024-01-01: first\n";
+
+        JsonNode result = OASParserUtil.parseYamlWithLimit(yaml, null);
+
+        Assert.assertEquals("2024-01-01", result.path("info").path("version").asText());
+        Assert.assertTrue(result.path("info").path("version").isTextual());
+        Assert.assertEquals("2024-01-01T10:00:00Z", result.path("info").path("x-released").asText());
+        Assert.assertEquals("2024-01-01", result.path("info").path("x-quoted").asText());
+        Assert.assertEquals("2023-12-31", result.path("x-merged").path("from").asText());
+        Assert.assertEquals("2024-02-02", result.path("x-merged").path("to").asText());
+        Assert.assertEquals("first", result.path("x-by-date").path("2024-01-01").asText());
+    }
+
+    @Test
     public void testPreprocessYamlWithLimitJsonPassThrough() throws Exception {
 
         OASParserOptions parserOptions = new OASParserOptions();

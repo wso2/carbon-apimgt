@@ -44,4 +44,23 @@ public class CommonUtilTest {
         Assert.assertEquals("name", required.get(0).asText());
         Assert.assertEquals("type", required.get(1).asText());
     }
+
+    @Test
+    public void testYamlToJsonPreservesDateStrings() throws Exception {
+        String yaml =
+                "info:\n" +
+                "  version: 2024-01-01\n" +
+                "  released: 2024-01-01 10:00:00\n" +
+                "  quoted: '2024-01-01'\n" +
+                "by-date:\n" +
+                "  2024-01-01: first\n";
+
+        JsonNode root = new ObjectMapper().readTree(CommonUtil.yamlToJson(yaml));
+
+        Assert.assertTrue(root.path("info").path("version").isTextual());
+        Assert.assertEquals("2024-01-01", root.path("info").path("version").asText());
+        Assert.assertEquals("2024-01-01 10:00:00", root.path("info").path("released").asText());
+        Assert.assertEquals("2024-01-01", root.path("info").path("quoted").asText());
+        Assert.assertEquals("first", root.path("by-date").path("2024-01-01").asText());
+    }
 }

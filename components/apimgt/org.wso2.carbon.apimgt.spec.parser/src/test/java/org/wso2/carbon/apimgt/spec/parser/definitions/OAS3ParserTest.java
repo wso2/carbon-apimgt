@@ -169,6 +169,31 @@ public class OAS3ParserTest extends OASTestBase {
     }
 
     @Test
+    public void testValidateOpenAPIDefinitionPreservesUnquotedDates() throws Exception {
+        String openApi = "openapi: \"3.0.0\"\n" +
+                "info:\n" +
+                "  title: My API\n" +
+                "  version: 2024-01-01\n" +
+                "paths:\n" +
+                "  /items:\n" +
+                "    get:\n" +
+                "      responses:\n" +
+                "        \"200\":\n" +
+                "          description: OK\n" +
+                "          content:\n" +
+                "            application/json:\n" +
+                "              example: 2023-12-31\n";
+        APIDefinitionValidationResponse response = oas3Parser.validateAPIDefinition(openApi, true, null);
+        Assert.assertTrue(response.isValid());
+        com.fasterxml.jackson.databind.JsonNode json =
+                new com.fasterxml.jackson.databind.ObjectMapper().readTree(response.getJsonContent());
+        Assert.assertEquals("2024-01-01", json.path("info").path("version").asText());
+        Assert.assertTrue(json.path("info").path("version").isTextual());
+        Assert.assertEquals("2023-12-31", json.path("paths").path("/items").path("get").path("responses")
+                .path("200").path("content").path("application/json").path("example").asText());
+    }
+
+    @Test
     public void testGenerateExample() throws Exception {
         String relativePath = "definitions" + File.separator + "oas3" + File.separator + "oas3_mock_response.yaml";
         String openApi = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath), "UTF-8");
