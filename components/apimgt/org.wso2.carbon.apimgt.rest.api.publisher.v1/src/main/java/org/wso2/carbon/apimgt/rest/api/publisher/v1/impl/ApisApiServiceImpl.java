@@ -4524,16 +4524,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         // Reject unknown or mismatched revisions with API_REVISION_NOT_FOUND (900347)
         // before API lookup or writing deployment mappings.
-        APIRevision apiRevision = apiProvider.getAPIRevision(revisionId);
-        if (apiRevision == null) {
-            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Revision with Revision UUID: "
-                    + revisionId, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, revisionId));
-        }
-        if (!StringUtils.equalsIgnoreCase(apiId, apiRevision.getApiUUID())) {
-            throw new APIMgtResourceNotFoundException("API Revision with Revision UUID: " + revisionId
-                    + " does not belong to API: " + apiId,
-                    ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, revisionId));
-        }
+        validateAPIRevisionForDeployment(apiId, revisionId, apiProvider);
 
         Map<String, Environment> environments = APIUtil.getEnvironments(organization);
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
@@ -5432,6 +5423,32 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         // if apiProvider.getEnvironment(organization, envId) return null, it will throw an exception
         apiProvider.getEnvironment(organization, envId);
+    }
+
+    /**
+     * Rejects a revision deployment request whose revision does not exist or belongs to another API, with
+     * API_REVISION_NOT_FOUND (900347). Otherwise an unknown revision UUID is looked up as an API and fails with a
+     * generic "API not found" error, and a revision of another API reaches APIProvider#deployAPIRevision, which
+     * writes a deployment mapping for it before failing.
+     *
+     * @param apiId       UUID of the API in the request path
+     * @param revisionId  UUID of the revision to deploy
+     * @param apiProvider API provider
+     * @throws APIManagementException if the revision does not exist or does not belong to the API
+     */
+    private void validateAPIRevisionForDeployment(String apiId, String revisionId, APIProvider apiProvider)
+            throws APIManagementException {
+
+        APIRevision apiRevision = apiProvider.getAPIRevision(revisionId);
+        if (apiRevision == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Revision with Revision UUID: "
+                    + revisionId, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, revisionId));
+        }
+        if (!StringUtils.equalsIgnoreCase(apiId, apiRevision.getApiUUID())) {
+            throw new APIMgtResourceNotFoundException("API Revision with Revision UUID: " + revisionId
+                    + " does not belong to API: " + apiId,
+                    ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, revisionId));
+        }
     }
 
     /**
