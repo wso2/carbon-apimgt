@@ -4815,11 +4815,59 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         //publishing keytemplate after update
         if (oldKeyTemplate != null && newKeyTemplate != null) {
-            KeyTemplateEvent keyTemplateEvent = new KeyTemplateEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
-                    tenantId, tenantDomain, APIConstants.EventType.CUSTOM_POLICY_UPDATE.name(),
-                    "update", oldKeyTemplate, newKeyTemplate);
-            APIUtil.sendNotification(keyTemplateEvent, APIConstants.NotifierType.KEY_TEMPLATE.name());
+            if (!oldKeyTemplate.equals(newKeyTemplate)
+                    && isKeyTemplateUsedByOtherGlobalPolicies(oldKeyTemplate, policy.getPolicyName(), tenantId)) {
+                // The old key template is still used by other custom policies. Removing it from the gateways would
+                // stop enforcing those policies, hence only add the new key template.
+                if (log.isDebugEnabled()) {
+                    log.debug("Key template " + oldKeyTemplate + " is still used by other custom policies. "
+                            + "Skipping its removal while updating custom policy " + policy.getPolicyName());
+                }
+                KeyTemplateEvent keyTemplateEvent = new KeyTemplateEvent(UUID.randomUUID().toString(),
+                        System.currentTimeMillis(), APIConstants.EventType.CUSTOM_POLICY_ADD.name(), tenantId,
+                        tenantDomain, "add", newKeyTemplate);
+                APIUtil.sendNotification(keyTemplateEvent, APIConstants.NotifierType.KEY_TEMPLATE.name());
+            } else {
+                KeyTemplateEvent keyTemplateEvent = new KeyTemplateEvent(UUID.randomUUID().toString(),
+                        System.currentTimeMillis(), tenantId, tenantDomain,
+                        APIConstants.EventType.CUSTOM_POLICY_UPDATE.name(), "update", oldKeyTemplate, newKeyTemplate);
+                APIUtil.sendNotification(keyTemplateEvent, APIConstants.NotifierType.KEY_TEMPLATE.name());
+            }
         }
+    }
+
+    /**
+     * Checks whether the given key template is used by any custom (global) policy of the tenant other than the
+     * given policy. Gateways keep a single entry per key template, so it must not be removed while it is in use.
+     * If the custom policies cannot be read, the key template is treated as in use, so that it is kept on the
+     * gateways. Keeping a key template that is no longer used does no harm.
+     *
+     * @param keyTemplate        key template to check
+     * @param excludedPolicyName name of the policy to exclude from the check
+     * @param tenantId           tenant id
+     * @return true if another custom policy of the tenant uses the key template, or if this cannot be checked
+     */
+    private boolean isKeyTemplateUsedByOtherGlobalPolicies(String keyTemplate, String excludedPolicyName,
+                                                           int tenantId) {
+        if (keyTemplate == null) {
+            return false;
+        }
+        GlobalPolicy[] globalPolicies;
+        try {
+            globalPolicies = apiMgtDAO.getGlobalPolicies(tenantId);
+        } catch (APIManagementException e) {
+            // The policy change is already saved, so do not fail the request. Keep the key template instead.
+            log.warn("Error while checking whether key template " + keyTemplate + " is used by other custom "
+                    + "policies. Keeping it on the gateways.", e);
+            return true;
+        }
+        for (GlobalPolicy globalPolicy : globalPolicies) {
+            if (keyTemplate.equals(globalPolicy.getKeyTemplate())
+                    && !globalPolicy.getPolicyName().equals(excludedPolicyName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -4891,10 +4939,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiMgtDAO.removeThrottlePolicy(policyLevel, policyName, tenantID);
 
         if (globalPolicy != null) {
-            KeyTemplateEvent keyTemplateEvent = new KeyTemplateEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
-                    APIConstants.EventType.CUSTOM_POLICY_DELETE.name(), tenantId, tenantDomain,
-                    "remove", globalPolicy.getKeyTemplate());
-            APIUtil.sendNotification(keyTemplateEvent, APIConstants.NotifierType.KEY_TEMPLATE.name());
+            if (isKeyTemplateUsedByOtherGlobalPolicies(globalPolicy.getKeyTemplate(), policyName, tenantID)) {
+                // Other custom policies still use this key template. Removing it from the gateways would stop
+                // enforcing those policies, hence keep it.
+                if (log.isDebugEnabled()) {
+                    log.debug("Key template " + globalPolicy.getKeyTemplate() + " is still used by other custom "
+                            + "policies. Skipping its removal while deleting custom policy " + policyName);
+                }
+            } else {
+                KeyTemplateEvent keyTemplateEvent = new KeyTemplateEvent(UUID.randomUUID().toString(),
+                        System.currentTimeMillis(), APIConstants.EventType.CUSTOM_POLICY_DELETE.name(), tenantId,
+                        tenantDomain, "remove", globalPolicy.getKeyTemplate());
+                APIUtil.sendNotification(keyTemplateEvent, APIConstants.NotifierType.KEY_TEMPLATE.name());
+            }
         }
     }
 

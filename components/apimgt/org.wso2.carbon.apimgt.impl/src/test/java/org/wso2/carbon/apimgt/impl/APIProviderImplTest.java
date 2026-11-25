@@ -94,6 +94,8 @@ import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.Artifac
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.notifier.events.Event;
+import org.wso2.carbon.apimgt.impl.notifier.events.KeyTemplateEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ScopeEvent;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.MCPUtils;
@@ -664,6 +666,132 @@ public class APIProviderImplTest {
         Mockito.when(apimgtDAO.getGlobalPolicy("testName")).
                 thenReturn(globalPolicy);
         assertNotNull(apiProvider.getGlobalPolicy("testName"));
+    }
+
+    @Test
+    public void testDeleteGlobalPolicyKeepsKeyTemplateUsedByOtherPolicies() throws APIManagementException {
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        Mockito.when(apimgtDAO.getGlobalPolicy("policy1"))
+                .thenReturn(createGlobalPolicy("policy1", "$appId:$resourceKey"));
+        Mockito.when(apimgtDAO.getGlobalPolicies(ArgumentMatchers.anyInt()))
+                .thenReturn(new GlobalPolicy[]{createGlobalPolicy("policy2", "$appId:$resourceKey")});
+
+        apiProvider.deletePolicy("admin", PolicyConstants.POLICY_LEVEL_GLOBAL, "policy1");
+
+        // policy2 still uses the key template, so gateways must not be asked to remove it.
+        PowerMockito.verifyStatic(APIUtil.class, Mockito.never());
+        APIUtil.sendNotification(any(), ArgumentMatchers.eq(APIConstants.NotifierType.KEY_TEMPLATE.name()));
+    }
+
+    @Test
+    public void testDeleteGlobalPolicyRemovesKeyTemplateNotUsedByOtherPolicies() throws APIManagementException {
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        Mockito.when(apimgtDAO.getGlobalPolicy("policy1"))
+                .thenReturn(createGlobalPolicy("policy1", "$appId:$resourceKey"));
+        Mockito.when(apimgtDAO.getGlobalPolicies(ArgumentMatchers.anyInt())).thenReturn(new GlobalPolicy[0]);
+
+        apiProvider.deletePolicy("admin", PolicyConstants.POLICY_LEVEL_GLOBAL, "policy1");
+
+        KeyTemplateEvent event = captureKeyTemplateEvent();
+        assertEquals(APIConstants.EventType.CUSTOM_POLICY_DELETE.name(), event.getType());
+        assertEquals("$appId:$resourceKey", event.getKeyTemplate());
+    }
+
+    @Test
+    public void testUpdateGlobalPolicyKeyTemplateKeepsOldTemplateUsedByOtherPolicies() throws APIManagementException {
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        Mockito.when(apimgtDAO.getGlobalPolicy("policy1"))
+                .thenReturn(createGlobalPolicy("policy1", "$appId:$resourceKey"));
+        Mockito.when(apimgtDAO.getGlobalPolicies(ArgumentMatchers.anyInt())).thenReturn(new GlobalPolicy[]{
+                createGlobalPolicy("policy1", "$appId:$resourceKey:$userId"),
+                createGlobalPolicy("policy2", "$appId:$resourceKey")});
+
+        apiProvider.updatePolicy(createGlobalPolicy("policy1", "$appId:$resourceKey:$userId"));
+
+        // policy2 still uses the old key template, so only the new key template is added.
+        KeyTemplateEvent event = captureKeyTemplateEvent();
+        assertEquals(APIConstants.EventType.CUSTOM_POLICY_ADD.name(), event.getType());
+        assertEquals("$appId:$resourceKey:$userId", event.getKeyTemplate());
+    }
+
+    @Test
+    public void testUpdateGlobalPolicyKeyTemplateReplacesTemplateNotUsedByOtherPolicies()
+            throws APIManagementException {
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        Mockito.when(apimgtDAO.getGlobalPolicy("policy1"))
+                .thenReturn(createGlobalPolicy("policy1", "$appId:$resourceKey"));
+        Mockito.when(apimgtDAO.getGlobalPolicies(ArgumentMatchers.anyInt())).thenReturn(new GlobalPolicy[]{
+                createGlobalPolicy("policy1", "$appId:$resourceKey:$userId")});
+
+        apiProvider.updatePolicy(createGlobalPolicy("policy1", "$appId:$resourceKey:$userId"));
+
+        // No other policy uses the old key template, so it is replaced as before.
+        KeyTemplateEvent event = captureKeyTemplateEvent();
+        assertEquals(APIConstants.EventType.CUSTOM_POLICY_UPDATE.name(), event.getType());
+        assertEquals("$appId:$resourceKey", event.getOldKeyTemplate());
+        assertEquals("$appId:$resourceKey:$userId", event.getNewKeyTemplate());
+    }
+
+    @Test
+    public void testUpdateGlobalPolicyWithSameKeyTemplate() throws APIManagementException {
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        Mockito.when(apimgtDAO.getGlobalPolicy("policy1"))
+                .thenReturn(createGlobalPolicy("policy1", "$appId:$resourceKey"));
+
+        apiProvider.updatePolicy(createGlobalPolicy("policy1", "$appId:$resourceKey"));
+
+        // The key template did not change, so there is no usage check and the update is sent as before.
+        Mockito.verify(apimgtDAO, Mockito.never()).getGlobalPolicies(ArgumentMatchers.anyInt());
+        KeyTemplateEvent event = captureKeyTemplateEvent();
+        assertEquals(APIConstants.EventType.CUSTOM_POLICY_UPDATE.name(), event.getType());
+        assertEquals("$appId:$resourceKey", event.getOldKeyTemplate());
+        assertEquals("$appId:$resourceKey", event.getNewKeyTemplate());
+    }
+
+    @Test
+    public void testDeleteGlobalPolicyKeepsKeyTemplateWhenUsageCheckFails() throws APIManagementException {
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        Mockito.when(apimgtDAO.getGlobalPolicy("policy1"))
+                .thenReturn(createGlobalPolicy("policy1", "$appId:$resourceKey"));
+        Mockito.when(apimgtDAO.getGlobalPolicies(ArgumentMatchers.anyInt()))
+                .thenThrow(new APIManagementException("Error while retrieving global policies"));
+
+        apiProvider.deletePolicy("admin", PolicyConstants.POLICY_LEVEL_GLOBAL, "policy1");
+
+        // The delete does not fail, and the key template is kept on the gateways.
+        PowerMockito.verifyStatic(APIUtil.class, Mockito.never());
+        APIUtil.sendNotification(any(), ArgumentMatchers.eq(APIConstants.NotifierType.KEY_TEMPLATE.name()));
+    }
+
+    @Test
+    public void testUpdateGlobalPolicyKeyTemplateAddsNewTemplateWhenUsageCheckFails()
+            throws APIManagementException {
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        Mockito.when(apimgtDAO.getGlobalPolicy("policy1"))
+                .thenReturn(createGlobalPolicy("policy1", "$appId:$resourceKey"));
+        Mockito.when(apimgtDAO.getGlobalPolicies(ArgumentMatchers.anyInt()))
+                .thenThrow(new APIManagementException("Error while retrieving global policies"));
+
+        apiProvider.updatePolicy(createGlobalPolicy("policy1", "$appId:$resourceKey:$userId"));
+
+        // The update does not fail. The new key template is added and the old one is kept on the gateways.
+        KeyTemplateEvent event = captureKeyTemplateEvent();
+        assertEquals(APIConstants.EventType.CUSTOM_POLICY_ADD.name(), event.getType());
+        assertEquals("$appId:$resourceKey:$userId", event.getKeyTemplate());
+    }
+
+    private GlobalPolicy createGlobalPolicy(String name, String keyTemplate) {
+        GlobalPolicy globalPolicy = new GlobalPolicy(name);
+        globalPolicy.setKeyTemplate(keyTemplate);
+        return globalPolicy;
+    }
+
+    private KeyTemplateEvent captureKeyTemplateEvent() {
+        ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+        PowerMockito.verifyStatic(APIUtil.class, Mockito.times(1));
+        APIUtil.sendNotification(eventCaptor.capture(),
+                ArgumentMatchers.eq(APIConstants.NotifierType.KEY_TEMPLATE.name()));
+        return (KeyTemplateEvent) eventCaptor.getValue();
     }
 
     @Test
