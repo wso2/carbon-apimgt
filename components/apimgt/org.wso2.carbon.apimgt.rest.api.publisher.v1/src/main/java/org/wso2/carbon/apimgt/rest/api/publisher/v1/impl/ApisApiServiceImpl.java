@@ -4522,13 +4522,17 @@ public class ApisApiServiceImpl implements ApisApiService {
                     ExceptionCodes.from(ExceptionCodes.THIRD_PARTY_API_REVISION_DEPLOYMENT_UNSUPPORTED, apiId));
         }
 
-        // Reject an unknown revision up front with API_REVISION_NOT_FOUND (900347). Otherwise the
-        // getAPIByID(revisionId) lookup below treats the non-existent revision UUID as an API and fails with
-        // a generic "API not found" error.
+        // Reject unknown or mismatched revisions with API_REVISION_NOT_FOUND (900347)
+        // before API lookup or writing deployment mappings.
         APIRevision apiRevision = apiProvider.getAPIRevision(revisionId);
         if (apiRevision == null) {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Revision with Revision UUID: "
                     + revisionId, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, revisionId));
+        }
+        if (!StringUtils.equalsIgnoreCase(apiId, apiRevision.getApiUUID())) {
+            throw new APIMgtResourceNotFoundException("API Revision with Revision UUID: " + revisionId
+                    + " does not belong to API: " + apiId,
+                    ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, revisionId));
         }
 
         Map<String, Environment> environments = APIUtil.getEnvironments(organization);
@@ -4546,10 +4550,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (isEndpointValidationApplicable(targetEnvironment)) {
                 // Resolve the revision's DTO lazily and only once (its frozen endpoints, not the working copy's,
                 // are what the gateway deploys), and only when an environment the check applies to is targeted.
-                // A revision of another API is left to the existing deployment flow to report.
                 if (!apiRevisionDtoResolved) {
-                    apiRevisionDto = StringUtils.equals(apiId, apiRevision.getApiUUID())
-                            ? getAPIByID(revisionId, apiProvider, organization) : null;
+                    apiRevisionDto = getAPIByID(revisionId, apiProvider, organization);
                     apiRevisionDtoResolved = true;
                 }
                 validateEndpointsForGatewayEnvironmentType(targetEnvironment, apiRevisionDto);
