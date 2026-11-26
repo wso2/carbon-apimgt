@@ -26,13 +26,11 @@ import org.apache.cxf.phase.Phase;
 import javax.ws.rs.core.MultivaluedMap;
 
 /**
- * This class adds security headers to prevent content sniffing and protect against XSS
+ * This class adds security headers to prevent content sniffing.
  */
 public class ResponseOutInterceptor extends AbstractPhaseInterceptor<Message> {
     private static final String X_CONTENT_TYPE_OPTIONS = "X-Content-Type-Options";
-    private static final String X_XSS_PROTECTION = "X-XSS-Protection";
     private static final String NO_SNIFF = "nosniff";
-    private static final String XSS_PROTECTION_MODE_BLOCK = "1; mode=block";
 
     public ResponseOutInterceptor() {
         super(Phase.PRE_PROTOCOL);
@@ -49,7 +47,6 @@ public class ResponseOutInterceptor extends AbstractPhaseInterceptor<Message> {
 
     private void setOutBoundHeaders(Message message, MultivaluedMap<String, Object> headers) {
         headers.add(X_CONTENT_TYPE_OPTIONS, NO_SNIFF);
-        headers.add(X_XSS_PROTECTION, XSS_PROTECTION_MODE_BLOCK);
         message.put(Message.PROTOCOL_HEADERS, headers);
     }
 }
