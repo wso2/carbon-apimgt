@@ -19,14 +19,17 @@
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -35,6 +38,8 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.dto.OrgAccessControl;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
@@ -43,6 +48,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
+import org.wso2.carbon.core.util.CryptoUtil;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -50,7 +56,7 @@ import java.util.List;
 import java.util.Map;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({APIManagerConfiguration.class})
+@PrepareForTest({APIManagerConfiguration.class, CryptoUtil.class, APIUtil.class, RestApiCommonUtil.class})
 public class APIMappingUtilTest {
 
     private APIManagerConfiguration config;
@@ -251,5 +257,44 @@ public class APIMappingUtilTest {
         APIListDTO expanded = (APIListDTO) APIMappingUtil.fromAPIListToDTO(apiList, true);
         Assert.assertEquals(2, expanded.getList().get(0).getAdditionalProperties().size());
         Assert.assertEquals(2, expanded.getList().get(0).getAdditionalPropertiesMap().size());
+    }
+
+    @Test
+    public void testFromAPItoDTOWithJsonObjectCustomParameters() throws Exception {
+
+        // Endpoint config as stored by a WSDL import where customParameters was sent as a JSON object
+        String endpointConfig = "{\"endpoint_type\":\"http\","
+                + "\"production_endpoints\":{\"url\":\"http://localhost:8080/prod\"},"
+                + "\"sandbox_endpoints\":{\"url\":\"http://localhost:8080/sand\"},"
+                + "\"endpoint_security\":{"
+                + "\"production\":{\"enabled\":true,\"type\":\"BASIC\",\"username\":\"user\",\"customParameters\":{}},"
+                + "\"sandbox\":{\"enabled\":true,\"type\":\"BASIC\",\"username\":\"user\",\"customParameters\":{}}}}";
+        API model = APIMappingUtil.fromDTOtoAPI(apidto, PROVIDER);
+        model.setEndpointConfig(endpointConfig);
+        model.setSwaggerDefinition(
+                "{\"openapi\":\"3.0.1\",\"info\":{\"title\":\"test\",\"version\":\"1.0.0\"},\"paths\":{}}");
+
+        PowerMockito.mockStatic(CryptoUtil.class);
+        PowerMockito.when(CryptoUtil.getDefaultCryptoUtil()).thenReturn(Mockito.mock(CryptoUtil.class));
+        APIProvider apiProvider = Mockito.mock(APIProvider.class);
+        // fromAPItoDTO reads tenant-conf (expose endpoint password flag) via the cache, which needs a Carbon runtime
+        PowerMockito.stub(PowerMockito.method(APIUtil.class, "getTenantConfig", String.class))
+                .toReturn(new JSONObject());
+        // Scope mapping looks up the logged-in user's tenant from CarbonContext
+        PowerMockito.stub(PowerMockito.method(RestApiCommonUtil.class, "getLoggedInUserTenantDomain"))
+                .toReturn("carbon.super");
+
+        // Threw ClassCastException (JSONObject cannot be cast to String) before the fix
+        APIDTO dto = APIMappingUtil.fromAPItoDTO(model, apiProvider);
+
+        JSONObject dtoEndpointConfig = (JSONObject) new JSONParser()
+                .parse(new com.google.gson.Gson().toJson(dto.getEndpointConfig()));
+        JSONObject endpointSecurity = (JSONObject) dtoEndpointConfig.get("endpoint_security");
+        for (String env : new String[]{"production", "sandbox"}) {
+            Object customParameters = ((JSONObject) endpointSecurity.get(env)).get("customParameters");
+            Assert.assertTrue(env + " customParameters should be a JSON object",
+                    customParameters instanceof JSONObject);
+            Assert.assertTrue(env + " customParameters should be empty", ((JSONObject) customParameters).isEmpty());
+        }
     }
 }
