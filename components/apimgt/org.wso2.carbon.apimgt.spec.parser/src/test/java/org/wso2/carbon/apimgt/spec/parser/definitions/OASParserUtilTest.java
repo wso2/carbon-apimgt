@@ -20,18 +20,21 @@
 package org.wso2.carbon.apimgt.spec.parser.definitions;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.api.APIDefinition;
+import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.OASParserOptions;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.yaml.snakeyaml.error.YAMLException;
 
 import java.io.File;
 import java.io.IOException;
@@ -637,5 +640,152 @@ public class OASParserUtilTest {
         String jsonWithSpace = "   {\"test\": \"value\"}";
         result = OASParserUtil.preprocessYamlWithLimit(jsonWithSpace, parserOptions);
         Assert.assertEquals("JSON with whitespace should pass through", jsonWithSpace, result);
+    }
+
+    @Test
+    public void testParseYamlWithLimitKeepsDateScalarsAsStrings() throws Exception {
+
+        String yaml = "openapi: 3.0.0\n" +
+                "info:\n" +
+                "  title: Test API\n" +
+                "  version: 2024-01-01\n" +
+                "  x-release-time: 2024-01-01T10:00:00Z\n" +
+                "  x-quoted-date: \"2024-01-01\"\n" +
+                "  x-count: 5\n" +
+                "  x-ratio: 1.5\n" +
+                "  x-enabled: true\n" +
+                "  x-empty: null\n";
+        OASParserOptions parserOptions = new OASParserOptions();
+        parserOptions.setYamlCodePointLimit("10");
+
+        JsonNode info = OASParserUtil.parseYamlWithLimit(yaml, parserOptions).get("info");
+        Assert.assertTrue(info.get("version").isTextual());
+        Assert.assertEquals("2024-01-01", info.get("version").asText());
+        Assert.assertTrue(info.get("x-release-time").isTextual());
+        Assert.assertEquals("2024-01-01T10:00:00Z", info.get("x-release-time").asText());
+        Assert.assertEquals("2024-01-01", info.get("x-quoted-date").asText());
+        Assert.assertTrue(info.get("x-count").isInt());
+        Assert.assertTrue(info.get("x-ratio").isDouble());
+        Assert.assertTrue(info.get("x-enabled").isBoolean());
+        Assert.assertTrue(info.get("x-empty").isNull());
+
+        String json = OASParserUtil.preprocessYamlWithLimit(yaml, parserOptions);
+        Assert.assertTrue(json.contains("\"version\":\"2024-01-01\""));
+    }
+
+    @Test
+    public void testParseYamlWithLimitKeepsDateTimeVariantsAsStrings() throws Exception {
+
+        String yaml = "openapi: 3.0.0\n" +
+                "info:\n" +
+                "  version: 2024-01-01\n" +
+                "  x-space-time: 2024-01-01 10:00:00\n" +
+                "  x-offset-time: 2024-01-01T10:00:00.123+05:30\n" +
+                "  x-tagged: !!timestamp 2024-01-01\n" +
+                "  x-dates:\n" +
+                "    - 2024-01-01\n" +
+                "    - 2024-12-31\n" +
+                "  x-semver: 1.0.0\n" +
+                "  x-year: 2024\n" +
+                "  x-flag: false\n" +
+                "  x-tilde: ~\n";
+
+        // Null parser options use the default loader options.
+        JsonNode info = OASParserUtil.parseYamlWithLimit(yaml, null).get("info");
+        Assert.assertEquals("2024-01-01", info.get("version").textValue());
+        Assert.assertEquals("2024-01-01 10:00:00", info.get("x-space-time").textValue());
+        Assert.assertEquals("2024-01-01T10:00:00.123+05:30", info.get("x-offset-time").textValue());
+        Assert.assertEquals("2024-01-01", info.get("x-tagged").textValue());
+        Assert.assertEquals("2024-01-01", info.get("x-dates").get(0).textValue());
+        Assert.assertEquals("2024-12-31", info.get("x-dates").get(1).textValue());
+        Assert.assertEquals("1.0.0", info.get("x-semver").textValue());
+        Assert.assertTrue(info.get("x-year").isInt());
+        Assert.assertEquals(2024, info.get("x-year").intValue());
+        Assert.assertTrue(info.get("x-flag").isBoolean());
+        Assert.assertFalse(info.get("x-flag").booleanValue());
+        Assert.assertTrue(info.get("x-tilde").isNull());
+    }
+
+    @Test
+    public void testParseYamlWithLimitRejectsYamlAboveCodePointLimit() throws Exception {
+
+        // 0.00001 MB gives a limit of 41 code points.
+        OASParserOptions parserOptions = new OASParserOptions();
+        parserOptions.setYamlCodePointLimit("0.00001");
+        Assert.assertEquals(Integer.valueOf(41), parserOptions.getYamlCodePointLimit());
+
+        JsonNode small = OASParserUtil.parseYamlWithLimit("version: 2024-01-01\n", parserOptions);
+        Assert.assertEquals("2024-01-01", small.get("version").textValue());
+
+        StringBuilder yaml = new StringBuilder("openapi: 3.0.0\ninfo:\n  version: 2024-01-01\n");
+        for (int i = 0; i < 200; i++) {
+            yaml.append("  x-date-").append(i).append(": 2024-01-01\n");
+        }
+        try {
+            OASParserUtil.parseYamlWithLimit(yaml.toString(), parserOptions);
+            Assert.fail("YAML above the code point limit should be rejected");
+        } catch (YAMLException e) {
+            Assert.assertTrue(e.getMessage(), e.getMessage().contains("exceeds the limit"));
+        }
+        try {
+            OASParserUtil.preprocessYamlWithLimit(yaml.toString(), parserOptions);
+            Assert.fail("YAML above the code point limit should be rejected");
+        } catch (YAMLException e) {
+            Assert.assertTrue(e.getMessage(), e.getMessage().contains("exceeds the limit"));
+        }
+    }
+
+    @Test
+    public void testValidateAPIDefinitionKeepsUnquotedDateVersion() throws Exception {
+
+        String yaml = "openapi: 3.0.0\n" +
+                "info:\n" +
+                "  title: Date Version API\n" +
+                "  version: 2024-01-01\n" +
+                "  x-release-date: 2024-01-01\n" +
+                "paths:\n" +
+                "  /items:\n" +
+                "    get:\n" +
+                "      parameters:\n" +
+                "        - name: since\n" +
+                "          in: query\n" +
+                "          schema:\n" +
+                "            type: string\n" +
+                "            format: date\n" +
+                "            example: 2024-01-01\n" +
+                "      responses:\n" +
+                "        '200':\n" +
+                "          description: OK\n";
+        OASParserOptions parserOptions = new OASParserOptions();
+        parserOptions.setYamlCodePointLimit("10");
+
+        APIDefinitionValidationResponse response = OASParserUtil.validateAPIDefinition(yaml, true, parserOptions);
+        Assert.assertTrue("Definition should be valid", response.isValid());
+        Assert.assertEquals("2024-01-01", response.getInfo().getVersion());
+
+        JsonNode content = new ObjectMapper().readTree(response.getJsonContent());
+        Assert.assertEquals("2024-01-01", content.path("info").path("x-release-date").textValue());
+        JsonNode schema = content.path("paths").path("/items").path("get").path("parameters").get(0).path("schema");
+        Assert.assertEquals("2024-01-01", schema.path("example").asText());
+    }
+
+    @Test
+    public void testPreprocessYamlWithLimitKeepsScalarTypes() throws Exception {
+
+        String yaml = "info:\n" +
+                "  version: 2024-01-01\n" +
+                "  x-count: 5\n" +
+                "  x-ratio: 1.5\n" +
+                "  x-enabled: true\n" +
+                "  x-empty: null\n";
+
+        JsonNode info = new ObjectMapper().readTree(OASParserUtil.preprocessYamlWithLimit(yaml, null)).get("info");
+        Assert.assertTrue(info.get("version").isTextual());
+        Assert.assertEquals("2024-01-01", info.get("version").textValue());
+        Assert.assertEquals(5, info.get("x-count").intValue());
+        Assert.assertTrue(info.get("x-ratio").isDouble());
+        Assert.assertEquals(1.5, info.get("x-ratio").doubleValue(), 0.0);
+        Assert.assertTrue(info.get("x-enabled").booleanValue());
+        Assert.assertTrue(info.get("x-empty").isNull());
     }
 }
