@@ -1499,7 +1499,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             } else {
                 String errorMessage = "Error while adding Blocking Condition. Condition type: "
                         + body.getConditionType() + ", " + "value: " + body.getConditionValue() + ". " + e.getMessage();
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+                RestApiUtil.handleBadRequest(errorMessage, e, log);
             }
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving Blocking Condition resource location: Condition type: "
