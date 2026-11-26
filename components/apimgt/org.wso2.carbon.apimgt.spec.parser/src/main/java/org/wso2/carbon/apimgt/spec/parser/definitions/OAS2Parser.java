@@ -1814,16 +1814,22 @@ public class OAS2Parser extends APIDefinition {
             String[] apiTransports = transports.split(",");
             if (ArrayUtils.contains(apiTransports, APISpecParserConstants.HTTPS_PROTOCOL)
                     && hostsWithSchemes.get(APISpecParserConstants.HTTPS_PROTOCOL) != null) {
-                schemes.add(Scheme.HTTPS);
-                host = hostsWithSchemes.get(APISpecParserConstants.HTTPS_PROTOCOL).trim()
+                String httpsHost = hostsWithSchemes.get(APISpecParserConstants.HTTPS_PROTOCOL).trim()
                         .replace(APISpecParserConstants.HTTPS_PROTOCOL_URL_PREFIX, "");
+                if (StringUtils.isNotEmpty(httpsHost)) {
+                    schemes.add(Scheme.HTTPS);
+                    host = httpsHost;
+                }
             }
             if (ArrayUtils.contains(apiTransports, APISpecParserConstants.HTTP_PROTOCOL)
                     && hostsWithSchemes.get(APISpecParserConstants.HTTP_PROTOCOL) != null) {
-                schemes.add(Scheme.HTTP);
-                if (StringUtils.isEmpty(host)) {
-                    host = hostsWithSchemes.get(APISpecParserConstants.HTTP_PROTOCOL).trim()
-                            .replace(APISpecParserConstants.HTTP_PROTOCOL_URL_PREFIX, "");
+                String httpHost = hostsWithSchemes.get(APISpecParserConstants.HTTP_PROTOCOL).trim()
+                        .replace(APISpecParserConstants.HTTP_PROTOCOL_URL_PREFIX, "");
+                if (StringUtils.isNotEmpty(httpHost)) {
+                    schemes.add(Scheme.HTTP);
+                    if (StringUtils.isEmpty(host)) {
+                        host = httpHost;
+                    }
                 }
             }
             swagger.setSchemes(schemes);
