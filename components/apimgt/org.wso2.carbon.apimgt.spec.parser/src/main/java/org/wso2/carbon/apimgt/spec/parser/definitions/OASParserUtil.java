@@ -96,6 +96,7 @@ import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.spec.parser.definitions.mixin.License31Mixin;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
+import org.yaml.snakeyaml.nodes.Tag;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -2629,8 +2630,23 @@ public class OASParserUtil {
             loaderOptions.setCodePointLimit(yamlCodePointLimit);
         }
 
-        Object loaded = new org.yaml.snakeyaml.Yaml(new SafeConstructor(loaderOptions)).load(yaml);
+        Object loaded = new org.yaml.snakeyaml.Yaml(createSafeConstructor(loaderOptions)).load(yaml);
         return new ObjectMapper().valueToTree(loaded);
+    }
+
+    /**
+     * Creates a SafeConstructor that keeps YAML timestamp scalars as their original string values.
+     *
+     * @param loaderOptions loader options to apply to the constructor
+     * @return SafeConstructor instance
+     */
+    private static SafeConstructor createSafeConstructor(LoaderOptions loaderOptions) {
+
+        return new SafeConstructor(loaderOptions) {
+            {
+                this.yamlConstructors.put(Tag.TIMESTAMP, this.yamlConstructors.get(Tag.STR));
+            }
+        };
     }
 
     /**
