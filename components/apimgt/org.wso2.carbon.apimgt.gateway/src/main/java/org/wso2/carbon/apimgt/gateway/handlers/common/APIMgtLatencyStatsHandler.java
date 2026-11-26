@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.gateway.handlers.common;
 
 import com.atlassian.oai.validator.model.Headers;
+import io.opentelemetry.api.trace.SpanKind;
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -37,6 +38,7 @@ import org.jetbrains.annotations.NotNull;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.TelemetryLogUtil;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -90,7 +92,8 @@ public class APIMgtLatencyStatsHandler extends AbstractHandler {
                     (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
             TelemetryTracer tracer = ServiceReferenceHolder.getInstance().getTelemetryTracer();
             TelemetrySpan span = TelemetryUtil.startSpan(APIMgtGatewayConstants.RESOURCE_SPAN, responseLatencySpan,
-                    tracer);
+                    tracer, SpanKind.INTERNAL);
+            GatewayUtils.setCommonHTTPAttributes(span, messageContext);
             messageContext.setProperty(APIMgtGatewayConstants.RESOURCE_SPAN, span);
             TelemetryLogUtil.setTracingIds(span);
         } else if (Util.tracingEnabled()) {

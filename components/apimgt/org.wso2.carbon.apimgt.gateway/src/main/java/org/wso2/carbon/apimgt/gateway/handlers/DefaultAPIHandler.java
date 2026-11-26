@@ -119,6 +119,11 @@ public class DefaultAPIHandler extends AbstractSynapseHandler {
                 if (transportInUrl instanceof String && StringUtils.isNotEmpty((String) transportInUrl)) {
                     String updatedTransportInUrl = ((String) transportInUrl).replaceFirst(selectedPath,
                             selectedAPI.getContext());
+                    // Keep the path the client actually requested: rewriting a default-version alias inserts the
+                    // version segment, which must not leak into inbound HTTP span attributes such as url.path.
+                    if (messageContext.getProperty(APIMgtGatewayConstants.CLIENT_REQUEST_PATH) == null) {
+                        messageContext.setProperty(APIMgtGatewayConstants.CLIENT_REQUEST_PATH, path);
+                    }
                     axis2MessageContext.setProperty(APIConstants.TRANSPORT_URL_IN, updatedTransportInUrl);
                 }
                 messageContext.getPropertyKeySet().remove(RESTConstants.REST_FULL_REQUEST_PATH);
