@@ -17,6 +17,8 @@
  */
 package org.wso2.carbon.apimgt.impl.wsdl;
 
+import io.swagger.inflector.examples.models.Example;
+import io.swagger.inflector.examples.models.ObjectExample;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.junit.Assert;
@@ -51,7 +53,10 @@ import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ APIManagerComponent.class, ServiceReferenceHolder.class,
@@ -181,5 +186,24 @@ public class SequenceUtilsTestCase {
         List<JSONObject> mapping = SequenceUtils.getResourceParametersFromSwagger(swaggerObj, resourceObj, HTTP_METHOD);
         Assert.assertNotNull(mapping);
         Assert.assertTrue("Failed to process the parameter mapping", mapping.size() == 2);
+    }
+
+    @Test
+    public void testListExamplesWithNullExample() {
+        Map<String, String> parameterJsonPathMapping = new HashMap<>();
+        SequenceUtils.listExamples("param", null, parameterJsonPathMapping);
+        Assert.assertEquals("simple", parameterJsonPathMapping.get("param"));
+    }
+
+    @Test
+    public void testListExamplesWithNullChildExample() {
+        // A WSDL element without a generated example results in a null child value
+        ObjectExample rootExample = new ObjectExample();
+        Map<String, Example> values = new LinkedHashMap<>();
+        values.put("intA", null);
+        rootExample.setValues(values);
+        Map<String, String> parameterJsonPathMapping = new HashMap<>();
+        SequenceUtils.listExamples("Add", rootExample, parameterJsonPathMapping);
+        Assert.assertEquals("simple", parameterJsonPathMapping.get("Add.intA"));
     }
 }
