@@ -90,11 +90,12 @@ public final class ApacheFeignHttpClient implements Client {
 
         // per request timeouts
         RequestConfig requestConfig =
-                (client instanceof Configurable ? RequestConfig.copy(((Configurable) client).getConfig())
-                        : RequestConfig.custom())
-                        .setConnectTimeout(options.connectTimeoutMillis())
-                        .setSocketTimeout(options.readTimeoutMillis())
-                        .build();
+        (client instanceof Configurable ? RequestConfig.copy(((Configurable) client).getConfig())
+                : RequestConfig.custom())
+                .setConnectTimeout(options.connectTimeoutMillis())
+                .setConnectionRequestTimeout(options.connectTimeoutMillis())
+                .setSocketTimeout(options.readTimeoutMillis())
+                .build();
         requestBuilder.setConfig(requestConfig);
 
         URI uri = new URIBuilder(request.url()).build();
