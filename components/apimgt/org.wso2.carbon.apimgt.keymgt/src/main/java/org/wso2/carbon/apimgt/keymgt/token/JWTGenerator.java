@@ -138,9 +138,10 @@ public class JWTGenerator extends AbstractJWTGenerator {
         int tenantId = APIUtil.getTenantId(username);
         if (jwtConfigurationDto.isEnableUserClaims()) {
             String accessToken = validationContext.getAccessToken();
+            String consumerKey = validationContext.getValidationInfoDTO().getConsumerKey();
             Map<String, String> claims = getClaims(username, accessToken, tenantId,
                     jwtConfigurationDto.getConsumerDialectUri(),
-                    validationContext.getValidationInfoDTO().getKeyManager());
+                    validationContext.getValidationInfoDTO().getKeyManager(), consumerKey);
             customClaims.putAll(claims);
         }
         ClaimsRetriever claimsRetriever = getClaimsRetriever();
@@ -151,16 +152,17 @@ public class JWTGenerator extends AbstractJWTGenerator {
     }
 
     private Map<String, String> getClaims(String username, String accessToken, int tenantId, String dialectURI,
-                                          String keyManager)
+                                          String keyManager, String consumerKey)
             throws APIManagementException {
 
         APIManagerConfiguration apiManagerConfiguration =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
         ExtendedJWTConfigurationDto jwtConfigurationDto = apiManagerConfiguration.getJwtConfigurationDto();
         boolean isBindFederatedUserClaims = jwtConfigurationDto.isBindFederatedUserClaimsForOpaque();
-        if (apiManagerConfiguration.isJWTClaimCacheEnabled()) {
+        boolean isJWTClaimCacheEnabled = apiManagerConfiguration.isJWTClaimCacheEnabled();
+        if (isJWTClaimCacheEnabled && StringUtils.isNotEmpty(consumerKey)) {
             log.debug("JWT claim cache is enabled. Looking up claims in cache");
-            String cacheKey = username.concat("_").concat(String.valueOf(tenantId));
+            String cacheKey = getClaimCacheKey(username, tenantId, keyManager, consumerKey);
             Object claims = CacheProvider.getJWTClaimCache().get(cacheKey);
             if (claims instanceof Map) {
                 return (Map<String, String>) claims;
@@ -182,7 +184,12 @@ public class JWTGenerator extends AbstractJWTGenerator {
                 }
             }
         } else {
-            log.debug("JWT claim cache is disabled. Retrieving claims directly from key manager");
+            if (isJWTClaimCacheEnabled && log.isDebugEnabled()) {
+                log.debug("Consumer key is not available. Skipping JWT claim cache and retrieving claims " +
+                        "directly from key manager");
+            } else {
+                log.debug("JWT claim cache is disabled. Retrieving claims directly from key manager");
+            }
             Map<String, String> tempClaims = getClaimsFromKeyManager(username, accessToken, tenantId, dialectURI,
                     keyManager, isBindFederatedUserClaims);
             if (tempClaims != null) {
@@ -191,6 +198,11 @@ public class JWTGenerator extends AbstractJWTGenerator {
             }
         }
         return new HashMap<>();
+    }
+
+    private String getClaimCacheKey(String username, int tenantId, String keyManager, String consumerKey) {
+        return String.join(":", username, String.valueOf(tenantId), StringUtils.defaultString(keyManager),
+                consumerKey);
     }
 
     /**
