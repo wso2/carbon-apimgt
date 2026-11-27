@@ -46,6 +46,7 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
+import org.yaml.snakeyaml.nodes.Tag;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -251,10 +252,25 @@ public class CommonUtil {
      */
     public static String yamlToJson(String yaml) throws IOException {
 
-        Object obj = new Yaml(new SafeConstructor(new LoaderOptions())).load(yaml);
+        Object obj = new Yaml(createSafeConstructor(new LoaderOptions())).load(yaml);
 
         ObjectMapper jsonWriter = new ObjectMapper();
         return jsonWriter.writeValueAsString(obj);
+    }
+
+    /**
+     * Creates a SafeConstructor that keeps YAML timestamp scalars as their original string values.
+     *
+     * @param loaderOptions loader options to apply to the constructor
+     * @return SafeConstructor instance
+     */
+    private static SafeConstructor createSafeConstructor(LoaderOptions loaderOptions) {
+
+        return new SafeConstructor(loaderOptions) {
+            {
+                this.yamlConstructors.put(Tag.TIMESTAMP, this.yamlConstructors.get(Tag.STR));
+            }
+        };
     }
 
     /**
