@@ -23,7 +23,7 @@ package org.wso2.carbon.apimgt.api.gateway;
  */
 public class FailoverPolicyConfigDTO {
 
-    private static final long DEFAULT_REQUEST_TIMEOUT = 30000L;
+    private static final long DEFAULT_REQUEST_TIMEOUT = 30L;
     private static final long DEFAULT_SUSPEND_DURATION = 0L;
     private FailoverPolicyDeploymentConfigDTO production;
     private FailoverPolicyDeploymentConfigDTO sandbox;
@@ -73,7 +73,7 @@ public class FailoverPolicyConfigDTO {
     /**
      * Gets the request timeout duration.
      *
-     * @return the request timeout in milliseconds
+     * @return the request timeout in seconds
      */
     public Long getRequestTimeout() {
 
@@ -83,7 +83,7 @@ public class FailoverPolicyConfigDTO {
     /**
      * Sets the request timeout duration.
      *
-     * @param requestTimeout the request timeout in milliseconds to set
+     * @param requestTimeout the request timeout in seconds to set
      */
     public void setRequestTimeout(Long requestTimeout) {
         validateDuration(suspendDuration, "Request timeout");

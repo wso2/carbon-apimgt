@@ -28,6 +28,7 @@ import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.velocity.exception.ResourceNotFoundException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.simple.JSONObject;
@@ -50,6 +51,7 @@ import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.SequenceBackendData;
 import org.wso2.carbon.apimgt.api.model.SimplifiedEndpoint;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -94,6 +96,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -1181,7 +1184,40 @@ public class TemplateBuilderUtil {
         // Secure-vault mode: register each GCP service-account key chunk in the vault and assign the aliases
         // on the endpoints before the template is rendered, so it emits vault-lookups instead of chunk values.
         registerGCPServiceAccountKeyVaultChunks(type, endpoints, defaultEndpoint, api, gatewayAPIDTO);
-        String endpointsString = builder.getStringForEndpoints(type, endpoints, defaultEndpoint);
+
+        boolean faultFailoverEnabled = APIUtil.isFaultFailoverEnabled() && hasModelFailoverPolicy(api);
+        String faultSeqName = GatewayUtils.getEndpointKey(api) + AIAPIConstants.ENDPOINT_FAULT_SEQUENCE + type;
+        String faultSeqContent = null;
+        if (faultFailoverEnabled) {
+            try {
+                String faultSeqString = builder.getStringForEndpointsFaultSequence(type);
+                OMElement faultSeqElement = APIUtil.buildOMElement(
+                        new ByteArrayInputStream(faultSeqString.getBytes(StandardCharsets.UTF_8)));
+                if (faultSeqElement == null) {
+                    throw new APIManagementException("The fault failover sequence for API " + api.getId()
+                            + " (" + type + ") could not be parsed");
+                }
+                QName nameAttribute = new QName(APIConstants.OM_ELEMENT_NAME);
+                if (faultSeqElement.getAttribute(nameAttribute) != null) {
+                    faultSeqElement.getAttribute(nameAttribute).setAttributeValue(faultSeqName);
+                }
+                faultSeqContent = APIUtil.convertOMtoString(faultSeqElement);
+            } catch (Exception e) {
+                if (!isTemplateMissing(e)) {
+                    throw new APIManagementException("Could not render the fault failover sequence for API "
+                            + api.getId() + " (" + type + ")", e);
+                }
+                log.warn("The fault failover sequence template was not found, so API " + api.getId() + " (" + type
+                        + ") is deployed without fault-path failover. Check that "
+                        + "ai_api_endpoints_fault_seq_template.xml is present in the api_templates folder.");
+                faultFailoverEnabled = false;
+            }
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Fault failover enabled for API " + api.getId() + " (" + type + "): " + faultFailoverEnabled);
+        }
+
+        String endpointsString = builder.getStringForEndpoints(type, endpoints, defaultEndpoint, faultFailoverEnabled);
         OMElement endpointsElement = APIUtil.buildOMElement(
                 new ByteArrayInputStream(endpointsString.getBytes()));
 
@@ -1189,14 +1225,58 @@ public class TemplateBuilderUtil {
             QName nameAttribute = new QName(APIConstants.OM_ELEMENT_NAME);
             if (endpointsElement.getAttribute(nameAttribute) != null) {
                 endpointsElement.getAttribute(nameAttribute).setAttributeValue(
-                        getEndpointKey(api) + AIAPIConstants.ENDPOINT_SEQUENCE + type);
+                        GatewayUtils.getEndpointKey(api) + AIAPIConstants.ENDPOINT_SEQUENCE + type);
+            }
+            if (faultFailoverEnabled) {
+                String onErrorTarget = endpointsElement.getAttributeValue(new QName("onError"));
+                if (!faultSeqName.equals(onErrorTarget)) {
+                    log.warn("The endpoints sequence for API " + api.getId() + " (" + type + ") does not route "
+                            + "faults to " + faultSeqName + " (onError: " + onErrorTarget + "), so fault-path "
+                            + "failover will not run. Check that ai_api_endpoints_seq_template.xml has not been "
+                            + "customised from an older version.");
+                }
             }
             GatewayContentDTO endpointSequence = new GatewayContentDTO();
-            endpointSequence.setName(getEndpointKey(api) + AIAPIConstants.ENDPOINT_SEQUENCE + type);
+            endpointSequence.setName(GatewayUtils.getEndpointKey(api) + AIAPIConstants.ENDPOINT_SEQUENCE + type);
             endpointSequence.setContent(APIUtil.convertOMtoString(endpointsElement));
             gatewayAPIDTO.setSequenceToBeAdd(
                     addGatewayContentToList(endpointSequence, gatewayAPIDTO.getSequenceToBeAdd()));
         }
+
+        if (faultFailoverEnabled) {
+            GatewayContentDTO faultSequence = new GatewayContentDTO();
+            faultSequence.setName(faultSeqName);
+            faultSequence.setContent(faultSeqContent);
+            gatewayAPIDTO.setSequenceToBeAdd(
+                    addGatewayContentToList(faultSequence, gatewayAPIDTO.getSequenceToBeAdd()));
+            if (log.isDebugEnabled()) {
+                log.debug("Added fault failover sequence: " + faultSeqName);
+            }
+        }
+    }
+
+    /** Whether the API or any of its resources has a Model Failover policy. */
+    private static boolean hasModelFailoverPolicy(API api) {
+
+        Stream<OperationPolicy> apiLevel = api.getApiPolicies() == null ? Stream.empty()
+                : api.getApiPolicies().stream();
+        Stream<OperationPolicy> resourceLevel = api.getUriTemplates() == null ? Stream.empty()
+                : api.getUriTemplates().stream()
+                        .filter(t -> t.getOperationPolicies() != null)
+                        .flatMap(t -> t.getOperationPolicies().stream());
+        return Stream.concat(apiLevel, resourceLevel)
+                .anyMatch(p -> AIAPIConstants.MODEL_FAILOVER_POLICY_NAME.equals(p.getPolicyName()));
+    }
+
+    /** Whether the failure was caused by the template file not being found. */
+    private static boolean isTemplateMissing(Throwable e) {
+
+        for (Throwable cause = e; cause != null; cause = cause.getCause()) {
+            if (cause instanceof ResourceNotFoundException) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
