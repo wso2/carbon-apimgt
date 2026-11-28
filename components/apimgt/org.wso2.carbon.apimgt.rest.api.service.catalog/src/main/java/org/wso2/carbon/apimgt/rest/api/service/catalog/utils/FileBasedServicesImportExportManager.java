@@ -167,9 +167,7 @@ public class FileBasedServicesImportExportManager {
         if (!targetFile.toPath().startsWith(baseFile.toPath())) {
             throw new IOException("Archive name resolves outside the target directory: " + archiveName);
         }
-        try (FileOutputStream fileOutputStream = new FileOutputStream(archiveLocation + File.separator +
-                archiveName
-                + APIConstants.ZIP_FILE_EXTENSION);
+        try (FileOutputStream fileOutputStream = new FileOutputStream(targetFile);
              ZipOutputStream zipOutputStream = new ZipOutputStream(fileOutputStream)) {
             for (File file : fileList) {
                 if (!file.isDirectory()) {

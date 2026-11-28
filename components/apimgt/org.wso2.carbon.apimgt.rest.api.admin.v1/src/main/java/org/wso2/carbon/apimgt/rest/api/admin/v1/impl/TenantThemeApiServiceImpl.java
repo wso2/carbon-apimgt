@@ -16,7 +16,6 @@
  */
 package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -34,7 +33,6 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -44,7 +42,6 @@ import javax.ws.rs.core.Response;
 public class TenantThemeApiServiceImpl implements TenantThemeApiService {
 
     private static final Log log = LogFactory.getLog(TenantThemeApiServiceImpl.class);
-    private static final String TENANT_THEMES_EXPORT_DIR_PREFIX = "exported-tenant-themes";
 
     /**
      * Import a Tenant Theme for a particular tenant by uploading an archive file.
@@ -96,19 +93,14 @@ public class TenantThemeApiServiceImpl implements TenantThemeApiService {
         }
 
         InputStream tenantTheme = apiAdmin.getTenantTheme(tenantId);
-        String tempPath =
-                System.getProperty(RestApiConstants.JAVA_IO_TMPDIR) + File.separator + TENANT_THEMES_EXPORT_DIR_PREFIX;
-        String tempFile = tenantDomain + APIConstants.ZIP_FILE_EXTENSION;
-        File tenantThemeArchive = new File(tempPath, tempFile);
-
-        try {
-            FileUtils.copyInputStreamToFile(tenantTheme, tenantThemeArchive);
-            return Response.ok(tenantThemeArchive, MediaType.APPLICATION_OCTET_STREAM)
-                    .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\""
-                            + tenantThemeArchive.getName() + "\"").build();
-        } catch (IOException e) {
-            throw new APIManagementException(e.getMessage(), e,
-                    ExceptionCodes.from(ExceptionCodes.TENANT_THEME_EXPORT_FAILED, tenantDomain, e.getMessage()));
+        if (tenantTheme == null) {
+            RestApiUtil.handleResourceNotFoundError(
+                    "Tenant Theme for tenant " + tenantDomain + " does not exist.", log);
         }
+        // The theme content is already held in memory, so it is streamed to the client directly rather than
+        // being staged in a temporary file first
+        return Response.ok(tenantTheme, MediaType.APPLICATION_OCTET_STREAM)
+                .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\""
+                        + tenantDomain + APIConstants.ZIP_FILE_EXTENSION + "\"").build();
     }
 }

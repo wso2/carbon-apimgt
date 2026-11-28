@@ -1074,31 +1074,38 @@ public class ExportUtils {
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         JsonArray certificatesList = new JsonArray();
-        certificateMetadataDTOS.forEach(metadataDTO -> {
+        for (CertificateMetadataDTO metadataDTO : certificateMetadataDTOS) {
+            String metaDataAlias = metadataDTO.getAlias();
+            // The alias becomes the exported certificate file name, so it must not carry any path segments
+            if (metaDataAlias == null || metaDataAlias.contains("/") || metaDataAlias.contains("\\")
+                    || metaDataAlias.contains("..")) {
+                throw new APIImportExportException("Invalid certificate alias: " + metaDataAlias
+                        + ". For tenantId: " + tenantId + " hostname: " + url);
+            }
             try (ByteArrayInputStream certificate = certificateManager.getCertificateContent(tenantId,
-                    metadataDTO.getAlias())) {
+                    metaDataAlias)) {
                 byte[] certificateContent = IOUtils.toByteArray(certificate);
                 String certificateContentEncoded = APIConstants.BEGIN_CERTIFICATE_STRING.concat(System.lineSeparator())
                         .concat(new String(Base64.encodeBase64(certificateContent))).concat(System.lineSeparator())
                         .concat(APIConstants.END_CERTIFICATE_STRING);
-                CommonUtil.writeFile(certDirectoryPath + File.separator + metadataDTO.getAlias() + ".crt",
+                CommonUtil.writeFile(certDirectoryPath + File.separator + metaDataAlias + ".crt",
                         certificateContentEncoded);
                 // Add the file name to the Certificate Metadata
                 JsonObject modifiedCertificateMetadata = (JsonObject) gson.toJsonTree(metadataDTO);
                 modifiedCertificateMetadata
-                        .addProperty(ImportExportConstants.CERTIFICATE_FILE, metadataDTO.getAlias() + ".crt");
+                        .addProperty(ImportExportConstants.CERTIFICATE_FILE, metaDataAlias + ".crt");
                 certificatesList.add(modifiedCertificateMetadata);
             } catch (APIManagementException e) {
                 log.error("Error retrieving certificate content. For tenantId: " + tenantId + " hostname: " + url
-                        + " alias: " + metadataDTO.getAlias(), e);
+                        + " alias: " + metaDataAlias, e);
             } catch (IOException e) {
                 log.error("Error while converting certificate content to Byte Array. For tenantId: " + tenantId
-                        + " hostname: " + url + " alias: " + metadataDTO.getAlias(), e);
+                        + " hostname: " + url + " alias: " + metaDataAlias, e);
             } catch (APIImportExportException e) {
                 log.error("Error while writing the certificate content. For tenantId: " + tenantId + " hostname: " + url
-                        + " alias: " + metadataDTO.getAlias(), e);
+                        + " alias: " + metaDataAlias, e);
             }
-        });
+        }
         return certificatesList;
     }
 
