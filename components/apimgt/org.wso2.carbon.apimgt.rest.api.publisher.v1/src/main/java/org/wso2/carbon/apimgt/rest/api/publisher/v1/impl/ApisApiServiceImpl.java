@@ -4522,18 +4522,14 @@ public class ApisApiServiceImpl implements ApisApiService {
                     ExceptionCodes.from(ExceptionCodes.THIRD_PARTY_API_REVISION_DEPLOYMENT_UNSUPPORTED, apiId));
         }
 
-        // Reject an unknown revision up front with API_REVISION_NOT_FOUND (900347). Otherwise the
-        // getAPIByID(revisionId) lookup below treats the non-existent revision UUID as an API and fails with
-        // a generic "API not found" error. Resolve the revision's DTO once (its frozen endpoints, not the
-        // working copy's, are what the gateway deploys), rather than once per environment.
-        if (apiProvider.getAPIRevision(revisionId) == null) {
-            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Revision with Revision UUID: "
-                    + revisionId, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, revisionId));
-        }
-        APIDTO apiRevisionDto = getAPIByID(revisionId, apiProvider, organization);
+        // Reject unknown or mismatched revisions with API_REVISION_NOT_FOUND (900347)
+        // before API lookup or writing deployment mappings.
+        validateAPIRevisionForDeployment(apiId, revisionId, apiProvider);
 
         Map<String, Environment> environments = APIUtil.getEnvironments(organization);
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
+        APIDTO apiRevisionDto = null;
+        boolean apiRevisionDtoResolved = false;
         for (APIRevisionDeploymentDTO apiRevisionDeploymentDTO : apIRevisionDeploymentDTOList) {
             String environment = apiRevisionDeploymentDTO.getName();
             Boolean displayOnDevportal = apiRevisionDeploymentDTO.isDisplayOnDevportal();
@@ -4541,7 +4537,16 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIRevisionDeployment apiRevisionDeployment = ApisApiServiceImplUtils.mapAPIRevisionDeploymentWithValidation(revisionId,
                     environments, environment, displayOnDevportal, vhost, true);
 
-            validateEndpointsForGatewayEnvironmentType(environments.get(environment), apiRevisionDto);
+            Environment targetEnvironment = environments.get(environment);
+            if (isEndpointValidationApplicable(targetEnvironment)) {
+                // Resolve the revision's DTO lazily and only once (its frozen endpoints, not the working copy's,
+                // are what the gateway deploys), and only when an environment the check applies to is targeted.
+                if (!apiRevisionDtoResolved) {
+                    apiRevisionDto = getAPIByID(revisionId, apiProvider, organization);
+                    apiRevisionDtoResolved = true;
+                }
+                validateEndpointsForGatewayEnvironmentType(targetEnvironment, apiRevisionDto);
+            }
             apiRevisionDeployments.add(apiRevisionDeployment);
         }
         Map<String, String> complianceResult = PublisherCommonUtils.checkGovernanceComplianceSync(apiId,
@@ -5421,6 +5426,51 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     /**
+     * Rejects a revision deployment request whose revision does not exist or belongs to another API, with
+     * API_REVISION_NOT_FOUND (900347). Otherwise an unknown revision UUID is looked up as an API and fails with a
+     * generic "API not found" error, and a revision of another API reaches APIProvider#deployAPIRevision, which
+     * writes a deployment mapping for it before failing.
+     *
+     * @param apiId       UUID of the API in the request path
+     * @param revisionId  UUID of the revision to deploy
+     * @param apiProvider API provider
+     * @throws APIManagementException if the revision does not exist or does not belong to the API
+     */
+    private void validateAPIRevisionForDeployment(String apiId, String revisionId, APIProvider apiProvider)
+            throws APIManagementException {
+
+        APIRevision apiRevision = apiProvider.getAPIRevision(revisionId);
+        if (apiRevision == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Revision with Revision UUID: "
+                    + revisionId, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, revisionId));
+        }
+        if (!StringUtils.equalsIgnoreCase(apiId, apiRevision.getApiUUID())) {
+            throw new APIMgtResourceNotFoundException("API Revision with Revision UUID: " + revisionId
+                    + " does not belong to API: " + apiId,
+                    ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, revisionId));
+        }
+    }
+
+    /**
+     * Checks whether the upfront endpoint validation applies to the given gateway environment. It applies only to
+     * production- or sandbox-type environments of the Regular (Synapse) gateway type, which are the only ones whose
+     * artifact generation (TemplateBuilderUtil#createAPIGatewayDTOtoPublishAPI) skips an API that lacks the matching
+     * endpoint. Hybrid environments and other gateway types are left unchanged.
+     *
+     * @param environment target gateway environment
+     * @return true if the validation applies
+     */
+    private boolean isEndpointValidationApplicable(Environment environment) {
+
+        if (environment == null
+                || !APIConstants.API_GATEWAY_TYPE_REGULAR.equalsIgnoreCase(environment.getGatewayType())) {
+            return false;
+        }
+        return APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType())
+                || APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environment.getType());
+    }
+
+    /**
      * Rejects a revision deployment when the target gateway environment's type requires an endpoint the API does
      * not define. Mirrors the guard in TemplateBuilderUtil#createAPIGatewayDTOtoPublishAPI, which would otherwise
      * skip the API during synapse artifact generation and surface as "Storage returned null" on the gateway.
@@ -5444,18 +5494,24 @@ public class ApisApiServiceImpl implements ApisApiService {
         if (!requiresProductionEndpoint && !requiresSandboxEndpoint) {
             return;
         }
+        // AI APIs can define endpoints outside endpointConfig (API endpoints with a primary production / sandbox
+        // endpoint), which the generation-time guard counts but endpointConfig alone does not show. They are left
+        // to the generation-time guard, which logs a WARN when it skips one.
+        if (apiDto.getSubtypeConfiguration() != null && APIConstants.API_SUBTYPE_AI_API
+                .equals(apiDto.getSubtypeConfiguration().getSubtype())) {
+            return;
+        }
         if (!(apiDto.getEndpointConfig() instanceof Map)) {
             return;
         }
         Map endpointConfigMap = (Map) apiDto.getEndpointConfig();
-        if (APIConstants.ENDPOINT_TYPE_AWSLAMBDA
-                .equals(endpointConfigMap.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+        if (APIConstants.ENDPOINT_TYPE_AWSLAMBDA.equalsIgnoreCase(
+                String.valueOf(endpointConfigMap.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)))) {
             return;
         }
-        // APIUtil.isProductionEndpointsExists / isSandboxEndpointsExists dereference config members without
-        // null checks and catch only ParseException / ClassCastException, so several endpoint configurations
-        // make them throw. The try/catch around the calls below is what makes them safe; this cheap
-        // pre-check only skips the most common such shape without logging a stack trace for it.
+        // Configurations without an endpoint_type are left to the generation-time guard, so that only the
+        // well-formed shapes are rejected upfront. The try/catch around the predicates below is a safety net for
+        // any configuration they cannot evaluate.
         if (!endpointConfigMap.containsKey(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)) {
             return;
         }
